@@ -69,7 +69,11 @@ bc. application.langs=fr,en
 This property affects how the dates are rendered in the templates using the ${date.format()}.
 It also set the default date format when binding a date parameter.
 
-h2. <a name="retrieve">Retrieve localized messages</a>
+
+h2(#retrieve). <a>Retrieve localized messages</a>
+
+
+h3(#argument). Message arguments
 
 From the application code, you can retrieve messages defined in message files. From Java, use the @play.i18n.Messages@ object.
 
@@ -77,23 +81,66 @@ bc. public static void hello() {
     renderText(Messages.get("hello"));
 }
 
-We support message formatting through the standard Java formatting syntax. You can also define dynamic content in your messages:
+We support message formatting through the standard @java.util.Formatter@ ‘Format string syntax’. You can also define dynamic content in your messages:
 
 bc. hello=Hello %s!
 
-and
+where @%s@ represents a message argument that will be output as a @String@. Message arguments are provided by additional (varargs) arguments to @Messages.get@:
 
 bc. public static void hello(String user) {
     renderText(Messages.get("hello", user));
 }
 
+
+h3(#template). Template output
+
 From a template you can use the special @&{…}@ syntax to display localized messages:
 
 bc. <h1>&{'hello'}</h1>
 
-or using dynamic content:
+or using dynamic content in message arguments:
 
 bc. <h1>&{'hello', params.user}</h1>
+
+
+h3(#arguments). Multiple arguments
+
+You can define multiple message arguments, such as this message which refers to two ‘decimal integer’ arguments:
+
+bc. guess=Please pick a number between %d and %d
+
+which you display by specifying the message arguments in the right order:
+
+bc. <p>&{'guess', low, high}</p>
+
+
+h3(#indices). Argument indices
+
+You can also specify the message argument explicitly, to use a different order. For example, suppose a message in English has two parameters:
+
+bc. guess.characteristic=Guess %s’s %s.
+
+with message output like:
+
+bc. <p>&{'guess.characteristic', person.name, 'age'}</p>
+
+The French localisation has the two message in the opposite order, so in the French localisation we specify the argument indices:
+
+bc. guess.characteristic=Devinez %2$s de %1$s.
+
+where @%2$s@ outputs the **second** argument as a decimal integer.
+
+Finally, we want to localise the characteristic name ‘age’ as well, so we would change the output to use the message key @person.age@, and change the message definitions to:
+
+bc. guess.characteristic=Guess %s’s &{%s}.
+person.age = age
+
+and
+
+bc. guess.characteristic=Devinez &{%2$s} de %1$s.
+person.age = l’age
+
+where @&{%s}@ is itself a message look-up, with the argument value as the message key.
 
 p(note). **Continuing the discussion**
  

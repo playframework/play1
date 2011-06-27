@@ -369,6 +369,10 @@ The message look up always has the field name as the first parameter, and your m
 bc. validation.used = &{%1$s} already used on date %2$s
 user.password = Password
 
+where @&{%1$s}@ uses the message argument with index 1 (the field name) as the message key for another message look-up, and @%2$s@ is the second message argument (the formatted date).
+
+p(note). The message syntax - @%s@, @%s2$s@ and @&{…}@ - is explained in the section on how to "Retrieve localized messages":i18n#retrieve.
+
 
 h2. <a name="customannotations">Custom annotations</a>
 
