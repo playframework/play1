@@ -404,6 +404,7 @@ public class Scope {
         @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
             try {
+                checkAndParse();
                 // TODO: This is used by the test, but this is not the most convenient.
                 return (T) Binder.bind(key, type, type, null, data);
             } catch (Exception e) {
@@ -415,6 +416,7 @@ public class Scope {
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
             try {
+                checkAndParse();
                 return (T) Binder.directBind(key, annotations, get(key), type);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
