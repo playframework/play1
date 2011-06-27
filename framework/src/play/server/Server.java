@@ -21,7 +21,7 @@ public class Server {
 
     public Server(String[] args) {
 
-        System.setProperty("file.encoding", "utf-8");
+        //System.setProperty("file.encoding", "utf-8");
         final Properties p = Play.configuration;
 
         httpPort = Integer.parseInt(getOpt(args, "http.port", p.getProperty("http.port", "-1")));
