@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +36,7 @@ import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
+import play.exceptions.DatabaseException;
 import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
 import play.libs.IO;
@@ -430,6 +434,32 @@ public class Fixtures {
             return;
         }
 
+        if (DBPlugin.url.startsWith("jdbc:sqlserver:")) {
+            Statement exec=null;
+
+            try {
+                List<String> names = new ArrayList<String>();
+                Connection connection = DB.getConnection();
+
+                ResultSet rs = connection.getMetaData().getTables(null, null, null, new String[]{"TABLE"});
+                while (rs.next()) {
+                    String name = rs.getString("TABLE_NAME");
+                    names.add(name);
+                }
+
+                    // Then we disable all foreign keys
+                exec = connection.createStatement();
+                for (String tableName:names)
+                    exec.addBatch("ALTER TABLE " + tableName+" NOCHECK CONSTRAINT ALL");
+                exec.executeBatch();
+                exec.close();
+                
+                return;
+            } catch (SQLException ex) {
+                throw new DatabaseException("Error while disabling foreign keys", ex);
+            }
+        }
+
         // Maybe Log a WARN for unsupported DB ?
         Logger.warn("Fixtures : unable to disable constraints, unsupported database : " + DBPlugin.url);
     }
@@ -464,6 +494,34 @@ public class Fixtures {
         if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
             return;
         }
+
+        if (DBPlugin.url.startsWith("jdbc:sqlserver:")) {
+           Connection connect = null;
+            Statement exec=null;
+            try {
+                connect = DB.getConnection();
+                // We must first drop all foreign keys
+                ArrayList<String> checkFKCommands=new ArrayList<String>();
+                exec=connect.createStatement();
+                ResultSet rs=exec.executeQuery("SELECT 'ALTER TABLE ' + TABLE_SCHEMA + '.[' + TABLE_NAME +'] WITH CHECK CHECK CONSTRAINT [' + CONSTRAINT_NAME + ']' FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
+                while (rs.next())
+                {
+                    checkFKCommands.add(rs.getString(1));
+                }
+                exec.close();
+                exec=null;
+
+                 // Now we have the drop commands, let's execute them
+                exec=connect.createStatement();
+                for (String sql:checkFKCommands)
+                    exec.addBatch(sql);
+                exec.executeBatch();
+                exec.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException("Cannot enable foreign keys", ex);
+            }
+            return;
+          }
 
         Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + DBPlugin.url);
     }
