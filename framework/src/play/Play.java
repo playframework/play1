@@ -397,8 +397,12 @@ public class Play {
                 } else {
                     r = System.getProperty(jp);
                     if (r == null) {
-                        Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
-                        continue;
+                        r = System.getenv(jp);
+                        
+                        if (r == null) {
+                            Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
+                            continue;
+                        }
                     }
                 }
                 matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
