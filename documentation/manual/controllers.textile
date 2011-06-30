@@ -174,7 +174,7 @@ If no <code>@As</code> annotation is specified, then Play! uses the default date
 To set the default date format to use, edit your application.conf and set the following property:
 
 bc. date.format=yyy-MM-dd
-    date.format.fr=dd/MM/yyyy
+date.format.fr=dd/MM/yyyy
 
 Please note that the language fr in the application.conf must be enabled as well:
 

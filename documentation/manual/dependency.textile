@@ -276,7 +276,7 @@ repositories:
 
 h3. Local repositories
 
-Finally and probably foremost, you may want to define a repository that references local modules. With this scenario, dependencies work very much like application.conf's module resolution (now deprecated).
+Finally and probably foremost, you may want to define a repository that references local modules. With this scenario, dependencies work very much like @application.conf@’s module resolution (now deprecated).
 
 So given the following folder structure,
 
