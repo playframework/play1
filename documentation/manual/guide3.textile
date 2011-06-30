@@ -301,7 +301,7 @@ Add these two keys to the configuration file:
 bc. # Blog engine configuration
 # ~~~~~
 blog.title=Yet another blog
-blog.baseline=We won't write about anything
+blog.baseline=We will write about nothing
 
 Reload the home page and check that it works!
 
