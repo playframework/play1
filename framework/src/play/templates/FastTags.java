@@ -372,6 +372,13 @@ public class FastTags {
         }
     }
 
+    /**
+     * Removes all html tag whitespace from the rendered output
+     */
+    public static void _spaceless (Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        out.println(JavaExtensions.toString(body).replaceAll(">\\s+<", "><").trim();
+    }
+
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuilder attrs = new StringBuilder();
         Arrays.sort(unless);
