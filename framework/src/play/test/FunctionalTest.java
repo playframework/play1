@@ -23,6 +23,7 @@ import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Scope.RenderArgs;
 
 import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
@@ -44,6 +45,8 @@ public abstract class FunctionalTest extends BaseTest {
 
     private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
 
+    private static Map<String, Object> renderArgs = new HashMap<String, Object>();
+    
     @Before
     public void clearCookies(){
         savedCookies = null;
@@ -261,8 +264,13 @@ public abstract class FunctionalTest extends BaseTest {
         final Future invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
-            public void execute() throws Exception {                
+            public void execute() throws Exception {
+            	renderArgs.clear();
                 ActionInvoker.invoke(request, response);
+                
+                if(RenderArgs.current().data != null) {
+                	renderArgs.putAll(RenderArgs.current().data);
+                }
             }
 
             @Override
@@ -427,6 +435,10 @@ public abstract class FunctionalTest extends BaseTest {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    public static Object renderArgs(String name) {
+    	return renderArgs.get(name);
     }
 
     // Utils
