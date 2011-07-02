@@ -32,7 +32,7 @@ public class MyTest extends UnitTest {
 
 h3. Functional test
 
-A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects. 
+A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects.
 
 Here is an example of a Functional test:
 
@@ -49,6 +49,16 @@ public class ApplicationTest extends FunctionalTest {
         assertStatus(200, response);
     }
      
+}
+
+Using the @renderArgs()@ method, you can also get direct access to the arguments passed to the view, instead of having to make assertions about the response itself.  For example:
+
+bc. @Test
+public void testUserIsFoundAndPassedToView() {
+    Response response = POST("/user/find?name=mark&dob=18011977")
+    assertThat(renderArgs("user"), is(notNullValue());
+    User user = (User) renderArgs("user");
+    assertThat(user.name, is("mark"));
 }
 
 h3. Selenium test
