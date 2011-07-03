@@ -213,7 +213,7 @@ def autotest(app, args):
         line = soutint.readline().strip()
         if line:
             print line
-            if line.find('/@tests to run the tests') > -1:
+            if line.find('Listening for HTTP') > -1:
                 soutint.close()
                 break
 
