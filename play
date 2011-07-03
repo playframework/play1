@@ -101,7 +101,7 @@ try:
     if remaining_args.count('--%%%s' % play_env["id"]) == 1:
         remaining_args.remove('--%%%s' % play_env["id"])
 
-    if play_command == 'test' or play_command == 'auto-test':
+    if play_command in ['test', 'auto-test', 'autotest'] :
         # If framework-id is not a valid test-id, force it to 'test'
         if not isTestFrameworkId( play_env["id"] ): 
             play_env["id"] = 'test'
