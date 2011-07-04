@@ -181,7 +181,7 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        if(isDisabled()) {
+        if(isDisabled() || Play.mode.isProd()) {
             return;
         }
         try {
@@ -198,7 +198,7 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        if (! isDisabled() && Play.mode.isProd()) {
+        if (!isDisabled() && Play.mode.isProd()) {
             try {
                 checkEvolutionsState();
             } catch (InvalidDatabaseRevision e) {
