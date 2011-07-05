@@ -138,6 +138,8 @@ Remember the session for one week:
 
 bc. application.session.maxAge=7d
 
+Default: the session is based on a transient cookie expires when the browser is closed.
+
 
 h3(#application.session.secure). application.session.secure
 
@@ -516,7 +518,7 @@ Default: @false@
 
 h3(#jpa.entities). jpa.entities
 
-Comma-separated list of names of additional JPA entity classes to load. For example:
+Comma-separated list of names of additional JPA entity classes to load. This is useful when you have additional entities that are not in the @models@ package, such as model classes in a separate JAR. For example:
 
 bc. org.example.model.Person, org.example.model.Organisation
 
@@ -848,21 +850,21 @@ h2(#xforwarded). Proxy forwarding
 
 h3(#XForwardedHost). XForwardedHost
 
-Request host for proxy support.
+Overrides the @X-Forwarded-Host@ HTTP header value - the original host requested by the client, for use with proxy servers.
 
-Default: @x-forwarded-host@ HTTP header value.
+Default: @X-Forwarded-Host@ HTTP header value.
 
 
 h3(#XForwardedProto). XForwardedProto
 
-Sets the proxy request to SSL, overriding the @x-forwarded-proto@ and @x-forwarded-ssl@ HTTP headers. For example:
+Sets the proxy request to SSL, overriding the @X-Forwarded-Proto@ and @X-Forwarded-SSL@ HTTP header values - the protocol originally requested by the client. For example:
 
 bc. XForwardedProto=https
 
 
 h3(#XForwardedSupport). XForwardedSupport
 
-A comma-separated list of IP addresses. Proxy support for @x-forwarded-for@ headers.
+A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server.
 
 Default: @127.0.0.1@
 
