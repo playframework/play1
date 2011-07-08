@@ -358,11 +358,13 @@ public class Router {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
                     if (absolute) {
-                        boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
-                        String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
+                    	boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
+                    	String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
                         if (!StringUtils.isEmpty(route.host)) {
-                            // Compute the host
-                            to = (isSecure ? "https://" : "http://") + route.host + to;
+                        	// Compute the host
+                        	int port = Http.Request.current() == null ? 80 : Http.Request.current().get().port;
+                        	String host = (port != 80 && port != 443) ? route.host + ":" + port : route.host;
+                            to = (isSecure ? "https://" : "http://") + host + to;
                         } else {
                             to = base + to;
                         }
