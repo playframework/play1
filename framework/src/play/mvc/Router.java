@@ -668,6 +668,7 @@ public class Router {
                         Logger.warn("Static route cannot have a dynamic host name");
                         return;
                     }
+                    this.hostPattern = new Pattern(host.replaceAll("\\.", "\\\\."));
                 }
                 if (!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
                     Logger.warn("Static route only support GET method");
