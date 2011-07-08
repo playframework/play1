@@ -236,9 +236,7 @@ public class Router {
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
             try {
-                String format = request.format;
-                String host = request.host;
-                if (route.matches(request.method, request.path, format, host) != null) {
+                if (route.matches(request.method, request.path, request.format, request.domain) != null) {
                     break;
                 }
             } catch (Throwable t) {
@@ -267,9 +265,7 @@ public class Router {
             }
         }
         for (Route route : routes) {
-            String format = request.format;
-            String host = request.host;
-            Map<String, String> args = route.matches(request.method, request.path, format, host);
+            Map<String, String> args = route.matches(request.method, request.path, request.format, request.domain);
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
@@ -307,9 +303,9 @@ public class Router {
         return route(method, path, headers, null);
     }
 
-    public static Map<String, String> route(String method, String path, String headers, String host) {
+    public static Map<String, String> route(String method, String path, String headers, String domain) {
         for (Route route : routes) {
-            Map<String, String> args = route.matches(method, path, headers, host);
+            Map<String, String> args = route.matches(method, path, headers, domain);
             if (args != null) {
                 args.put("action", route.action);
                 return args;
@@ -808,10 +804,10 @@ public class Router {
          * @param method GET/POST/etc.
          * @param path   Part after domain and before query-string. Starts with a "/".
          * @param accept Format, e.g. html.
-         * @param host   AKA the domain.
+         * @param domain The domain (host without port)
          * @return ???
          */
-        public Map<String, String> matches(String method, String path, String accept, String host) {
+        public Map<String, String> matches(String method, String path, String accept, String domain) {
             // Normalize
             if (path.equals(Play.ctxPath)) {
                 path = path + "/";
@@ -821,10 +817,10 @@ public class Router {
 
                 Matcher matcher = pattern.matcher(path);
 
-                boolean hostMatches = (host == null);
-                if (host != null) {
+                boolean hostMatches = (domain == null);
+                if (domain != null) {
 
-                    Matcher hostMatcher = hostPattern.matcher(host);
+                    Matcher hostMatcher = hostPattern.matcher(domain);
                     hostMatches = hostMatcher.matches();
                 }
                 // Extract the host variable
@@ -858,11 +854,11 @@ public class Router {
                                 localArgs.put(arg.name, matcher.group(arg.name));
                             }
                         }
-                        if (hostArg != null && host != null) {
+                        if (hostArg != null && domain != null) {
                             // Parse the hostname and get only the part we are interested in
                             String routeValue = hostArg.defaultValue.replaceAll("\\{.*}", "");
-                            host = host.replace(routeValue, "");
-                            localArgs.put(hostArg.name, host);
+                            domain = domain.replace(routeValue, "");
+                            localArgs.put(hostArg.name, domain);
                         }
                         localArgs.putAll(staticArgs);
                         return localArgs;
