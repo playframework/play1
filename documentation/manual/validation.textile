@@ -4,17 +4,17 @@ Validations ensure that the data has certain values or meets specific requiremen
 
 h2. <a name="how">How validation works in Play</a>
 
-Each request has it own **Validation** object which collects errors. There are three ways to define validations.
+Each request has it own @Validation@ object which collects errors. There are three ways to define validations.
 
-# <span>In a controller method, call methods on the controller's **validation** field directly. You can also access a subset of the API using the **play.data.validation.Validation** class’ static methods.</span> 
+# <span>In a controller method, call methods on the controller's @validation@ field directly. You can also access a subset of the API using the @play.data.validation.Validation@ class’ static methods.</span> 
 # <span>Add validation annotations to the controller method's parameter declarations.</span>
-# <span>Add the **@Valid** annotation to action methods’ POJO parameters, and add validation annotations to the POJO properties.</span> 
+# <span>Add the <code>@Valid</code> annotation to action methods’ POJO parameters, and add validation annotations to the POJO properties.</span> 
 
-The validation object maintains a collection of **play.data.validation.Error** objects. Each error has two properties:
+The validation object maintains a collection of @play.data.validation.Error@ objects. Each error has two properties:
 
-* The **key**. This helps you to determine which data element caused the error. The key value can be set arbitrarily but when Play generates errors, it uses default conventions that follow the Java variables’ names.
+* The @key@. This helps you to determine which data element caused the error. The key value can be set arbitrarily but when Play generates errors, it uses default conventions that follow the Java variables’ names.
 
-* The **message**. This contains the error’s textual description. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
+* The @message@. This contains the error’s textual description. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
 
 Using the first approach, let’s see how to validate a simple HTTP parameter:
 
@@ -50,24 +50,24 @@ bc. public static void hello(String name, Integer age) {
      }
 }
 
-Assuming that name and age are **null**, this would display:
+Assuming that name and age are @null@, this would display:
 
 bc. Required
 Required
 
-This is because the default message, defined in **$PLAY_HOME/resources/messages**, is:
+This is because the default message, defined in @$PLAY_HOME/resources/messages@, is:
 
 bc. validation.required=Required
 
 There are three ways to customise the validation message. 
 
-# <span>Override the default message, by redefining the message in your application’s **messages** file.</span> 
+# <span>Override the default message, by redefining the message in your application’s @messages@ file.</span> 
 # <span>Provide a custom message as an additional validation parameter.</span>
 # <span>Provide a message key for a localised message as an additional validation parameter.</span> 
 
 h3. Localised validation messages 
 
-The simplest way to override these messages is to use the same message key for a message in your application’s **conf/messages** file. For example:
+The simplest way to override these messages is to use the same message key for a message in your application’s @conf/messages@ file. For example:
 
 bc. validation.required = Please enter a value 
 
@@ -84,7 +84,7 @@ This changes the output to:
 bc. name is required
 age is required
 
-This error key defaults to the parameter name, and is itself used to look up a message. For example, the **name** parameter in the **hello** action method above could be localised with: 
+This error key defaults to the parameter name, and is itself used to look up a message. For example, the @name@ parameter in the @hello@ action method above could be localised with: 
 
 bc. name = Customer name
 
@@ -93,14 +93,14 @@ This would result in the output:
 bc. Customer name is required
 age is required
 
-You can change also override the error key using the **error.message(String key)** method. For example:
+You can change also override the error key using the @error.message(String key)@ method. For example:
 
 bc. Error error = validation.required(name).error;
 if(error != null) {
     System.out.println(error.message("Customer name"));
 }
 
-Several of the built-in validations define additional message parameters that correspond to the validation parameters. For example, the 'match' validation defines a second **String** parameter for the specified regular expression, which differs from the **%s** placeholder above in that it specifies the parameter index ‘2’: 
+Several of the built-in validations define additional message parameters that correspond to the validation parameters. For example, the 'match' validation defines a second @String@ parameter for the specified regular expression, which differs from the @%s@ placeholder above in that it specifies the parameter index ‘2’: 
 
 bc. validation.match=Must match %2$s 
 
@@ -108,11 +108,11 @@ Similarly, the 'range' validation defines two additional numeric parameters, wit
 
 bc. validation.range=Not in the range %2$d through %3$d 
 
-Look in the file **$PLAY_HOME/resources/messages** to see which other validations have parameters. 
+Look in the file @$PLAY_HOME/resources/messages@ to see which other validations have parameters. 
 
 h3. Custom localised validation messages 
 
-The validation messages in **$PLAY_HOME/resources/messages** use the default message key for each of Play’s "built-in validations":validation-builtin. You can specify a different message key. For example: 
+The validation messages in @$PLAY_HOME/resources/messages@ use the default message key for each of Play’s "built-in validations":validation-builtin. You can specify a different message key. For example: 
 
 bc. validation.required.em = You must enter the %s! 
 
@@ -122,7 +122,7 @@ Use this new message key for the message, for manual validation in the action me
 bc. validation.required(manualKey).message("validation.required.em"); 
 
 
-Alternatively, use the key in the annotation’s **message** parameter: 
+Alternatively, use the key in the annotation’s @message@ parameter: 
 
 bc. public static void hello(@Required(message="validation.required.em") String name) { 
    …
@@ -170,7 +170,7 @@ public class Person extends Model {
 
 h2. <a name="display">Displaying validation errors in the template</a>
 
-In most cases you want to display the error messages in the view template. You can access them in the template using the **errors** object. Some tags help you to display the errors:
+In most cases you want to display the error messages in the view template. You can access them in the template using the @errors@ object. Some tags help you to display the errors:
 
 Let’s see a sample:
 
@@ -200,7 +200,7 @@ bc. #{ifErrors}
 
 But in a real application you want to redisplay the original form. So you will have two actions: one to display the form and another one to handle the POST. 
 
-Of course the validation will occur in the second action and if some error occurs you will have to redirect to the first action. In this case you need a special trick to keep your errors during the redirect. Use the **validation.keep()** method. This will save the errors collection for the next action.
+Of course the validation will occur in the second action and if some error occurs you will have to redirect to the first action. In this case you need a special trick to keep your errors during the redirect. Use the @validation.keep()@ method. This will save the errors collection for the next action.
 
 Let’s see a real sample:
 
@@ -224,7 +224,7 @@ bc. public class Application extends Controller {
  
 }
 
-And the **view/Application/index.html** template:
+And the @view/Application/index.html@ template:
 
 bc. #{ifErrors}
    <h1>Oops…</h1>
@@ -269,7 +269,7 @@ bc. #{ifErrors}
 
 h2. <a name="annotations">Validation annotations</a>
 
-The annotations in the **play.data.validation** package provide an alternative and more concise way to specify validation constraints, with an annotation that corresponds to each **Validation** object method. To use the validation annotations, just annotate the controller method parameters:
+The annotations in the @play.data.validation@ package provide an alternative and more concise way to specify validation constraints, with an annotation that corresponds to each @Validation@ object method. To use the validation annotations, just annotate the controller method parameters:
 
 bc. public static void hello(@Required String name, @Required @Min(0) Integer age) {
    if(validation.hasErrors()) {
@@ -284,7 +284,7 @@ h2. <a name="objects">Validating complex objects</a>
 
 You can also use the validation annotations to easily add constraints to your model object’s properties, and then in the controller specify that all properties must be valid. Let’s rewrite the previous example using a User class.
 
-First the **User** class, with validation annotations on the properties:
+First the @User@ class, with validation annotations on the properties:
 
 bc. package models;
  
@@ -298,7 +298,7 @@ public class User {
     public Integer age;
 }
 
-Then the modified **hello** action, which uses the **@Valid** annotation to specify that all of the **User** object’s properties must be valid:
+Then the modified @hello@ action, which uses the <code>@Valid</code> annotation to specify that all of the @User@ object’s properties must be valid:
 
 bc. public static void hello(@Valid User user) {
    if(validation.hasErrors()) {
@@ -331,11 +331,11 @@ bc. #{ifErrors}
 
 h2. <a name="builtin">Built-in validations</a>
 
-The **play.data.validation** package contains several "built-in validations":validation-builtin that you can use on the **Validation** object or with annotations.
+The @play.data.validation@ package contains several "built-in validations":validation-builtin that you can use on the @Validation@ object or with annotations.
 
-h2. <a name="custom">Custom validation</a>
+h2. <a name="custom">Custom validation using @CheckWith</a>
 
-Can’t find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
+Can’t find the validator you need in the @play.data.validation@ package? Write your own. You can use the generic <code>@CheckWith</code> annotation to bind your own @Check@ implementation.
 
 For example:
 
@@ -350,9 +350,106 @@ bc. public class User {
         public boolean isSatisfied(Object user, Object password) {
             return notMatchPreviousPasswords(password);
         }
-        
     }
 }
+
+The default validation error message key is @validation.invalid@. To use a different key, call @Check.setMessage@ with a message key and message parameters.
+
+bc. static class MyPasswordCheck extends Check {
+ 
+    public boolean isSatisfied(Object user, Object password) {
+        final Date lastUsed = dateLastUsed(password);
+        setMessage("validation.used", JavaExtensions.format(lastUsed));
+        return lastUsed == null;
+    }
+}
+
+The message look up always has the field name as the first parameter, and your message parameters as subsequent parameters. So, for the example above, you could define the message like:
+
+bc. validation.used = &{%1$s} already used on date %2$s
+user.password = Password
+
+where @&{%1$s}@ uses the message argument with index 1 (the field name) as the message key for another message look-up, and @%2$s@ is the second message argument (the formatted date).
+
+p(note). The message syntax - @%s@, @%s2$s@ and @&{…}@ - is explained in the section on how to "Retrieve localized messages":i18n#retrieve.
+
+
+h2. <a name="customannotations">Custom annotations</a>
+
+You can also write your own annotation validations, which is more complex but makes your model code cleaner and allows you to introduce validator parameters.
+
+For example, suppose we want a less restrictive version of the "@URL":validation-builtin#url validation, so we can allow URLs with any scheme such as a @file://@ URL, and with a parameter that lets us specify exactly which schemes are allowed.
+
+First, we write a custom validation annotation, with a parameter for overriding the default message:
+
+bc. import net.sf.oval.configuration.annotation.Constraint;
+import java.lang.annotation.*;
+ 
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Constraint(checkWith = URICheck.class)
+public @interface URI {
+    String message() default URICheck.message;
+}
+
+This annotation refers to an implementation of @net.sf.oval.configuration.annotation.AbstractAnnotationCheck@.
+
+bc. public class URICheck extends AbstractAnnotationCheck<URI> {
+ 
+    /** Error message key. */
+    public final static String message = "validation.uri";
+ 
+    /** URI schemes allowed by validation. */
+    private List<String> schemes;
+ 
+    @Override
+    public void configure(URI uri) {
+        setMessage(uri.message());
+        this.schemes = Arrays.asList(uri.schemes());
+    }
+ 
+    /**
+     * Add the URI schemes to the message variables so they can be included
+     * in the error message.
+     */
+    @Override
+    public Map<String, String> createMessageVariables() {
+        final Map<String, String> variables = new TreeMap<String, String>();
+        variables.put("2", JavaExtensions.join(schemes, ", "));
+        return variables;
+    }
+ 
+    @Override
+    public boolean isSatisfied(Object validatedObject, Object value,
+        OValContext context, Validator validator) throws OValException {
+ 
+        requireMessageVariablesRecreation();
+        try {
+            final java.net.URI uri = new java.net.URI(value.toString());
+            final boolean schemeValid = schemes.contains(uri.getScheme());
+            return schemes.size() == 0 || schemeValid;
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+}
+
+The @isSatisfied@ method calls @requireMessageVariablesRecreation()@ to instruct OVal to call @createMessageVariables()@ before rendering the message. This returns an ordered map of variables that are passed to the message formatter. The map keys are not used; the @"2"@ in this example indicates the message parameter index. As before, the first parameter is the field name.
+
+To use this use the annotation on a model property.
+
+bc. public class User {
+    
+    @URI(message = "validation.uri.schemes", schemes = {"http", "https"})
+    public String profile;
+}
+
+We can define the messages like this:
+
+bc. validation.uri = Not a valid URI
+validation.uri.schemes = &{%1$s} is not a valid URI - allowed schemes are %2$s
+
+
 
 p(note). **Continuing the discussion**
  

@@ -200,7 +200,7 @@ class PlayApplication(object):
         self.jpda_port = self.readConf('jpda.port')
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('127.0.0.1', int(self.jpda_port)))
+            s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
@@ -324,9 +324,7 @@ class PlayConfParser:
         return washedResult
 
     def get(self, key):
-        print "key:" + key
         if key in self.entries:
-            print "value:"+self.entries[key]
             return self.entries[key]
         if key in self.DEFAULTS:
             return self.DEFAULTS[key]

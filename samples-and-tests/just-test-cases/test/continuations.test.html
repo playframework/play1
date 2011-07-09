@@ -84,7 +84,7 @@
     assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
 
     open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
-    assertTextPresent('1-A-B-C-D-E')
+    assertBodyText('1-A-B-C-D-E')
 
 	open('/useAwaitViaOtherClass')
     assertTextPresent('failCount: 2')

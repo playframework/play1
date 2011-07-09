@@ -8,7 +8,7 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.6
-    - bytecodeparser 0.1
+    - bytecodeparser 0.2
     - c3p0 0.9.1.2
     - cglib -> cglib-nodep 2.2
     - com.google.code.gson -> gson 1.7.1
@@ -33,7 +33,7 @@ require:    &allDependencies
     - joda-time 1.6
     - junit 4.8.1
     - jregex 1.2_01
-    - log4j 1.2.15
+    - log4j 1.2.16
     - net.sf.ehcache -> ehcache-core 2.0.0
     - net.sf.ezmorph -> ezmorph 1.0.3
     - net.sf.jsr107cache -> jsr107cache 1.0

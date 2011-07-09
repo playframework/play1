@@ -14,7 +14,7 @@ This pattern splits the application into separate layers: the Presentation layer
 
 !images/diagrams_mvc!
 
-In a Play application these three layers are defined in the **app** directory, each one in a separate Java package.
+In a Play application these three layers are defined in the @app@ directory, each one in a separate Java package.
 
 h3. app/controllers
 
@@ -55,41 +55,41 @@ This directory contains all executable artifacts: Java source code and view temp
 
 p(note). **Where are my .class files?**
  
-Don’t look for compiled Java classes. The framework compiles the Java source code at runtime and only keeps compiled classes in a bytecode cache under the **tmp** directory. The main executable artifacts in a Play application are the *.java* source files, not the compiled classes.
+Don’t look for compiled Java classes. The framework compiles the Java source code at runtime and only keeps compiled classes in a bytecode cache under the @tmp@ directory. The main executable artifacts in a Play application are the *.java* source files, not the compiled classes.
 
 There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. You can of course add your own packages like for example a *utils* package.
 
 In addition, the views package is further organized into sub-packages:
 
-* **tags**, hosts application tags, e.g. reusable pieces of templates.
-* **One views folder for each Controller**, by convention templates related to each Controller are stored in their own sub-package.
+* @tags@, hosts application tags, e.g. reusable pieces of templates.
+* one @views@ folder for each controller - by convention templates related to each controller are stored in their own sub-package.
 
 
 h3. The **public** directory
 
-Resources stored in the **public** directory are static assets and are served directly by the Web server.
+Resources stored in the @public@ directory are static assets and are served directly by the Web server.
 
 This directory is split into three standard sub-directories: for images, CSS stylesheets and JavaScript files. You should try to organize your static assets like this to keep all Play applications consistent.
 
 p(note). **Tip**
  
-By default the /public directory is mapped to the /public URL path, but you can easily change that, or even use several directories for your static assets.
+By default the @/public@ directory is mapped to the @/public@ URL path, but you can easily change that, or even use several directories for your static assets.
 
 
-h3. The **conf** directory
+h3(#conf). The **conf** directory
 
-The **conf** directory contains all configuration files for the application.
+The @conf@ directory contains all configuration files for the application.
 
 There are two required configuration files:
 
-* **application.conf**, the main configuration file for the application. It contains standard configuration options.
-* **routes**, the routes definition file.
+* @application.conf@, the main configuration file for the application. It contains standard configuration options.
+* @routes@, the routes definition file.
 
-If you need to add some configuration options specific to your application, it’s a good idea to add more options to the **application.conf** file. Configuration options in this file are read programmatically with **Play.configuration.get("propertyName")**.
+If you need to add some configuration options specific to your application, it’s a good idea to add more options to the @application.conf@ file. Configuration options in this file are read programmatically with @Play.configuration.get("propertyName")@. When you create a new application, the @play new@ command copies a default configuration file from the @$PLAY_HOME/resources/application-skel/conf@ directory with some commented-out options to get you started.
 
-If any library needs a specific configuration file, try to file it under the conf directory: **this directory is included in the Java ClassPath**.
+If any library needs a specific configuration file, try to file it under the @conf@ directory: **this directory is included in the Java ClassPath**.
 
-You can add additional configuration files to the Play configuration by specifying a file name in **application.conf** as the value of a configuration option that has **@include.** at the start of the key. For example, if you define additional MIME types in a **conf/mime-types.conf**
+You can add additional configuration files to the Play configuration by specifying a file name in @application.conf@ as the value of a configuration option that has <code>@include.</code> at the start of the key. For example, if you define additional MIME types in a @conf/mime-types.conf@
 
 bc. # Web fonts
 mimetype.eot = application/vnd.ms-fontobject
@@ -97,7 +97,7 @@ mimetype.otf = application/octet-stream
 mimetype.ttf = application/octet-stream
 mimetype.woff = application/x-font-woff
 
-you can include them by adding the following line to **application.conf**:
+you can include them by adding the following line to @application.conf@:
 
 bc. @include.mime = mime-types.conf
 
@@ -135,20 +135,20 @@ For example, using the NetBeans debugger:
 
 h2. Class enhancement
 
-A Play plug-in (i.e. a subclass of **play.PlayPlugin**) may include ‘enhancers’ that modify application classes at runtime, to add functionality. This is how some of Play’s magic works.
+A Play plug-in (i.e. a subclass of @play.PlayPlugin@) may include ‘enhancers’ that modify application classes at runtime, to add functionality. This is how some of Play’s magic works.
 
-The built-in **play.CorePlugin** uses several enhancers from the **play.classloading.enhancers** package to dynamically add code to your application’s classes:
+The built-in @play.CorePlugin@ uses several enhancers from the @play.classloading.enhancers@ package to dynamically add code to your application’s classes:
 
-* **ContinuationEnhancer** - adds continuations support to controller classes
-* **ControllersEnhancer** - makes controller action methods thread-safe and adds HTTP redirects for method calls
-* **LocalvariablesNamesEnhancer** - tracks local variable names in controllers
-* **MailerEnhancer** - sets-up **play.mvc.Mailer** subclasses
-* **PropertiesEnhancer** - turns all application classes into valid JavaBeans, with properties based on fields
-* **SigEnhancer** - computes a unique hash for each class’ signature, to enable automatic reloading.
+* @ContinuationEnhancer@ - adds continuations support to controller classes
+* @ControllersEnhancer@ - makes controller action methods thread-safe and adds HTTP redirects for method calls
+* @LocalvariablesNamesEnhancer@ - tracks local variable names in controllers
+* @MailerEnhancer@ - sets-up @play.mvc.Mailer@ subclasses
+* @PropertiesEnhancer@ - turns all application classes into valid JavaBeans, with properties based on fields
+* @SigEnhancer@ - computes a unique hash for each class’ signature, to enable automatic reloading.
 
-In addition, the **play.db.jpa.JPAPlugin** enhances subclasses of **play.db.jpa.JPABase** with implementations of the convenience methods for JPA queries. This normally applies to your application's model classes that subclass **play.db.jpa.Model**. The JPA queries in question are those defined in **play.db.jpa.GenericModel**.
+In addition, the @play.db.jpa.JPAPlugin@ enhances subclasses of @play.db.jpa.JPABase@ with implementations of the convenience methods for JPA queries. This normally applies to your application's model classes that subclass @play.db.jpa.Model@. The JPA queries in question are those defined in @play.db.jpa.GenericModel@.
 
-To add your own enhancer, call a subclass of **play.classloading.enhancers.Enhancer** from your plug-in’s **enhance(ApplicationClass)** method.
+To add your own enhancer, call a subclass of @play.classloading.enhancers.Enhancer@ from your plug-in’s @enhance(ApplicationClass)@ method.
 
 p(note). **Continuing the discussion**
  

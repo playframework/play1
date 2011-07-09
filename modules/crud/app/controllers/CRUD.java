@@ -11,7 +11,6 @@ import play.utils.Java;
 import play.db.Model;
 import play.data.validation.*;
 import play.exceptions.*;
-import play.i18n.*;
 
 public abstract class CRUD extends Controller {
 
@@ -90,7 +89,7 @@ public abstract class CRUD extends Controller {
         Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (validation.hasErrors()) {
-            renderArgs.put("error", Messages.get("crud.hasErrors"));
+            renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/show.html", type, object);
             } catch (TemplateNotFoundException e) {
@@ -98,7 +97,7 @@ public abstract class CRUD extends Controller {
             }
         }
         object._save();
-        flash.success(Messages.get("crud.saved", type.modelName));
+        flash.success(play.i18n.Messages.get("crud.saved", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
@@ -127,7 +126,7 @@ public abstract class CRUD extends Controller {
         Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (validation.hasErrors()) {
-            renderArgs.put("error", Messages.get("crud.hasErrors"));
+            renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/blank.html", type, object);
             } catch (TemplateNotFoundException e) {
@@ -135,7 +134,7 @@ public abstract class CRUD extends Controller {
             }
         }
         object._save();
-        flash.success(Messages.get("crud.created", type.modelName));
+        flash.success(play.i18n.Messages.get("crud.created", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
@@ -153,13 +152,13 @@ public abstract class CRUD extends Controller {
         try {
             object._delete();
         } catch (Exception e) {
-            flash.error(Messages.get("crud.delete.error", type.modelName));
+            flash.error(play.i18n.Messages.get("crud.delete.error", type.modelName));
             redirect(request.controller + ".show", object._key());
         }
-        flash.success(Messages.get("crud.deleted", type.modelName));
+        flash.success(play.i18n.Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
     }
-    
+
     protected static ObjectType createObjectType(Class<? extends Model> entityClass) {
         return new ObjectType(entityClass);
     }
@@ -170,7 +169,7 @@ public abstract class CRUD extends Controller {
     public @interface For {
         Class<? extends Model> value();
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Exclude {}
@@ -229,7 +228,7 @@ public abstract class CRUD extends Controller {
         @SuppressWarnings("unchecked")
         public static Class<? extends Model> getEntityClassForController(Class<? extends Controller> controllerClass) {
             if (controllerClass.isAnnotationPresent(For.class)) {
-                return ((For) (controllerClass.getAnnotation(For.class))).value();
+                return controllerClass.getAnnotation(For.class).value();
             }
             for(Type it : controllerClass.getGenericInterfaces()) {
                 if(it instanceof ParameterizedType) {
@@ -257,24 +256,29 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-            return Model.Manager.factoryFor(entityClass).count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
+            List<String> properties = searchFields == null ? new ArrayList<String>(0) : Arrays.asList(searchFields.split("[ ]"));
+            return Model.Manager.factoryFor(entityClass).count(properties, search, where);
         }
 
         @SuppressWarnings("unchecked")
         public List<Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
-            return Model.Manager.factoryFor(entityClass).fetch((page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
+            int offset = (page - 1) * getPageSize();
+            List<String> properties = searchFields == null ? new ArrayList<String>(0) : Arrays.asList(searchFields.split("[ ]"));
+            return Model.Manager.factoryFor(entityClass).fetch(offset, getPageSize(), orderBy, order, properties, search, where);
         }
 
         public Model findById(Object id) {
-            if (id == null) return null;
+            if (id == null) {
+                return null;
+            }
             return Model.Manager.factoryFor(entityClass).findById(id);
         }
 
         public List<ObjectField> getFields() {
-            List<ObjectField> fields = new ArrayList<ObjectField>();
-            List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
+            List<ObjectField> fields = new ArrayList<ObjectField>(10);
+            List<ObjectField> hiddenFields = new ArrayList<ObjectField>(10);
             for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
-                ObjectField of = new ObjectField(f);                
+                ObjectField of = new ObjectField(f);
                 if (of.type != null) {
                     if (of.type.equals("hidden")) {
                         hiddenFields.add(of);
@@ -297,6 +301,7 @@ public abstract class CRUD extends Controller {
             return null;
         }
 
+        @Override
         public int compareTo(ObjectType other) {
             return modelName.compareTo(other.modelName);
         }
@@ -352,7 +357,7 @@ public abstract class CRUD extends Controller {
                     type = "enum";
                 }
                 if (property.isGenerated) {
-                    type = null;                   
+                    type = null;
                 }
                 if (field.isAnnotationPresent(Required.class)) {
                     required = true;

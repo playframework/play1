@@ -1,0 +1,12 @@
+Customer(bob):
+    name:  bob
+
+Order(cake):
+    product: cake
+    items: 3
+    customer: bob
+
+Order(biscuits):
+    product: biscuits
+    items: 4
+    customer: bob

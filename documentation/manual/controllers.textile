@@ -19,7 +19,7 @@ The web’s principles are not fundamentally object-oriented. So a layer is need
 
 h2. <a name="overview">Controller overview</a>
 
-A Controller is a Java class, hosted by the **controllers** package, and subclassing **play.mvc.Controller**.
+A Controller is a Java class, hosted by the @controllers@ package, and subclassing @play.mvc.Controller@.
 
 This is a Controller:
 
@@ -48,17 +48,17 @@ bc. public static void action_name(params...);
 
 You can define parameters in the action method signature. These parameters will be automatically resolved by the framework from the corresponding HTTP parameters.
 
-Usually, an action method doesn’t include a return statement. The method exit is done by the invocation of a **result** method. In this example, **render(…)** is a result method that executes and displays a template.
+Usually, an action method doesn’t include a return statement. The method exit is done by the invocation of a **result** method. In this example, @render(…)@ is a result method that executes and displays a template.
 
 h2. <a name="params">Retrieving HTTP parameters</a>
 
 An HTTP request contains data. This data can be extracted from:
 
-* The URI path: in **/clients/1541**, 1541 is the dynamic part of the URI Pattern.
-* The Query String: **/clients?id=1541.**
-* The request body: if the request was sent from an HTML form, the request body contains the form data encoded as **x-www-urlform-encoded**.
+* The URI path: in @/clients/1541@, 1541 is the dynamic part of the URI Pattern.
+* The Query String: @/clients?id=1541@.
+* The request body: if the request was sent from an HTML form, the request body contains the form data encoded as @x-www-urlform-encoded@.
 
-In all cases, Play extracts this data and builds a Map<String, String[]> which contains all the HTTP parameters. The key is the parameter name. The parameter name is derived from:
+In all cases, Play extracts this data and builds a @Map<String, String[]>@ which contains all the HTTP parameters. The key is the parameter name. The parameter name is derived from:
 
 * The name of the dynamic part of the URI (as specified in the route)
 * The name portion of a name-value pair taken from the Query String
@@ -66,7 +66,7 @@ In all cases, Play extracts this data and builds a Map<String, String[]> which c
 
 h3. <a name="paramsmap">Using the params map</a>
 
-The **params** object is available to any Controller class (it is defined in the **play.mvc.Controller** super class). This object contains all the HTTP parameters found for the current request.
+The @params@ object is available to any Controller class (it is defined in the @play.mvc.Controller@ super class). This object contains all the HTTP parameters found for the current request.
 
 For example:
 
@@ -91,7 +91,7 @@ For example, in this request:
 
 bc. /clients?id=1451
 
-An action method can retrieve the **id** parameter value by declaring an **id** parameter in its signature:
+An action method can retrieve the @id@ parameter value by declaring an @id@ parameter in its signature:
 
 bc. public static void show(String id) {
     System.out.println(id); 
@@ -129,7 +129,7 @@ h3. <a name="simpletypes">Simple types</a>
 
 All the native and common Java types are automatically bound:
 
-**int**, **long**, **boolean**, **char**, **byte**, **float**, **double**, **Integer**, **Long**, **Boolean**, **Char**, **String**, **Byte**, **Float**, **Double**.
+@int@, @long@, @boolean@, @char@, @byte@, @float@, @double@, @Integer@, @Long@, @Boolean@, @Char@, @String@, @Byte@, @Float@, @Double@.
 
 Note that if the parameter is missing in the HTTP Request, or if automatic conversion fails, Object types will be set to null and native types will be set to their default values.
 
@@ -149,7 +149,7 @@ A date object can be automatically bound if the date’s string representation m
 * MM-dd-yy
 * MM'/'dd'/'yy
 
-Using the **@As** annotation, you can specify the date format.
+Using the <code>@As</code> annotation, you can specify the date format.
 
 For example:
 
@@ -162,33 +162,34 @@ bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
 
 You can of course refine the date format according to the language. For example:
 
-bc.  public static void articlesSince(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
+bc.  public static void articlesSince(@As(lang={"fr,de","*"}, 
+        value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
 }
 
-In this example, we specified that for the French and German languages the date format is **dd-MM-yyyy** and for all the other languages it's **MM-dd-yyyy**. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
+In this example, we specified that for the French and German languages the date format is @dd-MM-yyyy@ and for all the other languages it's @MM-dd-yyyy@. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
 
-If no **@As** annotation is specified, then Play! uses the default date format according to your locale.
+If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale.
 To set the default date format to use, edit your application.conf and set the following property:
 
 bc. date.format=yyy-MM-dd
-    date.format.fr=dd/MM/yyyy
+date.format.fr=dd/MM/yyyy
 
 Please note that the language fr in the application.conf must be enabled as well:
 
 bc. application.langs=fr
 
-This property also affects how the dates are rendered in the templates using **${date.format()}**.
+This property also affects how the dates are rendered in the templates using @${date.format()}@.
 
 
 h3. <a name="calendar">Calendar</a>
 
-The calendar binding works exactly as with the date, except that Play is choosing the Calendar object according to your locale. The **@Bind** annotation can also be used.
+The calendar binding works exactly as with the date, except that Play is choosing the Calendar object according to your locale. The <code>@Bind</code> annotation can also be used.
 
 h3. <a name="file">File</a>
 
-File upload is easy with Play. Use a **multipart/form-data** encoded request to post files to the server, and then use the **java.io.File** type to retrieve the file object:
+File upload is easy with Play. Use a @multipart/form-data@ encoded request to post files to the server, and then use the @java.io.File@ type to retrieve the file object:
 
 bc. public static void create(String comment, File attachment) {
     String s3Key = S3.post(attachment);
@@ -215,25 +216,25 @@ h3. <a name="array">Arrays or collections of supported types</a>
 All supported types can be retrieved as an Array or a collection of objects:
 
 bc. public static void show(Long[] id) {
-    ...
+    …
 }
 
 or:
 
 bc. public static void show(List<Long> id) {
-    ...
+    …
 }
 
 or:
 
 bc. public static void show(Set<Long> id) {
-    ...
+    …
 }
 
 Play also handles the special case of binding a Map<String, String> like this:
 
 bc. public static void show(Map<String, String> client) {
-    ...
+    …
 }
 
 
@@ -241,7 +242,7 @@ A query string like the following:
 
 bc. ?client.name=John&client.phone=111-1111&client.phone=222-2222
 
-would bind the client variable to a map with two elements. The first element with key **name** and value **John**, and the second with key **phone** and value **111-1111, 222-2222**.
+would bind the client variable to a map with two elements. The first element with key @name@ and value @John@, and the second with key @phone@ and value @111-1111, 222-2222@.
 
 h3. <a name="pojo">POJO object binding</a>
 
@@ -265,7 +266,7 @@ bc. ?client.name=Zenexity
 &client.address.zip=75009
 &client.address.country=France
 
-In order to update a list of model objects, use array notation and reference the object’s ID. For example imagine the Client model has a list of Customer models declared as **List Customer customers**. To update the list of Customers you would provide a query string like the following:
+In order to update a list of model objects, use array notation and reference the object’s ID. For example imagine the Client model has a list of Customer models declared as @List Customer customers@. To update the list of Customers you would provide a query string like the following:
 
 bc. ?client.customers[0].id=123
 &client.customers[1].id=456
@@ -276,7 +277,7 @@ h2. <a name="objectbinding">JPA object binding</a>
 
 You can automatically bind a JPA object using the HTTP to Java binding.
 
-You can provide the **user.id** field yourself in the HTTP parameters. When Play finds the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
+You can provide the @user.id@ field yourself in the HTTP parameters. When Play finds the @id@ field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
 
 bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
@@ -295,78 +296,81 @@ The binding system now supports more customization.
 
 h3. <a name="as">@play.data.binding.As</a>
 
-The first thing is the new **@play.data.binding.As** annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
+The first thing is the new <code>@play.data.binding.As</code> annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the @DateBinder@:
 
 bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
-	...
+    …
 }
 
-The **@As** annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
+The <code>@As</code> annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
-		@As(
-			lang={"fr,de","en","*"},
-			value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
-		)
-		Date updatedAt
-	) {
-	...
+        @As(
+            lang={"fr,de","en","*"},
+            value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
+        )
+        Date updatedAt
+    ) {
+    …
 }
 
-The **@As** annotation can work with all binders that support it, including your own binder. For example, using the **ListBinder**:
+The <code>@As</code> annotation can work with all binders that support it, including your own binder. For example, using the @ListBinder@:
 
 bc. public static void update(@As(",") List<String> items) {
-	...
+    …
 }
 
-This binds a simple comma separated **String** as a **List**.
+This binds a simple comma separated @String@ as a @List@.
 
 h3. <a name="nobinding">@play.data.binding.NoBinding</a>
 
-The new **@play.data.binding.NoBinding** annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
+The new <code>@play.data.binding.NoBinding</code> annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
 
 bc. public class User extends Model {
-	@NoBinding("profile") public boolean isAdmin;
-	@As("dd, MM yyyy") Date birthDate;
-	public String name;
+    @NoBinding("profile") public boolean isAdmin;
+    @As("dd, MM yyyy") Date birthDate;
+    public String name;
 }
  
 public static void editProfile(@As("profile") User user) {
-	...
+    …
 }
 
-In this case, the **isAdmin** field will never be bound from the **editProfile** action, even if an malicious user includes a **user.isAdmin=true** field in a fake form post.
+In this case, the @isAdmin@ field will never be bound from the @editProfile@ action, even if an malicious user includes a @user.isAdmin=true@ field in a fake form post.
 
 h3. <a name="typebinder">play.data.binding.TypeBinder</a>
 
-The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of **TypeBinder** that you define in your project. For example:
+The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of @TypeBinder@ that you define in your project. For example:
 
 bc. public class MyCustomStringBinder implements TypeBinder<String> {
  
-    public Object bind(String name, Annotation[] anns, String value, Class clazz) {
+    public Object bind(String name, Annotation[] anns, String value, 
+    Class clazz) {
         return "!!" + value + "!!";
     }
 }
 
 You can use it in any action, like:
 
-bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String name) {
-	...
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) 
+String name) {
+    …
 }
 
 h3. <a name="global">@play.data.binding.Global</a>
 
-Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the **java.awt.Point** class like this:
+Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the @java.awt.Point@ class like this:
 
 bc. @Global
 public class PointBinder implements TypeBinder<Point> {
  
-    public Object bind(String name, Annotation[] anns, String value, Class class) {
-		String[] values = value.split(",");
-		return new Point(
-			Integer.parseInt(values[0]),
-			Integer.parseInt(values[1])
-		);
+    public Object bind(String name, Annotation[] anns, String value, 
+    Class class) {
+        String[] values = value.split(",");
+        return new Point(
+            Integer.parseInt(values[0]),
+            Integer.parseInt(values[1])
+        );
     }
 }
 
@@ -385,11 +389,11 @@ bc. public static void show(Long id) {
     System.out.println("This message will never be displayed !");
 }
 
-The **render(…)** method emits a Result object and stops further method execution.
+The @render(…)@ method emits a Result object and stops further method execution.
 
 h3. <a name="text">Return some textual content</a>
 
-The **renderText(…)** method emits a simple Result event which writes some text directly to the underlying HTTP Response.
+The @renderText(…)@ method emits a simple Result event which writes some text directly to the underlying HTTP Response.
 
 Example:
 
@@ -432,7 +436,6 @@ bc. public class Clients extends Controller {
     public static void index() {
         render();    
     }
- 
 }
 
 A template name is automatically deduced from the Play conventions. The default template path is resolved using the Controller and action names. 
@@ -443,7 +446,7 @@ bc. app/views/Clients/index.html
 
 h4. Add data to the template scope
 
-Often the template needs data. You can add these data to the template scope using the **renderArgs** object:
+Often the template needs data. You can add these data to the template scope using the @renderArgs@ object:
 
 bc. public class Clients extends Controller {
  
@@ -452,10 +455,9 @@ bc. public class Clients extends Controller {
         renderArgs.put("client", client);
         render();    
     }
- 
 }
 
-During template execution, the **client** variable will be defined.
+During template execution, the @client@ variable will be defined.
 
 For example:
 
@@ -463,7 +465,7 @@ bc. <h1>Client ${client.name}</h1>
 
 h4. A simpler way to add data to the template scope
 
-You can pass data directly to the template using **render(…)** method arguments:
+You can pass data directly to the template using @render(…)@ method arguments:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
@@ -486,7 +488,7 @@ You can only pass **local variables** in this way.
 
 h4. Specify another template
 
-If you don’t want to use the default template, you can specify your own template file using the **renderTemplate(…)** method, by passing the template name as the first parameter:
+If you don’t want to use the default template, you can specify your own template file using the @renderTemplate(…)@ method, by passing the template name as the first parameter:
 
 Example:
 
@@ -497,7 +499,7 @@ bc. public static void show(Long id) {
 
 h3. <a name="redirect">Redirect to another URL</a>
 
-The **redirect(…)** method emits a Redirect event that in turn generates an HTTP Redirect response.
+The @redirect(…)@ method emits a Redirect event that in turn generates an HTTP Redirect response.
 
 bc. public static void index() {
     redirect("http://www.zenexity.fr");
@@ -506,7 +508,7 @@ bc. public static void index() {
 
 h3. <a name="chaining">Action chaining</a>
 
-There is no equivalent to the Servlet API **forward**. An HTTP request can only invoke one action. If you need to invoke another action, you have to redirect the browser to the URL able to invoke that action. In this way, the browser URL is always consistent with the executed action, and the **Back/Forward/Refresh** management is much easier.
+There is no equivalent to the Servlet API @forward@. An HTTP request can only invoke one action. If you need to invoke another action, you have to redirect the browser to the URL able to invoke that action. In this way, the browser URL is always consistent with the executed action, and the **Back/Forward/Refresh** management is much easier.
 
 You can send a Redirect response to any action, simply by invoking the action method in a Java way. The Java call is intercepted by the framework and the correct HTTP Redirect is generated.
 
@@ -524,7 +526,6 @@ bc. public class Clients extends Controller {
         client.save();
         show(client.id);
     }
- 
 }
 
 With these routes:
@@ -532,12 +533,12 @@ With these routes:
 bc. GET    /clients/{id}            Clients.show
 POST   /clients                 Clients.create 
 
-* The browser sends a POST to the **/clients** URL.
-* The Router invokes the **Clients** controller’s **create** action.
-* The action method calls the **show** action method directly.
+* The browser sends a POST to the @/clients@ URL.
+* The Router invokes the @Clients@ controller’s @create@ action.
+* The action method calls the @show@ action method directly.
 * The Java call is intercepted and the Router reverse route generation creates the URL needed to invoke Clients.show with an id parameter.
-* The HTTP Response is **302 Location:/clients/3132**.
-* The browser then issues **GET /clients/3132**.
+* The HTTP Response is @302 Location:/clients/3132@.
+* The browser then issues @GET /clients/3132@.
 * …
 
 h3. <a name="encoding">Customise web encoding</a>
@@ -568,11 +569,11 @@ h2. <a name="interceptions">Interceptions</a>
 
 A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It’s a useful way to define treatments that are common to all actions: verifying that a user is authenticated, loading request-scope information…
 
-These methods have to be **static** but not **public**. You have to annotate these methods with a valid interception marker.
+These methods have to be @static@ but not @public@. You have to annotate these methods with a valid interception marker.
 
 h3. <a name="before">@Before</a>
 
-Methods annotated with the **@Before** annotation are executed before each action call for this Controller.
+Methods annotated with the <code>@Before</code> annotation are executed before each action call for this Controller.
 
 So, to create a security check:
 
@@ -587,9 +588,7 @@ bc. public class Admin extends Application {
         List<User> users = User.findAll();
         render(users);
     }
- 
-    ...
- 
+    …
 }
 
 If you don’t want the @Before method to intercept all action calls, you can specify a list of actions to exclude:
@@ -606,8 +605,7 @@ bc. public class Admin extends Application {
         render(users);
     }
  
-    ...
- 
+    …
 }
 
 Or if you want the @Before method to intercept a list of action calls, you can specify a only param :
@@ -616,17 +614,16 @@ bc. public class Admin extends Application {
  
     @Before(only={"login","logout"})
     static void doSomething() {  
-		...  
-	}
-	
-   	...
+        …  
+    }
+    …
 }
 
-The **unless** and **only** parameters are available for the **@After**, **@Before** and **@Finally** annotations.
+The @unless@ and @only@ parameters are available for the <code>@After</code>, <code>@Before</code> and <code>@Finally</code> annotations.
 
 h3. <a name="after">@After</a>
 
-Methods annotated with the **@After** annotation are executed after each action call for this Controller.
+Methods annotated with the <code>@After</code> annotation are executed after each action call for this Controller.
 
 bc. public class Admin extends Application {
  
@@ -640,13 +637,12 @@ bc. public class Admin extends Application {
         render(users);
     }
  
-    ...
- 
+    …
 }
 
 h3. <a name="catch">@Catch</a>
 
-Methods annotated with **@Catch** are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
+Methods annotated with <code>@Catch</code> are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
 
 bc. public class Admin extends Application {
 	
@@ -691,7 +687,7 @@ bc. public class Admin extends Application {
 
 h3. <a name="finally">@Finally</a>
 
-Methods annotated with the **@Finally** annotation are always executed after each action call to this Controller.
+Methods annotated with the <code>@Finally</code> annotation are always executed after each action call to this Controller.
 @Finally-methods are called both after successful action calls and if an error occurred.
 
 bc. public class Admin extends Application {
@@ -705,9 +701,7 @@ bc. public class Admin extends Application {
         List<User> users = User.findAll();
         render(users);
     }
- 
-    ...
- 
+    …
 }
 
 If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
@@ -716,20 +710,18 @@ bc. public class Admin extends Application {
  
     @Finally
     static void log(Throwable e) {
-		if( e == null ){
-			Logger.info("action call was successful");
-		}else{
-			Logger.info("action call failed", e);
-		}
+        if( e == null ){
+            Logger.info("action call was successful");
+        } else{
+            Logger.info("action call failed", e);
+        }
     }
  
     public static void index() {
         List<User> users = User.findAll();
         render(users);
     }
- 
-    ...
- 
+    …
 }
 
 
@@ -739,7 +731,7 @@ If a Controller class is a subclass of another Controller class, interceptions a
 
 h3. <a name="with">Adding more interceptors using the @With annotation</a>
 
-Because Java does not allow multiple inheritance, it can be very limiting to rely on the Controller hierarchy to apply interceptors. But you can define some interceptors in a totally different class, and link them with any controller using the **@With** annotation.
+Because Java does not allow multiple inheritance, it can be very limiting to rely on the Controller hierarchy to apply interceptors. But you can define some interceptors in a totally different class, and link them with any controller using the <code>@With</code> annotation.
 
 Example:
 
@@ -758,8 +750,7 @@ And on another Controller:
 bc. @With(Secure.class)
 public class Admin extends Application {
     
-    ...
-     
+    …
 }
 
 h2. <a name="session">Session and Flash scopes</a>
@@ -782,7 +773,7 @@ bc. public static void index() {
     render(messages);
 }
 
-The session expires when you close your web browser, unless the **application.session.maxAge** configuration property is set. For example:
+The session expires when you close your web browser, unless the @application.session.maxAge@ configuration property is set. For example:
 
 bc. application.session.maxAge=7d  # Remember for one week.
 
