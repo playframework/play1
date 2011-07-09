@@ -62,6 +62,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     private static boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         final String playId = e.getServletContext().getInitParameter("play.id");
@@ -81,6 +82,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if (isGreaterThan(e.getServletContext(), 2, 4)) {
             loadRouter(e.getServletContext().getContextPath());
         }
+
+        Thread.currentThread().setContextClassLoader(oldClassLoader);
     }
 
     public void contextDestroyed(ServletContextEvent e) {
