@@ -391,5 +391,35 @@ public class WithContinuations extends Controller {
         renderText( res );
     }
     
+    public static void usingRenderArgsAndAwaitWithCallBack(String arg) {
+         renderArgs.put("arg", arg);
+
+         await("1s", new F.Action0() {
+
+             @Override
+             public void invoke() {
+                 renderText(renderArgs.get("arg"));
+             }
+         });
+    }
+
+    public static void usingRenderArgsAndAwaitWithFutureAndCallback(final String arg) {
+        renderArgs.put("arg", arg);
+
+        Promise<String> promise = new Job() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return "result";
+        }
+
+        }.now();
+        await(promise, new F.Action<String>() {
+
+            @Override
+            public void invoke(String result) {
+                renderText(result + "/" + renderArgs.get("arg"));
+            }
+        });
+    }
 }
 

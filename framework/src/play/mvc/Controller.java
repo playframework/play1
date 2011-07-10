@@ -955,6 +955,7 @@ public class Controller implements ControllerSupport {
     protected static void await(int millis, F.Action0 callback) {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.A, callback);
+        storeOrRestoreDataStateForContinuations(null);
         throw new Suspend(millis);
     }
 
@@ -1036,6 +1037,7 @@ public class Controller implements ControllerSupport {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.F, future);
         Request.current().args.put(ActionInvoker.A, callback);
+        storeOrRestoreDataStateForContinuations(null);
         throw new Suspend(future);
     }
 
