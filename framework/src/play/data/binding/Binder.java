@@ -234,7 +234,7 @@ public class Binder {
                 }
                 for (String v : value) {
                     try {
-                        r.add(directBind(name, annotations, v, componentClass));
+                        r.add(directBind(name + (StringUtils.isEmpty(suffix) ? "" : suffix), annotations, v, componentClass));
                     } catch (Exception e) {
                         // ?? One item was bad
                         Logger.debug(e, "error:");
@@ -255,7 +255,7 @@ public class Binder {
                 return MISSING;
             }
 
-            return directBind(name, annotations, value[0], clazz, type);
+            return directBind(name + (StringUtils.isEmpty(suffix) ? "" : suffix), annotations, value[0], clazz, type);
         } catch (Exception e) {
             Validation.addError(name + suffix, "validation.invalid");
             return MISSING;
