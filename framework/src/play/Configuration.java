@@ -19,75 +19,6 @@ import play.vfs.VirtualFile;
 
 public class Configuration extends Properties {
 	
-	public class FilterResult
-	{
-		private Configuration config = null;
-		private String prefix = "";
-		public FilterResult(final Configuration conf)
-		{
-			super();
-			this.config = (Configuration)conf.clone();
-		}
-		
-		public Configuration fetch()
-		{
-			return fetch(true);
-		}
-		public Configuration fetch(final boolean showPrefix)
-		{
-			if (showPrefix) {
-				return config;
-				
-			} else {
-				Configuration c = new Configuration();
-				for (final Object key : keySet()) {
-					c.put(key.toString().substring(prefix.length()), config.getProperty(key.toString()));
-				}
-				return c;
-			}
-		}
-		public Set<Object> keys()
-		{
-			return this.config.keySet();
-		}
-		public int count()
-		{
-			return this.config.size();
-		}
-		public FilterResult group(final String prefix)
-		{
-			this.prefix += prefix + ".";
-			for (final Object key : keySet()) {
-				if (!key.toString().startsWith(this.prefix)) {
-					this.config.remove(key);
-				}
-			}
-			return this;
-		}
-		public FilterResult group(final String prefix, final String subLabel)
-		{
-			return group(prefix + "[" + subLabel + "]");
-		}
-		public FilterResult filterValue(final String pattern)
-		{
-			for (final Object key : this.config.keySet()) {
-				final String v = getProperty(key.toString());
-				if (!v.matches(pattern)) {
-					this.config.remove(key);
-				}
-			}
-			return this;
-		}
-		public FilterResult filterValue(final Pattern pattern)
-		{
-			return filterValue(pattern.pattern());
-		}
-		public List<String> subLabels()
-		{
-			return null;
-		}
-	}
-	
 	/**
 	 * 
 	 */
@@ -100,24 +31,64 @@ public class Configuration extends Properties {
 	public String id = null;
 	private HashSet<String> seenFileNames = new HashSet<String>();
 	
+	/**
+	 * stores now filtering key prefix
+	 */
+	private String prefix = "";
+	
 	private VirtualFile baseDir = null;
 	
-	public FilterResult group(final String prefix)
+	public Configuration hidePrefix()
 	{
-		return new FilterResult(this).group(prefix);
+	    Configuration result = new Configuration();
+	    int len = prefix.length();
+	    for (final Object key : keySet()) {
+	        result.put(key.toString().substring(len), getProperty(key.toString()));
+	    }
+	    return result;
 	}
-	public FilterResult group(final String prefix, final String subLabel)
+	private String pushPrefix(final String prefix)
 	{
-		return new FilterResult(this).group(prefix, subLabel);
+	    if (prefix != null && !prefix.isEmpty()) {
+	        this.prefix += prefix + ".";
+	    }
+	    return this.prefix;
 	}
-	public FilterResult filterValue(final String pattern)
+	public Configuration group(final String prefix)
 	{
-		return new FilterResult(this).filterValue(pattern);
+	    Configuration result = new Configuration();
+	    final String _prefix = result.pushPrefix(prefix);
+        for (final Object key : keySet()) {
+            if (key.toString().startsWith(_prefix)) {
+                result.put(key, getProperty(key.toString()));
+            }
+        }
+        return result;
 	}
-	public FilterResult filterValue(final Pattern pattern)
+	public Configuration group(final String prefix, final String subLabel)
 	{
-		return new FilterResult(this).filterValue(pattern);
+	    return group(prefix + "[" + subLabel + "]");
 	}
+	public Configuration filterValue(final String pattern)
+    {
+	    Configuration result = new Configuration();
+	    result.prefix = this.prefix;
+        for (final Object key : keySet()) {
+            final String v = getProperty(key.toString());
+            if (v.matches(pattern)) {
+                result.put(key, getProperty(key.toString()));
+            }
+        }
+        return result;
+    }
+    public Configuration filterValue(final Pattern pattern)
+    {
+        return filterValue(pattern.pattern());
+    }
+    public List<String> subLabels()
+    {
+        return null;
+    }
 	
 	/**
 	 * Read other Properties instance
@@ -258,7 +229,7 @@ public class Configuration extends Properties {
 	}
 	private Set<Object> findIncludeKeys()
 	{
-		return this.group("@include").keys();
+		return this.group("@include").keySet();
 //		HashSet<String> keys = new HashSet<String>();
 //		for (Object key : keySet()) {
 //			if (key.toString().startsWith("@include.")) {
@@ -337,7 +308,7 @@ public class Configuration extends Properties {
 	private Set<Object> findRemainKeyword()
 	{
 //		Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
-		return this.filterValue("\\$\\{([^}]+)}").keys();
+		return this.filterValue("\\$\\{([^}]+)}").keySet();
 	}
 	private void resolveKeyword()
 	{

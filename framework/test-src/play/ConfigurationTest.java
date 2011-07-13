@@ -46,21 +46,21 @@ public class ConfigurationTest {
 		// - db.driver
 		// - db.user
 		// - db.pass
-		Configuration map1 = conf.group("db").fetch();
+		Configuration map1 = conf.group("db");
 		assertEquals(map1.getProperty("db.url"), "jdbc:mysql:test");
 		assertEquals(map1.getProperty("db.driver"), "test.Driver");
 		assertEquals(map1.getProperty("db.user"), "sample_user");
 		assertEquals(map1.getProperty("db.pass"), "mypassword");
 		assertEquals(map1.size(), 4);
-		assertEquals(conf.group("db").count(), 4);
+		assertEquals(conf.group("db").size(), 4);
 		
 		// 2. TREE FILTER & LABEL SPLIT
 		// expected:
 		// - url     <-- original config line is "db.url=...". fetch(false) method hides "db." prefix.
-		Configuration map2 = conf.group("db").group("url").fetch(false);
+		Configuration map2 = conf.group("db").group("url").hidePrefix();
 		assertEquals(map2.getProperty("url"), "jdbc:mysql:test");
 		assertEquals(map2.size(), 1);
-		assertEquals(conf.group("db").group("url").count(), 1);
+		assertEquals(conf.group("db").group("url").size(), 1);
 		
 		// 3. SUB-LABEL
 		// expected:
@@ -68,13 +68,13 @@ public class ConfigurationTest {
 		// - db[readonly].driver
 		// - db[readonly].user
 		// - db[readonly].pass
-		Configuration map3 = conf.group("db", "readonly").fetch(false);
+		Configuration map3 = conf.group("db", "readonly").hidePrefix();
 		assertEquals(map3.getProperty("url"), "jdbc:mysql:test");
 		assertEquals(map3.getProperty("driver"), "test.Driver");
 		assertEquals(map3.getProperty("user"), "sample_user");
 		assertEquals(map3.getProperty("pass"), "mypassword");
 		assertEquals(map3.size(), 4);
-		assertEquals(conf.group("db", "readonly").count(), 4);
+		assertEquals(conf.group("db", "readonly").size(), 4);
 		
 		// 4. LIST SUB-LABELS
 		// expected:
