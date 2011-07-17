@@ -41,7 +41,7 @@ The @play new@ command creates a new directory @helloworld/@ and populates it wi
 
 @public/@ contains all the publicly available resources, which includes JavaScript, stylesheets and images directories.
 
-@test/@ contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
+@test/@ contains all the application tests. Tests are written either as Java JUnit tests or as Selenium tests.
 
 p(note). Because **Play uses UTF-8** as single encoding, it's very important that all text files hosted in these directories are encoded using this charset. Make sure to configure your text editor accordingly.
 
@@ -285,7 +285,7 @@ bc. *{ You can use plain selenium command using the selenium tag }*
     assertNotTitle('Application error')
 #{/selenium}
 
-This test should run without any problem with the application for now. It just open the home page and check that the page content does not contain the ‘Application error’ text.
+This test should run without any problem with the application for now. It just opens the home page and checks that the page content does not contain the ‘Application error’ text.
 
 Let’s write a test for our application. Edit the test content:
 
@@ -294,7 +294,7 @@ bc. #{selenium}
     open('/')
     assertNotTitle('Application error')
     
-    // Check that it is the form
+    // Check that it is the Hello World application
     assertTextPresent('The Hello world app.')
     
     // Submit the form

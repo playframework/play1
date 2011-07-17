@@ -1,4 +1,4 @@
-h1. A first iteration for the data model
+h1. A first iteration of the data model
 
 Here we will start to write the model for our blog engine.
 
@@ -209,7 +209,7 @@ public void createPost() {
     assertNotNull(firstPost.postedAt);
 }
 
-p(note). **Don’t forget** to import the @java.util.List@ or will get a compilation error.
+p(note). **Don’t forget** to import the @java.util.List@ or you will get a compilation error.
 
 h2. <a>Adding Comments</a>
 
@@ -295,7 +295,7 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the @mappedBy@ attribute to tell JPA that the @Comment@ class’s post field maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the @Comments@ belong to the @Post@, it’s better that the @Comment@ class maintains the relationship.
+Note how we have used the @mappedBy@ attribute to tell JPA that the @Comment@ class’ post field maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the @Comments@ belong to the @Post@, it’s better that the @Comment@ class maintains the relationship.
 
 We have set the @cascade@ property to tell JPA that we want @Post@ deletion be cascaded to @comments@. This way, if you delete a post, all related comments will be deleted as well.
 

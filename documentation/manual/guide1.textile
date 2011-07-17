@@ -62,7 +62,7 @@ The @play new@ command creates a new directory @yabe/@ and populates it with a s
 
 @public/@ contains all the publicly available resources, which includes JavaScript files, stylesheets and images directories.
 
-@test/@ contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
+@test/@ contains all the application tests. Tests are written either as Java JUnit tests or as Selenium tests.
 
 p(note). Because **Play uses UTF-8** as single encoding, it’s very important that all text files hosted in these directories are encoded using this charset. Make sure to configure your text editor accordingly.
 
@@ -172,7 +172,7 @@ You can remove this useless line, and now edit the @yabe/app/views/Application/i
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
  
-<h1>A blog will be there</h1>
+<h1>A blog will be here</h1>
 
 Like for Java code changes, just refresh the page in the browser to see the modification.
 
@@ -216,7 +216,7 @@ $ bzr ignore logs
 Now we can commit our first blog engine version:
 
 bc. $ bzr add
-$ bzr commit -m "YABE inital version"
+$ bzr commit -m "YABE initial version"
 
 h3. <a>Git</a>
 

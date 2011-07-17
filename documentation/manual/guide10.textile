@@ -8,7 +8,7 @@ h2. <a name="controller">Testing the controller part</a>
 
 Play gives you a way to test directly the application’s controller part using JUnit. We call these tests **‘Functional tests’**. This is because we want to test the web application’s complete functionality.
 
-Basically a functional test calls the Play @ActionInvoker@ directly, simulating an HTTP request. So we give an HTTP method, an URI and HTTP parameters. Play then routes the request, invokes the corresponding action and sends you back the filled response. You can then analyze it to check that the response content is like you expected.
+Basically a functional test calls the Play @ActionInvoker@ directly, simulating an HTTP request. So we give an HTTP method, a URI and HTTP parameters. Play then routes the request, invokes the corresponding action and sends you back the filled response. You can then analyze it to check that the response content is like you expected.
 
 Let’s write a first functional test. Open the @yabe/test/ApplicationTest.java@ unit test:
 
@@ -55,7 +55,7 @@ These kinds of JUnit based **‘Functional tests’** are still useful, typicall
 
 h2. <a name="selenium">Writing Selenium tests</a>
 
-"Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool things here is that Selenium allows to run the test suite directly in any existing browser. As it does not use any ‘browser simulator’, you can be sure that you’re testing what your users will use.
+"Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool thing here is that Selenium allows to run the test suite directly in any existing browser. As it does not use any ‘browser simulator’, you can be sure that you’re testing what your users will use.
 
 A Selenium test suite is typically written as an HTML file. The HTML syntax required by Selenium is a little tedious to write (formatted using an HTML table element). The good news is that Play helps you generate it using the Play template engine and a set of tags that support a simplified syntax for Selenium scenarios. An interesting side effect of using templates is that your are not tied to ‘static scenarios’ any more and you can use the power of Play templates (looping, conditional blocks) to write more complicated tests.
 
@@ -74,7 +74,7 @@ bc. *{ You can use plain Selenium commands using the selenium tag }*
 
 This test should run without any problem with the yabe application. It just opens the home page and checks that the page content does not contain the ‘Application error’ text.
 
-However like any complex test, you need to set-up a set of well-known data before navigating the application and testing it. We will of course reuse the fixture concept and the @yabe/test/data.yml@ file that we’ve used before. To import this data set before the test suite, just use the @#{fixtures /}@ tag:
+However like any complex test, you need to set-up a set of well-known data before navigating the application and testing it. We will of course reuse the fixture concept and the @yabe/test/data.yml@ file that we’ve used before. To import this data set before the test suite, just use the @#{fixture /}@ tag:
 
 bc. #{fixture delete:'all', load:'data.yml' /}
  
