@@ -36,7 +36,7 @@ bc. …
 </h2>
 …
 
-You can new refresh the home page, and click a post title to display the post.
+You can now refresh the home page, and click a post title to display the post.
 
 !images/guide4-0!
 
@@ -221,7 +221,7 @@ bc. public static void postComment(Long postId, @Required String author, @Requir
     show(postId);
 }
 
-and display the success message in @show.html@ if present (add it at the top the page):
+and display the success message in @show.html@ if present (add it at the top of the page):
 
 bc. …
 #{if flash.success}
