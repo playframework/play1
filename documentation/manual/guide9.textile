@@ -228,7 +228,7 @@ bc. #{extends 'admin.html' /}
     
 #{/form}
 
-As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent the the @Admin.save@ action. 
+As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent to the @Admin.save@ action. 
 
 Now we can change the @save()@ method a little to handle both creation and editing cases:
 
@@ -262,9 +262,9 @@ bc. public static void save(Long id, String title, String content, String tags) 
     index();
 }
 
-And for better URL we will use the same trick as before, by adding a new preferred route if an @id@ parameter exist:
+And for better URL we will use the same trick as before, by adding a new preferred route if an @id@ parameter exists:
 
-bc. POST    /admin/myPosts/{id}                  Admin.save
+bc. POST    /admin/myPosts/{id}                 Admin.save
 POST    /admin/new                          Admin.save
 
 That’s done! Now we’re using the same action for both creating new blog posts and editing old ones, and the administration area is finished!

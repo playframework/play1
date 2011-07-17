@@ -84,7 +84,7 @@ The expression language used by the play template engine is "Groovy":http://groo
 
 h2. <a>JPA on steroids</a>
 
-The Java Persistence API (JPA) is the cleanest object-relational mapping ORM) API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
+The Java Persistence API (JPA) is the cleanest object-relational mapping (ORM) API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
 
 Moreover if you use the provided @play.db.jpa.Model@ superclass it will help make your code prettier. Have a look:
 
