@@ -18,7 +18,9 @@ import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
 
 public class Configuration extends Properties {
-	
+	public class ReferenceLoopsException extends Exception {
+		
+	}
 	/**
 	 * 
 	 */
@@ -41,28 +43,41 @@ public class Configuration extends Properties {
 	public Configuration hidePrefix()
 	{
 	    Configuration result = new Configuration();
-	    int len = prefix.length();
+	    result.prefix = "";
+	    int len = this.prefix.length() == 0 ? 0 : this.prefix.length() + 1;
 	    for (final Object key : keySet()) {
-	        result.put(key.toString().substring(len), getProperty(key.toString()));
+	    	Logger.warn("prefix:%s key:%s", this.prefix, key);
+	    	if (key.toString().equals(this.prefix)) {
+	    		result.put("", getProperty(key.toString()));
+	    	} else {
+	    		result.put(key.toString().substring(len), getProperty(key.toString()));
+	    	}
 	    }
 	    return result;
 	}
 	private String pushPrefix(final String prefix)
 	{
 	    if (prefix != null && !prefix.isEmpty()) {
-	        this.prefix += prefix + ".";
+	        this.prefix += "." + prefix;
+	    }
+	    if (this.prefix.startsWith(".")) {
+	    	this.prefix = this.prefix.replaceFirst("\\.", "");
 	    }
 	    return this.prefix;
 	}
 	public Configuration group(final String prefix)
 	{
 	    Configuration result = new Configuration();
+	    result.prefix = this.prefix;
 	    final String _prefix = result.pushPrefix(prefix);
+	    Logger.info("New configuration prefix is %s.", result.prefix);
         for (final Object key : keySet()) {
-            if (key.toString().startsWith(_prefix)) {
+            if (key.toString().equals(_prefix) 
+            		|| key.toString().startsWith(_prefix + ".")) {
                 result.put(key, getProperty(key.toString()));
             }
         }
+        Logger.debug("Prefix:%s SIZE:%d.", _prefix, result.size());
         return result;
 	}
 	public Configuration group(final String prefix, final String subLabel)
@@ -84,10 +99,6 @@ public class Configuration extends Properties {
     public Configuration filterValue(final Pattern pattern)
     {
         return filterValue(pattern.pattern());
-    }
-    public List<String> subLabels()
-    {
-        return null;
     }
 	
 	/**
@@ -121,7 +132,7 @@ public class Configuration extends Properties {
 	 */
 	public Configuration()
 	{
-		this(VirtualFile.open(DEFAULT_BASE_DIR), DEFAULT_CONF_FILE);
+		//this(VirtualFile.open(DEFAULT_BASE_DIR), DEFAULT_CONF_FILE);
 	}
 	
 	/**
@@ -129,7 +140,7 @@ public class Configuration extends Properties {
 	 * 
 	 * @param basedir
 	 */
-	public Configuration(final VirtualFile basedir)
+	public Configuration(final VirtualFile basedir) throws ReferenceLoopsException
 	{
 		this(basedir, DEFAULT_CONF_FILE);
 	}
@@ -139,7 +150,7 @@ public class Configuration extends Properties {
 	 * 
 	 * @param configuration filename to load
 	 */
-	public Configuration(final String filename) {
+	public Configuration(final String filename) throws ReferenceLoopsException {
 		this(VirtualFile.open(DEFAULT_BASE_DIR), filename);
 	}
 	
@@ -147,10 +158,11 @@ public class Configuration extends Properties {
 	 * Construct from conf file.
 	 * @param conf
 	 */
-	public Configuration(VirtualFile basedir, final String filename)
+	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException
 	{
 		super();
 		this.baseDir = basedir;
+		Logger.debug("loading %s...", filename);
 		
 		// Builtin configurations
 //		this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
@@ -158,6 +170,7 @@ public class Configuration extends Properties {
 		
 		try {
 			this.read(filename);
+			Logger.debug("loaded %s...", filename);
 			int preIncludes = 0, postIncludes = 0;
 			int preProfile = 0, postProfile = 0;
 			int loop = 0, maxLoop = 100;
@@ -183,6 +196,9 @@ public class Configuration extends Properties {
 				
 			} while (preIncludes != postIncludes || preProfile != postProfile);
 			
+			// Keyword
+			resolveKeyword();
+			
 			// DEBUG
 			Logger.debug("Configuration -> filename:%s, id:%s, includes:%d files.",
 					filename,
@@ -193,7 +209,11 @@ public class Configuration extends Properties {
 		} catch (NullPointerException e) {
         	Logger.error("Invalid conf file (null)");
         	System.exit(-1);
-        
+        	
+		} catch (ReferenceLoopsException e) {
+			Logger.error("Configuration reference loops occurred.");
+			throw e;
+			
 		} catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
             	Logger.fatal(e.getCause().getMessage());
@@ -205,6 +225,10 @@ public class Configuration extends Properties {
             System.exit(-1);
         
 		}
+	}
+	public Object getProperty()
+	{
+		return this.getProperty("");
 	}
 	/**
 	 * Check if the configuration file already loaded?
@@ -249,6 +273,7 @@ public class Configuration extends Properties {
         			throw new RuntimeException("Too many @include found in your configuration.");
         		}
         		try {
+        			Logger.debug("@include %s found.", filename);
                     this.read(filename);
                     
                 } catch (Exception ex) {
@@ -260,7 +285,9 @@ public class Configuration extends Properties {
 	}
 	private void detectKeyword()
 	{
-		
+		for (Object key : keySet()) {
+			String value = getProperty(key.toString());
+		}
 	}
 	private HashSet<String> findProfileKeys(final String id)
 	{
@@ -310,7 +337,7 @@ public class Configuration extends Properties {
 //		Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
 		return this.filterValue("\\$\\{([^}]+)}").keySet();
 	}
-	private void resolveKeyword()
+	private void resolveKeyword() throws ReferenceLoopsException
 	{
 		// Resolve ${..}
         Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
@@ -328,14 +355,15 @@ public class Configuration extends Properties {
                     r = Play.frameworkPath.getAbsolutePath();
                     
                 } else {
-                	if (this.contains(jp)) {
+                	if (this.containsKey(jp)) {
                 		if (key.toString().trim().equals(jp)) {
                 			Logger.fatal("Keyword must not be itself-loop, exit. (%s=%s)", key, value);
-                			System.exit(-1);
+                			throw new ReferenceLoopsException();
                 		}
                 		r = getProperty(jp);
                 		
                 	} else {
+                		Logger.warn("finding system property %s", jp);
                 		r = System.getProperty(jp);
                 		
                 	}

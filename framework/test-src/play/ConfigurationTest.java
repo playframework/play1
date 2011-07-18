@@ -6,6 +6,7 @@ import org.apache.log4j.Level;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.Configuration.ReferenceLoopsException;
 import play.vfs.VirtualFile;
 import static org.junit.Assert.*;
 
@@ -18,21 +19,28 @@ public class ConfigurationTest {
 	@Test
 	public void loadTest() throws Exception {
 		Configuration conf = new Configuration(getBaseDir(), "configurationTest.conf");
-		assertEquals(conf.getProperty("hello.world"), "hello, world");
+		assertEquals("hello, world", conf.getProperty("hello.world"));
+		
+		// keyword
+		assertEquals("Keyword is \"hello, world\".", conf.getProperty("hello.keyword"));
 	}
 	
 	@Test
-    public void replaceKeywordTest() throws Exception {
-		Configuration conf = new Configuration(getBaseDir(), "includeTest.conf");
-		
-		assertEquals(conf.getProperty("hello.world"), "HELLO! \"hello, world\"");
-	}
-	@Test
 	public void profileTest() throws Exception {
+		
+		
+		fail();
 		
 	}
 	@Test
 	public void referenceLoopTest() throws Exception {
+		try {
+			Configuration conf = new Configuration(getBaseDir(), "includeLoopTest.conf");
+			fail();
+			
+		} catch (ReferenceLoopsException e) {
+			
+		}
 		Configuration conf = new Configuration(getBaseDir(), "loopTest1.conf");
 	}
 	
@@ -47,20 +55,20 @@ public class ConfigurationTest {
 		// - db.user
 		// - db.pass
 		Configuration map1 = conf.group("db");
-		assertEquals(map1.getProperty("db.url"), "jdbc:mysql:test");
-		assertEquals(map1.getProperty("db.driver"), "test.Driver");
-		assertEquals(map1.getProperty("db.user"), "sample_user");
-		assertEquals(map1.getProperty("db.pass"), "mypassword");
-		assertEquals(map1.size(), 4);
-		assertEquals(conf.group("db").size(), 4);
+		assertEquals("jdbc:mysql:test", map1.getProperty("db.url"));
+		assertEquals("test.Driver", map1.getProperty("db.driver"));
+		assertEquals("sample_user", map1.getProperty("db.user"));
+		assertEquals("mypassword", map1.getProperty("db.pass"));
+		assertEquals(4, map1.size());
+		assertEquals(4, conf.group("db").size());
 		
 		// 2. TREE FILTER & LABEL SPLIT
 		// expected:
 		// - url     <-- original config line is "db.url=...". fetch(false) method hides "db." prefix.
 		Configuration map2 = conf.group("db").group("url").hidePrefix();
-		assertEquals(map2.getProperty("url"), "jdbc:mysql:test");
-		assertEquals(map2.size(), 1);
-		assertEquals(conf.group("db").group("url").size(), 1);
+		assertEquals("jdbc:mysql:test", map2.getProperty());
+		assertEquals(1, map2.size());
+		assertEquals(1, conf.group("db").group("url").size());
 		
 		// 3. SUB-LABEL
 		// expected:
@@ -69,21 +77,12 @@ public class ConfigurationTest {
 		// - db[readonly].user
 		// - db[readonly].pass
 		Configuration map3 = conf.group("db", "readonly").hidePrefix();
-		assertEquals(map3.getProperty("url"), "jdbc:mysql:test");
-		assertEquals(map3.getProperty("driver"), "test.Driver");
-		assertEquals(map3.getProperty("user"), "sample_user");
-		assertEquals(map3.getProperty("pass"), "mypassword");
-		assertEquals(map3.size(), 4);
-		assertEquals(conf.group("db", "readonly").size(), 4);
-		
-		// 4. LIST SUB-LABELS
-		// expected:
-		// ["readonly", "readwrite"]  <-- list "db[*].*" without main label "db.*"
-		List<String> subLabels = conf.group("db").subLabels();
-		assertTrue(subLabels.contains("readonly"));
-		assertTrue(subLabels.contains("readwrite"));
-		assertEquals(subLabels.size(), 2);
-		
+		assertEquals("jdbc:mysql:test:ReadOnly", map3.getProperty("url"));
+		assertEquals("test.ReadOnlyDriver", map3.getProperty("driver"));
+		assertEquals("readonly_user", map3.getProperty("user"));
+		assertEquals("myreadonlypassword", map3.getProperty("pass"));
+		assertEquals(4, map3.size());
+		assertEquals(4, conf.group("db", "readonly").size());
 		
 	}
 }
