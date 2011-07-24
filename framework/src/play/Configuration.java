@@ -65,6 +65,28 @@ public class Configuration extends Properties {
 	    }
 	    return this.prefix;
 	}
+	
+	
+	public static class SubLabel
+	{
+		public static String format(final String key, final String subLabel)
+		{
+			return key + "[" + subLabel + "]";
+		}
+		public static Boolean exists(final String key, final String prefix)
+		{
+			return key.startsWith(prefix + "[");
+		}
+		public static String getSubLabel(final String key, final String prefix)
+		{
+			return null;
+		}
+		public static List<String> getSubLabels(final Configuration config)
+		{
+			List<String> list = new ArrayList<String>();
+			return list;
+		}
+	}
 	public Configuration group(final String prefix)
 	{
 	    Configuration result = new Configuration();
@@ -75,6 +97,10 @@ public class Configuration extends Properties {
             if (key.toString().equals(_prefix) 
             		|| key.toString().startsWith(_prefix + ".")) {
                 result.put(key, getProperty(key.toString()));
+                
+            } else if (SubLabel.exists(key.toString(), _prefix)) {
+            	// collect sublabels
+//            	final List<String> sublabels = getSubLabels(key.toString(), _prefix);
             }
         }
         Logger.debug("Prefix:%s SIZE:%d.", _prefix, result.size());
@@ -82,7 +108,7 @@ public class Configuration extends Properties {
 	}
 	public Configuration group(final String prefix, final String subLabel)
 	{
-	    return group(prefix + "[" + subLabel + "]");
+	    return group(SubLabel.format(prefix, subLabel));
 	}
 	public Configuration filterValue(final String pattern)
     {
@@ -116,15 +142,15 @@ public class Configuration extends Properties {
 	 * 
 	 * @param filename
 	 */
-	public void read(final String filename)
+	public void read(final VirtualFile filename)
 	{
-		if (checkIfAlreadyLoaded(filename)) {
+		if (checkIfAlreadyLoaded(filename.getName())) {
 			Logger.debug("config file %s has been already loaded", filename);
 			return;
 		}
 
-		seenFileNames.add(filename);
-		this.read(IO.readUtf8Properties(this.baseDir.child(filename).inputstream()));
+		seenFileNames.add(filename.getName());
+		this.read(IO.readUtf8Properties(filename.inputstream()));
 	}
 	
 	/**
@@ -140,37 +166,20 @@ public class Configuration extends Properties {
 	 * 
 	 * @param basedir
 	 */
-	public Configuration(final VirtualFile basedir) throws ReferenceLoopsException
+	public Configuration(final VirtualFile file) throws ReferenceLoopsException
 	{
-		this(basedir, DEFAULT_CONF_FILE);
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param configuration filename to load
-	 */
-	public Configuration(final String filename) throws ReferenceLoopsException {
-		this(VirtualFile.open(DEFAULT_BASE_DIR), filename);
-	}
-	
-	/**
-	 * Construct from conf file.
-	 * @param conf
-	 */
-	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException
-	{
+//		this(basedir, DEFAULT_CONF_FILE);
 		super();
-		this.baseDir = basedir;
-		Logger.debug("loading %s...", filename);
+		this.baseDir = file.child("..");
+		Logger.debug("loading %s...", file.getName());
 		
 		// Builtin configurations
 //		this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
 //		this.putIfNotExists("play.path", Play.frameworkPath.getAbsolutePath());
 		
 		try {
-			this.read(filename);
-			Logger.debug("loaded %s...", filename);
+			this.read(file);
+			Logger.debug("loaded %s...", file.getName());
 			int preIncludes = 0, postIncludes = 0;
 			int preProfile = 0, postProfile = 0;
 			int loop = 0, maxLoop = 100;
@@ -192,7 +201,7 @@ public class Configuration extends Properties {
 				postIncludes = findIncludeKeys().size();
 				
 				// trace
-				Logger.trace("Configuration file [%s] processing loop:%d", filename, loop);
+				Logger.trace("Configuration file [%s] processing loop:%d", file.getName(), loop);
 				
 			} while (preIncludes != postIncludes || preProfile != postProfile);
 			
@@ -201,7 +210,7 @@ public class Configuration extends Properties {
 			
 			// DEBUG
 			Logger.debug("Configuration -> filename:%s, id:%s, includes:%d files.",
-					filename,
+					file.getName(),
 					Play.id,
 					seenFileNames.size() - 1 // without initial config
 					);
@@ -217,7 +226,7 @@ public class Configuration extends Properties {
 		} catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
             	Logger.fatal(e.getCause().getMessage());
-                Logger.fatal("Cannot read %s", filename);
+                Logger.fatal("Cannot read %s", file.getName());
                 
             } else {
             	Logger.fatal(e.getMessage());
@@ -225,6 +234,24 @@ public class Configuration extends Properties {
             System.exit(-1);
         
 		}
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param configuration filename to load
+	 */
+	public Configuration(final String filename) throws ReferenceLoopsException {
+		this(VirtualFile.open(DEFAULT_BASE_DIR).child(filename));
+	}
+	
+	/**
+	 * Construct from conf file.
+	 * @param conf
+	 */
+	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException
+	{
+		this(basedir.child(filename));
 	}
 	public Object getProperty()
 	{
@@ -254,13 +281,6 @@ public class Configuration extends Properties {
 	private Set<Object> findIncludeKeys()
 	{
 		return this.group("@include").keySet();
-//		HashSet<String> keys = new HashSet<String>();
-//		for (Object key : keySet()) {
-//			if (key.toString().startsWith("@include.")) {
-//				keys.add(key.toString());
-//			}
-//		}
-//		return keys;
 	}
 	private void detectInclude()
 	{
@@ -274,7 +294,7 @@ public class Configuration extends Properties {
         		}
         		try {
         			Logger.debug("@include %s found.", filename);
-                    this.read(filename);
+                    this.read(this.baseDir.child(filename));
                     
                 } catch (Exception ex) {
                 	ex.printStackTrace();
