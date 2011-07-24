@@ -38,7 +38,7 @@ Change the @jpa.ddl@ configuration key:
 
 bc. %server01.jpa.ddl=update
 
-However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want that hibernate update your database, change the @jpa.ddl@ configuration key to validate:
+However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want Hibernate to update your database, change the @jpa.ddl@ configuration key to @validate@:
 
 bc. %server01.jpa.ddl=validate
 

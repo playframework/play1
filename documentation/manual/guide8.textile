@@ -254,7 +254,7 @@ Do the same for the @Tags@, @Comments@ and @Users@ controllers. Now try to log o
 
 h2. <a>Customizing the CRUD layout</a>
 
-That’s fun but when we go to the CRUD part of the administration area, we lose the administration layout. That’s because the CRUD module provides it own layout. But we can of course override it. Use this Play command:
+That’s fun but when we go to the CRUD part of the administration area, we lose the administration layout. That’s because the CRUD module provides its own layout. But we can of course override it. Use this Play command:
 
 bc. play crud:ov --layout
 
