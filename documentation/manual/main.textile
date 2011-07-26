@@ -76,7 +76,7 @@ p(note). **Tip**
 By default the @/public@ directory is mapped to the @/public@ URL path, but you can easily change that, or even use several directories for your static assets.
 
 
-h3. The **conf** directory
+h3(#conf). The **conf** directory
 
 The @conf@ directory contains all configuration files for the application.
 
@@ -85,7 +85,7 @@ There are two required configuration files:
 * @application.conf@, the main configuration file for the application. It contains standard configuration options.
 * @routes@, the routes definition file.
 
-If you need to add some configuration options specific to your application, it’s a good idea to add more options to the @application.conf@ file. Configuration options in this file are read programmatically with @Play.configuration.get("propertyName")@.
+If you need to add some configuration options specific to your application, it’s a good idea to add more options to the @application.conf@ file. Configuration options in this file are read programmatically with @Play.configuration.get("propertyName")@. When you create a new application, the @play new@ command copies a default configuration file from the @$PLAY_HOME/resources/application-skel/conf@ directory with some commented-out options to get you started.
 
 If any library needs a specific configuration file, try to file it under the @conf@ directory: **this directory is included in the Java ClassPath**.
 
