@@ -28,8 +28,9 @@ public class ConfigurationTest {
 	@Test
 	public void profileTest() throws Exception {
 		
-		
-		fail();
+		Play.id = "test";
+		Configuration conf = new Configuration(getBaseDir(), "configurationTest.conf");
+		assertEquals("hello, TEST!!", conf.getProperty("hello.world"));
 		
 	}
 	@Test
@@ -69,6 +70,9 @@ public class ConfigurationTest {
 		assertEquals("jdbc:mysql:test", map2.getProperty());
 		assertEquals(1, map2.size());
 		assertEquals(1, conf.group("db").group("url").size());
+		map2 = conf.group("dev.db");
+		assertEquals(4, map2.size());
+		assertEquals("dev.db", map2.prefix);
 		
 		// 3. SUB-LABEL
 		// expected:
@@ -83,6 +87,10 @@ public class ConfigurationTest {
 		assertEquals("myreadonlypassword", map3.getProperty("pass"));
 		assertEquals(4, map3.size());
 		assertEquals(4, conf.group("db", "readonly").size());
+		
+		// 4. Collect SubLabel
+		List<String> sublabels = conf.group("db").getSubLables();
+		assertEquals(2, sublabels.size());
 		
 	}
 }

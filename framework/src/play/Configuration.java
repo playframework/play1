@@ -26,7 +26,7 @@ public class Configuration extends Properties {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final String DEFAULT_BASE_DIR = Configuration.class.getResource("/").getPath();
-	private static final String DEFAULT_CONF_FILE = "application.conf";
+//	private static final String DEFAULT_CONF_FILE = "application.conf";
 	private static final int MAX_INCLUDE_FILES = 16;
 	private static final Pattern PROFILE_KEY_PATTERN = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
 	
@@ -36,131 +36,17 @@ public class Configuration extends Properties {
 	/**
 	 * stores now filtering key prefix
 	 */
-	private String prefix = "";
-	
+	public String prefix = "";
+	private List<String> subLables = new ArrayList<String>();
 	private VirtualFile baseDir = null;
-	
-	public Configuration hidePrefix()
-	{
-	    Configuration result = new Configuration();
-	    result.prefix = "";
-	    int len = this.prefix.length() == 0 ? 0 : this.prefix.length() + 1;
-	    for (final Object key : keySet()) {
-	    	Logger.warn("prefix:%s key:%s", this.prefix, key);
-	    	if (key.toString().equals(this.prefix)) {
-	    		result.put("", getProperty(key.toString()));
-	    	} else {
-	    		result.put(key.toString().substring(len), getProperty(key.toString()));
-	    	}
-	    }
-	    return result;
-	}
-	private String pushPrefix(final String prefix)
-	{
-	    if (prefix != null && !prefix.isEmpty()) {
-	        this.prefix += "." + prefix;
-	    }
-	    if (this.prefix.startsWith(".")) {
-	    	this.prefix = this.prefix.replaceFirst("\\.", "");
-	    }
-	    return this.prefix;
-	}
-	
-	
-	public static class SubLabel
-	{
-		public static String format(final String key, final String subLabel)
-		{
-			return key + "[" + subLabel + "]";
-		}
-		public static Boolean exists(final String key, final String prefix)
-		{
-			return key.startsWith(prefix + "[");
-		}
-		public static String getSubLabel(final String key, final String prefix)
-		{
-			return null;
-		}
-		public static List<String> getSubLabels(final Configuration config)
-		{
-			List<String> list = new ArrayList<String>();
-			return list;
-		}
-	}
-	public Configuration group(final String prefix)
-	{
-	    Configuration result = new Configuration();
-	    result.prefix = this.prefix;
-	    final String _prefix = result.pushPrefix(prefix);
-	    Logger.info("New configuration prefix is %s.", result.prefix);
-        for (final Object key : keySet()) {
-            if (key.toString().equals(_prefix) 
-            		|| key.toString().startsWith(_prefix + ".")) {
-                result.put(key, getProperty(key.toString()));
-                
-            } else if (SubLabel.exists(key.toString(), _prefix)) {
-            	// collect sublabels
-//            	final List<String> sublabels = getSubLabels(key.toString(), _prefix);
-            }
-        }
-        Logger.debug("Prefix:%s SIZE:%d.", _prefix, result.size());
-        return result;
-	}
-	public Configuration group(final String prefix, final String subLabel)
-	{
-	    return group(SubLabel.format(prefix, subLabel));
-	}
-	public Configuration filterValue(final String pattern)
-    {
-	    Configuration result = new Configuration();
-	    result.prefix = this.prefix;
-        for (final Object key : keySet()) {
-            final String v = getProperty(key.toString());
-            if (v.matches(pattern)) {
-                result.put(key, getProperty(key.toString()));
-            }
-        }
-        return result;
-    }
-    public Configuration filterValue(final Pattern pattern)
-    {
-        return filterValue(pattern.pattern());
-    }
-	
-	/**
-	 * Read other Properties instance
-	 * 
-	 * @param prop
-	 */
-	public void read(final Properties prop)
-	{
-		this.putAll(prop);
-	}
-	
-	/**
-	 * Read a configuration file
-	 * 
-	 * @param filename
-	 */
-	public void read(final VirtualFile filename)
-	{
-		if (checkIfAlreadyLoaded(filename.getName())) {
-			Logger.debug("config file %s has been already loaded", filename);
-			return;
-		}
-
-		seenFileNames.add(filename.getName());
-		this.read(IO.readUtf8Properties(filename.inputstream()));
-	}
 	
 	/**
 	 * Defautl Constructor
 	 */
 	public Configuration()
 	{
-		//this(VirtualFile.open(DEFAULT_BASE_DIR), DEFAULT_CONF_FILE);
+		super();
 	}
-	
 	/**
 	 * Constructor
 	 * 
@@ -168,7 +54,6 @@ public class Configuration extends Properties {
 	 */
 	public Configuration(final VirtualFile file) throws ReferenceLoopsException
 	{
-//		this(basedir, DEFAULT_CONF_FILE);
 		super();
 		this.baseDir = file.child("..");
 		Logger.debug("loading %s...", file.getName());
@@ -229,8 +114,9 @@ public class Configuration extends Properties {
                 Logger.fatal("Cannot read %s", file.getName());
                 
             } else {
-            	Logger.fatal(e.getMessage());
+            	Logger.fatal(e.toString());
             }
+            e.printStackTrace();
             System.exit(-1);
         
 		}
@@ -249,10 +135,165 @@ public class Configuration extends Properties {
 	 * Construct from conf file.
 	 * @param conf
 	 */
-	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException
-	{
+	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException	{
 		this(basedir.child(filename));
 	}
+	
+	public Configuration hidePrefix()
+	{
+		if (this.prefix.isEmpty()) {
+			return this;
+		}
+	    Configuration result = new Configuration();
+	    result.prefix = "";
+	    int len = this.prefix.length() + 1;
+	    for (final Object key : keySet()) {
+	    	Logger.warn("prefix:%s key:%s", this.prefix, key);
+	    	if (key.toString().equals(this.prefix)) {
+	    		result.put("", getProperty(key.toString()));
+	    	} else {
+	    		result.put(key.toString().substring(len), getProperty(key.toString()));
+	    	}
+	    }
+	    return result;
+	}
+	private String pushPrefix(final String prefix)
+	{
+	    if (prefix != null && !prefix.isEmpty()) {
+	        this.prefix += "." + prefix;
+	    }
+	    if (this.prefix.startsWith(".")) {
+	    	this.prefix = this.prefix.replaceFirst("\\.", "");
+	    }
+	    return this.prefix;
+	}
+	
+	
+	public static class SubLabel
+	{
+		public static String format(final String key, final String subLabel)
+		{
+			return key + "[" + subLabel + "]";
+		}
+		public static Boolean exists(final String key, final String prefix)
+		{
+			return key.startsWith(prefix + "[");
+		}
+		public static Pattern getSubLabelPattern(final String prefix)
+		{
+			final String p = prefix == null ? "" : prefix;
+			return Pattern.compile("^" + Pattern.quote(p) + "\\[([^\\]]+)\\]");
+		}
+		public static String getSubLabel(final String key, final String prefix)
+		{
+			Matcher m = getSubLabelPattern(prefix).matcher(key.toString());
+			if (m.matches()) {
+				return m.group(1);
+			} else {
+				return null;
+			}
+		}
+		public static List<String> getSubLabels(final Configuration config)
+		{
+			List<String> list = new ArrayList<String>();
+			final Pattern ptn = Pattern.compile("^" + Pattern.quote(config.prefix) + "\\[([^\\]]+)\\]");
+			for (final Object key : config.keySet()) {
+				System.out.println("KEY: " + key.toString());
+				Matcher m = ptn.matcher(key.toString());
+				if (m.matches()) {
+					list.add(key.toString());
+				}
+			}
+			return list;
+		}
+	}
+	public Configuration group(final String prefix)
+	{
+		// checking arg
+		if (prefix == null || prefix.trim().isEmpty()) {
+			return this;
+		}
+		
+		// filtering group
+	    Configuration result = new Configuration();
+	    result.prefix = this.prefix;
+	    final String _prefix = result.pushPrefix(prefix);
+	    Logger.info("New configuration prefix is %s.", result.prefix);
+        for (final Object key : keySet()) {
+            if (key.toString().equals(_prefix)
+            		|| key.toString().startsWith(_prefix + ".")) {
+                result.put(key, getProperty(key.toString()));
+                
+            } else {
+            	String sublabel = SubLabel.getSubLabel(key.toString(), _prefix);
+            	if (sublabel != null) {
+            		result.subLables.add(sublabel);
+            	}
+            }
+        }
+        Logger.debug("Prefix:%s SIZE:%d.", _prefix, result.size());
+        return result;
+	}
+	public Configuration group(final String prefix, final String subLabel)
+	{
+	    return group(SubLabel.format(prefix, subLabel));
+	}
+	public List<String> getSubLables()
+	{
+		return SubLabel.getSubLabels(this);
+	}
+	public Configuration filterValue(final String pattern)
+    {
+		// checking arg
+		if (pattern == null || pattern.trim().isEmpty()) {
+			return this;
+		}
+		
+		// filtering value
+	    Configuration result = new Configuration();
+	    result.prefix = this.prefix;
+        for (final Object key : keySet()) {
+            final String v = getProperty(key.toString());
+            if (v.matches(pattern)) {
+                result.put(key, getProperty(key.toString()));
+            }
+        }
+        return result;
+    }
+    public Configuration filterValue(final Pattern pattern)
+    {
+        return filterValue(pattern.pattern());
+    }
+	
+	/**
+	 * Read other Properties instance
+	 * 
+	 * @param prop
+	 */
+	public void read(final Properties prop)
+	{
+		this.putAll(prop);
+	}
+	
+	/**
+	 * Read a configuration file
+	 * 
+	 * @param filename
+	 */
+	public void read(final VirtualFile filename)
+	{
+		if (checkIfAlreadyLoaded(filename.getName())) {
+			Logger.debug("config file %s has been already loaded", filename);
+			return;
+		}
+
+		seenFileNames.add(filename.getName());
+		this.read(IO.readUtf8Properties(filename.inputstream()));
+	}
+	
+
+	
+	
 	public Object getProperty()
 	{
 		return this.getProperty("");
