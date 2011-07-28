@@ -2,15 +2,13 @@ package play;
 
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
 
-import play.Configuration.ReferenceLoopsException;
+import play.exceptions.ConfigurationException;
 import play.vfs.VirtualFile;
-import static org.junit.Assert.*;
 
-public class ConfigurationTest {
+public class ConfigurationTest extends Assert {
 
 	private VirtualFile getBaseDir()
 	{
@@ -39,7 +37,7 @@ public class ConfigurationTest {
 			Configuration conf = new Configuration(getBaseDir(), "includeLoopTest.conf");
 			fail();
 			
-		} catch (ReferenceLoopsException e) {
+		} catch (ConfigurationException e) {
 			
 		}
 		Configuration conf = new Configuration(getBaseDir(), "loopTest1.conf");
