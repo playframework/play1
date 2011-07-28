@@ -13,14 +13,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import play.exceptions.ConfigurationException;
 import play.libs.IO;
 import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
 
 public class Configuration extends Properties {
-	public class ReferenceLoopsException extends Exception {
-		
-	}
+
 	/**
 	 * 
 	 */
@@ -52,7 +51,7 @@ public class Configuration extends Properties {
 	 * 
 	 * @param basedir
 	 */
-	public Configuration(final VirtualFile file) throws ReferenceLoopsException
+	public Configuration(final VirtualFile file) throws ConfigurationException
 	{
 		super();
 		this.baseDir = file.child("..");
@@ -104,8 +103,8 @@ public class Configuration extends Properties {
         	Logger.error("Invalid conf file (null)");
         	System.exit(-1);
         	
-		} catch (ReferenceLoopsException e) {
-			Logger.error("Configuration reference loops occurred.");
+		} catch (ConfigurationException e) {
+			Logger.error(e.getMessage());
 			throw e;
 			
 		} catch (RuntimeException e) {
@@ -127,7 +126,7 @@ public class Configuration extends Properties {
 	 * 
 	 * @param configuration filename to load
 	 */
-	public Configuration(final String filename) throws ReferenceLoopsException {
+	public Configuration(final String filename) throws ConfigurationException {
 		this(VirtualFile.open(DEFAULT_BASE_DIR).child(filename));
 	}
 	
@@ -135,7 +134,7 @@ public class Configuration extends Properties {
 	 * Construct from conf file.
 	 * @param conf
 	 */
-	public Configuration(VirtualFile basedir, final String filename) throws ReferenceLoopsException	{
+	public Configuration(VirtualFile basedir, final String filename) throws ConfigurationException	{
 		this(basedir.child(filename));
 	}
 	
@@ -398,7 +397,7 @@ public class Configuration extends Properties {
 //		Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
 		return this.filterValue("\\$\\{([^}]+)}").keySet();
 	}
-	private void resolveKeyword() throws ReferenceLoopsException
+	private void resolveKeyword() throws ConfigurationException
 	{
 		// Resolve ${..}
         Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
@@ -419,7 +418,7 @@ public class Configuration extends Properties {
                 	if (this.containsKey(jp)) {
                 		if (key.toString().trim().equals(jp)) {
                 			Logger.fatal("Keyword must not be itself-loop, exit. (%s=%s)", key, value);
-                			throw new ReferenceLoopsException();
+                			throw new ConfigurationException("Self keyword replacement loop occurred.");
                 		}
                 		r = getProperty(jp);
                 		
