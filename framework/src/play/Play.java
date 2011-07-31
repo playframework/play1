@@ -362,7 +362,7 @@ public class Play {
                 fatalServerErrorOccurred();
             }
         }
-        // Ok, check for instance specifics configuration
+        // OK, check for instance specifics configuration
         Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
         for (Object key : propsFromFile.keySet()) {
@@ -396,6 +396,9 @@ public class Play {
                     r = Play.frameworkPath.getAbsolutePath();
                 } else {
                     r = System.getProperty(jp);
+                    if (r == null) {
+                        r = System.getenv(jp);
+                    }
                     if (r == null) {
                         Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
                         continue;
