@@ -1,21 +1,16 @@
 package play;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import play.exceptions.ConfigurationException;
 import play.libs.IO;
-import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
 
 public class Configuration extends Properties {
@@ -61,6 +56,7 @@ public class Configuration extends Properties {
 //		this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
 //		this.putIfNotExists("play.path", Play.frameworkPath.getAbsolutePath());
 		
+		final String profile = Play.id;
 		try {
 			this.read(file);
 			Logger.debug("loaded %s...", file.getName());
@@ -73,15 +69,15 @@ public class Configuration extends Properties {
 				}
 				
 				// count before
-				preProfile = findProfileKeys(Play.id).size();
+				preProfile = findProfileKeys(profile).size();
 				preIncludes = findIncludeKeys().size();
 				
 				// resolve
-				detectProfile(Play.id);
+				detectProfile(profile);
 				detectInclude();
 
 				// count again
-				postProfile = findProfileKeys(Play.id).size();
+				postProfile = findProfileKeys(profile).size();
 				postIncludes = findIncludeKeys().size();
 				
 				// trace
@@ -93,9 +89,9 @@ public class Configuration extends Properties {
 			resolveKeyword();
 			
 			// DEBUG
-			Logger.debug("Configuration -> filename:%s, id:%s, includes:%d files.",
+			Logger.debug("Configuration -> filename:%s, profile:%s, includes:%d files.",
 					file.getName(),
-					Play.id,
+					profile,
 					seenFileNames.size() - 1 // without initial config
 					);
 			
@@ -289,10 +285,6 @@ public class Configuration extends Properties {
 		seenFileNames.add(filename.getName());
 		this.read(IO.readUtf8Properties(filename.inputstream()));
 	}
-	
-
-	
-	
 	public Object getProperty()
 	{
 		return this.getProperty("");
@@ -349,6 +341,7 @@ public class Configuration extends Properties {
 			String value = getProperty(key.toString());
 		}
 	}
+	@Deprecated
 	private HashSet<String> findProfileKeys(final String id)
 	{
 		
@@ -372,24 +365,12 @@ public class Configuration extends Properties {
 	}
 	private void detectProfile(final String id)
 	{
-		HashSet<String> keys = findProfileKeys(id);
-//        Properties newConfiguration = new OrderSafeProperties();
-//        Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
-        for (final Object key : keys) {
+        for (final Object key : this.keySet()) {
             Matcher matcher = PROFILE_KEY_PATTERN.matcher(key.toString());
-            this.put(matcher.group(2), this.get(key).toString().trim());
-            
+            if (matcher.matches() && matcher.group(1).equals(id)) {
+            	this.put(matcher.group(2), this.get(key).toString().trim());
+            }
         }
-//        for (Object key : this.keySet()) {
-//            Matcher matcher = pattern.matcher(key + "");
-//            if (matcher.matches()) {
-//                String instance = matcher.group(1);
-//                if (instance.equals(id)) {
-//                    newConfiguration.put(matcher.group(2), this.get(key).toString().trim());
-//                }
-//            }
-//        }
-        //this = newConfiguration;
 	}
 
 	private Set<Object> findRemainKeyword()
