@@ -163,23 +163,50 @@ public class Configuration extends Properties {
 	    return this.prefix;
 	}
 	
-	
+	/**
+	 * sub-label utility class
+	 * 
+	 */
 	public static class SubLabel
 	{
+		public static String format(final String subLabel)
+		{
+			return format("", subLabel);
+		}
+		
+		/**
+		 * building sub-label key prefix
+		 * 
+		 * @param key
+		 * @param subLabel
+		 * @return build result string
+		 */
 		public static String format(final String key, final String subLabel)
 		{
 			return key + "[" + subLabel + "]";
 		}
-		public static Boolean exists(final String key, final String prefix)
+		
+		public static boolean exists(final String key)
+		{
+			return exists(key, "");
+		}
+		
+		/**
+		 * is this key having sublabel?
+		 * 
+		 * @param key
+		 * @param prefix
+		 * @return
+		 */
+		public static boolean exists(final String key, final String prefix)
 		{
 			return key.startsWith(prefix + "[") && key.contains("]");
 		}
-		public static Pattern getSubLabelPattern(final String prefix)
+		public static String get(final String key)
 		{
-			final String p = prefix == null ? "" : prefix;
-			return Pattern.compile("^" + Pattern.quote(p) + "\\[([^\\]]+)\\]");
+			return get(key, "");
 		}
-		public static String getSubLabel(final String key, final String prefix)
+		public static String get(final String key, final String prefix)
 		{
 			try {
 				String src = key.substring(prefix.length() + 1);
@@ -190,6 +217,13 @@ public class Configuration extends Properties {
 			}
 		}
 	}
+	
+	/**
+	 * filtering specified group prefix
+	 * 
+	 * @param prefix
+	 * @return
+	 */
 	public Configuration group(final String prefix)
 	{
 		// checking arg
@@ -209,7 +243,7 @@ public class Configuration extends Properties {
                 result.put(key, getProperty(_key));
                 
             } else if (SubLabel.exists(_key, _prefix)) {
-            	final String sublabel = SubLabel.getSubLabel(_key, _prefix);
+            	final String sublabel = SubLabel.get(_key, _prefix);
             	if (sublabel != null && !result.subLabels.contains(sublabel)) {
             		result.subLabels.add(sublabel);
             	}
@@ -218,6 +252,14 @@ public class Configuration extends Properties {
         Logger.debug("Prefix:%s SIZE:%d.", _prefix, result.size());
         return result;
 	}
+	
+	/**
+	 * filtering group with sub-label
+	 * 
+	 * @param prefix
+	 * @param subLabel
+	 * @return
+	 */
 	public Configuration group(final String prefix, final String subLabel)
 	{
 	    return group(SubLabel.format(prefix, subLabel));
@@ -225,7 +267,6 @@ public class Configuration extends Properties {
 	public List<String> getSubLables()
 	{
 		return this.subLabels;
-//		return SubLabel.getSubLabels(this);
 	}
 	public Configuration filterValue(final String pattern)
     {
