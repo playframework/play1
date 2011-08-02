@@ -53,6 +53,8 @@ try:
         print r"~ |  __/|_|\____|\__ (_)"
         print r"~ |_|            |__/   "
         print r"~"
+    else:
+        sys.argv.remove("--silent")
 
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
     if not os.path.exists(play_version_file):
