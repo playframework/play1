@@ -31,7 +31,7 @@ public class Configuration extends Properties {
 	 * stores now filtering key prefix
 	 */
 	public String prefix = "";
-	private List<String> subLables = new ArrayList<String>();
+	private List<String> subLabels = new ArrayList<String>();
 	private VirtualFile baseDir = null;
 	
 	/**
@@ -172,7 +172,7 @@ public class Configuration extends Properties {
 		}
 		public static Boolean exists(final String key, final String prefix)
 		{
-			return key.startsWith(prefix + "[");
+			return key.startsWith(prefix + "[") && key.contains("]");
 		}
 		public static Pattern getSubLabelPattern(final String prefix)
 		{
@@ -181,25 +181,13 @@ public class Configuration extends Properties {
 		}
 		public static String getSubLabel(final String key, final String prefix)
 		{
-			Matcher m = getSubLabelPattern(prefix).matcher(key.toString());
-			if (m.matches()) {
-				return m.group(1);
-			} else {
+			try {
+				String src = key.substring(prefix.length() + 1);
+				return src.substring(0, src.indexOf("]"));
+				
+			} catch (Exception e) {
 				return null;
 			}
-		}
-		public static List<String> getSubLabels(final Configuration config)
-		{
-			List<String> list = new ArrayList<String>();
-			final Pattern ptn = Pattern.compile("^" + Pattern.quote(config.prefix) + "\\[([^\\]]+)\\]");
-			for (final Object key : config.keySet()) {
-				System.out.println("KEY: " + key.toString());
-				Matcher m = ptn.matcher(key.toString());
-				if (m.matches()) {
-					list.add(key.toString());
-				}
-			}
-			return list;
 		}
 	}
 	public Configuration group(final String prefix)
@@ -215,14 +203,15 @@ public class Configuration extends Properties {
 	    final String _prefix = result.pushPrefix(prefix);
 	    Logger.info("New configuration prefix is %s.", result.prefix);
         for (final Object key : keySet()) {
-            if (key.toString().equals(_prefix)
-            		|| key.toString().startsWith(_prefix + ".")) {
-                result.put(key, getProperty(key.toString()));
+        	final String _key = key.toString();
+            if (_key.equals(_prefix)
+            		|| _key.startsWith(_prefix + ".")) {
+                result.put(key, getProperty(_key));
                 
-            } else {
-            	String sublabel = SubLabel.getSubLabel(key.toString(), _prefix);
-            	if (sublabel != null) {
-            		result.subLables.add(sublabel);
+            } else if (SubLabel.exists(_key, _prefix)) {
+            	final String sublabel = SubLabel.getSubLabel(_key, _prefix);
+            	if (sublabel != null && !result.subLabels.contains(sublabel)) {
+            		result.subLabels.add(sublabel);
             	}
             }
         }
@@ -235,7 +224,8 @@ public class Configuration extends Properties {
 	}
 	public List<String> getSubLables()
 	{
-		return SubLabel.getSubLabels(this);
+		return this.subLabels;
+//		return SubLabel.getSubLabels(this);
 	}
 	public Configuration filterValue(final String pattern)
     {
