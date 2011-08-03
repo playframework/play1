@@ -132,6 +132,11 @@ try:
 
     cmdloader = CommandLoader(play_env["basedir"])
 
+    # ~~~~~~~~~~~~~~~~~ Run version command right away
+    if play_command == 'version':
+      cmdloader.commands['version'].execute(command='version', version=play_env["version"], showLogo=showLogo)
+      sys.exit(0)
+
     # ~~~~~~~~~~~~~~~~~ Resolve dependencies if needed
     if remaining_args.count('--deps') == 1:
         cmdloader.commands['dependencies'].execute(command='dependencies', app=play_app, args=['--sync'], env=play_env, cmdloader=cmdloader)
