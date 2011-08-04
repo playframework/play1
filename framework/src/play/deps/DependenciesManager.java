@@ -193,6 +193,7 @@ public class DependenciesManager {
     }
 
     public File install(ArtifactDownloadReport artifact) throws Exception {
+        Boolean force = System.getProperty("play.forcedeps").equals("true");
         try {
             File from = artifact.getLocalFile();
             if (!isPlayModule(artifact)) {
@@ -210,7 +211,11 @@ public class DependenciesManager {
                 new File(application, "modules").mkdir();
                 Files.delete(to);
                 if (from.isDirectory()) {
-                    IO.writeContent(from.getAbsolutePath(), to);
+                    if (force) {
+                        IO.copyDirectory(from, to);
+                    } else {
+                        IO.writeContent(from.getAbsolutePath(), to);
+                    }
                     System.out.println("~ \tmodules/" + to.getName() + " -> " + from.getAbsolutePath());
                 } else {
                     Files.unzip(from, to);

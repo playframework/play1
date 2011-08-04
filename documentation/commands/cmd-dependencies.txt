@@ -12,12 +12,12 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Compute resolve and retrieve project dependencies and install them either
-~ in lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
+~ Compute resolve and retrieve project dependencies and install them either in
+~ lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
 ~
-~ By default the command will not delete unrecognized artifacts. Use the --sync option
-~ to keep both lib/ and modules/ directory synchronized with the dependencies management
-~ system.
+~ By default the command will not delete unrecognized artifacts.
+~ Use the --sync option to keep both lib/ and modules/ directory synchronized
+~ with the dependencies management system.
 ~
 ~ Options:
 ~ ~~~~~~~~
@@ -34,6 +34,10 @@
 ~ --sync:
 ~ Keep lib/ and modules/ directory synced.
 ~ Delete unknow dependencies.
+~
+~ --forceCopy:
+~ Never create files pointing to the original folder, always copy the folder
+~ instead.
 ~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
