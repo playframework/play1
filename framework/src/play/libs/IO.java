@@ -346,4 +346,23 @@ public class IO {
             }
         }
     }
+
+    // If targetLocation does not exist, it will be created.
+    public static void copyDirectory(File source, File target) {
+        if (source.isDirectory()) {
+            if (!target.exists()) {
+                target.mkdir();
+            }
+            for (String child: source.list()) {
+                copyDirectory(new File(source, child), new File(target, child));
+            }
+        } else {
+            try {
+                write(new FileInputStream(source),  new FileOutputStream(target));
+            } catch (IOException e) {
+                throw new UnexpectedException(e);
+            }
+        }
+    }
+
 }

@@ -21,9 +21,14 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
+    force = "false"
+    if args.count('--forceCopy') == 1:
+        args.remove('--forceCopy')
+        force = "true"
+
     classpath = app.getClasspath()
 
-    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
+    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version'], '-Dplay.forcedeps=%s' % (force)]
     if args.count('--verbose'):
         add_options.append('-Dverbose')
     if args.count('--sync'):
