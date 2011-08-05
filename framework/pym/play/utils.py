@@ -207,8 +207,6 @@ def copy_directory(source, target, exclude = None):
         if re.search(r'/\.[^\.]|\\\.[^\.]', path_from_source):
             continue
         for file in files:
-            if root.find('/.') > -1 or root.find('\\.') > -1:
-                continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
 
