@@ -23,7 +23,7 @@
             </library>
         </orderEntry>
         <orderEntry type="module-library">
-            <library name="PlayFramework Dependecies">
+            <library name="PlayFramework Dependencies">
                 <CLASSES>
                     <root url="file://%PLAYHOME%/framework/lib" />
                 </CLASSES>
