@@ -52,7 +52,22 @@ public class FirePhoque {
         }
 
         // Let's tweak WebClient
-        WebClient firephoque = new WebClient(BrowserVersion.INTERNET_EXPLORER_8);
+
+        String headlessBrowser = System.getProperty("headlessBrowser", "INTERNET_EXPLORER_8");
+        BrowserVersion browserVersion;
+        if ("FIREFOX_3".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_3;
+        } else if ("FIREFOX_3_6".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_3_6;
+        } else if ("INTERNET_EXPLORER_6".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_6;
+        } else if ("INTERNET_EXPLORER_7".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_7;
+        } else {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
+        }
+
+        WebClient firephoque = new WebClient(browserVersion);
         firephoque.setPageCreator(new DefaultPageCreator() {
 
             @Override
