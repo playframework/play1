@@ -107,6 +107,15 @@
                 padding: 3px 8px;
                 -moz-user-select: none;
             }
+            #headless {
+                background: blue;
+                color: #fff;
+                font-size: 120%;
+                border: 1px double blue;
+                cursor: pointer;
+                padding: 3px 8px;
+                -moz-user-select: none;
+            }
             #stop {
                 background: #c00;
                 color: #fff;
@@ -118,6 +127,10 @@
             }
             #start.disabled {
                 background: #b7d2aa;
+                cursor: default;
+            }
+            #headless.disabled {
+                background: #a4c4f3;
                 cursor: default;
             }
             #results {
@@ -381,8 +394,12 @@
                                 port = play.configuration['http.port'];
                             }
                         }%
-                        $('#selenium-runner').attr('src', '@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=${protocol}://localhost:${port}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
-                        $('#selenium-mask, #selenium').show();
+                        if($('#headless').is('.disabled')) {
+                            $('#selenium-runner').attr('src', '@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=${protocol}://localhost:${port}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                            $('#selenium-mask, #selenium').show();
+                        } else {
+                            $.ajax({url: '@{TestRunner.run("XXX", true)}'.replace('XXX', testId), async: true});
+                        }
                         window.checkResult = setInterval(function() {
                              var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
                              if(req.status == 200) {
@@ -490,7 +507,15 @@
                     if($(this).is('.disabled')) return;
                     run();
                 });
-                        
+
+                $('#headless').click(function() {
+                    if($(this).is('.disabled')) {
+                        $(this).removeClass('disabled');
+                    } else {
+                        $(this).addClass('disabled');
+                    }
+                });
+
                 $('#stop').click(function() {
                     stop();
                 });
@@ -563,15 +588,16 @@
             
             <div id="stopped">
                 <span id="start">Start !</span>
+                <span id="headless" class="disabled">Headless</span>
                 &nbsp;
                 <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>) - <span id="unselectAll"><a id="" href="#">Unselect all</a></span></span>
-				
+
                 <span id="quickLinks">
                     <span id="sa">(<a id="" href="#">Select all</a></span> -
                     <span id="ra"><a id="" href="#">Run all</a>)</span>
                 </span>
             </div>
-            
+
             <div id="started">
                 <span id="stop">Stop ...</span>
                 &nbsp;(running <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span>)
