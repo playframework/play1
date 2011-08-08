@@ -38,7 +38,9 @@
                     <root url="jar://%PLAYHOME%/framework/play-%PLAYVERSION%.jar!/" />
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    <root url="file://%PLAYHOME%/framework/src" />
+                </SOURCES>
             </library>
         </orderEntry>
     </component>
