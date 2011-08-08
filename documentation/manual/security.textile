@@ -81,7 +81,7 @@ Will only work when called from a form including a proper authenticity token:
 bc. <form method="post" action="/account/destroy">
     #{authenticityToken /}
     <input type="submit" value="destroy my account">
-#{/form}
+</form>
 
 For POST requests, Play’s "form tag":tags#form automatically generates the authenticity token:
 
