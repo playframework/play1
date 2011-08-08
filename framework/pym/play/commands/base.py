@@ -213,7 +213,7 @@ def autotest(app, args):
         line = soutint.readline().strip()
         if line:
             print line
-            if line.find('/@tests to run the tests') > -1:
+            if line.find('Listening for HTTP') > -1:
                 soutint.close()
                 break
 
@@ -237,12 +237,6 @@ def autotest(app, args):
 
     print "~"
     time.sleep(1)
-    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
-        print "~ All tests passed"
-        print "~"
-    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
-        print "~ Some tests have failed. See file://%s for results" % test_result
-        print "~"
     
     # Kill if exists
     http_port = app.readConf('http.port')
@@ -252,6 +246,15 @@ def autotest(app, args):
         opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception, e:
         pass
+ 
+    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
+        print "~ All tests passed"
+        print "~"
+        testspassed = True
+    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
+        print "~ Some tests have failed. See file://%s for results" % test_result
+        print "~"
+        sys.exit(1)
 
 def id(play_env):
     if not play_env["id"]:
