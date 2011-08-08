@@ -23,7 +23,7 @@
             </library>
         </orderEntry>
         <orderEntry type="module-library">
-            <library name="PlayFramework Dependecies">
+            <library name="PlayFramework Dependencies">
                 <CLASSES>
                     <root url="file://%PLAYHOME%/framework/lib" />
                 </CLASSES>
@@ -38,7 +38,9 @@
                     <root url="jar://%PLAYHOME%/framework/play-%PLAYVERSION%.jar!/" />
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    <root url="file://%PLAYHOME%/framework/src" />
+                </SOURCES>
             </library>
         </orderEntry>
     </component>
