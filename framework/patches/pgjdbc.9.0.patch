@@ -1,0 +1,16 @@
+Index: org/postgresql/jdbc2/AbstractJdbc2ResultSetMetaData.java
+===================================================================
+RCS file: /cvsroot/jdbc/pgjdbc/org/postgresql/jdbc2/AbstractJdbc2ResultSetMetaData.java,v
+retrieving revision 1.25
+diff -u -r1.25 AbstractJdbc2ResultSetMetaData.java
+--- org/postgresql/jdbc2/AbstractJdbc2ResultSetMetaData.java	2 Apr 2011 11:09:26 -0000	1.25
++++ org/postgresql/jdbc2/AbstractJdbc2ResultSetMetaData.java	8 Aug 2011 11:56:14 -0000
+@@ -299,7 +299,7 @@
+      */
+     public String getTableName(int column) throws SQLException
+     {
+-        return "";
++        return getBaseTableName(column);
+     }
+ 
+     public String getBaseTableName(int column) throws SQLException
