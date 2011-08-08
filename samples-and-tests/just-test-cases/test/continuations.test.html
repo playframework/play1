@@ -89,5 +89,10 @@
     open('@{WithContinuations.usingRenderArgsAndAwait()}')
     assertBodyText('true')
 
+    open('@{WithContinuations.usingRenderArgsAndAwaitWithCallBack("renderArg")}')
+    assertBodyText('renderArg')
+
+	open('@{WithContinuations.usingRenderArgsAndAwaitWithFutureAndCallback("renderArg")}')
+    assertBodyText('result/renderArg')
 
 #{/selenium}

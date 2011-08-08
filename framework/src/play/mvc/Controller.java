@@ -954,6 +954,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void await(int millis, F.Action0 callback) {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.A, callback);
+        Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
         throw new Suspend(millis);
     }
 
@@ -995,6 +996,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.F, future);
         Request.current().args.put(ActionInvoker.A, callback);
+        Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
         throw new Suspend(future);
     }
 
