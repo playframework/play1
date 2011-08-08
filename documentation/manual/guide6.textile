@@ -4,7 +4,7 @@ As our blog will contain more posts, it will become more and more difficult to r
 
 h2. <a>The Tag model object</a>
 
-We will add one more object to the blog model definition. The Tag class itself is indeed very simple:
+We will add one more object to the blog model definition. The @Tag@ class itself is indeed very simple:
 
 bc. package models;
  
@@ -32,7 +32,7 @@ public class Tag extends Model implements Comparable<Tag> {
  
 }
 
-Because we want something like lazy tag creation we will always get them using the **findOrCreateByName(String name)** factory method. Let’s add it to the Tag class:
+Because we want something like lazy tag creation we will always get them using the @findOrCreateByName(String name)@ factory method. Let’s add it to the @Tag@ class:
 
 bc. public static Tag findOrCreateByName(String name) {
     Tag tag = Tag.find("byName", name).first();
@@ -44,9 +44,9 @@ bc. public static Tag findOrCreateByName(String name) {
 
 h2. <a>Tagging posts</a>
 
-Now it’s time to link the new Tag model with the Post one. Let’s add the correct relationship to the Post class:
+Now it’s time to link the new @Tag@ model with the @Post@ one. Let’s add the correct relationship to the @Post@ class:
 
-bc. ...
+bc. …
 @ManyToMany(cascade=CascadeType.PERSIST)
 public Set<Tag> tags;
     
@@ -58,36 +58,36 @@ public Post(User author, String title, String content) {
     this.content = content;
     this.postedAt = new Date();
 }
-...
+…
 
-p(note). Note that we use a **TreeSet** here in order to keep the tag list in a predictable order (alphabetical order in fact, because of our previous compareTo implementation).
+p(note). Note that we use a @TreeSet@ here in order to keep the tag list in a predictable order (alphabetical order in fact, because of our previous compareTo implementation).
 
 We will keep this relationship unidirectional.
 
-We will also add a bunch of helper methods to make tag management simpler. First one, the ability to tag a Post:
+We will also add a bunch of helper methods to make tag management simpler. First one, the ability to tag a @Post@:
 
-bc. ...
+bc. …
 public Post tagItWith(String name) {
     tags.add(Tag.findOrCreateByName(name));
     return this;
 }
-...
+…
 
 Then the ability to retrieve all posts tagged with a specific tag:
 
-bc. ...
+bc. …
 public static List<Post> findTaggedWith(String tag) {
     return Post.find(
         "select distinct p from Post p join p.tags as t where t.name = ?", tag
     ).fetch();
 }
-...
+…
 
 It is time to write a new test case to test this stuff. Restart the server in **test** mode by typing:
 
 bc. $ play test
 
-And add a new **@Test** to the **BasicTest** class:
+And add a new <code>@Test</code> to the @BasicTest@ class:
 
 bc. @Test
 public void testTags() {
@@ -120,43 +120,46 @@ Well, we won’t use it in our blog right now, but what if we wanted to retrieve
 
 I give you the needed JPQL query because you will likely use it in several web projects:
 
-bc. ...
+bc. …
 public static List<Post> findTaggedWith(String... tags) {
     return Post.find(
-            "select distinct p from Post p join p.tags as t where t.name in (:tags) group by p.id, p.author, p.title, p.content,p.postedAt having count(t.id) = :size"
+        "select distinct p from Post p join p.tags as t " +
+        "where t.name in (:tags) group by p.id, p.author, p.title, " +
+        "p.content, p.postedAt having count(t.id) = :size"
     ).bind("tags", tags).bind("size", tags.length).fetch();
 }
-...
+…
 
-The tricky part is that we have to use a **having count** statement to filter only posts that have exactly **all tags** from the joined view.
+The tricky part is that we have to use a @having count@ statement to filter only posts that have exactly **all tags** from the joined view.
 
-p(note). **Note** that we can’t use the **Post.find("…", tags, tags.count)** signature here. It’s just because **tags** is already a **vararg**.
+p(note). **Note** that we can’t use the @Post.find("…", tags, tags.count)@ signature here. It’s just because @tags@ is already a **vararg**.
 
 You can test it by adding more checks to the previous test:
 
-bc. ...
+bc. …
 assertEquals(1, Post.findTaggedWith("Red", "Blue").size());   
 assertEquals(1, Post.findTaggedWith("Red", "Green").size());   
 assertEquals(0, Post.findTaggedWith("Red", "Green", "Blue").size());  
 assertEquals(0, Post.findTaggedWith("Green", "Blue").size());
-...
+…
 
 h2. <a>The tag cloud</a>
 
-Where we have tags, we need a tag cloud. Let’s add a method to the **Tag** class to generate the tag cloud:
+Where we have tags, we need a tag cloud. Let’s add a method to the @Tag@ class to generate the tag cloud:
 
 bc. public static List<Map> getCloud() {
     List<Map> result = Tag.find(
-        "select new map(t.name as tag, count(p.id) as pound) from Post p join p.tags as t group by t.name order by t.name"
+        "select new map(t.name as tag, count(p.id) as pound) " +
+        "from Post p join p.tags as t group by t.name order by t.name"
     ).fetch();
     return result;
 }
 
-Here we use a handy Hibernate feature that allows to return a custom object from a JPA query. It will result a **List** containing for each tag a **Map** with two attributes: **name** for the tag name and **pound** for the tag count.
+Here we use a handy Hibernate feature that allows to return a custom object from a JPA query. It will result a @List@ containing for each tag a @Map@ with two attributes: @name@ for the tag name and @pound@ for the tag count.
 
 Let’s test it by adding one more check to our tags test:
 
-bc. ...
+bc. …
 List<Map> cloud = Tag.getCloud();
 assertEquals(
     "[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]", 
@@ -167,9 +170,9 @@ h2. <a>Adding tags to the Blog UI</a>
 
 We can now use the new tagging stuff to add one more way to browse the blog. As always, to work efficiently we need to add a bunch of test tags to our initial data set.
 
-Modify the **/yabe/conf/initial-data.yml** file to add some tags to the tests posts. For example:
+Modify the @/yabe/conf/initial-data.yml@ file to add some tags to the tests posts. For example:
 
-bc. ... 
+bc. … 
 Tag(play):
     name:           Play
  
@@ -181,11 +184,11 @@ Tag(test):
  
 Tag(mvc):
     name:           MVC    
-...
+…
 
 And then add them to posts declaration as is:
 
-bc. ...
+bc. …
 Post(jeffPost):
     title:          The MVC application
     postedAt:       2009-06-06
@@ -196,7 +199,7 @@ Post(jeffPost):
                     - mvc
     content:        >
                     A Play
-...
+…
 
 p(note). Add the Tags declaration at the top of the YAML file, because they need to be created before any Post references them.
 
@@ -204,9 +207,9 @@ You need to restart your application to force loading of the new initial data se
 
 !images/guide6-1!
 
-Then modify the **#{display /}** tag to show the tag set on the **full** post view. Edit the **/yabe/app/views/tags/display.html** file:
+Then modify the @#{display /}@ tag to show the tag set on the **full** post view. Edit the @/yabe/app/views/tags/display.html@ file:
 
-bc. ...
+bc. …
 #{if _as != 'full'}
     <span class="post-comments">
         &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
@@ -224,29 +227,29 @@ bc. ...
         #{/list}
     </span>
 #{/elseif}
-...
+…
 
 !images/guide6-2!
 
 h2. <a>The new ‘tagged with’ page</a>
 
-Now we can add a new way to list blog posts by tags. Above we left the link blank; we will replace it by a link to the new **listTagged** action:
+Now we can add a new way to list blog posts by tags. Above we left the link blank; we will replace it by a link to the new @listTagged@ action:
 
-bc. ...
+bc. …
 - Tagged 
 #{list items:_post.tags, as:'tag'}
     <a href="@{Application.listTagged(tag.name)}">${tag}</a>${tag_isLast ? '' : ', '}
 #{/list}
-...
+…
 
-And create the action method on the **Application** controller:
+And create the action method on the @Application@ controller:
 
-bc. ...
+bc. …
 public static void listTagged(String tag) {
     List<Post> posts = Post.findTaggedWith(tag);
     render(tag, posts);
 }
-...
+…
 
 As always we create a specific route to keep clean URI:
 
@@ -257,12 +260,12 @@ Well, we have a problem because we have an existing route that conflicts with th
 bc. GET     /posts/{id}                     Application.show
 GET     /posts/{tag}                    Application.listTagged
 
-But because we’ll assume that an **id** is numeric and a **tag** is not, we can easily solve the situation using a regular expression to restrict the first route:
+But because we’ll assume that an @id@ is numeric and a @tag@ is not, we can easily solve the situation using a regular expression to restrict the first route:
 
 bc. GET     /posts/{<[0-9]+>id}             Application.show
 GET     /posts/{tag}                    Application.listTagged 
 
-Finally we just have to create the **/yabe/app/views/Application/listTagged.html** template that will be used by the new **listTagged** action:
+Finally we just have to create the @/yabe/app/views/Application/listTagged.html@ template that will be used by the new @listTagged@ action:
 
 bc. #{extends 'main.html' /}
 #{set title:'Posts tagged with ' + tag /}

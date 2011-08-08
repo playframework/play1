@@ -18,7 +18,7 @@ We will call this blog engine project **yabe**.
 
 !images/guide1-0!
 
-p(note). This tutorial is also distributed as a sample application. You can find the final code in your Play installation’s **samples-and-tests/yabe/** directory.
+p(note). This tutorial is also distributed as a sample application. You can find the final code in your Play installation’s @samples-and-tests/yabe/@ directory.
 
 h2. <a>Prerequisites</a>
 
@@ -36,9 +36,9 @@ h2. <a>Installing the Play framework</a>
 
 Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
-p(note). If you’re using Windows, it is generally a good idea to avoid space characters in the path, so for example **c:\play** would be a better choice than **c:\Documents And Settings\user\play**.
+p(note). If you’re using Windows, it is generally a good idea to avoid space characters in the path, so for example @c:\play@ would be a better choice than @c:\Documents And Settings\user\play@.
 
-To work efficiently, you need to add the Play directory to your working path. It allows you to just type **play** at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type **play**; it should show you the play basic usage help.
+To work efficiently, you need to add the Play directory to your working path. It allows you to just type @play@ at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type @play@; it should show you the play basic usage help.
 
 h2. <a>Project creation</a>
 
@@ -52,17 +52,17 @@ It will prompt you for the application full name. Type **Yet Another Blog Engine
 
 !images/guide1-1!
 
-The **play new** command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
+The @play new@ command creates a new directory @yabe/@ and populates it with a series of files and directories, the most important being:
 
-**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where **.java** source files live.
+@app/@ contains the application’s core, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where @.java@ source files live.
 
-**conf/** contains all the configuration files for the application, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalization.
+@conf/@ contains all the configuration files for the application, especially the main @application.conf@ file, the @routes@ definition files and the @messages@ files used for internationalization.
 
-**lib/** contains all optional Java libraries packaged as standard **.jar** files.
+@lib/@ contains all optional Java libraries packaged as standard @.jar@ files.
 
-**public/** contains all the publicly available resources, which includes JavaScript files, stylesheets and images directories.
+@public/@ contains all the publicly available resources, which includes JavaScript files, stylesheets and images directories.
 
-**test/** contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
+@test/@ contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
 
 p(note). Because **Play uses UTF-8** as single encoding, it’s very important that all text files hosted in these directories are encoded using this charset. Make sure to configure your text editor accordingly.
 
@@ -70,11 +70,11 @@ Now if you’re a seasoned Java developer, you may wonder where all the .class f
 
 That allows two very important things in the development process. The first one is that Play will detect changes you make to any Java source file and automatically reload them at runtime. The second is that when a Java exception occurs, Play will create better error reports showing you the exact source code.
 
-p(note). In fact Play keeps a bytecode cache in the application’s **tmp/** directory, but only to speed things up between restart on large applications. You can discard this cache using the **play clean** command if needed.
+p(note). In fact Play keeps a bytecode cache in the application’s @tmp/@ directory, but only to speed things up between restart on large applications. You can discard this cache using the @play clean@ command if needed.
 
 h2. <a>Running the application</a>
 
-We can now test the newly-created application. Just return to the command line, go to the newly-created **yabe/** directory and type **play run**. Play will now load the application and start a web server on port 9000.
+We can now test the newly-created application. Just return to the command line, go to the newly-created @yabe/@ directory and type @play run@. Play will now load the application and start a web server on port 9000.
 
 You can see the new application by opening a browser to "http://localhost:9000":http://localhost:9000. A new application has a standard welcome page that just tells you that it was successfully created.
 
@@ -82,11 +82,11 @@ You can see the new application by opening a browser to "http://localhost:9000":
 
 Let’s see how the new application can display this page. 
 
-The main entry point of your application is the **conf/routes** file. This file defines all accessible URLs for the application. If you open the generated routes file you will see this first ‘route’:
+The main entry point of your application is the @conf/routes@ file. This file defines all accessible URLs for the application. If you open the generated routes file you will see this first ‘route’:
 
 bc. GET		/			Application.index
 
-That simply tells Play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controllers.Application.index**, because the **controllers** package is implicit. 
+That simply tells Play that when the web server receives a **GET** request for the @/@ path, it must call the @Application.index@ Java method. In this case, @Application.index@ is a shortcut for @controllers.Application.index@, because the @controllers@ package is implicit. 
 
 When you create standalone Java applications you generally use a single entry point defined by a method such as:
 
@@ -94,9 +94,9 @@ bc. public static void main(String[] args) {
   ... 
 }
 
-A Play application has several entry points, one for each URL. We call these methods **action** methods. Action methods are defined in special classes that we call **controllers**.
+A Play application has several entry points, one for each URL. We call these methods @action@ methods. Action methods are defined in special classes that we call @controllers@.
 
-Let’s see what the **controllers.Application** controller looks like. Open the **yabe/app/controllers/Application.java** source file:
+Let’s see what the @controllers.Application@ controller looks like. Open the @yabe/app/controllers/Application.java@ source file:
 
 bc. package controllers;
  
@@ -110,26 +110,26 @@ public class Application extends Controller {
  
 }
 
-Notice that controller classes extend the **play.mvc.Controller** class. This class provides many useful methods for controllers, like the **render()** method we use in the index action.
+Notice that controller classes extend the @play.mvc.Controller@ class. This class provides many useful methods for controllers, like the @render()@ method we use in the index action.
 
-The index action is defined as a **public static void** method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.  
+The index action is defined as a @public static void@ method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.  
 
-The default index action is simple: it calls the **render()** method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
+The default index action is simple: it calls the @render()@ method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
 
-Templates are simple text files that live in the **/app/views** directory. Because we didn’t specify a template, the default one for this action will be used: **Application/index.html**
+Templates are simple text files that live in the @/app/views@ directory. Because we didn’t specify a template, the default one for this action will be used: @Application/index.html@
 
-To see what the template looks like, open the **/yabe/app/views/Application/index.html** file:
+To see what the template looks like, open the @/yabe/app/views/Application/index.html@ file:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
  
 #{welcome /}
 
-The template content seems pretty light. In fact, all you see are Play tags. Play tags are similar to JSP tags. This is the **#{welcome /}** tag that generates the welcome message you saw in the browser. 
+The template content seems pretty light. In fact, all you see are Play tags. Play tags are similar to JSP tags. This is the @#{welcome /}@ tag that generates the welcome message you saw in the browser. 
 
-The **#{extends /}** tag tells Play that this template inherits another template called **main.html**. Template inheritance is a powerful concept that allows you to create complex web pages by reusing common parts.
+The @#{extends /}@ tag tells Play that this template inherits another template called @main.html@. Template inheritance is a powerful concept that allows you to create complex web pages by reusing common parts.
 
-Open the **/yabe/app/views/main.html** template:
+Open the @/yabe/app/views/main.html@ template:
 
 bc. <!DOCTYPE html>
 <html>
@@ -146,9 +146,9 @@ bc. <!DOCTYPE html>
     </body>
 </html>
 
-Do you see the **#{doLayout /}** tag? This is where the content of **Application/index.html** will be inserted.
+Do you see the @#{doLayout /}@ tag? This is where the content of @Application/index.html@ will be inserted.
  
-We can try to edit the controller file to see how Play automatically reloads it. Open the **yabe/app/controllers/Application.java** file in a text editor, and add a mistake by removing the trailing semicolon after the **render()** call:
+We can try to edit the controller file to see how Play automatically reloads it. Open the @yabe/app/controllers/Application.java@ file in a text editor, and add a mistake by removing the trailing semicolon after the @render()@ call:
 
 bc. public static void index() {
     render()
@@ -165,9 +165,9 @@ bc. public static void index() {
     render();
 }
 
-This time, Play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **/** URL will output the ‘Yop’ message to the console.
+This time, Play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the @/@ URL will output the ‘Yop’ message to the console.
 
-You can remove this useless line, and now edit the **yabe/app/views/Application/index.html** template to replace the welcome message:
+You can remove this useless line, and now edit the @yabe/app/views/Application/index.html@ template to replace the welcome message:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -184,7 +184,7 @@ One more thing before starting to code. For the blog engine, we will need a data
 
 At the beginning, we will do a lot of testing and changes in the application model. For that reason, it’s better to use an in-memory database so we always start with a fresh data set.
 
-To set-up the database, open the **yabe/conf/application.conf** file and uncomment this line:
+To set-up the database, open the @yabe/conf/application.conf@ file and uncomment this line:
 
 bc. db=mem
 
@@ -198,7 +198,7 @@ h2. <a>Using a version control system 	to track changes</a>
 
 When you work on a project, it’s highly recommended to store your source code in a version control system (VCS). It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application.
 
-When storing a Play application in a VCS, it’s important to exclude the **tmp/**, **modules/**, **lib/**, **test-result/** and **logs/** directories.
+When storing a Play application in a VCS, it is important to exclude the @tmp/@, @modules/@, @lib/@, @test-result/@ and @logs/@ directories.
 
 h3. <a>Bazaar</a>
 

@@ -1,12 +1,12 @@
 h1. Manage application.conf in several environments
 
-When you work in a team, different developers will use different configuration keys in their **application.conf**. For example, the log level, some database configuration… This generally leads to recurrent conflicts when you commit the file using your VCS. 
+When you work in a team, different developers will use different configuration keys in their @application.conf@. For example, the log level, some database configuration… This generally leads to recurrent conflicts when you commit the file using your VCS. 
 
 Furthermore, different deployment environments - e.g. dev, test, staging and production - need different configurations.
 
 h2. <a name="id">The framework ID</a>
 
-To resolve this problem, Play allows you to give an **ID** to each framework installation. Use the play tool’s **id** command to define this ID:
+To resolve this problem, Play allows you to give an **ID** to each framework installation. Use the play tool’s @id@ command to define this ID:
 
 bc. play id
 
@@ -36,14 +36,14 @@ You can specify the framework ID to use for a particular command directly from t
 
 bc. play run --%production
 
-with these lines defined in the **application.conf** file:
+with these lines defined in the @application.conf@ file:
 
 bc. application.mode=dev
 %production.application.mode=prod
 
-It should be compatible with all commands using the framework ID information. The default ID is still defined using the **play id** command.
+It should be compatible with all commands using the framework ID information. The default ID is still defined using the @play id@ command.
 
-By the way, **play test** is then equivalent to:
+By the way, @play test@ is then equivalent to:
 
 bc. play run --%test
 

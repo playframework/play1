@@ -10,7 +10,7 @@ The first hint that something different is going on here is when you first hear 
 
 h2. <a>URLs for perfectionists</a>
 
-For example, the Play framework, like other modern web frameworks, provides first-class support for arbitrary ’clean’ URLs, which has always been lacking from the Servlet API. It is no coincidence that at the time of writing, "Struts URLs for perfectionists":http://www.lunatech-research.com/archives/2005/07/29/struts-urls, a set of work-arounds for the Servlet API-based Struts 1.x web framework, remains the third-most popular out of 160 articles on www.lunatech-research.com despite being a 2005 article about a previous-generation Java web technology.
+For example, the Play framework, like other modern web frameworks, provides first-class support for arbitrary ’clean’ URLs, which has always been lacking from the Servlet API. It is no coincidence that at the time of writing, "Struts URLs for perfectionists":http://www.lunatech-research.com/archives/2005/07/29/struts-urls, a set of work-arounds for the Servlet API-based Struts 1.x web framework, remains the third-most popular out of 160 articles on "www.lunatech-research.com":http://www.lunatech-research.com despite being a 2005 article about a previous-generation Java web technology.
 
 In Servlet-based frameworks, the Servlet API does not provide useful URL-routing support; Servlet-based frameworks configure web.xml to forward all requests to a single controller Servlet, and then implement URL routing in the framework, with additional configuration. At this point, it does not matter whether the Servlet API was ever intended to solve the URL-routing problem and failed by not being powerful enough, or whether it was intended to be a lower-level API that you do not build web applications in directly. Either way, the result is the same: web frameworks add an additional layer on top of the Servlet API, itself a layer on top of HTTP.
 
@@ -26,7 +26,7 @@ POST       /item            Item.addItem
 GET        /item/{id}       Item.getItem
 GET        /item/{id}.pdf   Item.getItemPdf
 
-In this example, there is more than one controller. We also see the use of an id URL parameter in the last two URLs.
+In this example, there is more than one controller. We also see the use of an @id@ URL parameter in the last two URLs.
 
 h2. <a>Better usability is not just for normal people</a>
 

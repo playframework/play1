@@ -12,7 +12,7 @@ However Play is a unique Java framework. It does not really rely on the so-calle
 
 h2. <a>Why don’t you rename the ‘play’ package to ‘org.playframework’?!</a>
 
-You are missing the point. Play is not another library that you add to your Servlet container. It’s really a full stack Java framework that runs your application stand-alone. The Java package naming conventions exist to avoid name clashes when you use several different libraries from several vendors. But believe us, you will never put the **play.jar** library in your own project. This is not the way Play works. Play **is the platform**. Don’t worry about that.
+You are missing the point. Play is not another library that you add to your Servlet container. It’s really a full stack Java framework that runs your application stand-alone. The Java package naming conventions exist to avoid name clashes when you use several different libraries from several vendors. But believe us, you will never put the @play.jar@ library in your own project. This is not the way Play works. Play **is the platform**. Don’t worry about that.
 
 h2. <a>Why do I need Python (I would prefer Maven)?</a>
 

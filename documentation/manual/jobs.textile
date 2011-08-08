@@ -4,7 +4,7 @@ Because Play is a web application framework, most of the application logic is do
 
 But sometimes you will need to execute some application logic outside of any HTTP request. It can be useful for initialization tasks, maintenance tasks or to run long tasks without blocking the HTTP request execution pool.
 
-Jobs are fully managed by the framework. That means that Play will manage all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extend the **play.jobs.Job** super class.
+Jobs are fully managed by the framework. That means that Play will manage all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extend the @play.jobs.Job@ super class.
 
 bc. package jobs;
  
@@ -18,7 +18,7 @@ public class MyJob extends Job {
     
 }
 
-Sometimes you need to create jobs that return a result. You then override the **doJobWithResult()** method.
+Sometimes you need to create jobs that return a result. You then override the @doJobWithResult()@ method.
 
 bc. package jobs;
  
@@ -33,11 +33,11 @@ public class MyJob extends Job<String> {
     
 }
 
-Here the use of **String** is just for the example, of course a job can return any object type.
+Here the use of @String@ is just for the example, of course a job can return any object type.
 
 h2. <a name="concepts">Bootstrap jobs</a>
 
-Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
+Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the <code>@OnApplicationStart</code> annotation.
 
 bc. import play.jobs.*;
  
@@ -55,9 +55,9 @@ public class Bootstrap extends Job {
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
-The default is that all jobs annotated with *@OnApplicationStart* will be executed in sequence. When all jobs are finished, your application is ready to start processing incoming requests.
+The default is that all jobs annotated with <code>@OnApplicationStart</code> will be executed in sequence. When all jobs are finished, your application is ready to start processing incoming requests.
 
-If you want your jobs to start when your application starts, but you want to start processing incoming requests immediately, you can annotate your job like this: *@OnApplicationStart(async=true)*. Then your job will be started in the background when the application starts. All async jobs will be started at the same time.
+If you want your jobs to start when your application starts, but you want to start processing incoming requests immediately, you can annotate your job like this: <code>@OnApplicationStart(async=true)</code>. Then your job will be started in the background when the application starts. All async jobs will be started at the same time.
 
 p(note). **Warning**
  
@@ -67,7 +67,7 @@ When you run in PROD mode, the application will start synchronously with the ser
 
 h2. <a name="scheduling">Scheduled jobs</a>
 
-Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the **@Every** annotation.
+Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the <code>@Every</code> annotation.
 
 bc. import play.jobs.*;
  
@@ -83,7 +83,7 @@ public class Bootstrap extends Job {
     
 }
 
-If the **@Every** annotation is not enough you can use the **@On** annotation to run your jobs using a CRON expression.
+If the <code>@Every</code> annotation is not enough you can use the <code>@On</code> annotation to run your jobs using a CRON expression.
 
 bc. import play.jobs.*;
  

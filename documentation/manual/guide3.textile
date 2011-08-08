@@ -12,7 +12,7 @@ In fact, before coding the first screen we need one more thing. Working on a web
 
 One way to inject default data into the blog is to load a fixture file at application load time. To do that we will create a Bootstrap Job. A Play job is something that executes itself outside of any HTTP request, for example at the application start or at specific interval using a CRON job.
 
-Let’s create the **/yabe/app/Bootstrap.java** job that will load a set of default data using **Fixtures**:
+Let’s create the @/yabe/app/Bootstrap.java@ job that will load a set of default data using @Fixtures@:
 
 bc. import play.*;
 import play.jobs.*;
@@ -32,23 +32,23 @@ public class Bootstrap extends Job {
  
 }
 
-We have annotated this Job with the **@OnApplicationStart** annotation to tell Play that we want to run this job synchronously at application start-up.
+We have annotated this Job with the <code>@OnApplicationStart</code> annotation to tell Play that we want to run this job synchronously at application start-up.
 
-p(note). In fact this job will be run differently in DEV or PROD modes. In DEV mode, Play waits for a first request to start. So this job will be executed synchronously at the first request. That way, if the job fails, you will get the error message in your browser. In PROD mode however, the job will be executed at application start-up (synchrously with the **play run** command) and will prevent the application from starting in case of an error.
+p(note). In fact this job will be run differently in DEV or PROD modes. In DEV mode, Play waits for a first request to start. So this job will be executed synchronously at the first request. That way, if the job fails, you will get the error message in your browser. In PROD mode however, the job will be executed at application start-up (synchrously with the @play run@ command) and will prevent the application from starting in case of an error.
 
-You have to create an **initial-data.yml** in the **yabe/conf/** directory. You can of course reuse the **data.yml** content that we just used for tests previously.
+You have to create an @initial-data.yml@ in the @yabe/conf/@ directory. You can of course reuse the @data.yml@ content that we just used for tests previously.
 
-Now run the application using **play run** and display the page "http://localhost:9000/":http://localhost:9000/ in the browser.
+Now run the application using @play run@ and display the page "http://localhost:9000/":http://localhost:9000/ in the browser.
 
 h2. <a>The blog home page</a>
 
 This time, we can really start to code the home page.
 
-Do you remember how the first page is displayed? First the routes file specifies that the **/** URL will invoke the **controllers.Application.index()** action method. Then this method calls **render()** and executes the **/yabe/app/views/Application/index.html** template.
+Do you remember how the first page is displayed? First the routes file specifies that the @/@ URL will invoke the @controllers.Application.index()@ action method. Then this method calls @render()@ and executes the @/yabe/app/views/Application/index.html@ template.
 
 We will keep these components but add code to them to load the posts list and display them.
 
-Open the **/yabe/app/controllers/Application.java** controller and modify the **index()** action to load the posts list, as is:
+Open the @/yabe/app/controllers/Application.java@ controller and modify the @index()@ action to load the posts list, as is:
 
 bc. package controllers;
  
@@ -71,9 +71,9 @@ public class Application extends Controller {
  
 }
 
-Can you see how we pass objects to the **render** method? It will allow us to access them from the template using the same name. In this case, the variables **frontPost** and **olderPosts** will be available in the template.
+Can you see how we pass objects to the @render@ method? It will allow us to access them from the template using the same name. In this case, the variables @frontPost@ and @olderPosts@ will be available in the template.
 
-Open the **/yabe/app/views/Application/index.html** and modify it to display these objects:
+Open the @/yabe/app/views/Application/index.html@ and modify it to display these objects:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -138,7 +138,7 @@ bc. #{extends 'main.html' /}
     </div>
 #{/else}
 
-You can read about this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the **?:** operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
+You can read about this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the @?:@ operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
 
 OK, now refresh the blog home page.
 
@@ -148,7 +148,7 @@ Not pretty but it works!
 
 However you can see we have already started to duplicate code. Because we will display posts in several ways (full, full with comment, teaser) we should create something like a function that we could call from several templates. This is exactly what a Play tag does!
 
-To create a tag, just create the new **/yabe/app/views/tags/display.html** file. A tag is just another template. It has parameters (like a function). The **#{display /}** tag will have two parameters: the Post object to display and the display mode which will be one of ‘home’, ‘teaser’ or ‘full’.
+To create a tag, just create the new @/yabe/app/views/tags/display.html@ file. A tag is just another template. It has parameters (like a function). The @#{display /}@ tag will have two parameters: the Post object to display and the display mode which will be one of @home@, @teaser@ or @full@.
 
 bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
  
@@ -235,9 +235,9 @@ Reload the page and check that all is fine.
 
 h2. <a>Improving the layout</a>
 
-As you can see, the **index.html** template extends **main.html**. Because we want to provide a common layout for all blog pages, with the blog title and authentication links, we need to modify this file.
+As you can see, the @index.html@ template extends @main.html@. Because we want to provide a common layout for all blog pages, with the blog title and authentication links, we need to modify this file.
 
-Edit the **/yabe/app/views/main.html** file:
+Edit the @/yabe/app/views/main.html@ file:
 
 bc. <!DOCTYPE html >
 <html>
@@ -280,11 +280,11 @@ bc. <!DOCTYPE html >
     </body>
 </html>
 
-Refresh and check the result. It seems to work, except that the **blogTitle** and the **blogBaseLine** variables are not displayed. This is because we didn’t pass them to the **render(…)** call. Of course we could add them to the **render()** call in the **index** action. But because the **main.html** file will be used as main template for all application actions, we don’t want to add them every time.
+Refresh and check the result. It seems to work, except that the @blogTitle@ and the @blogBaseLine@ variables are not displayed. This is because we didn’t pass them to the @render(…)@ call. Of course we could add them to the @render()@ call in the @index@ action. But because the @main.html@ file will be used as main template for all application actions, we don’t want to add them every time.
 
-One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a **@Before** interceptor. 
+One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a <code>@Before</code> interceptor. 
 
-Let’s add the **addDefaults()** method to the Application controller:
+Let’s add the @addDefaults()@ method to the Application controller:
 
 bc. @Before
 static void addDefaults() {
@@ -292,9 +292,9 @@ static void addDefaults() {
     renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
 }
 
-p(note). You will need to import **play.Play** in the **Application.java** file.
+p(note). You will need to import @play.Play@ in the @Application.java@ file.
 
-All variables added to the **renderArgs** scope will be available from the templates. And you can see that the method reads the variable’s values from the **Play.configuration** object. This object contains all configuration keys from the **/yabe/conf/application.conf** file.
+All variables added to the @renderArgs@ scope will be available from the templates. And you can see that the method reads the variable’s values from the @Play.configuration@ object. This object contains all configuration keys from the @/yabe/conf/application.conf@ file.
 
 Add these two keys to the configuration file:
 
@@ -309,9 +309,9 @@ Reload the home page and check that it works!
 
 h2. <a>Adding some style</a>
 
-Now the blog home page is almost done, but it’s not very pretty. We’ll add some style to make it shinier. As you have seen, the main template file main.html includes the **/public/stylesheets/main.css** stylesheet. We’ll keep it but add more style rules to it.
+Now the blog home page is almost done, but it’s not very pretty. We’ll add some style to make it shinier. As you have seen, the main template file main.html includes the @/public/stylesheets/main.css@ stylesheet. We’ll keep it but add more style rules to it.
 
-You can "download it here":files/main.css, and copy it to the **/public/stylesheets/main.css** file.
+You can "download it here":files/main.css, and copy it to the @/public/stylesheets/main.css@ file.
 
 Refresh the home page and you should now see a styled page.
 

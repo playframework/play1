@@ -2,7 +2,7 @@ h1. Use a cache
 
 To create high-performance systems, sometimes you need to cache data. Play has a cache library and will use "Memcached":http://www.danga.com/memcached/ when used in a distributed environment.
 
-If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the "share nothing" assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
+If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the ‘share nothing’ assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
 It is important to understand that the cache contract is clear: when you put data in a cache, you can’t expect that data to remain there forever. In fact you shouldn’t. A cache is fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
 
@@ -19,7 +19,7 @@ bc. public static void allProducts() {
 
 h2. <a name="api">The cache API</a>
 
-The cache API is provided by the **play.cache.Cache** class. This class contains the set of methods to set, replace, and get data from the cache. Refer to the Memcached documentation to understand the exact behavior of each method.
+The cache API is provided by the @play.cache.Cache@ class. This class contains the set of methods to set, replace, and get data from the cache. Refer to the Memcached documentation to understand the exact behavior of each method.
 
 Some examples:
 
@@ -53,13 +53,13 @@ public static void deleteProduct(String id) {
     allProducts();
 }
 
-Some methods start with the **safe** prefix - e.g. **safeDelete**, **safeSet**. The standard methods are non-blocking. That means that when you issue the call:
+Some methods start with the @safe@ prefix - e.g. @safeDelete@, @safeSet@. The standard methods are non-blocking. That means that when you issue the call:
 
 bc. Cache.delete("product_" + id);
 
-The **delete** method will return immediately and will not wait until the cached object is actually deleted. So if an error occurs - e.g. an IO error - the object may still be present.
+The @delete@ method will return immediately and will not wait until the cached object is actually deleted. So if an error occurs - e.g. an IO error - the object may still be present.
 
-When you need to make sure that the object is deleted before continuing, you can use the **safeDelete** method:
+When you need to make sure that the object is deleted before continuing, you can use the @safeDelete@ method:
 
 bc. Cache.safeDelete("product_" + id);
 
@@ -70,9 +70,9 @@ bc. if(!Cache.safeDelete("product_" + id)) {
 }
 ...
 
-Note that those being blocking calls, **safe** methods will slow down your application. So use them only when needed.
+Note that those being blocking calls, @safe@ methods will slow down your application. So use them only when needed.
 
-Also note that when specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations.
+Also note that when specifying @expiration == "0s"@ (zero seconds) the actual expiration-time may vary between different cache implementations.
 
 h2. <a name="session">Don’t use the Session as a cache!</a>
 
@@ -96,7 +96,7 @@ Here we have used a unique UUID to keep unique information in the Cache for each
 
 h2. <a name="memcached">Configure memcached</a>
 
-When you want to enable a real Memcached implementation, enable Memcached and define the daemon address in your **application.conf**:
+When you want to enable a real Memcached implementation, enable Memcached and define the daemon address in your @application.conf@:
 
 bc. memcached=enabled
 memcached.host=127.0.0.1:11211

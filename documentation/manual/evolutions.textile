@@ -10,9 +10,9 @@ p(note). If you work with JPA, Hibernate can handle database evolutions for you 
 
 h2. <a name="script">Evolutions scripts</a>
 
-Play tracks your database evolutions using several **evolutions script**. These scripts are written in plain old SQL and should be located in the **db/evolutions** directory of your application.
+Play tracks your database evolutions using several **evolutions script**. These scripts are written in plain old SQL and should be located in the @db/evolutions@ directory of your application.
 
-The first script is named **1.sql**, the second script **2.sql**, and so on…
+The first script is named @1.sql@, the second script @2.sql@, and so on…
 
 Each script contains two parts:
 
@@ -40,7 +40,7 @@ DROP TABLE User;
 
 As you see you have to delimitate the both *Ups* and *Downs* section by using comments in your SQL script.
 
-Evolutions are automatically activated if a database is configured in application.conf and evolution scripts are present. You can disable them by setting **evolutions.enabled=false** in application.conf.
+Evolutions are automatically activated if a database is configured in application.conf and evolution scripts are present. You can disable them by setting @evolutions.enabled=false@ in @application.conf@.
 For example when tests set up their own database you can disable evolutions for the test environment.
 
 When **evolutions** are activated, Play will check your database schema state before each request in DEV mode, or before starting the application in PROD mode. In DEV mode, if your database schema is not up to date, an error page will suggest that you synchronise your database schema by running the appropriate SQL script.
@@ -53,7 +53,7 @@ p(note). If you use an in-memory database (*db=mem*), Play will automatically ru
 
 h2. Synchronizing concurrent changes
 
-Now let's imagine that we have two developers working on this project. Developer A will work on a feature that require a new database table. So it will create the following **2.sql** evolution script:
+Now let’s imagine that we have two developers working on this project. Developer A will work on a feature that requires a new database table. So he will create the following @2.sql@ evolution script:
 
 bc. # Add Post
  
@@ -73,7 +73,7 @@ DROP TABLE Post;
 
 Play will apply this evolution script to Developer A’s database.
 
-On the other hand, developer B will work on a feature that require to alter the User table. So it will also create the following **2.sql** evolution script:
+On the other hand, developer B will work on a feature that requires altering the @User@ table. So he will also create the following @2.sql@ evolution script:
 
 bc. # Update User
  
@@ -83,13 +83,13 @@ ALTER TABLE User ADD age INT;
 # --- !Downs
 ALTER TABLE User DROP age;
 
-Developer B finishes his feature and commit (let's say they are using Git). Now developer A has to merge the work of his colleague before continuing, so it run **git pull**, and the merge has a conflict, like:
+Developer B finishes his feature and commits (let's say they are using Git). Now developer A has to merge the his colleague’s work before continuing, so he runs @git pull@, and the merge has a conflict, like:
 
 bc. Auto-merging db/evolutions/2.sql
 CONFLICT (add/add): Merge conflict in db/evolutions/2.sql
 Automatic merge failed; fix conflicts and then commit the result.
 
-Each developer has created a **2.sql** evolution script. So developer A needs to merge the content of this file:
+Each developer has created a @2.sql@ evolution script. So developer A needs to merge the contents of this file:
 
 bc. <<<<<<< HEAD
 # Add Post
@@ -169,7 +169,7 @@ bc. ALTER TABLE User ADD company varchar(255);
 
 … and then mark this problem as manually resolved by clicking on the button.
 
-But because you evolution script has error, you probably want to fix it. So you modify the **3.sql** script:
+But because your evolution script has errors, you probably want to fix it. So you modify the @3.sql@ script:
 
 bc. # Add another column to User
   
@@ -189,7 +189,7 @@ p(note). In developement mode however it is often simpler to simply trash your d
 
 h2. Evolutions commands
 
-The evolutions run interactively in DEV mode. However in PROD mode you will have to use the **evolutions** command to fix your database schema before running your application.
+The evolutions run interactively in DEV mode. However in PROD mode you will have to use the @evolutions@ command to fix your database schema before running your application.
 
 If you try to run a application in production mode on a database that is not up to date, the application will not start.
 
