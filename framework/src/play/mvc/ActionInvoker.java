@@ -27,6 +27,7 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
+import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
 import play.mvc.results.Result;
@@ -516,6 +517,8 @@ public class ActionInvoker {
             // Action0
             instance = Http.Request.current().args.get(A);
             Future f = (Future) Http.Request.current().args.get(F);
+            Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+            Scope.RenderArgs.current.set(renderArgs);
             if (f == null) {
                 method = instance.getClass().getDeclaredMethod("invoke");
                 method.setAccessible(true);
