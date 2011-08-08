@@ -550,8 +550,8 @@ public class Play {
     public static synchronized void stop() {
         if (started) {
             Logger.trace("Stopping the play application");
-            started = false;
             pluginCollection.onApplicationStop();
+            started = false;
             Cache.stop();
             Router.lastLoading = 0L;
         }
