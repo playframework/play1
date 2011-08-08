@@ -87,5 +87,13 @@ public class FunctionalTestTest extends FunctionalTest {
         assertIsOk(response);
     }
     
+    @Test
+    public void canGetRenderArgs() {
+		Response response = GET("/users/edit");
+        assertIsOk(response);
+        assertNotNull(renderArgs("u"));
+        User u = (User) renderArgs("u");
+        assertEquals("Guillaume", u.name);
+    }
 }
 
