@@ -1,6 +1,6 @@
 h1. Manage application.conf in several environments
 
-When you work in a team, different developers will use different configuration keys in their @application.conf@. For example, the log level, some database configuration… This generally leads to recurrent conflicts when you commit the file using your VCS. 
+When you work in a team, different developers will use different configuration keys in their @application.conf@. For example, the log level or some database configuration. This generally leads to recurrent conflicts when you commit the file using your VCS. 
 
 Furthermore, different deployment environments - e.g. dev, test, staging and production - need different configurations.
 

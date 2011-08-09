@@ -12,7 +12,7 @@ h3. Keep your secret… secret
 
 The session is a hash of key/values, signed but not encrypted. That means that as long as your secret is safe, it is not possible for a third-party to forge sessions.
 
-The secret is stored in conf/application.conf. It is very important to keep it private: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command "play secret".
+The secret is stored in @conf/application.conf@. It is very important to keep it private: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command @play secret@.
 
 h3. Don’t store critical data
 
@@ -31,9 +31,7 @@ Let’s say you’re writing a blog, and anyone can add a comment. If you blindl
 
 Consequently it is very important to be protected from those attacks.
 
-Play’s template engine automatically escapes strings. For that, you need to ensure @escapeInTemplates@ is enabled in your application.conf. It is by default in newly created applications, since Play 1.0.1.
-
-If you really need to insert unescaped HTML in your templates, you can do so using the "raw()":javaextensions#raw Java extension on the string. But if the string comes from a user input, you need to make sure it is sanitized first.
+Play’s template engine automatically escapes strings. If you really need to insert unescaped HTML in your templates, you can do so using the "raw()":javaextensions#raw Java extension on the string. But if the string comes from a user input, you need to make sure it is sanitized first.
 
 When sanitizing user inputs, always prefer whitelisting (only allow a list of safe tags) to blacklisting (forbid a list of unsafe tags and allow all the rest).
 
