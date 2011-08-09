@@ -21,7 +21,8 @@ def execute(**kargs):
         app.check_jpda()
     modules = app.modules()
     classpath = app.getClasspath()
-
+    
+    application_basename = os.path.basename(app.path)
     # determine the name of the project
     # if this is an application, the name of the project is in the application.conf file
     # if this is a module, we infer the name from the path
@@ -29,7 +30,7 @@ def execute(**kargs):
     if application_name:
         application_name = application_name.replace("/", " ")
     else:
-        application_name = os.path.basename(app.path)
+        application_name = application_basename
 
     dotProject = os.path.join(app.path, '.project')
     dotClasspath = os.path.join(app.path, '.classpath')
@@ -115,19 +116,19 @@ def execute(**kargs):
         replaceAll(dotClasspath, r'%MODULES%', '')
 
     if is_application:
-        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PROJECT_BASENAME%', application_basename)
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_VERSION%', play_env["version"])
 
-        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_BASENAME%', application_basename)
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_VERSION%', play_env["version"])
 
-        replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_BASENAME%', application_basename)
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))
 
         os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
