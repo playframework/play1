@@ -14,7 +14,7 @@
 ~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
-~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
+~ All options specified after the application path are passed to the JVM (example. -Xms64m -Xmx256m).
 ~ All the shell environment variables are passed to the JVM.
 ~
 ~ The PID of the created Java process is written to the server.pid file.
