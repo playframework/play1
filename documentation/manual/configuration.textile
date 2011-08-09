@@ -175,7 +175,7 @@ h2(#attachments). Attachments
 
 h3(#attachments.path). attachments.path
 
-Storage path for @play.db.jpa.Blob@ content. For example:
+Storage path for @play.db.jpa.Blob@ content. This can be an absolute path, or a relative path to a folder inside the Play application folder. For example:
 
 bc. attachments.path=data/attachments
 
@@ -227,6 +227,8 @@ h3(#date.format). date.format
 Sets the default date format, using a @java.text.SimpleDateFormat@ pattern. For example:
 
 bc. date.format=dd-MM-yyyy
+
+This property also affects how @${date.format()}@ renders dates in templates. It also set the default date format when binding a date parameter.
 
 Default: @yyyy-MM-dd@
 
@@ -604,7 +606,7 @@ bc. memcached.1.host=127.0.0.1:11211
 memcached.2.host=127.0.0.1:11212
 
 
-h2(#mimetype). Custom mime types
+h2(#mimetype). Custom MIME types
 
 You can declare additional MIME types. For example:
 
@@ -633,7 +635,7 @@ h2(#mail). Mail
 
 h3(#mail.debug). mail.debug
 
-Enables SMTP transaction logging.
+Enables SMTP transaction logging; under the hood, Play uses JavaMail to perform the actual SMTP transactions.
 
 bc. mail.debug=true
 
@@ -658,7 +660,7 @@ Default: none.
 
 h3(#mail.smtp.channel). mail.smtp.channel
 
-SMTP encrypted channel configuration, used with "mail.smtp.host":#mail.smtp.host. Values:
+There are two ways to send the e-mail over an encrypted channel, which you can choose with this configuration property. Values:
 
 * @clear@ - no encryption
 * @ssl@ - SMTP-over-SSL (SMTPS) connector; an SSL socket listening on port 465

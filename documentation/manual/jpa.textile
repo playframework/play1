@@ -200,9 +200,7 @@ If you upload another file for the same user, this will be saved as a new file o
 
 If the HTTP request did not specify the file’s correct MIME type, you can use file name extension mapping, as described in the "controller file upload":controllers#file section.
 
-To save attachments in a different folder, specify a different path in the @application.conf@ file. This can be an absolute path, or a relative path to a folder inside the Play application folder:
-
-bc. attachments.path=photos
+To save attachments in a different folder, configure "attachments.path":configuration#attachments.path.
 
 To serve a stored file, pass @Blob.get()@ to the controller’s @renderBinary@ method, as described in the "controller binary response":controllers#binary section.
 

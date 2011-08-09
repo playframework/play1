@@ -146,32 +146,18 @@ h2. <a name="database">Set-up a database to persist your model objects</a>
 
 Most of the time you will need to save the model object data permanently. The most natural way is to save this data into a database. 
 
-During development, you can quickly set up an embedded database either in-memory or save it in a sub-directory within your application.
-
-To start an in-memory H2 database instance, just add this line to your @conf/application.conf@ file:
-
-bc. db=mem
-
-If your prefer to save the database in the file system, use:
-
-bc. db=fs
-
-If you want to connect to an existing **MySQL5 server**, use the following:
-
-bc. db=mysql:user:pwd@database_name
+During development, you can quickly set up an embedded database either in-memory or save it in a sub-directory within your application using the "db configuration":configuration#db.
 
 The Play distribution includes JDBC drivers for H2 and MySQL in the @$PLAY_HOME/framework/lib/@ directory. If you are using a PostgreSQL or Oracle database, for example, then you should add the JDBC driver library there, or in your application’s @lib/@ directory.
 
-To connect to any JDBC compliant database. Just add the driver library to and define JDBC properties in the application.conf:
+To connect to any JDBC compliant database. Just add the driver library to and define the JDBC properties "db.url":configuration#db.url, "db.driver":configuration#db.driver, "db.user":configuration#db.user and "db.pass":configuration#db.pass:
 
 bc. db.url=jdbc:mysql://localhost/test
 db.driver=com.mysql.jdbc.Driver
 db.user=root
 db.pass=
 
-You can also specify a JPA dialect with the configuration option:
-
-bc. jpa.dialect=<dialect>
+You can also configure a JPA dialect with "jpa.dialect":configuration#jpa.dialect.
 
 From your code, you can then obtain a @java.sql.Connection@ from the @play.db.DB@ and use it in the standard way.
 
