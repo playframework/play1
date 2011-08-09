@@ -53,15 +53,17 @@ bc.
 
 Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
 
+
 h3. Datasource
 
-Play also supports Datasource and resource look-up. To use a JNDI Datasource, configure the Play database plugin (@play.db.DBPlugin@) in application.conf as shown below:
+Play also supports Datasource and resource look-up. To use a JNDI Datasource, set the "database configuration":configuration#dbconf as shown below:
 
 bc. db=java:comp/env/jdbc/mydb
 jpa.dialect=org.hibernate.dialect.Oracle10gDialect
 jpa.ddl=verify
 
 The database plugin detects the pattern @db=java:@ and will de-activate the default JDBC system.
+
 
 h3. Custom web.xml
 

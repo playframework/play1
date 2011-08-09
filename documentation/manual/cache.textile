@@ -96,16 +96,7 @@ Here we have used a unique UUID to keep unique information in the Cache for each
 
 h2. <a name="memcached">Configure memcached</a>
 
-When you want to enable a real Memcached implementation, enable Memcached and define the daemon address in your @application.conf@:
-
-bc. memcached=enabled
-memcached.host=127.0.0.1:11211
-
-You can connect to a distributed cache by specifying multiple daemon addresses: 
-
-bc. memcached=enabled
-memcached.1.host=127.0.0.1:11211
-memcached.2.host=127.0.0.1:11212
+When you want to enable a real Memcached implementation, enable Memcached  with the "memcached configuration":configuration#memcached and define the daemon address in the "memcached.host configuration":configuration#memcached.host.
 
 p(note). **Continuing the discussion**
  

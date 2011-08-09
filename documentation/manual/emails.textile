@@ -112,7 +112,7 @@ Your can include links to your application in e-mails like this:
 
 bc. @@{application.index}
 
-If you send mails from Jobs you have to configure @application.baseUrl@ in @application.conf@. @application.baseUrl@ must be a valid external base URL to your application.
+If you send mails from Jobs you have to set "application.baseUrl":configuration#application.baseUrl to a valid external base URL for your application.
 
 For example, to send an e-mail from a Job running on the playframework.org web site, the configuration would look like this:
 
@@ -120,40 +120,20 @@ bc. application.baseUrl=http://www.playframework.org/
 
 h2. <a name="smtp">SMTP configuration</a>
 
-E-mail functionality is configured in your application’s @conf/application.conf@ file. First of all, you need to define the SMTP server to use:
+E-mail functionality is configured by several "mail configuration":configuration#mail properties:
 
-bc. mail.smtp.host=smtp.taldius.net
+* SMTP server - "mail.smtp.host":configuration#mail.smtp.host
+* SMTP server authentication - "mail.smtp.user":configuration#mail.smtp.user and "mail.smtp.pass":configuration#mail.smtp.pass
+* encrypted channel - "mail.smtp.channel":configuration#mail.smtp.channel
+* JavaMail SMTP transaction logging - "mail.debug":configuration#mail.debug.
 
-If your SMTP server requires authentication, use the following properties: 
+Two additional configuration properties let you override default behaviour:
 
-bc. mail.smtp.user=jfp
-mail.smtp.pass=topsecret
+* "mail.smtp.socketFactory.class":configuration#mail.smtp.socketFactory.class
+* "mail.smtp.port":configuration#mail.smtp.port
 
-h3. Channel & ports
 
-There are two ways to send the e-mail over an encrypted channel. If your server supports the @starttls@ command (see: "RFC 2487":http://www.apps.ietf.org/rfc/rfc2487.html), you can use a clear connection on port 25 that will switch to SSL/TLS. You can do so by adding this configuration option:
-
-bc. mail.smtp.channel=starttls
-
-Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is an SSL socket listening on port 465. In that case, you tell Play to use this setup using the configuration option:
-
-bc. mail.smtp.channel=ssl
-
-h2. <a name="configuration">More about configuration</a>
-
-Under the hood, Play uses JavaMail to perform the actual SMTP transactions. If you need to see what’s going on, try:
-
-bc. mail.debug=true
-
-When using SSL connections with JavaMail, the default SSL behavior is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behavior is to skip that check. You can control this using the following property:
-
-bc. mail.smtp.socketFactory.class
-
-If you need to connect to servers using non-standard ports, the following property will override the defaults:
-
-bc. mail.smtp.port=2500
-
-h2. <a name="gmail">Using Gmail</a>
+h3. <a name="gmail">Using Gmail</a>
 
 To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.org/modules/playapps, use this configuration: 
 
