@@ -120,8 +120,7 @@ public class Application extends Controller {
     }
     
     public static void book(Date at) {
-        java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+    	java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
         renderText("Booked at %s !!", df.format(at));
     }
 
