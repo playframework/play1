@@ -239,7 +239,7 @@ public class Evolutions extends PlayPlugin {
 
     private static void addMainProjectToModuleList() {
         if (evolutionsDirectory.exists()) {
-            modulesWithEvolutions.put(Play.configuration.getProperty("application.name"), VirtualFile.fromRelativePath(evolutionsDirectory.getPath()));
+            modulesWithEvolutions.put(Play.configuration.getProperty("application.name"), VirtualFile.open(evolutionsDirectory));
         }
     }
 
@@ -276,9 +276,10 @@ public class Evolutions extends PlayPlugin {
         try {
             checkEvolutionsState();
         } catch (InvalidDatabaseRevision e) {
+        	Logger.info("Automatically applying evolutions in in-memory database");
             for(Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {            
                 if ("mem".equals(Play.configuration.getProperty("db")) && listDatabaseEvolutions(moduleRoot.getKey()).peek().revision == 0) {
-                    Logger.info("Automatically applying evolutions in in-memory database");
+                	Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
                     applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
                 } else {
                     throw e;
