@@ -185,7 +185,7 @@ Play detects this new evolution that replaces the previous *3* one, and will run
 
 Now everything is fixed, and you can continue to work.
 
-p(note). In developement mode however it is often simpler to simply trash your developement database and reapply all evolutions from the beginning.
+p(note). In development mode however it is often simpler to simply trash your developement database and reapply all evolutions from the beginning.
 
 h2. Evolutions commands
 
@@ -295,6 +295,25 @@ bc. $ play evolutions:markApplied
 If there are any errors while automatically running the evolutions scripts, as in DEV mode, you need to manually resolve them, and mark your database schema as fixed by running:
 
 bc. $ play evolutions:resolve
+
+
+h2. Evolutions and modules
+
+If you specify a dependency on a module which itself contains Evolutions scripts, then Evolutions will now detect and apply those scripts as well.  These changes will always be run before your application's changes in case you have any foreign key dependencies on tables maintained in the module.
+
+If your application does not have any Evolutions, but a dependent module does, this will still run and apply those changes.
+
+p(note). By default all included modules with Evolutions scripts (in their respective 'db/evolutions' folders) will be passed into Evolutions.  The application will also be included if it has Evolutions scripts.
+
+If you wish to only work with a subset of your modules when running the evolutions commands you can pass a command-line switch specifying with a comma separated list of modules you wish to include:
+
+bc. $play evolutions -Dmodules=application,module1,module2
+
+or for a single module:
+
+bc. $play evolutions:apply -Dmodules=module3
+
+p(note).  If you use the command-line switch, your application will **NOT** be included by default, unless you specify it in the list of modules.
 
 p(note). **Continuing the discussion**
 
