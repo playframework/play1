@@ -16,8 +16,8 @@ def execute(**kargs):
     play_env = kargs.get("env")
 
     is_application = os.path.exists(os.path.join(app.path, 'conf', 'application.conf'))
-    app.check()
     if is_application:
+        app.check()
         app.check_jpda()
     modules = app.modules()
     classpath = app.getClasspath()
