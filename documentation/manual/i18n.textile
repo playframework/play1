@@ -35,9 +35,7 @@ back=Retour
 
 h2. <a name="languages">Define languages supported by the application</a>
 
-In the @conf/application.conf@ file, define a list of supported languages:
-
-bc. application.langs=fr,en,ja
+Define a list of supported languages in the "application.langs configuration":configuration#application.langs.
 
 On the first request from a new user, Play will guess the default language to use. It does so by parsing the HTTP @Accept-language@ header. It will then save the chosen language in a @PLAY_LANG@ cookie. So the next request will use the same language.
 
@@ -55,19 +53,10 @@ bc. Lang.change("ja");
 
 The new value will be saved back to the user’s language cookie.
 
+
 h2. <a name="dates">Define date format according to your locale</a>
 
-To set the default date format to use, edit your application.conf and set the following property:
-
-bc. date.format=yyy-MM-dd
-date.format.fr=dd/MM/yyyy
-
-Please note that the language fr in the application.conf must be enabled as well (see above):
-
-bc. application.langs=fr,en
-
-This property affects how the dates are rendered in the templates using the ${date.format()}.
-It also set the default date format when binding a date parameter.
+Configure "date.format":configuration#date.format to specify the default date format to use.
 
 
 h2(#retrieve). <a>Retrieve localized messages</a>

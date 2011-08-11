@@ -170,17 +170,7 @@ bc.  public static void articlesSince(@As(lang={"fr,de","*"},
 
 In this example, we specified that for the French and German languages the date format is @dd-MM-yyyy@ and for all the other languages it's @MM-dd-yyyy@. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
 
-If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale.
-To set the default date format to use, edit your application.conf and set the following property:
-
-bc. date.format=yyy-MM-dd
-date.format.fr=dd/MM/yyyy
-
-Please note that the language fr in the application.conf must be enabled as well:
-
-bc. application.langs=fr
-
-This property also affects how the dates are rendered in the templates using @${date.format()}@.
+If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale. The "date.format configuration":configuration#date.format specifies the default date format to use.
 
 
 h3. <a name="calendar">Calendar</a>
@@ -206,9 +196,7 @@ bc. String mimeType = MimeTypes.getContentType(attachment.getName());
 
 The @play.libs.MimeTypes@ class looks up the MIME type for the given file name’s extension in the file @$PLAY_HOME/framework/src/play/libs/mime-types.properties@ 
 
-You can also add your own types to your application’s @conf/application.conf@ file. For example, to add a MIME type for GIMP images with the @.xcf@ extension, add the line: 
-
-bc. mimetype.xcf=application/x-gimp-image 
+You can also add your own types using the "Custom MIME types configuration":configuration#mimetype.
 
 
 h3. <a name="array">Arrays or collections of supported types</a>
@@ -559,11 +547,8 @@ bc. <form action="@{application.index}" method="POST" accept-charset="ISO-8859-1
 
 h4. Custom encoding for the entire application
 
-Set the @application.web_encoding@ in @application.conf@ to specify which encoding Play uses when communicating with the browser. This also changes the default encoding for Play’s powerful "Web Service client":libs#WebServiceclient.
+Configure "application.web_encoding":configuration#application.web_encoding to specify which encoding Play uses when communicating with the browser.
 
-bc. application.web_encoding=ISO-8859-1
-
-Changing @application.web_encoding@ affects the @charset@ part of the @Content-type@ HTTP header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play serves static content: So, if you have modified the default response encoding and you have static text-files (in the @public/@ folder) that contain special characters, you must make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
 
 h2. <a name="interceptions">Interceptions</a>
 
@@ -773,11 +758,9 @@ bc. public static void index() {
     render(messages);
 }
 
-The session expires when you close your web browser, unless the @application.session.maxAge@ configuration property is set. For example:
+The session expires when you close your web browser, unless you configure "application.session.maxAge":configuration#application.session.maxAge.
 
-bc. application.session.maxAge=7d  # Remember for one week.
-
-The cache has different semantics than the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
+The cache has different semantics to the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 
 p(note). **Continuing the discussion**
  

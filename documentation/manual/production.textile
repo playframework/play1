@@ -108,11 +108,11 @@ bc. LoadModule proxy_module modules/mod_proxy.so
 
 h3. Apache as a front proxy to allow transparent upgrade of your application
 
-The basic idea is to run 2 Play instances of your web application and let the front-end proxy load-balance them. In case one is not available, it will forward all the requests to the available one.
+The basic idea is to run two Play instances of your web application and let the front-end proxy load-balance them. In case one is not available, it will forward all the requests to the available one.
 
 Let’s start the same Play application two times: one on port 9999 and one on port 9998.
 
-Copy the application 2 times and edit the application.conf in the conf directory to change the port numbers.
+Make a copy of the application and edit the @application.conf@ in the @conf@ directory to change the port numbers.
 
 For each web application directory:
 
@@ -165,11 +165,7 @@ h3. Advanced proxy settings
 
 When using an HTTP frontal server, request addresses are seen as coming from the HTTP server. In a usual set-up, where you both have the Play app and the proxy running on the same machine, the Play app will see the requests coming from 127.0.0.1.
 
-Proxy servers can add a specific header to the request to tell the proxied application where the request came from. Most web servers will add an X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in your Play app configuration:
-
-bc. XForwardedSupport=127.0.0.1,10.0.0.25
-
-Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
+Proxy servers can add a specific header to the request to tell the proxied application where the request came from. Most web servers will add an X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in the "XForwardedSupport configuration":configuration#XForwardedSupport, Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
 
 However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
 
