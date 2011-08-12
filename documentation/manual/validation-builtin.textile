@@ -42,6 +42,30 @@ bc. @InFuture String dueDate
 
 Message key: @validation.future@
 
+<h2><a name="ipv4Address">ipv4Address</a></h2>
+
+Checks that the value is an IP address that complies with the version 4 protocol; empty strings are considered valid.
+
+bc. validation.ipv4Address(value);
+
+Annotation syntax:
+
+bc. @IPv4Address String ip
+
+Message key: @validation.ipv4@
+
+<h2><a name="ipv6Address">ipv6Address</a></h2>
+
+Checks that the value is an IP address that complies with the version 6 protocol; empty strings are considered valid.
+
+bc. validation.ipv6Address(value);
+
+Annotation syntax:
+
+bc. @IPv6Address String ip
+
+Message key: @validation.ipv6@
+
 <h2><a name="isTrue">isTrue</a></h2>
 
 Checks that the value is a @String@ or @Boolean@ that evaluates to @true@, e.g. for an 'I agree to the terms' checkbox that must be checked, or a non-zero @Number@. Null values are considered false/invalid.
@@ -128,6 +152,36 @@ bc. @Past String actualDepartureDate
 
 Message key: @validation.past@
 
+<h2><a name="phone">phone</a></h2>
+
+Checks that the value is a valid phone number; empty strings are considered valid. The validation is relaxed and is intented to enforce a basic phone pattern. Please implement your own @Match for country specific validations.
+
+bc. validation.phone(value);
+
+Annotation syntax:
+
+bc. @Phone String phone
+
+Message key: @validation.phone@
+
+Format: @+CCC (SSSSSS)9999999999xEEEE@
+ 
+* @+@          optional country code mark
+* @CCC@        optional country code, up to 3 digits, note than it MUST be followed be a delimiter
+* @(SSSSSS)@   optional subzone, up to 6 digits
+* @9999999999@ mandatory number, up to 20 digits (which should cover all know cases current and future)
+* @x@          optional extension, can also be spelled "ext" or "extension"
+* @EEEE@       optional extension number, up to 4 digits
+* Delimiters can be either a _space_, @-@, @.@ or @/@ and can be used anywhere in the number
+  
+Examples:
+
+* @usa:(305) 613 09 58 ext 101@
+* @france:+33 1 47 37 62 24 x3@
+* @germany:+49-4312 / 777 777@
+* @china:+86 (10)69445464@
+* @uk:(020) 1234 1234@
+
 <h2><a name="range">range</a></h2>
 
 Checks that the value is a number within the range (inclusive) specified by the two given numbers.
@@ -164,56 +218,3 @@ bc. @URL String address
 
 Message key: @validation.url@
 
-<h2><a name="phone">phone</a></h2>
-
-Checks that the value is a valid phone number; empty strings are considered valid. The validation is relaxed and is intented to enforce a basic phone pattern. Please implement your own @Match for country specific validations.
-
-bc. validation.phone(value);
-
-Annotation syntax:
-
-bc. @Phone String phone
-
-Message key: @validation.phone@
-
-Format: @+CCC (SSSSSS)9999999999xEEEE@
- 
-* @+@          optional country code mark
-* @CCC@        optional country code, up to 3 digits, note than it MUST be followed be a delimiter
-* @(SSSSSS)@   optional subzone, up to 6 digits
-* @9999999999@ mandatory number, up to 20 digits (which should cover all know cases current and future)
-* @x@          optional extension, can also be spelled "ext" or "extension"
-* @EEEE@       optional extension number, up to 4 digits
-* Delimiters can be either a _space_, @-@, @.@ or @/@ and can be used anywhere in the number
-  
-Examples:
-
-* @usa:(305) 613 09 58 ext 101@
-* @france:+33 1 47 37 62 24 x3@
-* @germany:+49-4312 / 777 777@
-* @china:+86 (10)69445464@
-* @uk:(020) 1234 1234@
-
-<h2><a name="ipv4Address">ipv4Address</a></h2>
-
-Checks that the value is an IP address that complies with the version 4 protocol; empty strings are considered valid.
-
-bc. validation.ipv4Address(value);
-
-Annotation syntax:
-
-bc. @IPv4Address String ip
-
-Message key: @validation.ipv4@
-
-<h2><a name="ipv6Address">ipv6Address</a></h2>
-
-Checks that the value is an IP address that complies with the version 6 protocol; empty strings are considered valid.
-
-bc. validation.ipv6Address(value);
-
-Annotation syntax:
-
-bc. @IPv6Address String ip
-
-Message key: @validation.ipv6@
