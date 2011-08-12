@@ -208,7 +208,7 @@ Message key: @validation.required@
 
 <h2><a name="url">url</a></h2>
 
-Checks that the value is a valid URL; empty strings are considered valid.
+Checks that the value is a valid URL; empty strings are considered valid. Note that not all valid URLs (as defined by RFC 1738) are accepted; only URLs with an @http@, @https@ or @ftp@ scheme are considered valid.
 
 bc. validation.url(value);
 
