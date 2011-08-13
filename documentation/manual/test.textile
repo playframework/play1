@@ -1,4 +1,4 @@
-h1. Test your application
+loadModels:h1. Test your application
 
 Creating automatic test suites for your application is a good way to make it robust. It allows you to work in a very agile way.
 
@@ -166,7 +166,7 @@ p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
 
 For Selenium tests, you can use the @#{fixture /}@ tag:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     
@@ -180,7 +180,7 @@ bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
 
 and for Selenium tests:
 
-bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
+bc. #{fixture delete:'all', loadModels:['users.yml', 'roles.yml', 'permissions.yml'] /}
 
 h2. <a name="running">Running the tests</a>
 
