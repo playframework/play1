@@ -134,6 +134,11 @@ public class Configuration extends Properties {
 		this(basedir.child(filename));
 	}
 	
+	/**
+	 * Creates a new Configuration from this without upper prefixes
+	 * 
+	 * @return new Configuration object without prefixes
+	 */
 	public Configuration hidePrefix()
 	{
 		if (this.prefix.isEmpty()) {
@@ -141,7 +146,9 @@ public class Configuration extends Properties {
 		}
 	    Configuration result = new Configuration();
 	    result.prefix = "";
-	    int len = this.prefix.length() + 1;
+	    
+	    // without next "." character
+	    final int len = this.prefix.length() + 1;
 	    for (final Object key : keySet()) {
 	    	Logger.warn("prefix:%s key:%s", this.prefix, key);
 	    	if (key.toString().equals(this.prefix)) {
@@ -152,6 +159,13 @@ public class Configuration extends Properties {
 	    }
 	    return result;
 	}
+	
+	/**
+	 * Pushes prefix stack
+	 * 
+	 * @param stacking prefix string
+	 * @return result prefix string
+	 */
 	private String pushPrefix(final String prefix)
 	{
 	    if (prefix != null && !prefix.isEmpty()) {
@@ -164,11 +178,21 @@ public class Configuration extends Properties {
 	}
 	
 	/**
-	 * sub-label utility class
+	 * configuration Sub-Label utility class
 	 * 
+	 * <p>'Sub-Label' is string to grouping configurations.</p>
+	 * <p>For example, DB connection settings can define like below.
+	 * <pre>db.url=jdbc://localhost/test
+	 * db[readonly].url=jdbc://localhost/test?readonly=true</pre>
+	 * </p>
 	 */
 	public static class SubLabel
 	{
+		/**
+		 * 
+		 * @param subLabel
+		 * @return
+		 */
 		public static String format(final String subLabel)
 		{
 			return format("", subLabel);
@@ -186,6 +210,11 @@ public class Configuration extends Properties {
 			return key + "[" + subLabel + "]";
 		}
 		
+		/**
+		 * 
+		 * @param key
+		 * @return
+		 */
 		public static boolean exists(final String key)
 		{
 			return exists(key, "");
@@ -202,10 +231,23 @@ public class Configuration extends Properties {
 		{
 			return key.startsWith(prefix + "[") && key.contains("]");
 		}
+		
+		/**
+		 * 
+		 * @param key
+		 * @return
+		 */
 		public static String get(final String key)
 		{
 			return get(key, "");
 		}
+		
+		/**
+		 * 
+		 * @param key
+		 * @param prefix
+		 * @return
+		 */
 		public static String get(final String key, final String prefix)
 		{
 			try {
@@ -264,10 +306,21 @@ public class Configuration extends Properties {
 	{
 	    return group(SubLabel.format(prefix, subLabel));
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
 	public List<String> getSubLables()
 	{
 		return this.subLabels;
 	}
+	
+	/**
+	 * 
+	 * @param pattern
+	 * @return
+	 */
 	public Configuration filterValue(final String pattern)
     {
 		// checking arg
@@ -286,6 +339,12 @@ public class Configuration extends Properties {
         }
         return result;
     }
+	
+	/**
+	 * 
+	 * @param pattern
+	 * @return
+	 */
     public Configuration filterValue(final Pattern pattern)
     {
         return filterValue(pattern.pattern());
@@ -316,10 +375,16 @@ public class Configuration extends Properties {
 		seenFileNames.add(filename.getName());
 		this.read(IO.readUtf8Properties(filename.inputstream()));
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
 	public Object getProperty()
 	{
 		return this.getProperty("");
 	}
+	
 	/**
 	 * Check if the configuration file already loaded?
 	 * 
@@ -335,16 +400,31 @@ public class Configuration extends Properties {
         }
         return false;
 	}
+	
+	/**
+	 * 
+	 * @param key
+	 * @param value
+	 */
 	public void putIfNotExists(final Object key, final Object value)
 	{
 		if (!this.contains(key)) {
 			this.put(key, value);
 		}
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
 	private Set<Object> findIncludeKeys()
 	{
 		return this.group("@include").keySet();
 	}
+	
+	/**
+	 * 
+	 */
 	private void detectInclude()
 	{
 		Set<Object> keys = findIncludeKeys();
@@ -366,16 +446,15 @@ public class Configuration extends Properties {
         	}
         }
 	}
-	private void detectKeyword()
-	{
-		for (Object key : keySet()) {
-			String value = getProperty(key.toString());
-		}
-	}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
 	@Deprecated
 	private HashSet<String> findProfileKeys(final String id)
 	{
-		
 		HashSet<String> keys = new HashSet<String>();
 		if (id == null) {
 			return keys;
@@ -394,6 +473,11 @@ public class Configuration extends Properties {
 		}
 		return keys;
 	}
+	
+	/**
+	 * 
+	 * @param id
+	 */
 	private void detectProfile(final String id)
 	{
         for (final Object key : this.keySet()) {
@@ -404,11 +488,10 @@ public class Configuration extends Properties {
         }
 	}
 
-	private Set<Object> findRemainKeyword()
-	{
-//		Pattern pattern = Pattern.compile("\\$\\{([^}]+)}");
-		return this.filterValue("\\$\\{([^}]+)}").keySet();
-	}
+	/**
+	 * 
+	 * @throws ConfigurationException
+	 */
 	private void resolveKeyword() throws ConfigurationException
 	{
 		// Resolve ${..}
