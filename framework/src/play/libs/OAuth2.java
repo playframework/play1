@@ -2,6 +2,7 @@ package play.libs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
@@ -35,6 +36,28 @@ public class OAuth2 {
 
     public static boolean isCodeResponse() {
         return Params.current().get("code") != null;
+    }
+
+
+    /**
+     * First step of the OAuth2 process: redirects the user to the authorization page
+     *
+     * @param callbackURL
+     * @param scopes
+     */
+    public void retrieveVerificationCode(String callbackURL, List<String> scopes) 
+    {
+        StringBuilder scopeBuilder = new StringBuilder();
+        for (String scope : scopes)
+        {
+            scopeBuilder.append(scope);
+            scopeBuilder.append(",");
+        }
+		
+        throw new Redirect(authorizationURL 
+                        + "?client_id=" + clientid 
+                        + "&redirect_uri=" + callbackURL
+                        + "&scope=" + scopeBuilder);
     }
 
     /**
