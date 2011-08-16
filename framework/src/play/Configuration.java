@@ -533,5 +533,15 @@ public class Configuration extends Properties {
             setProperty(key.toString(), newValue.toString());
         }
 	}
+	
+	public <T> T toObject(final Class<T> cls)
+	{
+		return null;
+	}
+	
+	public <T> T toObject(final Class<T> cls, T object)
+	{
+		return object;
+	}
 }
 

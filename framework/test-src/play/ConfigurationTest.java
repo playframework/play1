@@ -91,4 +91,28 @@ public class ConfigurationTest extends Assert {
 		assertEquals(2, sublabels.size());
 		
 	}
+	
+	public class DBConf {
+		public String url;
+		public String driver;
+		public String user;
+		private String pass;
+		public String getPass() {
+			return pass;
+		}
+		public void setPass(String pass) {
+			this.pass = pass;
+		}
+	}
+	
+	@Test
+	public void toObject() throws Exception {
+		Configuration conf = new Configuration(getBaseDir(), "configurationTest.conf");
+
+		DBConf dbconf = conf.group("db").toObject(DBConf.class);
+		assertEquals("jdbc:mysql:test", dbconf.url);
+		assertEquals("test.Driver", dbconf.driver);
+		assertEquals("sample_user", dbconf.user);
+		assertEquals("mypassword", dbconf.getPass());
+	}
 }
