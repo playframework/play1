@@ -7,9 +7,9 @@
 }%
 
 %{
-	if(_loadModels) {
-    	play.test.Fixtures.loadModels(_loadModels)
-	} else if(_load) {
+    if(_loadModels) {
+        play.test.Fixtures.loadModels(_loadModels)
+    } else if(_load) {
         play.test.Fixtures.loadModels(_load)
     }
 }%
