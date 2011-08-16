@@ -58,21 +58,36 @@ bc. # play idealize myApp
 
 To create a single module project, do the following in IntelliJ IDEA.
 
-# On the *File* menu, select *New Project…*
+# On the command line, use the @play new@ command to create the Play project.
+# On the command line, use the @play idealize@ command to create an IntelliJ IDEA module.
+# In IntelliJ IDEA, on the *File* menu, select *New Project…*
 # In the *New Project* wizard, select *Create project from scratch*.
 # Click the *Next* button.
-# Change the *Project files location* to the Play application directory.
-# Set the *Project file format* to your preferred format.
-# Uncheck *Create module* (since the module already exists).
+# On the next wizard page, change the *Project files location* to the directory containing your Play application.
+# On the same wizard page, set the *Project file format* to your preferred format.
+# On the same wizard page, uncheck *Create module* (since the module already exists).
 # Click the *Finish* button.
 # On the *File* menu, select *New Module…*
-# On the *Add Module* wizard, select *Import existing module*.
-# Under *Select IDEA module file*, select the @.iml@ file in the application directory.
+# On the *Add Module* wizard, select *Import existing module* and select the @.iml@ in the application directory.
 # Click the *Finish* button.
 
 !images/intellij!
 
-You can use the *Run* and *Debug* using the context menu. 
+To add a run configuration:
+
+# In IntelliJ IDEA, on the *Run* menu, select *Edit Configurations*.
+# Right-click on *Application* under *Defaults* and select *Add New Configuration*.
+# Under *Main class*, enter *play.server.Server*.
+# Under *VM parameters*, enter *-Dapplication.path=".".
+# Under *Working directory*, enter the application path.
+
+To run Play in test mode in IntelliJ:
+
+# Edit the run configuration and in *VM parameters*, append *-Dplay.id=test*.
+# Right-click on your module and select *Open Module Settings*.
+# Select the *Dependencies* tab.
+# Click *Add…* and select *Single-Entry Module Library*.
+# Select @$PLAY_HOME/modules/testrunner/lib/play-testrunner.jar@ and click *OK*.
 
 p(note). **Do not commit the .iml files when you work in a team!**
  

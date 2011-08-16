@@ -42,6 +42,30 @@ bc. @InFuture String dueDate
 
 Message key: @validation.future@
 
+<h2><a name="ipv4Address">ipv4Address</a></h2>
+
+Checks that the value is an IP address that complies with the version 4 protocol; empty strings are considered valid.
+
+bc. validation.ipv4Address(value);
+
+Annotation syntax:
+
+bc. @IPv4Address String ip
+
+Message key: @validation.ipv4@
+
+<h2><a name="ipv6Address">ipv6Address</a></h2>
+
+Checks that the value is an IP address that complies with the version 6 protocol; empty strings are considered valid.
+
+bc. validation.ipv6Address(value);
+
+Annotation syntax:
+
+bc. @IPv6Address String ip
+
+Message key: @validation.ipv6@
+
 <h2><a name="isTrue">isTrue</a></h2>
 
 Checks that the value is a @String@ or @Boolean@ that evaluates to @true@, e.g. for an 'I agree to the terms' checkbox that must be checked, or a non-zero @Number@. Null values are considered false/invalid.
@@ -128,42 +152,6 @@ bc. @Past String actualDepartureDate
 
 Message key: @validation.past@
 
-<h2><a name="range">range</a></h2>
-
-Checks that the value is a number within the range (inclusive) specified by the two given numbers.
-
-bc. validation.range(wordCount, 17500, 40000); // Novella
-
-Annotation syntax:
-
-bc. @Range(min = 17500, max = 40000) String wordCount
-
-Message key: @validation.range@
-
-<h2><a name="required">required</a></h2>
-
-Checks that the value is a non-empty @String@, @Collection@, @File@ or array.
-
-bc. validation.required(value);
-
-Annotation syntax:
-
-bc. @Required String value
-
-Message key: @validation.required@
-
-<h2><a name="url">url</a></h2>
-
-Checks that the value is a valid URL; empty strings are considered valid.
-
-bc. validation.url(value);
-
-Annotation syntax:
-
-bc. @URL String address
-
-Message key: @validation.url@
-
 <h2><a name="phone">phone</a></h2>
 
 Checks that the value is a valid phone number; empty strings are considered valid. The validation is relaxed and is intented to enforce a basic phone pattern. Please implement your own @Match for country specific validations.
@@ -194,26 +182,39 @@ Examples:
 * @china:+86 (10)69445464@
 * @uk:(020) 1234 1234@
 
-<h2><a name="ipv4Address">ipv4Address</a></h2>
+<h2><a name="range">range</a></h2>
 
-Checks that the value is an IP address that complies with the version 4 protocol; empty strings are considered valid.
+Checks that the value is a number within the range (inclusive) specified by the two given numbers.
 
-bc. validation.ipv4Address(value);
-
-Annotation syntax:
-
-bc. @IPv4Address String ip
-
-Message key: @validation.ipv4@
-
-<h2><a name="ipv6Address">ipv6Address</a></h2>
-
-Checks that the value is an IP address that complies with the version 6 protocol; empty strings are considered valid.
-
-bc. validation.ipv6Address(value);
+bc. validation.range(wordCount, 17500, 40000); // Novella
 
 Annotation syntax:
 
-bc. @IPv6Address String ip
+bc. @Range(min = 17500, max = 40000) String wordCount
 
-Message key: @validation.ipv6@
+Message key: @validation.range@
+
+<h2><a name="required">required</a></h2>
+
+Checks that the value is a non-empty @String@, @Collection@, @File@ or array.
+
+bc. validation.required(value);
+
+Annotation syntax:
+
+bc. @Required String value
+
+Message key: @validation.required@
+
+<h2><a name="url">url</a></h2>
+
+Checks that the value is a valid URL; empty strings are considered valid. Note that not all valid URLs (as defined by RFC 1738) are accepted; only URLs with an @http@, @https@ or @ftp@ scheme are considered valid.
+
+bc. validation.url(value);
+
+Annotation syntax:
+
+bc. @URL String address
+
+Message key: @validation.url@
+

@@ -84,6 +84,8 @@ This changes the output to:
 bc. name is required
 age is required
 
+p(note). *Limitation*: Play cannot determine the correct parameter name when more than one required-field validation using the @validation.required(age)@ syntax fails. In this case, you must specify the field name directly, i.e. @validation.required("age", age)@.
+
 This error key defaults to the parameter name, and is itself used to look up a message. For example, the @name@ parameter in the @hello@ action method above could be localised with: 
 
 bc. name = Customer name
