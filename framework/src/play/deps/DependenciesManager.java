@@ -25,8 +25,9 @@ public class DependenciesManager {
         // Paths
         File application = new File(System.getProperty("application.path"));
         File framework = new File(System.getProperty("framework.path"));
+        File userHome  = new File(System.getProperty("user.home"));
 
-        DependenciesManager deps = new DependenciesManager(application, framework);
+        DependenciesManager deps = new DependenciesManager(application, framework, userHome);
 
         ResolveReport report = deps.resolve();
             if(report != null) {
@@ -48,11 +49,13 @@ public class DependenciesManager {
 
     File application;
     File framework;
+    File userHome;
     HumanReadyLogger logger;
 
-    public DependenciesManager(File application, File framework) {
+    public DependenciesManager(File application, File framework, File userHome) {
         this.application = application;
         this.framework = framework;
+        this.userHome = userHome;
     }
 
     public void report() {
@@ -293,6 +296,13 @@ public class DependenciesManager {
         ivySettings.setDefaultConflictManager(conflictManager);
 
         Ivy ivy = Ivy.newInstance(ivySettings);
+
+        // Default ivy config see: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/807
+        File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
+        if(ivyDefaultSettings.exists()) {
+            ivy.configure(ivyDefaultSettings);
+        }
+
         if (debug) {
             ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_DEBUG));
         } else if (verbose) {
