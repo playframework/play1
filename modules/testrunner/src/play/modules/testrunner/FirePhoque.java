@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,10 @@ public class FirePhoque {
             System.out.println("~ The application does not start. There are errors: " + e);
             System.exit(-1);
         }
+        runTestsInHeadlessBrowser(app, root, selenium, tests, true);
+    }
+
+    public static void runTestsInHeadlessBrowser(String app, File root, String selenium, List<String> tests, boolean writeToConsole) throws MalformedURLException, InterruptedException {
 
         // Let's tweak WebClient
         WebClient firephoque = new WebClient(BrowserVersion.INTERNET_EXPLORER_8);
@@ -120,18 +125,18 @@ public class FirePhoque {
                 maxLength = testName.length();
             }
         }
-        System.out.println("~ " + tests.size() + " test" + (tests.size() != 1 ? "s" : "") + " to run:");
-        System.out.println("~");
+        printlnToConsole("~ " + tests.size() + " test" + (tests.size() != 1 ? "s" : "") + " to run:", writeToConsole);
+        printlnToConsole("~", writeToConsole);
         firephoque.openWindow(new URL(app + "/@tests/init"), "headless");
         boolean ok = true;
         for (String test : tests) {
             long start = System.currentTimeMillis();
             String testName = test.replace(".class", "").replace(".test.html", "").replace(".", "/").replace("$", "/");
-            System.out.print("~ " + testName + "... ");
+            printToConsole("~ " + testName + "... ", writeToConsole);
             for (int i = 0; i < maxLength - testName.length(); i++) {
-                System.out.print(" ");
+                printToConsole(" ", writeToConsole);
             }
-            System.out.print("    ");
+            printToConsole("    ", writeToConsole);
             URL url;
             if (test.endsWith(".class")) {
                 url = new URL(app + "/@tests/" + test);
@@ -143,15 +148,15 @@ public class FirePhoque {
             int retry = 0;
             while(retry < 5) {
                 if (new File(root, test.replace("/", ".") + ".passed.html").exists()) {
-                    System.out.print("PASSED     ");
+                    printToConsole("PASSED     ", writeToConsole);
                     break;
                 } else if (new File(root, test.replace("/", ".") + ".failed.html").exists()) {
-                    System.out.print("FAILED  !  ");
+                    printToConsole("FAILED  !  ", writeToConsole);
                     ok = false;
                     break;
                 } else {
                     if(retry++ == 4) {
-                        System.out.print("ERROR   ?  ");
+                        printToConsole("ERROR   ?  ", writeToConsole);
                         ok = false;
                         break;
                     } else {
@@ -166,12 +171,24 @@ public class FirePhoque {
             int minutes = (duration / (1000 * 60)) % 60;
 
             if (minutes > 0) {
-                System.out.println(minutes + " min " + seconds + "s");
+                printlnToConsole(minutes + " min " + seconds + "s", writeToConsole);
             } else {
-                System.out.println(seconds + "s");
+                printlnToConsole(seconds + "s", writeToConsole);
             }
         }
         firephoque.openWindow(new URL(app + "/@tests/end?result=" + (ok ? "passed" : "failed")), "headless");
 
+    }
+
+    private static void printToConsole(String message, boolean writeToConsole) {
+        if (writeToConsole) {
+            System.out.print(message);
+        }
+    }
+
+    private static void printlnToConsole(String message, boolean writeToConsole) {
+        if (writeToConsole) {
+            System.out.println(message);
+        }
     }
 }

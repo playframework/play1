@@ -152,9 +152,21 @@ def show_modules(app, args):
     print "~ "
     sys.exit(0)
 
+def getFirephoqueClasspath(app):
+    fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
+    fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
+    for jar in os.listdir(fpcp_libs):
+        if jar.endswith('.jar'):
+           fpcp.append(os.path.normpath(os.path.join(fpcp_libs, jar)))
+    cp_args = ':'.join(fpcp)
+    if os.name == 'nt':
+        cp_args = ';'.join(fpcp)
+    return cp_args
+
 def test(app, args):
     app.check()
-    java_cmd = app.java_cmd(args)
+    cp_args = getFirephoqueClasspath(app) + app.cp_args()
+    java_cmd = app.java_cmd(args, cp_args)
     print "~ Running in test mode"
     print "~ Ctrl+C to stop"
     print "~ "
@@ -220,14 +232,7 @@ def autotest(app, args):
     # Run FirePhoque
     print "~"
 
-    fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
-    fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
-    for jar in os.listdir(fpcp_libs):
-        if jar.endswith('.jar'):
-           fpcp.append(os.path.normpath(os.path.join(fpcp_libs, jar)))
-    cp_args = ':'.join(fpcp)
-    if os.name == 'nt':
-        cp_args = ';'.join(fpcp)    
+    cp_args = getFirephoqueClasspath(app)
     java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), 'play.modules.testrunner.FirePhoque']
     try:
         subprocess.call(java_cmd, env=os.environ)

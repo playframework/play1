@@ -8,8 +8,10 @@ import java.util.*;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.jobs.Job;
 import play.libs.IO;
 import play.libs.Mail;
+import play.modules.testrunner.FirePhoque;
 import play.mvc.*;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -43,7 +45,7 @@ public class TestRunner extends Controller {
         renderText(list);
     }
 
-    public static void run(String test) throws Exception {
+    public static void run(String test, Boolean headless) throws Exception {
         if (test.equals("init")) {
             File testResults = Play.getFile("test-result");
             if (!testResults.exists()) {
@@ -101,10 +103,15 @@ public class TestRunner extends Controller {
                 }
             }
             if (testFile.exists()) {
-                Template testTemplate = TemplateLoader.load(VirtualFile.open(testFile));
-                Map<String, Object> options = new HashMap<String, Object>();
-                response.contentType = "text/html";
-                renderText(testTemplate.render(options));
+                if (headless != null && headless) {
+                    new HeadlessTestJob(test).now();
+                    renderText(null);
+                } else {
+                    Template testTemplate = TemplateLoader.load(VirtualFile.open(testFile));
+                    Map<String, Object> options = new HashMap<String, Object>();
+                    response.contentType = "text/html";
+                    renderText(testTemplate.render(options));
+                }
             } else {
                 renderText("Test not found, %s", testFile);
             }
@@ -156,6 +163,33 @@ public class TestRunner extends Controller {
     		notFound();
     	}
     	renderText(value);
+    }
+
+    private static class HeadlessTestJob extends Job {
+
+        private final String test;
+
+        public HeadlessTestJob(String test) {
+            this.test = test;
+        }
+
+        @Override
+        public void doJob() throws Exception {
+            String protocol = "http";
+            String port = "9000";
+            if (Play.configuration.getProperty("https.port") != null) {
+                port = Play.configuration.getProperty("https.port");
+                protocol = "https";
+            } else if (Play.configuration.getProperty("http.port") != null) {
+                port = Play.configuration.getProperty("http.port");
+            }
+            String applicationUrl = String.format("%s://localhost:%s", protocol, port);
+            List<String> tests = new ArrayList<String>();
+            tests.add(test);
+
+            String testRunnerUrl = Router.reverse(Play.modules.get("_testrunner").child("/public/test-runner/selenium/TestRunner.html"));
+            FirePhoque.runTestsInHeadlessBrowser(applicationUrl, Play.getFile("test-result"), testRunnerUrl, tests, false);
+        }
     }
 	
 }
