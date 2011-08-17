@@ -122,9 +122,9 @@
 
     // Host
     open('/')
-    assertTextPresent('1: http://static.foo.com/assets/hello.html')
+    assertTextPresent('1: http://static.foo.com:9003/assets/hello.html')
     assertTextPresent('2: /assets/hello.html')
-    assertTextPresent('3: http://static2.foo.com/x/hello.html')
+    assertTextPresent('3: http://static2.foo.com:9003/x/hello.html')
     assertTextPresent('4: /x/hello.html')
     assertTextPresent('5: http://localhost:9003/public/image.gif')
     assertTextPresent('6: /public/image.gif')
