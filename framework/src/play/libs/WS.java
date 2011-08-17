@@ -3,6 +3,7 @@ package play.libs;
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -245,7 +246,11 @@ public class WS extends PlayPlugin {
         }
 
         public WSRequest(String url, String encoding) {
-            this.url = url;
+            try {
+                this.url = new URI(url).toASCIIString();
+            } catch (Exception e) {
+                this.url = url;
+            }
             this.encoding = encoding;
         }
 

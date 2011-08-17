@@ -1,6 +1,9 @@
 package play.utils;
 
 import java.lang.annotation.Annotation;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,7 +16,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import play.Logger;
 import play.Play;
 import play.mvc.Scope;
 
@@ -215,6 +221,26 @@ public class Utils {
                 "ddMMyyyy"));
             }
             return dateformat.get();
+        }
+    }
+
+    private static final Pattern encodedChars = Pattern.compile("%([a-fA-F0-9][a-fA-F0-9])");
+
+    public static String decodeBytes(String enc, CharsetDecoder decoder) {
+        Matcher matcher = encodedChars.matcher(enc);
+        StringBuffer buf = new StringBuffer();
+        ByteBuffer bytes = ByteBuffer.allocate(enc.length() / 3);
+        while (matcher.find()) {
+            int b = Integer.parseInt(matcher.group(1), 16);
+            bytes.put((byte) b);
+        }
+        bytes.flip();
+        try {
+            if (bytes.hasRemaining())
+                return decoder.decode(bytes).toString();
+            return enc;
+        } catch (CharacterCodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

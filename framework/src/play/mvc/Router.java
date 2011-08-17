@@ -3,20 +3,30 @@ package play.mvc;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.mail.util.ASCIIUtility;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.lang.CharSet;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIUtils;
+import org.bouncycastle.util.encoders.UrlBase64;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.utils.Utils;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.UnexpectedException;
@@ -387,7 +397,7 @@ public class Router {
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
 
-        String encoding = Http.Response.current() == null ? "utf-8" : Http.Response.current().encoding;
+        String encoding = Http.Response.current() == null ? Play.defaultWebEncoding : Http.Response.current().encoding;
 
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
@@ -472,18 +482,10 @@ public class Router {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     @SuppressWarnings("unchecked")
                                     List<Object> vals = (List<Object>) value;
-                                    try {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(vals.get(0).toString().replace("$", "\\$"), encoding));
-                                    } catch (UnsupportedEncodingException e) {
-                                        throw new UnexpectedException(e);
-                                    }
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString()).replace("$", "\\$");
                                 } else {
-                                    try {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), encoding).replace("%3A", ":").replace("%40", "@"));
-                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), encoding).replace("%3A", ":").replace("%40", "@"));
-                                    } catch (UnsupportedEncodingException e) {
-                                        throw new UnexpectedException(e);
-                                    }
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@"));
+                                    host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@"));
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static
@@ -855,7 +857,14 @@ public class Router {
                             // FIXME: Careful with the arguments that are not matching as they are part of the hostname
                             // Defaultvalue indicates it is a one of these urls. This is a trick and should be changed.
                             if (arg.defaultValue == null) {
-                                localArgs.put(arg.name, matcher.group(arg.name));
+                                String encoding = Http.Response.current() == null ? Play.defaultWebEncoding : Http.Response.current().encoding;
+                                Charset charset = null;
+                                try {
+                                    charset = Charset.forName(encoding.toUpperCase());
+                                } catch(Exception e) {
+                                     charset =  Charset.forName("UTF-8");
+                                }
+                                localArgs.put(arg.name, Utils.decodeBytes(matcher.group(arg.name), charset.newDecoder()));
                             }
                         }
                         if (hostArg != null && host != null) {
