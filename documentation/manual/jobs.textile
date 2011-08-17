@@ -115,6 +115,22 @@ bc. public static void encodeVideo(Long videoId) {
 
 Calling @now()@ on a Job returns a @Promise@ value that you can use to retrieve the task result once finished.
 
+h2. <a name="concepts">Stopping the application</a>
+
+Because you sometimes need to perform some action before the application shutdown, Play also provides a <code>@OnApplicationStop</code> annotation.
+
+bc. import play.jobs.*;
+
+@OnApplicationStop
+public class Bootstrap extends Job {
+
+    public void doJob() {
+        Fixture.deleteAll();
+    }
+
+}
+
 p(note). **Continuing the discussion**
 
-Let's see how to combine Jobs with more powerfull %(next)"Asynchronous programming with HTTP":asynchronous%.
+Let's see how to combine Jobs with more powerful %(next)"Asynchronous programming with HTTP":asynchronous%.
+
