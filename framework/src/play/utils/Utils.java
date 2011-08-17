@@ -1,27 +1,17 @@
 package play.utils;
 
+import play.Play;
+import play.mvc.Scope;
+
 import java.lang.annotation.Annotation;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import play.Logger;
-import play.Play;
-import play.mvc.Scope;
 
 /**
  * Generic utils

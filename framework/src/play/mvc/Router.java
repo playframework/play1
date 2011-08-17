@@ -1,39 +1,26 @@
 package play.mvc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.sun.mail.util.ASCIIUtility;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
-import org.apache.commons.lang.CharSet;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URIUtils;
-import org.bouncycastle.util.encoders.UrlBase64;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
-import play.utils.Utils;
-import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
-import play.exceptions.UnexpectedException;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
 import play.utils.Default;
+import play.utils.Utils;
+import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * The router matches HTTP requests to action invocations
