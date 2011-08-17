@@ -534,10 +534,28 @@ public class Configuration extends Properties {
         }
 	}
 	
-	public <T> T toObject(final Class<T> cls)
-	{
-		return null;
-	}
+	/**
+	 * create POJO instance having configuration values in their fields
+	 * 
+	 * @param Class of having values written in configuration file. 
+	 * @return instance of class <code>cls</code> has field with value written in configuration file.<br/>
+	 *         return null if failed to create instance of class <code>cls</code>.
+	 */
+    public <T> T toObject(final Class<T> cls)
+    {
+        try {
+            return toObject(cls, cls.newInstance());
+            
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
 	
 	public <T> T toObject(final Class<T> cls, T object)
 	{
