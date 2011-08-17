@@ -103,6 +103,14 @@ public class Application extends Controller {
         render(name);
     }
 
+    public static void helloWorld(String name) {
+        render("/Application/hello.html", name);
+    }
+
+    public static void helloSteph(String name) {
+        render("/Application/hello.html", name);
+    }
+
     public static void yop() {
         render();
     }

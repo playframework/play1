@@ -203,6 +203,14 @@ You can also directly map a URL path to a static file rendering.
 bc. # Serve index.html static file for home requests
 GET     /home                   staticFile:/public/html/index.html
 
+h2. URL Encoding
+
+Because it is imposible to decode and re-encode URL (you don't know if a slash is a slash or an %2F for example), URL should be expressed encoded. UTF-8 is the default encoding but you can use one of ISO-8859-1, UTF-16BE, UTF-16LE, UTF-16 using the defaultWebEncoding config parameter. See http://download.oracle.com/javase/1.4.2/docs/api/java/nio/charset/Charset.html for more info.  
+
+For example:
+
+# map /stéphane
+bc. GET /st%C3%A9phane Application.stephane
 
 h2. <a name="reverse">Reverse routing: generate some URL</a>
 

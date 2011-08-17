@@ -1,6 +1,12 @@
 package play.utils;
 
 import java.lang.annotation.Annotation;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,7 +19,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import play.Logger;
 import play.Play;
 import play.mvc.Scope;
 
@@ -217,4 +226,14 @@ public class Utils {
             return dateformat.get();
         }
     }
+
+
+    public static String urlDecodePath(String enc) {
+        try {
+          return URLDecoder.decode(enc.replaceAll("\\+", "%2B"), "UTF-8");
+        } catch(Exception e) {
+            return enc;
+        }
+    }
+
 }

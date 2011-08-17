@@ -536,9 +536,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         final int i = uri.indexOf("?");
         String querystring = "";
-        String path = URLDecoder.decode(uri, encoding);
+        String path = uri;
         if (i != -1) {
-            path = URLDecoder.decode(uri.substring(0, i), encoding);
+            path = uri.substring(0, i);
             querystring = uri.substring(i + 1);
         }
 
