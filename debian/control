@@ -1,4 +1,4 @@
-Source: play-1.2.1
+Source: play-1.2.2
 Section: unknown
 Priority: extra
 Maintainer: Stephane Epardaud <stephane@lunatech.com>
@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7), ant
 Standards-Version: 3.8.3
 Homepage: http://www.playframework.org
 
-Package: play-1.2.1
+Package: play-1.2.2
 Provides: play-1.2
 Architecture: all
 Depends: ${misc:Depends}, python (>= 2.5), java-runtime
