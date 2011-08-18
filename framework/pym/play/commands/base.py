@@ -8,6 +8,7 @@ import getopt
 import urllib2
 import webbrowser
 import time
+import signal
 
 from play.utils import *
 
@@ -119,14 +120,25 @@ def new(app, args, env, cmdloader=None):
     print "~ Have fun!"
     print "~"
 
+process = None
+
+def handle_sigterm(signum, frame):
+    global process
+    if 'process' in globals():
+        process.terminate()
+        sys.exit(0)
+
 def run(app, args):
+    global process
     app.check()
     
     print "~ Ctrl+C to stop"
     print "~ "
     java_cmd = app.java_cmd(args)
     try:
-        subprocess.call(java_cmd, env=os.environ)
+        process = subprocess.Popen (java_cmd, env=os.environ)
+        signal.signal(signal.SIGTERM, handle_sigterm)
+        process.wait()
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
