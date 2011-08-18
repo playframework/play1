@@ -151,5 +151,26 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(a, User.find("from User order by j DESC").first());
     }
     
+    @Test
+    public void verifyCountWithCompositeKey() {
+        
+        List<DataWithCompositeKey> list = DataWithCompositeKey.findAll();
+        for (DataWithCompositeKey d : list) {
+            d.delete();
+        }
+        DataWithCompositeKey d = new DataWithCompositeKey();
+        d.key1 = "1";
+        d.key2 = "1";
+        d.save();
+        
+        d = new DataWithCompositeKey();
+        d.key1 = "1";
+        d.key2 = "2";
+        d.save();
+        
+        assertEquals(2l, DataWithCompositeKey.count());
+        assertEquals(2l, DataWithCompositeKey.count(""));
+    }
+    
 }
 

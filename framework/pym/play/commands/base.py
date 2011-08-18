@@ -178,11 +178,17 @@ def autotest(app, args):
     print "~"
 
     # Kill if exists
-    http_port = app.readConf('http.port')
+    http_port = 9000
+    protocol = 'http'
+    if app.readConf('https.port'):
+        http_port = app.readConf('https.port')
+        protocol = 'https'
+    else:
+        http_port = app.readConf('http.port')
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
-        opener.open('http://localhost:%s/@kill' % http_port);
+        opener.open('http://localhost:%s/@kill' % http_port)
     except Exception, e:
         pass
 
@@ -222,7 +228,7 @@ def autotest(app, args):
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
         cp_args = ';'.join(fpcp)    
-    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=http://localhost:%s' % http_port, 'play.modules.testrunner.FirePhoque']    
+    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), 'play.modules.testrunner.FirePhoque']
     try:
         subprocess.call(java_cmd, env=os.environ)
     except OSError:
@@ -243,7 +249,7 @@ def autotest(app, args):
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
-        opener.open('http://localhost:%s/@kill' % http_port);
+        opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception, e:
         pass
 

@@ -10,7 +10,9 @@ import play.exceptions.CacheException;
 import play.libs.Time;
 
 /**
- * The Cache. Mainly an interface to memcached.
+ * The Cache. Mainly an interface to memcached or EhCache.
+ *
+ * Note: When specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations
  */
 public abstract class Cache {
 
@@ -183,7 +185,7 @@ public abstract class Cache {
 
     /**
      * Delete an element from the cache.
-     * @param key The element key     * 
+     * @param key The element key
      */
     public static void delete(String key) {
         cacheImpl.delete(key);
@@ -236,7 +238,7 @@ public abstract class Cache {
                 cacheImpl = EhCacheImpl.getInstance();
             }
         } else {
-            cacheImpl = EhCacheImpl.getInstance();
+            cacheImpl = EhCacheImpl.newInstance();
         }
     }
 

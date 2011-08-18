@@ -217,7 +217,7 @@ public class TemplateLoader {
     }
 
     private static void scan(List<Template> templates, VirtualFile current) {
-        if (!current.isDirectory() && !current.getName().startsWith(".")) {
+        if (!current.isDirectory() && !current.getName().startsWith(".") && !current.getName().endsWith(".scala.html")) {
             long start = System.currentTimeMillis();
             Template template = load(current);
             if (template != null) {
@@ -230,7 +230,7 @@ public class TemplateLoader {
                 }
                 templates.add(template);
             }
-        } else if (!current.getName().startsWith(".")) {
+        } else if (current.isDirectory() && !current.getName().startsWith(".")) {
             for (VirtualFile virtualFile : current.list()) {
                 scan(templates, virtualFile);
             }

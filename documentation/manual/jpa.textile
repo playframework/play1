@@ -159,6 +159,50 @@ Or even count using a query:
 
 bc. long userPostCount = Post.count("author = ?", connectedUser);
 
+
+h2. <a name="files">Storing uploaded files with play.db.jpa.Blob</a>
+
+You can use the @play.db.jpa.Blob@ type to store uploaded files in the file system (not in the database). On the server, Play stores the uploaded image in a file in the @attachments/@ folder, inside the application folder. The file name (a "UUID":http://en.wikipedia.org/wiki/Uuid) and MIME type are stored in a database attribute whose SQL type is @VARCHAR@.
+
+The basic use case of uploading, storing and serving a file is extremely easy in Play. This is because the binding framework automatically binds a file uploaded from an HTML form to your JPA model, and because Play provides convenience methods that make serving binary data as easy as serving plain text. To store file uploads in your model, add a property of type @play.db.jpa.Blob@
+
+bc. import play.db.jpa.Blob;
+ 
+@Entity
+public class User extends Model {
+ 
+   public String name;
+   public Blob photo;
+}
+
+To upload files, add a form to your view template, and use a file upload form control for the model’s @Blob@ property:
+
+bc. #{form @addUser(), enctype:'multipart/form-data'}
+   <input type="file" name="user.photo">
+   <input type="submit" name="submit" value="Upload">
+#{/form}
+
+Then, in the controller, add an action that saves the upload in a new model object:
+
+bc. public static void addUser(User user) {
+   user.save();
+   index();
+}
+
+This code does not appear to do anything other than save the JPA entity, because the file upload is handled automatically by Play. First, before the start of the action method, the uploaded file is saved in a sub-folder of @tmp/uploads/@. Next, when the entity is saved, the file is copied to the @attachments/@ folder, with a UUID as the file name. Finally, when the action is complete, the temporary file is deleted.
+
+If you upload another file for the same user, this will be saved as a new file on the server, whose name is a new UUID. This means that the original file will now be orphaned. If you do not have unlimited disk space then you will have to implement your own scheme for cleaning up, perhaps with an "asynchronous job":jobs.
+
+If the HTTP request did not specify the file’s correct MIME type, you can use file name extension mapping, as described in the "controller file upload":controllers#file section.
+
+To save attachments in a different folder, specify a different path in the @application.conf@ file. This can be an absolute path, or a relative path to a folder inside the Play application folder:
+
+bc. attachments.path=photos
+
+To serve a stored file, pass @Blob.get()@ to the controller’s @renderBinary@ method, as described in the "controller binary response":controllers#binary section.
+
+
+
 h2. <a name="save">Explicit save</a>
 
 Hibernate maintains a cache of Objects that have been queried from the database. These Objects are referred to as persistent Objects as long as the EntityManager that was used to fetch them is still active. That means that any changes to these Objects within the bounds of a transaction are automatically persisted when the transaction is committed. In standard JPA, these updates are implicit within the transaction’s boundary; you don’t have to explicitly call any method to persist the values.

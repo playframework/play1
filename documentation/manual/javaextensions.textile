@@ -250,6 +250,10 @@ Replaces new-line characters with HTML **br** tags. Returns: **String**.
 bc. ${"one\ntwo".nl2br()}
 one<br/>two
 
+Note that the output is not HTML-escaped, so that the **br** tag is not escaped in the output. This means that you probably want to use "escape()":#escape for user input:
+
+bc. ${userInput.escape().nl2br()}
+
 
 h3. <a name="raw">raw()</a>
 

@@ -138,3 +138,4 @@ configure-stamp
 debian/play-*/*
 debian/play-*.debhelper.log
 debian/play-*.substvars
+*~

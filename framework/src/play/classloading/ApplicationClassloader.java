@@ -95,6 +95,12 @@ public class ApplicationClassloader extends ClassLoader {
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
     public Class<?> loadApplicationClass(String name) {
+
+        Class maybeAlreadyLoaded = findLoadedClass(name);
+        if(maybeAlreadyLoaded != null) {
+            return maybeAlreadyLoaded;
+        }
+
         if (Play.usePrecompiled) {
             try {
                 File file = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
@@ -387,23 +393,25 @@ public class ApplicationClassloader extends ClassLoader {
                 }
 
             } else {
-                List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
-                // Let's plugins play
-                Play.pluginCollection.compileAll(all);
+                if(!Play.pluginCollection.compileSources()) {
 
-                for (VirtualFile virtualFile : Play.javaPath) {
-                    all.addAll(getAllClasses(virtualFile));
-                }
-                List<String> classNames = new ArrayList<String>();
-                for (int i = 0; i < all.size(); i++) {
-                	ApplicationClass applicationClass = all.get(i);
-                    if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
-                        classNames.add(all.get(i).name);
+                    List<ApplicationClass> all = new ArrayList<ApplicationClass>();
+
+                    for (VirtualFile virtualFile : Play.javaPath) {
+                        all.addAll(getAllClasses(virtualFile));
                     }
-                }
+                    List<String> classNames = new ArrayList<String>();
+                    for (int i = 0; i < all.size(); i++) {
+                            ApplicationClass applicationClass = all.get(i);
+                        if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
+                            classNames.add(all.get(i).name);
+                        }
+                    }
 
-                Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+                    Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+
+                }
 
                 for (ApplicationClass applicationClass : Play.classes.all()) {
                     Class clazz = loadApplicationClass(applicationClass.name);

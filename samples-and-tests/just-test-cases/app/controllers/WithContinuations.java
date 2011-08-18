@@ -9,8 +9,11 @@ import static play.libs.F.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.*;
 
 import models.*;
+
+import play.jobs.*;
 
 public class WithContinuations extends Controller {
     
@@ -233,6 +236,88 @@ public class WithContinuations extends Controller {
                 renderText("yep -> %s", result);
             }
         });
+    }
+    
+    
+    public static class CompletedFuture<T> implements Future {
+
+        private final T data;
+        
+        public CompletedFuture(T data) {
+            this.data = data;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
+
+        public T get() throws InterruptedException, ExecutionException {
+            return data;
+        }
+
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return data;
+        }
+    }
+    
+    public static void renderTemplateWithVariablesAssignedBeforeAwait() {
+        int n = 1;
+        String a = "A";
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        String c = "C";
+        
+        await(40);
+        
+        String d = "D";
+        
+        await( new CompletedFuture<Boolean>(true));
+        
+        String e = "E";
+        
+        render(n,a,b,c,d,e);
+    }
+    
+    public static void usingRenderArgsAndAwait() {
+        renderArgs.put("a", "1");
+        int size = Scope.RenderArgs.current().data.size();
+        await(10);
+        renderArgs.put("b", "2");
+        size++;
+        
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        renderArgs.put("c", "3");
+        size++;
+        
+        await( new CompletedFuture<Boolean>(true));
+        
+        renderArgs.put("d", "4");
+        size++;
+        
+        boolean res = "1234".equals(""+renderArgs.get("a")+renderArgs.get("b")+renderArgs.get("c")+renderArgs.get("d")) && size == Scope.RenderArgs.current().data.size();
+        
+        renderText( res );
     }
     
 }

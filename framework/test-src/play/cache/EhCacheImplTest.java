@@ -7,7 +7,7 @@ public class EhCacheImplTest {
 
     @Test
     public void verifyThatTTLSurvivesIncrDecr() throws Exception {
-        final EhCacheImpl cache = EhCacheImpl.getInstance();
+        final EhCacheImpl cache = EhCacheImpl.newInstance();
         cache.clear();
 
         final String key = "EhCacheImplTest_verifyThatTTLSurvivesIncrDecr";

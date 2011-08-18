@@ -16,7 +16,7 @@ HELP = {
 }
 
 def execute(**kargs):
-    
+
     args = kargs.get("args")
     play_env = kargs.get("env")
 
@@ -28,10 +28,10 @@ def execute(**kargs):
 
     if command.find(':resolve') > 0:
         args.append('-Dmode=resolve')
-    
+
     if command.find(':apply') > 0:
         args.append('-Dmode=apply')
-        
+
     if command.find(':markApplied') > 0:
         args.append('-Dmode=markApplied')
 

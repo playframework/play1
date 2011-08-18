@@ -271,4 +271,8 @@ public class Application extends Controller {
         }
         render(users);
     }
+    
+    public static void fastTag_render_test() {
+        render();
+    }
 }

@@ -64,7 +64,7 @@ public class Logger {
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
 
-            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
+            if (log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0) {
                 // The log4j configuration file is located somewhere in the application folder,
                 // so it's probably a custom configuration file
                 configuredManually = true;
@@ -158,7 +158,6 @@ public class Logger {
             return log4j.isTraceEnabled();
         }
     }
-
 
     /**
      *
@@ -551,12 +550,20 @@ public class Logger {
                     errorOut.println(playException.getErrorTitle());
                 }
                 errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
+            } else {
+                sw.append(format(message, args));
             }
 
-            if (forceJuli || log4j == null) {
-                juli.log(toJuliLevel(level.toString()), sw.toString(), e);
-            } else {
-                log4j.log(level, sw.toString(), e);
+            try {
+                if (forceJuli || log4j == null) {
+                    juli.log(toJuliLevel(level.toString()), sw.toString(), e);
+                } else if (recordCaller) {
+                    org.apache.log4j.Logger.getLogger(getCallerClassName(5)).log(level, sw.toString(), e);
+                } else {
+                    log4j.log(level, sw.toString(), e);
+                }
+            } catch (Exception e1) {
+                log4j.error("Oops. Error in Logger !", e1);
             }
             return true;
         }
@@ -600,6 +607,13 @@ public class Logger {
      */
     static String getCallerClassName() {
         final int level = 4;
+        return getCallerClassName(level);
+    }
+
+    /**
+     * @return the className of the class actually logging the message
+     */
+    static String getCallerClassName(final int level) {
         CallInfo ci = getCallerInformations(level);
         return ci.className;
     }
@@ -677,5 +691,4 @@ public class Logger {
             // nothing to do
         }
     }
-
 }

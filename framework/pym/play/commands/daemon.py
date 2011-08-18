@@ -40,9 +40,9 @@ def start(app, args):
     sysout = app.readConf('application.log.system.out')
     sysout = sysout!='false' and sysout!='off'
     if not sysout:
-      sout = None
+        sout = None
     else:
-      sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
+        sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
     try:
         pid = subprocess.Popen(app.java_cmd(args), stdout=sout, env=os.environ).pid
     except OSError:
@@ -63,8 +63,8 @@ def stop(app):
         print "~"
         sys.exit(-1)
     pid = open(app.pid_path()).readline().strip()
-    os.remove(app.pid_path())
     kill(pid)
+    os.remove(app.pid_path())
     print "~ OK, %s is stopped" % app.path
     print "~"
 

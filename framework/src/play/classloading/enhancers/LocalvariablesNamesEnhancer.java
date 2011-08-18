@@ -1,8 +1,11 @@
 package play.classloading.enhancers;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +27,7 @@ import javassist.compiler.NoFieldException;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.libs.F.T2;
 
 /**
  * Track names of local variables ...
@@ -57,15 +61,49 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
 
             return parameters;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new UnexpectedException("Cannot extract parameter names", e);
         }
     }
+    
+    public static List<String> lookupParameterNames(Method method) {
+       try {
+           List<String> parameters = new ArrayList<String>();
+
+           ClassPool classPool = newClassPool();
+           CtClass ctClass = classPool.get(method.getDeclaringClass().getName());
+           CtClass[] cc = new CtClass[method.getParameterTypes().length];
+           for (int i = 0; i < method.getParameterTypes().length; i++) {
+               cc[i] = classPool.get(method.getParameterTypes()[i].getName());
+           }
+           CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName(),cc);
+
+           // Signatures names
+           CodeAttribute codeAttribute = (CodeAttribute) ctMethod.getMethodInfo().getAttribute("Code");
+           if (codeAttribute != null) {
+               LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
+               if (localVariableAttribute != null && localVariableAttribute.tableLength() >= ctMethod.getParameterTypes().length) {
+                   for (int i = 0; i < ctMethod.getParameterTypes().length + 1; i++) {
+                       String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                       if (!name.equals("this")) {
+                           parameters.add(name);
+                       }
+                   }
+               }
+           }
+
+           return parameters;
+       } catch (Exception e) {
+           throw new UnexpectedException("Cannot extract parameter names", e);
+       }
+   }
 
     //
-
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isAnon(applicationClass)) {
+            return;
+        }
 
         CtClass ctClass = makeClass(applicationClass);
         if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName())) && !ctClass.getName().matches("^controllers\\..*\\$class$")) {
@@ -74,7 +112,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
 
-            if(method.getName().contains("$")) {
+            if (method.getName().contains("$")) {
                 // Generated method, skip
                 continue;
             }
@@ -85,10 +123,24 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 continue;
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
+            List<T2<Integer,String>> parameterNames = new ArrayList<T2<Integer,String>>();
             if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length) {
-                if (method.getParameterTypes().length > 0) {
+                if(method.getParameterTypes().length > 0) {
                     continue;
                 }
+            } else {
+                for(int i=0; i<localVariableAttribute.tableLength(); i++) {
+                    if (!localVariableAttribute.variableName(i).equals("__stackRecorder")) {
+                        parameterNames.add(new T2<Integer,String>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
+                    }
+                }
+                Collections.sort(parameterNames, new Comparator<T2<Integer,String>>() {
+
+                    public int compare(T2<Integer, String> o1, T2<Integer, String> o2) {
+                        return o1._1.compareTo(o2._1);
+                    }
+
+                });
             }
             List<String> names = new ArrayList<String>();
             for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {
@@ -96,11 +148,11 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     continue;
                 }
                 try {
-                    String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                    String name = parameterNames.get(i)._2;
                     if (!name.equals("this")) {
                         names.add(name);
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Logger.warn(e, "While applying localvariables to %s.%s, param %s", ctClass.getName(), method.getName(), i);
                 }
             }
@@ -132,7 +184,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 continue;
             }
 
-            if(isScalaObject(ctClass)) {
+            if (isScala(applicationClass)) {
                 continue;
             }
 
@@ -396,6 +448,20 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         public static Object getLocalVariable(String variable) {
             return getLocalVariables().get(variable);
+        }
+
+        public static Stack<Map<String, Object>> getLocalVariablesStateBeforeAwait() {
+            Stack<Map<String, Object>> state = localVariables.get();
+            // must clear the ThreadLocal to prevent destroying the state when exit() is called due to continuations-suspend
+            localVariables.set(new Stack<Map<String, Object>>());
+            return state;
+        }
+
+        public static void setLocalVariablesStateAfterAwait(Stack<Map<String, Object>> state) {
+            if (state==null) {
+                state = new Stack<Map<String, Object>>();
+            }
+            localVariables.set( state );
         }
     }
     private final static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();

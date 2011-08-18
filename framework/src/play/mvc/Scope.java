@@ -30,6 +30,7 @@ public class Scope {
     public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
+    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
     /**
      * Flash scope
@@ -193,14 +194,24 @@ public class Scope {
                             }
                         }
                         session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    } else {
+                        // Just restored. Nothing changed. No cookie-expire.
+                        session.changed = false;
+                    }
+                } else {
+                    // no previous cookie to restore; but we may have to set the timestamp in the new cookie
+                    if (COOKIE_EXPIRE != null) {
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
+
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
         Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
+        boolean changed = false;
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 
         public static Session current() {
@@ -226,9 +237,17 @@ public class Scope {
             return data.get(AT_KEY);
         }
 
+        void change() {
+            changed = true;
+        }
+
         void save() {
             if (Http.Response.current() == null) {
                 // Some request like WebSocket don't have any response
+                return;
+            }
+            if(!changed && SESSION_SEND_ONLY_IF_CHANGED && COOKIE_EXPIRE == null) {
+                // Nothing changed and no cookie-expire, consequently send nothing back.
                 return;
             }
             if (isEmpty()) {
@@ -261,6 +280,7 @@ public class Scope {
             if (key.contains(":")) {
                 throw new IllegalArgumentException("Character ':' is invalid in a session key.");
             }
+            change();
             if (value == null) {
                 data.remove(key);
             } else {
@@ -269,6 +289,7 @@ public class Scope {
         }
 
         public void put(String key, Object value) {
+            change();
             if (value == null) {
                 put(key, (String) null);
             }
@@ -280,6 +301,7 @@ public class Scope {
         }
 
         public boolean remove(String key) {
+            change();
             return data.remove(key) != null;
         }
 
@@ -290,6 +312,7 @@ public class Scope {
         }
 
         public void clear() {
+            change();
             data.clear();
         }
 
@@ -381,8 +404,9 @@ public class Scope {
         @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
             try {
+                checkAndParse();
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.directBind(key, null, get(key), type);
+                return (T) Binder.bind(key, type, type, null, data);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
@@ -392,6 +416,7 @@ public class Scope {
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
             try {
+                checkAndParse();
                 return (T) Binder.directBind(key, annotations, get(key), type);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
@@ -449,6 +474,7 @@ public class Scope {
 
         public String urlEncode() {
             checkAndParse();
+            String encoding = Http.Response.current().encoding;
             StringBuilder ue = new StringBuilder();
             for (String key : data.keySet()) {
                 if (key.equals("body")) {
@@ -457,9 +483,9 @@ public class Scope {
                 String[] values = data.get(key);
                 for (String value : values) {
                     try {
-                        ue.append(URLEncoder.encode(key, "utf-8")).append("=").append(URLEncoder.encode(value, "utf-8")).append("&");
+                        ue.append(URLEncoder.encode(key, encoding)).append("=").append(URLEncoder.encode(value, encoding)).append("&");
                     } catch (Exception e) {
-                        Logger.error(e, "Error (utf-8 ?)");
+                        Logger.error(e, "Error (encoding ?)");
                     }
                 }
             }

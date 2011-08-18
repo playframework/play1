@@ -51,7 +51,7 @@ public class Error extends Result {
             Logger.warn(e, "Error page caused an error");
         }
         try {
-            response.out.write(errorHtml.getBytes("utf-8"));
+            response.out.write(errorHtml.getBytes(getEncoding()));
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

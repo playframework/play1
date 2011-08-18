@@ -32,7 +32,7 @@ import play.mvc.Http.Response;
 public class CorePlugin extends PlayPlugin {
 
     /**
-     * Get the appication status
+     * Get the application status
      */
     public static String computeApplicationStatus(boolean json) {
         if (json) {

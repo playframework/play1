@@ -83,4 +83,11 @@
     open('@{WithContinuations.waitWithTimeout()}')
     assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
 
+    open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
+    assertBodyText('1-A-B-C-D-E')
+
+    open('@{WithContinuations.usingRenderArgsAndAwait()}')
+    assertBodyText('true')
+
+
 #{/selenium}

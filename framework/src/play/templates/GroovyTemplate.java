@@ -45,6 +45,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
+import play.mvc.Http;
 import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
@@ -177,12 +178,27 @@ public class GroovyTemplate extends BaseTemplate {
         compiledTemplateName = compiledTemplate.getName();
     }
 
+    @Override
+    public String render(Map<String, Object> args) {
+        try {
+            return super.render(args);
+        } finally {
+            currentTemplate.remove();
+        }
+    }
+
+    @Override
     protected String internalRender(Map<String, Object> args) {
         compile();
         Binding binding = new Binding(args);
         binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
+        // If current response-object is present, add _response_encoding'
+        Http.Response currentResponse = Http.Response.current();
+        if (currentResponse != null) {
+            binding.setVariable("_response_encoding", currentResponse.encoding);
+        }
         StringWriter writer = null;
         Boolean applyLayouts = false;
 
@@ -238,14 +254,25 @@ public class GroovyTemplate extends BaseTemplate {
             if (monitor != null) {
                 monitor.stop();
             }
-            currentTemplate.remove();
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
             layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().internalRender(layoutArgs);
-            return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
+
+            // Must replace '____%LAYOUT%____' inside the string layoutR with the content from writer..
+            final String whatToFind = "____%LAYOUT%____";
+            final int pos = layoutR.indexOf(whatToFind);
+            if (pos >=0) {
+                // prepending and appending directly to writer/buffer to prevent us
+                // from having to duplicate the string.
+                // this makes us use half of the memory!
+                writer.getBuffer().insert(0,layoutR.substring(0,pos));
+                writer.append(layoutR.substring(pos+whatToFind.length()));
+                return writer.toString().trim();
+            }
+            return layoutR;
         }
         if (writer != null) {
             return writer.toString();
@@ -383,7 +410,12 @@ public class GroovyTemplate extends BaseTemplate {
             if (val.length == 1) {
                 return Messages.get(val[0]);
             } else {
-                return Messages.get(val[0], Arrays.copyOfRange(val,1,val.length));
+                // extract args from val
+                Object[] args = new Object[val.length-1];
+                for( int i=1;i<val.length;i++) {
+                    args[i-1] = val[i];
+                }
+                return Messages.get(val[0], args);
             }
         }
 

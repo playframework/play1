@@ -17,7 +17,7 @@ public class JPQL {
     }
 
     public long count(String entity) {
-        return Long.parseLong(em().createQuery("select count(e) from " + entity + " e").getSingleResult().toString());
+        return Long.parseLong(em().createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
     }
 
     public long count(String entity, String query, Object[] params) {
@@ -154,7 +154,7 @@ public class JPQL {
         if (query.trim().length() == 0) {
             return "select count(*) from " + entityName;
         }
-        return "select count(e) from " + entityName + " e where " + query;
+        return "select count(*) from " + entityName + " e where " + query;
     }
 
     @SuppressWarnings("unchecked")

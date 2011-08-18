@@ -26,6 +26,7 @@ import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.I18N;
+import play.mvc.Http;
 import play.templates.BaseTemplate.RawData;
 import play.utils.HTML;
 
@@ -236,7 +237,7 @@ public class JavaExtensions {
 
     public static String urlEncode(String entity) {
         try {
-            return URLEncoder.encode(entity, "UTF-8");
+            return URLEncoder.encode(entity, Http.Response.current().encoding);
         } catch (UnsupportedEncodingException e) {
             Logger.error(e, entity);
         }

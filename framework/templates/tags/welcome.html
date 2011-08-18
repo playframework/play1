@@ -3,8 +3,8 @@
 #{if play.mode.toString() == 'DEV'}
     
 #{set 'moreStyles'}
-	<link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="@{'/public/playmanual/wiki.css'}" type="text/css" media="screen" charset="utf-8">
+	<link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="${_response_encoding}">
+	<link rel="stylesheet" href="@{'/public/playmanual/wiki.css'}" type="text/css" media="screen" charset="${_response_encoding}">
 #{/set}
 
 <div class="wrapper">

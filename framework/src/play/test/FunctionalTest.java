@@ -280,7 +280,9 @@ public abstract class FunctionalTest extends BaseTest {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
             for(Map.Entry<String,Http.Cookie> e : response.cookies.entrySet()) {
-                if(e.getValue().maxAge != null && e.getValue().maxAge > 0) {
+                // If Max-Age is unset, browsers discard on exit; if
+                // 0, they discard immediately.
+                if(e.getValue().maxAge == null || e.getValue().maxAge > 0) {
                     savedCookies.put(e.getKey(), e.getValue());
                 }
             }
@@ -293,6 +295,18 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response makeRequest(final Request request) {
         Response response = newResponse();
         makeRequest(request, response);
+
+        if (response.status == 302) { // redirect
+            // if Location-header is pressent, fix it to "look like" a functional-test-url
+            Http.Header locationHeader = response.headers.get("Location");
+            if (locationHeader != null) {
+                String locationUrl = locationHeader.value();
+                if (locationUrl.startsWith("http://localhost/")) {
+                    locationHeader.values.clear();
+                    locationHeader.values.add( locationUrl.substring(16));//skip 'http://localhost'
+                }
+            }
+        }
         return response;
     }
 
@@ -409,7 +423,7 @@ public abstract class FunctionalTest extends BaseTest {
     public static String getContent(Response response) {
         byte[] data = response.out.toByteArray();
         try {
-            return new String(data, "utf-8");
+            return new String(data, response.encoding);
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }

@@ -2,7 +2,7 @@
 
 #{if request.actionMethod != 'jobdetails'}
 	<div id="search">
-		<form action="@{Application.search()}" method="GET" accept-charset="utf-8">
+		<form action="@{Application.search()}" method="GET" accept-charset="${_response_encoding}">
 			<label for="keywords">Find a job</label>
 			<input type="text" name="by" value="${by}" id="keywords" />
 			&nbsp;

@@ -110,8 +110,9 @@ public class ActionInvoker {
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
 
-            // add parameters from the URI query string 
-            Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            // add parameters from the URI query string
+            String encoding = Http.Request.current().encoding;
+            Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes(encoding))));
             Lang.resolvefrom(request);
 
             // 2. Easy debugging ...
@@ -503,6 +504,8 @@ public class ActionInvoker {
     static final String C = "__continuation";
     static final String A = "__callback";
     static final String F = "__future";
+    static final String CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES = "__CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES";
+    static final String CONTINUATIONS_STORE_RENDER_ARGS = "__CONTINUATIONS_STORE_RENDER_ARGS";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case

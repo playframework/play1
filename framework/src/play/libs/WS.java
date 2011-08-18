@@ -2,10 +2,13 @@ package play.libs;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,12 +22,13 @@ import org.xml.sax.InputSource;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.libs.F.Promise;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.OAuth.TokenPair;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
-import play.libs.F.Promise;
+import play.mvc.Http;
 import play.mvc.Http.Header;
+import play.utils.HTTP;
 import play.utils.NoOpEntityResolver;
 
 import com.google.gson.JsonElement;
@@ -58,12 +62,99 @@ public class WS extends PlayPlugin {
         BASIC, DIGEST, NTLM, KERBEROS, SPNEGO
     }
 
+    /**
+     * Singleton configured with default encoding - this one is used
+     * when calling static method on WS.
+     */
+    private static WSWithEncoding wsWithDefaultEncoding;
+
+    /**
+     * Internal class exposing all the methods previously exposed by WS.
+     * This impl has information about encoding.
+     * When calling original static methos on WS, then a singleton of
+     * WSWithEncoding is called - configured with default encoding.
+     * This makes this encoding-enabling backward compatible
+     */
+    public static class WSWithEncoding {
+        public final String encoding;
+
+        public WSWithEncoding(String encoding) {
+            this.encoding = encoding;
+        }
+
+        /**
+         * Use thos method to get an instance to WS with diferent encoding
+         * @param newEncoding the encoding to use in the communication
+         * @return a new instance of WS with specified encoding
+         */
+        public WSWithEncoding withEncoding(String newEncoding ) {
+            return new WSWithEncoding( newEncoding );
+        }
+
+        /**
+         * URL-encode a string to be used as a query string parameter.
+         * @param part string to encode
+         * @return url-encoded string
+         */
+        public String encode(String part) {
+            try {
+                return URLEncoder.encode(part, encoding);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Build a WebService Request with the given URL.
+         * This object support chaining style programming for adding params, file, headers to requests.
+         * @param url of the request
+         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+         */
+        public WSRequest url(String url) {
+            init();
+            return wsImpl.newRequest(url, encoding);
+        }
+
+        /**
+         * Build a WebService Request with the given URL.
+         * This constructor will format url using params passed in arguments.
+         * This object support chaining style programming for adding params, file, headers to requests.
+         * @param url to format using the given params.
+         * @param params the params passed to format the URL.
+         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+         */
+        public WSRequest url(String url, String... params) {
+            Object[] encodedParams = new String[params.length];
+            for (int i = 0; i < params.length; i++) {
+                encodedParams[i] = encode(params[i]);
+            }
+            return url(String.format(url, encodedParams));
+        }
+
+    }
+
+    /**
+     * Use thos method to get an instance to WS with diferent encoding
+     * @param encoding the encoding to use in the communication
+     * @return a new instance of WS with specified encoding
+     */
+    public static WSWithEncoding withEncoding(String encoding ) {
+        return wsWithDefaultEncoding.withEncoding(encoding);
+    }
+    
     @Override
     public void onApplicationStop() {
         if (wsImpl != null) {
             wsImpl.stop();
             wsImpl = null;
         }
+    }
+
+    @Override
+    public void onApplicationStart() {
+
+        wsWithDefaultEncoding = new WSWithEncoding(Play.defaultWebEncoding);
+
     }
 
     private synchronized static void init() {
@@ -86,17 +177,14 @@ public class WS extends PlayPlugin {
     }
 
     /**
-     * URL-encode an UTF-8 string to be used as a query string parameter.
+     * URL-encode a string to be used as a query string parameter.
      * @param part string to encode
      * @return url-encoded string
      */
     public static String encode(String part) {
-        try {
-            return URLEncoder.encode(part, "utf-8");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return wsWithDefaultEncoding.encode(part);
     }
+
 
     /**
      * Build a WebService Request with the given URL.
@@ -105,8 +193,7 @@ public class WS extends PlayPlugin {
      * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
     public static WSRequest url(String url) {
-        init();
-        return wsImpl.newRequest(url);
+        return wsWithDefaultEncoding.url(url);
     }
 
     /**
@@ -118,27 +205,24 @@ public class WS extends PlayPlugin {
      * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
     public static WSRequest url(String url, String... params) {
-        Object[] encodedParams = new String[params.length];
-        for (int i = 0; i < params.length; i++) {
-            encodedParams[i] = encode(params[i]);
-        }
-        return url(String.format(url, encodedParams));
+        return wsWithDefaultEncoding.url(url, params);
     }
 
     public interface WSImpl {
-        public WSRequest newRequest(String url);
+        public WSRequest newRequest(String url, String encoding);
         public void stop();
     }
 
     public static abstract class WSRequest {
         public String url;
+        public final String encoding;
         public String username;
         public String password;
         public Scheme scheme;
         public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
-        public Map<String, Object> parameters = new HashMap<String, Object>();
+        public Map<String, Object> parameters = new LinkedHashMap<String, Object>();
         public String mimeType;
         public boolean followRedirects = true;
         /**
@@ -147,12 +231,16 @@ public class WS extends PlayPlugin {
         public Integer timeout = 60;
 
         public ServiceInfo oauthInfo = null;
-        public TokenPair oauthTokens = null;
+        public String oauthToken = null;
+        public String oauthSecret = null;
 
-        public WSRequest() {}
+        public WSRequest() {
+            this.encoding = Play.defaultWebEncoding;
+        }
 
-        public WSRequest(String url) {
+        public WSRequest(String url, String encoding) {
             this.url = url;
+            this.encoding = encoding;
         }
 
         /**
@@ -195,10 +283,16 @@ public class WS extends PlayPlugin {
          * Sign the request for do a call to a server protected by oauth
          * @return the WSRequest for chaining.
          */
-        public WSRequest oauth(ServiceInfo oauthInfo, TokenPair oauthTokens) {
+        public WSRequest oauth(ServiceInfo oauthInfo, String token, String secret) {
             this.oauthInfo = oauthInfo;
-            this.oauthTokens = oauthTokens;
+            this.oauthToken = token;
+            this.oauthSecret = secret;
             return this;
+        }
+
+        @Deprecated
+        public WSRequest oauth(ServiceInfo oauthInfo, OAuth.TokenPair oauthTokens) {
+            return this.oauth(oauthInfo, oauthTokens.token, oauthTokens.secret);
         }
 
         /**
@@ -365,9 +459,17 @@ public class WS extends PlayPlugin {
         public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
-
+        
         protected String basicAuthHeader() {
             return  "Basic " + Codec.encodeBASE64(this.username + ":" + this.password);
+        }
+
+        protected String encode(String part) {
+            try {
+                return URLEncoder.encode(part, encoding);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         protected String createQueryString() {
@@ -397,7 +499,7 @@ public class WS extends PlayPlugin {
             return sb.toString();
         }
 
-    };
+    }
 
     public static class FileParam {
         public File file;
@@ -422,6 +524,8 @@ public class WS extends PlayPlugin {
      */
     public static abstract class HttpResponse {
 
+        private String _encoding = null;
+
         /**
          * the HTTP status code
          * @return the status code of the http response
@@ -429,11 +533,40 @@ public class WS extends PlayPlugin {
         public abstract Integer getStatus();
 
         /**
+         * @return true if the status code is 20x, false otherwise
+         */
+        public boolean success() {
+            return Http.StatusCode.success(this.getStatus());
+        }
+
+        /**
          * The http response content type
          * @return the content type of the http response
          */
         public String getContentType() {
             return getHeader("content-type");
+        }
+
+        public String getEncoding() {
+            // Have we already parsed it?
+            if( _encoding != null ) {
+                return _encoding;
+            }
+
+            // no! must parse it and remember
+            String contentType = getContentType();
+            if( contentType == null ) {
+                _encoding = Play.defaultWebEncoding;
+            } else {
+                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( contentType );
+                if( contentTypeEncoding.encoding == null ) {
+                    _encoding = Play.defaultWebEncoding;
+                } else {
+                    _encoding = contentTypeEncoding.encoding;
+                }
+            }
+            return _encoding;
+
         }
 
         public abstract String getHeader(String key);
@@ -445,7 +578,7 @@ public class WS extends PlayPlugin {
          * @return a DOM document
          */
         public Document getXml() {
-            return getXml("UTF-8");
+            return getXml( getEncoding() );
         }
 
         /**
@@ -470,8 +603,18 @@ public class WS extends PlayPlugin {
          * @return the body of the http response
          */
         public String getString() {
-            return IO.readContentAsString(getStream());
+            return IO.readContentAsString(getStream(), getEncoding());
         }
+
+        /**
+         * get the response body as a string
+         * @param encoding string charset encoding
+         * @return the body of the http response
+         */
+        public String getString(String encoding) {
+            return IO.readContentAsString(getStream(), encoding);
+        }
+
 
         /**
          * Parse the response string as a query string.
@@ -496,7 +639,7 @@ public class WS extends PlayPlugin {
         public abstract InputStream getStream();
 
         /**
-         * get the response body as a {@link com.google.gson.JSONObject}
+         * get the response body as a {@link com.google.gson.JsonElement}
          * @return the json response
          */
         public JsonElement getJson() {

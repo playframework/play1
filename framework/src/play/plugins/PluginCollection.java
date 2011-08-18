@@ -318,7 +318,6 @@ public class PluginCollection {
         Play.plugins = Collections.unmodifiableList( getEnabledPlugins() );
     }
 
-
     /**
      * Returns new readonly list of all enabled plugins
      * @return
@@ -343,6 +342,24 @@ public class PluginCollection {
      */
     public boolean isEnabled( PlayPlugin plugin){
         return getEnabledPlugins().contains( plugin );
+    }
+
+    public boolean compileSources() {
+        for( PlayPlugin plugin : getEnabledPlugins() ){
+            if(plugin.compileSources()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean detectClassesChange() {
+        for(PlayPlugin plugin : getEnabledPlugins()){
+            if(plugin.detectClassesChange()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void invocationFinally(){
@@ -439,6 +456,7 @@ public class PluginCollection {
         }
     }
 
+    @Deprecated
     public List<ApplicationClasses.ApplicationClass> onClassesChange(List<ApplicationClasses.ApplicationClass> modified){
         List<ApplicationClasses.ApplicationClass> modifiedWithDependencies = new ArrayList<ApplicationClasses.ApplicationClass>();
         for( PlayPlugin plugin : getEnabledPlugins() ){
@@ -447,7 +465,7 @@ public class PluginCollection {
         return modifiedWithDependencies;
     }
 
-
+    @Deprecated
     public void compileAll(List<ApplicationClasses.ApplicationClass> classes){
         for( PlayPlugin plugin : getEnabledPlugins() ){
             plugin.compileAll(classes);

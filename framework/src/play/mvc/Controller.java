@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Future;
 
 import org.w3c.dom.Document;
@@ -18,6 +19,7 @@ import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.data.binding.Unbinder;
@@ -897,7 +899,56 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     protected static void await(int millis) {
         Request.current().isNew = false;
+        storeOrRestoreDataStateForContinuations(null);
         Continuation.suspend(millis);
+    }
+
+    /**
+     * Used to store data before Continuation suspend and restore after.
+     *
+     * If isRestoring == null, the method will try to resolve it.
+     *
+     * important: when using isRestoring == null you have to KNOW that continuation suspend
+     * is going to happen and that this method is called twice for this single
+     * continuation suspend operation for this specific request.
+     *
+     * @param isRestoring true if restoring, false if storing, and null if you don't know
+     */
+    private static void storeOrRestoreDataStateForContinuations(Boolean isRestoring) {
+
+        if (isRestoring==null) {
+            // Sometimes, due to how continuations suspends/restarts the code, we do not
+            // know when calling this method if we're suspending or restoring.
+
+            final String continuationStateKey = "__storeOrRestoreDataStateForContinuations_started";
+            if ( Http.Request.current().args.remove(continuationStateKey)!=null ) {
+                isRestoring = true;
+            } else {
+                Http.Request.current().args.put(continuationStateKey, true);
+                isRestoring = false;
+            }
+        }
+
+        if (isRestoring) {
+            //we are restoring after suspend
+
+            // localVariablesState
+            Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
+            LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.setLocalVariablesStateAfterAwait(localVariablesState);
+
+            // renderArgs
+            Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+            Scope.RenderArgs.current.set( renderArgs);
+
+        } else {
+            // we are storing before suspend
+
+            // localVariablesState
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES, LocalVariablesNamesTracer.getLocalVariablesStateBeforeAwait());
+
+            // renderArgs
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+        }
     }
 
     protected static void await(int millis, F.Action0 callback) {
@@ -908,6 +959,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
+
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);
         } else if(Request.current().args.containsKey(ActionInvoker.F)) {
@@ -917,8 +969,10 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             StackRecorder.get().isRestoring = false;
             StackRecorder.get().value = null;
             future = (Future<T>)Request.current().args.get(ActionInvoker.F);
+
             // Now reset the Controller invocation context
             ControllerInstrumentation.stopActionCall();
+            storeOrRestoreDataStateForContinuations( true );
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
@@ -931,6 +985,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
         } else {
             Request.current().isNew = false;
+            storeOrRestoreDataStateForContinuations( false );
             Continuation.suspend(future);
             return null;
         }
