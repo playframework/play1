@@ -303,6 +303,26 @@ repositories:
 
 Note: don't forget to run @play dependencies myplayapp@.
 
+
+h3. Custom ivy settings
+
+Play is using Ivy under the hood. If you require a special configuration such as setting a proxy, basic authentication for an internal maven nexus repository, you can edit the ivysettings.xml file. It is located in the .ivy2 folder in your home directory.
+
+bc. Example1, you want ivy to ignore checksums:
+# .ivy2/ivysettings.xml
+<ivysettings>
+  <property name="ivy.checksums" value=""/>
+</ivysettings>
+
+bc. Example2, you want to use basic auth:
+# .ivy2/ivysettings.xml
+<ivysettings>
+  <credentials host="maven-repo.xxx" realm="Sonatype Nexus Repository Manager" username="user" passwd="reallygreatpassword"/>
+</ivysettings>
+
+
+There are many things you can configure see: http://ant.apache.org/ivy/history/2.1.0/settings.html
+
 p(note). **Continuing the discussion**
 
 Next: %(next)"Database evolutions":evolutions%.
