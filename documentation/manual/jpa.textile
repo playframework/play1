@@ -22,7 +22,7 @@ h2. <a name="transactions">Transaction management</a>
 
 Play will automatically manage transactions for you. It will start a transaction automatically the first time you perform an JPA operation in the HTTP request and commit it when the HTTP response is sent. If your code throws an exception, the transaction will automatically rollback.
 
-If you need to force transaction rollback from the application code, you can use the @JPA.setRollbackOnly()@ method.
+If you need to force transaction rollback from the application code, you can use the @JPA.setRollbackOnly()@ method, which tells JPA not to commit the current transaction.
 
 You can also use annotations to specify how transactions should be handled.
 
