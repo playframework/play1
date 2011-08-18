@@ -133,6 +133,12 @@ Two additional configuration properties let you override default behaviour:
 * "mail.smtp.port":configuration#mail.smtp.port
 
 
+By default, in DEV mode, the e-mail will be printed to the console, while in PROD mode it will be sent to the actual SMTP server. You can change the default behaviour in DEV mode by commenting the following line:
+
+bc. # Default is to use a mock Mailer
+mail.smtp=mock
+
+
 h3. <a name="gmail">Using Gmail</a>
 
 To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.org/modules/playapps, use this configuration: 
