@@ -204,13 +204,30 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.destroyMethod", "close");
         }
 
-        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
+        Matcher m = new jregex.Pattern("^mysql:(//)?(({user}[\\w]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
         if (m.matches()) {
             String user = m.group("user");
             String password = m.group("pwd");
             String name = m.group("name");
+            String host = m.group("host");
             p.put("db.driver", "com.mysql.jdbc.Driver");
-            p.put("db.url", "jdbc:mysql://localhost/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            p.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            if (user != null) {
+                p.put("db.user", user);
+            }
+            if (password != null) {
+                p.put("db.pass", password);
+            }
+        }
+        
+        m = new jregex.Pattern("^postgres:(//)?(({user}[\\w]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
+        if (m.matches()) {
+            String user = m.group("user");
+            String password = m.group("pwd");
+            String name = m.group("name");
+            String host = m.group("host");
+            p.put("db.driver", "org.postgresql.Driver");
+            p.put("db.url", "jdbc:postgresql://" + (host == null ? "localhost" : host) + "/" + name);
             if (user != null) {
                 p.put("db.user", user);
             }
