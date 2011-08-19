@@ -1,0 +1,314 @@
+package play.server;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.stream.ChunkedFile;
+import org.jboss.netty.handler.stream.ChunkedInput;
+import static org.jboss.netty.buffer.ChannelBuffers.*;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
+
+import play.Logger;
+import play.exceptions.UnexpectedException;
+import play.libs.MimeTypes;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+
+public class FileService  {
+
+    public static void serve(File localFile, HttpRequest nettyRequest, HttpResponse nettyResponse, ChannelHandlerContext ctx, Request request, Response response, Channel channel) throws FileNotFoundException {
+        final RandomAccessFile raf = new RandomAccessFile(localFile, "r");
+        try {
+            long fileLength = raf.length();
+            
+            boolean isKeepAlive = HttpHeaders.isKeepAlive(nettyRequest) && nettyRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_1);
+            
+            Logger.trace("keep alive " + isKeepAlive);
+            Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            
+            if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
+                // Add 'Content-Length' header only for a keep-alive connection.
+                Logger.trace("file length " + fileLength);
+                nettyResponse.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(fileLength));
+            }
+
+            nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+
+            // Write the initial line and the header.
+            ChannelFuture writeFuture;
+
+            // Write the content.
+            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
+                ChunkedInput chunkedInput = getChunckedInput(raf, MimeTypes.getContentType(localFile.getName(), "text/plain"), channel, nettyRequest, nettyResponse);
+                channel.write(nettyResponse);
+                writeFuture = channel.write(chunkedInput);
+            } else {
+                writeFuture = channel.write(nettyResponse);
+                raf.close();
+            }
+
+            if (!isKeepAlive) {
+                writeFuture.addListener(ChannelFutureListener.CLOSE);
+            }
+        } catch (Throwable exx) {
+            exx.printStackTrace();
+            try {
+                raf.close();
+            } catch (Throwable ex) { /* Left empty */ }
+            try {
+                ctx.getChannel().close();
+            } catch (Throwable ex) { /* Left empty */ }
+        }
+    }
+    
+    public static ChunkedInput getChunckedInput(RandomAccessFile raf, String contentType, Channel channel, HttpRequest nettyRequest, HttpResponse nettyResponse) throws IOException {
+        if(ByteRangeInput.accepts(nettyRequest)) {
+            ByteRangeInput server = new ByteRangeInput(raf, contentType, nettyRequest);
+            server.prepareNettyResponse(nettyResponse);
+            return server;
+        } else {
+            return new ChunkedFile(raf);
+        }
+    }
+    
+    public static class ByteRangeInput implements ChunkedInput{
+        RandomAccessFile raf;
+        HttpRequest request;
+        int chunkSize = 8096;
+        ByteRange[] byteRanges;
+        int currentByteRange = 0;
+        String contentType;
+        
+        boolean unsatisfiable = false;
+        
+        int fileLength;
+        
+        public ByteRangeInput(File file, String contentType, HttpRequest request) throws FileNotFoundException, IOException {
+            this(new RandomAccessFile(file, "r"), contentType, request);
+        }
+        
+        public ByteRangeInput(RandomAccessFile raf, String contentType, HttpRequest request) throws FileNotFoundException, IOException {
+            this.raf = raf;
+            this.request = request;
+            fileLength = (int) raf.length();
+            initRanges();
+            this.contentType = contentType;
+            Logger.debug("Invoked ByteRangeServer, found byteRanges: %s (with header Range: %s)", Arrays.toString(byteRanges), request.getHeader("range"));
+        }
+        
+        public void prepareNettyResponse(HttpResponse nettyResponse) {
+            nettyResponse.addHeader("Accept-Ranges", "bytes");
+            if(unsatisfiable) {
+                nettyResponse.setStatus(HttpResponseStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+                nettyResponse.setHeader("Content-Range", "bytes " + 0 + "-" + (fileLength-1) + "/" + fileLength);
+                nettyResponse.setHeader("Content-length", 0);
+            } else {
+                nettyResponse.setStatus(HttpResponseStatus.PARTIAL_CONTENT);
+                if(byteRanges.length == 1) {
+                    ByteRange range = byteRanges[0];
+                    nettyResponse.setHeader("Content-Range", "bytes " + range.start + "-" + range.end + "/" + fileLength);
+                } else {
+                    nettyResponse.setHeader("Content-type", "multipart/byteranges; boundary="+DEFAULT_SEPARATOR);
+                }
+                int length = 0;
+                for(ByteRange range: byteRanges) {
+                    length += range.computeTotalLengh();
+                }
+                nettyResponse.setHeader("Content-length", length);
+            }
+        }
+        
+        @Override
+        public Object nextChunk() throws Exception {
+            Logger.trace("FileService nextChunk");
+            try {
+                int count = 0;
+                byte[] buffer = new byte[chunkSize];
+                while(count < chunkSize && currentByteRange < byteRanges.length && byteRanges[currentByteRange] != null) {
+                    if(byteRanges[currentByteRange].remaining() > 0) {
+                        count += byteRanges[currentByteRange].fill(buffer, count);
+                    } else {
+                        currentByteRange++;
+                    }
+                }
+                if(count == 0)
+                    return null;
+                
+                return wrappedBuffer(buffer);
+            } catch (Exception e) {
+                Logger.error(e, "error sending file");
+                throw e;
+            }
+        }
+        
+        @Override
+        public boolean hasNextChunk() throws Exception {
+            Logger.trace("FileService hasNextChunk() : " + (currentByteRange < byteRanges.length && byteRanges[currentByteRange].remaining() > 0));
+            return currentByteRange < byteRanges.length && byteRanges[currentByteRange].remaining() > 0;
+        }
+        
+        @Override
+        public boolean isEndOfInput() throws Exception {
+            return !hasNextChunk();
+        }
+        
+        @Override
+        public void close() throws Exception {
+            raf.close();
+        }
+        
+        public static boolean accepts(HttpRequest request) {
+            return request.containsHeader("range");
+        }
+        
+        private void initRanges() {
+            try {
+                String headerValue = request.getHeader("range").trim().substring("bytes=".length());
+                String[] rangesValues = headerValue.split(",");
+                ArrayList<int[]> ranges = new ArrayList<int[]>(rangesValues.length);
+                for(int i = 0; i < rangesValues.length; i++) {
+                    String rangeValue = rangesValues[i];
+                    int start, end;
+                    if(rangeValue.startsWith("-")) {
+                        end = fileLength - 1;
+                        start = fileLength - 1 - Integer.parseInt(rangeValue.substring("-".length()));
+                    } else {
+                        String[] range = rangeValue.split("-");
+                        start = Integer.parseInt(range[0]);
+                        end = range.length > 1 ? Integer.parseInt(range[1]) : fileLength - 1;
+                    }
+                    if(end > fileLength - 1)
+                        end = fileLength - 1;
+                    if(start <= end)
+                        ranges.add(new int[] { start, end });
+                }
+                int[][] reducedRanges = reduceRanges(ranges.toArray(new int[0][]));
+                ByteRange[] byteRanges = new ByteRange[reducedRanges.length];
+                for(int i = 0; i < reducedRanges.length; i++) {
+                    int[] range = reducedRanges[i];
+                    byteRanges[i] = new ByteRange(range[0], range[1], fileLength, "application/octet-stream", reducedRanges.length > 1);
+                }
+                this.byteRanges = byteRanges;
+                if(this.byteRanges.length == 0)
+                    unsatisfiable = true;
+            } catch (Exception e) {
+                unsatisfiable = true;
+            }
+        }
+        
+        private static boolean rangesIntersect(int[] r1, int[] r2) {
+            return r1[0] >= r2[0] && r1[0] <= r2[1] || r1[1] >= r2[0]
+                    && r1[0] <= r2[1];
+        }
+
+        private static int[] mergeRanges(int[] r1, int[] r2) {
+            return new int[] { r1[0] < r2[0] ? r1[0] : r2[0],
+                    r1[1] > r2[1] ? r1[1] : r2[1] };
+        }
+
+        private static int[][] reduceRanges(int[]... chunks) {
+            if (chunks.length == 0)
+                return new int[0][];
+            int[][] sortedChunks = Arrays.copyOf(chunks, chunks.length);
+            Arrays.sort(sortedChunks, new Comparator<int[]>() {
+                public int compare(int[] t1, int[] t2) {
+                    return new Integer(t1[0]).compareTo(t2[0]);
+                }
+            });
+            ArrayList<int[]> result = new ArrayList<int[]>();
+            result.add(sortedChunks[0]);
+            for (int i = 1; i < sortedChunks.length; i++) {
+                int[] c1 = sortedChunks[i];
+                int[] r1 = result.get(result.size() - 1);
+                if (rangesIntersect(c1, r1)) {
+                    result.set(result.size() - 1, mergeRanges(c1, r1));
+                } else {
+                    result.add(c1);
+                }
+            }
+            return result.toArray(new int[0][]);
+        }
+        
+        private static String makeRangeBodyHeader(String separator, String contentType, int start, int end, int fileLength) {
+            return  "--" + separator + "\r\n" +
+                    "Content-Type: " + contentType + "\r\n" +
+                    "ContentRange: bytes " + start + "-" + end + "/" + fileLength + "\r\n" +
+                    "\r\n";
+        }
+        
+        private class ByteRange {
+            public int start;
+            public int end;
+            public byte[] header;
+            
+            public int length() {
+                return end - start + 1;
+            }
+            public int remaining() {
+                return end - start + 1 - servedRange;
+            }
+            
+            public int computeTotalLengh() {
+                return length() + header.length;
+            }
+            
+            public int servedHeader = 0;
+            public int servedRange = 0;
+            
+            public ByteRange(int start, int end, int fileLength, String contentType, boolean includeHeader) {
+                this.start = start;
+                this.end = end;
+                if(includeHeader) {
+                    header = makeRangeBodyHeader(DEFAULT_SEPARATOR, contentType, start, end, fileLength).getBytes();
+                } else {
+                    header = new byte[0];
+                }
+            }
+            
+            public int fill(byte[] into, int offset) throws IOException {
+                Logger.trace("FileService fill at " + offset);
+                int count = 0;
+                for(; offset < into.length && servedHeader < header.length; offset++, servedHeader++, count++) {
+                    into[offset] = header[servedHeader];
+                }
+                if(offset < into.length) {
+                    try {
+                        raf.seek(start + servedRange);
+                        int maxToRead = remaining() > (into.length - offset) ? (into.length - offset) : remaining();
+                        int read = raf.read(into, offset, maxToRead);
+                        if(read < 0) {
+                            throw new UnexpectedException("error while reading file : no more to read ! length=" + raf.length() + ", seek=" + (start + servedRange));
+                        }
+                        count += read;
+                        servedRange += read;
+                    } catch(IOException e) {
+                        throw new UnexpectedException(e);
+                    }
+                }
+                return count;
+            }
+            
+            @Override
+            public String toString() {
+                return "ByteRange("+start+","+end+")";
+            }
+        }
+        
+        private static final String DEFAULT_SEPARATOR = "$$$THIS_STRING_SEPARATES$$$";
+    }
+}
