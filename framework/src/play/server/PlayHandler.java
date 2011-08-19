@@ -1003,6 +1003,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         public void writeChunk(Object chunk) throws Exception {
+            if (closed) {
+                throw new Exception("Socket closed");
+            }
             byte[] chunkBytes;
             if (chunk instanceof byte[]) {
                 chunkBytes = (byte[])chunk;
