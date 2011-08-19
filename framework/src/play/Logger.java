@@ -15,6 +15,8 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.xml.DOMConfigurator;
+
 import play.exceptions.PlayException;
 
 /**
@@ -54,7 +56,9 @@ public class Logger {
     public static void init() {
         String log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.xml");
         URL log4jConf = Logger.class.getResource(log4jPath);
+        boolean isXMLConfig = true;
         if (log4jConf == null) { // try again with the .properties
+            isXMLConfig = false;
             log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.properties");
             log4jConf = Logger.class.getResource(log4jPath);
         }
@@ -69,8 +73,11 @@ public class Logger {
                 // so it's probably a custom configuration file
                 configuredManually = true;
             }
-
-            PropertyConfigurator.configure(log4jConf);
+            if (isXMLConfig) {
+                DOMConfigurator.configure(log4jConf);
+            } else {
+                PropertyConfigurator.configure(log4jConf);
+            }
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
             if (Play.runingInTestMode()) {
