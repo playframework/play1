@@ -217,6 +217,8 @@ class PlayApplication(object):
             memory = self.readConf('jvm.memory')
             if memory:
                 java_args = java_args + memory.split(' ')
+            elif 'JAVA_OPTS' in os.environ:
+                java_args = java_args + os.environ['JAVA_OPTS'].split(' ')
         if cp_args is None:
             cp_args = self.cp_args()
 
