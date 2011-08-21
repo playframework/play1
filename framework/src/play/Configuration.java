@@ -615,6 +615,29 @@ public class Configuration extends Properties {
 				continue;
 			}
 			
+			// setter
+			final String setterName = toSetterName(key.toString());
+			try {
+				cls.getMethod(setterName, String.class).invoke(object,
+						target.getProperty(key.toString()));
+
+			} catch (NoSuchMethodException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+
+			} catch (InvocationTargetException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+
+			} catch (IllegalArgumentException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+
+			} catch (SecurityException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+
+			} catch (IllegalAccessException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+
+			}
+
 			// public field
 			try {
 				// only public field
@@ -627,29 +650,6 @@ public class Configuration extends Properties {
 			} catch (IllegalAccessException e) {
 				play.Logger.debug("%s %s", e.toString(), e.getMessage());
 			}
-			
-			// setter
-			final String setterName = toSetterName(key.toString());
-			try {
-				cls.getMethod(setterName, String.class).invoke(object, target.getProperty(key.toString()));
-				
-			} catch (NoSuchMethodException e) {
-				play.Logger.debug("%s %s", e.toString(), e.getMessage());
-				
-			} catch (InvocationTargetException e) {
-				play.Logger.debug("%s %s", e.toString(), e.getMessage());
-				
-			} catch (IllegalArgumentException e) {
-				play.Logger.debug("%s %s", e.toString(), e.getMessage());
-				
-			} catch (SecurityException e) {
-				play.Logger.debug("%s %s", e.toString(), e.getMessage());
-				
-			} catch (IllegalAccessException e) {
-				play.Logger.debug("%s %s", e.toString(), e.getMessage());
-				
-			}
-			
 		}
 		return object;
 	}
