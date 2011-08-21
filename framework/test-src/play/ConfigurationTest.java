@@ -106,13 +106,18 @@ public class ConfigurationTest extends Assert {
 	}
 	
 	@Test
-	public void toObject() throws Exception {
+	public void toBeanTest() throws Exception {
 		Configuration conf = new Configuration(getBaseDir(), "configurationTest.conf");
 
-		DBConf dbconf = conf.group("db").toObject(DBConf.class);
+		DBConf dbconf = (DBConf)conf.group("db").toBean(new DBConf());
 		assertEquals("jdbc:mysql:test", dbconf.url);
 		assertEquals("test.Driver", dbconf.driver);
 		assertEquals("sample_user", dbconf.user);
 		assertEquals("mypassword", dbconf.getPass());
+	}
+	
+	@Test
+	public void toSetterNameTest() throws Exception {
+		assertEquals("setPassword", Configuration.toSetterName("password"));
 	}
 }

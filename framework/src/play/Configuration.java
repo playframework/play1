@@ -1,6 +1,8 @@
 package play;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -537,29 +539,83 @@ public class Configuration extends Properties {
 	/**
 	 * create POJO instance having configuration values in their fields
 	 * 
-	 * @param Class of having values written in configuration file. 
-	 * @return instance of class <code>cls</code> has field with value written in configuration file.<br/>
+	 * @param Instance of the bean class.
+	 * @param Class of having values written in configuration file.
+	 * @return An instance of class <code>cls</code> has field with value written in configuration file.<br/>
 	 *         return null if failed to create instance of class <code>cls</code>.
 	 */
-    public <T> T toObject(final Class<T> cls)
-    {
-        try {
-            return toObject(cls, cls.newInstance());
-            
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
-    }
-	
-	public <T> T toObject(final Class<T> cls, T object)
+	public <T> T toBean(T object, final Class<T> cls)
 	{
+		return (T)toBean(object);
+	}
+	
+	/**
+	 * create POJO instance having configuration values in their fields
+	 * 
+	 * @param Class of having values written in configuration file.
+	 * @return An instance has field with value written in configuration file.<br/>
+	 *         return null if failed to create instance of class <code>cls</code>.
+	 */
+	public Object toBean(Object object)
+	{
+		final Class cls = object.getClass();
+		Configuration target = this.hidePrefix();
+		for (final Object key : target.keySet()) {
+			if (key.toString().contains(".")) {
+				// skip recursive definition
+				continue;
+			}
+			
+			// public field
+			try {
+				// only public field
+				cls.getField(key.toString()).set(object, target.getProperty(key.toString()));
+				continue;
+				
+			} catch (NoSuchFieldException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			} catch (IllegalAccessException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+			}
+			
+			// setter
+			final String setterName = toSetterName(key.toString());
+			try {
+				cls.getMethod(setterName, String.class).invoke(object, target.getProperty(key.toString()));
+				
+			} catch (NoSuchMethodException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			} catch (InvocationTargetException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			} catch (IllegalArgumentException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			} catch (SecurityException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			} catch (IllegalAccessException e) {
+				play.Logger.debug("%s %s", e.toString(), e.getMessage());
+				
+			}
+			
+		}
 		return object;
 	}
+	
+	/**
+	 * create setter method name from field name
+	 * 
+	 * @param name of the field
+	 * @return setter method name
+	 */
+	public static String toSetterName(final String field)
+	{
+		if (field == null || field.isEmpty()) {
+			return null;
+		}
+		return "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
+	}
 }
-
