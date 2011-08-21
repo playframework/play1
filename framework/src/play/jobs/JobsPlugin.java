@@ -225,6 +225,35 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
+        
+        List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
+        
+        for (final Class clazz : jobs) {
+            // @OnApplicationStop
+            if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
+                try {
+                    Job<?> job = ((Job<?>) clazz.newInstance());
+                    scheduledJobs.add(job);
+                    job.run();
+                    if (job.wasError) {
+                        if (job.lastException != null) {
+                            throw job.lastException;
+                        }
+                        throw new RuntimeException("@OnApplicationStop Job has failed");
+                    }
+                } catch (InstantiationException e) {
+                    throw new UnexpectedException("Job could not be instantiated", e);
+                } catch (IllegalAccessException e) {
+                    throw new UnexpectedException("Job could not be instantiated", e);
+                } catch (Throwable ex) {
+                    if (ex instanceof PlayException) {
+                        throw (PlayException) ex;
+                    }
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+        
         executor.shutdownNow();
         executor.getQueue().clear();
     }

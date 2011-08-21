@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,7 +118,7 @@ public class DBPlugin extends PlayPlugin {
     }
 
     /**
-     * Needed because DriverManager will not load a driver ouside of the system classloader
+     * Needed because DriverManager will not load a driver outside of the system classloader
      */
     public static class ProxyDriver implements Driver {
 
@@ -125,6 +126,13 @@ public class DBPlugin extends PlayPlugin {
 
         ProxyDriver(Driver d) {
             this.driver = d;
+        }
+
+        /*
+         * JDK 7 compatibility
+         */
+        public Logger getParentLogger() {
+            return null;
         }
 
         public boolean acceptsURL(String u) throws SQLException {

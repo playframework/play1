@@ -399,6 +399,13 @@ public class DBConfig {
             this.driver = d;
         }
 
+        /*
+         * JDK 7 compatibility
+         */
+        public java.util.logging.Logger getParentLogger() {
+            return null;
+        }
+
         public boolean acceptsURL(String u) throws SQLException {
             return this.driver.acceptsURL(u);
         }

@@ -1,24 +1,10 @@
 package play.libs;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -31,8 +17,13 @@ import play.mvc.Http.Header;
 import play.utils.HTTP;
 import play.utils.NoOpEntityResolver;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -245,7 +236,11 @@ public class WS extends PlayPlugin {
         }
 
         public WSRequest(String url, String encoding) {
-            this.url = url;
+            try {
+                this.url = new URI(url).toASCIIString();
+            } catch (Exception e) {
+                this.url = url;
+            }
             this.encoding = encoding;
         }
 

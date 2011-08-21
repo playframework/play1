@@ -16,6 +16,8 @@ GET         /re/{<[A-Z]{2,4}>re}            Application.ok
 GET         /{lucky}/doIt                   Application.showIt
 
 GET         www.zenexity.com/hello          Application.helloZen
+GET         /st%C3%A9phane                  Application.helloSteph
+GET         /hello%20world                  Application.helloWorld
 GET         {clientName}.myApp.com/home     Application.myHomePage
 GET         assets.{_}/images               Application.imagesAssets
 GET         {client}.{_}/dashboard          Application.dashboard
