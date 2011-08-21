@@ -19,7 +19,8 @@ import play.vfs.VirtualFile;
  * 
  * <p>Feature:
  * <ul>
- * <li>keyword resolving is not only system property, other configuration key can be in-line keyword.</li>
+ * <li>keyword resolving is not only system property, other configuration key can be in-line keyword.
+ * and keyword resolving works in other(included) configuration.</li>
  * <li>grouping configurations having same prefix.
  * for example, filtering with prefix 'db' gets configurations their starts with 'db.'.</li>
  * <li>in grouping feature, they can specify sub label.
@@ -80,12 +81,12 @@ public class Configuration extends Properties {
 		try {
 			this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
 		} catch (NullPointerException e) {
-			// DO NOTHING
+			play.Logger.error("Could not load `Play.applicationPath` : %s", e.toString());
 		}
 		try {
 			this.putIfNotExists("play.path", Play.frameworkPath.getAbsolutePath());
 		} catch (NullPointerException e) {
-			// DO NOTHING
+			play.Logger.error("Could not load `Play.frameworkPath` : %s", e.toString());
 		}
 		
 		final String profile = Play.id;
