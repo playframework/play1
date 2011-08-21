@@ -1,7 +1,6 @@
 package play;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,18 +14,39 @@ import play.exceptions.ConfigurationException;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 
+/**
+ * play framework configuration class
+ * 
+ * <p>Feature:
+ * <ul>
+ * <li>keyword resolving is not only system property, other configuration key can be in-line keyword.</li>
+ * <li>grouping configurations having same prefix.
+ * for example, filtering with prefix 'db' gets configurations their starts with 'db.'.</li>
+ * <li>in grouping feature, they can specify sub label.
+ * for example, filtering with prefix 'db' and sub label 'readonly',
+ * gets configurations their starts with 'db[readonly].'.</li>
+ * <li>can create java bean object from configuration.
+ * bean class should have public field or public setter method,
+ * and the configuration having same name with them copies into bean instance.</li>
+ * </ul></p>
+ */
 public class Configuration extends Properties {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+	
+	/** default directory of find configration file */
 	private static final String DEFAULT_BASE_DIR = Configuration.class.getResource("/").getPath();
-//	private static final String DEFAULT_CONF_FILE = "application.conf";
+	
+	/** max count of include file */
 	private static final int MAX_INCLUDE_FILES = 16;
+	
+	/** max count of resolving include and keyword */
+	private static final int MAX_RESOLVE_LOOP_COUNT = 100;
+	
+	/** pattern of profile key */
 	private static final Pattern PROFILE_KEY_PATTERN = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
 	
-	public String id = null;
+	/** set of configuration file already read */
 	private HashSet<String> seenFileNames = new HashSet<String>();
 	
 	/**
@@ -43,10 +63,12 @@ public class Configuration extends Properties {
 	{
 		super();
 	}
+	
 	/**
 	 * Constructor
 	 * 
-	 * @param basedir
+	 * @param VirtualFile instance references root configuration file.
+	 * @throws ConfigurationException
 	 */
 	public Configuration(final VirtualFile file) throws ConfigurationException
 	{
@@ -55,18 +77,28 @@ public class Configuration extends Properties {
 		Logger.debug("loading %s...", file.getName());
 		
 		// Builtin configurations
-//		this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
-//		this.putIfNotExists("play.path", Play.frameworkPath.getAbsolutePath());
+		try {
+			this.putIfNotExists("application.path", Play.applicationPath.getAbsolutePath());
+		} catch (NullPointerException e) {
+			// DO NOTHING
+		}
+		try {
+			this.putIfNotExists("play.path", Play.frameworkPath.getAbsolutePath());
+		} catch (NullPointerException e) {
+			// DO NOTHING
+		}
 		
 		final String profile = Play.id;
 		try {
 			this.read(file);
-			Logger.debug("loaded %s...", file.getName());
+			Logger.debug("read %s...", file.getName());
 			int preIncludes = 0, postIncludes = 0;
 			int preProfile = 0, postProfile = 0;
-			int loop = 0, maxLoop = 100;
+			int loop = 0;
+			
+			// loops while new configuration keys found
 			do {
-				if (maxLoop < loop++) {
+				if (MAX_RESOLVE_LOOP_COUNT < loop++) {
 					throw new RuntimeException("Too many configuration loops occurred.");
 				}
 				
@@ -75,8 +107,8 @@ public class Configuration extends Properties {
 				preIncludes = findIncludeKeys().size();
 				
 				// resolve
-				detectProfile(profile);
-				detectInclude();
+				resolveProfile(profile);
+				resolveInclude();
 
 				// count again
 				postProfile = findProfileKeys(profile).size();
@@ -89,8 +121,6 @@ public class Configuration extends Properties {
 			
 			// Keyword
 			resolveKeyword();
-			
-			// DEBUG
 			Logger.debug("Configuration -> filename:%s, profile:%s, includes:%d files.",
 					file.getName(),
 					profile,
@@ -130,7 +160,9 @@ public class Configuration extends Properties {
 	
 	/**
 	 * Construct from conf file.
-	 * @param conf
+	 * 
+	 * @param VirtualFile instance references parent directory of configuration file
+	 * @param file name of configuration file
 	 */
 	public Configuration(VirtualFile basedir, final String filename) throws ConfigurationException	{
 		this(basedir.child(filename));
@@ -152,9 +184,9 @@ public class Configuration extends Properties {
 	    // without next "." character
 	    final int len = this.prefix.length() + 1;
 	    for (final Object key : keySet()) {
-	    	Logger.warn("prefix:%s key:%s", this.prefix, key);
 	    	if (key.toString().equals(this.prefix)) {
 	    		result.put("", getProperty(key.toString()));
+	    		
 	    	} else {
 	    		result.put(key.toString().substring(len), getProperty(key.toString()));
 	    	}
@@ -186,14 +218,16 @@ public class Configuration extends Properties {
 	 * <p>For example, DB connection settings can define like below.
 	 * <pre>db.url=jdbc://localhost/test
 	 * db[readonly].url=jdbc://localhost/test?readonly=true</pre>
+	 * this settings have sub label `readonly` with prefix `db`.
 	 * </p>
 	 */
 	public static class SubLabel
 	{
 		/**
+		 * building sub label key prefix
 		 * 
-		 * @param subLabel
-		 * @return
+		 * @param subLabel sub label
+		 * @return result string
 		 */
 		public static String format(final String subLabel)
 		{
@@ -201,11 +235,11 @@ public class Configuration extends Properties {
 		}
 		
 		/**
-		 * building sub-label key prefix
+		 * building sub label key prefix
 		 * 
-		 * @param key
-		 * @param subLabel
-		 * @return build result string
+		 * @param key main label
+		 * @param subLabel sub label
+		 * @return result string
 		 */
 		public static String format(final String key, final String subLabel)
 		{
@@ -213,9 +247,10 @@ public class Configuration extends Properties {
 		}
 		
 		/**
+		 * is this key having sub label?
 		 * 
-		 * @param key
-		 * @return
+		 * @param key the original key string
+		 * @return true:exists false:not exists
 		 */
 		public static boolean exists(final String key)
 		{
@@ -223,11 +258,11 @@ public class Configuration extends Properties {
 		}
 		
 		/**
-		 * is this key having sublabel?
+		 * is this key having sub label?
 		 * 
-		 * @param key
-		 * @param prefix
-		 * @return
+		 * @param key the original key string
+		 * @param prefix main label string
+		 * @return true:exists false:not exists
 		 */
 		public static boolean exists(final String key, final String prefix)
 		{
@@ -235,9 +270,10 @@ public class Configuration extends Properties {
 		}
 		
 		/**
+		 * split sub label from key string without main label
 		 * 
-		 * @param key
-		 * @return
+		 * @param key the original key string
+		 * @return only sub label string
 		 */
 		public static String get(final String key)
 		{
@@ -245,10 +281,11 @@ public class Configuration extends Properties {
 		}
 		
 		/**
+		 * split sub label from key string
 		 * 
-		 * @param key
-		 * @param prefix
-		 * @return
+		 * @param key the original key string
+		 * @param prefix main label string
+		 * @return only sub label string
 		 */
 		public static String get(final String key, final String prefix)
 		{
@@ -265,8 +302,8 @@ public class Configuration extends Properties {
 	/**
 	 * filtering specified group prefix
 	 * 
-	 * @param prefix
-	 * @return
+	 * @param prefix main label
+	 * @return new Configuration instance having the prefix
 	 */
 	public Configuration group(final String prefix)
 	{
@@ -279,7 +316,7 @@ public class Configuration extends Properties {
 	    Configuration result = new Configuration();
 	    result.prefix = this.prefix;
 	    final String _prefix = result.pushPrefix(prefix);
-	    Logger.info("New configuration prefix is %s.", result.prefix);
+	    Logger.debug("New configuration prefix is %s.", result.prefix);
         for (final Object key : keySet()) {
         	final String _key = key.toString();
             if (_key.equals(_prefix)
@@ -300,9 +337,9 @@ public class Configuration extends Properties {
 	/**
 	 * filtering group with sub-label
 	 * 
-	 * @param prefix
-	 * @param subLabel
-	 * @return
+	 * @param prefix main label
+	 * @param subLabel sub label
+	 * @return new Configuration instance having the prefix and sublabel
 	 */
 	public Configuration group(final String prefix, final String subLabel)
 	{
@@ -310,8 +347,9 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * get list of sublabel
 	 * 
-	 * @return
+	 * @return list of sublabel in current grouping
 	 */
 	public List<String> getSubLables()
 	{
@@ -319,9 +357,10 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * filter with value
 	 * 
-	 * @param pattern
-	 * @return
+	 * @param pattern Regex pattern string of filter
+	 * @return new Configuration instance having matches the pattern
 	 */
 	public Configuration filterValue(final String pattern)
     {
@@ -343,9 +382,10 @@ public class Configuration extends Properties {
     }
 	
 	/**
+	 * filter with value
 	 * 
-	 * @param pattern
-	 * @return
+	 * @param pattern Regex pattern of filter
+	 * @return new Configuration instance having matches the pattern
 	 */
     public Configuration filterValue(final Pattern pattern)
     {
@@ -365,22 +405,27 @@ public class Configuration extends Properties {
 	/**
 	 * Read a configuration file
 	 * 
-	 * @param filename
+	 * @param file VirtualFile instance references configuration file
 	 */
-	public void read(final VirtualFile filename)
+	public void read(final VirtualFile file)
 	{
-		if (checkIfAlreadyLoaded(filename.getName())) {
-			Logger.debug("config file %s has been already loaded", filename);
+		if (checkIfAlreadyLoaded(file.getName())) {
+			Logger.debug("config file %s has been already loaded", file);
 			return;
 		}
 
-		seenFileNames.add(filename.getName());
-		this.read(IO.readUtf8Properties(filename.inputstream()));
+		seenFileNames.add(file.getName());
+		this.read(IO.readUtf8Properties(file.inputstream()));
 	}
 	
 	/**
+	 * get property with blank key
 	 * 
-	 * @return
+	 * when excuted group() and hidePrefix(), configuration has no key name
+	 * if that has just same name with group() parameter.
+	 * this method is for it.
+	 * 
+	 * @return root configuration value
 	 */
 	public Object getProperty()
 	{
@@ -404,9 +449,10 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * put value if the key has not exists
 	 * 
-	 * @param key
-	 * @param value
+	 * @param key configuration key
+	 * @param value configuration value
 	 */
 	public void putIfNotExists(final Object key, final Object value)
 	{
@@ -416,8 +462,9 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * get list of configuration include definition
 	 * 
-	 * @return
+	 * @return keys starts with "@include."
 	 */
 	private Set<Object> findIncludeKeys()
 	{
@@ -425,9 +472,9 @@ public class Configuration extends Properties {
 	}
 	
 	/**
-	 * 
+	 * process configuration include
 	 */
-	private void detectInclude()
+	private void resolveInclude()
 	{
 		Set<Object> keys = findIncludeKeys();
         for (final Object key : keys) {
@@ -450,11 +497,11 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * count profiled keys
 	 * 
-	 * @param id
-	 * @return
+	 * @param id playframework application profile
+	 * @return the count of keys having same profile with param.
 	 */
-	@Deprecated
 	private HashSet<String> findProfileKeys(final String id)
 	{
 		HashSet<String> keys = new HashSet<String>();
@@ -477,10 +524,11 @@ public class Configuration extends Properties {
 	}
 	
 	/**
+	 * process the profiled keys
 	 * 
-	 * @param id
+	 * @param id playframework application profile
 	 */
-	private void detectProfile(final String id)
+	private void resolveProfile(final String id)
 	{
         for (final Object key : this.keySet()) {
             Matcher matcher = PROFILE_KEY_PATTERN.matcher(key.toString());
@@ -491,6 +539,13 @@ public class Configuration extends Properties {
 	}
 
 	/**
+	 * replace keyword in configuration values
+	 * 
+	 * <p>replaces keywords written in values with <code>${...}</code> pattern.
+	 * replaceable keywords are the key of loaded configuration key or 
+	 * system property key.</p>
+	 * 
+	 * <p>loaded configuration has higher priority than system property.</p>
 	 * 
 	 * @throws ConfigurationException
 	 */
@@ -504,30 +559,22 @@ public class Configuration extends Properties {
             StringBuffer newValue = new StringBuffer(100);
             while (matcher.find()) {
                 String jp = matcher.group(1);
-                String r;
-                if (jp.equals("application.path")) {
-                    r = Play.applicationPath.getAbsolutePath();
-                
-                } else if (jp.equals("play.path")) {
-                    r = Play.frameworkPath.getAbsolutePath();
-                    
-                } else {
-                	if (this.containsKey(jp)) {
-                		if (key.toString().trim().equals(jp)) {
-                			Logger.fatal("Keyword must not be itself-loop, exit. (%s=%s)", key, value);
-                			throw new ConfigurationException("Self keyword replacement loop occurred.");
-                		}
-                		r = getProperty(jp);
-                		
-                	} else {
-                		Logger.warn("finding system property %s", jp);
-                		r = System.getProperty(jp);
-                		
-                	}
-                    if (r == null) {
-                        Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
-                        continue;
-                    }
+                String r = null;
+            	if (this.containsKey(jp)) {
+            		if (key.toString().trim().equals(jp)) {
+            			Logger.fatal("Keyword must not be itself-loop, exit. (%s=%s)", key, value);
+            			throw new ConfigurationException("Self keyword replacement loop occurred.");
+            		}
+            		r = getProperty(jp);
+            		
+            	} else {
+            		Logger.debug("finding system property %s", jp);
+            		r = System.getProperty(jp);
+            		
+            	}
+                if (r == null) {
+                    Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
+                    continue;
                 }
                 matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
             }
@@ -544,6 +591,7 @@ public class Configuration extends Properties {
 	 * @return An instance of class <code>cls</code> has field with value written in configuration file.<br/>
 	 *         return null if failed to create instance of class <code>cls</code>.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T toBean(T object, final Class<T> cls)
 	{
 		return (T)toBean(object);
@@ -558,7 +606,7 @@ public class Configuration extends Properties {
 	 */
 	public Object toBean(Object object)
 	{
-		final Class cls = object.getClass();
+		final Class<?> cls = object.getClass();
 		Configuration target = this.hidePrefix();
 		for (final Object key : target.keySet()) {
 			if (key.toString().contains(".")) {
