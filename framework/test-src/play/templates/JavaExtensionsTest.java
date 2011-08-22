@@ -1,6 +1,7 @@
 package play.templates;
 
 import static org.junit.Assert.*;
+import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +31,44 @@ public class JavaExtensionsTest {
     public void tearDown() throws Exception {
     }
 
-    //TODO @Test public void testEnumValues()  {}
+    //Trivial no test @Test public void testEnumValues()  {}
 
-    //TODO @Test public void testContains()  {}
+    @Test 
+    public void testContains()  {
+        String[] testArray = {"a", "b", "c"};
+        assertTrue(JavaExtensions.contains(testArray, "a"));
+        assertFalse(JavaExtensions.contains(testArray, "1"));
+    }
 
     //TODO @Test public void testAsXml()  {}
 
-    //TODO @Test public void testAdd()  {}
+    @Test 
+    public void testAdd()  {
+        String[] testArray = {"a", "b", "c"};
+        assertThat(JavaExtensions.add(new String[]{"a", "b"}, "c")).hasSize(3).contains(testArray);
+        
+    }
 
-    //TODO @Test public void testRemove()  {}
+    @Test 
+    public void testRemove()  {
+        String[] testArray = {"a", "b", "c"};
+        assertThat(JavaExtensions.remove(testArray, "c")).hasSize(2).contains("a", "b");
+    }
 
     //TODO @Test public void testToStringClosure()  {}
 
-    //TODO @Test public void testCapitalizeWords()  {}
+    @Test 
+    public void testCapitalizeWords()  {
+        assertThat(JavaExtensions.capitalizeWords("This is a small   test!")).as("This Is A Small  Test!");
+    }
 
-    //TODO @Test public void testPad()  {}
+    @Test 
+    public void testPad()  {
+        assertThat(JavaExtensions.pad("12345", 4)).as("12345");
+        assertThat(JavaExtensions.pad("12345", 5)).as("12345");
+        assertThat(JavaExtensions.pad("12345", 6)).as("12345&nbsp;");
+        assertThat(JavaExtensions.pad("12345", 8)).as("12345&nbsp;&nbsp;&nbsp;");
+    }
 
     //TODO @Test public void testEscapeHtml()  {}
 
@@ -170,10 +194,44 @@ public class JavaExtensionsTest {
 
     //TODO @Test public void testCamelCase()  {}
 
-    //TODO @Test public void testYesno()  {}
+    @Test 
+    public void testYesno()  {
+        String yes = "Y";
+        String no = "N";
+        String[] yesNo = {yes, no};
+        assertEquals(no, JavaExtensions.yesno(null, yesNo));
+        assertEquals(no, JavaExtensions.yesno(Boolean.FALSE, yesNo));
+        assertEquals(yes, JavaExtensions.yesno(Boolean.TRUE, yesNo));
+        //String
+        assertEquals(no, JavaExtensions.yesno("", yesNo));
+        assertEquals(yes, JavaExtensions.yesno("Test", yesNo));
+        //Number
+        assertEquals(no, JavaExtensions.yesno(Long.valueOf(0), yesNo));
+        assertEquals(yes, JavaExtensions.yesno(Long.valueOf(1), yesNo));
+        assertEquals(yes, JavaExtensions.yesno(Long.valueOf(-1), yesNo));
+        //Collection
+        List <String> testCollection = new ArrayList <String>();
+        assertEquals(no, JavaExtensions.yesno(testCollection, yesNo));
+        testCollection.add("1");
+        assertEquals(yes, JavaExtensions.yesno(testCollection, yesNo));
+        
+    }
 
-    //TODO @Test public void testLast()  {}
+    @Test 
+    public void testLast()  {
+        List <String> testCollection = new ArrayList <String>();
+        testCollection.add("1");
+        testCollection.add("2");
+        assertEquals("2", JavaExtensions.last(testCollection));
+    }
 
-    //TODO @Test public void testJoin()  {}
+    @Test 
+    public void testJoin()  {
+        List <String> testCollection = new ArrayList <String>();
+        testCollection.add("1");
+        testCollection.add("2");
+        
+        assertEquals("1, 2", JavaExtensions.join(testCollection, ", "));
+    }
 
 }
