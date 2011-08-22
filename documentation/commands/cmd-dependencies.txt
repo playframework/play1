@@ -42,3 +42,6 @@
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
 ~
+~ --clearcache:
+~ Clear the ivy cache (equivalent to rm -r ~/.ivy2/cache)
+~

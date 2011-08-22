@@ -1,9 +1,12 @@
 package play.deps;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.cache.DefaultRepositoryCacheManager;
 import org.apache.ivy.core.cache.RepositoryCacheManager;
@@ -17,6 +20,7 @@ import org.apache.ivy.plugins.parser.ModuleDescriptorParserRegistry;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.FilterHelper;
+
 import play.libs.Files;
 import play.libs.IO;
 
@@ -263,15 +267,34 @@ public class DependenciesManager {
             return null;
         }
 
-        System.out.println("~ Resolving dependencies using " + ivyModule.getAbsolutePath() + ",");
-        System.out.println("~");
 
         // Variables
         System.setProperty("play.path", framework.getAbsolutePath());
-
+        
         // Ivy
         Ivy ivy = configure();
 
+        // Clear the cache
+        boolean clearcache = System.getProperty("clearcache") != null;
+        if(clearcache){
+           System.out.println("~ Clearing cache : " + ivy.getResolutionCacheManager().getResolutionCacheRoot() + ",");
+           System.out.println("~");
+           try{
+      		   FileUtils.deleteDirectory(ivy.getResolutionCacheManager().getResolutionCacheRoot());
+      		   System.out.println("~       Clear");
+           }catch(IOException e){
+        	   System.out.println("~       Could not clear");
+        	   System.out.println("~ ");
+        	   e.printStackTrace();
+             }
+
+           System.out.println("~");
+         }
+        
+
+        System.out.println("~ Resolving dependencies using " + ivyModule.getAbsolutePath() + ",");
+        System.out.println("~");
+        
         // Resolve
         ResolveEngine resolveEngine = ivy.getResolveEngine();
         ResolveOptions resolveOptions = new ResolveOptions();
