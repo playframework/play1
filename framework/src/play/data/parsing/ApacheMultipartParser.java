@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FileCleaningTracker;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
 import play.Logger;
 import play.Play;
@@ -142,7 +143,7 @@ public class ApacheMultipartParser extends DataParser {
             this.fieldName = stream.getFieldName();
             this.contentType = stream.getContentType();
             this.isFormField = stream.isFormField();
-            this.fileName = stream.getName();
+            this.fileName = FilenameUtils.getName(stream.getName());
             this.sizeThreshold = Integer.parseInt(Play.configuration.getProperty("upload.threshold", "10240"));
             this.repository = null;
         }

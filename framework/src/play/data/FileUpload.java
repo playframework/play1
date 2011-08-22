@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import play.Logger;
 import play.data.parsing.TempFilePlugin;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
@@ -21,9 +24,13 @@ public class FileUpload implements Upload {
 
     public FileUpload(FileItem fileItem) {
         this.fileItem = fileItem;
-        defaultFile = new File(TempFilePlugin.createTempFolder(), fileItem.getFieldName() + File.separator + fileItem.getName());
-        defaultFile.getParentFile().mkdirs();
+        File tmp = TempFilePlugin.createTempFolder();
+        defaultFile = new File(tmp, FilenameUtils.getName(fileItem.getFieldName()) + File.separator + FilenameUtils.getName(fileItem.getName()));
         try {
+            if(!defaultFile.getCanonicalPath().startsWith(tmp.getCanonicalPath())) {
+                throw new IOException("Temp file try to override existing file?");
+            }
+            defaultFile.getParentFile().mkdirs();
             fileItem.write(defaultFile);
         } catch (Exception e) {
             throw new IllegalStateException("Error when trying to write to file " + defaultFile.getAbsolutePath(), e);

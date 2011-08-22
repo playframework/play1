@@ -89,6 +89,7 @@ public class Files {
 
     public static void unzip(File from, File to) {
         try {
+            String outDir = to.getCanonicalPath();
             ZipFile zipFile = new ZipFile(from);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
@@ -98,6 +99,9 @@ public class Files {
                     continue;
                 }
                 File f = new File(to, entry.getName());
+                if(!f.getCanonicalPath().startsWith(outDir)) {
+                    throw new IOException("Corrupted zip file");
+                }
                 f.getParentFile().mkdirs();
                 FileOutputStream os = new FileOutputStream(f);
                 IO.copy(zipFile.getInputStream(entry), os);
