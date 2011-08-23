@@ -81,7 +81,7 @@ The @play.libs.F@ library provide several useful constructs coming from function
 
 h3. @Option<T>@, @Some<T>@ and @None<T>@
 
-When you write a function that may not return a result (e.g. a @find@ method), a common (bad) Java pattern is to return @null@ when there is no result. This practice is dangerous because the function return type does not clearly shows that it may not return an object and it has been recognized by the nullable references inventor to be a "“billion-dollar mistake”":http://en.wikipedia.org/wiki/Pointer_(computing)#Null_pointer.
+When you write a function that may not return a result in some cases (e.g. a @find@ method), a common (bad) Java pattern is to return @null@ when there is no result. This practice is dangerous because the function return type does not clearly shows that it may not return an object and it has been recognized by the nullable references inventor to be a "“billion-dollar mistake”":http://en.wikipedia.org/wiki/Pointer_(computing)#Null_pointer.
 @Option<T>@ is an elegant solution to this problem: instead of returning an object of type @T@, the function returns an @Option<T>@. If the function succeeds, it returns an object of type @Some<T>@ (wrapping the real result), otherwise an object of type @None<T>@, which both are subtypes of @Option<T>@.
 Here is an example:
 
@@ -110,7 +110,7 @@ The body of the for loop is be executed once, only if the @div@ function succeed
 
 h3. @Tuple<A, B>@
 
-The handy @Tuple<A, B>@ class wraps to objects of type @A@ and @B@. You can retrieve the objects using the @_1@ and @_2@ fields, respectively. For example:
+The handy @Tuple<A, B>@ class wraps two objects of type @A@ and @B@. You can retrieve the objects using the @_1@ and @_2@ fields, respectively. For example:
 
 bc. public Option<Tuple<String, String>> parseEmail(String email) {
     final Matcher matcher = Pattern.compile("(\\w+)@(\\w+)").matcher(email);
