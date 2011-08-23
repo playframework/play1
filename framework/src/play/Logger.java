@@ -25,10 +25,12 @@ public class Logger {
 
     /**
      * Will force use of java.util.logging (default to try log4j first).
+     * @deprecated will be removed with 1.4
      */
     public static boolean forceJuli = false;
     /**
      * Will redirect all log from java.util.logging to log4j.
+     * @deprecated will be removed with 1.4
      */
     public static boolean redirectJuli = false;
     /**
@@ -41,8 +43,10 @@ public class Logger {
     public static org.apache.log4j.Logger log4j;
     /**
      * When using java.util.logging.
+     * @deprecated will be removed with 1.4
      */
     public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
+
     /**
      * true if logger is configured manually (log4j-config file supplied by application)
      */
@@ -113,6 +117,8 @@ public class Logger {
 
     /**
      * Utility method that translayte log4j levels to java.util.logging levels.
+     *      
+     *  @deprecated will be removed with 1.4
      */
     static java.util.logging.Level toJuliLevel(String level) {
         java.util.logging.Level juliLevel = java.util.logging.Level.INFO;
