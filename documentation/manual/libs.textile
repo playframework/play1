@@ -79,17 +79,55 @@ The @play.libs.F@ library provide several useful constructs coming from function
 * @Either<A,B>@ (contains either a A value or a B value)
 * @Tuple<A,B>@ (contains both A and B values)
 
-h3. Promises
+h3. @Option<T>@, @Some<T>@ and @None<T>@
 
-A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
+When you write a function that may not return a result (e.g. a @find@ method), a common (bad) Java pattern is to return @null@ when there is no result. This practice is dangerous because the function return type does not clearly shows that it may not return an object and it has been recognized by the nullable references inventor to be a "“billion-dollar mistake”":http://en.wikipedia.org/wiki/Pointer_(computing)#Null_pointer.
+@Option<T>@ is an elegant solution to this problem: instead of returning an object of type @T@, the function returns an @Option<T>@. If the function succeeds, it returns an object of type @Some<T>@ (wrapping the real result), otherwise an object of type @None<T>@, which both are subtypes of @Option<T>@.
+Here is an example:
 
-@Promise@ instances are used everywhere in Play in place of @Future@ instances (for Jobs, @WS.async@, etc…).
+bc. /* Safe division (will never throw a runtime ArithmeticException) */
+public Option<Double> div(double a, double b) {
+    if (b == 0)
+        return None();
+    else
+        return Some(a / b);
+}
 
-Promises can be combined in several ways. For example:
+Here is a way to use this function:
 
-bc. Promise p = Promise.waitAll(p1, p2, p3)
-Promise p = Promise.waitAny(p1, p2, p3)
-Promise p = Promise.waitEither(p1, p2, p3)
+bc. Option<Double> q = div(42, 5);
+if (q.isDefined()) {
+    Logger.info("q = %s", q.get()); // "q = 8.4"
+}
+
+But there is a more convenient syntax to use it, leveraging the fact that @Option<T>@ implements @Iterable<T>@:
+
+bc. for (double q : div(42, 5)) {
+    Logger.info("q = %s", q); // "q = 8.4"
+}
+
+The body of the for loop is be executed once, only if the @div@ function succeeded.
+
+h3. @Tuple<A, B>@
+
+The handy @Tuple<A, B>@ class wraps to objects of type @A@ and @B@. You can retrieve the objects using the @_1@ and @_2@ fields, respectively. For example:
+
+bc. public Option<Tuple<String, String>> parseEmail(String email) {
+    final Matcher matcher = Pattern.compile("(\\w+)@(\\w+)").matcher(email);
+    if (matcher.matches()) {
+        return Some(Tuple(matcher.group(1), matcher.group(2)));
+    }
+    return None();
+}
+
+Then:
+
+bc. for (Tuple<String, String> email : parseEmail("foo@bar.com")) {
+    Logger.info("name = %s", email._1); // "name = foo"
+    Logger.info("server = %s", email._2); // "server = bar.com"
+}
+
+p(note). The @T2<A, B>@ class is an alias for @Tuple<A, B>@. To handle tuples of 3 elements use the @T3<A, B, C>@ class, and so on up to @T5<A, B, C, D, E>@.
 
 h3. Pattern Matching
 
@@ -115,6 +153,18 @@ bc. for(String s: String.and(StartsWith("command:")).match(o)) {
 }
 
 The for loop is executed once, only if the condition is met, and it automatically extracts the String value without the need for casting. Because there is no explicit cast, everything is type-safe, and checked by the compiler.
+
+h3. Promises
+
+A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
+
+@Promise@ instances are used everywhere in Play in place of @Future@ instances (for Jobs, @WS.async@, etc…).
+
+Promises can be combined in several ways. For example:
+
+bc. Promise p = Promise.waitAll(p1, p2, p3)
+Promise p = Promise.waitAny(p1, p2, p3)
+Promise p = Promise.waitEither(p1, p2, p3)
 
 h2. OAuth
 
