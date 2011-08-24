@@ -96,6 +96,9 @@ public class PluginCollection {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
+                    if (line.trim().length() == 0) {
+                        continue;
+                    }
                     String[] infos = line.split(":");
                     PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
 
