@@ -141,6 +141,9 @@ public class PluginCollection {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (line.trim().length() == 0) {
+                        continue;
+                    }
                     String[] lineParts = line.split(":");
                     LoadingPluginInfo info = new LoadingPluginInfo(lineParts[1].trim(), Integer.parseInt(lineParts[0]), url);
                     pluginsToLoad.add(info);
