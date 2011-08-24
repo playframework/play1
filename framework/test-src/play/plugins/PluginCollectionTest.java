@@ -47,6 +47,33 @@ public class PluginCollectionTest {
     }
 
     @Test
+    public void verifyLoadingFromFilesWithBlankLines() throws Exception {
+        //verify that only application specific plugins gets reloaded
+        new PlayBuilder().build();
+
+        //create custom PluginCollection that fakes that TestPlugin is application plugin
+        PluginCollection pc = new PluginCollection(){
+            @Override
+            protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
+                //return true only if This is our TestPlugin
+                return plugin.getClass().equals( TestPlugin.class);
+            }
+        };
+        //make sure we load custom play.plugins-file
+        pc.play_plugins_resourceName = "play/plugins/custom-play-with-blank-lines.plugins";
+
+        pc.loadPlugins();
+
+        PlayPlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
+        PlayPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
+
+        assertThat(pc.getAllPlugins()).containsExactly(
+                corePlugin_first_instance,
+                testPlugin_first_instance);
+
+    }
+
+    @Test
     public void verifyReloading() throws Exception{
         //verify that only application specific plugins gets reloaded
         new PlayBuilder().build();
