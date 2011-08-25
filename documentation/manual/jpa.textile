@@ -278,22 +278,6 @@ bc. for(Post p : Post.<Post>findAll()) {
 }
 
 
-h2. <a name="multiple">Using JPA with multiple databases</a>
-
-You can configure Play to use multiple databases, as described in the "model":model#multiple section.
-
-When creating Entity and Model classes for databases other than the default, you have to annotate the Class with <code>@PersistenceUnit(name="other")</code>. In this case ‘other’ corresponds to the DB config name ‘other’ (See Model-documentation for more info).
-
-You can use @package-info.java@ and annotate the package with <code>@PersistenceUnit</code> to enforce a specific JPA configuration to all entity-classes in the Java package.
-
-If you need to specify special Hibernate configuration parameters for non-default JPA configurations, you must prefix the @hibernate.@ settings in application.conf with ‘db_configName.’, eg. @db_other.hibernate.some.special.setting=true@.
-
-When executing methods on the Entity classes and objects, Play automatically uses the correct database configuration, but if you like you can access it with code:
-
-bc. EntityManager em = JPA.getJPAConfig("other").em();
-
-@JPA.getJPAConfig(configName)@ returns an object with all the same methods you find in JPA.
-
 p(note). It is important to notice that Play does not support XA (two-phase commits). If you use several different JPA configurations in the same request, **Play will try to commit as many transactions as possible**. If the commit to the first database succeeds and the second commit to the other database fails, the first commit will not get rolled back. Bear this in mind when using multiple JPA configurations in the same request.
 
 p(note). **Continuing the discussion**

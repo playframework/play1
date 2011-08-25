@@ -203,27 +203,6 @@ Product product = Product.findById(2L);
 product.save();
 product.delete();
 
-h3. <a name="multiple">Support for multiple databases</a>
-
-You can configure Play to use multiple (separate) databases.
-
-The default database is configured by configuration parameters in @conf/application.conf@ whose keys start with ‘db.’ (e.g: @db.url@). To configure an additional database, add an underscore and a suffix to the ‘db’ part of the key, like this:
-
-bc. db_other.url=jdbc:mysql://localhost/test
-db_other.driver=com.mysql.jdbc.Driver
-db_other.user=root
-db_other.pass=
-
-This database configuration is now called 'other' in Play. For example, configure JPA for this 'other' configuration like this:
-
-bc. db_other.jpa.dialect=<dialect>
-
-You can then access this configuration from your application’s Java code like this:
-
-bc. Connection conn = DB.getDBConfig("other").getConnection()
-
-@DB.getDBConfig(configName)@ returns an Object with all the methods you usually find as statics methods in the @play.db.DB@ class.
-
 h2. <a name="stateless">Keep the model stateless</a>
 
 Play is designed to operate in a ‘share nothing’ architecture. The idea is to keep the application completely stateless. By doing this you will allow your application to run on as many server nodes as needed at the same time.
