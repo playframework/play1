@@ -1,4 +1,4 @@
-h1. Completing the application tests
+loadModels:h1. Completing the application tests
 
 We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
 
@@ -76,7 +76,7 @@ This test should run without any problem with the yabe application. It just open
 
 However like any complex test, you need to set-up a set of well-known data before navigating the application and testing it. We will of course reuse the fixture concept and the @yabe/test/data.yml@ file that we’ve used before. To import this data set before the test suite, just use the @#{fixture /}@ tag:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     // Open the home page, and check that no error occurred
@@ -89,7 +89,7 @@ Another important thing to check is that we have a fresh user session at the tes
 
 So let’s start our test with a special command:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     clearSession()
@@ -104,7 +104,7 @@ Run it to be sure that there is no mistake. It should be green.
 
 So we can write a more specific test. Open the home page and check that the default posts are present:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium 'Check home page'}
     clearSession()
