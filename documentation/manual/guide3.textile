@@ -100,7 +100,7 @@ bc. #{extends 'main.html' /}
         </div>
     </div>
     
-    #{if olderPosts.size() > 1}
+    #{if olderPosts}
         <div class="older-posts">    
             <h3>Older posts <span class="from">from this blog</span></h3>
         
