@@ -141,4 +141,9 @@
     assertTextPresent('17: http://localhost:9003/application/ok?re=A')
     assertTextPresent('18: http://localhost:9003/re/TITI')
     assertTextPresent('19: http://assets.localhost:9003/images')
+
+
+    open('/client')
+    assertTextPresent('localhost')
+
 #{/selenium}    

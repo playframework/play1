@@ -96,7 +96,7 @@ public class Application extends Controller {
     }
     
     public static void dashboard(String client) {
-        
+        renderText(client);
     }
 
     public static void hello(String name) {
