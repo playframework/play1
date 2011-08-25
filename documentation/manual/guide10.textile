@@ -57,7 +57,7 @@ h2. <a name="selenium">Writing Selenium tests</a>
 
 "Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool thing here is that Selenium allows to run the test suite directly in any existing browser. As it does not use any ‘browser simulator’, you can be sure that you’re testing what your users will use.
 
-A Selenium test suite is typically written as an HTML file. The HTML syntax required by Selenium is a little tedious to write (formatted using an HTML table element). The good news is that Play helps you generate it using the Play template engine and a set of tags that support a simplified syntax for Selenium scenarios. An interesting side effect of using templates is that your are not tied to ‘static scenarios’ any more and you can use the power of Play templates (looping, conditional blocks) to write more complicated tests.
+A Selenium test suite is typically written as an HTML file. The HTML syntax required by Selenium is a little tedious to write (formatted using an HTML table element). The good news is that Play helps you generate it using the Play template engine and a set of tags that support a simplified syntax for Selenium scenarios. An interesting side effect of using templates is that you are not tied to ‘static scenarios’ any more and you can use the power of Play templates (looping, conditional blocks) to write more complicated tests.
 
 p(note). However you can still write plain HTML Selenium syntax in the template and forget the specific Selenium tags if needed. It can become interesting if you use one of the several Selenium tools that generates the test scenarios for you, like "Selenium IDE":http://seleniumhq.org/projects/ide.
 
