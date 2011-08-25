@@ -562,7 +562,7 @@ Methods annotated with the <code>@Before</code> annotation are executed before e
 
 So, to create a security check:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before
     static void checkAuthentification() {
@@ -578,7 +578,7 @@ bc. public class Admin extends Application {
 
 If you don’t want the @Before method to intercept all action calls, you can specify a list of actions to exclude:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before(unless="login")
     static void checkAuthentification() {
@@ -595,7 +595,7 @@ bc. public class Admin extends Application {
 
 Or if you want the @Before method to intercept a list of action calls, you can specify a only param :
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before(only={"login","logout"})
     static void doSomething() {  
@@ -610,7 +610,7 @@ h3. <a name="after">@After</a>
 
 Methods annotated with the <code>@After</code> annotation are executed after each action call for this Controller.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @After
     static void log() {
@@ -629,7 +629,7 @@ h3. <a name="catch">@Catch</a>
 
 Methods annotated with <code>@Catch</code> are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
 	
     @Catch(IllegalStateException.class)
     public static void logIllegalState(Throwable throwable) {
@@ -647,7 +647,7 @@ bc. public class Admin extends Application {
 
 As with normal Java exception handling, you can catch a super-class to catch more exception types. If you have more than one catch method, you can specify their **priority** so that they are executed in order of priority (priority 1 is executed first).
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Catch(value = Throwable.class, priority = 1)
     public static void logThrowable(Throwable throwable) {
@@ -675,7 +675,7 @@ h3. <a name="finally">@Finally</a>
 Methods annotated with the <code>@Finally</code> annotation are always executed after each action call to this Controller.
 @Finally-methods are called both after successful action calls and if an error occurred.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Finally
     static void log() {
@@ -691,7 +691,7 @@ bc. public class Admin extends Application {
 
 If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Finally
     static void log(Throwable e) {
@@ -733,7 +733,7 @@ bc. public class Secure extends Controller {
 And on another Controller:
 
 bc. @With(Secure.class)
-public class Admin extends Application {
+public class Admin extends Controller {
     
     …
 }
