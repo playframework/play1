@@ -179,7 +179,7 @@ bc. <h3>Post a comment</h3>
 
 Note that we reuse the posted parameters to fill the HTML input values.
 
-To make the UI feedback more pleasant for the poster, we will add a little JavaScript to automatically set focus on the comment form in case of an error. As this script uses "JQuery":files/jquery-1.4.2.min.js and "JQuery Tools Expose":files/jquery.tools-1.2.5.toolbox.expose.min.js as support libraries, you have to include them. Download these two libraries to the @yabe/public/javascripts/@ directory and modify the @main.html@ template to include them:
+To make the UI feedback more pleasant for the poster, we will add a little JavaScript to automatically set focus on the comment form in case of an error. As this script uses "JQuery":files/jquery-1.4.2.min.js and "JQuery Tools Expose":http://cdn.jquerytools.org/1.2.5/full/jquery.tools.min.js as support libraries, you have to include them. Download these two libraries to the @yabe/public/javascripts/@ directory and modify the @main.html@ template to include them:
 
 bc. …
     <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}"></script>
