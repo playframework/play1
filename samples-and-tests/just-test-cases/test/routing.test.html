@@ -145,4 +145,9 @@
     assertTextPresent('21: http://localhost:9003/hello%20world')
     assertTextPresent('22: http://localhost:9003/st%C3%A9phane?name=nicola%C3%AFs')
     assertTextPresent('23: http://localhost:9003/hello%20world?name=nicola%C3%AFs')
+
+
+    open('/client')
+    assertTextPresent('localhost')
+
 #{/selenium}    

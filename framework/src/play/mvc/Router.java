@@ -856,7 +856,7 @@ public class Router {
                             // Parse the hostname and get only the part we are interested in
                             String routeValue = hostArg.defaultValue.replaceAll("\\{.*}", "");
                             domain = domain.replace(routeValue, "");
-                            localArgs.put(hostArg.name, host);
+                            localArgs.put(hostArg.name, domain);
                         }
                         localArgs.putAll(staticArgs);
                         return localArgs;
