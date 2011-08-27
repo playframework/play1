@@ -1,8 +1,8 @@
 h1. Adding tagging support
 
-As our blog will contain more posts, it will become more and more difficult to retrieve them. To help classify posts by subjects we will add tagging support. 
+As our blog will contain more posts, it will become more and more difficult to retrieve them. To help classify posts by subject we will add tagging support.
 
-h2. <a>The Tag model object</a>
+h2. <a name="model">The Tag model object</a>
 
 We will add one more object to the blog model definition. The @Tag@ class itself is indeed very simple:
 
@@ -17,19 +17,18 @@ import play.db.jpa.*;
 public class Tag extends Model implements Comparable<Tag> {
  
     public String name;
-    
+ 
     private Tag(String name) {
         this.name = name;
     }
-    
+ 
     public String toString() {
         return name;
     }
-    
+ 
     public int compareTo(Tag otherTag) {
         return name.compareTo(otherTag.name);
     }
- 
 }
 
 Because we want something like lazy tag creation we will always get them using the @findOrCreateByName(String name)@ factory method. Let’s add it to the @Tag@ class:
@@ -42,15 +41,15 @@ bc. public static Tag findOrCreateByName(String name) {
     return tag;
 }
 
-h2. <a>Tagging posts</a>
+h2. <a name="tagging">Tagging posts</a>
 
-Now it’s time to link the new @Tag@ model with the @Post@ one. Let’s add the correct relationship to the @Post@ class:
+Now it is time to link the new @Tag@ model with the @Post@ model. Let’s add the correct relationship to the @Post@ class:
 
 bc. …
 @ManyToMany(cascade=CascadeType.PERSIST)
 public Set<Tag> tags;
-    
-public Post(User author, String title, String content) { 
+ 
+public Post(User author, String title, String content) {
     this.comments = new ArrayList<Comment>();
     this.tags = new TreeSet<Tag>();
     this.author = author;
@@ -60,11 +59,11 @@ public Post(User author, String title, String content) {
 }
 …
 
-p(note). Note that we use a @TreeSet@ here in order to keep the tag list in a predictable order (alphabetical order in fact, because of our previous compareTo implementation).
+p(note). Note that we use a @TreeSet@ here in order to keep the tag list in a predictable order (alphabetical order in fact, because of our previous @compareTo@ implementation).
 
 We will keep this relationship unidirectional.
 
-We will also add a bunch of helper methods to make tag management simpler. First one, the ability to tag a @Post@:
+We will also add a bunch of helper methods to make tag management simpler. The first one tags a @Post@:
 
 bc. …
 public Post tagItWith(String name) {
@@ -73,7 +72,7 @@ public Post tagItWith(String name) {
 }
 …
 
-Then the ability to retrieve all posts tagged with a specific tag:
+The next one retrieves all posts with a specific tag:
 
 bc. …
 public static List<Post> findTaggedWith(String tag) {
@@ -83,11 +82,11 @@ public static List<Post> findTaggedWith(String tag) {
 }
 …
 
-It is time to write a new test case to test this stuff. Restart the server in **test** mode by typing:
+It is time to write a new test case to test this stuff. Restart the server in @test@ mode by typing:
 
 bc. $ play test
 
-And add a new <code>@Test</code> to the @BasicTest@ class:
+Now add a new <code>@Test</code> to the @BasicTest@ class:
 
 bc. @Test
 public void testTags() {
@@ -97,24 +96,23 @@ public void testTags() {
     // Create a new post
     Post bobPost = new Post(bob, "My first post", "Hello world").save();
     Post anotherBobPost = new Post(bob, "Hop", "Hello world").save();
-    
+ 
     // Well
     assertEquals(0, Post.findTaggedWith("Red").size());
-    
+ 
     // Tag it now
     bobPost.tagItWith("Red").tagItWith("Blue").save();
     anotherBobPost.tagItWith("Red").tagItWith("Green").save();
-    
+ 
     // Check
-    assertEquals(2, Post.findTaggedWith("Red").size());        
+    assertEquals(2, Post.findTaggedWith("Red").size());
     assertEquals(1, Post.findTaggedWith("Blue").size());
     assertEquals(1, Post.findTaggedWith("Green").size());
-    
 }
 
 Make sure that it works.
 
-h2. <a>A little more difficult now</a>
+h2. <a name="multiple">A little more difficult now</a>
 
 Well, we won’t use it in our blog right now, but what if we wanted to retrieve posts tagged with several tags? It’s more difficult than it seems.
 
@@ -123,56 +121,53 @@ I give you the needed JPQL query because you will likely use it in several web p
 bc. …
 public static List<Post> findTaggedWith(String... tags) {
     return Post.find(
-        "select distinct p from Post p join p.tags as t " +
-        "where t.name in (:tags) group by p.id, p.author, p.title, " +
-        "p.content, p.postedAt having count(t.id) = :size"
+            "select distinct p from Post p join p.tags as t where t.name in (:tags) group by p.id, p.author, p.title, p.content,p.postedAt having count(t.id) = :size"
     ).bind("tags", tags).bind("size", tags.length).fetch();
 }
 …
 
 The tricky part is that we have to use a @having count@ statement to filter only posts that have exactly **all tags** from the joined view.
 
-p(note). **Note** that we can’t use the @Post.find("…", tags, tags.count)@ signature here. It’s just because @tags@ is already a **vararg**.
+p(note). **Note** that we cannot use the @Post.find("…", tags, tags.count)@ signature here, because @tags@ is already a **vararg**.
 
 You can test it by adding more checks to the previous test:
 
 bc. …
-assertEquals(1, Post.findTaggedWith("Red", "Blue").size());   
-assertEquals(1, Post.findTaggedWith("Red", "Green").size());   
-assertEquals(0, Post.findTaggedWith("Red", "Green", "Blue").size());  
+assertEquals(1, Post.findTaggedWith("Red", "Blue").size());
+assertEquals(1, Post.findTaggedWith("Red", "Green").size());
+assertEquals(0, Post.findTaggedWith("Red", "Green", "Blue").size());
 assertEquals(0, Post.findTaggedWith("Green", "Blue").size());
 …
 
-h2. <a>The tag cloud</a>
+h2. <a name="cloud">The tag cloud</a>
 
 Where we have tags, we need a tag cloud. Let’s add a method to the @Tag@ class to generate the tag cloud:
 
 bc. public static List<Map> getCloud() {
     List<Map> result = Tag.find(
-        "select new map(t.name as tag, count(p.id) as pound) " +
-        "from Post p join p.tags as t group by t.name order by t.name"
+        "select new map(t.name as tag, count(p.id) as pound) from Post p join p.tags as t group by t.name order by t.name"
     ).fetch();
     return result;
 }
 
-Here we use a handy Hibernate feature that allows to return a custom object from a JPA query. It will result a @List@ containing for each tag a @Map@ with two attributes: @name@ for the tag name and @pound@ for the tag count.
+Here we use a handy Hibernate feature that allows us to return a custom object from a JPA query. This results in a @List@ containing a @Map@ for each tag with two attributes: @name@ for the tag name and @pound@ for the tag count.
 
 Let’s test it by adding one more check to our tags test:
 
 bc. …
 List<Map> cloud = Tag.getCloud();
 assertEquals(
-    "[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]", 
+    "[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]",
     cloud.toString()
 );
 
-h2. <a>Adding tags to the Blog UI</a>
+h2. <a name="data">Adding tags to the Blog UI</a>
 
 We can now use the new tagging stuff to add one more way to browse the blog. As always, to work efficiently we need to add a bunch of test tags to our initial data set.
 
 Modify the @/yabe/conf/initial-data.yml@ file to add some tags to the tests posts. For example:
 
-bc. … 
+bc. …
 Tag(play):
     name:           Play
  
@@ -183,17 +178,17 @@ Tag(test):
     name:           Test
  
 Tag(mvc):
-    name:           MVC    
+    name:           MVC
 …
 
-And then add them to posts declaration as is:
+And then add them to the post’s declaration:
 
 bc. …
 Post(jeffPost):
     title:          The MVC application
     postedAt:       2009-06-06
     author:         jeff
-    tags:           
+    tags:
                     - play
                     - architecture
                     - mvc
@@ -201,7 +196,7 @@ Post(jeffPost):
                     A Play
 …
 
-p(note). Add the Tags declaration at the top of the YAML file, because they need to be created before any Post references them.
+p(note). Add the @Tags@ declaration at the top of the YAML file, because they need to be created before any @Post@ references them.
 
 You need to restart your application to force loading of the new initial data set. Note how Play even tells you about problems in YAML files:
 
@@ -212,7 +207,7 @@ Then modify the @#{display /}@ tag to show the tag set on the **full** post view
 bc. …
 #{if _as != 'full'}
     <span class="post-comments">
-        &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
+        &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'}
         comment${_post.comments.size().pluralize()}
         #{if _post.comments}
             , latest by ${_post.comments[0].author}
@@ -221,7 +216,7 @@ bc. …
 #{/if}
 #{elseif _post.tags}
     <span class="post-tags">
-        - Tagged 
+        - Tagged
         #{list items:_post.tags, as:'tag'}
             <a href="#">${tag}</a>${tag_isLast ? '' : ', '}
         #{/list}
@@ -231,18 +226,18 @@ bc. …
 
 !images/guide6-2!
 
-h2. <a>The new ‘tagged with’ page</a>
+h2. <a name="page">The new ‘tagged with’ page</a>
 
-Now we can add a new way to list blog posts by tags. Above we left the link blank; we will replace it by a link to the new @listTagged@ action:
+Now we can add a new way to list blog posts by tags. In the @#{display /}@ tag, above, we left the link blank; we will now replace it by a link to the new @listTagged@ action:
 
 bc. …
-- Tagged 
+- Tagged
 #{list items:_post.tags, as:'tag'}
     <a href="@{Application.listTagged(tag.name)}">${tag}</a>${tag_isLast ? '' : ', '}
 #{/list}
 …
 
-And create the action method on the @Application@ controller:
+Create the action method on the @Application@ controller:
 
 bc. …
 public static void listTagged(String tag) {
@@ -251,21 +246,21 @@ public static void listTagged(String tag) {
 }
 …
 
-As always we create a specific route to keep clean URI:
+As always we create a specific route to keep the URI clean:
 
 bc. GET     /posts/{tag}                    Application.listTagged
 
-Well, we have a problem because we have an existing route that conflicts with this new one. These two routes will match the same URI:
+We have a problem because we have an existing route that conflicts with this new one. These two routes will match the same URI:
 
 bc. GET     /posts/{id}                     Application.show
 GET     /posts/{tag}                    Application.listTagged
 
-But because we’ll assume that an @id@ is numeric and a @tag@ is not, we can easily solve the situation using a regular expression to restrict the first route:
+However, because we’ll assume that an @id@ is numeric and a @tag@ is not, we can easily solve the situation using a regular expression to restrict the first route:
 
 bc. GET     /posts/{<[0-9]+>id}             Application.show
-GET     /posts/{tag}                    Application.listTagged 
+GET     /posts/{tag}                    Application.listTagged
 
-Finally we just have to create the @/yabe/app/views/Application/listTagged.html@ template that will be used by the new @listTagged@ action:
+Finally, we just have to create the @/yabe/app/views/Application/listTagged.html@ template that will be used by the new @listTagged@ action:
 
 bc. #{extends 'main.html' /}
 #{set title:'Posts tagged with ' + tag /}
@@ -273,10 +268,10 @@ bc. #{extends 'main.html' /}
 *{********* Title ********* }*
  
 #{if posts.size() > 1}
-   <h3>There are ${posts.size()} posts tagged '${tag}'</h3>  
-#{/if} 
+   <h3>There are ${posts.size()} posts tagged '${tag}'</h3>
+#{/if}
 #{elseif posts}
-    <h3>There is 1 post tagged '${tag}'</h3>  
+    <h3>There is 1 post tagged '${tag}'</h3>
 #{/elseif}
 #{else}
     <h3>No post tagged '${tag}'</h3>
@@ -284,12 +279,12 @@ bc. #{extends 'main.html' /}
  
 *{********* Posts list *********}*
  
-<div class="older-posts">    
+<div class="older-posts">
     #{list items:posts, as:'post'}
         #{display post:post, as:'teaser' /}
     #{/list}
-</div> 
+</div>
 
 !images/guide6-3!
 
-p(note). Next: %(next)"A basic admin area using CRUD":guide7%.
+-p(note). Next: %(next)"A basic admin area using CRUD":guide7%.

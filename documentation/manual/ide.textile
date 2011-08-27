@@ -77,8 +77,8 @@ To add a run configuration:
 
 # In IntelliJ IDEA, on the *Run* menu, select *Edit Configurations*.
 # Right-click on *Application* under *Defaults* and select *Add New Configuration*.
-# Under *Main class*, enter *play.server.Server*.
-# Under *VM parameters*, enter *-Dapplication.path=".".
+# Under *Main class*, enter @play.server.Server@.
+# Under *VM parameters*, enter @-Dapplication.path="."@.
 # Under *Working directory*, enter the application path.
 
 To run Play in test mode in IntelliJ:
