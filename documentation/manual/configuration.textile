@@ -40,7 +40,7 @@ Default: @PLAY_LANG@
 
 h3(#application.langs). application.langs
 
-Defines locales used by your application. You can then place localized messages in @conf/messages.{locale}@ files. The value is a comma-separated list of language codes, for example:
+Defines locales used by your application. You can then place localised messages in @conf/messages.{locale}@ files. The value is a comma-separated list of language codes, for example:
 
 bc. application.langs=fr,en,ja
 
@@ -99,7 +99,7 @@ Default: no value.
 
 h3(#application.secret). application.secret
 
-The secret key is used to secure cryptographics functions, usually set by the @play new@ or @play secret@ command. If you deploy your application to several instances be sure to use the same key. For example:
+The secret key is used to secure cryptographic functions, usually set by the @play new@ or @play secret@ command. If you deploy your application to several instances be sure to use the same key. For example:
 
 bc. application.secret=mNuAvlsFVjeuynN4IWZxZzFOHYVagafzjruHmWTL26VISKr46rUtyGcJuX7aYx4q
 
@@ -319,7 +319,7 @@ Default: @1@
 
 h3(#db.pool.timeout). db.pool.timeout
 
-Connection pool time-out in milliseoncds. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout. For example:
+Connection pool time-out in milliseconds. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout. For example:
 
 bc. db.pool.timeout=10000
 
@@ -342,7 +342,7 @@ Database connection user name, used with "db.url":#db.url.
 Default: none, or @sa@ when "db":#db is set to @mem@ or @fs@. 
 
 
-h2(#evolutions). Database evoluations
+h2(#evolutions). Database evolutions
 
 
 h3(#evolutions.enabled). evolutions.enabled
@@ -356,7 +356,7 @@ Default: @true@
 
 h2(#hibernate). Hibernate
 
-You can specify additional hibernate properties. For example, to enable SQL comments:
+You can specify additional Hibernate properties. For example, to enable SQL comments:
 
 bc. hibernate.use_sql_comments=true
 
@@ -377,7 +377,7 @@ HTTP listener address, to restrict addresses the server listens on. For example:
 
 bc. http.address=127.0.0.1
 
-Default: the server listens for HTTP on the wilcard address.
+Default: the server listens for HTTP on the wildcard address.
 
 
 h3(#http.cacheControl). http.cacheControl
@@ -462,7 +462,7 @@ Custom @USER_AGENT@ header value for web services requests. For example:
 
 bc. http.userAgent=myApp 1.0
 
-Defualt: none.
+Default: none.
 
 
 h3(#https.port). https.port
@@ -721,7 +721,7 @@ Default: @smtp@
 
 h3(#mail.smtp.socketFactory.class). mail.smtp.socketFactory.class
 
-When using SSL connections with JavaMail, the default SSL behavior is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behavior is to skip that check. You can control this using this property.
+When using SSL connections with JavaMail, the default SSL behaviour is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behaviour is to skip that check. You can control this using this property.
 
 
 h3(#mail.smtp.user). mail.smtp.user
@@ -783,7 +783,7 @@ Default: none - no maximum.
 
 h3(#play.pool). play.pool
 
-Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialize all requests (very useful for debugging purpose). For example:
+Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialise all requests (very useful for debugging purpose). For example:
 
 bc. play.pool=10
 
