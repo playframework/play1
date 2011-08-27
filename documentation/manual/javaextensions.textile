@@ -312,7 +312,7 @@ h3. <a name="escapeHtml">escapeHtml()</a>
 
 Escapes reserved HTML characters. Returns: @String@.
 
-bc. ${"The <blink>tag</blink> is evil".escape().raw()}
+bc. ${"The <blink>tag</blink> is evil".escapeHtml().raw()}
 The &lt;blink&gt;tag&lt;/blink&gt; is evil
 
 
@@ -328,7 +328,7 @@ h3. <a name="escapeXml">escapeXml()</a>
 
 Escapes reserved XML characters. Returns: @String@.
 
-bc. ${"<>\"&".escape().raw()}
+bc. ${"<>\"&".escapeXml().raw()}
 &lt;&gt;&quot;&amp;
 
 

@@ -1,4 +1,4 @@
-h1. Completing the application tests
+loadModels:h1. Completing the application tests
 
 We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
 
@@ -57,7 +57,7 @@ h2. <a name="selenium">Writing Selenium tests</a>
 
 "Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool thing here is that Selenium allows to run the test suite directly in any existing browser. As it does not use any ‘browser simulator’, you can be sure that you’re testing what your users will use.
 
-A Selenium test suite is typically written as an HTML file. The HTML syntax required by Selenium is a little tedious to write (formatted using an HTML table element). The good news is that Play helps you generate it using the Play template engine and a set of tags that support a simplified syntax for Selenium scenarios. An interesting side effect of using templates is that your are not tied to ‘static scenarios’ any more and you can use the power of Play templates (looping, conditional blocks) to write more complicated tests.
+A Selenium test suite is typically written as an HTML file. The HTML syntax required by Selenium is a little tedious to write (formatted using an HTML table element). The good news is that Play helps you generate it using the Play template engine and a set of tags that support a simplified syntax for Selenium scenarios. An interesting side effect of using templates is that you are not tied to ‘static scenarios’ any more and you can use the power of Play templates (looping, conditional blocks) to write more complicated tests.
 
 p(note). However you can still write plain HTML Selenium syntax in the template and forget the specific Selenium tags if needed. It can become interesting if you use one of the several Selenium tools that generates the test scenarios for you, like "Selenium IDE":http://seleniumhq.org/projects/ide.
 
@@ -76,7 +76,7 @@ This test should run without any problem with the yabe application. It just open
 
 However like any complex test, you need to set-up a set of well-known data before navigating the application and testing it. We will of course reuse the fixture concept and the @yabe/test/data.yml@ file that we’ve used before. To import this data set before the test suite, just use the @#{fixture /}@ tag:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     // Open the home page, and check that no error occurred
@@ -89,7 +89,7 @@ Another important thing to check is that we have a fresh user session at the tes
 
 So let’s start our test with a special command:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     clearSession()
@@ -104,7 +104,7 @@ Run it to be sure that there is no mistake. It should be green.
 
 So we can write a more specific test. Open the home page and check that the default posts are present:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium 'Check home page'}
     clearSession()
