@@ -139,6 +139,15 @@ public class TestEngine {
 
         @Override
         public void testFailure(Failure failure) throws Exception {
+
+            if (current == null) {
+                // The test probably failed before it could start, ie in @BeforeClass
+                current = new TestResult();
+                results.add(current); // must add it here since testFinished() never was called.
+                current.name = "Before any test started, maybe in @BeforeClass?";
+                current.time = System.currentTimeMillis();
+            }
+
             if (failure.getException() instanceof AssertionError) {
                 current.error = "Failure, " + failure.getMessage();
             } else {
