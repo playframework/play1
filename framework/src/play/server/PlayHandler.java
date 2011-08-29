@@ -619,8 +619,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(Response.current().encoding));
-            setContentLength(nettyResponse, errorHtml.length());
+            byte[] bytes = errorHtml.getBytes(Response.current().encoding);
+            ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
+            setContentLength(nettyResponse, bytes.length);
             nettyResponse.setContent(buf);
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -706,8 +707,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             try {
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
 
-                ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(encoding));
-                setContentLength(nettyResponse, errorHtml.length());
+                byte[] bytes = errorHtml.getBytes(encoding);
+                ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
+                setContentLength(nettyResponse, bytes.length);
                 nettyResponse.setContent(buf);
                 ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -717,8 +719,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Logger.error(ex, "Error during the 500 response generation");
                 try {
                     final String errorHtml = "Internal Error (check logs)";
-                    ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(encoding));
-                    setContentLength(nettyResponse, errorHtml.length());
+                    byte[] bytes = errorHtml.getBytes(encoding);
+                    ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
+                    setContentLength(nettyResponse, bytes.length);
                     nettyResponse.setContent(buf);
                     ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
                     writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -729,8 +732,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         } catch (Throwable exxx) {
             try {
                 final String errorHtml = "Internal Error (check logs)";
-                ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(encoding));
-                setContentLength(nettyResponse, errorHtml.length());
+                byte[] bytes = errorHtml.getBytes(encoding);
+                ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
+                setContentLength(nettyResponse, bytes.length);
                 nettyResponse.setContent(buf);
                 ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -830,8 +834,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             try {
                 HttpResponse errorResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
                 final String errorHtml = "Internal Error (check logs)";
-                ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(response.encoding));
-                setContentLength(nettyResponse, errorHtml.length());
+                byte[] bytes = errorHtml.getBytes(response.encoding);
+                ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
+                setContentLength(nettyResponse, bytes.length);
                 errorResponse.setContent(buf);
                 ChannelFuture future = ctx.getChannel().write(errorResponse);
                 future.addListener(ChannelFutureListener.CLOSE);
