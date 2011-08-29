@@ -1,9 +1,11 @@
 package play.deps;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
@@ -15,6 +17,7 @@ import org.apache.ivy.plugins.parser.ModuleDescriptorParserRegistry;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.FilterHelper;
+
 import play.libs.Files;
 import play.libs.IO;
 
@@ -51,6 +54,20 @@ public class DependenciesManager {
     File framework;
     File userHome;
     HumanReadyLogger logger;
+    
+    final FileFilter dirsToTrim = new FileFilter() {
+    
+        @Override
+        public boolean accept(File file) {
+            return file.isDirectory() && isDirToTrim(file.getName());
+        }
+        
+        private boolean isDirToTrim(String fileName) {
+            return "documentation".equals(fileName) || "src".equals(fileName) || 
+                   "tmp".equals(fileName) || fileName.contains("sample") ||
+                   fileName.contains("test");
+        }
+    };
 
     public DependenciesManager(File application, File framework, File userHome) {
         this.application = application;
@@ -195,6 +212,7 @@ public class DependenciesManager {
 
     public File install(ArtifactDownloadReport artifact) throws Exception {
         Boolean force = System.getProperty("play.forcedeps").equals("true");
+        Boolean trim = System.getProperty("play.trimdeps").equals("true");
         try {
             File from = artifact.getLocalFile();
             if (!isPlayModule(artifact)) {
@@ -222,6 +240,13 @@ public class DependenciesManager {
                     Files.unzip(from, to);
                     System.out.println("~ \tmodules/" + to.getName());
                 }
+                
+                if (trim) {
+                    for (File dirToTrim : to.listFiles(dirsToTrim)) {
+                        Files.deleteDirectory(dirToTrim);
+                    }
+                }
+                
                 return to;
             }
         } catch (Exception e) {
