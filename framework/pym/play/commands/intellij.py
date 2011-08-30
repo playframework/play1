@@ -24,7 +24,14 @@ def execute(**kargs):
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/idea/imlTemplate.xml'), imlFile)
     cpXML = ""
 
-    replaceAll(imlFile, r'%PLAYHOME%', play_env["basedir"].replace('\\', '/'))
+    playHome = play_env["basedir"].replace('\\', '/')
+
+    if os.name == 'nt':
+        # On Windows, IntelliJ needs uppercase driveletter
+        if playHome[1:2] == ':':
+            playHome = playHome[0:1].upper() + playHome[1:]
+
+    replaceAll(imlFile, r'%PLAYHOME%', playHome)
     replaceAll(imlFile, r'%PLAYVERSION%', play_env["version"].replace('\\', '/'))
 
     lXML = ""
