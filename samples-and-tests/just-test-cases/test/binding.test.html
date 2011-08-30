@@ -73,6 +73,25 @@
         open('@{DataBinding.globalBinder('8')}')
         assertTextPresent('Incorrect value')
 
+        <!-- Binding errors -->
+        open('/databinding/singleBinder?single=1')
+        assertTextPresent('Success')
+
+        open('/databinding/singleBinder?single=error')
+        assertTextPresent('single')
+
+        open('/databinding/listBinder?list[0]=1')
+        assertTextPresent('Success')
+
+        open('/databinding/listBinder?list[0]=error')
+        assertTextPresent('list[0]')
+
+        open('/databinding/mapBinder?map[test]=1')
+        assertTextPresent('Success')
+
+        open('/databinding/mapBinder?map[test]=error')
+        assertTextPresent('map[test]')
+
 		<!-- Now unbind dates -->
         open('/databinding/changeLanguage/en/')
         open('@{Application.book(new java.util.Date(2879877856556))}')
