@@ -58,11 +58,11 @@ public class Blob implements BinaryField, UserType {
     }
 
     public boolean exists() {
-        return UUID != null && getFile().exists();
+        return UUID != null && !UUID.equalsIgnoreCase("null") && getFile().exists();
     }
 
     public File getFile() {
-        if(file == null) {
+        if(file == null || !file.getName().equals(UUID)) {
             file = new File(getStore(), UUID);
         }
         return file;
@@ -95,7 +95,7 @@ public class Blob implements BinaryField, UserType {
     }
 
     public void nullSafeSet(PreparedStatement ps, Object o, int i) throws HibernateException, SQLException {
-        if(o != null) {
+        if(o != null && ((Blob)o).UUID != null && !((Blob)o).UUID.equalsIgnoreCase("null")) {
             ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
         } else {
             ps.setNull(i, Types.VARCHAR);
