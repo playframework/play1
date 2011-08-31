@@ -112,6 +112,20 @@ class PlayApplication(object):
 
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
+    def find_and_add_all_jars(self, classpath, dir):
+
+        # ignore dirs that start with ".", example: .svn
+        if dir.find(".") == 0:
+            return
+
+        for file in os.listdir(dir):
+            fullPath = os.path.normpath(os.path.join(dir,file))
+            if os.path.isdir(fullPath):
+                self.find_and_add_all_jars(classpath, fullPath)
+            else:
+                if fullPath.endswith('.jar'):
+                    classpath.append(fullPath)
+
     def getClasspath(self):
         classpath = []
 
@@ -119,11 +133,9 @@ class PlayApplication(object):
         classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
         classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])))
 
-        # The application
+        # The application - recursively add jars to the classpath inside the lib folder to allow for subdirectories
         if os.path.exists(os.path.join(self.path, 'lib')):
-            for jar in os.listdir(os.path.join(self.path, 'lib')):
-                if jar.endswith('.jar'):
-                    classpath.append(os.path.normpath(os.path.join(self.path, 'lib/%s' % jar)))
+            self.find_and_add_all_jars(classpath, os.path.join(self.path, 'lib'))
 
         # The modules
         for module in self.modules():
