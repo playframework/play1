@@ -35,6 +35,8 @@ def execute(**kargs):
         add_options.append('-Dsync')
     if args.count('--debug'):
         add_options.append('-Ddebug')
+    if args.count('--clearcache'):
+        add_options.append('-Dclearcache')
     if args.count('--jpda'):
         print "~ Waiting for JPDA client to continue"
         add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])
