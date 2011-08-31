@@ -232,6 +232,10 @@ def autotest(app, args):
     # Run FirePhoque
     print "~"
 
+    headless_browser = ''
+    if app.readConf('headlessBrowser'):
+        headless_browser = app.readConf('headlessBrowser')
+
     fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
     fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
     for jar in os.listdir(fpcp_libs):
@@ -240,7 +244,7 @@ def autotest(app, args):
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
         cp_args = ';'.join(fpcp)    
-    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), 'play.modules.testrunner.FirePhoque']
+    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
     try:
         subprocess.call(java_cmd, env=os.environ)
     except OSError:
