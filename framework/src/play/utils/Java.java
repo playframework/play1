@@ -167,6 +167,22 @@ public class Java {
         throw new NoSuchMethodException(method);
     }
 
+    public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
+
+        Class invokedClass = null;
+        List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
+        if(assignableClasses.size() == 0)
+        {
+            invokedClass = clazz;
+        }
+        else
+        {
+            invokedClass = assignableClasses.get(0);
+        }
+        
+        return Java.invokeStaticOrParent(invokedClass, method, args);
+    }
+
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         return method.invoke(null, prepareArgs(method, args));
     }
