@@ -266,14 +266,21 @@ class PlayApplication(object):
     # ~~~~~~~~~~~~~~~~~~~~~~ MISC
 
     def toRelative(self, path):
-        return _absoluteToRelative(path, self.path, "").replace("//", "/")
+        return _absoluteToRelative(path, self.path).replace("//", "/")
 
-def _absoluteToRelative(path, reference, dots):
-    if path.find(reference) > -1:
-        ending = path.find(reference) + len(reference)
-        return dots + path[ending:]
-    else:
-        return _absoluteToRelative(path, os.path.dirname(reference), "/.." + dots)
+def _absoluteToRelative(path, start):
+    """Return a relative version of a path"""
+    # Credit - http://pypi.python.org/pypi/BareNecessities/0.2.8
+    if not path:
+        raise ValueError("no path specified")
+    start_list = os.path.abspath(start).split(os.path.sep)
+    path_list = os.path.abspath(path).split(os.path.sep)
+    # Work out how much of the filepath is shared by start and path.
+    i = len(os.path.commonprefix([start_list, path_list]))
+    rel_list = [os.path.pardir] * (len(start_list)-i) + path_list[i:]
+    if not rel_list:
+        return os.path.curdir
+    return os.path.join(*rel_list)
 
 class PlayConfParser:
 
