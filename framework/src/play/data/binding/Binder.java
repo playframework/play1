@@ -133,7 +133,7 @@ public class Binder {
                 // Special case Map<String, String>
                 // Multivalues composite params are binded to a Map<String, String>
                 // see http://play.lighthouseapp.com/projects/57987/tickets/443
-                if (keyClass==String.class && valueClass==String.class && isComposite(name, params)) {
+                if (keyClass==String.class && valueClass==String.class && suffix.length() == 0 && isComposite(name, params)) {
                     Map<String, String> stringMap = Utils.filterParams(params, name);
                     if (stringMap.size()>0) return stringMap;
                 }

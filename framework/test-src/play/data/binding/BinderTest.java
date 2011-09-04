@@ -83,6 +83,36 @@ public class BinderTest {
 
     }
 
+
+    @Test
+    public void verifyBindingOfStringMaps() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+
+        Map<String, String> specialCaseMap = new HashMap<String,String>();
+        params.put("specialCaseMap.a", new String[] {"AA"});
+        params.put("specialCaseMap.b", new String[] {"BB"});
+
+        specialCaseMap = (Map<String, String>)Binder.bind("specialCaseMap", specialCaseMap.getClass(), specialCaseMap.getClass(), noAnnotations, params);
+
+        assertThat(specialCaseMap.size()).isEqualTo(2);
+        assertThat(specialCaseMap.get("a")).isEqualTo("AA");
+        assertThat(specialCaseMap.get("b")).isEqualTo("BB");
+
+        Data3 data3;
+
+        params.put("data3.a", new String[] {"aAaA"});
+        params.put("data3.map[abc]", new String[] {"ABC"});
+        params.put("data3.map[def]", new String[] {"DEF"});
+
+        data3 = (Data3) Binder.bind("data3", Data3.class, Data3.class, noAnnotations, params);
+
+        assertThat(data3.a).isEqualTo("aAaA");
+        assertThat(data3.map.size()).isEqualTo(2);
+        assertThat(data3.map.get("abc")).isEqualTo("ABC");
+        assertThat(data3.map.get("def")).isEqualTo("DEF");
+    }
+
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
@@ -177,4 +207,10 @@ class Data2 {
         result = 31 * result + (data1 != null ? data1.hashCode() : 0);
         return result;
     }
+}
+
+
+class Data3 {
+    public String a;
+    public Map<String, String> map = new HashMap<String, String>();
 }
