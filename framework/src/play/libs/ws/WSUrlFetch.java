@@ -13,6 +13,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -39,11 +41,60 @@ public class WSUrlFetch implements WSImpl {
             super(url, encoding);
         }
 
+        private String getPreparedUrl(String method) {
+            String u = url;
+            if (parameters != null && !parameters.isEmpty()) {
+                // If not PUT or POST, we must add these params to the queryString
+                if (!("PUT".equals(method) || "POST".equals(method))) {
+                    // must add params to queryString/url
+                    StringBuilder sb = new StringBuilder(url);
+                    if (url.indexOf("?")>0) {
+                        sb.append('&');
+                    } else {
+                        sb.append('?');
+                    }
+                    int count=0;
+                    for( Map.Entry<String, Object> e : parameters.entrySet()) {
+                        count++;
+                        String key = e.getKey();
+                        Object value = e.getValue();
+                        if (value == null) continue;
+
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v: values) {
+                                if (count > 1) {
+                                    sb.append('&');
+                                }
+                                sb.append(encode(key));
+                                sb.append('=');
+                                sb.append(encode(v.toString()));
+                            }
+                        } else {
+                            if (count > 1) {
+                                sb.append('&');
+                            }
+                            sb.append(encode(key));
+                            sb.append('=');
+                            sb.append(encode(value.toString()));
+                        }
+
+                    }
+
+                    u = sb.toString();
+
+                    // Must clear the parameters to prevent us from using them again
+                    parameters.clear();
+                }
+            }
+            return u;
+        }
+
         /** Execute a GET request synchronously. */
         @Override
         public HttpResponse get() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "GET"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("GET")), "GET"));
             } catch (Exception e) {
                 Logger.error(e.toString());
                 throw new RuntimeException(e);
@@ -54,7 +105,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse post() {
             try {
-                HttpURLConnection conn = prepare(new URL(url), "POST");
+                HttpURLConnection conn = prepare(new URL(getPreparedUrl("POST")), "POST");
                 return new HttpUrlfetchResponse(conn);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -65,7 +116,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse put() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "PUT"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("PUT")), "PUT"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -75,7 +126,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse delete() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "DELETE"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("DELETE")), "DELETE"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -85,7 +136,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse options() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "OPTIONS"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("OPTIONS")), "OPTIONS"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -95,7 +146,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse head() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "HEAD"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("HEAD")), "HEAD"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -105,7 +156,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public HttpResponse trace() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "TRACE"));
+                return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("TRACE")), "TRACE"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
