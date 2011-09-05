@@ -117,5 +117,16 @@ public class Rest extends Controller {
         }
         renderText(r);
     }
+
+    public static void echoHttpMethod(String a, String b) {
+        String r = request.method;
+        if (a != null) {
+            r += " a="+a;
+        }
+        if (b != null) {
+            r += " b="+b;
+        }
+        renderText(r);
+    }
 	
 }
