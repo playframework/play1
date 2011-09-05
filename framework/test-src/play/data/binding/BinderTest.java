@@ -81,6 +81,37 @@ public class BinderTest {
 
     }
 
+
+     @Test
+    public void verifyBindingOfStringMaps() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+
+        Map<String, String> specialCaseMap = new HashMap<String,String>();
+        params.put("specialCaseMap.a", new String[] {"AA"});
+        params.put("specialCaseMap.b", new String[] {"BB"});
+
+        Data3 data3;
+
+        params.put("data3.a", new String[] {"aAaA"});
+        params.put("data3.map[abc]", new String[] {"ABC"});
+        params.put("data3.map[def]", new String[] {"DEF"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        specialCaseMap = (Map<String, String>)Binder.bind(rootParamNode, "specialCaseMap", specialCaseMap.getClass(), specialCaseMap.getClass(), noAnnotations);
+
+        assertThat(specialCaseMap.size()).isEqualTo(2);
+        assertThat(specialCaseMap.get("a")).isEqualTo("AA");
+        assertThat(specialCaseMap.get("b")).isEqualTo("BB");
+
+        data3 = (Data3) Binder.bind(rootParamNode, "data3", Data3.class, Data3.class, noAnnotations);
+
+        assertThat(data3.a).isEqualTo("aAaA");
+        assertThat(data3.map.size()).isEqualTo(2);
+        assertThat(data3.map.get("abc")).isEqualTo("ABC");
+        assertThat(data3.map.get("def")).isEqualTo("DEF");
+    }
+
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
