@@ -48,3 +48,7 @@
 ~~ --clearcache:
 ~ Clear the ivy cache (equivalent to rm -r ~/.ivy2/cache)
 ~
+~ --forProd
+~ Removes the module directories that are not necessary for production
+~ deployment: documentation/, src/, tmp/, *sample*/ and *test*/
+~

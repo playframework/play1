@@ -176,6 +176,13 @@ bc. play dependencies --forProd
 This removes the @documentation/@, @src/@, @tmp/@, @*sample*/@ and @*test*/@ directories from each module.
 
 
+When you deploy an application in production, you can reduce the size of its modules by removing module source code and documentation. You can do this by adding the @--forProd@ option to the command:
+
+bc. play dependencies --forProd
+
+This removes the @documentation/@, @src/@, @tmp/@, @*sample*/@ and @*test*/@ directories from each module.
+
+
 h2. <a name="conflicts">Conflict resolution</a>
 
 Whenever two components need different revisions of the same dependency, the conflicts manager will choose one. The default is to keep the latest revision and to evict the others. 
