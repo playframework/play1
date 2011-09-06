@@ -144,4 +144,11 @@ public class RestTest extends UnitTest {
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc").get().getString());
     }
 
+    @Test
+    public void testWSAsyncWithException() {
+        String url = "http://localhost:9003/SlowResponseTestController/testWSAsyncWithException";
+        String res = WS.url(url).get().getString();
+        assertEquals("ok", res);
+    }
+
 }

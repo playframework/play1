@@ -379,7 +379,8 @@ public class WSAsync implements WSImpl {
                     }
                     @Override
                     public void onThrowable(Throwable t) {
-                        throw new RuntimeException(t);
+                        // An error happened - must "forward" the exception to the one waiting for the result
+                        smartFuture.invokeWithException(t);
                     }
                 });
 
