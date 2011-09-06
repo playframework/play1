@@ -330,6 +330,20 @@ bc. Example2, you want to use basic auth:
 
 There are many things you can configure see: http://ant.apache.org/ivy/history/2.1.0/settings.html
 
+
+h3. Clearing ivy cache
+
+Ivy cache mechanism sometimes causes confusion about dependencies resolving.
+
+Especially when using 'http' type in the repositories section of conf/dependencies.yml.
+
+If you would clear this problem, consider using '--clearcache' option.
+
+bc. $ play dependencies --clearcache
+
+It is equivalent to rm -r ~/.ivy2/cache.
+
+
 p(note). **Continuing the discussion**
 
 Next: %(next)"Database evolutions":evolutions%.
