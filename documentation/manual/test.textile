@@ -224,6 +224,8 @@ So setting up a continuous integration system to test your application, could be
 
 Run these steps in a CRON tab, and you’re done!
 
+You can change the web browser compatibility mode used by the headless browser by configuring "headlessBrowser":configuration#headlessBrowser.
+
 p(note). **Continuing the discussion**
  
 Next: %(next)"Security guide":security%.

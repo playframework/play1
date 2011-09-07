@@ -354,6 +354,25 @@ bc. evolutions.enabled=false
 Default: @true@
 
 
+h2(#test). Test runner
+
+h3(#headlessBrowser). headlessBrowser
+
+Specifies the web browser compatibility mode for the HtmlUnit headless web browser used when running @play auto-test@.
+
+bc. headlessBrowser=INTERNET_EXPLORER_7
+
+Values:
+
+* @FIREFOX_3@
+* @FIREFOX_3_6@
+* @INTERNET_EXPLORER_6@
+* @INTERNET_EXPLORER_7@
+* @INTERNET_EXPLORER_8@
+
+Default: @INTERNET_EXPLORER_8@
+
+
 h2(#hibernate). Hibernate
 
 You can specify additional Hibernate properties. For example, to enable SQL comments:
