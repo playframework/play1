@@ -374,6 +374,19 @@ public class JavaExtensions {
         return result.toString();
     }
 
+    public static String truncate(String source, int length) {
+        return truncate(source, length, null);
+    }
+    
+    public static String truncate(String source, int length, String ending) {
+        if(source.isEmpty() || source.length() < length){
+            return source;
+        }
+        ending = (ending == null ? "..." : ending);
+        int position = length - ending.length();
+        return source.substring(0, position) + ending;
+    }
+
     public static String yesno(Object o, String[] values) {
         boolean value = play.templates.FastTags._evaluateCondition(o);
         if (value) {
