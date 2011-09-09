@@ -54,8 +54,13 @@ def execute(**kargs):
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
     replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', msXML)
     replaceAll(imlFile, r'%MODULE_LIBRARIES%', jdXML)
+    
+    iprFile = os.path.join(app.path, application_name + '.ipr')
+    shutil.copyfile(os.path.join(play_env["basedir"], 'resources/idea/iprTemplate.xml'), iprFile)
+    replaceAll(iprFile, r'%PROJECT_NAME%', application_name)
+    
 
     print "~ OK, the application is ready for Intellij Idea"
-    print "~ Use File/New Module/Import Existing module"
+    print "~ Use File, Open Project... to open \"" + application_name + ".ipr\""
     print "~"
 
