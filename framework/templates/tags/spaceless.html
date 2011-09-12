@@ -1,0 +1,24 @@
+*{
+ *  Removes whitespaces between HTML tags, including tab characters and newlines.
+ *  Space between tags and text won't be stripped.
+ *  Usage:
+ *      #{spaceless}
+ *      <div>
+ *          <ul>
+ *              <li>something here</li>
+ *              <li>some other stuff here</li>
+ *          </ul>
+ *      </div>
+ *      #{/spaceless}
+ *
+ *  Result:
+ *      <div><ul><li>something here</li><li>some other stuff here</li></ul></div>
+}*
+%{
+    if (!_body) {
+        throw new play.exceptions.TagInternalException("body cannot be empty for spaceless tag");
+    }
+
+    body = _body.toString().trim().replaceAll(">\\s+<", "><").raw()
+}%
+${body}
