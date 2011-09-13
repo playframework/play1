@@ -318,11 +318,27 @@ public class Router {
 
     public static String getFullUrl(String action, Map<String, Object> args) {
         ActionDefinition actionDefinition = reverse(action, args);
-        String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
+        String base = getBaseUrl();
         if (actionDefinition.method.equals("WS")) {
             return base.replaceFirst("https?", "ws") + actionDefinition;
         }
         return base + actionDefinition;
+    }
+
+    // Gets baseUrl from current request or application.baseUrl in application.conf
+    protected static String getBaseUrl() {
+        if (Http.Request.current() == null) {
+            // No current request is present - must get baseUrl from config
+            String appBaseUrl = Play.configuration.getProperty("application.baseUrl", "application.baseUrl");
+            if (appBaseUrl.endsWith("/")) {
+                // remove the trailing slash
+                appBaseUrl = appBaseUrl.substring(0, appBaseUrl.length()-1);
+            }
+            return appBaseUrl;
+
+        } else {
+            return Http.Request.current().getBase();
+        }
     }
 
     public static String getFullUrl(String action) {
@@ -356,7 +372,7 @@ public class Router {
                     }
                     if (absolute) {
                         boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
-                        String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
+                        String base = getBaseUrl();
                         if (!StringUtils.isEmpty(route.host)) {
                             // Compute the host
                           int port = Http.Request.current() == null ? 80 : Http.Request.current().get().port;
@@ -578,7 +594,7 @@ public class Router {
 
         public void absolute() {
             boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
-            String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
+            String base = getBaseUrl();
             String hostPart = host;
             String domain = Http.Request.current() == null ? "" : Http.Request.current().get().domain;
             int port = Http.Request.current() == null ? 80 : Http.Request.current().get().port;
