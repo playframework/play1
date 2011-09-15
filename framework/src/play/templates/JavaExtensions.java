@@ -382,7 +382,7 @@ public class JavaExtensions {
         if(source.isEmpty() || source.length() < length){
             return source;
         }
-        ending = (ending == null ? "..." : ending);
+        ending = (ending == null ? "\u2026" : ending);
         int position = length - ending.length();
         return source.substring(0, position) + ending;
     }
