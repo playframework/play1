@@ -69,8 +69,9 @@ public class Secure extends Controller {
             params.flash();
             login();
         }
-        // Mark user as connected
-        session.put("username", username);
+        // Mark user as connected if not previously done by authenticate
+	if (session.get("username") == null)
+	        session.put("username", username);
         // Remember if needed
         if(remember) {
             response.setCookie("rememberme", Crypto.sign(username) + "-" + username, "30d");
