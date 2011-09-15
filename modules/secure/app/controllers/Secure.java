@@ -182,15 +182,9 @@ public class Secure extends Controller {
         }
 
         private static Object invoke(String m, Object... args) throws Throwable {
-            Class security = null;
-            List<Class> classes = Play.classloader.getAssignableClasses(Security.class);
-            if(classes.size() == 0) {
-                security = Security.class;
-            } else {
-                security = classes.get(0);
-            }
+
             try {
-                return Java.invokeStaticOrParent(security, m, args);
+                return Java.invokeChildOrStatic(Security.class, m, args);       
             } catch(InvocationTargetException e) {
                 throw e.getTargetException();
             }
