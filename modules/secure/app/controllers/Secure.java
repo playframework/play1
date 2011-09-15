@@ -13,7 +13,7 @@ public class Secure extends Controller {
     @Before(unless={"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
         // Authent
-        if(!session.contains("username")) {
+        if(!(Boolean)Security.invoke("isConnected")) {
             flash.put("url", "GET".equals(request.method) ? request.url : "/"); // seems a good default
             login();
         }
