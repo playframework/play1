@@ -384,6 +384,9 @@ public class JavaExtensions {
         }
         ending = (ending == null ? "\u2026" : ending);
         int position = length - ending.length();
+        if(position < 1) {
+            throw new IllegalArgumentException(String.format("Minimum truncate length is %d", 1 + ending.length()));
+        }
         return source.substring(0, position) + ending;
     }
 
