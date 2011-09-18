@@ -17,7 +17,9 @@
                     %MODULE_LINKS%
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    %MODULE_LIB_SOURCES%
+                </SOURCES>
                 <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
                 %MODULE_LIBRARIES%
             </library>
