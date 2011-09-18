@@ -37,11 +37,9 @@ def execute(**kargs):
         msXML += '<root url="file://$MODULE_DIR$/lib" />'
         for jar_file in os.listdir(lib_path):
             if jar_file.endswith('-sources.jar'):
-                print 'debug: adding %s to sources' % jar_file
                 libXML += '<root url="jar://$MODULE_DIR$/lib/%s!/" />\n' % jar_file
     if len(modules):
         for i, module in enumerate(modules):
-            print 'debug: %s' % module
             libpath = os.path.join(module, 'lib')
             srcpath = os.path.join(module, 'src')
             lXML += '        <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
