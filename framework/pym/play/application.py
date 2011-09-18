@@ -234,9 +234,9 @@ class PlayApplication(object):
 
         self.jpda_port = self.readConf('jpda.port')
 
-        application_mode = self.readConf('application.mode')
+        application_mode = self.readConf('application.mode').lower()
 
-        if application_mode == 'prod' or application_mode == 'PROD':
+        if application_mode == 'prod':
             java_args.append('-server')
 
         java_policy = self.readConf('java.policy')
@@ -254,7 +254,7 @@ class PlayApplication(object):
             
         java_args.append('-Dfile.encoding=utf-8')
 
-        if self.readConf('application.mode') == 'dev' or self.readConf('application.mode') == 'DEV':
+        if self.readConf('application.mode').lower() == 'dev':
             if not self.play_env["disable_check_jpda"]: self.check_jpda()
             java_args.append('-Xdebug')
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
