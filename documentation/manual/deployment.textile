@@ -1,6 +1,6 @@
 h1. Deployment options
 
-Play applications can be deployed virtually anywhere: inside Servlet containers, as standalone servers, in Google Application Engine, Stack, a Cloud, etc...
+Play applications can be deployed virtually anywhere: inside Servlet containers, as standalone servers, on Heroku, Google Application Engine, Stack, a Cloud, etc...
 
 h2. <a name="standalone">Standalone Play applications</a>
 
