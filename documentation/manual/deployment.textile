@@ -100,6 +100,59 @@ bc. <?xml version="1.0" ?>
   </resource-ref>
 </web-app>
 
+h2. <a name="heroku">Heroku - Cloud Application Platform</a>
+
+To run your Play application on the Cloud with Heroku, follow these steps:
+
+1. Install the heroku command line client on "Linux":http://toolbelt.herokuapp.com/linux/readme, "Mac":http://toolbelt.herokuapp.com/osx/download, or "Windows":http://toolbelt.herokuapp.com/windows/download.
+2. Install "git":http://git-scm.com/ and setup your SSH key
+3. Create an account on "Heroku.com":http://heroku.com/signup
+4. Login to Heroku from the command line:
+
+bc. heroku auth:login
+
+5. Create a git repo:
+
+bc. git init
+
+6. Create a @.gitignore@ file containing the following content:
+
+bc. /tmp
+/modules
+/lib
+/test-result
+/logs
+
+7. Add the files to the git repo and commit them:
+
+bc. git add .
+git commit -m init
+
+8. Create a new app on Heroku:
+
+bc. heroku create -s cedar
+
+9. Push the app to Heroku:
+
+bc. git push heroku master
+
+10. Open the app in your browser:
+
+bc. heroku open
+
+
+To view the logs run:
+
+bc. heroku logs
+
+To scale the application to multiple dynos run:
+
+bc. heroku scale web=2
+
+
+Learn more in the "Heroku Dev Center":http://devcenter.heroku.com.
+
+
 h2. <a name="gae">Google Application Engine (GAE)</a>
 
 A Play application can very easily be deployed to the GAE. It is a matter of installing the relevant "GAE module.":http://playframework.org/modules/gae
