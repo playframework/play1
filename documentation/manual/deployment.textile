@@ -150,6 +150,13 @@ To scale the application to multiple dynos run:
 bc. heroku scale web=2
 
 
+To use the "Heroku Shared Database":http://devcenter.heroku.com/articles/database in production add the following to your @conf/application.conf@ file:
+
+bc. %prod.db=${DATABASE_URL}
+%prod.jpa.dialect=org.hibernate.dialect.PostgreSQLDialect
+%prod.jpa.ddl=update
+
+
 Learn more in the "Heroku Dev Center":http://devcenter.heroku.com.
 
 
