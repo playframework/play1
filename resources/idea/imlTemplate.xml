@@ -16,7 +16,9 @@
                     %MODULE_LIB_CLASSES%
                     %MODULE_LINKS%
                 </CLASSES>
-                <JAVADOC />
+                <JAVADOC>
+                    %MODULE_LIB_JAVADOC%
+                </JAVADOC>
                 <SOURCES>
                     %MODULE_LIB_SOURCES%
                 </SOURCES>

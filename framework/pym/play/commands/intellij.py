@@ -31,13 +31,16 @@ def execute(**kargs):
     mlXML = ""
     msXML = ""
     jdXML = ""
-    libXML = ""
+    depXML = ""
+    depJavadocXML = ""
     lib_path = os.path.join(app.path, 'lib')
     if os.path.exists(lib_path):
         msXML += '<root url="file://$MODULE_DIR$/lib" />'
         for jar_file in os.listdir(lib_path):
             if jar_file.endswith('-sources.jar'):
-                libXML += '<root url="jar://$MODULE_DIR$/lib/%s!/" />\n' % jar_file
+                depXML += '<root url="jar://$MODULE_DIR$/lib/%s!/" />\n' % jar_file
+            elif jar_file.endswith('-javadoc.jar'):
+                depJavadocXML += '<root url="jar://$MODULE_DIR$/lib/%s!/" />\n' % jar_file
     if len(modules):
         for i, module in enumerate(modules):
             libpath = os.path.join(module, 'lib')
@@ -52,7 +55,8 @@ def execute(**kargs):
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
     replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', msXML)
     replaceAll(imlFile, r'%MODULE_LIBRARIES%', jdXML)
-    replaceAll(imlFile, r'%MODULE_LIB_SOURCES', libXML)
+    replaceAll(imlFile, r'%MODULE_LIB_SOURCES%', depXML)
+    replaceAll(imlFile, r'%MODULE_LIB_JAVADOC%', depJavadocXML)
 
     print "~ OK, the application is ready for Intellij Idea"
     print "~ Use File/New Module/Import Existing module"
