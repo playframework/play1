@@ -47,7 +47,7 @@ public class JPABase implements Serializable, play.db.Model {
             em().flush();
         } catch (PersistenceException e) {
             if (e.getCause() instanceof GenericJDBCException) {
-                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(),e);
             } else {
                 throw e;
             }
@@ -73,7 +73,7 @@ public class JPABase implements Serializable, play.db.Model {
                 em().flush();
             } catch (PersistenceException e) {
                 if (e.getCause() instanceof GenericJDBCException) {
-                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(),e);
                 } else {
                     throw e;
                 }
