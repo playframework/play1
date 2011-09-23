@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -38,6 +39,17 @@ import java.util.TreeSet;
 @SuppressWarnings("unchecked")
 public class GenericModel extends JPABase {
 
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations)
+     */
+    @Deprecated
+    public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return create(rootParamNode, name, type, annotations);
+    }
+
     public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
@@ -47,6 +59,19 @@ public class GenericModel extends JPABase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations)
+     *
+     * @return
+     */
+    @Deprecated
+    public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return edit( rootParamNode, name, o, annotations);
     }
 
     @SuppressWarnings("deprecation")
@@ -150,6 +175,17 @@ public class GenericModel extends JPABase {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public <T extends GenericModel> T edit(ParamNode rootParamNode, String name)
+     */
+    @Deprecated
+    public <T extends GenericModel> T edit(String name, Map<String, String[]> params) {
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return edit(rootParamNode, name, this, null);
     }
 
     public <T extends GenericModel> T edit(ParamNode rootParamNode, String name) {
