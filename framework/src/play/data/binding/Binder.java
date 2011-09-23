@@ -81,6 +81,12 @@ public abstract class Binder {
         }
     }
 
+    @Deprecated
+    public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+        RootParamNode parentParamNode = RootParamNode.convert(params);
+        return bind(parentParamNode, name, clazz, type, annotations);
+    }
+
     public static Object bind( RootParamNode parentParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations) {
         return bind(parentParamNode, name, clazz, type, annotations, null);
     }
@@ -448,9 +454,31 @@ public abstract class Binder {
         return r;
     }
 
+    
+
 
     public static Object directBind(String value, Class<?> clazz) throws Exception {
         return directBind(null, value, clazz, null);
+    }
+
+    /**
+     * This method is deprecated - name parameter not needed. Use this instead:
+     *
+     *  public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception
+     */
+    @Deprecated
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
+        return directBind(annotations, value, clazz, null);
+    }
+
+    /**
+     * This method is deprecated - name parameter not needed. Use this instead:
+     *
+     *  public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception
+     */
+    @Deprecated
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
+        return directBind(annotations,  value,  clazz,  type);
     }
 
     @SuppressWarnings("unchecked")
