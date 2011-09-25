@@ -17,9 +17,9 @@ In Servlet-based frameworks, the Servlet API does not provide useful URL-routing
 Play combines the web framework, HTTP API and the HTTP server, which allows it to implement the same thing more directly with fewer layers and a single URL routing configuration. This configuration, like Grails’ and Cake PHP’s, reflects the structure of an HTTP request - HTTP method, URL path, and then the mapping:
 
 bc. # Play 'routes' configuration file…
-
+ 
 # Method   URL path         Controller
-
+ 
 GET        /                Application.index
 GET        /about           Application.about
 POST       /item            Item.addItem

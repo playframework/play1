@@ -8,7 +8,7 @@ Here is a mock-up of what we want to achieve:
 
 h2. <a>Bootstrapping with default data</a>
 
-In fact, before coding the first screen we need one more thing. Working on a web application without test data is not fun. You can’t even test what you’re doing. But because we haven’t developed the contribution screens yet, we can’t populate the blog with posts ourselves.
+In fact, before coding the first screen we need one more thing. Working on a web application without test data is not fun. You can’t even test what you’re doing. But because we haven’t developed the contribution screens yet, we can’t populate the blog with posts ourselves. 
 
 One way to inject default data into the blog is to load a fixture file at application load time. To do that we will create a Bootstrap Job. A Play job is something that executes itself outside of any HTTP request, for example at the application start or at specific interval using a CRON job.
 
@@ -17,19 +17,19 @@ Let’s create the @/yabe/app/Bootstrap.java@ job that will load a set of defaul
 bc. import play.*;
 import play.jobs.*;
 import play.test.*;
-
+ 
 import models.*;
-
+ 
 @OnApplicationStart
 public class Bootstrap extends Job {
-
+ 
     public void doJob() {
         // Check if the database is empty
         if(User.count() == 0) {
             Fixtures.loadModels("initial-data.yml");
         }
     }
-
+ 
 }
 
 We have annotated this Job with the <code>@OnApplicationStart</code> annotation to tell Play that we want to run this job synchronously at application start-up.
@@ -51,16 +51,16 @@ We will keep these components but add code to them to load the posts list and di
 Open the @/yabe/app/controllers/Application.java@ controller and modify the @index()@ action to load the posts list, as is:
 
 bc. package controllers;
-
+ 
 import java.util.*;
-
+ 
 import play.*;
 import play.mvc.*;
-
+ 
 import models.*;
-
+ 
 public class Application extends Controller {
-
+ 
     public static void index() {
         Post frontPost = Post.find("order by postedAt desc").first();
         List<Post> olderPosts = Post.find(
@@ -68,7 +68,7 @@ public class Application extends Controller {
         ).from(1).fetch(10);
         render(frontPost, olderPosts);
     }
-
+ 
 }
 
 Can you see how we pass objects to the @render@ method? It will allow us to access them from the template using the same name. In this case, the variables @frontPost@ and @olderPosts@ will be available in the template.
@@ -77,7 +77,7 @@ Open the @/yabe/app/views/Application/index.html@ and modify it to display these
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
-
+ 
 #{if frontPost}
     <div class="post">
         <h2 class="post-title">
@@ -87,8 +87,8 @@ bc. #{extends 'main.html' /}
             <span class="post-author">by ${frontPost.author.fullname}</span>
             <span class="post-date">${frontPost.postedAt.format('MMM dd')}</span>
             <span class="post-comments">
-                &nbsp;|&nbsp;
-                ${frontPost.comments.size() ?: 'no'}
+                &nbsp;|&nbsp; 
+                ${frontPost.comments.size() ?: 'no'} 
                 comment${frontPost.comments.size().pluralize()}
                 #{if frontPost.comments}
                     , latest by ${frontPost.comments[0].author}
@@ -99,11 +99,11 @@ bc. #{extends 'main.html' /}
             ${frontPost.content.nl2br()}
         </div>
     </div>
-
+    
     #{if olderPosts}
-        <div class="older-posts">
+        <div class="older-posts">    
             <h3>Older posts <span class="from">from this blog</span></h3>
-
+        
             #{list items:olderPosts, as:'oldPost'}
                 <div class="post">
                     <h2 class="post-title">
@@ -117,7 +117,7 @@ bc. #{extends 'main.html' /}
                             ${oldPost.postedAt.format('dd MMM yy')}
                         </span>
                         <div class="post-comments">
-                            ${oldPost.comments.size() ?: 'no'}
+                            ${oldPost.comments.size() ?: 'no'} 
                             comment${oldPost.comments.size().pluralize()}
                             #{if oldPost.comments}
                                 - latest by ${oldPost.comments[0].author}
@@ -127,11 +127,11 @@ bc. #{extends 'main.html' /}
                 </div>
             #{/list}
         </div>
-
+        
     #{/if}
-
+    
 #{/if}
-
+ 
 #{else}
     <div class="empty">
         There is currently nothing to read here.
@@ -151,7 +151,7 @@ However you can see we have already started to duplicate code. Because we will d
 To create a tag, just create the new @/yabe/app/views/tags/display.html@ file. A tag is just another template. It has parameters (like a function). The @#{display /}@ tag will have two parameters: the Post object to display and the display mode which will be one of @home@, @teaser@ or @full@.
 
 bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
-
+ 
 <div class="post ${_as == 'teaser' ? 'teaser' : ''}">
     <h2 class="post-title">
         <a href="#">${_post.title}</a>
@@ -161,7 +161,7 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
         <span class="post-date">${_post.postedAt.format('dd MMM yy')}</span>
         #{if _as != 'full'}
             <span class="post-comments">
-                &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'}
+                &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
                 comment${_post.comments.size().pluralize()}
                 #{if _post.comments}
                     , latest by ${_post.comments[0].author}
@@ -176,14 +176,14 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
         </div>
     #{/if}
 </div>
-
+ 
 #{if _as == 'full'}
     <div class="comments">
         <h3>
-            ${_post.comments.size() ?: 'no'}
+            ${_post.comments.size() ?: 'no'} 
             comment${_post.comments.size().pluralize()}
         </h3>
-
+        
         #{list items:_post.comments, as:'comment'}
             <div class="comment">
                 <div class="comment-metadata">
@@ -198,7 +198,7 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
                 </div>
             </div>
         #{/list}
-
+        
     </div>
 #{/if}
 
@@ -206,25 +206,25 @@ Now using this tag we can rewrite the home page without code duplication:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
-
+ 
 #{if frontPost}
-
+    
     #{display post:frontPost, as:'home' /}
-
+    
     #{if olderPosts.size()}
-
+    
         <div class="older-posts">
             <h3>Older posts <span class="from">from this blog</span></h3>
-
+        
             #{list items:olderPosts, as:'oldPost'}
                 #{display post:oldPost, as:'teaser' /}
             #{/list}
         </div>
-
+        
     #{/if}
-
+    
 #{/if}
-
+ 
 #{else}
     <div class="empty">
         There is currently nothing to read here.
@@ -242,15 +242,15 @@ Edit the @/yabe/app/views/main.html@ file:
 bc. <!DOCTYPE html >
 <html>
     <head>
-        <title>#{get 'title' /}</title>
+        <title>#{get 'title' /}</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <link rel="stylesheet" type="text/css" media="screen"
+        <link rel="stylesheet" type="text/css" media="screen" 
             href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png"
+        <link rel="shortcut icon" type="image/png" 
             href="@{'/public/images/favicon.png'}" />
     </head>
     <body>
-
+        
         <div id="header">
             <div id="logo">
                 yabe.
@@ -266,23 +266,23 @@ bc. <!DOCTYPE html >
                 <h2>${blogBaseline}</h2>
             </div>
         </div>
-
+        
         <div id="main">
-            #{doLayout /}
+            #{doLayout /} 
         </div>
-
+        
         <p id="footer">
-            Yabe is a (not that) powerful blog engine built with the
+            Yabe is a (not that) powerful blog engine built with the 
             <a href="http://www.playframework.org">Play framework</a>
             as a tutorial application.
         </p>
-
+        
     </body>
 </html>
 
 Refresh and check the result. It seems to work, except that the @blogTitle@ and the @blogBaseLine@ variables are not displayed. This is because we didn’t pass them to the @render(…)@ call. Of course we could add them to the @render()@ call in the @index@ action. But because the @main.html@ file will be used as main template for all application actions, we don’t want to add them every time.
 
-One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a <code>@Before</code> interceptor.
+One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a <code>@Before</code> interceptor. 
 
 Let’s add the @addDefaults()@ method to the Application controller:
 
@@ -325,5 +325,5 @@ bc. $ bzr st
 $ bzr add
 $ bzr commit -m 'Home page'
 
-p(note). Next: %(next)"The comments page":guide4%.
+p(note). Next: %(next)"The comments page":guide4%. 
 

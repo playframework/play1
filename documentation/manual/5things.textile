@@ -48,7 +48,7 @@ bc. public static void show(Long id) {
     Article article = Article.findById(id);
     render(article);
 }
-
+ 
 public static void edit(Long id, String title) {
     Article article = Article.findById(id);
     article.title = title;

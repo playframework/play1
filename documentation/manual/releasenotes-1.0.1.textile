@@ -30,19 +30,19 @@ This line is  added to new applications created with the 1.0.1 release.
 
 h2. <a>@javax.inject.Inject support</a>
 
-You can now use the <code>@Inject</code> annotation if you are using a Dependency Injection container like the one provided by the "Spring module":spring. The <code>@Inject</code> annotation automatically injects defined beans in your controllers, jobs and mailer. It works on static fields.
+You can now use the <code>@Inject</code> annotation if you are using a Dependency Injection container like the one provided by the "Spring module":spring. The <code>@Inject</code> annotation automatically injects defined beans in your controllers, jobs and mailer. It works on static fields. 
 
 For example to inject a @PriceWatcher@ service defined in Spring to one of your controllers, just do:
 
 bc. public class Application extends Controller {
-
+    
     @Inject
     static PriceWatcher prices;
-
+    
     public static void index() {
         prices.getAll(); // prices is defined here
     }
-
+    
 }
 
 Auto-reload should work as expected.
@@ -103,17 +103,17 @@ Can’t find the validator you need in the @play.data.validation@ package? Write
 For example:
 
 bc. public class User {
-
+    
     @Required
     @CheckWith(MyPasswordCheck.class)
     public String password;
-
+    
     static class MyPasswordCheck extends Check {
-
+        
         public abstract boolean isSatisfied(Object user, Object password) {
             return notMatchPreviousPasswords(password);
         }
-
+        
     }
 }
 
@@ -130,7 +130,7 @@ h2. <a>HTML5 as default doctype and JQuery in new applications</a>
 New applications come with a default HTML skeleton. Previously it was a **XHTML 1.0 Transitional** formatted HTML. Now it comes with a **HTML5** doctype by default:
 
 bc. <!DOCTYPE html>
-
+ 
 <html>
     <head>
         <title>#{get 'title' /}</title>
@@ -193,7 +193,7 @@ Now you can import this route on the client side:
 
 bc. <script type="text/javascript">
     var showUserAction = #{jsAction @Users.show(':id')}
-
+    
     var displayUserDetail = function(userId) {
         $('#userDetail').load( showUserAction({id: userId}) )
     }

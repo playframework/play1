@@ -9,7 +9,7 @@ email.setFrom("sender@zenexity.fr");
 email.addTo("recipient@zenexity.fr");
 email.setSubject("subject");
 email.setMsg("Message");
-Mail.send(email);
+Mail.send(email); 
 
 An HTML e-mail:
 
@@ -31,18 +31,18 @@ h2. <a name="mvc">Mail and MVC integration</a>
 
 You can also send complex, dynamic e-mail using the standard templates mechanism and syntax.
 
-First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass @play.mvc.Mailer@ and be part of the @notifiers@ package.
+First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass @play.mvc.Mailer@ and be part of the @notifiers@ package. 
 
 Each public static method will be an e-mail sender, in a similar manner as actions for an MVC controller. For example:
 
 bc. package notifiers;
-
+ 
 import play.*;
 import play.mvc.*;
 import java.util.*;
-
+ 
 public class Mails extends Mailer {
-
+ 
    public static void welcome(User user) {
       setSubject("Welcome %s", user.name);
       addRecipient(user.email);
@@ -53,7 +53,7 @@ public class Mails extends Mailer {
       addAttachment(attachment);
       send(user);
    }
-
+ 
    public static void lostPassword(User user) {
       String newpassword = user.password;
       setFrom("Robot <robot@thecompany.com>");
@@ -61,10 +61,10 @@ public class Mails extends Mailer {
       addRecipient(user.email);
       send(user, newpassword);
    }
-
+ 
 }
 
-h3. text/html e-mail
+h3. text/html e-mail 
 
 The @send@ method call will render the @app/views/Mails/welcome.html@ template as the e-mail message body.
 
@@ -99,7 +99,7 @@ The template for the lostPassword method could look like this:
 @app/views/Mails/lostPassword.txt@
 
 bc. Hello ${user.name},
-
+ 
 Your new password is ${newpassword}.
 
 h3. text/html e-mail with text/plain alternative
@@ -141,7 +141,7 @@ mail.smtp=mock
 
 h3. <a name="gmail">Using Gmail</a>
 
-To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.org/modules/playapps, use this configuration:
+To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.org/modules/playapps, use this configuration: 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin
@@ -149,5 +149,5 @@ mail.smtp.pass=yourGmailPassword
 mail.smtp.channel=ssl
 
 p(note). **Continuing the discussion**
-
+ 
 Now we shall move on to %(next)"Testing the application":test%.

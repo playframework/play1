@@ -40,14 +40,14 @@ h2. <a name="repository">Using the module repository</a>
 
 The "module repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
 
-You can also browse the module repository using the @play list-modules@ command.
+You can also browse the module repository using the @play list-modules@ command. 
 
 bc. gbo-mac:~ guillaume$ play list-modules
-~        _            _
+~        _            _ 
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/
+~ |_|            |__/   
 ~
 ~ play! 1.2, http://www.playframework.org
 ~
@@ -74,7 +74,7 @@ By convention the @head@ version is the unstable version of the module. You can 
 
 bc. play install scala
 
-Modules installed this way are downloaded to the @/modules@ directory of your framework installation.
+Modules installed this way are downloaded to the @/modules@ directory of your framework installation. 
 
 You can change the installation path using the @--path@ option:
 
@@ -91,7 +91,7 @@ Please tell us:
 * A short description of the module.
 * Your project home page.
 * Your OpenID.
-* Your module must be hosted somewhere with the source code available and a way to report bugs. If you don’t have any idea, <a href="http://github.com/">GitHub</a>, <a href="http://code.google.com/">Google Code</a> and <a href="http://launchpad.net/">Launchpad</a> are good choices.
+* Your module must be hosted somewhere with the source code available and a way to report bugs. If you don’t have any idea, <a href="http://github.com/">GitHub</a>, <a href="http://code.google.com/">Google Code</a> and <a href="http://launchpad.net/">Launchpad</a> are good choices. 
 
 To release your module, simply use the @play build-module@ command. Then connect to the module repository and upload the generated package.
 
@@ -99,5 +99,5 @@ You can of course use the offical Google Group to provide help and share informa
 
 
 p(note). **Continuing the discussion**
-
+ 
 Learn how to efficiently manage your modules using %(next)"Dependency management":dependency%.

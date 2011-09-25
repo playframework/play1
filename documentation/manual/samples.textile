@@ -28,7 +28,7 @@ A simple forum application that uses JPA.
 
 h2. <a>Jobboard</a>
 
-A fully-featured job board application that uses the CRUD module to automatically generate the administration area.
+A fully-featured job board application that uses the CRUD module to automatically generate the administration area. 
 
 !images/jobboard!
 

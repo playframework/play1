@@ -15,7 +15,7 @@ REST states a few key design principles:
 
 * Application functionality is divided into resources
 * Every resource is uniquely addressable using a URI
-* All resources share a uniform interface for the transfer of state between client and resource.
+* All resources share a uniform interface for the transfer of state between client and resource. 
 
 If you’re using HTTP, these interfaces are defined by the set of available HTTP methods. The protocol used to access the resource state is:
 
@@ -26,7 +26,7 @@ If you’re using HTTP, these interfaces are defined by the set of available HTT
 
 If an application follows the main REST design principles, the application is RESTful. The Play framework makes it easy to build RESTful applications:
 
-* The Play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns give you even more flexibility.
+* The Play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns give you even more flexibility. 
 * The protocol is stateless. This means you can’t save any state on the server between two successive requests.
 * Play considers HTTP as a key feature, thus the framework gives you full access to HTTP information.
 
@@ -36,14 +36,14 @@ The @conf/routes@ file is the configuration file used by the Router. This file l
 
 Let’s see what a route definition looks like:
 
-bc. GET    /clients/{id}             Clients.show
+bc. GET    /clients/{id}             Clients.show           
 
 Each route starts with the HTTP method, followed by the URI pattern. The last element of a route is the Java call definition.
 
 You can add a comment to the route file, with the @#@ character.
 
 bc. # Display a client
-GET    /clients/{id}             Clients.show
+GET    /clients/{id}             Clients.show           
 
 h3. The HTTP method
 
@@ -59,7 +59,7 @@ It also supports @WS@ as action method to indicate a "WebSocket":asynchronous#Us
 
 If you specify @*@ as the method, this route will match the HTTP Request for any method.
 
-bc. *   /clients/{id}             Clients.show
+bc. *   /clients/{id}             Clients.show           
 
 This route will accept both of:
 
@@ -103,7 +103,7 @@ bc. /clients/{<[a-z]{4,10}>id}
 Any valid regular expression can be used here.
 
 p(note). **Note**
-
+ 
 Dynamic parts are named. The Controller can later retrieve the dynamic parts from the HTTP params map.
 
 By default Play considers the trailing URL slash as important. For example, this route:
@@ -120,9 +120,9 @@ h3. Java call definition
 
 The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a @public static void@ method of a Controller class. A Controller class must be defined in the @controllers@ package and must be a subclass of @play.mvc.Controller@.
 
-You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The @controllers@ package itself is implicit, so you don’t need to specify it.
+You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The @controllers@ package itself is implicit, so you don’t need to specify it. 
 
-bc. GET    /admin             admin.Dashboard.index
+bc. GET    /admin             admin.Dashboard.index           
 
 h3. 404 as action
 
@@ -158,7 +158,7 @@ h3. Variables and scripts
 You can also use the @${…}@ syntax for variables, and the @%{…}@ syntax for scripts in the @routes@ file, as you can in templates. For example:
 
 bc. %{ context = play.configuration.getProperty('context', '') }%
-
+ 
 # Home page
 GET    ${context}         Secure.login
 GET    ${context}/        Secure.login
@@ -205,7 +205,7 @@ GET     /home                   staticFile:/public/html/index.html
 
 h2. URL Encoding
 
-Because it is imposible to decode and re-encode URL (you don't know if a slash is a slash or an %2F for example), URL should be expressed encoded. UTF-8 is the default encoding but you can use one of ISO-8859-1, UTF-16BE, UTF-16LE, UTF-16 using the defaultWebEncoding config parameter. See http://download.oracle.com/javase/1.4.2/docs/api/java/nio/charset/Charset.html for more info.
+Because it is imposible to decode and re-encode URL (you don't know if a slash is a slash or an %2F for example), URL should be expressed encoded. UTF-8 is the default encoding but you can use one of ISO-8859-1, UTF-16BE, UTF-16LE, UTF-16 using the defaultWebEncoding config parameter. See http://download.oracle.com/javase/1.4.2/docs/api/java/nio/charset/Charset.html for more info.  
 
 For example:
 
@@ -239,105 +239,105 @@ The priority order is again used to find the most specific Route able to generat
 
 h2. <a name="content-types">Setting content types</a>
 
-Play selects a "media type":http://en.wikipedia.org/wiki/Internet_media_type for the HTTP response according to the value of @request.format@. This value determines which view template file to use, by file extension, and also sets the response @Content-type@ to the media type that Play's @mime-types.properties@ file maps the format to.
+Play selects a "media type":http://en.wikipedia.org/wiki/Internet_media_type for the HTTP response according to the value of @request.format@. This value determines which view template file to use, by file extension, and also sets the response @Content-type@ to the media type that Play's @mime-types.properties@ file maps the format to. 
 
-The default format for a Play request is @html@. The default template for the @index()@ controller method (and @html@ format) is therefore the file @index.html@. If you specify a different format, in one of several ways, you can select an alternate template.
+The default format for a Play request is @html@. The default template for the @index()@ controller method (and @html@ format) is therefore the file @index.html@. If you specify a different format, in one of several ways, you can select an alternate template. 
 
 You can set the format programmatically before calling the @render@ method. For example, to serve a Cascading Style Sheet with media type @text/css@, you can do:
 
-bc. request.format = "css";
+bc. request.format = "css";  
 
-However, a cleaner approach is to use the URL to specify the format in the @routes@ file. You can add formats as specific routes, by specifying the format for the controller method. For example, the following route will handle a request for @/index.xml@, setting the format to @xml@ and rendering the @index.xml@ template.
+However, a cleaner approach is to use the URL to specify the format in the @routes@ file. You can add formats as specific routes, by specifying the format for the controller method. For example, the following route will handle a request for @/index.xml@, setting the format to @xml@ and rendering the @index.xml@ template. 
 
-bc. GET    /index.xml         Application.index(format:'xml')
+bc. GET    /index.xml         Application.index(format:'xml')  
 
 Similarly:
 
 bc. GET    /stylesheets/dynamic_css   css.SiteCSS(format:'css')
 
-Play can also extract the format directly from the URL, with a route such as the following.
+Play can also extract the format directly from the URL, with a route such as the following. 
 
-bc. GET    /index.{format}    Application.index
+bc. GET    /index.{format}    Application.index 
 
-With this route, a request for @/index.xml@ will set the format to @xml@ and render the XML template, while @/index.txt@ will render the plain text template.
+With this route, a request for @/index.xml@ will set the format to @xml@ and render the XML template, while @/index.txt@ will render the plain text template. 
 
 Play can also set the format automatically using HTTP content negotiation.
 
 
 h2. <a name="content-negotiation">HTTP content negotiation</a>
 
-One thing that Play has in common with other RESTful architectures is the direct use of HTTP functionality, instead of trying to hide HTTP or put an abstraction layer on top of it. "Content negotiation":http://en.wikipedia.org/wiki/Content_negotiation is an HTTP feature that allows an HTTP server to serve different "media types":http://en.wikipedia.org/wiki/Internet_media_type for the same URL, according to which media types are requested by the HTTP client. The client specifies acceptable content types using media types in the @Accept@ header, such as requiring an XML response with:
+One thing that Play has in common with other RESTful architectures is the direct use of HTTP functionality, instead of trying to hide HTTP or put an abstraction layer on top of it. "Content negotiation":http://en.wikipedia.org/wiki/Content_negotiation is an HTTP feature that allows an HTTP server to serve different "media types":http://en.wikipedia.org/wiki/Internet_media_type for the same URL, according to which media types are requested by the HTTP client. The client specifies acceptable content types using media types in the @Accept@ header, such as requiring an XML response with: 
 
 bc. Accept: application/xml
 
-A client may specify more than one media type, and also specify that any media type is acceptable with a catch-all wild-card media type (@*/*@):
+A client may specify more than one media type, and also specify that any media type is acceptable with a catch-all wild-card media type (@*/*@): 
 
 bc. Accept: application/xml, image/png, */*
 
-Conventional web browsers always include the wild-card value in the @Accept@ header: they will accept any media type, and Play will serve HTML - the default 'format'. Content negotiation is more likely to be used by custom clients, such as an Ajax request that requires a JSON response, or an e-book reader that requires a PDF or EPUB version of a document.
+Conventional web browsers always include the wild-card value in the @Accept@ header: they will accept any media type, and Play will serve HTML - the default 'format'. Content negotiation is more likely to be used by custom clients, such as an Ajax request that requires a JSON response, or an e-book reader that requires a PDF or EPUB version of a document. 
 
-h3. Setting the content type from HTTP headers
+h3. Setting the content type from HTTP headers 
 
 Play selects its default request format, @html@, if the @Accept@ header contains @text/html@ or @application/xhtml@, or as a result of the wildcard @*/*@ value. The default format is not selected if the wildcard value is not present.
 
-Play has built-in support for a few formats: @html@, @txt@, @json@ and @xml@. For example, define a controller method that renders some data:
+Play has built-in support for a few formats: @html@, @txt@, @json@ and @xml@. For example, define a controller method that renders some data: 
 
-bc. public static void index() {
-   final String name = "Peter Hilton";
-   final String organisation = "Lunatech Research";
-   final String url = "http://www.lunatech-research.com/";
-   render(name, organisation, url);
-}
+bc. public static void index() { 
+   final String name = "Peter Hilton"; 
+   final String organisation = "Lunatech Research"; 
+   final String url = "http://www.lunatech-research.com/"; 
+   render(name, organisation, url); 
+} 
 
-If you request a URL that is mapped to this method (@http://localhost:9000/@ in a new Play application) in a web browser, then play will render the @index.html@ template, because web browsers send an @Accept@ header that includes the value @text/html@.
+If you request a URL that is mapped to this method (@http://localhost:9000/@ in a new Play application) in a web browser, then play will render the @index.html@ template, because web browsers send an @Accept@ header that includes the value @text/html@. 
 
-Play responds to a request with the header @Accept: text/xml@ by setting the request format to @xml@ and rendering an @index.xml@ template, such as:
+Play responds to a request with the header @Accept: text/xml@ by setting the request format to @xml@ and rendering an @index.xml@ template, such as: 
 
-bc. <?xml version="1.0"?>
-<contact>
-<name>${name}</name>
-<organisation>${organisation}</organisation>
-<url>${url}</url>
-</contact>
+bc. <?xml version="1.0"?> 
+<contact> 
+<name>${name}</name> 
+<organisation>${organisation}</organisation> 
+<url>${url}</url> 
+</contact> 
 
-The built in @Accept@ header format mappings work as follows, for an @index()@ controller method: the accept header contains a media type that Play maps to a format, which is in turn mapped to a template file.
+The built in @Accept@ header format mappings work as follows, for an @index()@ controller method: the accept header contains a media type that Play maps to a format, which is in turn mapped to a template file. 
 
-|_. Accept header |_. Format |_. Template file name |_. Mapping |
-| null | null | index.html | Default template extension for null format |
-| image/png | null | index.html | Media type not mapped to a format |
-| ==*/*==, image/png | html | index.html | Default media type mapped to html format |
-| text/html | html | index.html | Built-in format |
-| application/xhtml | html | index.html | Built-in format |
-| text/xml | xml | index.xml | Built-in format |
-| application/xml | xml | index.xml | Built-in format |
-| text/plain | txt | index.txt | Built-in format |
-| text/javascript | json | index.json | Built-in format |
-| application/json, ==*/*== | json | index.json | Built-in format, default media type ignored |
+|_. Accept header |_. Format |_. Template file name |_. Mapping | 
+| null | null | index.html | Default template extension for null format | 
+| image/png | null | index.html | Media type not mapped to a format | 
+| ==*/*==, image/png | html | index.html | Default media type mapped to html format | 
+| text/html | html | index.html | Built-in format | 
+| application/xhtml | html | index.html | Built-in format | 
+| text/xml | xml | index.xml | Built-in format | 
+| application/xml | xml | index.xml | Built-in format | 
+| text/plain | txt | index.txt | Built-in format | 
+| text/javascript | json | index.json | Built-in format | 
+| application/json, ==*/*== | json | index.json | Built-in format, default media type ignored | 
 
 
-h3. Custom formats
+h3. Custom formats 
 
-You can add content negotiation for your own custom types by inspecting the request headers and setting the format accordingly, so that you only set that format when the HTTP request selects the corresponding media type. For example, to serve a "vCard":http://en.wikipedia.org/wiki/Vcard with media type @text/x-vcard@, in your controller, check for your custom format before all requests:
+You can add content negotiation for your own custom types by inspecting the request headers and setting the format accordingly, so that you only set that format when the HTTP request selects the corresponding media type. For example, to serve a "vCard":http://en.wikipedia.org/wiki/Vcard with media type @text/x-vcard@, in your controller, check for your custom format before all requests: 
 
-bc. @Before
-static void setFormat() {
-	if (request.headers.get("accept").value().equals("text/x-vcard")) {
-		request.format = "vcf";
-	}
-}
+bc. @Before 
+static void setFormat() { 
+	if (request.headers.get("accept").value().equals("text/x-vcard")) { 
+		request.format = "vcf"; 
+	} 
+} 
 
-Now, a request with an @Accept: text/x-vcard@ header will render an @index.vcf@ template, such as:
+Now, a request with an @Accept: text/x-vcard@ header will render an @index.vcf@ template, such as: 
 
-bc. BEGIN:VCARD
-VERSION:3.0
-N:${name}
-FN:${name}
-ORG:${organisation}
-URL:${url}
-END:VCARD
+bc. BEGIN:VCARD 
+VERSION:3.0 
+N:${name} 
+FN:${name} 
+ORG:${organisation} 
+URL:${url} 
+END:VCARD  
 
 
 p(note). **Continuing the discussion**
-
+ 
 When the Router has determined which Java call to invoke for the received HTTP Request, the Play framework then invokes that Java call. Let’s see how %(next)"Controllers":controllers% work.
 

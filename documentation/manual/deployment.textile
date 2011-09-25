@@ -21,7 +21,7 @@ Your Play application can also run inside your favorite application server. Most
 h3. Application server compatibility matrix
 
 || JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glassfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
-|| ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ ||  ✓ || ✓  ||
+|| ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ ||  ✓ || ✓  ||                                                                                                                                                            
 
 These application server are known to work with Play but feel free to report any other working deployment.
 
@@ -41,7 +41,7 @@ We recommend you refer to your application server manual in order to ‘isolate�
 
 Insert the following content (or create the file) in your application war directory at @myapp.war/WEB-INF/jboss-web.xml@:
 
-bc.
+bc. 
 <jboss-web>
  <class-loading java2classloadingcompliance="false">
  <loader-repository>
@@ -51,7 +51,7 @@ bc.
 </class-loading>
 </jboss-web>
 
-Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.
+Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
 
 
 h3. Datasource
@@ -86,7 +86,7 @@ bc. <?xml version="1.0" ?>
   </listener>
   <servlet>
     <servlet-name>play</servlet-name>
-    <servlet-class>play.server.ServletWrapper</servlet-class>
+    <servlet-class>play.server.ServletWrapper</servlet-class>	
   </servlet>
   <servlet-mapping>
     <servlet-name>play</servlet-name>

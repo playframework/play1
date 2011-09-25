@@ -1,4 +1,4 @@
-h1. Built-in template tags
+h1. Built-in template tags 
 
 These are the built-in tags that are available in addition to the core "template engine syntax":templates#syntax.
 
@@ -72,7 +72,7 @@ However, you can also use it with the @list@ tag and it will be executed if the 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
 #{/list}
-
+ 
 #{else}
     Nothing to do...
 #{/else}
@@ -83,11 +83,11 @@ h2. <a name="elseif">elseif</a>
 bc. #{if tasks.size() > 1}
     Busy tasklist
 #{/if}
-
+ 
 #{elseif tasks}
     One task on the list
 #{/elseif}
-
+ 
 #{else}
     Nothing to do
 #{/else}
@@ -237,7 +237,7 @@ Rendered as:
 
 bc. <form action="/client/create" id="creationForm" method="POST"
       accept-charset="utf-8" enctype="multipart/form-data">
-<input type="hidden" name="authenticityToken"
+<input type="hidden" name="authenticityToken" 
        value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
  ...
 </form>
@@ -256,7 +256,7 @@ bc. <head>
 You can also use the get tag in the following way, which will display "Homepage" if title has not been specified.
 
 bc. <head>
-    <title>#{get 'title'}Homepage #{/}
+    <title>#{get 'title'}Homepage #{/} 
 </head>
 
 h2. <a name="i18n">i18n</a>
@@ -302,7 +302,7 @@ Renders the tag body if there is a validation error for the input field field na
 
 bc. #{ifError 'user.name'}
   <p>
-    User name is invalid:
+    User name is invalid: 
     #{error 'user.name' /}
   <p>
 #{/ifError}
@@ -345,7 +345,7 @@ Now you can import this route client side:
 
 bc. <script type="text/javascript">
     var showUserAction = #{jsAction @Users.show(':id') /}
-
+    
     var displayUserDetail = function(userId) {
         $('userDetail').load( showUserAction({id: userId}) )
     }
@@ -487,7 +487,7 @@ This tag can generate options using @items@ attribute.
 
 * @items@ (optional) - list of objects, used to create @options@
 * @value@ (optional) - selected element in @items@
-* @labelProperty@ (optional) - for each item, attribute used as option's label
+* @labelProperty@ (optional) - for each item, attribute used as option's label 
 * @valueProperty@ (optional) - for each item, attribute used as option's value. @id@ is used by default
 
 p(note). The @labelProperty@ and @valueProperty@ shouldn't be primitives value. So, for example, instead of using @int@ or @long@ use an @Integer@ or @Long@ variable.
@@ -500,8 +500,8 @@ Will output:
 
 bc. <select name="users" size="1" class="test" id="select2" >
   <option value="0" >User-0</option>
-  <option value="1" >User-1</option>
-  <option value="2" >User-2</option>
+  <option value="1" >User-1</option>            
+  <option value="2" >User-2</option>            
   <option value="3" >User-3</option>
   <option value="4" >User-4</option>
   <option value="5" selected="selected">User-5</option>
@@ -547,6 +547,6 @@ Disables HTML escaping in template output, like the "raw()":javaextensions#arawa
 bc. ${'&amp;'}
 #{verbatim}${'&amp;'}#{/verbatim}
 
-In this example, the first line outputs @&amp;@ while the second line outputs an ampersand.
+In this example, the first line outputs @&amp;@ while the second line outputs an ampersand. 
 
 

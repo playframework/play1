@@ -29,20 +29,20 @@ h3. <a name="model">Create a User class</a>
 The CRUD module provides a user-interface for your application’s model classes. We will start by creating a User model class, which is a "JPA":jpa entity:
 
 bc. package models;
-
+ 
 import play.*;
 import play.db.jpa.*;
-
+ 
 import javax.persistence.*;
 import java.util.*;
-
+ 
 @Entity
 public class User extends Model {
-
+ 	
 	public String name;
 	public String email;
 	public String address;
-
+ 	
 }
 
 h3. <a name="controller">Create the Users controller</a>
@@ -50,9 +50,9 @@ h3. <a name="controller">Create the Users controller</a>
 Next, we create a simple controller that just inherits the CRUD controller. This is a kind of ‘marker’ that the CRUD module uses for generating routes.
 
 bc. package controllers;
-
+ 
 public class Users extends CRUD {
-
+   
 }
 
 Now open "http://localhost:9000/admin":http://localhost:9000/admin and you should see the User admin area.
@@ -62,12 +62,12 @@ Now open "http://localhost:9000/admin":http://localhost:9000/admin and you shoul
 The controller’s class name has to be the model class name with a final ‘s’. If you want to name it differently, you can do it using an annotation.
 
 bc. package controllers;
-
+ 
 import models.User;
-
+ 
 @CRUD.For(User.class)
 public class AdminUsers extends CRUD {
-
+   
 }
 
 h3. <a name="view">The User form</a>
@@ -79,34 +79,34 @@ Click the **Add** button, and you should see the User form.
 Now we can add some validation rules to the User class:
 
 bc. package models;
-
+ 
 import play.*;
 import play.db.jpa.*;
-
+ 
 import javax.persistence.*;
 import java.util.*;
-
+ 
 import play.data.validation.*;
-
+ 
 @Entity
 public class User extends Model {
-
+ 	
    @Required
    @MinSize(8)
    public String name;
-
+	
    @Required
    @Email
    public String email;
-
+	
    @Required
    @MaxSize(1000)
    public String address;
-
+ 
    public String toString() {
       return email;
    }
-
+	
 }
 
 
@@ -143,23 +143,23 @@ This will copy the default CRUD @list.html@ template to the @Users/list.html@ te
 Edit the template like this:
 
 bc. #{extends 'CRUD/layout.html' /}
-
+ 
 <div id="crudList" class="${type.name}">
-
+	
 	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
-
+ 
 	<div id="crudListSearch">
 		#{crud.search /}
 	</div>
-
+ 
 	<div id="crudListTable">
 		#{crud.table fields:['email', 'name'] /}
 	</div>
-
+	
 	<div id="crudListPagination">
 		#{crud.pagination /}
 	</div>
-
+	
 	<p id="crudListAdd">
 		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
 	</p>
@@ -177,27 +177,27 @@ You can go a bit further by customizing the way each field of your @User@ entity
 To customize a field, use the @#{crud.custom}@ tag:
 
 bc. #{crud.table fields:['name', 'company']}
-
+ 
    #{crud.custom 'company'}
      <a href="@{Companies.show(object.company.id)}">
       	 ${object.company.name}
      </a>
    #{/crud.custom}
-
+ 
 #{/crud.table}
 
 You can also display additional columns or form inputs by defining custom handlers:
 
 bc. #{crud.table fields:['name', 'company', 'edit']}
-
+ 
    #{crud.custom 'company'}
       <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
    #{/crud.custom}
-
+ 
    #{crud.custom 'edit'}
       <a href="@{Users.edit(object.id)}">Edit</a>
    #{/crud.custom}
-
+ 
 #{/crud.table}
 
 
@@ -207,13 +207,13 @@ The CRUD module is showing them as a text field. In this text field, the list is
 
 bc. @Entity
 public class Account extends Model {
-
+ 
       @CollectionOfElements
       public Set<ContentType> contentTypes;
-
+ 
       @CollectionOfElements
       public Set<String> usernames;
-
+ 
       public Account(Set<String> usernames {
             super();
             this.usernames = usernames;
@@ -224,12 +224,12 @@ This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","st
 
 h2. <a name="objecttype">Customize the _show_ and _blank_ views in a generic way</a>
 
-A central influence on the behavior of CRUD views is the @ObjectType@ for each field. So if you want to
+A central influence on the behavior of CRUD views is the @ObjectType@ for each field. So if you want to 
 change the CRUD module’s behaviour in a generic way, for example to hide fields with the <code>@Version</code> annotation, you can create you own @ObjectType@ class. You must also declare a static method in your controller or a superclass of your controller.
 
 bc. protected static ObjectType createObjectType(Class<? extends Model> type) {
    return new VersionObjectType(type);
-}
+} 
 
 Here is a complete example:
 
@@ -237,11 +237,11 @@ bc.   public class CustomAdminCompany extends CRUD {
    protected static ObjectType createObjectType(Class<? extends Model> type) {
       return new VersionObjectType(type);
    }
-
+   
    public static class VersionObjectType extends ObjectType {
-
+      
       private final String versionColumn;
-
+      
       public VersionObjectType(Class<? extends Model> modelClass) {
          super(modelClass);
          versionColumn = getVersionColumnName(modelClass);
@@ -263,7 +263,7 @@ bc.   public class CustomAdminCompany extends CRUD {
          }
          return null;
       }
-
+ 
       @Override
       public List<ObjectField> getFields() {
          List<ObjectField> result = super.getFields();
@@ -274,7 +274,7 @@ bc.   public class CustomAdminCompany extends CRUD {
          }
          return result;
       }
-   }
+   }   
 }
 
 This is not the end; you can also customize @findPage@ and other methods. Have a look at the source code.

@@ -1,6 +1,6 @@
 loadModels:h1. Completing the application tests
 
-We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project.
+We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
 
 Of course we’ve already written unit tests in order to test all the yabe model layer functionality. And it’s great as it will ensure that the blog engine’s core functionality is well tested. But a web application is not only about the ‘model’ part. We need to ensure that the web interface works as expected. That means testing the yabe blog engine’s controller layer. But we even need to test the UI itself, as for example, our JavaScript code.
 
@@ -17,9 +17,9 @@ import play.test.*;
 import play.mvc.*;
 import play.mvc.Http.*;
 import models.*;
-
+ 
 public class ApplicationTest extends FunctionalTest {
-
+ 
     @Test
     public void testThatIndexPageWorks() {
         Response response = GET("/");
@@ -27,7 +27,7 @@ public class ApplicationTest extends FunctionalTest {
         assertContentType("text/html", response);
         assertCharset("utf-8", response);
     }
-
+    
 }
 
 It looks like a standard JUnit test for now. Note that we use the Play @FunctionalTest@ super class in order to get all useful utility helpers. This test is correct and just checks that the application home page (typically the @/@ URL renders an HTML response with **‘200 OK’** as status code).
@@ -64,7 +64,7 @@ p(note). However you can still write plain HTML Selenium syntax in the template 
 The default test suite of a newly-created Play application already contains a Selenium test. Open the @yabe/test/Application.test.html@ file:
 
 bc. *{ You can use plain Selenium commands using the selenium tag }*
-
+ 
 #{selenium}
     // Open the home page, and check that no error occurred
     open('/')
@@ -77,7 +77,7 @@ This test should run without any problem with the yabe application. It just open
 However like any complex test, you need to set-up a set of well-known data before navigating the application and testing it. We will of course reuse the fixture concept and the @yabe/test/data.yml@ file that we’ve used before. To import this data set before the test suite, just use the @#{fixture /}@ tag:
 
 bc. #{fixture delete:'all', loadModels:'data.yml' /}
-
+ 
 #{selenium}
     // Open the home page, and check that no error occurred
     open('/')
@@ -90,10 +90,10 @@ Another important thing to check is that we have a fresh user session at the tes
 So let’s start our test with a special command:
 
 bc. #{fixture delete:'all', loadModels:'data.yml' /}
-
+ 
 #{selenium}
     clearSession()
-
+ 
     // Open the home page, and check that no error occurred
     open('/')
     waitForPageToLoad(1000)
@@ -105,19 +105,19 @@ Run it to be sure that there is no mistake. It should be green.
 So we can write a more specific test. Open the home page and check that the default posts are present:
 
 bc. #{fixture delete:'all', loadModels:'data.yml' /}
-
+ 
 #{selenium 'Check home page'}
     clearSession()
-
+ 
     // Open the home page
     open('/')
-
+ 
     // Check that the front post is present
     assertTextPresent('About the model layer')
     assertTextPresent('by Bob, 14 Jun 09')
     assertTextPresent('2 comments , latest by Guest')
     assertTextPresent('It is the domain-specific representation')
-
+ 
     // Check older posts
     assertTextPresent('The MVC application')
     assertTextPresent('Just a test of YABE')
@@ -132,22 +132,22 @@ Run it (you can run in a different window just by opening the test link in a new
 We will now test the comments form. Just add a new @#{selenium /}@ tag to the template:
 
 bc. #{selenium 'Test comments'}
-
+ 
     // Click on 'The MVC application post'
     clickAndWait('link=The MVC application')
     assertTextPresent('The MVC application')
     assertTextPresent('no comments')
-
+    
     // Post a new comment
     type('content', 'Hello')
     clickAndWait('css=input[type=submit]')
-
+    
     // Should get an error
     assertTextPresent('no comments')
     assertTextPresent('Author is required')
     type('author', 'Me')
     clickAndWait('css=input[type=submit]')
-
+    
     // Check
     assertTextPresent('Thanks for posting Me')
     assertTextPresent('1 comment')
@@ -178,7 +178,7 @@ And now run the test again, it should work.
 
 h2. <a name="cobertura">Measuring code coverage</a>
 
-Of course we haven’t written all required test cases for the application. But it’s enough for this tutorial. Now in a real-world project, how can we know if we have written enough test cases? We need something called **‘code coverage’**.
+Of course we haven’t written all required test cases for the application. But it’s enough for this tutorial. Now in a real-world project, how can we know if we have written enough test cases? We need something called **‘code coverage’**. 
 
 The ""Cobertura module":http://www.playframework.org/modules/cobertura generates code coverage reports using the "Cobertura":http://cobertura.sourceforge.net/ tool. Install the module using the @install@ command:
 
@@ -199,4 +199,4 @@ When all tests are passed, stop the application and cobertura will then generate
 
 As you see we’re far from testing all of the application’s cases. A good testing suite should approach 100%, even if it is of course nearly impossible to check all the code. Typically because we often need to hack in test mode, like we did for the captcha.
 
-p(note). Next: %(next)"Preparing for production":guide11%.
+p(note). Next: %(next)"Preparing for production":guide11%. 

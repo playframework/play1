@@ -7,25 +7,25 @@ h2. <a name="model">The Tag model object</a>
 We will add one more object to the blog model definition. The @Tag@ class itself is indeed very simple:
 
 bc. package models;
-
+ 
 import java.util.*;
 import javax.persistence.*;
-
+ 
 import play.db.jpa.*;
-
+ 
 @Entity
 public class Tag extends Model implements Comparable<Tag> {
-
+ 
     public String name;
-
+ 
     private Tag(String name) {
         this.name = name;
     }
-
+ 
     public String toString() {
         return name;
     }
-
+ 
     public int compareTo(Tag otherTag) {
         return name.compareTo(otherTag.name);
     }
@@ -48,7 +48,7 @@ Now it is time to link the new @Tag@ model with the @Post@ model. Let’s add th
 bc. …
 @ManyToMany(cascade=CascadeType.PERSIST)
 public Set<Tag> tags;
-
+ 
 public Post(User author, String title, String content) {
     this.comments = new ArrayList<Comment>();
     this.tags = new TreeSet<Tag>();
@@ -92,18 +92,18 @@ bc. @Test
 public void testTags() {
     // Create a new user and save it
     User bob = new User("bob@gmail.com", "secret", "Bob").save();
-
+ 
     // Create a new post
     Post bobPost = new Post(bob, "My first post", "Hello world").save();
     Post anotherBobPost = new Post(bob, "Hop", "Hello world").save();
-
+ 
     // Well
     assertEquals(0, Post.findTaggedWith("Red").size());
-
+ 
     // Tag it now
     bobPost.tagItWith("Red").tagItWith("Blue").save();
     anotherBobPost.tagItWith("Red").tagItWith("Green").save();
-
+ 
     // Check
     assertEquals(2, Post.findTaggedWith("Red").size());
     assertEquals(1, Post.findTaggedWith("Blue").size());
@@ -170,13 +170,13 @@ Modify the @/yabe/conf/initial-data.yml@ file to add some tags to the tests post
 bc. …
 Tag(play):
     name:           Play
-
+ 
 Tag(architecture):
     name:           Architecture
-
+ 
 Tag(test):
     name:           Test
-
+ 
 Tag(mvc):
     name:           MVC
 …
@@ -264,9 +264,9 @@ Finally, we just have to create the @/yabe/app/views/Application/listTagged.html
 
 bc. #{extends 'main.html' /}
 #{set title:'Posts tagged with ' + tag /}
-
+ 
 *{********* Title ********* }*
-
+ 
 #{if posts.size() > 1}
    <h3>There are ${posts.size()} posts tagged '${tag}'</h3>
 #{/if}
@@ -276,9 +276,9 @@ bc. #{extends 'main.html' /}
 #{else}
     <h3>No post tagged '${tag}'</h3>
 #{/else}
-
+ 
 *{********* Posts list *********}*
-
+ 
 <div class="older-posts">
     #{list items:posts, as:'post'}
         #{display post:post, as:'teaser' /}

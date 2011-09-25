@@ -26,14 +26,14 @@ h2. <a>Declaring the CRUD controllers</a>
 
 For each model object that we want to integrate to the administration area, we have to declare a controller that extends the @controllers.CRUD@ super controller. This is very easy.
 
-Create one controller for each model object. For example, for the @Post@ object create the @Posts@ controller in the @/yabe/app/controllers/Posts.java@ file.
+Create one controller for each model object. For example, for the @Post@ object create the @Posts@ controller in the @/yabe/app/controllers/Posts.java@ file. 
 
 bc. package controllers;
-
+ 
 import play.*;
 import play.mvc.*;
-
-public class Posts extends CRUD {
+ 
+public class Posts extends CRUD {    
 }
 
 p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, Play will automatically find the associated model object for each controller. If you need to use a different name, you can still use the <code>@CRUD.For</code> annotation. Check the "manual page":crud.
@@ -41,27 +41,27 @@ p(note). The convention is to pluralize the model object name to create the corr
 Create the same for all model objects:
 
 bc. package controllers;
-
+ 
 import play.*;
 import play.mvc.*;
-
-public class Users extends CRUD {
+ 
+public class Users extends CRUD {    
 }
 
 bc. package controllers;
-
+ 
 import play.*;
 import play.mvc.*;
-
-public class Comments extends CRUD {
+ 
+public class Comments extends CRUD {    
 }
 
 bc. package controllers;
-
+ 
 import play.*;
 import play.mvc.*;
-
-public class Tags extends CRUD {
+ 
+public class Tags extends CRUD {    
 }
 
 Now just open the "http://localhost:9000/admin/":http://localhost:9000/admin/ URL, and you should get to the administration area.
@@ -85,23 +85,23 @@ The generated administration area’s main problem is that forms don’t contain
 Let’s add some annotations to the @User@ class:
 
 bc. package models;
-
+ 
 import java.util.*;
 import javax.persistence.*;
-
+ 
 import play.db.jpa.*;
 import play.data.validation.*;
-
+ 
 @Entity
 public class User extends Model {
-
+ 
     @Email
     @Required
     public String email;
-
+    
     @Required
     public String password;
-
+    
     public String fullname;
     public boolean isAdmin;
 …
@@ -113,34 +113,34 @@ Now if you go to the edition or creation form for the @User@ model object, you w
 Let’s do the same for the @Post@ class:
 
 bc. package models;
-
+ 
 import java.util.*;
 import javax.persistence.*;
-
+ 
 import play.db.jpa.*;
 import play.data.validation.*;
-
+ 
 @Entity
 public class Post extends Model {
-
+ 
     @Required
     public String title;
-
+    
     @Required
     public Date postedAt;
-
+    
     @Lob
     @Required
     @MaxSize(10000)
     public String content;
-
+    
     @Required
     @ManyToOne
     public User author;
-
+    
     @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
     public List<Comment> comments;
-
+    
     @ManyToMany(cascade=CascadeType.PERSIST)
     public Set<Tag> tags;
 …
@@ -154,45 +154,45 @@ Here you see an interesting side effect: the <code>@MaxSize</code> validation ru
 Finally we can add validation rules to the @Comment@ and @Tag@ classes as well:
 
 bc. package models;
-
+ 
 import java.util.*;
 import javax.persistence.*;
-
+ 
 import play.db.jpa.*;
 import play.data.validation.*;
-
+ 
 @Entity
 public class Tag extends Model implements Comparable<Tag> {
-
+ 
     @Required
     public String name;
 …
 
 bc. package models;
-
+ 
 import java.util.*;
 import javax.persistence.*;
-
+ 
 import play.db.jpa.*;
 import play.data.validation.*;
-
+ 
 @Entity
 public class Comment extends Model {
-
+ 
     @Required
     public String author;
-
+    
     @Required
     public Date postedAt;
-
+     
     @Lob
     @Required
     @MaxSize(10000)
     public String content;
-
+    
     @ManyToOne
     @Required
-    public Post post;
+    public Post post; 
 …
 
 h2. <a>Better form labels</a>
@@ -232,27 +232,27 @@ bc. $ play crud:ov --template Comments/list
 Now you have a new template at @/yabe/app/views/Comments/list.html@:
 
 bc. #{extends 'CRUD/layout.html' /}
-
+ 
 <div id="crudList" class="${type.name}">
-
+	
 	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
-
+ 
 	<div id="crudListSearch">
 		#{crud.search /}
 	</div>
-
+ 
 	<div id="crudListTable">
 		#{crud.table /}
 	</div>
-
+ 	
 	<div id="crudListPagination">
 		#{crud.pagination /}
 	</div>
-
+	
 	<p id="crudListAdd">
 		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
 	</p>
-
+ 
 </div>
 
 The @#{crud.table /}@ actually generates the table. We can customize it using the @fields@ parameter to add more columns. Try this:
@@ -286,29 +286,29 @@ bc. $ play crud:ov --template Posts/show
 Now you have a new template at @/yabe/app/views/Posts/show.html@:
 
 bc. #{extends 'CRUD/layout.html' /}
-
+ 
 <div id="crudShow" class="${type.name}">
-
+	
 <h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
-
+ 
 <div class="objectForm">
 #{form action:@save(object.id), enctype:'multipart/form-data'}
     #{crud.form /}
     <p class="crudButtons">
-        <input type="submit" name="_save"
+        <input type="submit" name="_save" 
                value="&{'crud.save', type.modelName}" />
-        <input type="submit" name="_saveAndContinue"
+        <input type="submit" name="_saveAndContinue" 
                value="&{'crud.saveAndContinue', type.modelName}" />
     </p>
 #{/form}
 </div>
-
+ 
 #{form @delete(object.id)}
     <p class="crudDelete">
         <input type="submit" value="&{'crud.delete', type.modelName}" />
     </p>
 #{/form}
-
+ 
 </div>
 
 You can modify the @#{crud.form /}@ tag in @Posts/show.html@ to customise the @tags@ field by adding a @crud.custom@ tag to the @#{crud.form /}@ tag body:
@@ -342,11 +342,11 @@ bc. #{crud.form}
 	    </script>
 	    <div class="tags-list">
 	        #{list items:models.Tag.findAll(), as:'tag'}
-	           <span id="${tag.id}" onclick="toggle(this)"
+	           <span id="${tag.id}" onclick="toggle(this)" 
 	                class="tag ${object.tags.contains(tag) ? 'selected' : ''}">
 	               ${tag}
-	           </span>
-	           <input id="h${tag.id}" type="hidden" name="${fieldName}"
+	           </span> 
+	           <input id="h${tag.id}" type="hidden" name="${fieldName}" 
 	                    value="${object.tags.contains(tag) ? tag.id : ''}" />
 	        #{/list}
 	    </div>

@@ -1,8 +1,8 @@
 h1. Play libs
 
-The @play.libs@ package contains several useful libraries that will help you to achieve common programming tasks.
+The @play.libs@ package contains several useful libraries that will help you to achieve common programming tasks. 
 
-Most of these libraries are simple helpers that are really straightforward to use:
+Most of these libraries are simple helpers that are really straightforward to use: 
 
 * "Codec":/@api/play/libs/Codec.html: Utilities to encode and decode data.
 * "Crypto":/@api/play/libs/Crypto.html: Cryptographics utilities.
@@ -31,23 +31,23 @@ h2. Parsing XML using XPath
 The @XPath@ operations operate on all @org.w3.dom.Node@ types:
 
 bc. org.w3.dom.Document xmlDoc = … // retrieve a Document somewhere
-
+  
 for(Node event: XPath.selectNodes("events//event", xmlDoc)) {
-
+    
     String name = XPath.selectText("name", event);
     String data = XPath.selectText("@date", event);
-
+    
     for(Node place: XPath.selectNodes("//place", event)) {
         String place = XPath.selectText("@city", place);
         …
     }
-
+    
     …
 }
 
 h2. Web Service client
 
-The @play.libs.WS@ provides a powerful HTTP client. Under the hood it uses "Async HTTP client":https://github.com/AsyncHttpClient/async-http-client.
+The @play.libs.WS@ provides a powerful HTTP client. Under the hood it uses "Async HTTP client":https://github.com/AsyncHttpClient/async-http-client. 
 
 Making a request is easy:
 
@@ -135,12 +135,12 @@ Several times we've felt that we needed pattern matching in Java. Unfortunately 
 
 Our idea was to use the latest ‘for loop’ syntax to achieve basic pattern matching for Java. Pattern matching must both check if your object matches the required conditions and extract the interesting value. The Pattern matching library for Play is part of the @play.libs.F@ library.
 
-Let’s see a simple example; you have a reference of type Object and you want to check that it is a string that starts by ‘command:’.
+Let’s see a simple example; you have a reference of type Object and you want to check that it is a string that starts by ‘command:’. 
 
 The standard way would be:
 
 bc. Object o = anything();
-
+ 
 if(o instanceof String && ((String)o).startsWith("command:")) {
     String s = (String)o;
     System.out.println(s.toUpperCase());
@@ -156,7 +156,7 @@ The for loop is executed once, only if the condition is met, and it automaticall
 
 h3. Promises
 
-A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available.
+A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
 
 @Promise@ instances are used everywhere in Play in place of @Future@ instances (for Jobs, @WS.async@, etc…).
 
@@ -195,9 +195,9 @@ The access token can be retrieved this way:
 
 bc. public static void authenticate() {
     // TWITTER is a OAuth.ServiceInfo object
-    // getUser() is a method returning the current user
+    // getUser() is a method returning the current user 
     if (OAuth.isVerifierResponse()) {
-        // We got the verifier;
+        // We got the verifier; 
         // now get the access tokens using the request tokens
         OAuth.Response resp = OAuth.service(TWITTER).retrieveAccessToken(
             getUser().token, getUser().secret
@@ -209,7 +209,7 @@ bc. public static void authenticate() {
     }
     OAuth twitt = OAuth.service(TWITTER);
     Response resp = twitt.retrieveRequestToken();
-    // We received the unauthorized tokens
+    // We received the unauthorized tokens 
     // we need to store them before continuing
     getUser().token = resp.token; getUser().secret = resp.secret;
     getUser().save()
@@ -249,7 +249,7 @@ bc. public static void auth() {
         // Save accessToken, you will need it to request the service
         index();
     }
-    // authUrl is a String containing an absolute URL where the service
+    // authUrl is a String containing an absolute URL where the service 
     // should redirect the user back
     // This will trigger a redirect
     FACEBOOK.requestVerificationCode(authUrl);
@@ -283,29 +283,29 @@ static void checkAuthenticated() {
         login();
     }
 }
-
+ 
 public static void index() {
     render("Hello %s!", session.get("user"));
 }
-
+     
 public static void login() {
     render();
 }
-
+    
 public static void authenticate(String user) {
     if(OpenID.isAuthenticationResponse()) {
         UserInfo verifiedUser = OpenID.getVerifiedID();
         if(verifiedUser == null) {
             flash.error("Oops. Authentication has failed");
             login();
-        }
+        } 
         session.put("user", verifiedUser.id);
         index();
     } else {
         if(!OpenID.id(user).verify()) { // will redirect the user
             flash.error("Cannot verify your OpenID");
             login();
-        }
+        } 
     }
 }
 
@@ -314,7 +314,7 @@ And the @login.html@ template:
 bc. #{if flash.error}
 <h1>${flash.error}</h1>
 #{/if}
-
+ 
 <form action="@{Application.authenticate()}" method="POST">
     <label for="user">What’s your OpenID?</label>
     <input type="text" name="user" id="user" />
@@ -329,5 +329,5 @@ GET   /login                Application.login
 *     /authenticate         Application.authenticate
 
 p(note). **Continuing the discussion**
-
+ 
 Now we’ll check how to perform operations outside any HTTP request using %(next)"Ansynchronous Jobs":jobs%.

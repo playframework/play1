@@ -17,7 +17,7 @@ h2. <a>Download the binary package</a>
 Download the latest "Play binary package":http://download.playframework.org/ and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you’re on UNIX, make sure that the *play* script is runnable (otherwise simply do a @chmod +x play@). That’s all.
 
 p(note). *Tip*
-
+ 
 If you need to rebuild the framework for some reason, run @ant@ in the @$PLAY_HOME/framework/@ directory.
 
 
@@ -36,7 +36,7 @@ The Play framework is ready to use.
 
 h2. <a>Using the play command</a>
 
-When the framework is correctly installed, open a shell and execute *play*.
+When the framework is correctly installed, open a shell and execute *play*. 
 
 bc. $ play
 
@@ -65,5 +65,5 @@ You can then open a browser at "http://localhost:9000":http://localhost:9000 and
 !images/guide1-2!
 
 p(note). **Your Play environnement is ready**
-
+ 
 Next: %(next)"Set-up your preferred IDE":ide%.

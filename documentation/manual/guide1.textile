@@ -10,7 +10,7 @@ p(note). **All the code** included in this tutorial can be used for your project
 
 h2. <a name="project">The project</a>
 
-We chose to create yet another blog engine. It’s not a very imaginative choice but it will allow us to explore most of the functionality needed by a modern web application.
+We chose to create yet another blog engine. It’s not a very imaginative choice but it will allow us to explore most of the functionality needed by a modern web application. 
 
 To make things a bit more interesting, we will manage several users with different roles (editor, admin).
 
@@ -42,7 +42,7 @@ To work efficiently, you need to add the Play directory to your working path. It
 
 h2. <a name="new">Project creation</a>
 
-Now that Play is correctly installed, it’s time to create the blog application. Creating a Play application is pretty easy and fully managed by the play command line utility. That allows for standard project layouts between all Play applications.
+Now that Play is correctly installed, it’s time to create the blog application. Creating a Play application is pretty easy and fully managed by the play command line utility. That allows for standard project layouts between all Play applications. 
 
 Open a new command line and type:
 
@@ -66,7 +66,7 @@ The @play new@ command creates a new directory @yabe/@ and populates it with a s
 
 p(note). Because **Play uses UTF-8** as single encoding, it’s very important that all text files hosted in these directories are encoded using this charset. Make sure to configure your text editor accordingly.
 
-Now if you’re a seasoned Java developer, you may wonder where all the .class files go. The answer is nowhere: Play doesn’t use any class files; instead it reads the Java source files directly. Under the hood we use the Eclipse compiler to compile Java sources on the fly.
+Now if you’re a seasoned Java developer, you may wonder where all the .class files go. The answer is nowhere: Play doesn’t use any class files; instead it reads the Java source files directly. Under the hood we use the Eclipse compiler to compile Java sources on the fly. 
 
 That allows two very important things in the development process. The first one is that Play will detect changes you make to any Java source file and automatically reload them at runtime. The second is that when a Java exception occurs, Play will create better error reports showing you the exact source code.
 
@@ -80,18 +80,18 @@ You can see the new application by opening a browser to "http://localhost:9000":
 
 !images/guide1-2!
 
-Let’s see how the new application can display this page.
+Let’s see how the new application can display this page. 
 
 The main entry point of your application is the @conf/routes@ file. This file defines all accessible URLs for the application. If you open the generated routes file you will see this first ‘route’:
 
 bc. GET		/			Application.index
 
-That simply tells Play that when the web server receives a **GET** request for the @/@ path, it must call the @Application.index@ Java method. In this case, @Application.index@ is a shortcut for @controllers.Application.index@, because the @controllers@ package is implicit.
+That simply tells Play that when the web server receives a **GET** request for the @/@ path, it must call the @Application.index@ Java method. In this case, @Application.index@ is a shortcut for @controllers.Application.index@, because the @controllers@ package is implicit. 
 
 When you create standalone Java applications you generally use a single entry point defined by a method such as:
 
 bc. public static void main(String[] args) {
-  ...
+  ... 
 }
 
 A Play application has several entry points, one for each URL. We call these methods @action@ methods. Action methods are defined in special classes that we call @controllers@.
@@ -99,20 +99,20 @@ A Play application has several entry points, one for each URL. We call these met
 Let’s see what the @controllers.Application@ controller looks like. Open the @yabe/app/controllers/Application.java@ source file:
 
 bc. package controllers;
-
+ 
 import play.mvc.*;
-
+ 
 public class Application extends Controller {
-
+ 
 	public static void index() {
 		render();
 	}
-
+ 
 }
 
 Notice that controller classes extend the @play.mvc.Controller@ class. This class provides many useful methods for controllers, like the @render()@ method we use in the index action.
 
-The index action is defined as a @public static void@ method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.
+The index action is defined as a @public static void@ method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.  
 
 The default index action is simple: it calls the @render()@ method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
 
@@ -122,10 +122,10 @@ To see what the template looks like, open the @/yabe/app/views/Application/index
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
-
+ 
 #{welcome /}
 
-The template content seems pretty light. In fact, all you see are Play tags. Play tags are similar to JSP tags. This is the @#{welcome /}@ tag that generates the welcome message you saw in the browser.
+The template content seems pretty light. In fact, all you see are Play tags. Play tags are similar to JSP tags. This is the @#{welcome /}@ tag that generates the welcome message you saw in the browser. 
 
 The @#{extends /}@ tag tells Play that this template inherits another template called @main.html@. Template inheritance is a powerful concept that allows you to create complex web pages by reusing common parts.
 
@@ -134,27 +134,27 @@ Open the @/yabe/app/views/main.html@ template:
 bc. <!DOCTYPE html>
 <html>
     <head>
-        <title>#{get 'title' /}</title>
+        <title>#{get 'title' /}</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <link rel="stylesheet" type="text/css" media="screen"
+        <link rel="stylesheet" type="text/css" media="screen" 
             href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png"
+        <link rel="shortcut icon" type="image/png" 
             href="@{'/public/images/favicon.png'}" />
     </head>
     <body>
-        #{doLayout /}
+        #{doLayout /} 
     </body>
 </html>
 
 Do you see the @#{doLayout /}@ tag? This is where the content of @Application/index.html@ will be inserted.
-
+ 
 We can try to edit the controller file to see how Play automatically reloads it. Open the @yabe/app/controllers/Application.java@ file in a text editor, and add a mistake by removing the trailing semicolon after the @render()@ call:
 
 bc. public static void index() {
     render()
 }
 
-Go to the browser and refresh the page. You can see that Play detected the change and tried to reload the Application controller. But because you made a mistake, you get a compilation error.
+Go to the browser and refresh the page. You can see that Play detected the change and tried to reload the Application controller. But because you made a mistake, you get a compilation error. 
 
 !images/guide1-3!
 
@@ -171,16 +171,16 @@ You can remove this useless line, and now edit the @yabe/app/views/Application/i
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
-
+ 
 <h1>A blog will be here</h1>
 
 Like for Java code changes, just refresh the page in the browser to see the modification.
 
-p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, see "Setting-up your preferred IDE":ide.
+p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, see "Setting-up your preferred IDE":ide. 
 
 h2. <a name="db">Setting-up the database</a>
 
-One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called H2. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts.
+One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called H2. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts. 
 
 At the beginning, we will do a lot of testing and changes in the application model. For that reason, it’s better to use an in-memory database so we always start with a fresh data set.
 
@@ -239,7 +239,7 @@ Add the application’s files and commit:
 bc. $ git add .
 $ git commit -m "YABE initial version"
 
-Version 1 is committed and we now have a solid foundation for our project.
+Version 1 is committed and we now have a solid foundation for our project. 
 
-p(note). Go to the %(next)"A first iteration of the data model":guide2%.
+p(note). Go to the %(next)"A first iteration of the data model":guide2%. 
 

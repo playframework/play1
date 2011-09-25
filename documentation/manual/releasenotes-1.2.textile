@@ -10,14 +10,14 @@ Some APIs have been removed in Play 1.2, after having been deprecated for a long
 
 When you call a controller from a @FunctionalTest@, the action invocation now runs in its own transaction. Because the test itself also run in its own transaction, deadlocks can occur. So it's better to configure your database with *READ_UNCOMMITED* transactions while running tests. If you test again the in-memory H2 database, use the following database configuration:
 
-bc. %test.db.url=jdbc:h2:mem:play;MODE=MYSQL;LOCK_MODE=0@
+bc. %test.db.url=jdbc:h2:mem:play;MODE=MYSQL;LOCK_MODE=0@ 
 
-If you can't use *READ_UNCOMMITED* for your database transactions, you need to run every JPA access it their own transaction, either by managing JPA transaction by hand (using @JPA.em().getTransaction()@) or by spawning invocations using *Jobs*.
+If you can't use *READ_UNCOMMITED* for your database transactions, you need to run every JPA access it their own transaction, either by managing JPA transaction by hand (using @JPA.em().getTransaction()@) or by spawning invocations using *Jobs*. 
 
 
 h2. Dependency management
 
-"Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single @dependencies.yml@ file.
+"Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single @dependencies.yml@ file. 
 
 A Play application can have three kinds of dependencies:
 
@@ -30,7 +30,7 @@ Once you have expressed these dependencies in your application’s @conf/depende
 For example, using this file:
 
 bc. # Application dependencies
-
+ 
 require:
     - play
     - com.google.guava -> guava r07
@@ -56,11 +56,11 @@ The Promise type is part of new library (play.libs.F) that introduces several us
 
 h3. await(…)
 
-When your application code returns values that are not yet available using a @Promise<T>@, you want to be able to ask Play to wait for this promised result to be available before resuming your request. It allows your code to say explicitly:
+When your application code returns values that are not yet available using a @Promise<T>@, you want to be able to ask Play to wait for this promised result to be available before resuming your request. It allows your code to say explicitly: 
 
-bq. "I’m waiting for a result that will be available later"
+bq. "I’m waiting for a result that will be available later" 
 
-and so the framework to handle it as
+and so the framework to handle it as 
 
 bq. "Ok I will stop your code, reuse the thread to serve other requests, and resume your code as soon as the promised value you wait for is available".
 
@@ -120,7 +120,7 @@ bc. ws://localhost:9000/chat/messages
 
 h2. Database evolutions
 
-When you use a relational database, you need a way to track and organize your database schema changes. Play evolutions automatically track these changes and update your schema.
+When you use a relational database, you need a way to track and organize your database schema changes. Play evolutions automatically track these changes and update your schema. 
 
 !images/evolutions!
 
@@ -189,7 +189,7 @@ There are also some small new features as well as "130 fixed bugs":http://play.l
 
 * New @create()@ and @validateAndCreate()@ methods for JPA model.
 * Added @--pid_file=@, @--http.port=@, @--https.port=@ command line options to the @play@ command.
-* Support for lang-country pair (e.g. en-GB)
+* Support for lang-country pair (e.g. en-GB) 
 * Binding of @Map<String, String>@, with multivalues, composites, etc.
 * Ability to create your own CRUD @ObjectType@.
 * play.lib.WS client now supports Timeout.

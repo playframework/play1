@@ -22,7 +22,7 @@ bc. public static void generatePDF(Long reportId) {
     renderBinary(pdfStream);
 }
 
-Here we use @await(…)@ to ask Play to suspend the request until the @Promise<InputStream>@ value is redeemed.
+Here we use @await(…)@ to ask Play to suspend the request until the @Promise<InputStream>@ value is redeemed. 
 
 h3. Continuations
 
@@ -41,7 +41,7 @@ In fact here, your code will be executed in two steps, in two different threads.
 Using @await(…)@ and continuations, you could write a loop:
 
 bc. public static void loopWithoutBlocking() {
-    for(int i=0; i<=10; i++) {
+    for(int i=0; i<=10; i++) { 
          Logger.info(i);
          await("1s");
     }
@@ -90,7 +90,7 @@ When the client connects to the @ws://localhost:9000/helloSocket@ socket, Play w
 So a very basic socket example would be:
 
 bc. public class MyWebSocket extends WebSocketController {
-
+ 
     public static void hello(String name) {
         outbound.send("Hello %s!", name);
     }
@@ -103,7 +103,7 @@ Of course usually you don’t want to close the socket immediately. But it is ea
 For example a basic Echo server:
 
 bc. public class MyWebSocket extends WebSocketController {
-
+ 
     public static void echo() {
         while(inbound.isOpen()) {
              WebSocketEvent e = await(inbound.nextEvent());
@@ -123,7 +123,7 @@ bc. public class MyWebSocket extends WebSocketController {
              }
         }
     }
-
+ 
 }
 
 In this example, the nested ‘if’ and ‘cast’ soup was tedious to write and error prone. And here Java sucks. Even for this simple case it is not easy to handle. And for more complicated cases where you combine several streams and have even more event types, it becomes a nightmare.
@@ -135,16 +135,16 @@ So with some static imports, we can rewrite our previous echo sample as:
 bc. public static void echo() {
     while(inbound.isOpen()) {
          WebSocketEvent e = await(inbound.nextEvent());
-
+         
          for(String quit: TextFrame.and(Equals("quit")).match(e)) {
              outbound.send("Bye!");
              disconnect();
          }
-
+ 
          for(String message: TextFrame.match(e)) {
              outbound.send("Echo: %s", message);
          }
-
+         
          for(WebSocketClose closed: SocketClosed.match(e)) {
              Logger.info("Socket closed!");
          }
@@ -152,5 +152,5 @@ bc. public static void echo() {
 }
 
 p(note). **Continuing the discussion**
-
+ 
 Next, doing %(next)"Ajax requests":ajax%.

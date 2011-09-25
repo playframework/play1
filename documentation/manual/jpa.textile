@@ -40,14 +40,14 @@ For example, look at this Post model object:
 
 bc.. @Entity
 public class Post extends Model {
-
+ 
     public String title;
     public String content;
     public Date postDate;
-
+ 
     @ManyToOne
     public Author author;
-
+ 
     @OneToMany
     public List<Comment> comments;
 }
@@ -68,10 +68,10 @@ public class User extends GenericModel {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     public String id;
-
+ 
     @Required
     public String name;
-
+ 
     @Required
     @MaxSize(value=255, message = "email.maxsize")
     @play.data.validation.Email
@@ -103,7 +103,7 @@ List<Post> posts = Post.all().fetch(100);
 
 or even,
 
-bc.
+bc. 
 // 100 max posts start at 50
 List<Post> posts = Post.all().from(50).fetch(100);
 
@@ -169,10 +169,10 @@ You can use the @play.db.jpa.Blob@ type to store uploaded files in the file syst
 The basic use case of uploading, storing and serving a file is extremely easy in Play. This is because the binding framework automatically binds a file uploaded from an HTML form to your JPA model, and because Play provides convenience methods that make serving binary data as easy as serving plain text. To store file uploads in your model, add a property of type @play.db.jpa.Blob@
 
 bc. import play.db.jpa.Blob;
-
+ 
 @Entity
 public class User extends Model {
-
+ 
    public String name;
    public Blob photo;
 }
@@ -293,5 +293,5 @@ bc. EntityManager em = JPA.getJPAConfig("other").em();
 p(note). It is important to notice that Play does not support XA (two-phase commits). If you use several different JPA configurations in the same request, **Play will try to commit as many transactions as possible**. If the commit to the first database succeeds and the second commit to the other database fails, the first commit will not get rolled back. Bear this in mind when using multiple JPA configurations in the same request.
 
 p(note). **Continuing the discussion**
-
+ 
 Now we’ll check some %(next)"Play libraries":libs%.

@@ -31,9 +31,9 @@ If you need to fully configure Log4j, create a @log4j.properties@ file in the @c
 The default Log4j configuration is the following:
 
 bc. log4j.rootLogger=ERROR, Console
-
+ 
 log4j.logger.play=INFO
-
+ 
 # Console
 log4j.appender.Console=org.apache.log4j.ConsoleAppender
 log4j.appender.Console.layout=org.apache.log4j.PatternLayout
@@ -47,5 +47,5 @@ h3. <a name="production">Production configuration</a>
 See: "configure logging for production":production#logging for another example.
 
 p(note). **Continuing the discussion**
-
+ 
 Next, we continue configuration with %(next)"Configuration in several environments":ids%.

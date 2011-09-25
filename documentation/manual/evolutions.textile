@@ -6,7 +6,7 @@ When you use a relational database, you need a way to track and organize your da
 * When you deploy on a production server, you need to have a robust way to upgrade your database schema.
 * If you work on several machines, you need to keep all database schemas synchronized.
 
-p(note). If you work with JPA, Hibernate can handle database evolutions for you automatically. Evolutions are useful if you don't use JPA or if you prefer to manually take care of your database schema for finer tuning.
+p(note). If you work with JPA, Hibernate can handle database evolutions for you automatically. Evolutions are useful if you don't use JPA or if you prefer to manually take care of your database schema for finer tuning. 
 
 h2. <a name="script">Evolutions scripts</a>
 
@@ -22,9 +22,9 @@ Each script contains two parts:
 For example, take a look at this first evolution script that bootstraps a basic application:
 
 bc. # Users schema
-
+ 
 # --- !Ups
-
+ 
 CREATE TABLE User (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     email varchar(255) NOT NULL,
@@ -33,10 +33,10 @@ CREATE TABLE User (
     isAdmin boolean NOT NULL,
     PRIMARY KEY (id)
 );
-
+ 
 # --- !Downs
-
-DROP TABLE User;
+ 
+DROP TABLE User; 
 
 As you see you have to delimitate the both *Ups* and *Downs* section by using comments in your SQL script.
 
@@ -55,7 +55,7 @@ h2. Synchronizing concurrent changes
 Now let's imagine that we have two developers working on this project. Developer A will work on a feature that require a new database table. So he will create the following @2.sql@ evolution script:
 
 bc. # Add Post
-
+ 
 # --- !Ups
 CREATE TABLE Post (
     id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -66,7 +66,7 @@ CREATE TABLE Post (
     FOREIGN KEY (author_id) REFERENCES User(id),
     PRIMARY KEY (id)
 );
-
+ 
 # --- !Downs
 DROP TABLE Post;
 
@@ -75,10 +75,10 @@ Play will apply this evolution script to Developer A’s database.
 On the other hand, developer B will work on a feature that requires to alter the User table. So it will also create the following @2.sql@ evolution script:
 
 bc. # Update User
-
+ 
 # --- !Ups
 ALTER TABLE User ADD age INT;
-
+ 
 # --- !Downs
 ALTER TABLE User DROP age;
 
@@ -92,7 +92,7 @@ Each developer has created a @2.sql@ evolution script. So developer A needs to m
 
 bc. <<<<<<< HEAD
 # Add Post
-
+ 
 # --- !Ups
 CREATE TABLE Post (
     id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -103,15 +103,15 @@ CREATE TABLE Post (
     FOREIGN KEY (author_id) REFERENCES User(id),
     PRIMARY KEY (id)
 );
-
+ 
 # --- !Downs
 DROP TABLE Post;
 =======
 # Update User
-
+ 
 # --- !Ups
 ALTER TABLE User ADD age INT;
-
+ 
 # --- !Downs
 ALTER TABLE User DROP age;
 >>>>>>> devB
@@ -119,10 +119,10 @@ ALTER TABLE User DROP age;
 The merge is really easy to do:
 
 bc. # Add Post and update User
-
+ 
 # --- !Ups
 ALTER TABLE User ADD age INT;
-
+ 
 CREATE TABLE Post (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     title varchar(255) NOT NULL,
@@ -132,13 +132,13 @@ CREATE TABLE Post (
     FOREIGN KEY (author_id) REFERENCES User(id),
     PRIMARY KEY (id)
 );
-
+ 
 # --- !Downs
 ALTER TABLE User DROP age;
-
+ 
 DROP TABLE Post;
 
-This evolution script represents the new **revision 2** of the database, that is different of the previous revision 2 that developer A has already applied.
+This evolution script represents the new **revision 2** of the database, that is different of the previous revision 2 that developer A has already applied. 
 
 So Play will detect it and ask developer A to synchronize his database by first reverting the old revision 2 already applied, and by applying the new revision 2 script:
 
@@ -151,10 +151,10 @@ Sometimes you will make a mistake in your evolution scripts, and they will fail.
 For example, the **Ups** script of this evolution has an error:
 
 bc. # Add another column to User
-
+  
 # --- !Ups
 ALTER TABLE Userxxx ADD company varchar(255);
-
+ 
 # --- !Downs
 ALTER TABLE User DROP company;
 
@@ -171,10 +171,10 @@ bc. ALTER TABLE User ADD company varchar(255);
 But because your evolution script has errors, you probably want to fix it. So you modify the @3.sql@ script:
 
 bc. # Add another column to User
-
+  
 # --- !Ups
 ALTER TABLE User ADD company varchar(255);
-
+ 
 # --- !Downs
 ALTER TABLE User DROP company;
 
@@ -192,31 +192,31 @@ The evolutions run interactively in DEV mode. However in PROD mode you will have
 
 If you try to run a application in production mode on a database that is not up to date, the application will not start.
 
-bc. ~        _            _
+bc. ~        _            _ 
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/
+~ |_|            |__/   
 ~
 ~ play! master-localbuild, http://www.playframework.org
 ~ framework ID is prod
 ~
 ~ Ctrl+C to stop
-~
+~ 
 13:33:22 INFO  ~ Starting ~/test
 13:33:22 INFO  ~ Precompiling ...
 13:33:24 INFO  ~ Connected to jdbc:mysql://localhost
-13:33:24 WARN  ~
+13:33:24 WARN  ~ 
 13:33:24 WARN  ~ Your database is not up to date.
 13:33:24 WARN  ~ Use `play evolutions` command to manage database evolutions.
-13:33:24 ERROR ~
-
+13:33:24 ERROR ~ 
+ 
 @662c6n234
 Can't start in PROD mode with errors
-
+ 
 Your database needs evolution!
 An SQL script will be run on your database.
-
+ 
 play.db.Evolutions$InvalidDatabaseRevision
 	at play.db.Evolutions.checkEvolutionsState(Evolutions.java:323)
 	at play.db.Evolutions.onApplicationStart(Evolutions.java:197)
@@ -233,11 +233,11 @@ Exception in thread "main" play.db.Evolutions$InvalidDatabaseRevision
 The error message asks you to run the @play evolutions@ command:
 
 bc. $ play evolutions
-~        _            _
+~        _            _ 
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/
+~ |_|            |__/   
 ~
 ~ play! master-localbuild, http://www.playframework.org
 ~ framework ID is gbo
@@ -246,11 +246,11 @@ bc. $ play evolutions
 ~ Application revision is 3 [15ed3f5] and Database revision is 0 [da39a3e]
 ~
 ~ Your database needs evolutions!
-
+ 
 # ----------------------------------------------------------------------------
-
+ 
 # --- Rev:1,Ups - 6b21167
-
+ 
 CREATE TABLE User (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     email varchar(255) NOT NULL,
@@ -259,9 +259,9 @@ CREATE TABLE User (
     isAdmin boolean NOT NULL,
     PRIMARY KEY (id)
 );
-
+ 
 # --- Rev:2,Ups - 9cf7e12
-
+  
 ALTER TABLE User ADD age INT;
 CREATE TABLE Post (
     id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -272,13 +272,13 @@ CREATE TABLE Post (
     FOREIGN KEY (author_id) REFERENCES User(id),
     PRIMARY KEY (id)
 );
-
+ 
 # --- Rev:3,Ups - 15ed3f5
-
+ 
 ALTER TABLE User ADD company varchar(255);
-
+ 
 # ----------------------------------------------------------------------------
-
+ 
 ~ Run `play evolutions:apply` to automatically apply this script to the db
 ~ or apply it yourself and mark it done using `play evolutions:markApplied`
 ~

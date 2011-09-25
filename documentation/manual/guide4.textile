@@ -19,14 +19,14 @@ This action will display the @/yabe/app/views/Application/show.html@ template:
 
 bc. #{extends 'main.html' /}
 #{set title:post.title /}
-
+ 
 #{display post:post, as:'full' /}
 
 Because we’ve already written the @display@ tag, this page is really simple to write.
 
 h2. <a>Adding links to the details page</a>
 
-In the display tag we’ve left all links empty (using @#@). It’s now time to make these links point to the @Application.show@ action. With Play you can easily build links in a template using the <code>@{…}</code> notation. This syntax uses the router to ‘reverse’ the URL needed to call the specified action.
+In the display tag we’ve left all links empty (using @#@). It’s now time to make these links point to the @Application.show@ action. With Play you can easily build links in a template using the <code>@{…}</code> notation. This syntax uses the router to ‘reverse’ the URL needed to call the specified action. 
 
 Let’s edit the @/yabe/app/views/tags/display.html@ tag:
 
@@ -48,7 +48,7 @@ bc. …
     <h1><a href="@{Application.index()}">${blogTitle}</a></h1>
     <h2>${blogBaseline}</h2>
 </div>
-…
+… 
 
 We can now navigate between the home page and the post detail pages.
 
@@ -77,7 +77,7 @@ To allow users to navigate easily through posts, we will add a pagination mechan
 bc. public Post previous() {
     return Post.find("postedAt < ? order by postedAt desc", postedAt).first();
 }
-
+ 
 public Post next() {
     return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
 }
@@ -118,7 +118,7 @@ As you can see we just reuse the @addComment()@ method we previously added to th
 Let’s write the HTML form in the @show.html@ template (after the @#{display /}@ tag in fact):
 
 bc. <h3>Post a comment</h3>
-
+ 
 #{form @Application.postComment(post.id)}
     <p>
         <label for="author">Your name: </label>
@@ -155,15 +155,15 @@ p(note). **Don’t forget** to import @play.data.validation.*@ as well.
 As you can see, in case of validation errors, we re-display the post detail page. We have to modify the form code to display the error message:
 
 bc. <h3>Post a comment</h3>
-
+ 
 #{form @Application.postComment(post.id)}
-
+ 
     #{ifErrors}
         <p class="error">
             All fields are required!
         </p>
     #{/ifErrors}
-
+ 
     <p>
         <label for="author">Your name: </label>
         <input type="text" name="author" id="author" value="${params.author}" />
@@ -189,15 +189,15 @@ bc. …
 Now you can add this script to the @show.html@ template (add it at the end of the page):
 
 bc. <script type="text/javascript" charset="utf-8">
-    $(function() {
-        // Expose the form
-        $('form').click(function() {
-            $('form').expose({api: true}).load();
-        });
-
+    $(function() {         
+        // Expose the form 
+        $('form').click(function() { 
+            $('form').expose({api: true}).load(); 
+        }); 
+        
         // If there is an error, focus to form
         if($('form .error').size()) {
-            $('form').expose({api: true, loadSpeed: 0}).load();
+            $('form').expose({api: true, loadSpeed: 0}).load(); 
             $('form input[type=text]').get(0).focus();
         }
     });
@@ -227,7 +227,7 @@ bc. …
 #{if flash.success}
     <p class="success">${flash.success}</p>
 #{/if}
-
+ 
 #{display post:post, as:'full' /}
 …
 
@@ -239,5 +239,5 @@ bc. POST    /posts/{postId}/comments                Application.postComment
 
 That’s done. As always, commit the version to bazaar.
 
-p(note). Next: %(next)"Setting up a Captcha":guide5%.
+p(note). Next: %(next)"Setting up a Captcha":guide5%. 
 

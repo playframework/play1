@@ -4,8 +4,8 @@ The Play framework is a clean alternative to bloated Enterprise Java stacks. It 
 
 The Play framework’s goal is to ease web applications development while sticking with Java. Let’s see how this is possible.
 
-p(note). **Wanna see some code?**
-
+p(note). **Wanna see some code?** 
+ 
 Check "Five cool things you can do with play":5things, or start directly with the "hello world tutorial":firstapp.
 
 
@@ -19,7 +19,7 @@ The Java platform is infamous for its low productivity, mainly due to repeated a
 
 That’s why we rethought the development cycle to make developing with Play an efficient process.
 
-The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a <a href="http://en.wikipedia.org/wiki/LAMP_(software_bundle)">LAMP</a> or <a href="http://en.wikipedia.org/wiki/Ruby_on_Rails">Rails</a> environment.
+The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a <a href="http://en.wikipedia.org/wiki/LAMP_(software_bundle)">LAMP</a> or <a href="http://en.wikipedia.org/wiki/Ruby_on_Rails">Rails</a> environment. 
 
 It’s so fun that you can even work with a simple text editor and skip a full-featured Java IDE if you want.
 
@@ -29,7 +29,7 @@ Whenever an error occurs, the framework makes its best effort to identify and sh
 
 !images/guide1-3!
 
-Even the stack traces are stripped down and optimized to make it easier to solve problems. Look how template execution is nicely integrated to the Java stack trace.
+Even the stack traces are stripped down and optimized to make it easier to solve problems. Look how template execution is nicely integrated to the Java stack trace. 
 
 !images/stacktrace!
 
@@ -48,7 +48,7 @@ h2. <a name="http">HTTP-to-code mapping</a>
 
 If you’re already using another Java Web framework like the Servlet API or the Struts framework, you have already used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web application framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
 
-HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the Play framework.
+HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the Play framework. 
 
 For instance, binding a URI pattern to a Java call is just one line:
 
@@ -65,7 +65,7 @@ You and anyone else should be tired of writing things like this:
 
 bc. <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-
+ 
 <c:choose>
     <c:when test="${emails.unread != null && fn:size(emails.unread)}">
         You have ${fn:size(emails.unread)} unread email(s)!
@@ -118,5 +118,5 @@ The Play framework was initially inspired by our own Java applications. It has a
 The modular architecture lets you combine a web application with many others. Thanks to "application modules":modules, you can reuse your Java code, templates and static resources (such as JavaScript and CSS files) in a simple way.
 
 p(note). **Give it a try**
-
+ 
 "Install the Play framework":install and start developing your first application.

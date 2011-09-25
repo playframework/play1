@@ -6,7 +6,7 @@ h2. <a>Generating the captcha image</a>
 
 We’ll start to see how we can easily generate a captcha image using Play. Basically we will just use another action, except that it will return a binary stream instead of the HTML responses like we’ve returned so far.
 
-Since Play is a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the @play.libs.Images@ utility to simply generate a captcha image, and then write it to the HTTP response.
+Since Play is a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the @play.libs.Images@ utility to simply generate a captcha image, and then write it to the HTTP response. 
 
 As usual, we will start with a simple implementation. Add the @captcha@ action to the @Application@ controller:
 
@@ -15,7 +15,7 @@ bc. public static void captcha() {
     renderBinary(captcha);
 }
 
-Note that we can pass the captcha object directly to the renderBinary() method because the Images.Captcha class implements java.io.InputStream.
+Note that we can pass the captcha object directly to the renderBinary() method because the Images.Captcha class implements java.io.InputStream. 
 
 p(note). **Don’t forget** to import @play.libs.*@.
 
@@ -31,7 +31,7 @@ It should generate a random text for each refresh.
 
 h2. <a>How do we manage the state?</a>
 
-Until now it was easy, but the most complicated part is coming. To validate the captcha we need to save the random text written to the captcha image somewhere and then check it at the form submission time.
+Until now it was easy, but the most complicated part is coming. To validate the captcha we need to save the random text written to the captcha image somewhere and then check it at the form submission time. 
 
 Of course we could just put the text to the user session at the image generation time and then retrieve it later. But this solution has two drawbacks:
 
@@ -98,11 +98,11 @@ Now we just have to validate the captcha. We have added the @randomID@ as an hid
 Not that difficult. Let’s modify the @postComment@ action.
 
 bc. public static void postComment(
-        Long postId,
-        @Required(message="Author is required") String author,
-        @Required(message="A message is required") String content,
-        @Required(message="Please type the code") String code,
-        String randomID)
+        Long postId, 
+        @Required(message="Author is required") String author, 
+        @Required(message="A message is required") String content, 
+        @Required(message="Please type the code") String code, 
+        String randomID) 
 {
     Post post = Post.findById(postId);
     validation.equals(
@@ -119,7 +119,7 @@ bc. public static void postComment(
 
 Because we now have more error messages, modify the way we display errors in the @show.html@ template (yes we will just display the first error, it’s good enough):
 
-bc. ..
+bc. .. 
 #{ifErrors}
     <p class="error">
         ${errors[0]}
@@ -135,4 +135,4 @@ Check that the captcha is now fully functional.
 
 Great!
 
-p(note). Next: %(next)"Add tagging support":guide6%.
+p(note). Next: %(next)"Add tagging support":guide6%. 
