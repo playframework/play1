@@ -1,11 +1,11 @@
 package play.templates;
 
 public class GroovyInlineTags {
-    
+
     public enum CALL {
         START, END
     }
-    
+
     public static String _if(int index, CALL f) {
         StringBuilder s = new StringBuilder();
         switch(f) {
@@ -21,7 +21,7 @@ public class GroovyInlineTags {
         }
         return s.toString();
     }
-    
+
     public static String _ifnot(int index, CALL f) {
         StringBuilder s = new StringBuilder();
         switch(f) {
@@ -37,7 +37,7 @@ public class GroovyInlineTags {
         }
         return s.toString();
     }
-    
+
     public static String _else(int index, CALL f) {
         StringBuilder s = new StringBuilder();
         switch(f) {
@@ -51,7 +51,7 @@ public class GroovyInlineTags {
         }
         return s.toString();
     }
-    
+
     public static String _elseif(int index, CALL f) {
         StringBuilder s = new StringBuilder();
         switch(f) {
@@ -65,7 +65,7 @@ public class GroovyInlineTags {
         }
         return s.toString();
     }
-   
+
     public static String _list(int index, CALL f) {
         StringBuilder s = new StringBuilder();
         switch(f) {

@@ -1,9 +1,9 @@
 #{extends 'CRUD/layout.html' /}
 
 <div id="crudShow" class="${type.name}">
-	
+
 	<h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
-	
+
 	<div class="objectForm">
 	#{form @save(object.id)}
 		#{crud.form fields:superadmin ? ['title', 'place', 'category', 'company', 'tags', 'online', 'detail'] : ['title', 'place', 'category', 'tags', 'online', 'detail', ] /}
@@ -13,7 +13,7 @@
 		</p>
 	#{/form}
 	</div>
-	
+
 	#{form @delete(object.id)}
 		<p class="crudDelete">
 			<input type="submit" value="&{'crud.delete', type.modelName}" />

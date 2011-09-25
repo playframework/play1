@@ -17,16 +17,16 @@ bc. public static void index() {
 And complete the @yabe/app/views/Admin/index.html@:
 
 bc. #{extends 'admin.html' /}
- 
-<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} 
+
+<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'}
 ${posts.pluralize('post', 'posts')} so far</span></h3>
- 
+
 #{list items:posts, as:'post'}
     <p class="post ${post_parity}">
         <a href="#">${post.title}</a>
     </p>
 #{/list}
- 
+
 <p id="newPost" >
     <a href="#"><span>+</span> write a new post</a>
 </p>
@@ -49,7 +49,7 @@ And add the @form()@ and @save()@ actions to the @Admin.java@ controller:
 bc. public static void form() {
     render();
 }
- 
+
 public static void save() {
     // Not implemented yet
 }
@@ -57,45 +57,45 @@ public static void save() {
 Now you have to create the @yabe/app/views/Admin/form.html@ template:
 
 bc. #{extends 'admin.html' /}
- 
+
 <h3>Write, <span>a new post</span></h3>
- 
+
 #{form @save()}
- 
+
     #{ifErrors}
         <p class="error">
             Please correct these errors.
         </p>
     #{/ifErrors}
-     
+
     <p>
         #{field 'title'}
         <label>Post title:</label>
-        <input type="text" name="${field.name}" 
+        <input type="text" name="${field.name}"
             value="${post?.title}" class="${field.errorClass}" />
         #{/field}
     </p>
- 
+
     <p>
         #{field 'content'}
         <label>Write here:</label>
-        <textarea name="${field.name}" 
+        <textarea name="${field.name}"
             class="${field.errorClass}">${post?.content}</textarea>
         #{/field}
     </p>
- 
+
     <p>
         #{field 'tags'}
         <label>Enter some tags:</label>
-        <input type="text" size="50" 
+        <input type="text" size="50"
             name="${field.name}" value="${post?.tags?.join(' ')}" />
         #{/field}
     </p>
-    
+
     <p>
         <input type="submit" value="Publish this post to the blog" />
     </p>
-    
+
 #{/form}
 
 Finally, edit the @yabe/app/views/Admin/index.html@ template to link the **Write a new post** button to this form:
@@ -153,15 +153,15 @@ bc. public static void form(Long id) {
 As you see we made it optional, so the same action will retrieve an existing post only if the @id@ parameter is filled. So you can now link the main screen’s post list to the edit form. Edit the @yabe/app/views/Admin/index.html@ template:
 
 bc. #{extends 'admin.html' /}
- 
+
 <h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} ${posts.pluralize('post', 'posts')} so far</span></h3>
- 
+
 #{list items:posts, as:'post'}
     <p class="post ${post_parity}">
         <a href="@{Admin.form(post.id)}">${post.title}</a>
     </p>
 #{/list}
- 
+
 <p id="newPost" >
 	<a href="@{form()}"><span>+</span> write a new post</a>
 </p>
@@ -182,53 +182,53 @@ Refresh the **My posts** page and you should get better URL on these links.
 Now we need to modify the @yabe/app/views/Admin/form.html@ template as well:
 
 bc. #{extends 'admin.html' /}
- 
+
 #{ifnot post?.id}
     <h3>Write, <span>a new post</span></h3>
 #{/ifnot}
 #{else}
     <h3>Edit, <span>this post</span></h3>
 #{/else}
- 
+
 #{form @save(post?.id)}
- 
+
     #{ifErrors}
         <p class="error">
             Please correct these errors.
         </p>
     #{/ifErrors}
-     
+
     <p>
         #{field 'title'}
         <label>Post title:</label>
-        <input type="text" name="${field.name}" 
+        <input type="text" name="${field.name}"
             value="${post?.title}" class="${field.errorClass}" />
         #{/field}
     </p>
- 
+
     <p>
         #{field 'content'}
         <label>Write here:</label>
-        <textarea name="${field.name}" 
+        <textarea name="${field.name}"
             class="${field.errorClass}">${post?.content}</textarea>
         #{/field}
     </p>
- 
+
     <p>
         #{field 'tags'}
         <label>Enter some tags:</label>
-        <input type="text" size="50" 
+        <input type="text" size="50"
             name="${field.name}" value="${post?.tags?.join(' ')}" />
         #{/field}
     </p>
-    
+
     <p>
         <input type="submit" value="Publish this post to the blog" />
     </p>
-    
+
 #{/form}
 
-As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent to the @Admin.save@ action. 
+As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent to the @Admin.save@ action.
 
 Now we can change the @save()@ method a little to handle both creation and editing cases:
 
@@ -269,4 +269,4 @@ POST    /admin/new                          Admin.save
 
 That’s done! Now we’re using the same action for both creating new blog posts and editing old ones, and the administration area is finished!
 
-p(note). Next: %(next)"Completing the application tests":guide10%. 
+p(note). Next: %(next)"Completing the application tests":guide10%.

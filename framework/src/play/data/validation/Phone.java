@@ -21,7 +21,7 @@ import net.sf.oval.configuration.annotation.Constraint;
  * x an optional extension, which can also be spelled "ext" or "extension"
  * EEEE finally an optional extension
  * space, -, . and / are all considered delimiters and can be used anywhere in the number
- * 
+ *
  * i.e.
  *  US: (305) 613 09 58 ext 101
  *  France: +33 1 47 37 62 24 x3

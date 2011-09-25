@@ -16,7 +16,7 @@ public class JavaConsole extends Controller {
 	if(request.method == "POST" && script != null) {
 		try {
 			Interpreter i = new Interpreter();
-			utils.InterpreterHelper.out.set(new java.util.ArrayList<String>());    	
+			utils.InterpreterHelper.out.set(new java.util.ArrayList<String>());
 			i.eval("static import utils.InterpreterHelper.*;\n"+script);
 			renderArgs.put("results",utils.InterpreterHelper.out.get());
 		} catch (EvalError ex) {
@@ -24,7 +24,7 @@ public class JavaConsole extends Controller {
 			ex.printStackTrace();
 			renderArgs.put("trace",getStackTrace(ex));
 			renderArgs.put("error",ex);
-		}	
+		}
 	} else script = "println(\"hello java!\");";
         render("/console/repl.html",script);
     }

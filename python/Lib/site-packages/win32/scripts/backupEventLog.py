@@ -33,7 +33,7 @@ def BackupClearLog(logType):
 		print "Backed up %s log to %s" % (logType, fname)
 	finally:
 		win32evtlog.CloseEventLog(hlog)
-		
+
 if __name__=='__main__':
 	BackupClearLog("Application")
 	BackupClearLog("System")

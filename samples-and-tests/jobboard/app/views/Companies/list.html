@@ -1,7 +1,7 @@
 #{extends 'CRUD/layout.html' /}
 
 <div id="crudList" class="${type.name}">
-	
+
 	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
 
 	<div id="crudListSearch">
@@ -11,11 +11,11 @@
 	<div id="crudListTable">
 		#{crud.table fields:['name', 'email'] /}
 	</div>
-	
+
 	<div id="crudListPagination">
 		#{crud.pagination /}
 	</div>
-	
+
 	<p id="crudListAdd">
 		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
 	</p>

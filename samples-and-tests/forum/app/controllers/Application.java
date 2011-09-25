@@ -10,9 +10,9 @@ import notifiers.*;
 public class Application extends Controller {
 
     static Integer pageSize = Integer.parseInt(Play.configuration.getProperty("forum.pageSize", "10"));
-    
+
     // ~~~~~~~~~~~~ @Before interceptors
-    
+
     @Before
     static void globals() {
         renderArgs.put("connected", connectedUser());
@@ -29,7 +29,7 @@ public class Application extends Controller {
         }
     }
     // ~~~~~~~~~~~~ Actions
-    
+
     public static void signup() {
         render();
     }
@@ -107,9 +107,9 @@ public class Application extends Controller {
         flash.put("email", user.email);
         login();
     }
-    
+
     // ~~~~~~~~~~~~ Some utils
-    
+
     static void connect(User user) {
         session.put("logged", user.id);
     }

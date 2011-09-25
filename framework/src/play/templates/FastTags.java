@@ -124,9 +124,9 @@ public class FastTags {
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
-    
+
     /**
-     * The field tag is a helper, based on the spirit of Don't Repeat Yourself. 
+     * The field tag is a helper, based on the spirit of Don't Repeat Yourself.
      * @param args tag attributes
      * @param body tag inner body
      * @param out the output writer

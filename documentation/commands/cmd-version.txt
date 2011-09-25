@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ version -- Print the framework version
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play version

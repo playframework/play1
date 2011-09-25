@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ modules -- Display the computed modules list
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play modules [app_path] [--deps] [--%fwk_id]
@@ -9,14 +9,14 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Compute and display the modules list used to run the application hosted at the app_path directory.
-~ If app_path is omitted, the current directory is used. 
+~ If app_path is omitted, the current directory is used.
 ~
 ~ The displayed modules list is the same than the one used by the run and start commands.
 ~ The modules list depends of enabled modules in the conf/application.conf file.
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~
 ~ --%fwk_id:

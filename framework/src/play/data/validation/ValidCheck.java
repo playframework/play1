@@ -79,5 +79,5 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
             return false;
         }
     }
-    
+
 }

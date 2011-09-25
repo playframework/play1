@@ -3,15 +3,15 @@
 Tag(java):
     label:  Java
     code:   java
-    
+
 Tag(php):
     label:  PHP
-    code:   php    
-    
+    code:   php
+
 Tag(cool):
     label:  Cool job
-    code:   cool 
- 
+    code:   cool
+
 Tag(financial):
     label:  Financial
     code:   financial
@@ -21,7 +21,7 @@ Tag(financial):
 Category(dev):
     label:  Development
     code:   development
-    
+
 Category(business):
     label:  Business
     code:   business
@@ -30,13 +30,13 @@ Category(business):
 # Companies
 
 Company(google):
-    name:       Google    
+    name:       Google
     email:      jobs@google.com
     password:   yop
 
 
 Company(zenexity):
-    name:       Zenexity    
+    name:       Zenexity
     email:      jobs@zenexity.com
     password:   yop
     website:    http://www.zenexity.com
@@ -47,59 +47,59 @@ Company(zenexity):
 Job(phpDev):
     title:      PHP developper wanted
     place:      Chicago
-    postedAt:   2009-05-10 
+    postedAt:   2009-05-10
     detail:     >
                 h1. Lorem ipsum dolor sit amet
-                 
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
-                sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
-                magna aliquam erat volutpat. 
-                  
-                Ut wisi enim ad minim veniam, quis nostrud exerci 
-                tation ullamcorper suscipit lobortis nisl 
+
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+                sed diam nonummy nibh euismod tincidunt ut laoreet dolore
+                magna aliquam erat volutpat.
+
+                Ut wisi enim ad minim veniam, quis nostrud exerci
+                tation ullamcorper suscipit lobortis nisl
                 ut aliquip ex ea commodo consequat.
-    
+
     category:   dev
     online:     true
     company:    google
     tags:
                 - php
                 - cool
-               
+
 Job(javaDev):
     title:      Java developper wanted
     place:      Paris
-    postedAt:   2009-05-07 
+    postedAt:   2009-05-07
     detail:     >
                 h1. Lorem ipsum dolor sit amet
 
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
-                sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
-                magna aliquam erat volutpat. 
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+                sed diam nonummy nibh euismod tincidunt ut laoreet dolore
+                magna aliquam erat volutpat.
 
-                Ut wisi enim ad minim veniam, quis nostrud exerci 
-                tation ullamcorper suscipit lobortis nisl 
+                Ut wisi enim ad minim veniam, quis nostrud exerci
+                tation ullamcorper suscipit lobortis nisl
                 ut aliquip ex ea commodo consequat.
 
     category:   dev
     company:    zenexity
     tags:
                 - java
-                - cool 
+                - cool
 
 Job(playDev):
     title:      Play developper wanted
     place:      Paris
-    postedAt:   2009-05-11 
+    postedAt:   2009-05-11
     detail:     >
                 h1. Lorem ipsum dolor sit amet
 
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
-                sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
-                magna aliquam erat volutpat. 
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+                sed diam nonummy nibh euismod tincidunt ut laoreet dolore
+                magna aliquam erat volutpat.
 
-                Ut wisi enim ad minim veniam, quis nostrud exerci 
-                tation ullamcorper suscipit lobortis nisl 
+                Ut wisi enim ad minim veniam, quis nostrud exerci
+                tation ullamcorper suscipit lobortis nisl
                 ut aliquip ex ea commodo consequat.
 
     category:   dev
@@ -107,21 +107,21 @@ Job(playDev):
     company:    zenexity
     tags:
                 - java
-                - cool                  
-                
+                - cool
+
 Job(director):
     title:      CEO wanted
     place:      San Fransisco
-    postedAt:   2009-05-13 
+    postedAt:   2009-05-13
     detail:     >
                 h1. Lorem ipsum dolor sit amet
 
-                Lorem ipsum dolor sit amet, consectetuer adipiscing elit, 
-                sed diam nonummy nibh euismod tincidunt ut laoreet dolore 
-                magna aliquam erat volutpat. 
+                Lorem ipsum dolor sit amet, consectetuer adipiscing elit,
+                sed diam nonummy nibh euismod tincidunt ut laoreet dolore
+                magna aliquam erat volutpat.
 
-                Ut wisi enim ad minim veniam, quis nostrud exerci 
-                tation ullamcorper suscipit lobortis nisl 
+                Ut wisi enim ad minim veniam, quis nostrud exerci
+                tation ullamcorper suscipit lobortis nisl
                 ut aliquip ex ea commodo consequat.
 
     category:   business
@@ -129,6 +129,6 @@ Job(director):
     company:    google
     tags:
                 - financial
-                - cool   
-                
-                                         
+                - cool
+
+

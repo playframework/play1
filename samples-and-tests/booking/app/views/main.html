@@ -12,7 +12,7 @@
         #{get 'moreScripts' /}
     </head>
     <body>
-        
+
         <div id="header">
             <h1>play framework booking demo</h1>
             #{if user?.id}
@@ -27,7 +27,7 @@
                 </div>
             #{/if}
         </div>
-        
+
         <div id="content">
             #{if flash.error}
                 <p class="fError">
@@ -39,13 +39,13 @@
                     <strong>${flash.success}</strong>
                 </p>
             #{/if}
-            
+
             #{doLayout /}
         </div>
-        
+
         <div id="footer">
             Created with <a href="http://www.playframework.org">play framework</a> and really inspirated from the booking sample application provided by <a href="http://seamframework.org/">seam framework</a>
         </div>
-        
+
     </body>
 </html>

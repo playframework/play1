@@ -23,7 +23,7 @@ If you make any important changes to your application, such as changing the clas
 
 p(note). **Do not commit Eclipse configuration files when you work in a team!**
 
-The generated configuration files contain absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his Eclipse configuration files private. 
+The generated configuration files contain absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his Eclipse configuration files private.
 
 h3. Play Eclipse plug-in
 
@@ -44,10 +44,10 @@ Then you can just open the application as a NetBeans project.
 
 Use the standard *Run* button to start the application. When the application is started you can attach a debugging session at any time using the *Debug* button. Stopping the debugging session doesn’t stop the server.
 
-If you make any important change to your application such as changing the classpath, use @netbeansify@ again to regenerate the configuration files. 
+If you make any important change to your application such as changing the classpath, use @netbeansify@ again to regenerate the configuration files.
 
 p(note). **Do not commit the @nbproject/@ directory when you work in a team!**
- 
+
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his NetBeans configuration files private.
 
 h2(#intellij). <a>IntelliJ IDEA</a>
@@ -81,7 +81,7 @@ To run Play in test mode in IntelliJ:
 # Select @$PLAY_HOME/modules/testrunner/lib/play-testrunner.jar@ and click *OK*.
 
 p(note). **Do not commit the .iml files when you work in a team!**
- 
+
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his IntelliJ IDEA configuration files private.
 
 
@@ -103,7 +103,7 @@ As Play applications are standard Java applications, you don’t need a specific
 
 h3. Classpath settings
 
-A Play application classpath is built as follows (in this order): 
+A Play application classpath is built as follows (in this order):
 
 * The @conf/@ directory for the application
 * The @$PLAY_PATH/framework/play-$version.jar@
@@ -111,7 +111,7 @@ A Play application classpath is built as follows (in this order):
 * All JAR files found in the @$PLAY_PATH/framework/lib/@ directory
 
 p(note). *Tip*
- 
+
 If you have any modules enabled, you will need to add all modules’ libraries (from the @$module/lib/@ directory) to the classpath as well.
 
 

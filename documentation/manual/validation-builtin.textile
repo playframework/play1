@@ -165,7 +165,7 @@ bc. @Phone String phone
 Message key: @validation.phone@
 
 Format: @+CCC (SSSSSS)9999999999xEEEE@
- 
+
 * @+@          optional country code mark
 * @CCC@        optional country code, up to 3 digits, note than it MUST be followed be a delimiter
 * @(SSSSSS)@   optional subzone, up to 6 digits
@@ -173,7 +173,7 @@ Format: @+CCC (SSSSSS)9999999999xEEEE@
 * @x@          optional extension, can also be spelled "ext" or "extension"
 * @EEEE@       optional extension number, up to 4 digits
 * Delimiters can be either a _space_, @-@, @.@ or @/@ and can be used anywhere in the number
-  
+
 Examples:
 
 * @usa:(305) 613 09 58 ext 101@

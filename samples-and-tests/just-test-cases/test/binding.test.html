@@ -52,7 +52,7 @@
         assertText('userNameResult', 'x')
         assertText('passwordResult', 'x')
         assertText('roleResult', '')
-        
+
         type('userName', 'nicolas')
 	    type('password', 'nicolas')
         clickAndWait('submit')
@@ -61,15 +61,15 @@
         assertText('userNameResult', 'nicolas')
         assertText('passwordResult', 'nicolas')
         assertText('roleResult', '')
-        
+
         <!-- Custom binder -->
         open('@{DataBinding.customeBinding('kiki')}')
         assertTextPresent('--kiki--')
-        
+
         <!-- Global binder -->
         open('@{DataBinding.globalBinder('9,5')}')
         assertTextPresent('9|5')
-        
+
         open('@{DataBinding.globalBinder('8')}')
         assertTextPresent('Incorrect value')
 
@@ -77,14 +77,14 @@
         open('/databinding/changeLanguage/en/')
         open('@{Application.book(new java.util.Date(2879877856556))}')
 		assertTextPresent('Booked at 04/04/61 !!')
-		
+
 		<!-- Binding internal enum with empty string -->
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=RED')
 		assertTextPresent('false -> Nestle,Color RED')
-		
+
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=REDX')
 		assertTextPresent('true -> Nestle,null')
-		
+
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
 		assertTextPresent('false -> Nestle,null')
 

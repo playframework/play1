@@ -1,20 +1,20 @@
 #{selenium 'Test the @Before'}
 
 	open('@{Application.escapeData()}')
-	
+
 	// Check default (escaped)
 	assertText('default', '${'&nbsp;<i>Yop</i>&nbsp;'.escape()}')
-	
+
 	// Check raw
 	assertNotText('raw', '${'&nbsp;<i>Yop</i>&nbsp;'.escape()}')
 	assertNotText('raw', '${'<i>'.escape()}')
 	assertTextLike('raw', 'Yop')
-	
+
 	// Check verbatim
 	assertNotText('verbatim', '${'&nbsp;<i>Yop</i>&nbsp;'.escape()}')
 	assertNotText('verbatim', '${'<i>'.escape()}')
 	assertTextLike('verbatim', 'Yop')
-	
+
 	// Check default again (escaped)
 	assertText('defaultAgain', '${'&nbsp;<i>Yop</i>&nbsp;'.escape()}')
 

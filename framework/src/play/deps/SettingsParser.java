@@ -26,7 +26,7 @@ public class SettingsParser {
             super(message);
         }
     }
-    
+
     HumanReadyLogger logger;
 
     public SettingsParser(HumanReadyLogger logger) {

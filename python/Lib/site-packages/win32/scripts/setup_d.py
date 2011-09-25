@@ -19,7 +19,7 @@ def usage_and_die(rc):
     print "included these _d files.  Please run this script from"
     print "that directory"
     sys.exit(rc)
-    
+
 if win32api.__file__.find("_d") > 0:
     print "This scripts appears to be running a DEBUG version of Python."
     print "Please run it using a normal release build (python.exe)"
@@ -78,7 +78,7 @@ def _domodule(mod_name, release_mod_filename):
     if _docopy(new_fname, path):
         _doregister( mod_name, os.path.abspath( os.path.join(path, new_fname) ) )
 
-    
+
 # First the main Python DLL.
 path, fname = path, fname = os.path.split(win32api.GetModuleFileName(sys.dllhandle))
 base, ext = os.path.splitext(fname)

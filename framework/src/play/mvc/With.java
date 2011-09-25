@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface With { 
-    
+public @interface With {
+
     Class<?>[] value() default {};
 }

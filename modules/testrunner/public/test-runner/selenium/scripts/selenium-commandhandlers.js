@@ -31,7 +31,7 @@
 //     where seleniumApi is the Selenium object, and command a SeleniumCommand object.
 //
 //   - Handlers will return a "result" object (ActionResult, AccessorResult, AssertResult).
-//     ActionResults may contain a .terminationCondition function which is run by 
+//     ActionResults may contain a .terminationCondition function which is run by
 //     -executionloop.js after the command is run; we'll run it over and over again
 //     until it returns true or the .terminationCondition throws an exception.
 //     AccessorResults will contain the results of running getter (e.g. getTitle returns
@@ -246,11 +246,11 @@ objectExtend(CommandHandlerFactory.prototype, {
         // Register a waitForBlahBlah and waitForNotBlahBlah based on the specified accessor.
         var waitForActionMethod = this._waitForActionForPredicate(predicateBlock);
         var waitForActionBlock = fnBind(waitForActionMethod, seleniumApi);
-        
+
         var invertedPredicateBlock = this._invertPredicate(predicateBlock);
         var waitForNotActionMethod = this._waitForActionForPredicate(invertedPredicateBlock);
         var waitForNotActionBlock = fnBind(waitForNotActionMethod, seleniumApi);
-        
+
         this.registerAction("waitFor" + baseName, waitForActionBlock, false, true);
         this.registerAction("waitFor" + this._invertPredicateName(baseName), waitForNotActionBlock, false, true);
         //TODO decide remove "waitForNot.*Present" action name or not
@@ -306,14 +306,14 @@ ActionHandler.prototype.execute = function(seleniumApi, command) {
         // todo: this conditional logic is ugly
         seleniumApi.ensureNoUnhandledPopups();
     }
-    
+
     var handlerCondition = this.actionBlock(command.target, command.value);
-    
+
     // page load waiting takes precedence over any wait condition returned by
     // the action handler.
     var terminationCondition = (this.wait)
         ? seleniumApi.makePageLoadCondition() : handlerCondition;
-    
+
     return new ActionResult(terminationCondition);
 };
 

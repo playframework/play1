@@ -359,7 +359,7 @@ public class JPAPlugin extends PlayPlugin {
      * automatically on first use.
      *
      * It is better to specify readonly like this: @Transactional(readOnly=true)
-     * 
+     *
      * @param readonly true for a readonly transaction
      * @deprecated use @Transactional with readOnly-property instead
      */

@@ -1,16 +1,16 @@
 #{extends 'main.html' /}
 
 <div id="crud">
-	
+
 	<div id="crudHeader">
 		<h1>
 			#{if session.'company-name'}
-				<a href="@{Companies.show(session.'company-id')}">${session.'company-name'} (Edit my company profile)</a> - 
+				<a href="@{Companies.show(session.'company-id')}">${session.'company-name'} (Edit my company profile)</a> -
 			#{/if}
 			<a href="@{Administration.logout()}">Logout</a>
-		</h1>		
+		</h1>
 	</div>
-	
+
 	#{if request.actionMethod != 'index'}
 		<div id="crudBreadcrumb">
 			#{crud.navigation /}
@@ -27,10 +27,10 @@
 			${flash.error}
 		</div>
 	#{/if}
-	
+
 	<div id="crudContent">
 		#{doLayout /}
 	</div>
-	
+
 </div>
 

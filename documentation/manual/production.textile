@@ -23,7 +23,7 @@ bc. %production.db.url=jdbc:mysql://localhost/prod
 
 h3. Disable JPA automatic schema update:
 
-If you have used the automatic schema update feature provided by Hibernate, you should disable this feature for production. 
+If you have used the automatic schema update feature provided by Hibernate, you should disable this feature for production.
 
 For your production server, it’s usually a bad idea to let Hibernate automatically ALTER your production database’s schema and data…
 
@@ -47,9 +47,9 @@ For production it’s a good idea to use rolling log files. Do not send logging 
 Create a custom @log4j.properties@ in the @conf/@ directory:
 
 bc. log4j.rootLogger=ERROR, Rolling
- 
+
 log4j.logger.play=INFO
- 
+
 # Rolling files
 log4j.appender.Rolling=org.apache.log4j.RollingFileAppender
 log4j.appender.Rolling.File=application.log
@@ -77,24 +77,24 @@ The @/etc/lighttpd/lighttpd.conf@ file should define things like this:
 bc. server.modules = (
       "mod_access",
       "mod_proxy",
-      "mod_accesslog" 
+      "mod_accesslog"
 )
 …
 $HTTP["host"] =~ "www.myapp.com" {
     proxy.balance = "round-robin" proxy.server = ( "/" =>
         ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
 }
- 
+
 $HTTP["host"] =~ "www.loadbalancedapp.com" {
-    proxy.balance = "round-robin" proxy.server = ( "/" => ( 
-          ( "host" => "127.0.0.1", "port" => 9000 ), 
-          ( "host" => "127.0.0.1", "port" => 9001 ) ) 
+    proxy.balance = "round-robin" proxy.server = ( "/" => (
+          ( "host" => "127.0.0.1", "port" => 9000 ),
+          ( "host" => "127.0.0.1", "port" => 9001 ) )
     )
 }
 
 h3. Set-up with Apache
 
-The example below shows a simple set-up with "Apache httpd server":http://httpd.apache.org/ running in front of a standard Play configuration. 
+The example below shows a simple set-up with "Apache httpd server":http://httpd.apache.org/ running in front of a standard Play configuration.
 
 bc. LoadModule proxy_module modules/mod_proxy.so
 …
@@ -167,7 +167,7 @@ When using an HTTP frontal server, request addresses are seen as coming from the
 
 Proxy servers can add a specific header to the request to tell the proxied application where the request came from. Most web servers will add an X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in the "XForwardedSupport configuration":configuration#XForwardedSupport, Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
 
-However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
+However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like:
 
 bc. ProxyPreserveHost on
 
@@ -200,14 +200,14 @@ keystore.file=conf/certificate.jks
 
 Note that the values above are the default values.
 
-You can generate self-signed certificates using *openssl*: 
+You can generate self-signed certificates using *openssl*:
 
 bc. openssl genrsa 1024 > host.key
 openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
 
 If you are using the Java keystore mechanism, then the following properties can be configured in your @application.conf@ file:
 
-bc. # Keystore 
+bc. # Keystore
 ssl.KeyManagerFactory.algorithm=SunX509
 trustmanager.algorithm=JKS
 keystore.password=secret
@@ -234,5 +234,5 @@ bc. ant stop -Dplay.path=/path/to/playdirectory
 Note that you can also specify the path to Play framework in an environment variable or directly in your application's @build.xml@.
 
 p(note). **Continuing the discussion**
- 
+
 Next: %(next)"Deployment options":deployment%.

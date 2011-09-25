@@ -11,7 +11,7 @@ public class Tag extends Model {
 
     @Required
     public String label;
-    
+
     @Required
     public String code;
 
@@ -29,6 +29,6 @@ public class Tag extends Model {
     public String toString() {
         return label;
     }
-    
+
 }
 

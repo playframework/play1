@@ -6,7 +6,7 @@ import java.util.*;
 import models.*;
 
 public class CacheTest extends UnitTest {
-    
+
     @Before
     public void setup() {
         Fixtures.deleteAll();
@@ -20,7 +20,7 @@ public class CacheTest extends UnitTest {
         assertEquals("HOP", Cache.get("hop"));
         assertNull(Cache.get("yep"));
     }
-    
+
     @Test
     public void add() {
         Cache.set("hop", "HOP");
@@ -31,8 +31,8 @@ public class CacheTest extends UnitTest {
         assertEquals("HOP", Cache.get("hop"));
         assertEquals("HIP", Cache.get("yep"));
     }
-    
-    
+
+
     @Test
     public void replace() {
         Cache.set("hop", "HOP");
@@ -42,8 +42,8 @@ public class CacheTest extends UnitTest {
         Cache.replace("yep", "HIP");
         assertEquals("HIP", Cache.get("hop"));
         assertNull(Cache.get("yep"));
-    }   
-    
+    }
+
     @Test
     public void delete() {
         Cache.set("hop", "HOP");
@@ -57,7 +57,7 @@ public class CacheTest extends UnitTest {
         assertNull(Cache.get("hop"));
         assertNull(Cache.get("yep"));
     }
-    
+
     @Test
     public void incrDecr() {
         Cache.set("hop", 1L);
@@ -73,7 +73,7 @@ public class CacheTest extends UnitTest {
         Cache.decr("hop", 10);
         assertEquals(1L, Cache.get("hop"));
     }
-    
+
     @Test
     public void expiration() {
         Cache.set("hop", "Hop", "2s");
@@ -85,7 +85,7 @@ public class CacheTest extends UnitTest {
         pause(2500);
         assertNull(Cache.get("hop"));
     }
-    
+
     @Test
     public void cacheObjects() {
         List<User> users = User.findAll();
@@ -96,5 +96,5 @@ public class CacheTest extends UnitTest {
         Cache.add("users", users);
         assertEquals(users.size(), Cache.get("users", List.class).size());
     }
-    
+
 }

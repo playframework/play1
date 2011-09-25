@@ -4,7 +4,7 @@
 
     open('@{WithContinuations.loopWithWait()}')
     assertTextPresent('0:true;1:true;2:true;3:true;4:true')
-    
+
     open('@{WithContinuations.waitAndThenRedirect()}')
     assertTextPresent('Hello -> DONE:100')
 
@@ -16,70 +16,70 @@
 
     open('@{WithContinuations.waitAny()}')
     assertTextPresent('0:true[DONE:100];1:true[DONE:100]')
-    
+
     open('@{WithContinuations.withNaiveJPA()}')
     assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
-    
+
     open('@{WithContinuations.getUserByName('coco')}')
     assertTextPresent('Users:1 -> null')
-    
+
     open('@{WithContinuations.getUserByName('bob')}')
     assertTextPresent('Users:1 -> bob')
-    
+
     open('@{WithContinuations.withJPA()}')
     assertTextPresent('OK')
-    
+
     open('@{WithContinuations.getUserByName('kiki')}')
     assertTextPresent('Users:2 -> null')
-    
+
     open('@{WithContinuations.getUserByName('coco')}')
     assertTextPresent('Users:2 -> coco')
-    
+
     open('@{WithContinuations.rollbackWithoutContinuations()}')
     assertTextPresent('OK')
-    
+
     open('@{WithContinuations.getUserByName('user1')}')
     assertTextPresent('Users:2 -> null')
-    
+
     open('@{WithContinuations.rollbackWithContinuations()}')
     assertTextPresent('OK')
-    
+
     open('@{WithContinuations.getUserByName('user1')}')
     assertTextPresent('Users:12 -> user1')
-    
+
     open('@{WithContinuations.getUserByName('user9')}')
     assertTextPresent('Users:12 -> user9')
-    
+
     open('@{WithContinuations.rollbackWithContinuationsThatWorks()}')
     assertTextPresent('OK')
-    
+
     open('@{WithContinuations.getUserByName('oops1')}')
     assertTextPresent('Users:12 -> null')
-    
+
     open('@{WithContinuations.streamedResult()}')
     assertTextPresent('Hello 1')
     assertTextPresent('Hello 50')
     assertTextPresent('Hello 99')
     assertTextPresent('isOk->true')
-    
+
     open('@{WithContinuations.loopWithCallback()}')
     assertTextPresent('1:true;2:true;3:true;4:true;5:true')
-    
+
     open('@{WithContinuations.streamedCallback()}')
     assertTextPresent('Hello 1')
     assertTextPresent('Hello 50')
     assertTextPresent('Hello 99')
     assertTextPresent('isOk->true')
-    
+
     open('@{WithContinuations.jpaAndCallback()}')
     assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
-    
+
     open('@{WithContinuations.callbackWithResult()}')
     assertTextPresent('yep -> DONE:100')
-    
+
     open('@{WithContinuations.callbackWithResults()}')
     assertTextPresent('yep -> [DONE:100, DONE:200]')
-    
+
     open('@{WithContinuations.waitWithTimeout()}')
     assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
 

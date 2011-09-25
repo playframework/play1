@@ -8,7 +8,7 @@ import static play.data.binding.Binder.directBind;
 import models.*;
 
 public class DirectBindingTest extends UnitTest {
-    
+
     @Test
     public void testString() throws Exception  {
         assertTrue(directBind("", String.class).equals(""));
@@ -16,7 +16,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10", String.class).equals("10"));
         assertTrue(directBind("test", String.class).equals("test"));
     }
-    
+
     @Test
     public void testInteger() throws Exception  {
         assertTrue(directBind("", int.class).equals(0));
@@ -32,13 +32,13 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Integer.class).equals(new Integer("-10")));
         assertTrue(directBind("10.25", Integer.class).equals(new Integer("10")));
     }
-    
+
     @Test
     public void testEnum() throws Exception  {
         assertNull(directBind("", Factory.Color.class));
         assertTrue(directBind("RED", Factory.Color.class).equals(Factory.Color.RED));
     }
-    
+
     @Test
     public void testLong() throws Exception  {
         assertTrue(directBind("", long.class).equals(0l));
@@ -54,7 +54,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Long.class).equals(new Long("-10")));
         assertTrue(directBind("10.25", Long.class).equals(new Long("10")));
     }
-    
+
     @Test
     public void testByte() throws Exception  {
         assertTrue(directBind("", byte.class).equals((byte)0));
@@ -70,7 +70,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Byte.class).equals(new Byte("-10")));
         assertTrue(directBind("10.25", Byte.class).equals(new Byte("10")));
     }
-    
+
     @Test
     public void testShort() throws Exception  {
         assertTrue(directBind("", short.class).equals((short)0));
@@ -86,7 +86,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Short.class).equals(new Short("-10")));
         assertTrue(directBind("10.25", Short.class).equals(new Short("10")));
     }
-    
+
     @Test
     public void testFloat() throws Exception  {
         assertTrue(directBind("", float.class).equals(0f));
@@ -102,7 +102,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Float.class).equals(new Float("-10")));
         assertTrue(directBind("10.25", Float.class).equals(new Float("10.25")));
     }
-    
+
     @Test
     public void testDouble() throws Exception  {
         assertTrue(directBind("", double.class).equals(0d));
@@ -118,9 +118,9 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", Double.class).equals(new Double("-10")));
         assertTrue(directBind("10.25", Double.class).equals(new Double("10.25")));
     }
-    
+
     @Test
-    public void testBigDecimal() throws Exception  {        
+    public void testBigDecimal() throws Exception  {
         assertTrue(directBind("", BigDecimal.class) == null);
         assertTrue(directBind(null, BigDecimal.class) == null);
         assertTrue(directBind("0", BigDecimal.class).equals(new BigDecimal("0")));
@@ -128,7 +128,7 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("-10", BigDecimal.class).equals(new BigDecimal("-10")));
         assertTrue(directBind("10.25", BigDecimal.class).equals(new BigDecimal("10.25")));
     }
-    
+
     @Test
     public void testBoolean() throws Exception  {
         assertTrue(directBind("", boolean.class).equals(false));
@@ -148,5 +148,5 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("on", Boolean.class).equals(true));
         assertTrue(directBind("yes", Boolean.class).equals(true));
     }
-    
+
 }

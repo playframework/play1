@@ -13,6 +13,6 @@ public class PointBinder implements TypeBinder<Point> {
         String[] values = value.split(",");
         return new Point(Integer.parseInt(values[0]), Integer.parseInt(values[1]));
     }
-    
+
 }
 

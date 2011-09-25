@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ auto-test -- Automatically run all application tests
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play auto-test [app_path] [--deps]
@@ -9,7 +9,7 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Run the application hosted at the app_path directory, run a web browser and run all application tests.
-~ If app_path is omitted, the current directory is used. The application is run in foreground in the current shell. 
+~ If app_path is omitted, the current directory is used. The application is run in foreground in the current shell.
 ~ You can then stop it using Ctrl+C.
 ~
 ~ The System.out stream is redirected to the logs/system.out file. All application and framework logs are written to
@@ -33,6 +33,6 @@
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~

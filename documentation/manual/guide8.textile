@@ -23,12 +23,12 @@ The module provides a @controllers.Secure@ controller that declares all needed i
 Instead of directly inheriting from the @Secure@ controller, we can annotate the admin controllers using the <code>@With</code> annotation to tell Play to invoke the corresponding interceptors as well:
 
 bc. package controllers;
- 
+
 import play.*;
 import play.mvc.*;
- 
+
 @With(Secure.class)
-public class Posts extends CRUD {    
+public class Posts extends CRUD {
 }
 
 Do the same for the @Comments@, @Users@ and @Tags@ controllers.
@@ -46,15 +46,15 @@ The application has to provide an instance of @controllers.Secure.Security@ to c
 Create a @yabe/app/controllers/Security.java@ file and override the @authenticate()@ method:
 
 bc. package controllers;
- 
+
 import models.*;
- 
+
 public class Security extends Secure.Security {
-	
+
     static boolean authenticate(String username, String password) {
         return true;
     }
-    
+
 }
 
 As we already have the User objects part of the blog model, it is easy to implement a working version of this method:
@@ -72,17 +72,17 @@ We’ve started the administration area using the CRUD module, but it is not yet
 Let’s create a new @Admin@ controller for the administration part:
 
 bc.  package controllers;
- 
+
 import play.*;
 import play.mvc.*;
- 
+
 import java.util.*;
- 
+
 import models.*;
- 
+
 @With(Secure.class)
 public class Admin extends Controller {
-    
+
     @Before
     static void setConnectedUser() {
         if(Security.isConnected()) {
@@ -90,11 +90,11 @@ public class Admin extends Controller {
             renderArgs.put("user", user.fullname);
         }
     }
- 
+
     public static void index() {
         render();
     }
-    
+
 }
 
 And refactor the routes definition in @yabe/conf/routes@:
@@ -126,18 +126,18 @@ Good start! But since we will have several pages in this administration area, we
 bc. <!DOCTYPE html>
 <html>
     <head>
-        <title>Administration</title>		
+        <title>Administration</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        #{get 'moreStyles' /}	
-        <link rel="stylesheet" type="text/css" media="screen" 
+        #{get 'moreStyles' /}
+        <link rel="stylesheet" type="text/css" media="screen"
                 href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png" 
+        <link rel="shortcut icon" type="image/png"
                 href="@{'/public/images/favicon.png'}" />
         <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}"></script>
         <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
     </head>
     <body id="admin">
-        
+
         <div id="header">
             <div id="logo">
                 yabe. <span>administration</span>
@@ -148,17 +148,17 @@ bc. <!DOCTYPE html>
                 </li>
             </ul>
         </div>
-        
+
         <div id="main">
-            #{doLayout /} 
+            #{doLayout /}
         </div>
-        
+
         <p id="footer">
-            Yabe is a (not so) powerful blog engine built with the 
+            Yabe is a (not so) powerful blog engine built with the
             <a href="http://www.playframework.org">Play framework</a>
             as a tutorial application.
         </p>
-        
+
     </body>
 </html>
 
@@ -167,7 +167,7 @@ As you can see, it’s very close to the template used for the front part of the
 Now let’s use it in the @yabe/app/views/Admin/index.html@ template:
 
 bc. #{extends 'admin.html' /}
- 
+
 Welcome ${user}!
 
 And refresh!
@@ -207,7 +207,7 @@ Now we can show an administration menu if the user has the admin role. Update th
 
 bc. …
 <div id="main">
-    
+
     <ul id="adminMenu">
         <li class="${request.controller == 'Admin' ? 'selected' : ''}">
             <a href="@{Admin.index()}">My posts</a>
@@ -227,8 +227,8 @@ bc. …
             </li>
         #{/secure.check}
     </ul>
-    
-    #{doLayout /} 
+
+    #{doLayout /}
 </div>
 …
 
@@ -239,13 +239,13 @@ Note how we used the @#{secure.check /}@ tag to show part of the menu only to @a
 But that’s not yet enough to secure the site’s CRUD section! If a user knows the URL he can still access it. We have to protect the controllers as well. We can do so easily using the <code>@Check</code> annotation. For example, for the @Posts@ controller:
 
 bc. package controllers;
- 
+
 import play.*;
 import play.mvc.*;
- 
+
 @Check("admin")
 @With(Secure.class)
-public class Posts extends CRUD {    
+public class Posts extends CRUD {
 }
 
 Do the same for the @Tags@, @Comments@ and @Users@ controllers. Now try to log out and log in again with a standard user (like <code>jeff@gmail.com/secret</code>). You should not see the CRUD admin links. And if you try to access the "http://localhost:9000/admin/users":http://localhost:9000/admin/users URL directly you will get a **403 Forbidden** response.
@@ -262,12 +262,12 @@ And you get a new @/yabe/app/views/CRUD/layout.html@ template. Let’s replace i
 
 bc. #{extends 'admin.html' /}
 #{set 'moreStyles'}
-    <link rel="stylesheet" type="text/css" media="screen" 
+    <link rel="stylesheet" type="text/css" media="screen"
         href="@{'/public/stylesheets/crud.css'}" />
 #{/set}
- 
+
 <div id="crud">
- 
+
     #{if flash.success}
     	<div class="crudFlash flashSuccess">
     		${flash.success}
@@ -278,11 +278,11 @@ bc. #{extends 'admin.html' /}
     		${error ?: flash.error}
     	</div>
     #{/if}
- 
+
     <div id="crudContent">
     	#{doLayout /}
     </div>
- 
+
 </div>
 
 As you can see, we reuse @crud.css@ and include it in @admin.html@ using the **get/set** template variables mechanism. Now if you try the CRUD part of the administration area, it’s correctly integrated with the administration layout:
@@ -310,4 +310,4 @@ secure.signin=Log in now
 
 !images/guide8-8!
 
-p(note). Next: %(next)"Creating a custom editor area":guide9%. 
+p(note). Next: %(next)"Creating a custom editor area":guide9%.

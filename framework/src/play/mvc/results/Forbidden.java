@@ -45,5 +45,5 @@ public class Forbidden extends Result {
             throw new UnexpectedException(e);
         }
     }
-    
+
 }

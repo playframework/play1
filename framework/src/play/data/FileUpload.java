@@ -33,7 +33,7 @@ public class FileUpload implements Upload {
     public File asFile() {
         return defaultFile;
     }
-    
+
     public File asFile(File file) {
         try {
             Files.copy(defaultFile, file);
@@ -42,7 +42,7 @@ public class FileUpload implements Upload {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     public File asFile(String name) {
         return asFile(new File(name));
     }
@@ -58,7 +58,7 @@ public class FileUpload implements Upload {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     public String getContentType() {
         return fileItem.getContentType();
     }
@@ -74,7 +74,7 @@ public class FileUpload implements Upload {
     public Long getSize() {
         return defaultFile.length();
     }
-    
+
     public boolean isInMemory() {
         return fileItem.isInMemory();
     }

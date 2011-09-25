@@ -64,9 +64,9 @@ body {
 .about {
     text-indent: -999em;
     display: block;
-    width: 0; 
-    height: 0; 
-	border-left: 10px solid transparent; 
+    width: 0;
+    height: 0;
+	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
 	border-bottom: 10px solid #BAC36E;
 	border-top: 0;
@@ -142,9 +142,9 @@ body {
 .post .about {
     text-indent: -999em;
     display: block;
-    width: 0; 
-    height: 0; 
-	border-left: 10px solid transparent; 
+    width: 0;
+    height: 0;
+	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
 	border-bottom: 10px solid #fff;
 	border-top: 0;
@@ -243,9 +243,9 @@ h3 span {
 .comment .about {
     text-indent: -999em;
     display: block;
-    width: 0; 
-    height: 0; 
-	border-top: 10px solid transparent; 
+    width: 0;
+    height: 0;
+	border-top: 10px solid transparent;
 	border-bottom: 10px solid transparent;
 	border-right: 10px solid #E4EAFF;
 	border-left: 0;
@@ -297,7 +297,7 @@ form label {
 
 #captcha{
     display: block;
-    height: 50px;  
+    height: 50px;
 }
 
 .success {
@@ -306,7 +306,7 @@ form label {
     padding: 10px;
     -webkit-border-radius: 6px;
     -moz-border-radius: 6px;
-    -webkit-box-shadow: 0 2px 0 #4E840B; 
+    -webkit-box-shadow: 0 2px 0 #4E840B;
 }
 
 /** Pagination **/

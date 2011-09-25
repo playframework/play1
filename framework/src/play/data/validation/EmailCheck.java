@@ -23,5 +23,5 @@ public class EmailCheck extends AbstractAnnotationCheck<Email> {
         }
         return emailPattern.matcher(value.toString()).matches();
     }
-   
+
 }

@@ -1,6 +1,6 @@
 h1. Dependency management
 
-Play’s dependency management system allows you to express your application’s external dependencies in a single @dependencies.yml@ file. 
+Play’s dependency management system allows you to express your application’s external dependencies in a single @dependencies.yml@ file.
 
 A Play application can have three kinds of dependencies:
 
@@ -30,7 +30,7 @@ bc. commons-lang 2.5
 
 h3. Dynamic revisions
 
-The revision can be fixed (1.2, for instance) or dynamic. A dynamic revision expresses a range of allowed revisions. 
+The revision can be fixed (1.2, for instance) or dynamic. A dynamic revision expresses a range of allowed revisions.
 
 For example:
 
@@ -48,14 +48,14 @@ h2. <a name="yml">dependencies.yml</a>
 When you create a new Play application, a @dependencies.yml@ descriptor is automatically created in the @conf/@ directory:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
 
 The @require@ section list all dependencies needed by your application. Here the new application only depends on **Play version 1.2**. But let’s say your application needs "Google Guava":http://code.google.com/p/guava-libraries/; you would have:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07
@@ -65,11 +65,11 @@ h3. The ‘play dependencies’ command
 To ask Play to resolve, download and install the new dependencies, run @play dependencies@:
 
 bc. $ play dependencies
-~        _            _ 
+~        _            _
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/   
+~ |_|            |__/
 ~
 ~ play! 1.2, http://www.playframework.org
 ~ framework ID is gbo
@@ -92,9 +92,9 @@ bc. $ play dependencies
 ~ Done!
 ~
 
-Now Play has downloaded two JARs (**guava-r07.jar**, **jsr305-1.3.7.jar**) from the central Maven repository, and installed them into the application @lib/@ directory. 
+Now Play has downloaded two JARs (**guava-r07.jar**, **jsr305-1.3.7.jar**) from the central Maven repository, and installed them into the application @lib/@ directory.
 
-Why two jars, since we only declared one dependency? Because Google Guava has a transitive dependency. In fact this dependency is not really required and we would like to exclude it. 
+Why two jars, since we only declared one dependency? Because Google Guava has a transitive dependency. In fact this dependency is not really required and we would like to exclude it.
 
 h3. Transitive dependencies
 
@@ -103,7 +103,7 @@ By default, any transitive dependencies are automatically retrieved. But there a
 1. You can disable transitive dependencies for a particular dependency:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07:
@@ -112,9 +112,9 @@ require:
 2. You can disable transitive dependencies for the whole project:
 
 bc. # Application dependencies
-    
-transitiveDependencies: false    
-    
+
+transitiveDependencies: false
+
 require:
     - play 1.2
     - com.google.guava -> guava r07
@@ -122,7 +122,7 @@ require:
 3. You can exclude any specific dependency explicitely:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07:
@@ -134,11 +134,11 @@ h3. Keep lib/ and modules/ directory in sync
 Now if you run @play dependencies@ again, the findbugs dependency will be omitted:
 
 bc. $ play deps
-~        _            _ 
+~        _            _
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/   
+~ |_|            |__/
 ~
 ~ play! 1.2, http://www.playframework.org
 ~ framework ID is gbo
@@ -152,7 +152,7 @@ bc. $ play deps
 ~ 	lib/guava-r07.jar
 ~
 ~ ********************************************************************
-~ WARNING: Your lib/ and modules/ directories and not synced with 
+~ WARNING: Your lib/ and modules/ directories and not synced with
 ~ current dependencies (use --sync to automatically delete them)
 ~
 ~ 	Unknown: ~/Documents/coco/lib/jsr305-1.3.7.jar
@@ -161,13 +161,13 @@ bc. $ play deps
 ~ Done!
 ~
 
-However the **jsr305-1.3.7.jar** artifact downloaded before is still present in the application @lib/@ directory. 
+However the **jsr305-1.3.7.jar** artifact downloaded before is still present in the application @lib/@ directory.
 
 To keep the @lib/@ and @modules/@ directory synced with the dependency management system, you can specify the @--sync@ command to the @dependencies@ command:
 
 bc. play dependencies --sync
 
-If you run this command again the unwanted **JAR** will be deleted. 
+If you run this command again the unwanted **JAR** will be deleted.
 
 When you deploy an application in production, you can reduce the size of its modules by removing module source code and documentation. You can do this by adding the @--forProd@ option to the command:
 
@@ -178,12 +178,12 @@ This removes the @documentation/@, @src/@, @tmp/@, @*sample*/@ and @*test*/@ dir
 
 h2. <a name="conflicts">Conflict resolution</a>
 
-Whenever two components need different revisions of the same dependency, the conflicts manager will choose one. The default is to keep the latest revision and to evict the others. 
+Whenever two components need different revisions of the same dependency, the conflicts manager will choose one. The default is to keep the latest revision and to evict the others.
 
 But there is an exception. When a core dependency of Play framework itself is involved in a conflict, the version available in @$PLAY/framework/lib@ is preferred. For instance, Play depends on @commons-lang 2.5@. If your application requires @commons-lang 3.0@:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07:
@@ -193,11 +193,11 @@ require:
 Running @play dependencies@ will evict @commons-lang 3.0@ even if this version is newer:
 
 bc. play dependencies
-~        _            _ 
+~        _            _
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
-~ |_|            |__/   
+~ |_|            |__/
 ~
 ~ play! 1.2, http://www.playframework.org
 ~ framework ID is gbo
@@ -219,12 +219,12 @@ bc. play dependencies
 
 Also, note that dependencies already available in @$PLAY/framework/lib@ will not be installed in your application’s @lib/@ directory.
 
-Sometimes you want to force a specific dependency version, either to override a core dependency or to choose another revision that the latest version available. 
+Sometimes you want to force a specific dependency version, either to override a core dependency or to choose another revision that the latest version available.
 
 So you can specify the @force@ option on any dependency:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07:
@@ -234,12 +234,12 @@ require:
 
 h2. <a name="repositories">Adding new repositories</a>
 
-By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.org/modules. 
+By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.org/modules.
 
 You can, of course, specify new custom repositories in the @repositories@ section:
 
 bc. # Application dependencies
-    
+
 require:
     - play 1.2
     - com.google.guava -> guava r07:
@@ -247,10 +247,10 @@ require:
     - commons-lang 3.0:
         force: true
     - com.zenexity -> sso 1.0
-        
+
 # My custom repositories
 repositories:
-    
+
     - zenexity:
         type:       http
         artifact:   "http://www.zenexity.com/repo/[module]-[revision].[ext]"
@@ -264,7 +264,7 @@ h3. Maven repositories
 You can also add maven2-compatible repositories using the @iBiblio@ type, like this:
 
 bc. # Application dependencies
-    
+
 require:
     - play
     - play -> scala 0.8
@@ -294,12 +294,12 @@ mysecondmodule/
 The following @myplayapp/conf/depencencies.yml@ will achieve its goal.
 
 bc. # Application dependencies
-    
+
 require:
     - play
     - myfirstmodule -> myfirstmodule
     - mysecondmodule -> mysecondmodule
-    
+
 repositories:
     - My modules:
         type:       local

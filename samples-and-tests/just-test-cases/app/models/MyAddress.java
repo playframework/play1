@@ -9,6 +9,6 @@ public class MyAddress {
     @Required
     public String street;
     public int number;
-    
+
 }
 

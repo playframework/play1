@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Chat room' /}
 
-<h1>Ajax, long polling — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1> 
+<h1>Ajax, long polling — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1>
 
 <div id="thread">
     <script type="text/html" id="message_tmpl">
@@ -48,7 +48,7 @@
         $('#message').val('')
         $.post(say(), {message: message})
     });
-    
+
     $('#message').keypress(function(e) {
         if(e.charCode == 13 || e.keyCode == 13) {
             $('#send').click()
@@ -71,11 +71,11 @@
         });
     }
     getMessages();
-    
+
     // Display a message
     var display = function(event) {
         $('#thread').append(tmpl('message_tmpl', {event: event}));
         $('#thread').scrollTo('max')
     }
-    
+
 </script>

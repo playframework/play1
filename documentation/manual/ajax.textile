@@ -17,7 +17,7 @@ Now you can import this route client side:
 bc. <script type="text/javascript">
    var listAction = #{jsAction @list(':search', ':size', ':page') /}
    $('#result').load(
-       listAction({search: 'x', size: '10', page: '1'}), 
+       listAction({search: 'x', size: '10', page: '1'}),
        function() {
            $('#content').css('visibility', 'visible')
        }
@@ -43,5 +43,5 @@ bc. $.post(listAction, function(data) {
 });
 
 p(note). **Continuing the discussion**
- 
+
 Handle %(next)"Internationalization":i18n%.

@@ -33,7 +33,7 @@ public abstract class Template {
      * templates "communicate" with each other by storing info in the map
      */
     protected abstract String internalRender(Map<String, Object> args);
-    
+
     public String render() {
         return internalRender(new HashMap<String, Object>());
     }

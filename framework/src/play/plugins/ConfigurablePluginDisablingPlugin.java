@@ -86,7 +86,7 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
         //remember the plugins we disabled this time until the next time..
         previousDisabledPlugins.clear();
         previousDisabledPlugins.addAll(disabledPlugins);
-        
+
     }
 
     @SuppressWarnings("unchecked")

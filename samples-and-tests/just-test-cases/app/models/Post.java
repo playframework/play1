@@ -8,11 +8,11 @@ import java.util.*;
 
 @Entity
 public class Post extends Model {
-    
+
     public String name;
-    
+
     @ManyToMany(cascade=CascadeType.ALL)
     public List<Tag> tags = new ArrayList();
-    
+
 }
 

@@ -5,7 +5,7 @@
 ~ Alias:
 ~ ~~~~~
 ~ deps
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id]

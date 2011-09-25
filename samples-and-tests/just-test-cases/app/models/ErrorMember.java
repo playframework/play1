@@ -12,7 +12,7 @@ public class ErrorMember extends Model {
 
 	public ErrorMember() {
 	}
-	
+
 	@Required
 	private String name;
 

@@ -146,7 +146,7 @@ public class Fixtures {
         if (dbConfigName==null) {
             dbConfigName = DBConfig.defaultDbConfigName;
         }
-        
+
         try {
             idCache.clear();
             List<String> names = new ArrayList<String>();
@@ -229,7 +229,7 @@ public class Fixtures {
 
                         Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, null);
                         for(Field f : model.getClass().getFields()) {
-                            if (f.getType().isAssignableFrom(Map.class)) {	 	
+                            if (f.getType().isAssignableFrom(Map.class)) {
                                 f.set(model, objects.get(key).get(f.getName()));
                             }
                             if (f.getType().equals(byte[].class)) {
@@ -466,14 +466,14 @@ public class Fixtures {
             dbConfig.execute("SET CONSTRAINTS ALL DEFERRED");
             return;
         }
-        
+
         if (dbConfig.getUrl().startsWith("jdbc:sqlserver:")) {
             Statement exec=null;
 
             try {
                 List<String> names = new ArrayList<String>();
                 Connection connection=dbConfig.getConnection();
-                
+
                 ResultSet rs = connection.getMetaData().getTables(null, null, null, new String[]{"TABLE"});
                 while (rs.next()) {
                     String name = rs.getString("TABLE_NAME");
@@ -486,7 +486,7 @@ public class Fixtures {
                     exec.addBatch("ALTER TABLE " + tableName+" NOCHECK CONSTRAINT ALL");
                 exec.executeBatch();
                 exec.close();
-                
+
                 return;
             } catch (SQLException ex) {
                 throw new DatabaseException("Error while disabling foreign keys", ex);

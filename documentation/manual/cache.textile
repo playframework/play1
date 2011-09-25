@@ -4,7 +4,7 @@ To create high-performance systems, sometimes you need to cache data. Play has a
 
 If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the ‘share nothing’ assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
-It is important to understand that the cache contract is clear: when you put data in a cache, you can’t expect that data to remain there forever. In fact you shouldn’t. A cache is fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
+It is important to understand that the cache contract is clear: when you put data in a cache, you can’t expect that data to remain there forever. In fact you shouldn’t. A cache is fast, but values expire, and the cache generally exists only in memory (without persistent backup).
 
 So the best way to use the cache is to repopulate it when it doesn’t have what you expect:
 
@@ -31,13 +31,13 @@ bc. public static void showProduct(String id) {
     }
     render(product);
 }
- 
+
 public static void addProduct(String name, int price) {
     Product product = new Product(name, price);
     product.save();
     showProduct(product.id);
 }
- 
+
 public static void editProduct(String id, String name, int price) {
     Product product = Product.findById(id);
     product.name = name;
@@ -45,7 +45,7 @@ public static void editProduct(String id, String name, int price) {
     Cache.set("product_" + id, product, "30mn");
     showProduct(id);
 }
- 
+
 public static void deleteProduct(String id) {
     Product product = Product.findById(id);
     product.delete();
@@ -76,7 +76,7 @@ Also note that when specifying @expiration == "0s"@ (zero seconds) the actual ex
 
 h2. <a name="session">Don’t use the Session as a cache!</a>
 
-If you come from a framework that uses an in-memory Session implementation, you may be frustrated to see that Play allows only a small set of String data to be saved in the HTTP Session. But this is much better because a session is not the place to cache your application data! 
+If you come from a framework that uses an in-memory Session implementation, you may be frustrated to see that Play allows only a small set of String data to be saved in the HTTP Session. But this is much better because a session is not the place to cache your application data!
 
 So if you have been accustomed to doing things similar to:
 
@@ -99,5 +99,5 @@ h2. <a name="memcached">Configure memcached</a>
 When you want to enable a real Memcached implementation, enable Memcached  with the "memcached configuration":configuration#memcached and define the daemon address in the "memcached.host configuration":configuration#memcached.host.
 
 p(note). **Continuing the discussion**
- 
+
 Learn about %(next)"Sending emails":emails%.

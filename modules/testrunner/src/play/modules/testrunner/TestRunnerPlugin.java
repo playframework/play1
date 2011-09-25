@@ -45,5 +45,5 @@ public class TestRunnerPlugin extends PlayPlugin {
         System.out.println("~ Go to "+protocol+"://localhost:" + port + "/@tests to run the tests");
         System.out.println("~");
     }
-    
+
 }

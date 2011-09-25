@@ -17,19 +17,19 @@ public class OptimisticLockingCRUD extends CRUD {
     protected static CustomizableObjectType createObjectType(Class<? extends Model> entityClass) {
         return new CustomizableObjectType(entityClass);
     }
-    
-    
+
+
     public static class CustomizableObjectType extends ObjectType {
 
         private Set<String> hiddenFieldNames = new HashSet<String>();
         private Set<String> excludedFieldNames = new HashSet<String>();
-        
+
         private String[] showFieldNames = null;
         private String[] blankFieldNames = null;
-        
+
         private Map<String, ObjectField> fieldMap = new HashMap<String, ObjectField>();
 
-        
+
         public CustomizableObjectType(Class<? extends Model> modelClass) {
             super(modelClass);
             hiddenFieldNames.add("version");
@@ -39,7 +39,7 @@ public class OptimisticLockingCRUD extends CRUD {
                 throws ClassNotFoundException {
             super(modelClass);
         }
-        
+
         public void addHiddenFields(String... hiddenFields) {
             for (String hiddenField : hiddenFields) {
                 hiddenFieldNames.add(hiddenField);
@@ -51,7 +51,7 @@ public class OptimisticLockingCRUD extends CRUD {
                 excludedFieldNames.add(excludedField);
             }
         }
-        
+
         public void defineShowFields(String... showFields) {
             showFieldNames = showFields;
         }
@@ -59,10 +59,10 @@ public class OptimisticLockingCRUD extends CRUD {
         public void defineBlankFields(String... blankFields) {
             blankFieldNames = blankFields;
         }
-        
+
         @Override
         public List<ObjectField> getFields() {
-            String methodName = Request.current().actionMethod; 
+            String methodName = Request.current().actionMethod;
             if ("blank".equals(methodName) && blankFieldNames != null) {
                 return getFields(blankFieldNames);
             } else if ("show".equals(methodName) && showFieldNames != null) {
@@ -71,35 +71,35 @@ public class OptimisticLockingCRUD extends CRUD {
                 return getFieldsCommon();
             }
         }
-        
-        
-        
+
+
+
         private List <ObjectField> getFields(String[] fieldnameList) {
             if (fieldMap.isEmpty()) {
                 final List <ObjectField> fields = getFieldsCommon();
                 for (ObjectField objectField : fields) {
-                    fieldMap.put(objectField.name, objectField);    
+                    fieldMap.put(objectField.name, objectField);
                 }
             }
             final List<ObjectField> result = new ArrayList<ObjectField>(fieldnameList.length);
             for (String fieldname : fieldnameList) {
                 if (fieldMap.containsKey(fieldname)) {
-                    result.add(fieldMap.get(fieldname));    
+                    result.add(fieldMap.get(fieldname));
                 } else {
                     Logger.warn("Unknown field with name >%s<", fieldname);
                 }
-                                    
+
             }
-            return result;            
+            return result;
         }
-        
+
         private List<ObjectField> getFieldsCommon() {
             final List <ObjectField> fields = super.getFields();
             final Set<String> hiddenFieldsNotChanged = new HashSet<String>(hiddenFieldNames);
-            final Set<String> excludedFieldsNotChanged = new HashSet<String>(excludedFieldNames);            
+            final Set<String> excludedFieldsNotChanged = new HashSet<String>(excludedFieldNames);
             final List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
             final List<ObjectField> normalFields = new ArrayList<ObjectField>();
-            for (Iterator iterator = fields.iterator(); iterator.hasNext() && 
+            for (Iterator iterator = fields.iterator(); iterator.hasNext() &&
                     (!hiddenFieldsNotChanged.isEmpty() || !excludedFieldsNotChanged.isEmpty());) {
                 final ObjectField field = (ObjectField) iterator.next();
                 if (excludedFieldsNotChanged.remove(field.name)) {
@@ -113,7 +113,7 @@ public class OptimisticLockingCRUD extends CRUD {
                     Logger.debug("normal " + field.name);
                     normalFields.add(field);
                 }
-                
+
             }
             hiddenFields.addAll(normalFields);
             if (!hiddenFieldsNotChanged.isEmpty()) {
@@ -133,6 +133,6 @@ public class OptimisticLockingCRUD extends CRUD {
                 Logger.warn(message.toString());
             }
             return hiddenFields;
-        } 
+        }
     }
 }

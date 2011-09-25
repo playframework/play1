@@ -14,16 +14,16 @@ public class ContactData extends GenericModel {
 
   @Id
   public Long id;
-  
+
   @Column
   public String phone;
-  
+
   @ManyToOne(cascade=CascadeType.ALL)
   public Address address;
-  
+
   @Override
   public String toString() {
     return phone + " : " + (address == null ? "" : address.toString());
   }
-  
+
 }

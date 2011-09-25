@@ -580,7 +580,7 @@ public class Logger {
     }
 
     /**
-     * Try to format messages using java Formatter. 
+     * Try to format messages using java Formatter.
      * Fall back to the plain message if error.
      */
     static String format(String msg, Object... args) {
@@ -618,7 +618,7 @@ public class Logger {
         final int level = 4;
         return getCallerClassName(level);
     }
-    
+
     /**
      * @return the className of the class actually logging the message
      */

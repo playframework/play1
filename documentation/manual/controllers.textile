@@ -9,12 +9,12 @@ This is precisely the role played by the Controller layer: providing a **glue** 
 The Controller layer reduces the **impedance mismatch** between HTTP and the Domain Model.
 
 p(note). **Note**
- 
+
 There are different architectural models with different strategies. Some protocols give you direct access to the domain model objects. This is typically what EJB or Corba protocols do. In these cases, the architectural style used is RPC (Remote Procedure Call). These communication styles are hardly compatible with web architecture.
- 
+
 Some technologies like SOAP try to give access to the model object domain through the Web. However, SOAP is just another RPC-style protocol, in this case using HTTP as a transport protocol. It is not an application protocol.
 
-The web’s principles are not fundamentally object-oriented. So a layer is needed to adapt HTTP to your favorite language. 
+The web’s principles are not fundamentally object-oriented. So a layer is needed to adapt HTTP to your favorite language.
 
 
 h2. <a name="overview">Controller overview</a>
@@ -24,22 +24,22 @@ A Controller is a Java class, hosted by the @controllers@ package, and subclassi
 This is a Controller:
 
 bc. package controllers;
- 
+
 import models.Client;
 import play.mvc.Controller;
- 
+
 public class Clients extends Controller {
- 
+
     public static void show(Long id) {
         Client client = Client.findById(id);
         render(client);
     }
- 
+
     public static void delete(Long id) {
         Client client = Client.findById(id);
         client.delete();
     }
- 
+
 }
 
 Each public, static method in a Controller is called an action. The signature for an action method is always:
@@ -94,20 +94,20 @@ bc. /clients?id=1451
 An action method can retrieve the @id@ parameter value by declaring an @id@ parameter in its signature:
 
 bc. public static void show(String id) {
-    System.out.println(id); 
+    System.out.println(id);
 }
 
 You can use other Java types than String. In this case the framework will try to cast the parameter value to the correct Java type:
 
 bc. public static void show(Long id) {
-    System.out.println(id);  
+    System.out.println(id);
 }
 
 If the parameter is multivalued, you can declare an Array argument:
 
 bc. public static void show(Long[] id) {
     for(String anId : id) {
-        System.out.println(anid); 
+        System.out.println(anid);
     }
 }
 
@@ -115,12 +115,12 @@ or even a collection type:
 
 bc. public static void show(List<Long> id) {
     for(String anId : id) {
-        System.out.println(anid); 
+        System.out.println(anid);
     }
 }
 
 p(note). **Exceptions**
- 
+
 If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to its default value (typically null for objects and 0 for primitive numeric types). If a value is found but can’t be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
 
 h2. <a name="binding">Advanced HTTP to Java binding</a>
@@ -162,13 +162,13 @@ bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
 
 You can of course refine the date format according to the language. For example:
 
-bc.  public static void articlesSince(@As(lang={"fr,de","*"}, 
+bc.  public static void articlesSince(@As(lang={"fr,de","*"},
         value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
 }
 
-In this example, we specified that for the French and German languages the date format is @dd-MM-yyyy@ and for all the other languages it's @MM-dd-yyyy@. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
+In this example, we specified that for the French and German languages the date format is @dd-MM-yyyy@ and for all the other languages it's @MM-dd-yyyy@. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value.
 
 If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale. The "date.format configuration":configuration#date.format specifies the default date format to use.
 
@@ -192,9 +192,9 @@ The created file has the same name as the original file. It’s stored in a temp
 
 The uploaded file's MIME type should normally be specified by the HTTP request’s @Content-type@ header. However, when uploading files from a web browser, this might not happen for uncommon types. In this case, you can map the file name’s extension to a MIME type, using the @play.libs.MimeTypes@ class.
 
-bc. String mimeType = MimeTypes.getContentType(attachment.getName()); 
+bc. String mimeType = MimeTypes.getContentType(attachment.getName());
 
-The @play.libs.MimeTypes@ class looks up the MIME type for the given file name’s extension in the file @$PLAY_HOME/framework/src/play/libs/mime-types.properties@ 
+The @play.libs.MimeTypes@ class looks up the MIME type for the given file name’s extension in the file @$PLAY_HOME/framework/src/play/libs/mime-types.properties@
 
 You can also add your own types using the "Custom MIME types configuration":configuration#mimetype.
 
@@ -276,7 +276,7 @@ You can use JPA binding to modify complete object graphs in the same way as POJO
 bc. user.id = 1
 &user.name=morten
 &user.address.id=34
-&user.address.street=MyStreet 
+&user.address.street=MyStreet
 
 h2. <a name="custombinding">Custom binding</a>
 
@@ -319,7 +319,7 @@ bc. public class User extends Model {
     @As("dd, MM yyyy") Date birthDate;
     public String name;
 }
- 
+
 public static void editProfile(@As("profile") User user) {
     …
 }
@@ -331,8 +331,8 @@ h3. <a name="typebinder">play.data.binding.TypeBinder</a>
 The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of @TypeBinder@ that you define in your project. For example:
 
 bc. public class MyCustomStringBinder implements TypeBinder<String> {
- 
-    public Object bind(String name, Annotation[] anns, String value, 
+
+    public Object bind(String name, Annotation[] anns, String value,
     Class clazz) {
         return "!!" + value + "!!";
     }
@@ -340,7 +340,7 @@ bc. public class MyCustomStringBinder implements TypeBinder<String> {
 
 You can use it in any action, like:
 
-bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) 
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class)
 String name) {
     …
 }
@@ -351,8 +351,8 @@ Alternatively, you can define a global custom binder that will apply for the cor
 
 bc. @Global
 public class PointBinder implements TypeBinder<Point> {
- 
-    public Object bind(String name, Annotation[] anns, String value, 
+
+    public Object bind(String name, Annotation[] anns, String value,
     Class class) {
         String[] values = value.split(",");
         return new Point(
@@ -401,18 +401,18 @@ h3. <a name="binary">Return binary content</a>
 
 To serve binary data, such as a "file stored on the server":jpa#file, use the @renderBinary@ method. For example, if you have a @User@ model with a @play.db.jpa.Blob photo@ property, add a controller method to load the model object and render the image with the stored MIME type:
 
-bc. public static void userPhoto(long id) { 
-   final User user = User.findById(id); 
+bc. public static void userPhoto(long id) {
+   final User user = User.findById(id);
    response.setContentTypeIfNotSet(user.photo.type());
    java.io.InputStream binaryData = user.photo.get();
    renderBinary(binaryData);
-} 
+}
 
 h3. <a name="attachment">Download a file as an attachment</a>
 
 You can set an HTTP header to instruct the web browser to treat a binary response as an ‘attachment’, which generally results in the web browser downloading the file to the user’s computer. To do this, pass a file name as a parameter to the @renderBinary@ method, which causes Play to set the @Content-Disposition@ response header, providing a file name. For example, supposing the @User@ model from the previous example as a @photoFileName@ property:
 
-bc. renderBinary(binaryData, user.photoFileName); 
+bc. renderBinary(binaryData, user.photoFileName);
 
 
 h3. <a name="template">Execute a template</a>
@@ -420,13 +420,13 @@ h3. <a name="template">Execute a template</a>
 If the generated content is complex, you should use a template to generate the response content.
 
 bc. public class Clients extends Controller {
- 
+
     public static void index() {
-        render();    
+        render();
     }
 }
 
-A template name is automatically deduced from the Play conventions. The default template path is resolved using the Controller and action names. 
+A template name is automatically deduced from the Play conventions. The default template path is resolved using the Controller and action names.
 
 In this example the invoked template is:
 
@@ -437,11 +437,11 @@ h4. Add data to the template scope
 Often the template needs data. You can add these data to the template scope using the @renderArgs@ object:
 
 bc. public class Clients extends Controller {
- 
+
     public static void show(Long id) {
         Client client = Client.findById(id);
         renderArgs.put("client", client);
-        render();    
+        render();
     }
 }
 
@@ -457,7 +457,7 @@ You can pass data directly to the template using @render(…)@ method arguments:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
-    render(client);    
+    render(client);
 }
 
 In this case, the variables accessible by the template have the same name as the local Java variables.
@@ -466,11 +466,11 @@ You can pass more than one variable:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
-    render(id, client);    
+    render(id, client);
 }
 
 p(note). **Important!**
- 
+
 You can only pass **local variables** in this way.
 
 
@@ -482,7 +482,7 @@ Example:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
-    renderTemplate("Clients/showClient.html", id, client);    
+    renderTemplate("Clients/showClient.html", id, client);
 }
 
 h3. <a name="redirect">Redirect to another URL</a>
@@ -503,12 +503,12 @@ You can send a Redirect response to any action, simply by invoking the action me
 For example:
 
 bc. public class Clients extends Controller {
- 
+
     public static void show(Long id) {
         Client client = Client.findById(id);
         render(client);
     }
- 
+
     public static void create(String name) {
         Client client = new Client(name);
         client.save();
@@ -519,7 +519,7 @@ bc. public class Clients extends Controller {
 With these routes:
 
 bc. GET    /clients/{id}            Clients.show
-POST   /clients                 Clients.create 
+POST   /clients                 Clients.create
 
 * The browser sends a POST to the @/clients@ URL.
 * The Router invokes the @Clients@ controller’s @create@ action.
@@ -563,12 +563,12 @@ Methods annotated with the <code>@Before</code> annotation are executed before e
 So, to create a security check:
 
 bc. public class Admin extends Controller {
- 
+
     @Before
     static void checkAuthentification() {
         if(session.get("user") == null) login();
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         render(users);
@@ -579,27 +579,27 @@ bc. public class Admin extends Controller {
 If you don’t want the @Before method to intercept all action calls, you can specify a list of actions to exclude:
 
 bc. public class Admin extends Controller {
- 
+
     @Before(unless="login")
     static void checkAuthentification() {
         if(session.get("user") == null) login();
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         render(users);
     }
- 
+
     …
 }
 
 Or if you want the @Before method to intercept a list of action calls, you can specify a only param :
 
 bc. public class Admin extends Controller {
- 
+
     @Before(only={"login","logout"})
-    static void doSomething() {  
-        …  
+    static void doSomething() {
+        …
     }
     …
 }
@@ -611,17 +611,17 @@ h3. <a name="after">@After</a>
 Methods annotated with the <code>@After</code> annotation are executed after each action call for this Controller.
 
 bc. public class Admin extends Controller {
- 
+
     @After
     static void log() {
         Logger.info("Action executed ...");
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         render(users);
     }
- 
+
     …
 }
 
@@ -630,12 +630,12 @@ h3. <a name="catch">@Catch</a>
 Methods annotated with <code>@Catch</code> are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
 
 bc. public class Admin extends Controller {
-	
+
     @Catch(IllegalStateException.class)
     public static void logIllegalState(Throwable throwable) {
         Logger.error("Illegal state %s…", throwable);
     }
-    
+
     public static void index() {
         List<User> users = User.findAll();
         if (users.size() == 0) {
@@ -648,18 +648,18 @@ bc. public class Admin extends Controller {
 As with normal Java exception handling, you can catch a super-class to catch more exception types. If you have more than one catch method, you can specify their **priority** so that they are executed in order of priority (priority 1 is executed first).
 
 bc. public class Admin extends Controller {
- 
+
     @Catch(value = Throwable.class, priority = 1)
     public static void logThrowable(Throwable throwable) {
         // Custom error logging…
         Logger.error("EXCEPTION %s", throwable);
     }
- 
+
     @Catch(value = IllegalStateException.class, priority = 2)
     public static void logIllegalState(Throwable throwable) {
         Logger.error("Illegal state %s…", throwable);
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         if(users.size() == 0) {
@@ -676,12 +676,12 @@ Methods annotated with the <code>@Finally</code> annotation are always executed 
 @Finally-methods are called both after successful action calls and if an error occurred.
 
 bc. public class Admin extends Controller {
- 
+
     @Finally
     static void log() {
         Logger.info("Response contains : " + response.out);
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         render(users);
@@ -692,7 +692,7 @@ bc. public class Admin extends Controller {
 If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
 
 bc. public class Admin extends Controller {
- 
+
     @Finally
     static void log(Throwable e) {
         if( e == null ){
@@ -701,7 +701,7 @@ bc. public class Admin extends Controller {
             Logger.info("action call failed", e);
         }
     }
- 
+
     public static void index() {
         List<User> users = User.findAll();
         render(users);
@@ -721,20 +721,20 @@ Because Java does not allow multiple inheritance, it can be very limiting to rel
 Example:
 
 bc. public class Secure extends Controller {
-    
+
     @Before
     static void checkAuthenticated() {
         if(!session.containsKey("user")) {
             unAuthorized();
         }
     }
-}    
+}
 
 And on another Controller:
 
 bc. @With(Secure.class)
 public class Admin extends Controller {
-    
+
     …
 }
 
@@ -744,7 +744,7 @@ If you have to keep data across multiple HTTP Requests, you can save them in the
 
 It’s important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4 KB) and you can only store String values.
 
-Of course, cookies are signed with a secret key so the client can’t modify the cookie data (or it will be invalidated). The Play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the Play built-in cache mechanism and use the *session.getId()* key to keep them related to a specific user session. 
+Of course, cookies are signed with a secret key so the client can’t modify the cookie data (or it will be invalidated). The Play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the Play built-in cache mechanism and use the *session.getId()* key to keep them related to a specific user session.
 
 Example:
 
@@ -763,5 +763,5 @@ The session expires when you close your web browser, unless you configure "appli
 The cache has different semantics to the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 
 p(note). **Continuing the discussion**
- 
+
 The next important layer of the MVC model is the View layer, for which Play provides an efficient templating system with its %(next)"Template engine":templates%.

@@ -4,9 +4,9 @@ import play.jobs.*;
 import java.util.*;
 
 public class DoSomething extends Job<String> {
-    
+
     long d;
-    
+
     public DoSomething(long d) {
         this.d = d;
     }
@@ -15,6 +15,6 @@ public class DoSomething extends Job<String> {
         Thread.sleep(d);
         return "DONE:" + d;
     }
-    
+
 }
 

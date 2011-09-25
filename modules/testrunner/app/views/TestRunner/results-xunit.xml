@@ -16,7 +16,7 @@
         #{if result.trace}
           <system-err>
             ${result.trace.escapeXml().raw()}
-          </system-err>  
+          </system-err>
         #{/if}}
       #{/if}
       #{else}
@@ -31,7 +31,7 @@
         #{if result.trace}
           <system-err>
             ${result.trace.escapeXml().raw()}
-          </system-err>  
+          </system-err>
         #{/if}}
       #{/else}
     #{/if}

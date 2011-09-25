@@ -41,7 +41,7 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(11, cal.get(Calendar.MONTH));
         assertEquals(12, cal.get(Calendar.DAY_OF_MONTH));
     }
-    
+
     @Test
     public void dynamicFinders() {
         List<User> users = User.findAll();
@@ -56,7 +56,7 @@ public class SimpleJPATest extends UnitTest {
         assertNull(User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("byBIsNull").first());
         assertEquals(b, User.find("byBIsNotNull").first());
-        
+
         List<User> usersFounded;
         //Elike
         usersFounded = User.find("byNameElikeAndJ", "%a%", 45).fetch();
@@ -91,9 +91,9 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(0, usersFounded.size());
         usersFounded = User.find("byIGreaterThanEquals", 34).fetch();
         assertEquals(b, usersFounded.get(0));
-        
+
     }
-    
+
     @Test
     public void simpleFinders() {
         List<User> users = User.findAll();
@@ -110,8 +110,8 @@ public class SimpleJPATest extends UnitTest {
         assertNull(User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("b is null").first());
         assertEquals(b, User.find("b is not null").first());
-    }  
-    
+    }
+
     @Test
     public void fullFinders() {
         List<User> users = User.findAll();
@@ -126,7 +126,7 @@ public class SimpleJPATest extends UnitTest {
         assertNull(User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("from User where b is null").first());
         assertEquals(b, User.find("from User where b is not null").first());
-        
+
         assertEquals(a, User.find("select u from User u where u.name = ?", "A").first());
         assertEquals(b, User.find("select u from User u where u.name = ? and u.c = ?", "B", true).first());
         assertNull(User.find("select u from User u where u.name = ? and u.c = ?", "B", false).first());
@@ -135,25 +135,25 @@ public class SimpleJPATest extends UnitTest {
         assertNull(User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("select u from User u where u.b is null").first());
         assertEquals(b, User.find("select u from User u where u.b is not null").first());
-    } 
-    
+    }
+
     @Test
-    public void orderBy() { 
+    public void orderBy() {
         List<User> users = User.findAll();
         User a = users.get(0);
         User b = users.get(1);
         //
         assertEquals(a, User.find("from User order by name ASC").first());
-        assertEquals(b, User.find("from User order by name DESC").first()); 
+        assertEquals(b, User.find("from User order by name DESC").first());
         assertEquals(a, User.find("from User order by b ASC").first());
         assertEquals(b, User.find("from User order by b DESC").first());
         assertEquals(b, User.find("from User order by j ASC").first());
         assertEquals(a, User.find("from User order by j DESC").first());
     }
-    
+
     @Test
     public void verifyCountWithCompositeKey() {
-        
+
         List<DataWithCompositeKey> list = DataWithCompositeKey.findAll();
         for (DataWithCompositeKey d : list) {
             d.delete();
@@ -162,15 +162,15 @@ public class SimpleJPATest extends UnitTest {
         d.key1 = "1";
         d.key2 = "1";
         d.save();
-        
+
         d = new DataWithCompositeKey();
         d.key1 = "1";
         d.key2 = "2";
         d.save();
-        
+
         assertEquals(2l, DataWithCompositeKey.count());
         assertEquals(2l, DataWithCompositeKey.count(""));
     }
-    
+
 }
 

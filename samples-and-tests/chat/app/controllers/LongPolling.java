@@ -15,22 +15,22 @@ public class LongPolling extends Controller {
         ChatRoom.get().join(user);
         render(user);
     }
-    
+
     public static void say(String user, String message) {
         ChatRoom.get().say(user, message);
     }
-    
-    public static void waitMessages(Long lastReceived) {        
-        // Here we use continuation to suspend 
+
+    public static void waitMessages(Long lastReceived) {
+        // Here we use continuation to suspend
         // the execution until a new message has been received
         List messages = await(ChatRoom.get().nextMessages(lastReceived));
         renderJSON(messages, new TypeToken<List<IndexedEvent<ChatRoom.Event>>>() {}.getType());
     }
-    
+
     public static void leave(String user) {
         ChatRoom.get().leave(user);
         Application.index();
     }
-    
+
 }
 

@@ -10,7 +10,7 @@ import play.jobs.Job;
 import play.mvc.Mailer;
 
 public class Injector {
-    
+
     /**
      * For now, inject beans in controllers
      */

@@ -186,7 +186,7 @@ public class Mailer {
             templateName = templateName.replace(".", "/");
 
             String[] names = LVEnhancerRuntime.getParamNames().mergeParamsAndVarargs();
-            
+
             // overrides Template name
             if (args.length > 0 && args[0] instanceof String && names[0] == null) {
                 templateName = args[0].toString();

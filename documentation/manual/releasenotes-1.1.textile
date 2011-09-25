@@ -19,7 +19,7 @@ As you know, the Play test runner requires a browser to run application tests. T
 
 However, for continuous integration, it's sometimes difficult to automatically run a real browser on the integration server. So, since this release, Play embeds a stand-alone headless browser based on "HtmlUnit":http://htmlunit.sourceforge.net/.
 
-When you run tests with @play auto-test@, this browser will be used. 
+When you run tests with @play auto-test@, this browser will be used.
 
 !images/auto-test!
 
@@ -55,7 +55,7 @@ Play has now a native container for the "Glassfish application server":https://g
 
 The Glassfish container is hosted at "http://github.com/playframework/play-glassfish":http://github.com/playframework/play-glassfish, and should be soon available directly in the Glassfish @contrib@ repository.
 
-Because Glassfish allows to run several applications simultaneously, you can now run several Play applications in a single JVM. 
+Because Glassfish allows to run several applications simultaneously, you can now run several Play applications in a single JVM.
 
 !images/glassfish2!
 
@@ -73,7 +73,7 @@ bc. public static void index(String client) {
     …
 }
 
-When using the <code>@@{…}</code> notation (absolute reverse routing) in a template, the host will be used if provided by the corresponding route. This can be useful in several situations. 
+When using the <code>@@{…}</code> notation (absolute reverse routing) in a template, the host will be used if provided by the corresponding route. This can be useful in several situations.
 
 For example, if you want to use a content distribution network to distribute your static assets in production, you could write a @routes@ file like this:
 
@@ -101,13 +101,13 @@ The first thing is the new <code>@play.data.binding.As</code> annotation that ma
 
 bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
 	…
-} 
+}
 
 The <code>@As</code> annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
 		@As(
-			lang={"fr,de","en","*"}, 
+			lang={"fr,de","en","*"},
 			value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
 		)
 		Date updatedAt
@@ -127,12 +127,12 @@ h3. @play.data.binding.NoBinding
 
 The new <code>@play.data.binding.NoBinding</code> annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
 
-bc. public class User extends Model {	
+bc. public class User extends Model {
 	@NoBinding("profile") public boolean isAdmin;
 	@As("dd, MM yyyy") Date birthDate;
 	public String name;
 }
- 
+
 public static void editProfile(@As("profile") User user) {
 	…
 }
@@ -144,12 +144,12 @@ h3. play.data.binding.TypeBinder
 The <code>@As</code> annotation also allows you to define a completely custom binder. A custom binder is subclass of @TypeBinder@ that you define in your project. For example:
 
 bc. public class MyCustomStringBinder implements TypeBinder<String> {
- 
-    public Object bind(String name, Annotation[] anns, String value, 
+
+    public Object bind(String name, Annotation[] anns, String value,
     Class clazz) {
         return "!!" + value + "!!";
     }
- 
+
 }
 
 You can use it in any action, like:
@@ -165,17 +165,17 @@ Alternatively, you can define a global custom binder that will apply for the cor
 
 bc. @Global
 public class PointBinder implements TypeBinder<Point> {
- 
-    public Object bind(String name, Annotation[] anns, String value, 
+
+    public Object bind(String name, Annotation[] anns, String value,
     Class class) {
 		String[] values = value.split(",");
 		return new Point(
-			Integer.parseInt(values[0]), 
+			Integer.parseInt(values[0]),
 			Integer.parseInt(values[1])
 		);
     }
-    
-} 
+
+}
 
 As you see a global binder is a classical binder annotated with <code>@play.data.binding.Global</code>. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
 
@@ -197,7 +197,7 @@ bc. public static void mirrorFeed() throws Exception {
 		HttpResponse res = (
 			(Future<HttpResponse>)request.args.get("futureFeed")
 		).get()
-		renderXml(res.getXml());	
+		renderXml(res.getXml());
 	}
 }
 
@@ -236,14 +236,14 @@ keystore.file=conf/certificate.jks
 
 Note that the values above are the default values.
 
-You can generate self-signed certificates using *openssl*: 
+You can generate self-signed certificates using *openssl*:
 
 bc. openssl genrsa 1024 > host.key
 openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
 
 If you are using the Java keystore mechanism, then the following properties can be configured in your @application.conf@ file:
 
-bc. # Keystore 
+bc. # Keystore
 ssl.KeyManagerFactory.algorithm=SunX509
 trustmanager.algorithm=JKS
 keystore.password=secret
@@ -263,7 +263,7 @@ public static void index() {
 Second, there is now a new @#{cache}@ tag that allows to easily cache template fragments:
 
 bc. <h1>Very complex home page to build</h1>
- 
+
 #{cache 'home-' + connectedUser.email, for:'15min'}
 	…
 #{/cache}

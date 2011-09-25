@@ -26,7 +26,7 @@ public class BaseTest extends org.junit.Assert {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     /**
      * Flush and clear the JPA session
      */
@@ -42,5 +42,5 @@ public class BaseTest extends org.junit.Assert {
         }
 
     }
-    
+
 }

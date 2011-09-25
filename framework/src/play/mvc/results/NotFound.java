@@ -25,7 +25,7 @@ public class NotFound extends Result {
 
     /**
      * @param method routed method
-     * @param path  routed path 
+     * @param path  routed path
      */
     public NotFound(String method, String path) {
         super(method + " " + path);

@@ -31,7 +31,7 @@ import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
- * 
+ *
  * <p/>
  * Get latest BBC World news as a RSS content
  * <pre>
@@ -40,7 +40,7 @@ import java.util.*;
  *    // the real pain begins here...
  * </pre>
  * <p/>
- * 
+ *
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
  *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
@@ -422,7 +422,7 @@ public class WSAsync implements WSImpl {
                 }
 
                 // Don't have to set content-type: AHC will automatically choose multipart
-                
+
                 return;
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
@@ -503,7 +503,7 @@ public class WSAsync implements WSImpl {
                 }
                 setResolvedContentType("text/html; charset=" + encoding);
             }
-            
+
             if(this.mimeType != null) {
                 // User has specified mimeType
                 this.headers.put("Content-Type", this.mimeType);

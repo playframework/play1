@@ -11,18 +11,18 @@ import play.db.jpa.*;
 public class Post extends Model {
 
     public String content;
-    
+
     @As("yyyy-MM-dd")
     public Date postedAt;
-    
+
     @OneToOne
     public User postedBy;
-    
+
     @ManyToOne
     public Topic topic;
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public Post(Topic topic, User postedBy, String content) {
         this.topic = topic;
         this.postedBy = postedBy;
@@ -30,6 +30,6 @@ public class Post extends Model {
         this.postedAt = new Date();
         create();
     }
-    
+
 }
 

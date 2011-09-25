@@ -2,19 +2,19 @@
 
 	open('@{Validation.index()}')
 	assertTextPresent('{bottle.name1=[Required], bottle.name2=[Required], bottle=[Validation failed]}')
-	
+
 	open('@{Validation.index()}?bottle.name1=Coucou')
 	assertTextPresent('{bottle.name2=[Required], bottle=[Validation failed]}')
-	
+
 	open('@{Validation.index()}?bottle.name2=Ho')
 	assertTextPresent('{bottle.name1=[Required], bottle.name2=[Minimum size is 3], bottle=[Validation failed]}')
-	
+
 	open('@{Validation.index()}?bottle.name2=Hop')
 	assertTextPresent('{bottle.name1=[Required], bottle=[Validation failed]}')
-	
+
 	open('@{Validation.index()}?bottle.name1=Ye&bottle.name2=Hop')
 	assertTextPresent('{bottle.name1=[wrong.bottle], bottle=[Validation failed]}')
-	
+
 	open('@{Validation.index()}?bottle.name1=Hop&bottle.name2=Hop')
 	assertTextPresent('{}')
 
@@ -33,9 +33,9 @@
 
     open('@{Validation.user()}?user.birth=12/12/1992&user.email=NICO%2Bplay@LUNATECH.COM')
 	assertTextPresent('{}')
-	
+
 	// @Valid on collections
-	
+
 	open('@{Validation.user()}?user.birth=12/12/1992&user.email=NICO%2Bplay@LUNATECH.COM&user.addresses[0].street=Rotterdam+St&user.addresses[1].number=4')
     assertTextPresent('{user.addresses[1].street=[Required], user.addresses[1]=[Validation failed], user.addresses=[Validation failed], user=[Validation failed]}')
 

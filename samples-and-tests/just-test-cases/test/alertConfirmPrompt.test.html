@@ -3,22 +3,22 @@
 #{selenium}
     // Open the home page, and check that no error occured
     open('@{Application.alertConfirmPrompt()}')
-	
+
 	// Handle alert
 	click('showAlert')
 	assertAlert('Youhou')
-	
+
 	// Handle confirm
 	chooseOkOnNextConfirmation()
 	click('showConfirm')
 	assertConfirmation('Yes or no*')
 	assertAlert('*true')
-	
+
 	chooseCancelOnNextConfirmation()
 	click('showConfirm')
 	assertConfirmation('Yes or no*')
 	assertAlert('*false')
-	
+
 	// Prompt
 	assertTextPresent('Title: yop')
 	answerOnNextPrompt('Guillaume')
@@ -26,5 +26,5 @@
 	assertPrompt('*name*')
 	assertTextNotPresent('Title: yop')
 	assertTextPresent('Title: Guillaume')
-	
+
 #{/selenium}

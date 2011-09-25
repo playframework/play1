@@ -32,31 +32,31 @@ public class Application extends Controller {
         } catch (Exception ex) {
         }
     }
-    
+
     public static void helloZen() {
         renderText("Hello");
     }
-    
+
     public static void myHomePage(String clientName) {
         renderText(clientName);
     }
-    
+
     public static void some1() {
         renderText(Invoker.InvocationContext.current());
     }
-    
+
     @Youhou
     public static void some2() {
         renderText(Invoker.InvocationContext.current());
     }
-    
+
     @Youhou
     public static void some3() throws Exception {
         JobWithContext job = new JobWithContext();
         Future<String> future = job.now();
         renderText(future.get());
     }
-    
+
 
     // bug
 
@@ -78,7 +78,7 @@ public class Application extends Controller {
         routeArgs.put("lucky", "strike");
         render();
     }
-    
+
     public static void showIt() {
         renderText("Done");
     }
@@ -90,11 +90,11 @@ public class Application extends Controller {
     public static void simpleStatusCode() {
         response.status = 204;
     }
-    
+
     public static void imagesAssets() {
-        
+
     }
-    
+
     public static void dashboard(String client) {
         renderText(client);
     }
@@ -126,7 +126,7 @@ public class Application extends Controller {
     public static void tagContexts() {
         render();
     }
-    
+
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -213,19 +213,19 @@ public class Application extends Controller {
         Mail.send(email);
         renderText("OK5");
     }
-    
+
     public static void mailWithUrls() {
         notifiers.Welcome.welcome_mailWithUrls(false);
         renderText("OK_mailWithUrls");
     }
-    
+
     public static class MailJob extends Job {
         @Override
         public void doJob() {
             notifiers.Welcome.welcome_mailWithUrls(true);
         }
     }
-    
+
     public static void mailWithUrlsInJob() throws Exception {
         new MailJob().now().get();
         renderText("OK_mailWithUrlsInJob");
@@ -287,7 +287,7 @@ public class Application extends Controller {
         }
         render(users);
     }
-    
+
     public static void fastTag_render_test() {
         render();
     }

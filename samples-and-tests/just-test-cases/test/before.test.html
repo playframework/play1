@@ -2,20 +2,20 @@
 
 	open('@{UsingBefore.a('Guillaume')}')
 	assertTextPresent('Youhou Guillaume')
-	
+
 	// Now the @Finally
 	open('@{UsingBefore.b('Guillaume')}')
 	assertTextNotPresent('Youhou')
 	assertTextPresent('Yop')
-	
+
 	// Try to call directly UsingBefore.kiki
 	open('/usingbefore/kiki')
 	assertTextPresent('Not found')
-	
+
 	// Try to call a private method
 	open('/usingbefore/isPrivate')
 	assertTextPresent('Not found')
-	
+
 	// Try the priority of @Before
 	open('/usingbeforewithpriority/index')
 	assertTextPresent('yupyopyipyapdone')

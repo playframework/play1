@@ -4,7 +4,7 @@ h2. <a name="mvc">The MVC application model</a>
 
 A Play application follows the MVC architectural pattern applied to the web architecture.
 
-This pattern splits the application into separate layers: the Presentation layer and the Model layer. The Presentation layer is further split into a View and a Controller layer. 
+This pattern splits the application into separate layers: the Presentation layer and the Model layer. The Presentation layer is further split into a View and a Controller layer.
 
 * The **Model** is the domain-specific representation of the information on which the application operates. Domain logic adds ‘meaning’ to raw data (e.g., calculating if today is the user’s birthday, or the totals, taxes, and shipping charges for a shopping cart). Most applications use a persistent storage mechanism such as a database to store data. MVC does not specifically mention the data access layer because it is understood to be underneath, or encapsulated by, the Model.
 
@@ -18,7 +18,7 @@ In a Play application these three layers are defined in the @app@ directory, eac
 
 h3. app/controllers
 
-A Controller is a Java class where each public, static, method is an **action**. An action is a Java entry point invoked when an HTTP Request is received. The Java code from the Controller class isn’t really object oriented: it’s mainly procedural code. The action method extracts relevant data from the HTTP Request, reads or updates the model objects, and sends back a result which is wrapped into an HTTP Response. 
+A Controller is a Java class where each public, static, method is an **action**. An action is a Java entry point invoked when an HTTP Request is received. The Java code from the Controller class isn’t really object oriented: it’s mainly procedural code. The action method extracts relevant data from the HTTP Request, reads or updates the model objects, and sends back a result which is wrapped into an HTTP Response.
 
 h3. app/models
 
@@ -54,7 +54,7 @@ h3. The **app** directory
 This directory contains all executable artifacts: Java source code and view templates.
 
 p(note). **Where are my .class files?**
- 
+
 Don’t look for compiled Java classes. The framework compiles the Java source code at runtime and only keeps compiled classes in a bytecode cache under the @tmp@ directory. The main executable artifacts in a Play application are the *.java* source files, not the compiled classes.
 
 There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. You can of course add your own packages like for example a *utils* package.
@@ -72,7 +72,7 @@ Resources stored in the @public@ directory are static assets and are served dire
 This directory is split into three standard sub-directories: for images, CSS stylesheets and JavaScript files. You should try to organize your static assets like this to keep all Play applications consistent.
 
 p(note). **Tip**
- 
+
 By default the @/public@ directory is mapped to the @/public@ URL path, but you can easily change that, or even use several directories for your static assets.
 
 
@@ -108,12 +108,12 @@ This directory contains all standard Java libraries needed by your application. 
 
 h2. <a name="lifecycle">Development life cycle</a>
 
-There are no compilation, packaging or deployment phases while working with Play. However Play implements two distinct environments: DEV mode during the development phase and PROD mode when the application is deployed. 
+There are no compilation, packaging or deployment phases while working with Play. However Play implements two distinct environments: DEV mode during the development phase and PROD mode when the application is deployed.
 
 p(note). **About DEV/PROD modes**
- 
-You can run an application either in a DEV or PROD mode. You toggle this mode using the "application.mode configuration":configuration#application.mode. When run in DEV mode, Play will check for file changes and will handle hot reloading if necessary. 
- 
+
+You can run an application either in a DEV or PROD mode. You toggle this mode using the "application.mode configuration":configuration#application.mode. When run in DEV mode, Play will check for file changes and will handle hot reloading if necessary.
+
 The PROD mode is fully optimized for production: Java sources and templates are compiled once and cached for multiple uses.
 
 Java source code is compiled and loaded at runtime. If a Java source file is modified while the application is running, the source code is recompiled and hot-swapped into the JVM.
@@ -151,6 +151,6 @@ In addition, the @play.db.jpa.JPAPlugin@ enhances subclasses of @play.db.jpa.JPA
 To add your own enhancer, call a subclass of @play.classloading.enhancers.Enhancer@ from your plug-in’s @enhance(ApplicationClass)@ method.
 
 p(note). **Continuing the discussion**
- 
+
 Now that you’ve seen what a Play application is, let’s see how %(next)"HTTP routing":routes% works. The Router is in charge of translating incoming HTTP Requests into actions.
 

@@ -135,7 +135,7 @@ public class Server {
                 return a.substring(s.length());
             }
         }
-        return defaultValue; 
+        return defaultValue;
     }
 
     private static void writePID(File root) {

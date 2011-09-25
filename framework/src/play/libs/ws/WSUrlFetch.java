@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * Implementation of the WS interface based on Java URL Fetch API.
- * This is to be used for example in Google App Engine, where the 
+ * This is to be used for example in Google App Engine, where the
  * async http client can't be used.
  */
 public class WSUrlFetch implements WSImpl {

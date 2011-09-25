@@ -47,5 +47,5 @@ public class MinCheck extends AbstractAnnotationCheck<Min> {
         messageVariables.put("min", Double.toString(min));
         return messageVariables;
     }
-   
+
 }

@@ -15,6 +15,6 @@ public class Notifier extends Mailer {
         addRecipient(user.email, new InternetAddress("new-users@sampleforum.com", "New users notice"));
         return sendAndWait(user);
     }
-    
+
 }
 

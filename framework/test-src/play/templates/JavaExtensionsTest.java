@@ -33,7 +33,7 @@ public class JavaExtensionsTest {
 
     //Trivial no test @Test public void testEnumValues()  {}
 
-    @Test 
+    @Test
     public void testContains()  {
         String[] testArray = {"a", "b", "c"};
         assertTrue(JavaExtensions.contains(testArray, "a"));
@@ -42,14 +42,14 @@ public class JavaExtensionsTest {
 
     //TODO @Test public void testAsXml()  {}
 
-    @Test 
+    @Test
     public void testAdd()  {
         String[] testArray = {"a", "b", "c"};
         assertThat(JavaExtensions.add(new String[]{"a", "b"}, "c")).hasSize(3).contains(testArray);
-        
+
     }
 
-    @Test 
+    @Test
     public void testRemove()  {
         String[] testArray = {"a", "b", "c"};
         assertThat(JavaExtensions.remove(testArray, "c")).hasSize(2).contains("a", "b");
@@ -57,12 +57,12 @@ public class JavaExtensionsTest {
 
     //TODO @Test public void testToStringClosure()  {}
 
-    @Test 
+    @Test
     public void testCapitalizeWords()  {
         assertThat(JavaExtensions.capitalizeWords("This is a small   test!")).as("This Is A Small  Test!");
     }
 
-    @Test 
+    @Test
     public void testPad()  {
         assertThat(JavaExtensions.pad("12345", 4)).as("12345");
         assertThat(JavaExtensions.pad("12345", 5)).as("12345");
@@ -194,7 +194,7 @@ public class JavaExtensionsTest {
 
     //TODO @Test public void testCamelCase()  {}
 
-    @Test 
+    @Test
     public void testYesno()  {
         String yes = "Y";
         String no = "N";
@@ -214,10 +214,10 @@ public class JavaExtensionsTest {
         assertEquals(no, JavaExtensions.yesno(testCollection, yesNo));
         testCollection.add("1");
         assertEquals(yes, JavaExtensions.yesno(testCollection, yesNo));
-        
+
     }
 
-    @Test 
+    @Test
     public void testLast()  {
         List <String> testCollection = new ArrayList <String>();
         testCollection.add("1");
@@ -225,12 +225,12 @@ public class JavaExtensionsTest {
         assertEquals("2", JavaExtensions.last(testCollection));
     }
 
-    @Test 
+    @Test
     public void testJoin()  {
         List <String> testCollection = new ArrayList <String>();
         testCollection.add("1");
         testCollection.add("2");
-        
+
         assertEquals("1, 2", JavaExtensions.join(testCollection, ", "));
     }
 

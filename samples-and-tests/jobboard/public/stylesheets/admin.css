@@ -115,14 +115,14 @@
 }
 
 #login input {
-	display : block; 
+	display : block;
 	width: 230px;
 	margin-bottom:5px;
 }
 
 #login label {
-	float: left; 
-	width: 100px; 
+	float: left;
+	width: 100px;
 	margin-right: 5px;
 	font-weight: bold;
 	color: #333;

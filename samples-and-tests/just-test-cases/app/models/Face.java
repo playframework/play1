@@ -8,11 +8,11 @@ import java.util.*;
 
 @Entity
 public class Face extends Model {
-    
+
     public String name;
-    
+
     @OneToOne(cascade = CascadeType.ALL)
     public Nose nose;
-    
+
 }
 

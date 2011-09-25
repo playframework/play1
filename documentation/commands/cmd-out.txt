@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ out -- Follow logs/system.out file
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play out [app_path]

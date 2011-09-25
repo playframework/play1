@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ run -- Run the application in the current shell
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play run [app_path] [--deps] [--%fwk_id] [-f] [--java_options]
@@ -14,23 +14,23 @@
 ~ The script first tries to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
-~ All options specified after the application path are passed to the JVM (example. -Xms64m -Xmx256m).  
+~ All options specified after the application path are passed to the JVM (example. -Xms64m -Xmx256m).
 ~ If JVM memory options (starting with -Xm') are not specified in command line arguments, then any
 ~ arguments in the conf/application.conf file's jvm.memory property are passed to the JVM.
 ~ All the shell environment variables are passed to the JVM.
 ~
-~ If the application is in DEV mode, a JPDA session is automatically opened on the port specified by the 
-~ conf/application.conf file's jpda.port property (defaulting to 8000). If the JPDA port is already in use, 
+~ If the application is in DEV mode, a JPDA session is automatically opened on the port specified by the
+~ conf/application.conf file's jpda.port property (defaulting to 8000). If the JPDA port is already in use,
 ~ another available port is automatically chosen.
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ -f: 
+~ -f:
 ~ Disable the JPDA port checking and force the jpda.port value.
 ~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
 ~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~

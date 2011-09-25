@@ -13,18 +13,18 @@ public class JPABinding extends Controller {
     public static void index() {
         render();
     }
-    
+
     public static void create(Project project) {
         System.out.println(project);
         project.create();
         show(project.id);
     }
-    
+
     public static void show(Long id) {
         Project project = Project.findById(id);
         render(project);
     }
-    
+
     public static void save(Project project) {
         System.out.println("---> " + project.isPersistent());
         Logger.warn("Next warning is intended!");
@@ -32,12 +32,12 @@ public class JPABinding extends Controller {
         validation.keep();
         show(project.id);
     }
-    
+
     public static void createCompany(Company company) {
         company.create();
         render(company);
     }
-    
+
     public static void withMap(String companyId) {
         Company company = Company.findById(companyId);
         Project project = new Project();
@@ -46,26 +46,26 @@ public class JPABinding extends Controller {
         project.create();
         render("@show", project);
     }
-    
+
     public static void editMap(Long id) {
         Project project = Project.findById(id);
         project.companies.get("zenexity").name = "Coucou";
         show(id);
     }
-    
+
     public static void editMapAndSave(Long id) {
         Project project = Project.findById(id);
         project.companies.get("zenexity").name = "Coucou";
         project.save();
         show(id);
     }
-    
+
     public static void aSaveForm() {
         long a = A.count();
         long b = B.count();
         render(a, b);
     }
-    
+
     public static void aSubmitForm(@Valid A a) {
         System.out.println(a.id);
         System.out.println(a.b);
@@ -73,6 +73,6 @@ public class JPABinding extends Controller {
         System.out.println(a.b.name);
         aSaveForm();
     }
-    
+
 }
 

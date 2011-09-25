@@ -19,9 +19,9 @@ def execute(**kargs):
     env = kargs.get("env")
 
     if command == 'secure:':
-        print "~ Use: --css to override the Secure css" 
-        print "~      --login to override the login page" 
-        print "~      --layout to override the login layout page" 
+        print "~ Use: --css to override the Secure css"
+        print "~      --login to override the login page"
+        print "~      --layout to override the login layout page"
         print "~ "
         return
 

@@ -1,36 +1,36 @@
 h1. Asynchronous Jobs
 
-Because Play is a web application framework, most of the application logic is done by controllers responding to HTTP requests. 
+Because Play is a web application framework, most of the application logic is done by controllers responding to HTTP requests.
 
 But sometimes you will need to execute some application logic outside of any HTTP request. It can be useful for initialization tasks, maintenance tasks or to run long tasks without blocking the HTTP request execution pool.
 
 Jobs are fully managed by the framework. That means that Play will manage all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extend the @play.jobs.Job@ super class.
 
 bc. package jobs;
- 
+
 import play.jobs.*;
- 
+
 public class MyJob extends Job {
-    
+
     public void doJob() {
         // execute some application logic here ...
     }
-    
+
 }
 
 Sometimes you need to create jobs that return a result. You then override the @doJobWithResult()@ method.
 
 bc. package jobs;
- 
+
 import play.jobs.*;
-  
+
 public class MyJob extends Job<String> {
-    
+
     public String doJobWithResult() {
         // execute some application logic here ...
         return result;
     }
-    
+
 }
 
 Here the use of @String@ is just for the example, of course a job can return any object type.
@@ -40,17 +40,17 @@ h2. <a name="concepts">Bootstrap jobs</a>
 Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the <code>@OnApplicationStart</code> annotation.
 
 bc. import play.jobs.*;
- 
+
 @OnApplicationStart
 public class Bootstrap extends Job {
-    
+
     public void doJob() {
         if(Page.count() == 0) {
             new Page("root").save();
             Logger.info("A root page has been created.");
         }
     }
-    
+
 }
 
 You don’t need to return a result. Even if you do it, the result will be lost.
@@ -60,9 +60,9 @@ The default is that all jobs annotated with <code>@OnApplicationStart</code> wil
 If you want your jobs to start when your application starts, but you want to start processing incoming requests immediately, you can annotate your job like this: <code>@OnApplicationStart(async=true)</code>. Then your job will be started in the background when the application starts. All async jobs will be started at the same time.
 
 p(note). **Warning**
- 
-When you run the application in DEV mode, the application waits for the first HTTP request to start. Moreover when you are in DEV mode, the application will sometimes automatically restart when needed. 
- 
+
+When you run the application in DEV mode, the application waits for the first HTTP request to start. Moreover when you are in DEV mode, the application will sometimes automatically restart when needed.
+
 When you run in PROD mode, the application will start synchronously with the server start.
 
 h2. <a name="scheduling">Scheduled jobs</a>
@@ -70,43 +70,43 @@ h2. <a name="scheduling">Scheduled jobs</a>
 Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the <code>@Every</code> annotation.
 
 bc. import play.jobs.*;
- 
+
 @Every("1h")
 public class Bootstrap extends Job {
-    
+
     public void doJob() {
         List<User> newUsers = User.find("newAccount = true").fetch();
         for(User user : newUsers) {
             Notifier.sayWelcome(user);
         }
     }
-    
+
 }
 
 If the <code>@Every</code> annotation is not enough you can use the <code>@On</code> annotation to run your jobs using a CRON expression.
 
 bc. import play.jobs.*;
- 
-/** Fire at 12pm (noon) every day **/ 
+
+/** Fire at 12pm (noon) every day **/
 @On("0 0 12 * * ?")
 public class Bootstrap extends Job {
-    
+
     public void doJob() {
         Logger.info("Maintenance job ...");
         ...
     }
-    
+
 }
 
 p(note). **Tip**
- 
+
 We use the CRON expression parser from the "Quartz library":http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html.
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
 h2. <a name="tasks">Triggering task jobs</a>
 
-You can also trigger a Job at any time to perform a specific task by simply calling @now()@ on a Job instance. Then this job will be run immediately in a non blocking way. 
+You can also trigger a Job at any time to perform a specific task by simply calling @now()@ on a Job instance. Then this job will be run immediately in a non blocking way.
 
 bc. public static void encodeVideo(Long videoId) {
     new VideoEncoder(videoId).now();

@@ -14,9 +14,9 @@ public class Administration extends CRUD {
         }
         renderArgs.put("superadmin", session.contains("superadmin"));
     }
-    
+
     // ~~~~~~~
-    
+
     public static void login() {
         render();
     }
@@ -49,6 +49,6 @@ public class Administration extends CRUD {
         flash.error("Bad email or password");
         login();
     }
-    
+
 }
 

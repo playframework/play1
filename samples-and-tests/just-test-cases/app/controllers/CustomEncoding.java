@@ -13,14 +13,14 @@ public class CustomEncoding extends Controller {
         response.encoding = "iso-8859-1";
         renderText("Norwegian letters: ÆØÅ");
     }
-    
+
     public static void  getTemplate() {
         response.encoding = "iso-8859-1";
         String norwegianLetters = "ÆØÅ";
         // using txt-template, since special chars (ÆØÅ) gets turned into html-code when rendering html
         renderTemplate("CustomEncoding/getTemplate.txt", norwegianLetters);
-        
+
     }
 
-   
+
 }

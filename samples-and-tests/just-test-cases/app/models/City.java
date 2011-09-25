@@ -7,8 +7,8 @@ import java.util.*;
 
 @Entity
 public class City extends Model {
-    
+
     public String name;
-    
+
 }
 

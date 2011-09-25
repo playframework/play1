@@ -341,12 +341,12 @@ myMap.addElement('articlePages', {
     , description: 'article title loop-link'
     , locator: "//div[@id='content']/h1[@class='title']/a"
 });
-myMap.addElement('articlePages', {    
+myMap.addElement('articlePages', {
     name: 'author'
     , description: 'article author link'
     , locator: "//div[@id='content']/h3[@class='byline']/a"
 });
-myMap.addElement('articlePages', {    
+myMap.addElement('articlePages', {
     name: 'article_topics'
     , description: 'links to topics under which article is published, before \
 article content'
@@ -362,12 +362,12 @@ article content'
             + "[@title=" + args.topic.quoteForXPath() + "]";
     }
 });
-myMap.addElement('articlePages', {    
+myMap.addElement('articlePages', {
     name: 'discuss'
     , description: 'link to article discussion area, before article content'
     , locator: "//ul[@id='metastuff']/li[@class='discuss']/p/a"
 });
-myMap.addElement('articlePages', {    
+myMap.addElement('articlePages', {
     name: 'related_topics'
     , description: 'links to topics under which article is published, after \
 article content'
@@ -383,7 +383,7 @@ article content'
             + "[@title=" + args.topic.quoteForXPath() + "]";
     }
 });
-myMap.addElement('articlePages', {    
+myMap.addElement('articlePages', {
     name: 'join_discussion'
     , description: 'link to article discussion area, after article content'
     , locator: "//div[@class='discuss']/p/a"
@@ -431,7 +431,7 @@ myMap.addElement('topicListingPages', {
 // elements for the code page, which is a subpage under topics, i.e.
 // "http://alistapart.com/topics/code/"
 myMap.addPageset({
-    name: 'subtopicListingPages' 
+    name: 'subtopicListingPages'
     , description: 'pages listing subtopics'
     , pathPrefix: 'topics/'
     , paths: [
@@ -642,9 +642,9 @@ myMap.addElement('searchResultsPages', {
             + ")]";
     }
 });
-    
-    
-    
+
+
+
 myMap.addPageset({
     name: 'commentsPages'
     , description: 'pages listing comments made to an article'

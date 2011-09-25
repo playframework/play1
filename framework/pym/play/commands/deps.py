@@ -26,7 +26,7 @@ def execute(**kargs):
     if args.count('--forceCopy') == 1:
         args.remove('--forceCopy')
         force = "true"
-        
+
     if args.count('--forProd') == 1:
         args.remove('--forProd')
         force = "true"

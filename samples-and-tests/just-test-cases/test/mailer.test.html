@@ -5,7 +5,7 @@
 	storeLastReceivedEmailBy('toto@localhost', 'email')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
 	assertEquals('Yop', '$[subject]')
-	
+
 	open('@{Application.mail2()}')
 	assertTextPresent('OK2')
 	storeLastReceivedEmailBy('toto@localhost', 'email2')
@@ -46,7 +46,7 @@
 	//this regexp fails if text not present
 	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrls"])[1]}', 'body')
 
-	
-	
+
+
 
 #{/selenium}

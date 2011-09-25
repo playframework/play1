@@ -3,21 +3,21 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
         version="2.4">
-  
+
   <display-name>Play! (%APPLICATION_NAME%)</display-name>
-  
+
   <context-param>
     <param-name>play.id</param-name>
     <param-value>%PLAY_ID%</param-value>
   </context-param>
-  
+
   <listener>
       <listener-class>play.server.ServletWrapper</listener-class>
   </listener>
-  
+
   <servlet>
     <servlet-name>play</servlet-name>
-    <servlet-class>play.server.ServletWrapper</servlet-class>	
+    <servlet-class>play.server.ServletWrapper</servlet-class>
   </servlet>
 
   <servlet-mapping>

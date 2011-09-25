@@ -24,7 +24,7 @@ To protect a controller you just have to annotate it using <code>@With</code>. F
 
 bc. @With(Secure.class)
 public class Application extends Controller {
-    
+
     public static void index() {
         render();
     }
@@ -37,9 +37,9 @@ h2. <a>Customize the authentication mechanism</a>
 By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the @controllers@ package that extends the @controllers.Secure.Security@ class. Then you can override the @authenticate(String username, String password)@ method.
 
 bc. package controllers;
- 
+
 public class Security extends Secure.Security {
-    
+
     static boolean authenticate(String username, String password) {
         User user = User.find("byEmail", username).first();
         return user != null && user.password.equals(password);
@@ -54,7 +54,7 @@ From your application code, you can reuse the Security helper that you’ve just
 
 bc. @With(Secure.class)
 public class Application extends Controller {
-    
+
     public static void index() {
         String user = Security.connected();
         render(user);
@@ -68,9 +68,9 @@ You can use the <code>@Check</code> annotation either on controller classes or a
 For example:
 
 bc. @With(Secure.class)
-public class Application extends Controller { 
+public class Application extends Controller {
    …
-   
+
    @Check("isAdmin")
    public static void delete(Long id) {
        …
@@ -80,10 +80,10 @@ public class Application extends Controller {
 By default the secure module will always authorize all checks. You have to customize by overriding one more method in your @Security@ class.
 
 bc. package controllers;
- 
+
 public class Security extends Secure.Security {
     …
-    
+
     static boolean check(String profile) {
         User user = User.find("byEmail", connected()).first();
         if ("isAdmin".equals(profile)) {
@@ -92,5 +92,5 @@ public class Security extends Secure.Security {
         else {
             return false;
         }
-    }    
+    }
 }

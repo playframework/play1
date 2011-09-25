@@ -27,10 +27,10 @@ public class CheatSheetHelper {
             Arrays.sort(sheetFiles, new Comparator<File>() {
 
                 public int compare(File f1, File f2) {
-                    
+
                     String o1 = f1.getName();
                     String o2 = f2.getName();
-                    
+
                     if (o1.contains("-") && o2.contains("-")) {
                         return o1.substring(0, o1.indexOf("-"))
                             .compareTo(o2.substring(0, o1.indexOf("-")));
@@ -74,7 +74,7 @@ public class CheatSheetHelper {
         });
 
         Arrays.sort(categories);
-        
+
         Map<String, String> categoriesAndTitles = new LinkedHashMap<String, String>();
 
         for (File category : categories) {

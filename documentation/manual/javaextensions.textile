@@ -21,7 +21,7 @@ h3. <a name="pluralize">pluralize()</a>
 
 Returns an ‘s’ when the collection’s size is not 1. Returns: @String@.
 
-bc. colour${['red', 'green', 'blue'].pluralize()} 
+bc. colour${['red', 'green', 'blue'].pluralize()}
 colours
 
 
@@ -39,7 +39,7 @@ Returns the given plural form when the collection’s size is not 1; returns the
 
 bc. journ${['red'].pluralize('al', 'aux')}
 journal
- 
+
 journ${['red', 'green', 'blue'].pluralize('al', 'aux')}
 journaux
 
@@ -71,18 +71,18 @@ Formats the date as a relative time, compared to now, e.g. **3 minutes ago**. Re
 bc. ${new Date(new Date().getTime() - 1000000).since()}
 16 minutes ago
 
-You can customise the output using the following messages: @since.seconds@, @since.minutes@, @since.hours@, @since.days@, @since.months@ and @since.years@.  
+You can customise the output using the following messages: @since.seconds@, @since.minutes@, @since.hours@, @since.days@, @since.months@ and @since.years@.
 
 
 h3. <a name="since-condition">since(condition)</a>
 
 Formats the date as a relative time, compared to now. If the condition is true, dates more than one month ago are formatted as a date. Returns: @String@.
 
-You can customise the output using the same messages as for @since()@, as well as @since.format@ for dates more than one month ago.  
+You can customise the output using the same messages as for @since()@, as well as @since.format@ for dates more than one month ago.
 
 bc. ${new Date(1262350000000).since(false)}
 5 months ago
- 
+
 ${new Date(1262350000000).since(true)}
 Jan 1, 2010
 
@@ -125,7 +125,7 @@ h3. <a name="asAttr">asAttr()</a>
 Formats the map’s keys and values as HTML attributes. Returns: @play.templates.Template.ExecutableTemplate.RawData@.
 
 bc. ${[id:'42', color:'red'].asAttr()}
-id="42" color="red" 
+id="42" color="red"
 
 
 h3. <a name="asAttr-condition">asAttr(condition)</a>
@@ -133,7 +133,7 @@ h3. <a name="asAttr-condition">asAttr(condition)</a>
 Formats the map’s keys and values as HTML attributes, if the condition is true. Returns: @play.templates.Template.ExecutableTemplate.RawData@.
 
 bc. ${[id:'42', color:'red'].asAttr(true)}
-id="42" color="red" 
+id="42" color="red"
 
 
 
@@ -176,7 +176,7 @@ h3. <a name="number-pluralize">pluralize()</a>
 
 Returns an ‘s’ when the number is not 1. Returns: @String@.
 
-bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()} 
+bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()}
 colours - colours
 
 
@@ -194,7 +194,7 @@ Returns the given plural form when the number is not 1; returns the given singul
 
 bc. journ${1.pluralize('al', 'aux')}
 journal
- 
+
 journ${3.pluralize('al', 'aux')}
 journaux
 
@@ -261,7 +261,7 @@ Returns the object without template escaping. Returns: @play.templates.Template.
 
 bc. ${'<'}
 &lt;
- 
+
 ${'<'.raw()}
 <
 
@@ -280,7 +280,7 @@ Returns the first parameter (‘yes’) if the object evaluates to true, or the 
 
 bc. ${"".yesno('yes', 'no')}
 no
- 
+
 ${"not empty".yesno('yes', 'no')}
 yes
 

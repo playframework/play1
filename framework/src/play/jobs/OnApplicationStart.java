@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Jobs can be executed in the background if you set async == true.
  *
  * This will make your app start accepting incoming requests faster.
- * 
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

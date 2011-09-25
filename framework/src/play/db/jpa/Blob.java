@@ -31,7 +31,7 @@ public class Blob implements BinaryField, UserType {
         this.UUID = UUID;
         this.type = type;
     }
-    
+
     public InputStream get() {
         if(exists()) {
             try {
@@ -42,7 +42,7 @@ public class Blob implements BinaryField, UserType {
         }
         return null;
     }
-    
+
     public void set(InputStream is, String type) {
         this.UUID = Codec.UUID();
         this.type = type;
@@ -144,5 +144,5 @@ public class Blob implements BinaryField, UserType {
         }
         return store;
     }
-    
+
 }

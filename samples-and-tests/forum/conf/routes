@@ -20,12 +20,12 @@ GET		/forums/{<[0-9]+>forumId}										Forums.show
 POST	/forums/{<[0-9]+>forumId}/delete								Forums.delete
 
 # Topics
-GET		/forums/{<[0-9]+>forumId}/newTopic								Topics.post			
+GET		/forums/{<[0-9]+>forumId}/newTopic								Topics.post
 POST	/forums/{<[0-9]+>forumId}/topics								Topics.create
-GET		/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}				Topics.show		
+GET		/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}				Topics.show
 GET		/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}/reply		Topics.reply
-POST 	/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}				Topics.createReply	
-POST 	/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}/delete		Topics.delete			
+POST 	/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}				Topics.createReply
+POST 	/forums/{<[0-9]+>forumId}/topics/{<[0-9]+>topicId}/delete		Topics.delete
 
 # Users
 GET		/users															Users.index
@@ -33,8 +33,8 @@ GET		/profile														Users.profile
 GET		/users/{<[0-9]+>id}												Users.show
 
 # /public
-GET		/public															staticDir:public   
+GET		/public															staticDir:public
 
 # Catch all
-*		/{controller}													{controller}.index 
-*		/{controller}/{action}											{controller}.{action} 
+*		/{controller}													{controller}.index
+*		/{controller}/{action}											{controller}.{action}

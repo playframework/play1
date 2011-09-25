@@ -8,7 +8,7 @@ import play.Logger;
 import play.mvc.Controller;
 
 public class Rest extends Controller {
-    
+
 
     // filtering all strings through this method - this makes it possible
     // to replace strings that does work in utf-8 but not in iso-8859-1.
@@ -74,7 +74,7 @@ public class Rest extends Controller {
 		if (multipleValues.length > 0 && !multipleValues[0].equals(filterString("欢迎"))) error += "multipleValues[0] : was '"+multipleValues[0]+"', expected "+filterString("'名字")+"'\n";
 		if (multipleValues.length > 1 && !multipleValues[1].equals(filterString("dobrodošli"))) error += "multipleValues[1] : was '"+multipleValues[1]+"', expected '"+filterString("dobrodošli")+"'\n";
 		if (multipleValues.length > 2 && !multipleValues[2].equals(filterString("ยินดีต้อนรับ"))) error += "multipleValues[2] : was '"+multipleValues[2]+"', expected '"+filterString("ยินดีต้อนรับ")+"'\n";
-		
+
 		Logger.info("error: " + error);
 		return error;
 	}
@@ -89,20 +89,20 @@ public class Rest extends Controller {
 		if (error.length()> 0)error("ERROR : "+error);
 		renderText("FILE AND PARAMS POSTED!");
 	}
-	
+
 	private static void testFile(File file){
 		if (file == null) error("File is null");
 		if (file.length() != 749) error("File length is not 749 bytes as expected.");
 		assert(file.getName().equals(filterString("éç欢迎")+ ".txt"));
 		//read file
 	}
-	
+
 	public static void returnParam() {
 	    String param = params.get("paramÆØÅ");
 	    Logger.info("Serverside: params: " + param);
 	    renderText("param: " + param);
 	}
-	
+
 	public static void echo(String id) {
         String r = id;
 
@@ -112,7 +112,7 @@ public class Rest extends Controller {
                 if ( v == null) {
                     v = "flag";
                 }
-                r += "|" + key + "|" + v; 
+                r += "|" + key + "|" + v;
             }
         }
         renderText(r);
@@ -128,5 +128,5 @@ public class Rest extends Controller {
         }
         renderText(r);
     }
-	
+
 }

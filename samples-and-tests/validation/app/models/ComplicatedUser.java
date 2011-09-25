@@ -12,6 +12,6 @@ public class ComplicatedUser {
 	@Required @Email public String email;
 	@Required @Equals("email") public String emailConfirm;
 	@Required @IsTrue public boolean termsOfUse;
-    
+
 }
 

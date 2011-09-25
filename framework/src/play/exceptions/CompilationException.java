@@ -38,7 +38,7 @@ public class CompilationException extends PlayException implements SourceAttachm
     public String getErrorDescription() {
         return String.format("The file <strong>%s</strong> could not be compiled.\nError raised is : <strong>%s</strong>", isSourceAvailable() ? source.relativePath() : "", problem.toString().replace("<", "&lt;"));
     }
-    
+
     @Override
     public String getMessage() {
         return problem;
@@ -78,5 +78,5 @@ public class CompilationException extends PlayException implements SourceAttachm
     public boolean isSourceAvailable() {
         return source != null && line != null;
     }
-    
+
 }

@@ -1,7 +1,7 @@
 #{selenium 'Check #list tag'}
 
 	open('@{Application.listTag()}')
-	
+
 	// Check result
 	assertText('a', '*- 1. aa ,* = 2. ab ,*- 3. ac .*')
 	assertText('b', '*- 1. 0 ,* = 2. 1 ,*- 3. 2 ,* = 4. 3 .*')

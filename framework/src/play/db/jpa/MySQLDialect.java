@@ -11,5 +11,5 @@ public class MySQLDialect extends MySQLInnoDBDialect {
     public String getTableTypeString() {
         return " ENGINE=InnoDB DEFAULT CHARSET=utf8";
     }
-    
+
 }

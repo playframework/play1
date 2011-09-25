@@ -16,7 +16,7 @@ import play.PlayPlugin;
 public class TempFilePlugin extends PlayPlugin {
 
     private static DecimalFormat format = new DecimalFormat("##########");
-    
+
 
     static {
         format.setMinimumIntegerDigits(10);

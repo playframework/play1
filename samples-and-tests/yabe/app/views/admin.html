@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
- 
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>
-        <title>Administration</title>		
+        <title>Administration</title>
         <meta http-equiv="Content-Type" content="text/html; charset=${_response_encoding}"/>
         #{get 'moreStyles' /}
         <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}" />
@@ -11,7 +11,7 @@
         <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
     </head>
     <body id="admin">
-        
+
         <div id="header">
             <div id="logo">
                 yabe. <span>administration</span>
@@ -22,9 +22,9 @@
                 </li>
             </ul>
         </div>
-        
+
         <div id="main">
-            
+
             <ul id="adminMenu">
                 <li class="${request.controller == 'Admin' ? 'selected' : ''}">
                     <a href="@{Admin.index()}">My posts</a>
@@ -44,15 +44,15 @@
                     </li>
                 #{/secure.check}
             </ul>
-            
-            #{doLayout /} 
+
+            #{doLayout /}
         </div>
-        
+
         <p id="footer">
-            Yabe is a (not so) powerful blog engine built with the 
+            Yabe is a (not so) powerful blog engine built with the
             <a href="http://www.playframework.org">play framework</a>
             as a tutorial application.
         </p>
-        
+
     </body>
 </html>

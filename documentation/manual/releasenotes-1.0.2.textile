@@ -10,9 +10,9 @@ h2. <a>Module repository</a>
 
 The module repository’s goal is to centralize all contributed modules for the Play framework, and allow easy installation. The new module-related commands are:
 
-* @play list-modules@, to list the repository’s contents 
+* @play list-modules@, to list the repository’s contents
 * @play install@, to install a version of a module locally
-* @play new-module@, to create a new module skeleton 
+* @play new-module@, to create a new module skeleton
 * @play build-module@, to package a module and publish it to the repository.
 
 Also, you will see that almost all modules have been deleted. Only a bunch of ‘core’ modules are directly available: testrunner, docviewer, crud and secure.
@@ -59,7 +59,7 @@ h2. <a>HEAD method supported by default</a>
 
 Play now responds automatically to HEAD requests if there is an existing route for the GET method. This is because it is requested by the HTTP RFC that any resource respond to HEAD request as well.
 
-"http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html":http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html 
+"http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html":http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
 
 bq. The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.
 
@@ -117,7 +117,7 @@ h2. <a>A new command to generate the application Javadoc</a>
 
 Now you can generate the **Javadoc** for your project easily, using:
 
-bc. play javadoc 
+bc. play javadoc
 
 It generates the Javadoc API documentation for your project and its modules.
 

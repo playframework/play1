@@ -7,7 +7,7 @@ But now, what if you prefer keep using Java with Play? Could we bring some of th
 The main purpose of lambdaj is to partially eliminate the burden to write (often nested and poorly readable) loops while iterating over collections. From the lambdaj website:
 
 bq. How many times have you read or written the same two or three lines of code that frequently seem to go together, and even though they operate on different objects, feel like the same thing? And how often these repetitions involve some sort of collections iteration or more generically manipulation? These repetitions in the code is something that developers eventually learn to filter out and ignore when reading code, once they figure out where the interesting parts are placed. But even if the developers get used to it, it slows them down. Code like that is clearly written for computers to execute, not for developers to read.
- 
+
 lambdaj is a library that makes easier to address this issue by allowing to manipulate collections in a pseudo-functional and statically typed way. In our experience to iterate over collection, especially in nested loops, is often error prone and makes the code less readable. The purpose of this library is to alleviate these problems employing some functional programming techniques but without losing the static typing of java. We impose this last constraint to make refactoring easier and safer and allow the compiler to do its job.
 
 h2. <a>Let’s use lambdaj</a>
@@ -15,30 +15,30 @@ h2. <a>Let’s use lambdaj</a>
 We will start with a fresh application that displays a Car catalogue. The @Car@ model class is:
 
 bc. package models;
- 
+
 import play.*;
 import play.db.jpa.*;
- 
+
 import javax.persistence.*;
 import java.util.*;
- 
+
 @Entity
 public class Car extends Model {
-    
+
     public String name;
     public String brand;
     public int numberOfViews;
     public Date lastViewed;
-    
+
     @Transient
     public double price;
-    
+
     public Car viewed() {
         lastViewed = new Date();
         numberOfViews++;
         return this;
     }
-    
+
 }
 
 And let’s write a simple action that retrieve all these cars:
@@ -78,17 +78,17 @@ h2. <a>Using closures</a>
 
 Huh? But Java doesn’t have closures! Wait, lambdaj partially fills this omission with a feature that allows you to define, in its traditional DSL style, first-class functions with free variables.
 
-Let’s say we have a @PriceWatcher@ utility able to fetch in real time the price of each car. 
+Let’s say we have a @PriceWatcher@ utility able to fetch in real time the price of each car.
 
 bc. package models;
- 
+
 public class PriceWatcher {
- 
+
     public void setPrice(Car car) {
         // retrieve the correct price here
         car.price = currentPrice;
     }
-    
+
 }
 
 Because this data need to be **in real time** we don’t want store it in the database. Before displaying the car list we need to create a PriceWatcher object and ask it to resolve the current price of each car. Again, let’s do it the lambdaj way:
@@ -98,7 +98,7 @@ Car.forEach(cars); {
     of(priceWatcher).setPrice(var(Car.class));
 }
 
-We define a function with a free variable, and then ask to the @Car@ class to call them for each element of the @cars@ list. 
+We define a function with a free variable, and then ask to the @Car@ class to call them for each element of the @cars@ list.
 
 h2. <a>The final action code</a>
 
@@ -106,21 +106,21 @@ Using all these good lambdaj stuff, we can finally write the @index@ action in a
 
 bc. public static void index() {
     List<Car> cars = Car.find().fetch();
-    
+
     // Collect brands
     Collection<String> brands = selectDistinct(
         collect(cars, on(Car.class).brand)
-    );   
-    
+    );
+
     // Set all these cars viewed
     forEach(cars).viewed().save();
-    
+
     // Update the prices
     PriceWatcher priceWatcher = new PriceWatcher();
     Car.forEach(cars); {
         of(priceWatcher).update(var(Car.class));
     }
-        
+
     render(cars, brands);
 }
 

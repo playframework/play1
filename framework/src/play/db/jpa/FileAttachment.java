@@ -88,5 +88,5 @@ public class FileAttachment {
     public long length() {
         return get().length();
     }
-    
+
 }

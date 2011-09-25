@@ -46,7 +46,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
 
     private static Map<String, Object> renderArgs = new HashMap<String, Object>();
-    
+
     @Before
     public void clearCookies(){
         savedCookies = null;
@@ -77,7 +77,7 @@ public abstract class FunctionalTest extends BaseTest {
         }
         return response;
     }
-    
+
     /**
      * sends a GET request to the application under tests.
      * @param request
@@ -184,7 +184,7 @@ public abstract class FunctionalTest extends BaseTest {
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), null); 
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), null);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             requestEntity.writeRequest(baos);
@@ -267,7 +267,7 @@ public abstract class FunctionalTest extends BaseTest {
             public void execute() throws Exception {
             	renderArgs.clear();
                 ActionInvoker.invoke(request, response);
-                
+
                 if(RenderArgs.current().data != null) {
                 	renderArgs.putAll(RenderArgs.current().data);
                 }
@@ -436,7 +436,7 @@ public abstract class FunctionalTest extends BaseTest {
             throw new RuntimeException(ex);
         }
     }
-    
+
     public static Object renderArgs(String name) {
     	return renderArgs.get(name);
     }

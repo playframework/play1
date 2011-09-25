@@ -87,8 +87,8 @@
                     <source-folder style="packages">
                         <label>test</label>
                         <location>test</location>
-                    </source-folder>   
-                    %MORE%                 
+                    </source-folder>
+                    %MORE%
                 </items>
                 <context-menu>
                     <ide-action name="run"/>
@@ -104,8 +104,8 @@
                 <package-root>test</package-root>
                 %MODULES%
                 <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
-                <built-to>nbproject/classes</built-to>  
-                <source-level>1.5</source-level>                 
+                <built-to>nbproject/classes</built-to>
+                <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
     </configuration>

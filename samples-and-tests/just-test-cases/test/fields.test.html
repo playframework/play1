@@ -3,11 +3,11 @@
 	open('@{Fields.index()}')
 	assertTextNotPresent('Required')
 	assertValue('project_name', '')
-	
+
 	clickAndWait('go')
 	assertTextPresent('Required')
 	assertValue('project_name', '')
-	
+
 	type('project_name', 'Colcoz')
 	clickAndWait('go')
 	assertTextNotPresent('Required')

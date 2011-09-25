@@ -1,6 +1,6 @@
 h1. Manage application.conf in several environments
 
-When you work in a team, different developers will use different configuration keys in their @application.conf@. For example, the log level or some database configuration. This generally leads to recurrent conflicts when you commit the file using your VCS. 
+When you work in a team, different developers will use different configuration keys in their @application.conf@. For example, the log level or some database configuration. This generally leads to recurrent conflicts when you commit the file using your VCS.
 
 Furthermore, different deployment environments - e.g. dev, test, staging and production - need different configurations.
 
@@ -17,14 +17,14 @@ You can then prefix your configuration keys with the framework ID for which the 
 bc. application.name=Cool app
 application.mode=dev
 application.log=INFO
- 
+
 # Configuration for gbo
 %gbo.application.log=DEBUG
 %gbo.db=mem
- 
+
 # Configuration for src
 %scr.http.port=9500
- 
+
 # Production configuration
 %prod.http.port=80
 %prod.application.log=INFO
@@ -48,5 +48,5 @@ By the way, @play test@ is then equivalent to:
 bc. play run --%test
 
 p(note). **Continuing the discussion**
- 
+
 Now we shall move on to %(next)"Production deployment":production%.

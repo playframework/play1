@@ -4,7 +4,7 @@ package play.exceptions;
  * An unexpected exception
  */
 public class UnexpectedException extends PlayException {
-    
+
     public UnexpectedException(String message) {
         super(message);
     }
@@ -12,7 +12,7 @@ public class UnexpectedException extends PlayException {
     public UnexpectedException(Throwable exception) {
         super("Unexpected Error", exception);
     }
-    
+
     public UnexpectedException(String message, Throwable cause) {
         super(message, cause);
     }
@@ -30,6 +30,6 @@ public class UnexpectedException extends PlayException {
     	if(getCause() != null && getCause().getClass() != null)
     		return String.format("An unexpected error occured caused by exception <strong>%s</strong>:<br/> <strong>%s</strong>", getCause().getClass().getSimpleName(), getCause().getMessage());
     	else return String.format("Unexpected error : %s", getMessage());
-    } 
+    }
 }
 

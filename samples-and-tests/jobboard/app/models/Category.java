@@ -10,7 +10,7 @@ public class Category extends Model {
 
     @Required
     public String label;
-    
+
     @Required
     public String code;
 

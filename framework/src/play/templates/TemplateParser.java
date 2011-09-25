@@ -58,7 +58,7 @@ public class TemplateParser {
         }
         return "";
     }
-    
+
     public Token nextToken() {
         for (;;) {
 

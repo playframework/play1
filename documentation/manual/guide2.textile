@@ -19,29 +19,29 @@ h2. <a>The User class</a>
 We will start to code the blog engine by creating the User class. Create a new file @/yabe/app/models/User.java@, and declare a first implementation of the User class:
 
 bc. package models;
- 
+
 import java.util.*;
 import javax.persistence.*;
- 
+
 import play.db.jpa.*;
- 
+
 @Entity
 public class User extends Model {
- 
+
     public String email;
     public String password;
     public String fullname;
     public boolean isAdmin;
-    
+
     public User(String email, String password, String fullname) {
         this.email = email;
         this.password = password;
         this.fullname = fullname;
     }
- 
+
 }
 
-The <code>@Entity</code> annotation marks this class as a managed JPA entity, and the @Model@ superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
+The <code>@Entity</code> annotation marks this class as a managed JPA entity, and the @Model@ superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database.
 
 p(note). By default, the table name is ‘User’. If you change the configuration to use a database where ‘user’ is a reserved keyword, then you will need to specify a different table name for the JPA mapping. To do this, annotate the @User@ class with <code>@Table(name="blog_user")</code>.
 
@@ -65,7 +65,7 @@ bc. ~$ play test
 
 !images/guide2-0!
 
-The @play test@ command is almost the same as @play run@, except that it loads a test runner module that allows you to run test suite directly from a browser. 
+The @play test@ command is almost the same as @play run@, except that it loads a test runner module that allows you to run test suite directly from a browser.
 
 p(note). When you run a Play application in @test mode@, Play will automatically switch to the @test@ framework ID and load the @application.conf@ file accordingly. Check the "framework ID documentation":ids for more information.
 
@@ -78,14 +78,14 @@ To test the model part of the application we will use a JUnit test. As you can s
 bc. import org.junit.*;
 import play.test.*;
 import models.*;
- 
+
 public class BasicTest extends UnitTest {
- 
+
     @Test
     public void aVeryImportantThingToTest() {
         assertEquals(2, 1 + 1);
     }
- 
+
 }
 
 Remove the useless default test (@aVeryImportantThingToTest@) and create a test that tries to create a new user and retrieve it:
@@ -94,11 +94,11 @@ bc. @Test
 public void createAndRetrieveUser() {
     // Create a new user and save it
     new User("bob@gmail.com", "secret", "Bob").save();
-    
+
     // Retrieve the user with e-mail address bob@gmail.com
     User bob = User.find("byEmail", "bob@gmail.com").first();
-    
-    // Test 
+
+    // Test
     assertNotNull(bob);
     assertEquals("Bob", bob.fullname);
 }
@@ -107,7 +107,7 @@ As you can see, the Model superclass gives us two very useful methods: @save()@ 
 
 p(note). You can read more about the Model class’ methods in the Play manual’s "JPA support":jpa chapter.
 
-Select the @BasicTests.java@ in the test runner, click start and check that all is green. 
+Select the @BasicTests.java@ in the test runner, click start and check that all is green.
 
 We will need a method on the User class that checks if a user with a specified username and password exists. Let’s write it and test it.
 
@@ -123,45 +123,45 @@ bc. @Test
 public void tryConnectAsUser() {
     // Create a new user and save it
     new User("bob@gmail.com", "secret", "Bob").save();
-    
-    // Test 
+
+    // Test
     assertNotNull(User.connect("bob@gmail.com", "secret"));
     assertNull(User.connect("bob@gmail.com", "badpassword"));
     assertNull(User.connect("tom@gmail.com", "secret"));
 }
 
-Each time you make a modification you can run all the tests from the Play test runner to make sure you didn’t break anything. 
+Each time you make a modification you can run all the tests from the Play test runner to make sure you didn’t break anything.
 
 h2. <a>The Post class</a>
 
 The @Post@ class will represent blog posts. Let’s write a first implementation:
 
 bc. package models;
- 
+
 import java.util.*;
 import javax.persistence.*;
- 
+
 import play.db.jpa.*;
- 
+
 @Entity
 public class Post extends Model {
- 
+
     public String title;
     public Date postedAt;
-    
+
     @Lob
     public String content;
-    
+
     @ManyToOne
     public User author;
-    
+
     public Post(User author, String title, String content) {
         this.author = author;
         this.title = title;
         this.content = content;
         this.postedAt = new Date();
     }
- 
+
 }
 
 Here we use the <code>@Lob</code> annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the @User@ class using <code>@ManyToOne</code>. That means that each @Post@ is authored by a single @User@, and that each @User@ can author several @Post@ instances.
@@ -171,14 +171,14 @@ We will write a new test case to check that the @Post@ class works as expected. 
 So let’s write a JUnit @setup()@ method to delete the database before each test:
 
 bc. public class BasicTest extends UnitTest {
- 
+
     @Before
     public void setup() {
         Fixtures.deleteAll();
     }
-    
+
     ...
- 
+
 }
 
 p(note). The <code>@Before</code> concept is a core concept of the JUnit testing tool.
@@ -189,16 +189,16 @@ bc. @Test
 public void createPost() {
     // Create a new user and save it
     User bob = new User("bob@gmail.com", "secret", "Bob").save();
-    
+
     // Create a new post
     new Post(bob, "My first post", "Hello world").save();
-    
+
     // Test that the post has been created
     assertEquals(1, Post.count());
-    
+
     // Retrieve all posts created by Bob
     List<Post> bobPosts = Post.find("byAuthor", bob).fetch();
-    
+
     // Tests
     assertEquals(1, bobPosts.size());
     Post firstPost = bobPosts.get(0);
@@ -218,31 +218,31 @@ The last thing that we need to add to this first model draft is the ability to a
 Creating the @Comment@ class is pretty straightforward.
 
 bc. package models;
- 
+
 import java.util.*;
 import javax.persistence.*;
- 
+
 import play.db.jpa.*;
- 
+
 @Entity
 public class Comment extends Model {
- 
+
     public String author;
     public Date postedAt;
-     
+
     @Lob
     public String content;
-    
+
     @ManyToOne
     public Post post;
-    
+
     public Comment(Post post, String author, String content) {
         this.post = post;
         this.author = author;
         this.content = content;
         this.postedAt = new Date();
     }
- 
+
 }
 
 Let’s write a first test case:
@@ -251,26 +251,26 @@ bc. @Test
 public void postComments() {
     // Create a new user and save it
     User bob = new User("bob@gmail.com", "secret", "Bob").save();
- 
+
     // Create a new post
     Post bobPost = new Post(bob, "My first post", "Hello world").save();
- 
+
     // Post a first comment
     new Comment(bobPost, "Jeff", "Nice post").save();
     new Comment(bobPost, "Tom", "I knew that !").save();
- 
+
     // Retrieve all comments
     List<Comment> bobPostComments = Comment.find("byPost", bobPost).fetch();
- 
+
     // Tests
     assertEquals(2, bobPostComments.size());
- 
+
     Comment firstComment = bobPostComments.get(0);
     assertNotNull(firstComment);
     assertEquals("Jeff", firstComment.author);
     assertEquals("Nice post", firstComment.content);
     assertNotNull(firstComment.postedAt);
- 
+
     Comment secondComment = bobPostComments.get(1);
     assertNotNull(secondComment);
     assertEquals("Tom", secondComment.author);
@@ -278,15 +278,15 @@ public void postComments() {
     assertNotNull(secondComment.postedAt);
 }
 
-You can see that navigation between **Post** and **Comments** is not very easy: we need to use a query to retrieve all comments attached to a @Post@. We can do better by setting up the other side of the relationship with the @Post@ class. 
+You can see that navigation between **Post** and **Comments** is not very easy: we need to use a query to retrieve all comments attached to a @Post@. We can do better by setting up the other side of the relationship with the @Post@ class.
 
 Add the @comments@ field to the @Post@ class:
 
 bc. ...
 @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
 public List<Comment> comments;
- 
-public Post(User author, String title, String content) { 
+
+public Post(User author, String title, String content) {
     this.comments = new ArrayList<Comment>();
     this.author = author;
     this.title = title;
@@ -314,30 +314,30 @@ bc. @Test
 public void useTheCommentsRelation() {
     // Create a new user and save it
     User bob = new User("bob@gmail.com", "secret", "Bob").save();
- 
+
     // Create a new post
     Post bobPost = new Post(bob, "My first post", "Hello world").save();
- 
+
     // Post a first comment
     bobPost.addComment("Jeff", "Nice post");
     bobPost.addComment("Tom", "I knew that !");
- 
+
     // Count things
     assertEquals(1, User.count());
     assertEquals(1, Post.count());
     assertEquals(2, Comment.count());
- 
+
     // Retrieve Bob's post
     bobPost = Post.find("byAuthor", bob).first();
     assertNotNull(bobPost);
- 
+
     // Navigate to comments
     assertEquals(2, bobPost.comments.size());
     assertEquals("Jeff", bobPost.comments.get(0).author);
-    
+
     // Delete the post
     bobPost.delete();
-    
+
     // Check that all comments have been deleted
     assertEquals(1, User.count());
     assertEquals(0, Post.count());
@@ -354,14 +354,14 @@ When you start to write more complex tests, you often need a set of data to test
 
 Edit the @/yabe/test/data.yml@ file and start to describe a User:
 
-bc. 
+bc.
 User(bob):
     email: bob@gmail.com
     password: secret
     fullname: Bob
- 
+
 ...
- 
+
 
 Well, because the @data.yml@ file is a litle big, you can "download it here":files/data.yml.
 
@@ -370,34 +370,34 @@ Now we create a test case that loads this data and runs some assertions over it:
 bc. @Test
 public void fullTest() {
     Fixtures.loadModels("data.yml");
- 
+
     // Count things
     assertEquals(2, User.count());
     assertEquals(3, Post.count());
     assertEquals(3, Comment.count());
- 
+
     // Try to connect as users
     assertNotNull(User.connect("bob@gmail.com", "secret"));
     assertNotNull(User.connect("jeff@gmail.com", "secret"));
     assertNull(User.connect("jeff@gmail.com", "badpassword"));
     assertNull(User.connect("tom@gmail.com", "secret"));
- 
+
     // Find all of Bob's posts
     List<Post> bobPosts = Post.find("author.email", "bob@gmail.com").fetch();
     assertEquals(2, bobPosts.size());
- 
+
     // Find all comments related to Bob's posts
     List<Comment> bobComments = Comment.find("post.author.email", "bob@gmail.com").fetch();
     assertEquals(3, bobComments.size());
- 
+
     // Find the most recent post
     Post frontPost = Post.find("order by postedAt desc").first();
     assertNotNull(frontPost);
     assertEquals("About the model layer", frontPost.title);
- 
+
     // Check that this post has two comments
     assertEquals(2, frontPost.comments.size());
- 
+
     // Post a new comment
     frontPost.addComment("Jim", "Hello guys");
     assertEquals(3, frontPost.comments.size());
@@ -426,4 +426,4 @@ You can now commit your project.
 
 bc. $ bzr commit -m "The model layer is ready"
 
-p(note). Go to the %(next)"Building the first screen":guide3%. 
+p(note). Go to the %(next)"Building the first screen":guide3%.

@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ pid -- Show a running application's process ID
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play pid [app_path]

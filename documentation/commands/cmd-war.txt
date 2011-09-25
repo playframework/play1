@@ -1,14 +1,14 @@
 ~ Name:
 ~ ~~~~~
 ~ war -- Export the application as a stand-alone WAR archive
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play war [app_path] [--deps] [--%fwk_id] --output=war_path [--zip]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Package a snapshot of the Play framework and the application hosted at the app_path directory as a WAR package. 
+~ Package a snapshot of the Play framework and the application hosted at the app_path directory as a WAR package.
 ~ If app_path is omitted, the current directory is used.
 ~
 ~ All required modules are included as well.
@@ -17,7 +17,7 @@
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ --output, or -o: 
+~ --output, or -o:
 ~ The path where the WAR directory will be created. The contents of this directory will first be deleted.
 ~
 ~ --zip:
@@ -26,7 +26,7 @@
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
 ~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~
 ~ --exclude:

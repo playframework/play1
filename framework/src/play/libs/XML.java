@@ -61,7 +61,7 @@ public class XML {
     /**
      * Parse an XML file to DOM
      * @return null if an error occurs during parsing.
-     * 
+     *
      */
     public static Document getDocument(File file) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

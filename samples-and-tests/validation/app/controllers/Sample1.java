@@ -12,10 +12,10 @@ public class Sample1 extends Application {
     public static void index() {
         render();
     }
-    
+
     public static void handleSubmit(
-        String username, 
-        String firstname, 
+        String username,
+        String firstname,
         String lastname,
         Integer age,
         String password,
@@ -23,7 +23,7 @@ public class Sample1 extends Application {
         String email,
         String emailConfirm,
         boolean termsOfUse) {
-            
+
         // Validation rules
         validation.required(username);
         validation.minSize(username, 6);
@@ -40,15 +40,15 @@ public class Sample1 extends Application {
         validation.required(emailConfirm);
         validation.equals(emailConfirm, email);
         validation.isTrue(termsOfUse);
-        
+
         // Handle errors
         if(validation.hasErrors()) {
             render("@index");
         }
-        
+
         // Ok, display the created user
         render(username, firstname, lastname, age, password, email);
     }
-    
+
 }
 

@@ -2,11 +2,11 @@ h1. The template engine
 
 Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any text-based formatted document. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
 
-Templates are stored in the @app/views@ directory. 
+Templates are stored in the @app/views@ directory.
 
 h2. <a name="syntax">Template syntax</a>
 
-A template file is a text file, some parts of which have placeholders for dynamically generated content. The  template’s dynamic elements are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy’s syntax is very close to Java’s. 
+A template file is a text file, some parts of which have placeholders for dynamically generated content. The  template’s dynamic elements are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy’s syntax is very close to Java’s.
 
 Dynamic elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
 
@@ -26,14 +26,14 @@ Which will only display the client name if the client is not null.
 
 h3. Template decorators : #{extends  /} and  #{doLayout  /}
 
-Decorators provide a clean solution to share a page layout (or design) across several templates. 
+Decorators provide a clean solution to share a page layout (or design) across several templates.
 
-p(note). Use "#{get}":tags#ageta and "#{set}":tags#aseta tags to share variables between the template and the decorator. 
+p(note). Use "#{get}":tags#ageta and "#{set}":tags#aseta tags to share variables between the template and the decorator.
 
 Embedding a page in a decorator is the matter of a one liner:
 
 bc. #{extends 'simpledesign.html' /}
- 
+
 #{set title:'A decorated page' /}
 This content will be decorated.
 
@@ -133,7 +133,7 @@ A script is a more complicated set of expressions. A script can declare some var
 bc. %{
    fullName = client.name.toUpperCase()+' '+client.forname;
 }%
- 
+
 <h1>Client ${fullName}</h1>
 
 A script can write dynamic content directly using the @out@ object:
@@ -148,7 +148,7 @@ You can use a script to create a structure such as an iteration in your template
 bc. <h1>Client ${client.name}</h1>
 <ul>
 %{
-     for(account in client.accounts) { 
+     for(account in client.accounts) {
 }%
      <li>${account}</li>
 %{
@@ -165,13 +165,13 @@ A template can inherit another template, i.e. it can be included as a part of an
 To inherit another template, use the @extends@ tag:
 
 bc. #{extends 'main.html' /}
- 
+
 <h1>Some code</h1>
 
 The @main.html@ template is a standard template, but it uses the @doLayout@ tag to include the content:
 
 bc. <h1>Main template</h1>
- 
+
 <div id="content">
     #{doLayout /}
 </div>
@@ -191,9 +191,9 @@ bc. #{hello /}
 
 h3. Retrieve tag parameters
 
-Tag parameters are exposed as template variables. The variable names are constructed with the ‘_’ character prepended to the parameter name. 
+Tag parameters are exposed as template variables. The variable names are constructed with the ‘_’ character prepended to the parameter name.
 
-For example: 
+For example:
 
 bc. Hello ${_name} !
 
@@ -236,7 +236,7 @@ h2. <a name="fasttags">Custom Java tags</a>
 
 You can also define custom tags in Java code. Similarly to how JavaExtensions work by extending the @play.templates.JavaExtensions@ class, to create a FastTag you need to create a method in a class that extends @play.templates.FastTags@. Each method that you want to execute as a tag must have the following method signature.
 
-bc. public static void _tagName(Map<?, ?> args, Closure body, PrintWriter out, 
+bc. public static void _tagName(Map<?, ?> args, Closure body, PrintWriter out,
    ExecutableTemplate template, int fromLine)
 
 p(note). Note the underscore before the tag name.
@@ -245,9 +245,9 @@ To understand how to build an actual tag, let’s look at two of the built-in ta
 
 For example, the @verbatim@ tag is implemented by a one-line method that simply calls the toString method on the JavaExtensions, and passes in the body of the tag.
 
-bc. public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, 
+bc. public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out,
    ExecutableTemplate template, int fromLine) {
-   
+
    out.println(JavaExtensions.toString(body));
 }
 
@@ -255,22 +255,22 @@ The body of the tag would be anything between the open and close tag. So
 
 bc. <verbatim>My verbatim</verbatim>
 
-The body value would be 
+The body value would be
 
 bc. My verbatim
 
 The second example is the @option@ tag, which is slightly more complex because it relies on a parent tag to function.
 
-bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out, 
+bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out,
       ExecutableTemplate template, int fromLine) {
- 
+
    Object value = args.get("arg");
    Object selection = TagContext.parent("select").data.get("selected");
-   boolean selected = selection != null && value != null 
+   boolean selected = selection != null && value != null
       && selection.equals(value);
- 
-   out.print("<option value=\"" + (value == null ? "" : value) + "\" " 
-      + (selected ? "selected=\"selected\"" : "") 
+
+   out.print("<option value=\"" + (value == null ? "" : value) + "\" "
+      + (selected ? "selected=\"selected\"" : "")
       + "" + serialize(args, "selected", "value") + ">");
    out.println(JavaExtensions.toString(body));
    out.print("</option>");
@@ -286,9 +286,9 @@ To ensure that your tags do not conflict between projects, or with the core Play
 
 So, for a @hello@ tag, in a @my.tags@ namespace, you would do the following
 
-bc. @FastTags.Namespace("my.tags") 
+bc. @FastTags.Namespace("my.tags")
 public class MyFastTag extends FastTags {
-   public static void _hello (Map<?, ?> args, Closure body, PrintWriter out, 
+   public static void _hello (Map<?, ?> args, Closure body, PrintWriter out,
       ExecutableTemplate template, int fromLine) {
       ...
    }
@@ -328,16 +328,16 @@ You only need to create a Java class extending @play.templates.JavaExtensions@.
 For instance, to provide a custom currency formatter for a number:
 
 bc. package ext;
- 
+
 import play.templates.JavaExtensions;
- 
+
 public class CurrencyExtensions extends JavaExtensions {
- 
+
   public static String ccyAmount(Number number, String currencySymbol) {
      String format = "'"+currencySymbol + "'#####.##";
      return new DecimalFormat(format).format(number);
   }
- 
+
 }
 
 Each extension method is a static method and should return a @java.lang.String@ to be written back in the page. The first parameter will hold the enhanced object.
@@ -350,7 +350,7 @@ Template extension classes are automatically detected by Play at start-up. You j
 
 h2. <a name="implicits">Implicit objects available in a template</a>
 
-All objects added to the @renderArgs@ scope are directly injected as template variables. 
+All objects added to the @renderArgs@ scope are directly injected as template variables.
 
 For instance, to inject a ‘user’ bean into the template from a controller:
 

@@ -10,17 +10,17 @@ GET     /demo                                   Application.enterDemo
 GET     /refresh                                Refresh.index
 GET     /refresh/room                           Refresh.room
 POST    /refresh/room                           Refresh.say
-GET     /refresh/room/leave                     Refresh.leave          
+GET     /refresh/room/leave                     Refresh.leave
 
 # Long polling demo
 GET     /longpolling/room                       LongPolling.room
 GET     /longpolling/room/messages              LongPolling.waitMessages
-POST    /longpolling/room/messages              LongPolling.say  
-GET     /longpolling/room/leave                 LongPolling.leave    
+POST    /longpolling/room/messages              LongPolling.say
+GET     /longpolling/room/leave                 LongPolling.leave
 
 # WebSocket demo
 GET     /websocket/room                         WebSocket.room
-WS      /websocket/room/socket                  WebSocket.ChatRoomSocket.join    
+WS      /websocket/room/socket                  WebSocket.ChatRoomSocket.join
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

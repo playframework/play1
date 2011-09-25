@@ -54,7 +54,7 @@ import play.db.jpa.Model;
 public class City extends Model {
     public String name;
     public String state;
-    
+
     // bi-directional one-to-many, inverse side
     @OneToMany(mappedBy = "city", cascade = CascadeType.ALL)
     public List<Neighborhood> neighborhoods;
@@ -71,13 +71,13 @@ import play.db.jpa.Model;
 @Entity
 public class Neighborhood extends Model {
     public String name;
-    
+
     // bi-directional one-to-many, owning side
     @ManyToOne
     public City city;
-    
+
     public String tags;
-    
+
     // owning side
     @ManyToMany
     public List<User> users;
@@ -98,7 +98,7 @@ public class User extends Model {
     public String email;
     public String lang;
     public Date created;
-    
+
     // inverse side of the relation
     @ManyToMany(mappedBy = "users")
     public List<Neighborhood> neighborhoods;
@@ -132,4 +132,4 @@ bc. City city = City.all().first();
 List<Neighborhood> neighborhoods = city.neighborhoods;
 
 
- 
+

@@ -148,7 +148,7 @@ class Browser(UserAgentBase):
     def close(self):
         UserAgentBase.close(self)
         if self._response is not None:
-            self._response.close()    
+            self._response.close()
         if self._history is not None:
             self._history.close()
             self._history = None

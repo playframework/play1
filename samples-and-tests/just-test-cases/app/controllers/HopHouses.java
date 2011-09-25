@@ -10,10 +10,10 @@ public class HopHouses extends Controller {
     public static void index() {
         render();
     }
-    
+
     public static void submit(House h) {
         render(h);
     }
-    
+
 }
 

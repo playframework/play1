@@ -12,7 +12,7 @@ public class Fields extends Controller {
     public static void index() {
         render();
     }
-    
+
     public static void post(Project project) {
         System.out.println(project);
         if(project.validateAndSave()) {
@@ -20,6 +20,6 @@ public class Fields extends Controller {
         }
         render("@index", project);
     }
-    
+
 }
 

@@ -67,7 +67,7 @@ public class CorePlugin extends PlayPlugin {
     }
 
     /**
-     * Intercept /@status and check that the Authorization header is valid. 
+     * Intercept /@status and check that the Authorization header is valid.
      * Then ask each plugin for a status dump and send it over the HTTP response.
      */
     @Override

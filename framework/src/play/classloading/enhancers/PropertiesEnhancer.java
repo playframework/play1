@@ -24,7 +24,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
 /**
- * Generate valid JavaBeans. 
+ * Generate valid JavaBeans.
  */
 public class PropertiesEnhancer extends Enhancer {
 

@@ -139,7 +139,7 @@ class HTTPRedirectHandler(BaseHandler):
         visited[newurl] = visited.get(newurl, 0) + 1
 
         # Don't close the fp until we are sure that we won't use it
-        # with HTTPError.  
+        # with HTTPError.
         fp.read()
         fp.close()
 

@@ -9,7 +9,7 @@ import play.exceptions.UnexpectedException;
 
 @SuppressWarnings("serial")
 public class RequiredCheck extends AbstractAnnotationCheck<Required> {
-    
+
     final static String mes = "validation.required";
 
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {

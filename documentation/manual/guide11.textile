@@ -32,7 +32,7 @@ Edit the database configuration in the @yabe/conf/application.conf@ file:
 
 bc. %server01.db=mysql:root:secret@yabe
 
-We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. 
+We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change.
 
 Change the @jpa.ddl@ configuration key:
 
@@ -46,14 +46,14 @@ h2. <a>Setting up a frontal HTTP server</a>
 
 Now we could just change the embedded HTTP server’s default port to 80 in order to have a real production server. However it will limit us to installing only one Play application on a given server. As we typically want to install several applications in the same server (but using different IP host names), we need to use a frontal HTTP server as reverse proxy.
 
-You can choose any HTTP server and configure it as reverse proxy, however it is generally a good choice to take something light and fast like "LIGHTTPD":http://www.lighttpd.net/. 
+You can choose any HTTP server and configure it as reverse proxy, however it is generally a good choice to take something light and fast like "LIGHTTPD":http://www.lighttpd.net/.
 
 The exact configuration of LIGHTTPD is beyond the scope of this tutorial, but should be something like:
 
 bc. server.modules = (
       "mod_access",
       "mod_proxy",
-      "mod_accesslog" 
+      "mod_accesslog"
 )
 …
 $HTTP["host"] =~ "www.yabe.com" {
@@ -68,11 +68,11 @@ bc. %server01.XForwardedSupport=127.0.0.1
 h2. <a>This is just the beginning</a>
 
 p(note). If you have read and followed this tutorial, you’re now a seasoned Play developer. You know most of the concepts that drive Play application development.
- 
+
 At this stage, you may want to continue the tutorial with %(next)"internationalisation and localisation":guide12%.
 
 There are still more features we haven’t explored yet, especially related to Web services, like JSON or XML. Also Play comes with more modules that provide more features. And Play itself still evolves every day.
 
 If you are convinced that Play will help you save time for your next Java web application, you’re now ready to start. And don’t hesitate to ask us any question on the "Play Google Group":http://groups.google.com/group/play-framework.
- 
+
 **Thank you!**

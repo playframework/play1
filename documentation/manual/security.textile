@@ -92,5 +92,5 @@ You can of course add the @checkAuthenticity()@ method call as a "before filter"
 "More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery
 
 p(note). **Continuing the discussion**
- 
+
 Next: %(next)"Play modules":modules%.

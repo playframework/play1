@@ -28,18 +28,18 @@ public class OptimisticLockingModel extends GenericModel {
     @GeneratedValue
     public Long id;
 
-    
+
     @CheckWith(value=OptimisticLockingCheck.class, message="optimisticLocking.modelHasChanged")
     @Version
     @Column(nullable=false)
     /**
-     * The version which will be automatically updated which each update. 
+     * The version which will be automatically updated which each update.
      */
     public Long version;
-    
+
     public void setVersion(Long newVersion) {
         if (initialVersion == null)  {
-            //If the model loaded via hibernate the setVersion-Method isn't called! 
+            //If the model loaded via hibernate the setVersion-Method isn't called!
             if (version != null) {
                 initialVersion = version;
             } else {
@@ -53,7 +53,7 @@ public class OptimisticLockingModel extends GenericModel {
         return id;
     }
 
-     
+
     /**
      * Check with proof if the version of the current edited object is lesser
      * than the version in db.
@@ -70,23 +70,23 @@ public class OptimisticLockingModel extends GenericModel {
          * {@inheritDoc}
          */
         @Override
-        public boolean isSatisfied(Object model, Object value) {            
+        public boolean isSatisfied(Object model, Object value) {
             OptimisticLockingModel optimisticLockingModel = (OptimisticLockingModel) model;
-            if ((optimisticLockingModel.initialVersion != null && 
-                    optimisticLockingModel.version != null) && 
-                    (optimisticLockingModel.initialVersion.longValue() > 
+            if ((optimisticLockingModel.initialVersion != null &&
+                    optimisticLockingModel.version != null) &&
+                    (optimisticLockingModel.initialVersion.longValue() >
                      optimisticLockingModel.version.longValue())) {
                 final Request request = Request.current();
                 Long version = optimisticLockingModel.version;
                 Long initialVersion = optimisticLockingModel.initialVersion ;
                 //The following doesn't work see https://bugs.launchpad.net/play/+bug/634719
                 //http://play.lighthouseapp.com/projects/57987-play-framework/tickets/116
-//                setMessage(checkWithCheck.getMessage(), version != null ? version.toString() : "", 
+//                setMessage(checkWithCheck.getMessage(), version != null ? version.toString() : "",
 //                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : "");
-                setMessage("optimisticLocking.modelHasChanged", version != null ? version.toString() : "", 
-                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : ""); 
+                setMessage("optimisticLocking.modelHasChanged", version != null ? version.toString() : "",
+                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : "");
                 return false;
-            } 
+            }
             return true;
         }
     }

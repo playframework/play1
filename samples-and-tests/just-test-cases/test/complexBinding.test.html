@@ -10,7 +10,7 @@
 	assertText('tags', ' , , , ')
 	assertText('noSet', '')
 	assertText('noSetList', '')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -21,7 +21,7 @@
 	assertText('numbers', '3, 98, 0,')
 	assertText('moreNumbers', ', , ,')
 	assertText('tags', ' , , , ')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -32,10 +32,10 @@
 	type('moreNumbers3', '-34435355')
 	clickAndWait('go')
 	assertText('id', 'ABC')
-	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('numbers', '3, 0, -12,')
+	assertText('moreNumbers', '35657, -34435355,')
 	assertText('tags', ', , ,')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -46,10 +46,10 @@
 	type('moreMoreNumbers3', '-34435355')
 	clickAndWait('go')
 	assertText('id', 'ABC')
-	assertText('numbers', '3, 0, -12,')	
-	assertText('moreMoreNumbers', '35657, -34435355,')	
+	assertText('numbers', '3, 0, -12,')
+	assertText('moreMoreNumbers', '35657, -34435355,')
 	assertText('tags', ', , ,')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -60,12 +60,12 @@
 	type('moreTags3', 'C')
 	clickAndWait('go')
 	assertText('id', 'ABC')
-	assertText('numbers', '3, 0, -12,')	
+	assertText('numbers', '3, 0, -12,')
 	assertText('tags', ', , ,')
 	assertText('moreTags', 'A, , , , B, , C,')
 	assertTextPresent('x=null')
 	assertTextPresent('y=null')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -73,8 +73,8 @@
 	type('y', '-12')
 	clickAndWait('go')
 	assertTextPresent('x=3')
-	assertTextPresent('y=-12')	
-	
+	assertTextPresent('y=-12')
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -82,8 +82,8 @@
 	type('y', '-12')
 	clickAndWait('go')
 	assertTextPresent('x=null')
-	assertTextPresent('y=-12')	
-	
+	assertTextPresent('y=-12')
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -96,10 +96,10 @@
 	type('tags3', '日本語')
 	clickAndWait('go')
 	assertText('id', 'ABC')
-	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('numbers', '3, 0, -12,')
+	assertText('moreNumbers', '35657, -34435355,')
 	assertText('tags', 'fff, , 日本語,')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'ABC')
@@ -118,8 +118,8 @@
 	type('addressDog2', 'lulu')
 	clickAndWait('go')
 	assertText('id', 'ABC')
-	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('numbers', '3, 0, -12,')
+	assertText('moreNumbers', '35657, -34435355,')
 	assertText('tags', 'fff, , 日本語,')
 	assertTextPresent('56')
 	assertTextPresent('Paris')
@@ -127,7 +127,7 @@
 	assertTextPresent('rue des pyrénées')
 	assertTextPresent('2 bikes')
 	assertText('a.dogs', '*6 dogs*kiki*lulu*')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'YOP')
@@ -137,7 +137,7 @@
 	assertText('id', 'YOP')
 	assertTextPresent('en=Hello')
 	assertTextPresent('fr=Coucou')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'YOP')
@@ -148,7 +148,7 @@
 	clickAndWait('go')
 	assertText('id', 'YOP')
 	assertTextPresent('Kiki(3)')
-	
+
 	//
 	open('@{HopHouses.index()}')
 	type('id', 'YOP')

@@ -11,7 +11,7 @@
         <tr>
             <td colspan="3" style="font-style:italic; background: #e2e2e2">${command}</td>
         </tr>
-      %{ } else { 
+      %{ } else {
             def parts = play.test.Helpers.seleniumCommand(command); }%
             %{ if(parts && parts[0]) { }%
               <tr>

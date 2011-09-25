@@ -3,7 +3,7 @@
 
 #{form @save()}
     <input type="hidden" name="contact.id" value="${contact?.id}">
-    
+
     <p class="field">
         <label for="name">Name:</label>
         <input type="text" id="name" name="contact.name" value="${contact?.name}">
@@ -31,7 +31,7 @@
     <p class="buttons">
      	<a href="@{list()}">Cancel</a> or <input type="submit" value="Save this contact" id="saveContact">
     </p>
-    
+
     <script type="text/javascript" charset="${_response_encoding}">
         $("#birthdate").datepicker({dateFormat:'yy-mm-dd', showAnim:'fadeIn'})
 	</script>

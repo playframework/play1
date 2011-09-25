@@ -39,7 +39,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return Collections.emptyList();
-        
+
         return new ArrayList<Error>(validation.errors) {
 
             public Error forKey(String key) {
@@ -91,7 +91,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return null;
-          
+
         for (Error error : validation.errors) {
             if (error.key!=null && error.key.equals(field)) {
                 return error;
@@ -108,7 +108,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return Collections.emptyList();
-      
+
         List<Error> errors = new ArrayList<Error>();
         for (Error error : validation.errors) {
             if (error.key!=null && error.key.equals(field)) {

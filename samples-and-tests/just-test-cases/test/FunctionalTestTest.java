@@ -5,13 +5,13 @@ import models.*;
 import controllers.*;
 
 public class FunctionalTestTest extends FunctionalTest {
-    
+
     @org.junit.Before
     public void setUp() throws Exception {
         Fixtures.deleteDatabase();
         Fixtures.loadModels("users.yml");
     }
-    
+
     @Test
     public void testAndCall() {
         assertEquals(2, User.count());
@@ -34,14 +34,14 @@ public class FunctionalTestTest extends FunctionalTest {
         response = GET("/jpacontroller/show");
         assertIsOk(response);
     }
-    
+
     @Test
     public void usingTransaction() {
         Response response = GET("/users/list");
         assertIsOk(response);
         assertContentEquals("2", response);
     }
-    
+
     @Test
     public void usingTransaction2() {
         new User("Bob").create();
@@ -51,7 +51,7 @@ public class FunctionalTestTest extends FunctionalTest {
         User bob = User.find("byName", "Bob").first();
         assertNotNull(bob);
     }
-    
+
     @Test
     public void usingTransaction3() {
         Response response = POST("/users/newUser?name=Kiki");
@@ -60,33 +60,33 @@ public class FunctionalTestTest extends FunctionalTest {
         User kiki = User.find("byName", "Kiki").first();
         assertNotNull(kiki);
     }
-    
+
     public static class AnotherInnerTest extends UnitTest {
-        
+
         @Test
         public void hello() {
             assertEquals(2, 1+1);
         }
-        
+
     }
-    
+
     @Test
     public void usingRedirection() {
         Response response = GET("/users/redirectToIndex");
         assertStatus( 302, response);
         String location = response.headers.get("Location").value();
-        
+
         response = GET( location );
         assertIsOk(response);
-        
+
         response = POST("/users/redirectToIndex");
         assertStatus( 302, response);
         location = response.headers.get("Location").value();
-        
+
         response = POST( location );
         assertIsOk(response);
     }
-    
+
     @Test
     public void canGetRenderArgs() {
 		Response response = GET("/users/edit");

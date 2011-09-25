@@ -8,9 +8,9 @@ import play.mvc.Http.Response;
  * 401 Unauthorized
  */
 public class Unauthorized extends Result {
-    
+
     String realm;
-    
+
     public Unauthorized(String realm) {
         super(realm);
         this.realm = realm;

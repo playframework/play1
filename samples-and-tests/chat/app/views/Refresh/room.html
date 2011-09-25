@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Basic Chat room' /}
 
-<h1>Ajax, using active refresh — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1> 
+<h1>Ajax, using active refresh — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1>
 
 <div id="thread">
     #{list events}
@@ -52,10 +52,10 @@
             scrollDown()
         })
     }
-    
+
     // Call refresh every 5 seconds
     setInterval(refresh, 5000)
-    
+
     scrollDown()
-    
+
 </script>

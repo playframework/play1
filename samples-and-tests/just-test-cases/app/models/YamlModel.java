@@ -14,5 +14,5 @@ public class YamlModel extends GenericModel {
     public Long id;
     public String name;
     public byte[] binaryData;
-    
+
 }

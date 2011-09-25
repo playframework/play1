@@ -11,11 +11,11 @@ import play.mvc.Http.Response;
 public class RedirectToStatic extends Result {
 
     String file;
-    
+
     public RedirectToStatic(String file) {
         this.file = file;
     }
-    
+
     public void apply(Request request, Response response) {
         try {
             response.status = Http.StatusCode.FOUND;

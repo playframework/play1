@@ -13,6 +13,6 @@ public class JobWithContext extends Job<String> {
     public String doJobWithResult() {
         return Invoker.InvocationContext.current().toString();
     }
-    
+
 }
 

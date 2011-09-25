@@ -55,7 +55,7 @@
                             %{ if(object[field]) { }%
                                 <a class="currentAttachment" href="@{attachment(object.id, field)}">${object[field].filename} (${object[field].get().size().formatSize()})</a>
                              %{ } else { }%
-                                
+
                              %{ } }%
                         %{ } else { }%
                             ${object[field]?.escape()?.raw()}

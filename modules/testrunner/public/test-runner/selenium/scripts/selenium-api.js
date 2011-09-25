@@ -34,9 +34,9 @@ function Selenium(browserbot) {
      * <p>
      * We support the following strategies for locating elements:
      * </p>
-     * 
+     *
      * <ul>
-     * <li><strong>identifier</strong>=<em>id</em>: 
+     * <li><strong>identifier</strong>=<em>id</em>:
      * Select the element with the specified &#064;id attribute. If no match is
      * found, select the first element whose &#064;name attribute is <em>id</em>.
      * (This is normally the default; see below.)</li>
@@ -49,14 +49,14 @@ function Selenium(browserbot) {
      * <li>username</li>
      * <li>name=username</li>
      * </ul>
-     * 
+     *
      * <p>The name may optionally be followed by one or more <em>element-filters</em>, separated from the name by whitespace.  If the <em>filterType</em> is not specified, <strong>value</strong> is assumed.</p>
      *
      * <ul class="first last simple">
      * <li>name=flavour value=chocolate</li>
      * </ul>
      * </li>
-     * <li><strong>dom</strong>=<em>javascriptExpression</em>: 
+     * <li><strong>dom</strong>=<em>javascriptExpression</em>:
      *
      * Find an element by evaluating the specified string.  This allows you to traverse the HTML Document Object
      * Model using JavaScript.  Note that you must not return a value in this string; simply make it the last expression in the block.
@@ -68,7 +68,7 @@ function Selenium(browserbot) {
      *
      * </li>
      *
-     * <li><strong>xpath</strong>=<em>xpathExpression</em>: 
+     * <li><strong>xpath</strong>=<em>xpathExpression</em>:
      * Locate an element using an XPath expression.
      * <ul class="first last simple">
      * <li>xpath=//img[&#064;alt='The image alt text']</li>
@@ -98,7 +98,7 @@ function Selenium(browserbot) {
      * </ul>
      * <p>Currently the css selector locator supports all css1, css2 and css3 selectors except namespace in css3, some pseudo classes(:nth-of-type, :nth-last-of-type, :first-of-type, :last-of-type, :only-of-type, :visited, :hover, :active, :focus, :indeterminate) and pseudo elements(::first-line, ::first-letter, ::selection, ::before, ::after). </p>
      * </li>
-     * 
+     *
      * <li><strong>ui</strong>=<em>uiSpecifierString</em>:
      * Locate an element by resolving the UI specifier string to another locator, and evaluating it. See the <a href="http://svn.openqa.org/fisheye/browse/~raw,r=trunk/selenium/trunk/src/main/resources/core/scripts/ui-doc.html">Selenium UI-Element Reference</a> for more details.
      * <ul class="first last simple">
@@ -190,9 +190,9 @@ Selenium.decorateFunctionWithTimeout = function(f, timeout) {
     if (f == null) {
         return null;
     }
-    
+
     var timeoutTime = getTimeoutTime(timeout);
-    
+
     return function() {
         if (new Date().getTime() > timeoutTime) {
             throw new SeleniumError("Timed out after " + timeout + "ms");
@@ -226,7 +226,7 @@ Selenium.prototype.doClick = function(locator) {
    */
     var element = this.browserbot.findElement(locator);
     var elementWithHref = getAncestorOrSelfWithJavascriptHref(element);
-   
+
     if (browserVersion.isChrome && elementWithHref != null) {
         // SEL-621: Firefox chrome: Race condition bug in alert-handling code
         //
@@ -236,19 +236,19 @@ Selenium.prototype.doClick = function(locator) {
         // This workaround injects a callback into the executing href that
         // lowers a flag, which is initially raised. Execution of this click
         // command will wait for the flag to be lowered.
-        
+
         var win = elementWithHref.ownerDocument.defaultView;
         var originalLocation = win.location.href;
         var originalHref = elementWithHref.href;
-        
+
         elementWithHref.href = 'javascript:try { '
             + originalHref.replace(/^\s*javascript:/i, "")
             + ' } finally { window._executingJavascriptHref = undefined; }' ;
-        
+
         win._executingJavascriptHref = true;
-        
+
         this.browserbot.clickElement(element);
-        
+
         return Selenium.decorateFunctionWithTimeout(function() {
             if (win.closed) {
                 return true;
@@ -268,11 +268,11 @@ Selenium.prototype.doClick = function(locator) {
                 }
                 return true;
             }
-            
+
             return false;
         }, this.defaultTimeout);
     }
-    
+
     this.browserbot.clickElement(element);
 };
 
@@ -387,9 +387,9 @@ Selenium.prototype.doKeyPress = function(locator, keySequence) {
    *  character. For example: "w", "\119".
    */
     var element = this.browserbot.findElement(locator);
-    triggerKeyEvent(element, 'keypress', keySequence, true, 
-        this.browserbot.controlKeyDown, 
-        this.browserbot.altKeyDown, 
+    triggerKeyEvent(element, 'keypress', keySequence, true,
+        this.browserbot.controlKeyDown,
+        this.browserbot.altKeyDown,
             this.browserbot.shiftKeyDown,
             this.browserbot.metaKeyDown);
 };
@@ -469,9 +469,9 @@ Selenium.prototype.doKeyDown = function(locator, keySequence) {
    */
     var element = this.browserbot.findElement(locator);
     triggerKeyEvent(element, 'keydown', keySequence, true,
-        this.browserbot.controlKeyDown, 
-            this.browserbot.altKeyDown, 
-            this.browserbot.shiftKeyDown, 
+        this.browserbot.controlKeyDown,
+            this.browserbot.altKeyDown,
+            this.browserbot.shiftKeyDown,
             this.browserbot.metaKeyDown);
 };
 
@@ -486,8 +486,8 @@ Selenium.prototype.doKeyUp = function(locator, keySequence) {
    */
     var element = this.browserbot.findElement(locator);
     triggerKeyEvent(element, 'keyup', keySequence, true,
-        this.browserbot.controlKeyDown, 
-            this.browserbot.altKeyDown, 
+        this.browserbot.controlKeyDown,
+            this.browserbot.altKeyDown,
         this.browserbot.shiftKeyDown,
         this.browserbot.metaKeyDown);
 };
@@ -690,7 +690,7 @@ Selenium.prototype.doTypeKeys = function(locator, value) {
     *
     * <p>This is a convenience method for calling keyDown, keyUp, keyPress for every character in the specified string;
     * this is useful for dynamic UI widgets (like auto-completing combo boxes) that require explicit key events.</p>
-    * 
+    *
     * <p>Unlike the simple "type" command, which forces the specified value into the page directly, this command
     * may or may not have any visible effect, even in cases where typing keys would normally have a visible effect.
     * For example, if you use "typeKeys" on a form element, you may or may not see the results of what you typed in
@@ -919,12 +919,12 @@ Selenium.prototype.doOpenWindow = function(url, windowID) {
    * Opens a popup window (if a window with that ID isn't already open).
    * After opening the window, you'll need to select it using the selectWindow
    * command.
-   * 
+   *
    * <p>This command can also be a useful workaround for bug SEL-339.  In some cases, Selenium will be unable to intercept a call to window.open (if the call occurs during or before the "onLoad" event, for example).
    * In those cases, you can force Selenium to notice the open window's name by using the Selenium openWindow command, using
    * an empty (blank) url, like this: openWindow("", "myFunnyWindow").</p>
    *
-   * @param url the URL to open, which can be blank 
+   * @param url the URL to open, which can be blank
    * @param windowID the JavaScript window ID of the window to select
    */
    this.browserbot.openWindow(url, windowID);
@@ -937,7 +937,7 @@ Selenium.prototype.doSelectWindow = function(windowID) {
    * as the target.
    *
    * <p>
-   * 
+   *
    * Window locators provide different ways of specifying the window object:
    * by title, by internal JavaScript "name," or by JavaScript variable.
    * </p>
@@ -948,7 +948,7 @@ Selenium.prototype.doSelectWindow = function(windowID) {
    * just pick one.
    * </li>
    * <li><strong>name</strong>=<em>myWindow</em>:
-   * Finds the window using its internal JavaScript "name" property.  This is the second 
+   * Finds the window using its internal JavaScript "name" property.  This is the second
    * parameter "windowName" passed to the JavaScript method window.open(url, windowName, windowFeatures, replaceFlag)
    * (which Selenium intercepts).
    * </li>
@@ -966,17 +966,17 @@ Selenium.prototype.doSelectWindow = function(windowID) {
    * <p>3.) Otherwise, selenium looks in a hash it maintains that maps string names to window "names".</p>
    * <p>4.) If <em>that</em> fails, we'll try looping over all of the known windows to try to find the appropriate "title".
    * Since "title" is not necessarily unique, this may have unexpected behavior.</p>
-   * 
+   *
    * <p>If you're having trouble figuring out the name of a window that you want to manipulate, look at the Selenium log messages
    * which identify the names of windows created via window.open (and therefore intercepted by Selenium).  You will see messages
    * like the following for each window as it is opened:</p>
-   * 
+   *
    * <p><code>debug: window.open call intercepted; window ID (which you can use with selectWindow()) is "myNewWindow"</code></p>
    *
    * <p>In some cases, Selenium will be unable to intercept a call to window.open (if the call occurs during or before the "onLoad" event, for example).
    * (This is bug SEL-339.)  In those cases, you can force Selenium to notice the open window's name by using the Selenium openWindow command, using
    * an empty (blank) url, like this: openWindow("", "myFunnyWindow").</p>
-   * 
+   *
    * @param windowID the JavaScript window ID of the window to select
    */
     this.browserbot.selectWindow(windowID);
@@ -1076,7 +1076,7 @@ Selenium.prototype.doWaitForPopUp = function(windowID, timeout) {
     *                 If unspecified, or specified as "null", this command will
     *                 wait for the first non-top window to appear (don't rely
     *                 on this if you are working with multiple popups
-    *                 simultaneously). 
+    *                 simultaneously).
     * @param timeout a timeout in milliseconds, after which the action will return with an error.
     *                If this value is not specified, the default Selenium
     *                timeout will be used. See the setTimeout() command.
@@ -1085,7 +1085,7 @@ Selenium.prototype.doWaitForPopUp = function(windowID, timeout) {
         var timeout = this.defaultTimeout;
     }
     var timeoutTime = getTimeoutTime(timeout);
-    
+
     var popupLoadedPredicate = function () {
         var targetWindow;
         try {
@@ -1102,7 +1102,7 @@ Selenium.prototype.doWaitForPopUp = function(windowID, timeout) {
                 throw e;
             }
         }
-        
+
         if (!targetWindow) return false;
         if (!targetWindow.location) return false;
         if ("about:blank" == targetWindow.location) return false;
@@ -1141,7 +1141,7 @@ Selenium.prototype.doChooseCancelOnNextConfirmation = function() {
    * return true, as if the user had manually clicked OK; after running
    * this command, the next call to confirm() will return false, as if
    * the user had clicked Cancel.  Selenium will then resume using the
-   * default behavior for future confirmations, automatically returning 
+   * default behavior for future confirmations, automatically returning
    * true (OK) unless/until you explicitly call this command for each
    * confirmation.
    * </p>
@@ -1162,7 +1162,7 @@ Selenium.prototype.doChooseOkOnNextConfirmation = function() {
    * return true, as if the user had manually clicked OK, so you shouldn't
    * need to use this command unless for some reason you need to change
    * your mind prior to the next confirmation.  After any confirmation, Selenium will resume using the
-   * default behavior for future confirmations, automatically returning 
+   * default behavior for future confirmations, automatically returning
    * true (OK) unless/until you explicitly call chooseCancelOnNextConfirmation for each
    * confirmation.
    * </p>
@@ -1287,7 +1287,7 @@ Selenium.prototype.getConfirmation = function() {
    * <p>
    * By default, the confirm function will return true, having the same effect
    * as manually clicking OK. This can be changed by prior execution of the
-   * chooseCancelOnNextConfirmation command. 
+   * chooseCancelOnNextConfirmation command.
    * </p>
    * <p>
    * If an confirmation is generated but you do not consume it with getConfirmation,
@@ -1394,7 +1394,7 @@ Selenium.prototype.getText = function(locator) {
 Selenium.prototype.doHighlight = function(locator) {
     /**
     * Briefly changes the backgroundColor of the specified element yellow.  Useful for debugging.
-    * 
+    *
     * @param locator an <a href="#locators">element locator</a>
     */
     var element = this.browserbot.findElement(locator);
@@ -1810,9 +1810,9 @@ Selenium.prototype.getAttributeFromAllWindows = function(attributeName) {
     * @return string[] the set of values of this attribute from all known windows.
     */
     var attributes = new Array();
-    
+
     var win = selenium.browserbot.topWindow;
-    
+
     // DGF normally you should use []s instead of eval "win."+attributeName
     // but in this case, attributeName may contain dots (e.g. document.title)
     // in that case, we have no choice but to use eval...
@@ -1873,7 +1873,7 @@ Selenium.prototype.doSetMouseSpeed = function(pixels) {
     * <p>Setting this value to 0 means that we'll send a "mousemove" event to every single pixel
     * in between the start location and the end location; that can be very slow, and may
     * cause some browsers to force the JavaScript to timeout.</p>
-    * 
+    *
     * <p>If the mouse speed is greater than the distance between the two dragged objects, we'll
     * just send one "mousemove" at the start location and then one final one at the end location.</p>
     * @param pixels the number of pixels between "mousemove" events
@@ -1886,10 +1886,10 @@ Selenium.prototype.doSetMouseSpeed = function(pixels) {
     	this.mouseSpeed = pixels;
     }
 }
- 
+
 Selenium.prototype.getMouseSpeed = function() {
     /** Returns the number of pixels between "mousemove" events during dragAndDrop commands (default=10).
-    * 
+    *
     * @return number the number of pixels between "mousemove" events during dragAndDrop commands (default=10)
     */
     return this.mouseSpeed;
@@ -1905,32 +1905,32 @@ Selenium.prototype.doDragAndDrop = function(locator, movementsString) {
     var clientStartXY = getClientXY(element)
     var clientStartX = clientStartXY[0];
     var clientStartY = clientStartXY[1];
-    
+
     var movements = movementsString.split(/,/);
     var movementX = Number(movements[0]);
     var movementY = Number(movements[1]);
-    
+
     var clientFinishX = ((clientStartX + movementX) < 0) ? 0 : (clientStartX + movementX);
     var clientFinishY = ((clientStartY + movementY) < 0) ? 0 : (clientStartY + movementY);
-    
+
     var mouseSpeed = this.mouseSpeed;
     var move = function(current, dest) {
         if (current == dest) return current;
         if (Math.abs(current - dest) < mouseSpeed) return dest;
         return (current < dest) ? current + mouseSpeed : current - mouseSpeed;
     }
-    
+
     this.browserbot.triggerMouseEvent(element, 'mousedown', true, clientStartX, clientStartY);
     this.browserbot.triggerMouseEvent(element, 'mousemove',   true, clientStartX, clientStartY);
     var clientX = clientStartX;
     var clientY = clientStartY;
-    
+
     while ((clientX != clientFinishX) || (clientY != clientFinishY)) {
         clientX = move(clientX, clientFinishX);
         clientY = move(clientY, clientFinishY);
         this.browserbot.triggerMouseEvent(element, 'mousemove', true, clientX, clientY);
     }
-    
+
     this.browserbot.triggerMouseEvent(element, 'mousemove',   true, clientFinishX, clientFinishY);
     this.browserbot.triggerMouseEvent(element, 'mouseup',   true, clientFinishX, clientFinishY);
 };
@@ -1943,7 +1943,7 @@ Selenium.prototype.doDragAndDropToObject = function(locatorOfObjectToBeDragged, 
    */
    var startX = this.getElementPositionLeft(locatorOfObjectToBeDragged);
    var startY = this.getElementPositionTop(locatorOfObjectToBeDragged);
-   
+
    var destinationLeftX = this.getElementPositionLeft(locatorOfDragDestinationObject);
    var destinationTopY = this.getElementPositionTop(locatorOfDragDestinationObject);
    var destinationWidth = this.getElementWidth(locatorOfDragDestinationObject);
@@ -1951,12 +1951,12 @@ Selenium.prototype.doDragAndDropToObject = function(locatorOfObjectToBeDragged, 
 
    var endX = Math.round(destinationLeftX + (destinationWidth / 2));
    var endY = Math.round(destinationTopY + (destinationHeight / 2));
-   
+
    var deltaX = endX - startX;
    var deltaY = endY - startY;
-   
+
    var movementsString = "" + deltaX + "," + deltaY;
-   
+
    this.doDragAndDrop(locatorOfObjectToBeDragged, movementsString);
 };
 
@@ -2283,7 +2283,7 @@ Selenium.prototype.getXpathCount = function(xpath) {
     /**
     * Returns the number of nodes that match the specified xpath, eg. "//table" would give
     * the number of tables.
-    * 
+    *
     * @param xpath the xpath expression to evaluate. do NOT wrap this expression in a 'count()' function; we will do that for you.
     * @return number the number of nodes that match the specified xpath
     */
@@ -2354,7 +2354,7 @@ Selenium.prototype.doWaitForCondition = function(script, timeout) {
    * @param script the JavaScript snippet to run
    * @param timeout a timeout in milliseconds, after which this command will return with an error
    */
-   
+
     return Selenium.decorateFunctionWithTimeout(function () {
         var window = selenium.browserbot.getCurrentWindow();
         return eval(script);
@@ -2400,11 +2400,11 @@ Selenium.prototype.doWaitForFrameToLoad = function(frameAddress, timeout) {
     /**
      * Waits for a new frame to load.
      *
-     * <p>Selenium constantly keeps track of new pages and frames loading, 
+     * <p>Selenium constantly keeps track of new pages and frames loading,
      * and sets a "newPageLoaded" flag when it first notices a page load.</p>
-     * 
+     *
      * See waitForPageToLoad for more information.
-     * 
+     *
      * @param frameAddress FrameAddress from the server side
      * @param timeout a timeout in milliseconds, after which this command will return with an error
      */
@@ -2489,7 +2489,7 @@ Selenium.prototype.isCookiePresent = function(name) {
     var v = this.browserbot.getCookieByName(name);
     var absent = (v === null);
     return !absent;
-}   
+}
 
 Selenium.prototype.doCreateCookie = function(nameValuePair, optionsString) {
     /**
@@ -2584,7 +2584,7 @@ Selenium.prototype.doDeleteCookie = function(name,optionsString) {
         if ("/" != path) {
             path = path.replace(/\/$/, "");
         }
-    }    
+    }
     path = path.trim();
     domain = domain.trim();
     var cookieName = name.trim();
@@ -2631,7 +2631,7 @@ Selenium.prototype.doSetBrowserLogLevel = function(logLevel) {
 
 Selenium.prototype.doRunScript = function(script) {
     /**
-    * Creates a new "script" tag in the body of the current test window, and 
+    * Creates a new "script" tag in the body of the current test window, and
     * adds the specified text into the body of the command.  Scripts run in
     * this way can often be debugged more easily than scripts executed using
     * Selenium's "getEval" command.  Beware that JS exceptions thrown in these script
@@ -2653,7 +2653,7 @@ Selenium.prototype.doAddLocationStrategy = function(strategyName, functionDefini
     * Defines a new function for Selenium to locate elements on the page.
     * For example,
     * if you define the strategy "foo", and someone runs click("foo=blah"), we'll
-    * run your function, passing you the string "blah", and click on the element 
+    * run your function, passing you the string "blah", and click on the element
     * that your function
     * returns, or throw an "Element not found" error if your function returns null.
     *
@@ -2664,7 +2664,7 @@ Selenium.prototype.doAddLocationStrategy = function(strategyName, functionDefini
     * <li>inDocument: the currently selected document</li>
     * </ul>
     * The function must return null if the element can't be found.
-    * 
+    *
     * @param strategyName the name of the strategy to define; this should use only
     *   letters [a-zA-Z] with no spaces or other punctuation.
     * @param functionDefinition a string defining the body of a function in JavaScript.
@@ -2703,7 +2703,7 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
      *
      * @param filename  the path to the file to persist the screenshot as. No
      *                  filename extension will be appended by default.
-     *                  Directories will not be created if they do not exist,  
+     *                  Directories will not be created if they do not exist,
      *                  and an exception will be thrown, possibly by native
      *                  code.
      * @param kwargs    a kwargs string that modifies the way the screenshot
@@ -2726,9 +2726,9 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
             + '"firefoxproxy") and IE non-HTA ("iexploreproxy", NOT "iexplore" '
             + 'or "iehta"). The current browser isn\'t one of them!');
     }
-    
+
     // do or do not ... there is no try
-    
+
     if (browserVersion.isIE) {
         // targeting snapsIE >= 0.2
         function getFailureMessage(exceptionMessage) {
@@ -2748,7 +2748,7 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
             }
             return msg;
         }
-    
+
         if (typeof(runOptions) != 'undefined' &&
             runOptions.isMultiWindowMode() == false) {
             // framed mode
@@ -2782,12 +2782,12 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
 
             // it's going into a string, so escape the backslashes
             filename = filename.replace(/\\/g, '\\\\');
-            
+
             // this is sort of hackish. We insert a script into the document,
             // and remove it before anyone notices.
             var doc = selenium.browserbot.getDocument();
-            var script = doc.createElement('script'); 
-            var scriptContent = this.snapsieSrc 
+            var script = doc.createElement('script');
+            var scriptContent = this.snapsieSrc
                 + 'try {'
                 + '    new Snapsie().saveSnapshot("' + filename + '");'
                 + '}'
@@ -2806,12 +2806,12 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
         }
         return;
     }
-    
+
     var grabber = {
         prepareCanvas: function(width, height) {
             var styleWidth = width + 'px';
             var styleHeight = height + 'px';
-            
+
             var grabCanvas = document.getElementById('screenshot_canvas');
             if (!grabCanvas) {
                 // create the canvas
@@ -2821,17 +2821,17 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
                 grabCanvas.style.display = 'none';
                 document.documentElement.appendChild(grabCanvas);
             }
-            
+
             grabCanvas.width = width;
             grabCanvas.style.width = styleWidth;
             grabCanvas.style.maxWidth = styleWidth;
             grabCanvas.height = height;
             grabCanvas.style.height = styleHeight;
             grabCanvas.style.maxHeight = styleHeight;
-        
+
             return grabCanvas;
         },
-        
+
         prepareContext: function(canvas, box) {
             var context = canvas.getContext('2d');
             context.clearRect(box.x, box.y, box.width, box.height);
@@ -2839,7 +2839,7 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
             return context;
         }
     };
-    
+
     var SGNsUtils = {
         dataUrlToBinaryInputStream: function(dataUrl) {
             var nsIoService = Components.classes["@mozilla.org/network/io-service;1"]
@@ -2848,23 +2848,23 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
                 .newChannelFromURI(nsIoService.newURI(dataUrl, null, null));
             var binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
                 .createInstance(Components.interfaces.nsIBinaryInputStream);
-            
+
             binaryInputStream.setInputStream(channel.open());
             return binaryInputStream;
         },
-        
+
         newFileOutputStream: function(nsFile) {
             var writeFlag = 0x02; // write only
             var createFlag = 0x08; // create
             var truncateFlag = 0x20; // truncate
             var fileOutputStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
                 .createInstance(Components.interfaces.nsIFileOutputStream);
-                
+
             fileOutputStream.init(nsFile,
                 writeFlag | createFlag | truncateFlag, 0664, null);
             return fileOutputStream;
         },
-        
+
         writeBinaryInputStreamToFileOutputStream:
         function(binaryInputStream, fileOutputStream) {
             var numBytes = binaryInputStream.available();
@@ -2872,7 +2872,7 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
             fileOutputStream.write(bytes, numBytes);
         }
     };
-    
+
     // compute dimensions
     var window = this.browserbot.getCurrentWindow();
     var doc = window.document.documentElement;
@@ -2883,16 +2883,16 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
         height: doc.scrollHeight
     };
     LOG.debug('computed dimensions');
-    
+
     var originalBackground = doc.style.background;
-    
+
     if (kwargs) {
         var args = parse_kwargs(kwargs);
         if (args.background) {
             doc.style.background = args.background;
         }
     }
-    
+
     // grab
     var format = 'png';
     var canvas = grabber.prepareCanvas(box.width, box.height);
@@ -2902,9 +2902,9 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
     context.restore();
     var dataUrl = canvas.toDataURL("image/" + format);
     LOG.debug('grabbed to canvas');
-    
+
     doc.style.background = originalBackground;
-    
+
     // save to file
     var nsFile = Components.classes["@mozilla.org/file/local;1"]
         .createInstance(Components.interfaces.nsILocalFile);
@@ -2972,10 +2972,10 @@ Selenium.prototype.doRollup = function(rollupName, kwargs) {
             , rollupFailedMessage: null
         }
     };
-    
+
     var rule = RollupManager.getInstance().getRollupRule(rollupName);
     var expandedCommands = rule.getExpandedCommands(kwargs);
-    
+
     // hold your breath ...
     try {
         backupManager.backup();
@@ -2993,7 +2993,7 @@ Selenium.prototype.doRollup = function(rollupName, kwargs) {
                 this.rollupFailed = true;
                 this.rollupFailureMessages.push(result.failureMessage);
             }
-            
+
             if (this.pendingRollupCommands.length == 0) {
                 result = {
                     failed: this.rollupFailed
@@ -3010,7 +3010,7 @@ Selenium.prototype.doRollup = function(rollupName, kwargs) {
             backupManager.restore();
             this.commandError(errorMessage);
         };
-        
+
         loop.pendingRollupCommands = expandedCommands;
         loop.rollupFailed = false;
         loop.rollupFailureMessages = [];
@@ -3044,22 +3044,22 @@ Selenium.prototype.doAddScript = function(scriptContent, scriptTagId) {
         var msg = "Element with id '" + scriptTagId + "' already exists!";
         throw new SeleniumError(msg);
     }
-    
+
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
-    
+
     script.type = 'text/javascript';
-    
+
     if (scriptTagId) {
         script.id = scriptTagId;
     }
-    
+
     // replace some entities
     scriptContent = scriptContent
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&');
-    
+
     script.text = scriptContent;
     head.appendChild(script);
 };
@@ -3072,7 +3072,7 @@ Selenium.prototype.doRemoveScript = function(scriptTagId) {
     * @param scriptTagId  the id of the script element to remove.
     */
     var script = document.getElementById(scriptTagId);
-    
+
     if (script && getTagName(script) == 'script') {
         script.parentNode.removeChild(script);
     }
@@ -3088,9 +3088,9 @@ Selenium.prototype.doUseXpathLibrary = function(libraryName) {
     *   <li>"javascript-xpath" - Cybozu Labs' faster library</li>
     *   <li>"default" - The default library.  Currently the default library is "ajaxslt" .</li>
     * </ul>
-    * If libraryName isn't one of these three, then 
+    * If libraryName isn't one of these three, then
     * no change will be made.
-    *   
+    *
     */
 
     if (libraryName == "default") {
@@ -3101,15 +3101,15 @@ Selenium.prototype.doUseXpathLibrary = function(libraryName) {
 	if ((libraryName != 'ajaxslt') && (libraryName != 'javascript-xpath')) {
 		return;
 	}
-	
-	this.browserbot.xpathLibrary = libraryName;	
-	
+
+	this.browserbot.xpathLibrary = libraryName;
+
 };
 
 /**
  *  Factory for creating "Option Locators".
  *  An OptionLocator is an object for dealing with Select options (e.g. for
- *  finding a specified option, or asserting that the selected option of 
+ *  finding a specified option, or asserting that the selected option of
  *  Select element matches some condition.
  *  The type of locator returned by the factory depends on the locator string:
  *     label=<exp>  (OptionLocatorByLabel)

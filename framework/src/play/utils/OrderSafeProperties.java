@@ -35,7 +35,7 @@ public class OrderSafeProperties extends java.util.Properties {
             // by a backslash still yield single and double quote characters, respectively."
             // we must transform \" => " and \' => ' before escaping to prevent escaping the backslash
             line = line.replaceAll("\\\\\"", "\"").replaceAll("(^|[^\\\\])(\\\\')", "$1'");
-            
+
             String escapedLine = StringEscapeUtils.escapeJava( line ) + "\n";
             // remove escaped backslashes
             escapedLine = escapedLine.replaceAll("\\\\\\\\","\\\\");

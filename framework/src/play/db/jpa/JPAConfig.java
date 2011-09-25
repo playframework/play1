@@ -141,7 +141,7 @@ public class JPAConfig {
 
     /**
      * Looks up all {@link JPAConfigurationExtension} implementations and applies them to the JPA configuration.
-     * 
+     *
      * @param cfg the {@link} Ejb3Configuration for this {@link JPAConfig}
      * @param configName the name of the db configuration
      */

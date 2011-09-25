@@ -9,7 +9,7 @@
         <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
     </head>
     <body>
-        
+
         <h1>REPL</h1>
 	%{if (action.contains("java")) {  %}
 	<h2>-Java</h2>
@@ -28,12 +28,12 @@
 	#{/if}
 	<p>
 	<form action="${action}" method="POST">
-		  <textarea rows="20" cols="90" name="script">${script}</textarea> 
+		  <textarea rows="20" cols="90" name="script">${script}</textarea>
 		  <br>
-		<input type="submit" value="Submit" />	
-	  </form>	  
-        </p> 
-        
+		<input type="submit" value="Submit" />
+	  </form>
+        </p>
+
         <div id="results">
             #{list results}
                 <div class="print ${_parity}">
@@ -41,13 +41,13 @@
                 </div>
             #{/list}
         </div>
-        
+
         #{if error}
             <div id="error">
 		<h3>Oops, ${error.message}</h3>
-		%{if (script.split('\n').size()>=2) {  
-			if (action.contains("java")) { 
-				try { %} 
+		%{if (script.split('\n').size()>=2) {
+			if (action.contains("java")) {
+				try { %}
 					<div class="print">${script.split('\n')[error.getErrorLineNumber()-2]}</div>
 				%{ } catch (NullPointerException ex)  { %}
                 			<div class="print">${trace}</div>
@@ -63,7 +63,7 @@
 		%{ } }%
             </div>
         #{/if}
-        
-        
+
+
     </body>
 </html>

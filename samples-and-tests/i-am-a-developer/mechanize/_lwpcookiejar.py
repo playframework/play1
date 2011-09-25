@@ -173,7 +173,7 @@ class LWPCookieJar(FileCookieJar):
                                h("commenturl"),
                                rest,
                                h("rfc2109"),
-                               ) 
+                               )
                     if not ignore_discard and c.discard:
                         continue
                     if not ignore_expires and c.is_expired(now):

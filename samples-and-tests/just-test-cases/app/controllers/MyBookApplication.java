@@ -11,14 +11,14 @@ public class MyBookApplication extends Controller {
         List<MyBook> testEntries = MyBook.all().fetch();
         render(testEntries);
     }
-    
+
     public static void edit(Long id) {
         MyBook testObj = MyBook.findById(id);
         notFoundIfNull(testObj);
         render(testObj);
     }
 
-    
+
     public static void save(long id, MyBook testObj) {
         if (!testObj.isPersistent()) {
             notFound("The object Test with id "+ id + " wasn't found anymore!");
@@ -29,6 +29,6 @@ public class MyBookApplication extends Controller {
             render("Application/edit.html", testObj);
         }
     }
-    
+
 
 }

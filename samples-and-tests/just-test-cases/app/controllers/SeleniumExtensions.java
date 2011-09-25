@@ -14,15 +14,15 @@ public class SeleniumExtensions extends Controller {
 	public static void cacheAccess() {
 		String key = "magicKey";
 		Cache.set(key,"magicValue","1mn");
-		
+
 		ArrayList<Boolean> complex = new ArrayList<Boolean>();
 		complex.add(true);
 		complex.add(false);
 		Cache.set("complex", complex);
-		
+
 		renderText("OK");
 	}
-	
+
 	/**
 	 * Check we can get the last email sent to an address with Selenium (for
 	 * example to help user registration test)

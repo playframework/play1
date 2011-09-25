@@ -80,7 +80,7 @@ public class AnnotationHelper {
      * Contains the index of the locale inside the @As
      */
     private static class Tuple {
-        
+
         public int index = -1;
         public Locale locale;
 

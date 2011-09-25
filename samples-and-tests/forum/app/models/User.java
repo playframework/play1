@@ -14,17 +14,17 @@ public class User extends Model {
     @Email
     @Required
     public String email;
-    
+
     @Required
     public String passwordHash;
-    
+
     @Required
     public String name;
-    
+
     public String needConfirmation;
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public User(String email, String password, String name) {
         this.email = email;
         this.passwordHash = Codec.hexMD5(password);
@@ -32,9 +32,9 @@ public class User extends Model {
         this.needConfirmation = Codec.UUID();
         create();
     }
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public boolean checkPassword(String password) {
         return passwordHash.equals(Codec.hexMD5(password));
     }
@@ -42,9 +42,9 @@ public class User extends Model {
     public boolean isAdmin() {
         return email.equals(Play.configuration.getProperty("forum.adminEmail", ""));
     }
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public List<Post> getRecentsPosts() {
         return Post.find("postedBy = ? order by postedAt", this).fetch(1, 10);
     }
@@ -56,9 +56,9 @@ public class User extends Model {
     public Long getTopicsCount() {
         return Post.count("select count(distinct t) from Topic t, Post p, User u where p.postedBy = ? and p.topic = t", this);
     }
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public static User findByEmail(String email) {
         return find("email", email).first();
     }
@@ -74,6 +74,6 @@ public class User extends Model {
     public static boolean isEmailAvailable(String email) {
         return findByEmail(email) == null;
     }
-    
+
 }
 

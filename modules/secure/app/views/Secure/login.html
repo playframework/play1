@@ -1,11 +1,11 @@
 #{extends 'Secure/layout.html' /}
 
 <div id="login">
-	
+
 	<h1>&{'secure.title'}</h1>
-		
+
 	#{form @authenticate()}
-		
+
 		#{if flash.error}
 			<p class="error">
 				&{flash.error}
@@ -16,7 +16,7 @@
 				&{flash.success}
 			</p>
 		#{/if}
-	
+
 		<p id="username-field">
 			<label for="username">&{'secure.username'}</label>
 			<input type="text" name="username" id="username" value="${flash.username}" />

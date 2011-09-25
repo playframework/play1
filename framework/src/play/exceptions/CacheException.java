@@ -9,10 +9,10 @@ import play.Play;
  * Cache related exception
  */
 public class CacheException extends PlayException {
-    
+
     String sourceFile;
     List<String> source;
-    Integer line;    
+    Integer line;
 
     public CacheException(String message, Throwable cause) {
         super(message, cause);
@@ -28,13 +28,13 @@ public class CacheException extends PlayException {
     @Override
     public String getErrorTitle() {
         return "Cache error";
-    } 
+    }
 
     @Override
     public String getErrorDescription() {
         return getMessage();
     }
-    
+
     public String getSourceFile() {
         return sourceFile;
     }
@@ -51,5 +51,5 @@ public class CacheException extends PlayException {
     public boolean isSourceAvailable() {
         return sourceFile != null;
     }
-    
+
 }

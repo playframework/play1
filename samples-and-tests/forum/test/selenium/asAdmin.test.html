@@ -4,7 +4,7 @@
 
 #{selenium 'Use the forum as Administrator'}
 	clearSession()
-	
+
 	// Home page
 	open('/')
 	assertTextPresent('Still not a member ?')
@@ -12,7 +12,7 @@
 	assertTextPresent('Users help')
 	assertTextPresent('About this sample application')
 	assertTextPresent('7 posts in 4 topics')
-	
+
 	// Login
 	clickAndWait('link=Login')
 	assertTextPresent('Login')
@@ -24,7 +24,7 @@
 	assertTextPresent('Welcome back Admin !')
 	assertTextPresent('4 posts in 3 topics')
 	assertTextNotPresent('Still not a member ?')
-	
+
 	// Create a new forum
 	clickAndWait('link=Forums')
 	assertTextPresent('Administrator options')
@@ -32,12 +32,12 @@
 	type('name', 'Héhé')
 	type('description', 'A new forum')
 	clickAndWait('addForum')
-	
+
 	// Check
 	assertTextPresent('Héhé')
 	assertTextPresent('A new forum')
 	assertTextPresent('0 posts in 0 topics')
-	
+
 	// Delete a forum
 	clickAndWait('link=Play help')
 	assertTextPresent('Delete this forum')
@@ -52,16 +52,16 @@
 	clickAndWait('link=About play')
 	assertTextPresent('Delete this topic')
 	clickAndWait('deleteIt')
-	
+
 	// Check admin has no more posts
 	clickAndWait('link=Admin')
 	assertTextPresent('Admin')
 	assertTextPresent('0 posts in 0 topics')
 	assertTextPresent('No post by this user')
-	
+
 	// Logout
 	clickAndWait('link=Logout')
 	assertTextPresent('been logged out')
 	assertTextPresent('0 posts in 0 topics')
-	
+
 #{/selenium}
