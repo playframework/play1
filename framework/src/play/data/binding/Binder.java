@@ -175,6 +175,10 @@ public abstract class Binder {
             return MISSING;
         }
 
+        if (paramNode.getValue() == null && paramNode.getAllChildren().size() == 0) {
+            return MISSING;
+        }
+
         if (bindingAnnotations.checkNoBinding()) {
             return NO_BINDING;
         }
