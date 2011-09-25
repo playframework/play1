@@ -10,6 +10,6 @@ public class TestBinder implements TypeBinder<String> {
     public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
         return "--" + value + "--";
     }
-    
+
 }
 

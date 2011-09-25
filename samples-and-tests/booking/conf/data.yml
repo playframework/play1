@@ -4,7 +4,7 @@ models.User(gavin):
     username:   guillaume
     password:   foobar
     name:       Guillaume Bort
-    
+
 models.User(demo):
     username:   demo
     password:   demo
@@ -20,7 +20,7 @@ models.Hotel(h1):
     state:      GA
     zip:        30305
     country:    USA
-    
+
 models.Hotel(h2):
     price:      180
     name:       Doubletree
@@ -38,7 +38,7 @@ models.Hotel(h3):
     state:      NY
     zip:        10011
     country:    USA
-    
+
 models.Hotel(h4):
     price:      450
     name:       W Hotel
@@ -47,7 +47,7 @@ models.Hotel(h4):
     state:      NY
     zip:        10011
     country:    USA
-    
+
 models.Hotel(h5):
     price:      250
     name:       Hotel Rouge
@@ -55,8 +55,8 @@ models.Hotel(h5):
     city:       Washington
     state:      DC
     zip:        20036
-    country:    USA        
-    
+    country:    USA
+
 models.Hotel(h6):
     price:      300
     name:       70 Park Avenue Hotel
@@ -64,7 +64,7 @@ models.Hotel(h6):
     city:       NY
     state:      NY
     zip:        10011
-    country:    USA  
+    country:    USA
 
 models.Hotel(h7):
     price:      300
@@ -73,8 +73,8 @@ models.Hotel(h7):
     city:       Miami
     state:      FL
     zip:        33131
-    country:    USA  
-    
+    country:    USA
+
 models.Hotel(h8):
     price:      80
     name:       Sea Horse Inn
@@ -82,7 +82,7 @@ models.Hotel(h8):
     city:       Eau Claire
     state:      WI
     zip:        54703
-    country:    USA      
+    country:    USA
 
 models.Hotel(h9):
     price:      90
@@ -116,7 +116,7 @@ models.Hotel(h12):
     name:       Hilton Tel Aviv
     address:    Independence Park
     city:       Tel Aviv
-    state:      
+    state:
     zip:        63405
     country:    Israel
 
@@ -125,7 +125,7 @@ models.Hotel(h13):
     name:       InterContinental Tokyo Bay
     address:    Takeshiba Pier
     city:       Tokyo
-    state:      
+    state:
     zip:        105
     country:    Japan
 
@@ -134,7 +134,7 @@ models.Hotel(h14):
     name:       Hotel Beaulac
     address:    Esplanade Léopold-Robert 2
     city:       Neuchatel
-    state:      
+    state:
     zip:        2000
     country:    Switzerland
 
@@ -179,7 +179,7 @@ models.Hotel(h19):
     name:       Meliá White House
     address:    Albany Street
     city:       Regents Park London
-    state:      
+    state:
     zip:        NW13UP
     country:    Great Britain
 
@@ -190,4 +190,4 @@ models.Hotel(h10):
     city:       Chicago
     state:      IL
     zip:        60601
-    country:    USA       
+    country:    USA

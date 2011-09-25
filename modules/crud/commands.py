@@ -45,9 +45,9 @@ def execute(**kargs):
         print "~ "
         sys.exit(-1)
 
-    print "~ Specify the template to override, ex : -t Users/list" 
+    print "~ Specify the template to override, ex : -t Users/list"
     print "~ "
     print "~ Use --css to override the CRUD css"
     print "~ Use --index to override the CRUD index"
-    print "~ Use --layout to override the CRUD layout" 
+    print "~ Use --layout to override the CRUD layout"
     print "~ "

@@ -1,20 +1,20 @@
 #{if exception instanceof play.exceptions.PlayException}
-${exception.errorTitle} 
+${exception.errorTitle}
 ${exception.errorDescription.replace('<strong>', '').replace('</strong>', '')}
- 
+
 #{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
 ----------
 In ${exception.sourceFile} (around line ${exception.lineNumber})
 
-%{ 
+%{
     from = exception.lineNumber - 5 >= 0 && exception.lineNumber < exception.source.size() ? exception.lineNumber - 5 : 0
-    to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
+    to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1
 }%
 #{list items:exception.source[from..to], as:'line'}
 ${exception.lineNumber == line_index+from ? '>':' '} ${line_index+from}: ${line}
 #{/list}
 #{/if}
- 
+
 This exception has been logged with id ${exception.id}
 #{/if}
 #{else}

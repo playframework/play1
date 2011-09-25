@@ -53,7 +53,7 @@ public class Functions extends UnitTest {
 
         for(Boolean oops : e._3) {
             fail("Oops!");
-        }        
+        }
 
     }
 

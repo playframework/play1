@@ -5,17 +5,17 @@
 	assertTextNotPresent('Yop')
 
 	open('@{Flash.add()}')
-	assertTextPresent('Yop')	
-	
+	assertTextPresent('Yop')
+
 	open('@{Flash.index()}')
 	assertTextPresent('Yop')
-	
+
 	open('@{Flash.index()}')
 	assertTextNotPresent('Yop')
-	
+
 	open('@{Flash.addNow()}')
 	assertTextPresent('Yop')
-	
+
 	open('@{Flash.index()}')
 	assertTextNotPresent('Yop')
 

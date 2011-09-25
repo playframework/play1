@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ test -- Run the application in test mode in the current shell
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play test [app_path] [--deps] [-f] [--java_options]
@@ -14,7 +14,7 @@
 ~ The application is run in test mode: the framework ID is forced to 'test' (unless you specify it to be
 ~ something matching 'test-?.*', e.g 'test-special') and a web test runner is automatically
 ~ started at the /@tests URL.
-~ (Note that when using special test framework ID you have to make sure all test-settings in 
+~ (Note that when using special test framework ID you have to make sure all test-settings in
 ~ application.conf is available with this special framework ID)
 ~
 ~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
@@ -28,9 +28,9 @@
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ -f: 
+~ -f:
 ~ Disable the JPDA port checking and force the jpda.port value.
 ~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~

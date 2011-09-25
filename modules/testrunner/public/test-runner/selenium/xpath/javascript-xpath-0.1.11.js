@@ -374,13 +374,13 @@ BinaryExpr = function(op, left, right, datatype) {
 
     // Optimize [@id="foo"] and [@name="bar"]
     if (this.op == '=') {
-        if (!right.needContextNode && !right.needContextPosition && 
+        if (!right.needContextNode && !right.needContextPosition &&
             right.datatype != 'nodeset' && right.datatype != 'void' && left.quickAttr) {
             this.quickAttr = true;
             this.attrName = left.attrName;
             this.attrValueExpr = right;
         }
-        else if (!left.needContextNode && !left.needContextPosition && 
+        else if (!left.needContextNode && !left.needContextPosition &&
             left.datatype != 'nodeset' && left.datatype != 'void' && right.quickAttr) {
             this.quickAttr = true;
             this.attrName = right.attrName;
@@ -677,9 +677,9 @@ PathExpr.parse = function(lexer) {
         op = lexer.next();
         token = lexer.peek();
 
-        if (op == '/' && (lexer.empty() || 
-                (token != '.' && token != '..' && token != '@' && token != '*' && 
-                !/(?![0-9])[\w]/.test(token)))) { 
+        if (op == '/' && (lexer.empty() ||
+                (token != '.' && token != '..' && token != '@' && token != '*' &&
+                !/(?![0-9])[\w]/.test(token)))) {
             return FilterExpr.root();
         }
 
@@ -1044,7 +1044,7 @@ NodeUtil = {
                             all = [all];
                         }
                     }
-        
+
                     while (node = all[i++]) {
                         if (NodeUtil.attrMatch(node, attrName, attrValue)) result.push(node);
                     }
@@ -1157,16 +1157,16 @@ NodeUtil = {
                     var i = 0;
                     if (attrName == 'id' || attrName == 'name') {
                         children = children[attrValue];
-        
+
                         if (!children) {
                             return nodeset;
                         }
-        
+
                         if (!children.length || children.nodeType) {
                             children = [children];
                         }
                     }
-        
+
                     while (node = children[i++]) {
                         if (NodeUtil.attrMatch(node, attrName, attrValue)) result.push(node);
                     }
@@ -1275,7 +1275,7 @@ Step.axises = {
             }
             else {
                 var attr = attrs.getNamedItem(test.name);
-                
+
 /*@cc_on @if (@_jscript)
                 if (attr && attr.nodeValue) {
                     attr = new AttributeWrapper(attr, node, sourceIndex);;
@@ -1410,11 +1410,11 @@ Step.parse = function(lexer) {
         }
         else {
             if (lexer.peek(1) == '::') {
-                
+
                 if (!/(?![0-9])[\w]/.test(lexer.peek().charAt(0))) {
                     throw Error('bad token: ' + lexer.next());
                 }
-        
+
                 axis = lexer.next();
                 lexer.next();
 
@@ -1429,7 +1429,7 @@ Step.parse = function(lexer) {
                 axis = 'child';
             }
         }
-    
+
         token = lexer.peek();
         if (!/(?![0-9])[\w]/.test(token.charAt(0))) {
             if (token == '*') {
@@ -1569,7 +1569,7 @@ Step.prototype.show = function(indent) {
  */
 if (!window.NodeType && window.defaultConfig)
     window.NodeType = null;
-    
+
 NodeType = function(name, literal) {
     this.name = name;
     this.literal = literal;
@@ -1678,7 +1678,7 @@ NameTest.prototype.show = function(indent) {
  */
 if (!window.VariableReference && window.defaultConfig)
     window.VariableReference = null;
-    
+
 VariableReference = function(name) {
     this.name = name.substring(1);
 };
@@ -2243,7 +2243,7 @@ var NodeID = {
 
 if (!window.NodeSet && window.defaultConfig)
     window.NodeSet = null;
-    
+
 NodeSet = function() {
     this.length = 0;
     this.nodes = [];
@@ -2482,7 +2482,7 @@ NodeSet.prototype.del = function(index) {
     if (this.only) {
         delete this.only;
     }
-    else {  
+    else {
         var node = this.nodes.splice(index, 1)[0];
 
         if (this._first == node) {
@@ -2594,7 +2594,7 @@ NodeSet.prototype._add = function(node, reverse) {
 /*@end @*/
 
     this.length++;
-    if (reverse) 
+    if (reverse)
         this.nodes.unshift(node);
     else
         this.nodes.push(node);
@@ -2731,11 +2731,11 @@ var install = function(win) {
             throw win.Error('bad token: ' + lexer.next());
         }
     };
-    
+
     win.XPathExpression.prototype.evaluate = function(node, type) {
         return new win.XPathResult(this.expr.evaluate(new Ctx(node)), type);
     };
-    
+
     win.XPathResult = function (value, type) {
         if (type == 0) {
             switch (typeof value) {
@@ -2745,9 +2745,9 @@ var install = function(win) {
                 case 'number':  type ++; // 1
             }
         }
-    
+
         this.resultType = type;
-    
+
         switch (type) {
             case 1:
                 this.numberValue = value.isNodeSet ? value.number() : +value;
@@ -2769,10 +2769,10 @@ var install = function(win) {
                 return;
         }
     };
-    
+
     win.XPathResult.prototype.iterateNext = function() { return this.nodes[this.index++] };
     win.XPathResult.prototype.snapshotItem = function(i) { return this.nodes[i] };
-    
+
     win.XPathResult.ANY_TYPE = 0;
     win.XPathResult.NUMBER_TYPE = 1;
     win.XPathResult.STRING_TYPE = 2;
@@ -2783,12 +2783,12 @@ var install = function(win) {
     win.XPathResult.ORDERED_NODE_SNAPSHOT_TYPE = 7;
     win.XPathResult.ANY_UNORDERED_NODE_TYPE = 8;
     win.XPathResult.FIRST_ORDERED_NODE_TYPE = 9;
-    
-    
+
+
     doc.createExpression = function(expr) {
         return new win.XPathExpression(expr, null);
     };
-    
+
     doc.evaluate = function(expr, context, _, type) {
         return doc.createExpression(expr, null).evaluate(context, type);
     };

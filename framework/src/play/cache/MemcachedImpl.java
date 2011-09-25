@@ -91,7 +91,7 @@ public class MemcachedImpl implements CacheImpl {
 
     public void initClient() throws IOException {
         System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.Log4JLogger");
-        
+
         List<InetSocketAddress> addrs;
         if (Play.configuration.containsKey("memcached.host")) {
             addrs = AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host"));
@@ -106,14 +106,14 @@ public class MemcachedImpl implements CacheImpl {
         } else {
             throw new ConfigurationException("Bad configuration for memcached: missing host(s)");
         }
-        
+
         if (Play.configuration.containsKey("memcached.user")) {
             String memcacheUser = Play.configuration.getProperty("memcached.user");
             String memcachePassword = Play.configuration.getProperty("memcached.password");
             if (memcachePassword == null) {
                 throw new ConfigurationException("Bad configuration for memcached: missing password");
             }
-            
+
             // Use plain SASL to connect to memcached
             AuthDescriptor ad = new AuthDescriptor(new String[]{"PLAIN"},
                                     new PlainCallbackHandler(memcacheUser, memcachePassword));
@@ -121,7 +121,7 @@ public class MemcachedImpl implements CacheImpl {
                                         .setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
                                         .setAuthDescriptor(ad)
                                         .build();
-            
+
             client = new MemcachedClient(cf, addrs);
         } else {
             client = new MemcachedClient(addrs);

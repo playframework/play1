@@ -2,11 +2,11 @@
 
 	open('@{UsingAfter.a('Guillaume')}')
 	assertTextPresent('YopIop')
-	
+
 	// Now the @After unless
 	open('@{UsingAfter.b('Guillaume')}')
 	assertTextPresent('YopYop')
-	
+
         // Try the only param of @After
         open('@{UsingAfter.onlytest('waxzce')}')
 	assertTextPresent('onlywork')

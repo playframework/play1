@@ -103,7 +103,7 @@ public class Secure extends Controller {
 
         /**
          * @Deprecated
-         * 
+         *
          * @param username
          * @param password
          * @return
@@ -127,7 +127,7 @@ public class Secure extends Controller {
 
         /**
          * This method checks that a profile is allowed to view this page/method. This method is called prior
-         * to the method's controller annotated with the @Check method. 
+         * to the method's controller annotated with the @Check method.
          *
          * @param profile
          * @return true if you are allowed to execute this controller method.
@@ -184,7 +184,7 @@ public class Secure extends Controller {
         private static Object invoke(String m, Object... args) throws Throwable {
 
             try {
-                return Java.invokeChildOrStatic(Security.class, m, args);       
+                return Java.invokeChildOrStatic(Security.class, m, args);
             } catch(InvocationTargetException e) {
                 throw e.getTargetException();
             }

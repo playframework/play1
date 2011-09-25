@@ -11,19 +11,19 @@ import play.db.jpa.Model;
 
 @Entity
 public class Account extends GenericModel {
-    
+
   @Id
   public Long id;
 
   @Column
   public String name;
-  
+
   @ManyToOne(cascade=CascadeType.ALL)
   public ContactData contactData;
-  
+
   @Override
   public String toString() {
-    return name + " : " + (contactData == null ? "" : contactData.toString());  
+    return name + " : " + (contactData == null ? "" : contactData.toString());
   }
-  
+
 }

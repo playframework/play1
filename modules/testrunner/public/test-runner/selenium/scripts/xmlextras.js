@@ -11,7 +11,7 @@
 function getDomDocumentPrefix() {
 	if (getDomDocumentPrefix.prefix)
 		return getDomDocumentPrefix.prefix;
-	
+
 	var prefixes = ["MSXML2", "Microsoft", "MSXML", "MSXML3"];
 	var o;
 	for (var i = 0; i < prefixes.length; i++) {
@@ -22,14 +22,14 @@ function getDomDocumentPrefix() {
 		}
 		catch (ex) {};
 	}
-	
+
 	throw new Error("Could not find an installed XML parser");
 }
 
 function getXmlHttpPrefix() {
 	if (getXmlHttpPrefix.prefix)
 		return getXmlHttpPrefix.prefix;
-	
+
 	var prefixes = ["MSXML2", "Microsoft", "MSXML", "MSXML3"];
 	var o;
 	for (var i = 0; i < prefixes.length; i++) {
@@ -40,7 +40,7 @@ function getXmlHttpPrefix() {
 		}
 		catch (ex) {};
 	}
-	
+
 	throw new Error("Could not find an installed XML parser");
 }
 
@@ -56,7 +56,7 @@ XmlHttp.create = function () {
 	try {
 		if (window.XMLHttpRequest) {
 			var req = new XMLHttpRequest();
-			
+
 			// some versions of Moz do not support the readyState property
 			// and the onreadystate event so we patch it!
 			if (req.readyState == null) {
@@ -67,7 +67,7 @@ XmlHttp.create = function () {
 						req.onreadystatechange();
 				}, false);
 			}
-			
+
 			return req;
 		}
 		if (window.ActiveXObject) {
@@ -87,7 +87,7 @@ XmlDocument.create = function () {
 		// DOM2
 		if (document.implementation && document.implementation.createDocument) {
 			var doc = document.implementation.createDocument("", "", null);
-			
+
 			// some versions of Moz do not support the readyState property
 			// and the onreadystate event so we patch it!
 			if (doc.readyState == null) {
@@ -98,7 +98,7 @@ XmlDocument.create = function () {
 						doc.onreadystatechange();
 				}, false);
 			}
-			
+
 			return doc;
 		}
 		if (window.ActiveXObject)
@@ -115,23 +115,23 @@ if (window.DOMParser &&
 
 	// XMLDocument did not extend the Document interface in some versions
 	// of Mozilla. Extend both!
-	//XMLDocument.prototype.loadXML = 
+	//XMLDocument.prototype.loadXML =
 	Document.prototype.loadXML = function (s) {
-		
-		// parse the string to a new doc	
+
+		// parse the string to a new doc
 		var doc2 = (new DOMParser()).parseFromString(s, "text/xml");
-		
+
 		// remove all initial children
 		while (this.hasChildNodes())
 			this.removeChild(this.lastChild);
-			
+
 		// insert and import nodes
 		for (var i = 0; i < doc2.childNodes.length; i++) {
 			this.appendChild(this.importNode(doc2.childNodes[i], true));
 		}
 	};
-	
-	
+
+
 	/*
 	 * xml getter
 	 *

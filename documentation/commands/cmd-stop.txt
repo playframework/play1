@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ stop -- Stop the running application
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play stop [app_path]

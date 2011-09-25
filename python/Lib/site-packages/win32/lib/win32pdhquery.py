@@ -9,10 +9,10 @@ the more straightforward Query-based mechanism.
 
 The basic idea of a PDH Query is an object which can query the system
 about the status of any number of "counters."  The counters are paths
-to a particular piece of performance data.  For instance, the path 
+to a particular piece of performance data.  For instance, the path
 '\\Memory\\Available Bytes' describes just about exactly what it says
-it does, the amount of free memory on the default computer expressed 
-in Bytes.  These paths can be considerably more complex than this, 
+it does, the amount of free memory on the default computer expressed
+in Bytes.  These paths can be considerably more complex than this,
 but part of the point of this wrapper module is to hide that
 complexity from the end-user/programmer.
 
@@ -27,17 +27,17 @@ EXAMPLE: Collecting Data with a Query
 	As an example, the following code implements a logger which allows the
 	user to choose what counters they would like to log, and logs those
 	counters for 30 seconds, at two-second intervals.
-	
+
 	query = Query()
 	query.addcounterbybrowsing()
 	query.collectdatafor(30,2)
-	
+
 	The data is now stored in a list of lists as:
 	query.curresults
-	
+
 	The counters(paths) which were used to collect the data are:
 	query.curpaths
-	
+
 	You can use the win32pdh.ParseCounterPath(path) utility function
 	to turn the paths into more easily read values for your task, or
 	write the data to a file, or do whatever you want with it.
@@ -79,7 +79,7 @@ generated browser window is often hidden behind other windows.  No known
 workaround other than Alt-tabing to reach the browser window.
 
 ### Other References ###
-The win32pdhutil module (which should be in the %pythonroot%/win32/lib 
+The win32pdhutil module (which should be in the %pythonroot%/win32/lib
 directory) provides quick-and-dirty utilities for one-off access to
 variables from the PDH.  Almost everything in that module can be done
 with a Query object, but it provides task-oriented functions for a
@@ -96,7 +96,7 @@ http://msdn.microsoft.com/library/en-us/perfmon/base/using_the_pdh_interface.asp
 
 In general the Python version of the API is just a wrapper around the
 Query-based version of this API (as far as I can see), so you can learn what
-you need to from there.  From what I understand, the MSDN Online 
+you need to from there.  From what I understand, the MSDN Online
 resources are available for the price of signing up for them.  I can't
 guarantee how long that's supposed to last. (Or anything for that
 matter).
@@ -181,12 +181,12 @@ class BaseQuery:
 	def rawaddcounter(self,object, counter, instance = None, inum=-1, machine=None):
 		'''
 		Adds a single counter path, without catching any exceptions.
-		
+
 		See addcounter for details.
 		'''
 		path = win32pdh.MakeCounterPath( (machine,object,instance, None, inum,counter) )
 		self.paths.append(path)
-	
+
 	def addcounter(self,object, counter, instance = None, inum=-1, machine=None):
 		'''
 		Adds a single counter path to the paths attribute.  Normally
@@ -207,7 +207,7 @@ class BaseQuery:
 				return -1
 		else:
 			return -1
-		
+
 	def open(self):
 		'''
 		Build the base query object for this wrapper,
@@ -239,7 +239,7 @@ class BaseQuery:
 				self.curpaths = []
 				raise QueryError(self)
 		return 1 # already open
-		
+
 	def killbase(self,base=None):
 		'''
 		### This is not a public method
@@ -320,11 +320,11 @@ class BaseQuery:
 		### Not a public method
 		'''
 		return (self.paths,)
-		
+
 class Query(BaseQuery):
 	'''
 	Performance Data Helper(PDH) Query object:
-	
+
 	Provides a wrapper around the native PDH query object which
 	allows for query reuse, query storage, and general maintenance
 	functions (adding counter paths in various ways being the most
@@ -348,8 +348,8 @@ class Query(BaseQuery):
 	def addperfcounter(self, object, counter, machine=None):
 		'''
 		A "Performance Counter" is a stable, known, common counter,
-		such as Memory, or Processor.  The use of addperfcounter by 
-		end-users is deprecated, since the use of 
+		such as Memory, or Processor.  The use of addperfcounter by
+		end-users is deprecated, since the use of
 		addcounterbybrowsing is considerably more flexible and general.
 		It is provided here to allow the easy development of scripts
 		which need to access variables so common we know them by name
@@ -369,10 +369,10 @@ class Query(BaseQuery):
 		running copy of a process).  For instance, to track all python.exe
 		instances, you would need merely to ask:
 			query.addinstcounter('python','Virtual Bytes')
-		You can find the names of the objects and their available counters 
+		You can find the names of the objects and their available counters
 		by doing an addcounterbybrowsing() call on a query object (or by
 		looking in performance monitor's add dialog.)
-		
+
 		Beyond merely rearranging the call arguments to make more sense,
 		if the volatile flag is true, the instcounters also recalculate
 		the paths of the available instances on every call to open the
@@ -382,7 +382,7 @@ class Query(BaseQuery):
 			self.volatilecounters.append((object,counter,machine,objtype,format))
 		else:
 			self.paths[len(self.paths):] = self.getinstpaths(object,counter,machine,objtype,format)
-				
+
 	def getinstpaths(self,object,counter,machine=None,objtype='Process',format = win32pdh.PDH_FMT_LONG):
 		'''
 		### Not an end-user function
@@ -454,7 +454,7 @@ class Query(BaseQuery):
 	def collectdatawhile(self, period=1):
 		'''
 		Threaded collection of performance data:
-		This method sets up a simple semaphor system for signalling 
+		This method sets up a simple semaphor system for signalling
 		when you would like to start and stop a threaded data collection
 		method.  The collection runs every period seconds until the
 		semaphor attribute is set to a non-true value (which normally
@@ -496,7 +496,7 @@ class Query(BaseQuery):
 			self.curresults = tempresults
 		finally:
 			self.close()
-		
+
 	# pickle functions
 	def __getinitargs__(self):
 		return (self.paths,)
@@ -512,4 +512,4 @@ class QueryError:
 	def __repr__(self):
 		return '<Query Error in %s>'%repr(self.query)
 	__str__ = __repr__
-	
+

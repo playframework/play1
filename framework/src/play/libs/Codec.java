@@ -35,7 +35,7 @@ public class Codec {
     }
 
     /**
-     * Encode binary data to base64 
+     * Encode binary data to base64
      * @param value The binary data
      * @return The base64 encoded String
      */
@@ -77,7 +77,7 @@ public class Codec {
      * Build an hexadecimal SHA1 hash for a String
      * @param value The String to hash
      * @return An hexadecimal Hash
-     */    
+     */
     public static String hexSHA1(String value) {
         try {
             MessageDigest md;

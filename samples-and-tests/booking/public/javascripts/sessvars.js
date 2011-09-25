@@ -19,7 +19,7 @@ sanitizer added to toObject-method & includeFunctions flag now defaults to false
 sessvars=function(){
 
 	var x={};
-	
+
 	x.$={
 		prefs:{
 			memLimit:2000,
@@ -93,10 +93,10 @@ sessvars=function(){
 			else {this.prefs.autoFlush=false};
 		}
 	};
-	
+
 	x.$.$$={
-		compactOutput:false, 		
-		includeProtos:false, 	
+		compactOutput:false,
+		includeProtos:false,
 		includeFunctions: false,
 		detectCirculars:true,
 		restoreCirculars:true,
@@ -161,11 +161,11 @@ sessvars=function(){
 						for (var i in arg) {
 							if(!this.includeProtos && arg[i]===arg.constructor.prototype[i]){continue};
 							this.path.push(i);
-							var curr = out.length; 
+							var curr = out.length;
 							if (!first)
 								out.push(this.compactOutput?',':',\n');
 							this.toJsonStringArray(i, out);
-							out.push(':');                    
+							out.push(':');
 							this.toJsonStringArray(arg[i], out);
 							if (out[out.length - 1] == u)
 								out.splice(curr, out.length - curr);
@@ -207,7 +207,7 @@ sessvars=function(){
 			}
 		}
 	};
-	
+
 	x.$.init();
 	return x;
 }()

@@ -7,6 +7,6 @@ public class MappingRule {
     public static String kiki() {
         return "KIKI";
     }
-    
+
 }
 

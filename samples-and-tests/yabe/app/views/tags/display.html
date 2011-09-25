@@ -1,5 +1,5 @@
 *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
- 
+
 <div class="post ${_as == 'teaser' ? 'teaser' : ''}">
     <h2 class="post-title">
         <a href="@{Application.show(_post.id)}">${_post.title}</a>
@@ -17,7 +17,7 @@
         #{/if}
         #{elseif _post.tags}
             <span class="post-tags">
-                - Tagged 
+                - Tagged
                 #{list items:_post.tags, as:'tag'}
                     <a href="@{Application.listTagged(tag.name)}">${tag}</a>${tag_isLast ? '' : ', '}
                 #{/list}
@@ -31,11 +31,11 @@
         </div>
     #{/if}
 </div>
- 
+
 #{if _as == 'full'}
     <div class="comments">
         <h3>${_post.comments.size() ?: 'no'} comment${_post.comments.size().pluralize()}</h3>
-        
+
         #{list items:_post.comments, as:'comment'}
             <div class="comment">
                 <div class="comment-metadata">
@@ -48,6 +48,6 @@
                 </div>
             </div>
         #{/list}
-        
+
     </div>
 #{/if}

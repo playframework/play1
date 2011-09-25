@@ -63,7 +63,7 @@ public class Lang {
 
 
     /**
-     * Change language for next requests 
+     * Change language for next requests
      * @param locale (fr, ja, it ...)
      */
     public static void change(String locale) {

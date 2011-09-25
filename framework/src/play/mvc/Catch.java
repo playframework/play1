@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Catch { 
+public @interface Catch {
 
     Class<?>[] value() default {};
     /**

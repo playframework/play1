@@ -20,7 +20,7 @@ public abstract class Cache {
      * The underlying cache implementation
      */
     public static CacheImpl cacheImpl;
-    
+
     /**
      * Sometime we REALLY need to change the implementation :)
      */
@@ -38,7 +38,7 @@ public abstract class Cache {
     }
 
     /**
-     * Add an element only if it doesn't exist, and return only when 
+     * Add an element only if it doesn't exist, and return only when
      * the element is effectively cached.
      * @param key Element key
      * @param value Element value
@@ -105,7 +105,7 @@ public abstract class Cache {
     }
 
     /**
-     * Replace an element only if it already exists and return only when the 
+     * Replace an element only if it already exists and return only when the
      * element is effectively cached.
      * @param key Element key
      * @param value Element value
@@ -129,7 +129,7 @@ public abstract class Cache {
 
     /**
      * Increment the element value (must be a Number).
-     * @param key Element key 
+     * @param key Element key
      * @param by The incr value
      * @return The new value
      */
@@ -139,7 +139,7 @@ public abstract class Cache {
 
     /**
      * Increment the element value (must be a Number) by 1.
-     * @param key Element key 
+     * @param key Element key
      * @return The new value
      */
     public static long incr(String key) {
@@ -148,7 +148,7 @@ public abstract class Cache {
 
     /**
      * Decrement the element value (must be a Number).
-     * @param key Element key 
+     * @param key Element key
      * @param by The decr value
      * @return The new value
      */
@@ -158,7 +158,7 @@ public abstract class Cache {
 
     /**
      * Decrement the element value (must be a Number) by 1.
-     * @param key Element key 
+     * @param key Element key
      * @return The new value
      */
     public static long decr(String key) {
@@ -192,7 +192,7 @@ public abstract class Cache {
     }
 
     /**
-     * Delete an element from the cache and return only when the 
+     * Delete an element from the cache and return only when the
      * element is effectively removed.
      * @param key The element key
      * @return If the element an eventually been deleted
@@ -248,7 +248,7 @@ public abstract class Cache {
     public static void stop() {
         cacheImpl.stop();
     }
-    
+
     /**
      * Utility that check that an object is serializable.
      */

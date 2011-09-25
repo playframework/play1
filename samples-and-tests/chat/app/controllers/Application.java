@@ -13,14 +13,14 @@ public class Application extends Controller {
     public static void index() {
         render();
     }
-    
-    public static void enterDemo(@Required String user, @Required String demo) {        
+
+    public static void enterDemo(@Required String user, @Required String demo) {
         if(validation.hasErrors()) {
             flash.error("Please choose a nick name and the demonstration type…");
             index();
         }
-        
-        // Dispatch to the demonstration        
+
+        // Dispatch to the demonstration
         if(demo.equals("refresh")) {
             Refresh.index(user);
         }
@@ -29,7 +29,7 @@ public class Application extends Controller {
         }
         if(demo.equals("websocket")) {
             WebSocket.room(user);
-        }        
+        }
     }
 
 }

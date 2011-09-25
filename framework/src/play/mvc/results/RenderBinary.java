@@ -62,7 +62,7 @@ public class RenderBinary extends Result {
         this.contentType = contentType;
         this.inline = inline;
     }
-    
+
     public RenderBinary(InputStream is, String name, long length, String contentType, boolean inline) {
         this.is = is;
         this.name = name;
@@ -80,7 +80,7 @@ public class RenderBinary extends Result {
 
     /**
      * Send a file as the response. Content-disposion is set to attachment.
-     * 
+     *
      * @param file readable file to send back
      * @param name a name to use as Content-disposion's filename
      */
@@ -92,7 +92,7 @@ public class RenderBinary extends Result {
     }
 
     /**
-     * Send a file as the response. 
+     * Send a file as the response.
      * Content-disposion is set to attachment, name is taken from file's name
      * @param file readable file to send back
      */
@@ -101,7 +101,7 @@ public class RenderBinary extends Result {
     }
 
     /**
-     * Send a file as the response. 
+     * Send a file as the response.
      * Content-disposion is set to attachment, name is taken from file's name
      * @param file readable file to send back
      */

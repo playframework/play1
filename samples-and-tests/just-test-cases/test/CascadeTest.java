@@ -4,7 +4,7 @@ import play.test.*;
 import models.*;
 
 public class CascadeTest extends UnitTest {
-    
+
     @Before
     public void setup() {
         Fixtures.deleteAll();
@@ -18,7 +18,7 @@ public class CascadeTest extends UnitTest {
         assertEquals(0, Nose.count());
         assertEquals(1, Face.count());
     }
-    
+
     @Test
     public void case2() {
         Face face = Face.find("byName", "Bob").first();

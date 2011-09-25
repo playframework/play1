@@ -21,16 +21,16 @@
 					<span>${tag}</span>${tag_isLast ? '' : ','}
 				#{/list}
 				&nbsp; <a href="@{Application.index(category, null)}">(remove this filter)</a>
-				
+
 			</p>
 		#{/if}
-		
+
 		#{include 'Application/joblist.html' /}
 	</div>
 
 	<div id="tags">
 		<h2>Tags</h2>
-		
+
 		<ul>
 			#{list items:tags, as:'tag'}
 				<li>

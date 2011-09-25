@@ -4,7 +4,7 @@
 
 #{selenium 'Register a new User'}
 	clearSession()
-	
+
 	// Home page
 	open('/')
 	assertTextPresent('Still not a member ?')
@@ -12,16 +12,16 @@
 	assertTextPresent('Users help')
 	assertTextPresent('About this sample application')
 	assertTextPresent('7 posts in 4 topics')
-	
+
 	// Sign up
 	clickAndWait('link=Signup')
 	assertTextPresent('Signup')
 	assertTextPresent('We will send you an email for confirmation')
-	
+
 	// Errors
 	clickAndWait('signupButton')
 	assertTextPresent('Please correct these errors !')
-	
+
 	// Try a bad email
 	type('email', 'yop')
 	type('name', 'yop')
@@ -30,7 +30,7 @@
 	clickAndWait('signupButton')
 	assertTextPresent('Please correct these errors !')
 	assertTextPresent('Invalid email address')
-	
+
 	// Forget the name
 	type('email', 'toto@sampleforum.com')
 	type('name', '')
@@ -39,7 +39,7 @@
 	clickAndWait('signupButton')
 	assertTextPresent('Please correct these errors !')
 	assertTextPresent('Required')
-	
+
 	// Bad password
 	type('email', 'toto@sampleforum.com')
 	type('name', 'Toto')
@@ -48,13 +48,13 @@
 	clickAndWait('signupButton')
 	assertTextPresent('Please correct these errors !')
 	assertTextPresent('Must be equal to password')
-	
+
 	// Ok
 	type('password', 'hello')
 	type('password2', 'hello')
 	clickAndWait('signupButton')
 	assertTextPresent('Your account is created. Please check your emails ...')
-	
+
 	// Login
 	assertTextPresent('Login')
 	assertTextPresent('Email')
@@ -62,7 +62,7 @@
 	type('email', 'toto@sampleforum.com')
 	type('password', 'hello')
 	clickAndWait('loginButton')
-	
+
 	// Go to confirmation page
 	storeLastReceivedEmailBy('toto@sampleforum.com', 'email')
 	store('javascript{/http:[^\s]+/.exec(storedVars["email"])[0]}', 'confirmationUrl')
@@ -70,7 +70,7 @@
 	assertTextPresent('Welcome Toto !')
 	assertTextPresent('No post by this user')
 	assertTextNotPresent('Still not a member ?')
-	
+
 	// Logout
 	clickAndWait('link=Logout')
 	assertTextPresent('logged out')
@@ -82,5 +82,5 @@
 	type('password', 'hello')
 	clickAndWait('loginButton')
 	assertTextPresent('Welcome back Toto !')
-	
+
 #{/selenium}

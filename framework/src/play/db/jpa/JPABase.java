@@ -27,11 +27,11 @@ import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
 /**
- * A super class for JPA entities 
+ * A super class for JPA entities
  */
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
-    
+
     private transient JPAConfig _jpaConfig = null;
 
     public JPAContext getJPAContext() {
@@ -217,7 +217,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     /**
      * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #key key} and class</strong>
-     * @param other 
+     * @param other
      * @return true if equality condition above is verified
      */
     @Override

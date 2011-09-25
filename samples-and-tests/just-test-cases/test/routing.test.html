@@ -2,29 +2,29 @@
 
     open('/re/toto')
     assertTextPresent('OK: toto')
-    
+
     open('/re/1234')
     assertTextPresent('Not found')
-    
+
     open('/re/12345')
     assertTextPresent('OK: 12345')
-    
+
     open('/re/T')
     assertTextPresent('Not found')
 
     open('/re/TITI')
-    assertTextPresent('OK: TITI')   
-    
+    assertTextPresent('OK: TITI')
+
     open('/re/TITITOTO')
     assertTextPresent('Not found')
 
     open('/')
-    
+
     // Packages
     assertAttribute('wp1@href', '/sample/photo/index')
     assertAttribute('wp2@href', '/admin.test/index')
     assertAttribute('wp3@href', 'http://localhost:9003/admin.test/index')
-    
+
     // Missing name
     clickAndWait('sayHello')
     assertTextPresent('Hello !')
@@ -34,25 +34,25 @@
     type('name', 'Guillaume')
     clickAndWait('sayHello')
     assertTextPresent('Hello Guillaume !')
-    
+
     // test utf-8
     clickAndWait('back')
     type('name', '日本語')
     clickAndWait('sayHello')
     assertTextPresent('Hello 日本語 !')
-    
+
     // test escape
     clickAndWait('back')
     type('name', '&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
     clickAndWait('sayHello')
     assertTextPresent('&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
-    
+
     // Check URL
     assertAttribute('back@href', '/')
     clickAndWait('back')
     assertAttribute('form@action', '/sayHello?x-http-method-override=PUT')
     assertAttribute('form@method', 'regexpi:post')
-    
+
     // The yop form
     assertElementPresent('css=form[action=/application/yop]')
     assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
@@ -60,26 +60,26 @@
     assertTextPresent('Yop')
     clickAndWait('back')
     assertTextPresent('It works !')
-    
+
     // A GET form
     assertElementPresent('css=form[action=/aGetForm]')
     assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
     clickAndWait('yopGet')
     assertTextPresent('Hello !')
     clickAndWait('back')
-    
+
     // ... with a name
     type('getName', 'Toto')
     clickAndWait('yopGet')
     assertTextPresent('Hello Toto !')
     assertEval('window.document.location', '*/aGetForm?name=Toto')
-    
+
     // Direct URL with a trailing slash
     open('/aGetForm/')
     assertTextPresent('Hello 2null !')
     open('/aGetForm')
     assertTextPresent('Hello !')
-    
+
     // Optional slash
     open('/optionalSlash/')
     assertTextPresent('OK')
@@ -87,7 +87,7 @@
     assertTextPresent('OK')
     open('/optionalSlash//')
     assertTextPresent('Not found')
-    
+
     // Catch all route
     open('/application/optional')
     assertTextPresent('OK')
@@ -95,11 +95,11 @@
     assertTextPresent('OK')
     open('/Application/Optional')
     assertTextPresent('OK')
-    
+
     // Alternative URL
     open('/index')
     assertTextPresent('It works !')
-    
+
     // Reverse
     open('@{Application.reverserouting()}')
     assertText('a', '/')
@@ -111,14 +111,14 @@
     assertText('g', '/aGetForm?name=Yop')
     assertText('h', '/aGetForm/?name=Yop')
     assertText('i', '/optionalSlash')
-    
+
     // Reverse
     open('@{Application.reverserouting2()}')
     assertTextPresent('/jpabinding/save?project.name=colcoz')
 
     // Reverse
     open('@{Application.reverserouting3()}')
-    assertTextPresent('/jpabinding/save?project.name=COLCOZ')   
+    assertTextPresent('/jpabinding/save?project.name=COLCOZ')
 
     // Host
     open('/')
@@ -161,4 +161,4 @@
 
     open('@{Application.jsRouteError()}')
     assertTextPresent('Wrong parameter type')
-#{/selenium}    
+#{/selenium}

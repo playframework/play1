@@ -18,7 +18,7 @@ import controllers.Binary;
 
 
 public class BinaryTest extends FunctionalTest {
-	
+
 
 	@Before
 	public void setUp() {
@@ -26,11 +26,11 @@ public class BinaryTest extends FunctionalTest {
 		Fixtures.deleteDirectory("attachments");
 		URL deleteURL = reverse(); {
 			Binary.deleteAll();
-		}		
+		}
 		Response deletedResponse = GET(deleteURL);
 		assertStatus(200, deletedResponse);
 	}
-	
+
 	@Test
 	public void testUploadSomething() {
 		URL imageURL = reverse(); {
@@ -38,7 +38,7 @@ public class BinaryTest extends FunctionalTest {
 		}
 		Response getResponse = GET(imageURL);
 		assertStatus(404, getResponse);
-		
+
 		URL url = reverse(); {
 			Binary.save(null);
 		}
@@ -138,7 +138,7 @@ public class BinaryTest extends FunctionalTest {
 
 
 //  TODO: Missing possibility to upload multiple files at once
-//  See: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/472-functionaltest-and-ws-client-library-dont-allow-upload-of-multiple-file#ticket-472-2 
+//  See: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/472-functionaltest-and-ws-client-library-dont-allow-upload-of-multiple-file#ticket-472-2
 //  @Test
 //	public void testMultipleUpload() {
 //
@@ -168,5 +168,5 @@ public class BinaryTest extends FunctionalTest {
         assertIsOk(response);
         assertContentType("custom/contentType", response);
     }
-    
+
 }

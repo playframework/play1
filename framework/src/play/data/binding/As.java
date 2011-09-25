@@ -22,5 +22,5 @@ public @interface As {
             throw new UnsupportedOperationException("Not supported.");
         }
     }
-    
+
 }

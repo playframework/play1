@@ -25,13 +25,13 @@ public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
         // Add SSL handler first to encrypt and decrypt everything.
         SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
         engine.setUseClientMode(false);
-        
+
         if ("want".equalsIgnoreCase(mode)) {
             engine.setWantClientAuth(true);
         } else if ("need".equalsIgnoreCase(mode)) {
             engine.setNeedClientAuth(true);
         }
-        
+
         engine.setEnableSessionCreation(true);
 
         pipeline.addLast("ssl", new SslHandler(engine));

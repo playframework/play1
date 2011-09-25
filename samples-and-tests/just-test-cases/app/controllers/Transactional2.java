@@ -13,6 +13,6 @@ public class Transactional2 extends Controller {
 	public static void disabledTransactionTest() {
 		renderText("isInsideTransaction: " + JPA.isInsideTransaction());
 	}
-	
+
 }
 

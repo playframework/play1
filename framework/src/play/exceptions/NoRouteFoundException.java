@@ -36,7 +36,7 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
         this.source = Arrays.asList(template.source.split("\n"));
         this.line = line;
     }
-    
+
     public NoRouteFoundException(String action, Map<String, Object> args) {
         super("No route found");
         this.action = action;
@@ -44,15 +44,15 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
         if(this.action.startsWith("controllers.")) {
             this.action = this.action.substring(12);
         }
-    } 
-    
+    }
+
     public NoRouteFoundException(String action, Map<String, Object> args, ApplicationClass applicationClass, Integer line) {
         this(action, args);
         this.sourceFile = applicationClass.javaFile.relativePath();
         this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
         this.line = line;
     }
-    
+
     public NoRouteFoundException(String action, Map<String, Object> args, Template template, Integer line) {
         this(action, args);
         this.sourceFile = template.name;
@@ -66,7 +66,7 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
 
     public Map<String, Object> getArgs() {
         return args;
-    }    
+    }
 
     @Override
     public String getErrorTitle() {
@@ -83,7 +83,7 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
         }
         return String.format("No route able to invoke action <strong>%s</strong> with arguments <strong>%s</strong> was found.", action, args);
     }
-    
+
     @Override
     public boolean isSourceAvailable() {
         return source != null;

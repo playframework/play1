@@ -251,7 +251,7 @@ class PlayApplication(object):
             args += ["--http.port=%s" % self.play_env['http.port']]
         if self.play_env.has_key('https.port'):
             args += ["--https.port=%s" % self.play_env['https.port']]
-            
+
         java_args.append('-Dfile.encoding=utf-8')
 
         if self.readConf('application.mode').lower() == 'dev':
@@ -259,7 +259,7 @@ class PlayApplication(object):
             java_args.append('-Xdebug')
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
             java_args.append('-Dplay.debug=yes')
-        
+
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
 
@@ -301,10 +301,10 @@ class PlayConfParser:
             value = linedef[(linedef.find('=')+1):].strip()
             result[key] = value
         f.close()
-        
+
         # minimize the result based on frameworkId
         washedResult = dict()
-        
+
         # first get all keys with correct framework id
         for (key, value) in result.items():
             if key.startswith('%' + self.id + '.'):
@@ -317,22 +317,22 @@ class PlayConfParser:
                 if not (key in washedResult):
                     # add it
                     washedResult[key]=value
-                    
+
         # find all @include
         includeFiles = []
         for (key, value) in washedResult.items():
             if key.startswith('@include.'):
                 includeFiles.append(value)
-                
+
         # process all include files
         for includeFile in includeFiles:
             # read include file
             fromIncludeFile = self.readFile(confFolder, includeFile)
 
-            # add everything from include file 
+            # add everything from include file
             for (key, value) in fromIncludeFile.items():
                 washedResult[key]=value
-        
+
         return washedResult
 
     def get(self, key):

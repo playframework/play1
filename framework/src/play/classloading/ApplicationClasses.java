@@ -283,7 +283,7 @@ public class ApplicationClasses {
     /**
      * Retrieve the corresponding source file for a given class name.
      * It handles innerClass too !
-     * @param name The fully qualified class name 
+     * @param name The fully qualified class name
      * @return The virtualFile if found
      */
     public static VirtualFile getJava(String name) {

@@ -179,7 +179,7 @@ public class Java {
         {
             invokedClass = assignableClasses.get(0);
         }
-        
+
         return Java.invokeStaticOrParent(invokedClass, method, args);
     }
 

@@ -343,7 +343,7 @@ public class Mail {
         public static String getLastMessageReceivedBy(String email) {
             return emails.get(email);
         }
-        
+
         public static void reset(){
         	emails.clear();
         }

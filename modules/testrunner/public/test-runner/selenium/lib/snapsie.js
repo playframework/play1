@@ -7,11 +7,11 @@
 
 function Snapsie() {
     // private methods
-    
+
     function isQuirksMode(inDocument) {
         return (inDocument.compatMode == 'BackCompat');
     }
-    
+
     function getDrawableElement(inDocument) {
         if (isQuirksMode(inDocument)) {
             var body = inDocument.getElementsByTagName('body')[0];
@@ -22,7 +22,7 @@ function Snapsie() {
             return inDocument.documentElement;
         }
     }
-    
+
     /**
      * Returns the canonical Windows path for a given path. This means
      * basically replacing any forwards slashes with backslashes.
@@ -36,7 +36,7 @@ function Snapsie() {
     }
 
     // public methods
-    
+
     /**
      * Saves a screenshot of the current document to a file. If frameId is
      * specified, a screenshot of just the frame is captured instead.
@@ -52,7 +52,7 @@ function Snapsie() {
             , scrollTop : drawableElement.scrollTop
         };
         drawableElement.style.overflow = 'hidden';
-        
+
         var capturableDocument;
         var frameBCR = { left: 0, top: 0 };
         if (!frameId) {
@@ -61,13 +61,13 @@ function Snapsie() {
         else {
             var frame = document.getElementById(frameId);
             capturableDocument = frame.document;
-            
+
             // scroll as much of the frame into view as possible
             frameBCR = frame.getBoundingClientRect();
             window.scroll(frameBCR.left, frameBCR.top);
             frameBCR = frame.getBoundingClientRect();
         }
-        
+
         var nativeObj = new ActiveXObject('Snapsie.CoSnapsie');
         nativeObj.saveSnapshot(
             getCanonicalPath(outputFile),
@@ -81,9 +81,9 @@ function Snapsie() {
             frameBCR.left,
             frameBCR.top
         );
-        
+
         // revert
-        
+
         drawableElement.style.overflow = drawableInfo.overflow;
         drawableElement.scrollLeft = drawableInfo.scrollLeft;
         drawableElement.scrollTop = drawableInfo.scrollTop;

@@ -17,6 +17,6 @@ public class Validation extends Controller {
      public static void user(@Required @Valid User user) {
          renderText(validation.errorsMap());
     }
-    
+
 }
 

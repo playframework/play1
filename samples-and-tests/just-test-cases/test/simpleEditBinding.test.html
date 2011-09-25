@@ -9,7 +9,7 @@
 	assertValue('l', '356')
 	assertValue('k', '')
 	assertValue('birth', '21/12/1980')
-	
+
 	// No modification
 	clickAndWait('go')
 	assertText('name', 'Guillaume')
@@ -20,7 +20,7 @@
 	assertText('l', '356')
 	assertText('k', '')
 	assertText('birth', '21/12/1980')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('b', 'false')
@@ -34,7 +34,7 @@
 	assertText('l', '356')
 	assertText('k', '')
 	assertText('birth', '21/12/1980')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('b', '')
@@ -48,7 +48,7 @@
 	assertText('l', '356')
 	assertText('k', '')
 	assertText('birth', '21/12/1980')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('b', 'x')
@@ -62,7 +62,7 @@
 	assertText('l', '356')
 	assertText('k', '')
 	assertText('birth', '21/12/1980')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('birth', '12/05/2003')
@@ -75,7 +75,7 @@
 	assertText('l', '356')
 	assertText('k', '')
 	assertText('birth', '12/05/2003')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('birth', 'nimp')
@@ -87,9 +87,9 @@
 	assertText('j', '0')
 	assertText('l', '356')
 	assertText('k', '')
-	assertText('birth', '21/12/1980')	
+	assertText('birth', '21/12/1980')
 	assertTextPresent('u.birth: Incorrect value')
-	
+
 	//
 	open('@{Users.edit()}')
 	type('birth', '')
@@ -101,9 +101,9 @@
 	assertText('j', '0')
 	assertText('l', '356')
 	assertText('k', '')
-	assertText('birth', '')	
+	assertText('birth', '')
 	assertTextNotPresent('u.birth: Incorrect value')
-	
+
 	// Remove the birth field
 	open('@{Users.edit()}')
 	getEval('window.document.getElementById("birth").name="xxx"')
@@ -115,9 +115,9 @@
 	assertText('j', '0')
 	assertText('l', '356')
 	assertText('k', '')
-	assertText('birth', '21/12/1980')	
-	assertTextNotPresent('u.birth: Incorrect value')		
-	
+	assertText('birth', '21/12/1980')
+	assertTextNotPresent('u.birth: Incorrect value')
+
 	// Remove all fields !
 	open('@{Users.edit()}')
 	getEval('window.document.getElementById("name").name="xxx"')
@@ -136,7 +136,7 @@
 	assertText('j', '0')
 	assertText('l', '356')
 	assertText('k', '')
-	assertText('birth', '21/12/1980')	
+	assertText('birth', '21/12/1980')
 	assertTextNotPresent('Incorrect value')
 
 #{/selenium}

@@ -53,5 +53,5 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
         messageVariables.put("reference", new SimpleDateFormat("yyyy-MM-dd").format(reference));
         return messageVariables;
     }
-   
+
 }

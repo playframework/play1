@@ -13,7 +13,7 @@ import play.i18n.Lang;
 import play.mvc.Controller;
 
 public class DataBinding extends Controller {
-    
+
     @play.mvc.Before static void lang(String lang) {
         System.out.println(lang);
     }
@@ -54,11 +54,11 @@ public class DataBinding extends Controller {
     public static void signinPage() {
         render();
     }
-    
+
     public static void customeBinding(@As(binder=utils.TestBinder.class) String yop) {
         renderText(yop);
     }
-    
+
     public static void globalBinder(java.awt.Point p) {
         if(validation.hasErrors()) {
             renderText(validation.errors());
@@ -72,7 +72,7 @@ public class DataBinding extends Controller {
         if (verifyPerson.userName.equals(person.userName) && verifyPerson.password.equals(person.password)) {
            flash.success("Authentication successful!");
         } else {
-           flash.error("Authentication failed!"); 
+           flash.error("Authentication failed!");
         }
         render("/DataBinding/signinPage.html", person);
     }
@@ -83,7 +83,7 @@ public class DataBinding extends Controller {
         person.password = "nicolas";
         return person;
     }
-    
+
     public static void createFactory(@play.data.validation.Valid models.Factory factory) {
         renderText(validation.hasErrors() + " -> " + factory.name + "," + factory.color);
     }

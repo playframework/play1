@@ -61,7 +61,7 @@ def execute(**kargs):
     # Precompile first
     play.commands.precompile.execute(command=command, app=app, args=args, env=env)
 
-    # Package 
+    # Package
     package_as_war(app, env, war_path, war_zip_path, war_exclusion_list)
 
     print "~ Done !"

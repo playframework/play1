@@ -15,11 +15,11 @@ public class CustomAdminCompany extends CRUD {
     protected static ObjectType createObjectType(Class<? extends Model> entityClass) {
         return new VersionObjectType(entityClass);
     }
-    
+
     public static class VersionObjectType extends ObjectType {
-        
+
         private final String versionColumn;
-        
+
         public VersionObjectType(Class<? extends Model> modelClass) {
             super(modelClass);
             versionColumn = getVersionColumnName(modelClass);
@@ -54,6 +54,6 @@ public class CustomAdminCompany extends CRUD {
         }
 
     }
-    
+
 }
 

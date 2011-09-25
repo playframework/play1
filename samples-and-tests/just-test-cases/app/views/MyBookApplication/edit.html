@@ -5,13 +5,13 @@
 #{/ifError}
 
 #{ifErrors}
- 
+
    <h1>Oops...</h1>
- 
+
    #{errors}
        <li>${error.raw()}</li>
    #{/errors}
- 
+
 #{/ifErrors}
 
 
@@ -26,6 +26,6 @@
           <span class="error">${field.error}</span>
         </p>
        #{/}
-    <input type="submit" value="Save">    
+    <input type="submit" value="Save">
 #{/form}
 

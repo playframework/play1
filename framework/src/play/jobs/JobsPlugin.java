@@ -87,7 +87,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Object o : executor.getQueue()) {
                 ScheduledFuture task = (ScheduledFuture)o;
-                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");        
+                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");
             }
         }
         return sw.toString();
@@ -225,9 +225,9 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        
+
         List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
-        
+
         for (final Class clazz : jobs) {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
@@ -253,7 +253,7 @@ public class JobsPlugin extends PlayPlugin {
                 }
             }
         }
-        
+
         executor.shutdownNow();
         executor.getQueue().clear();
     }

@@ -10,15 +10,15 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  * Database error
  */
 public class DatabaseException extends PlayException implements SourceAttachment {
-    
+
     String sourceFile;
     List<String> source;
-    Integer line;    
-    
+    Integer line;
+
     public DatabaseException(String message) {
         super(message, null);
     }
-    
+
     public DatabaseException(String message, Throwable cause) {
         super(message, cause);
         StackTraceElement element = getInterestingStrackTraceElement(cause);

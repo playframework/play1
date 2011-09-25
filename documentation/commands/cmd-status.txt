@@ -5,7 +5,7 @@
 ~ Alias:
 ~ ~~~~~
 ~ st
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play status [app_path] [--url=http://...] [--secret=...]
@@ -19,14 +19,14 @@
 ~
 ~ Options:
 ~ ~~~~~~~~
-~ --url: 
+~ --url:
 ~ The script try to connect to the application at the localhost domain. If you want to monitor an application running on
 ~ a remote server, specify the application URL using this option (eg. play status --url=http://myapp.com)
 ~
-~ --secret: 
+~ --secret:
 ~ The script uses the secret key to generate an authorization token. It assumes that the secret key available from the
-~ app_path/conf/application.conf is valid. If not you can provide your own secret key using this option 
-~ (eg. play status --secret=bghjT7ZG7ZGCO8)  
-~ 
+~ app_path/conf/application.conf is valid. If not you can provide your own secret key using this option
+~ (eg. play status --secret=bghjT7ZG7ZGCO8)
+~
 ~ If you provide both options, you can run this command without a local application directory (app_path is not required).
 ~

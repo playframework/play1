@@ -1,16 +1,16 @@
 package controllers;
- 
+
 import play.*;
 import play.mvc.*;
 import play.data.validation.*;
- 
+
 import java.util.*;
- 
+
 import models.*;
- 
+
 @With(Secure.class)
 public class Admin extends Controller {
-    
+
     @Before
     static void setConnectedUser() {
         if(Security.isConnected()) {
@@ -18,12 +18,12 @@ public class Admin extends Controller {
             renderArgs.put("user", user.fullname);
         }
     }
- 
+
     public static void index() {
         List<Post> posts = Post.find("author.email", Security.connected()).fetch();
         render(posts);
     }
-    
+
     public static void form(Long id) {
         if(id != null) {
             Post post = Post.findById(id);
@@ -31,7 +31,7 @@ public class Admin extends Controller {
         }
         render();
     }
-    
+
     public static void save(Long id, String title, String content, String tags) {
         Post post;
         if(id == null) {
@@ -60,5 +60,5 @@ public class Admin extends Controller {
         post.save();
         index();
     }
-    
+
 }

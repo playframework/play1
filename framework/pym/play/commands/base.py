@@ -76,7 +76,7 @@ def new(app, args, env, cmdloader=None):
                 if os.path.isdir(os.path.join(env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
                     dirname = f
                     break
-        
+
         if not dirname:
             print "~ Oops. No module %s found" % m
             print "~ Try to install it using 'play install %s'" % m
@@ -98,7 +98,7 @@ def new(app, args, env, cmdloader=None):
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
     print "~"
 
-    # Configure modules 
+    # Configure modules
     runDepsAfter = False
     for m in md:
         # Check dependencies.yml of the module
@@ -111,7 +111,7 @@ def new(app, args, env, cmdloader=None):
                 runDepsAfter = True
             except Exception:
                 pass
-                
+
     if runDepsAfter:
         cmdloader.commands['dependencies'].execute(command='dependencies', app=app, args=['--sync'], env=env, cmdloader=cmdloader)
 
@@ -131,7 +131,7 @@ def handle_sigterm(signum, frame):
 def run(app, args):
     global process
     app.check()
-    
+
     print "~ Ctrl+C to stop"
     print "~ "
     java_cmd = app.java_cmd(args)
@@ -243,7 +243,7 @@ def autotest(app, args):
            fpcp.append(os.path.normpath(os.path.join(fpcp_libs, jar)))
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
-        cp_args = ';'.join(fpcp)    
+        cp_args = ';'.join(fpcp)
     java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
     try:
         subprocess.call(java_cmd, env=os.environ)
@@ -253,7 +253,7 @@ def autotest(app, args):
 
     print "~"
     time.sleep(1)
-    
+
     # Kill if exists
     http_port = app.readConf('http.port')
     try:
@@ -262,7 +262,7 @@ def autotest(app, args):
         opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception, e:
         pass
- 
+
     if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
         print "~ All tests passed"
         print "~"

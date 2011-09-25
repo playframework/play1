@@ -33,5 +33,5 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
         messageVariables.put("maxSize", Integer.toString(maxSize));
         return messageVariables;
     }
-   
+
 }

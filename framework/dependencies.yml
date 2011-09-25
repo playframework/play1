@@ -14,7 +14,7 @@ require:    &allDependencies
     - com.google.code.gson -> gson 1.7.1
     - com.jamonapi -> jamon 2.7
     - com.ning -> async-http-client 1.6.3
-    - commons-beanutils 1.8.3  
+    - commons-beanutils 1.8.3
     - commons-codec 1.4
     - commons-collections 3.2.1
     - commons-email 1.2
@@ -72,7 +72,7 @@ repositories:
         type:       local
         artifact:   "${play.path}/framework/lib/[artifact]-[revision].jar"
         contains:   *allDependencies
-        
+
     - playCoreCrud:
         type:       local
         artifact:   "${play.path}/modules/crud"
@@ -85,9 +85,9 @@ repositories:
         contains:
             - play -> secure $version
 
-    - playModules:  
+    - playModules:
         type:       chain
-        using:            
+        using:
             - playLocalModules:
                 type:       local
                 descriptor: "${play.path}/modules/[module]-[revision]/conf/dependencies.yml"
@@ -97,7 +97,7 @@ repositories:
                 type:       http
                 descriptor: "http://www.playframework.org/modules/repo/[module]/[revision]/dependencies.yml"
                 artifact:   "http://www.playframework.org/modules/[module]-[revision].zip"
-                
+
         contains:
             - play -> *
 

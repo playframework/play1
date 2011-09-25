@@ -96,33 +96,33 @@ public class RestTest extends UnitTest {
             Thread.sleep(1000);
         }
     }
-    
+
     @Test
     public void testEncodingOfParams() throws Exception {
         // related to #737
         Map<String, Object> params = new HashMap<String, Object>();
         params.put( "paramÆØÅ", "%%%æøåÆØÅ");
-        
+
         String res = WS.url("http://localhost:9003/ressource/returnParam").params(params).get().getString();
         Logger.info("res: " + res);
         assertEquals("param: %%%æøåÆØÅ", res);
-        
+
         // try it again with different encoding
         HttpResponse r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).get();
         Logger.info("res.contentType: " + r.getContentType());
         assertEquals("param: %%%æøåÆØÅ", r.getString());
-        
+
         // do the same with post..
         res = WS.url("http://localhost:9003/ressource/returnParam").params(params).post().getString();
         Logger.info("res: " + res);
         assertEquals("param: %%%æøåÆØÅ", res);
-        
+
         // try it again with different encoding
         r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).post();
         Logger.info("res.contentType: " + r.getContentType());
         assertEquals("param: %%%æøåÆØÅ", r.getString());
-        
-        
+
+
     }
 
     @Test
@@ -138,7 +138,7 @@ public class RestTest extends UnitTest {
         assertEquals("abc|id|abc|body||b|æøå=|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå=").get().getString());
         //test with 'flag'
         assertEquals("abc|id|abc|body||b|flag|a|flag", WS.url("http://localhost:9003/encoding/echo/abc?a&b=").get().getString());
-        
+
         // verify url ending with only ? or none
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc?").get().getString());
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc").get().getString());

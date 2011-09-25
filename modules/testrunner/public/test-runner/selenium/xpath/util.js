@@ -474,11 +474,11 @@ RegExp.escape = (function() {
     '/', '.', '*', '+', '?', '|', '^', '$',
     '(', ')', '[', ']', '{', '}', '\\'
   ];
-    
+
   var sRE = new RegExp(
     '(\\' + specials.join('|\\') + ')', 'g'
   );
-    
+
   return function(text) {
     return text.replace(sRE, '\\$1');
   }

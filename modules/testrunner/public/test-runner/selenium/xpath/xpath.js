@@ -171,7 +171,7 @@ function xpathCacheLookup(expr) {
 }
 
 /*DGF xpathReduce is where the magic happens in this parser.
-Skim down to the bottom of this file to find the table of 
+Skim down to the bottom of this file to find the table of
 grammatical rules and precedence numbers, "The productions of the grammar".
 
 The idea here
@@ -453,7 +453,7 @@ ExprContext.prototype.clone = function(opt_node, opt_position, opt_nodelist) {
 };
 
 ExprContext.prototype.setVariable = function(name, value) {
-  if (value instanceof StringValue || value instanceof BooleanValue || 
+  if (value instanceof StringValue || value instanceof BooleanValue ||
     value instanceof NumberValue || value instanceof NodeSetValue) {
     this.variables[name] = value;
     return;
@@ -735,7 +735,7 @@ LocationExpr.prototype.evaluate = function(ctx) {
 function xPathStep(nodes, steps, step, input, ctx) {
   var s = steps[step];
   var ctx2 = ctx.clone(input);
-  
+
   if (ctx.returnOnFirstMatch && !s.hasPositionalPredicate) {
     var nodelist = s.evaluate(ctx2).nodeSetValue();
     // the predicates were not processed in the last evaluate(), so that we can
@@ -807,7 +807,7 @@ StepExpr.prototype.evaluate = function(ctx) {
   var input = ctx.node;
   var nodelist = [];
   var skipNodeTest = false;
-  
+
   if (this.nodetest instanceof NodeTestAny) {
     skipNodeTest = true;
   }
@@ -864,7 +864,7 @@ StepExpr.prototype.evaluate = function(ctx) {
         copyArray(nodelist, input.attributes);
       }
     }
-    
+
   } else if (this.axis == xpathAxis.CHILD) {
     copyArray(nodelist, input.childNodes);
 
@@ -1143,7 +1143,7 @@ FunctionCallExpr.prototype.xpathfunctions = {
     var s1 = this.args[1].evaluate(ctx).stringValue();
     return new BooleanValue(s0.indexOf(s1) == 0);
   },
-  
+
   'ends-with': function(ctx) {
     assert(this.args.length == 2);
     var s0 = this.args[0].evaluate(ctx).stringValue();
@@ -1240,7 +1240,7 @@ FunctionCallExpr.prototype.xpathfunctions = {
     }
     return new StringValue(s0);
   },
-  
+
   'matches': function(ctx) {
     assert(this.args.length >= 2);
     var s0 = this.args[0].evaluate(ctx).stringValue();
@@ -1251,7 +1251,7 @@ FunctionCallExpr.prototype.xpathfunctions = {
         throw 'Invalid regular expression syntax: ' + s2;
       }
     }
-    
+
     try {
       var re = new RegExp(s1, s2);
     }
@@ -1425,7 +1425,7 @@ PathExpr.prototype.evaluate = function(ctx) {
   ctx.setReturnOnFirstMatch(false);
   var nodes = this.filter.evaluate(ctx).nodeSetValue();
   ctx.setReturnOnFirstMatch(flag);
-  
+
   var nodes1 = [];
   if (ctx.returnOnFirstMatch) {
     for (var i = 0; i < nodes.length; ++i) {
@@ -1457,7 +1457,7 @@ FilterExpr.prototype.evaluate = function(ctx) {
   ctx.setReturnOnFirstMatch(false);
   var nodes = this.expr.evaluate(ctx).nodeSetValue();
   ctx.setReturnOnFirstMatch(flag);
-  
+
   for (var i = 0; i < this.predicate.length; ++i) {
     var nodes0 = nodes;
     nodes = [];

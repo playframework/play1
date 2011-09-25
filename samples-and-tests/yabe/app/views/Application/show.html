@@ -17,19 +17,19 @@
 #{if flash.success}
     <p class="success">${flash.success}</p>
 #{/if}
- 
+
 #{display post:post, as:'full' /}
 
 <h3>Post a comment</h3>
- 
+
 #{form @Application.postComment(post.id)}
- 
+
     #{ifErrors}
         <p class="error">
             ${errors[0]}
         </p>
     #{/ifErrors}
- 
+
     <p>
         <label for="author">Your name: </label>
         <input type="text" name="author" id="author" value="${params.author}" />
@@ -51,15 +51,15 @@
 #{/form}
 
 <script type="text/javascript" charset="${_response_encoding}">
-    $(function() {         
-        // Expose the form 
-        $('form').click(function() { 
-            $('form').expose({api: true}).load(); 
-        }); 
-        
+    $(function() {
+        // Expose the form
+        $('form').click(function() {
+            $('form').expose({api: true}).load();
+        });
+
         // If there is an error, focus to form
         if($('form .error').size()) {
-            $('form').expose({api: true, loadSpeed: 0}).load(); 
+            $('form').expose({api: true, loadSpeed: 0}).load();
             $('form input[type=text]').get(0).focus();
         }
     });

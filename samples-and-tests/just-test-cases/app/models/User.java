@@ -10,14 +10,14 @@ import java.util.*;
 
 @Entity
 public class User extends Model {
-	
+
 	public User(String name) {
 		this.name = name;
 	}
-	
+
 	public User() {
 	}
-    
+
     public String name;
     public Boolean b;
     public boolean c;
@@ -32,7 +32,7 @@ public class User extends Model {
 
     @Email
     public String email;
-    
+
     @Valid
     @Transient
     public List<MyAddress> addresses;
@@ -40,10 +40,10 @@ public class User extends Model {
 	public String toString() {
 		return name;
 	}
-	
+
 	public static String yip() {
 		return "YIP";
 	}
-    
+
 }
 

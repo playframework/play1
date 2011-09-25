@@ -1,7 +1,7 @@
 #{selenium 'Check #if, #else, ... tags'}
 
 	open('@{Application.ifthenelse()}')
-	
+
 	// Check result
 	assertTextPresent('a is true')
 	assertTextPresent('b is false 1')
@@ -15,7 +15,7 @@
 	assertTextPresent('h is true')
 	assertTextPresent('i is false')
 	assertTextPresent('j is true')
-	
+
 	// Hmm
 	assertTextNotPresent('a is false')
 	assertTextNotPresent('b is true 1')

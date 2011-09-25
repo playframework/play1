@@ -20,7 +20,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
 /**
- * Enhance controllers classes. 
+ * Enhance controllers classes.
  */
 public class ControllersEnhancer extends Enhancer {
 
@@ -40,7 +40,7 @@ public class ControllersEnhancer extends Enhancer {
 
         for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
-            // Threaded access		
+            // Threaded access
             ctMethod.instrument(new ExprEditor() {
 
                 @Override

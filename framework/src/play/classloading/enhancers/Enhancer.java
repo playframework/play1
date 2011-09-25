@@ -33,7 +33,7 @@ public abstract class Enhancer {
     public Enhancer() {
         this.classPool = newClassPool();
     }
-    
+
     public static ClassPool newClassPool() {
         ClassPool classPool = new ClassPool();
         classPool.appendSystemPath();
@@ -88,8 +88,8 @@ public abstract class Enhancer {
     }
 
     /**
-     * Test if a class has the provided annotation 
-     * @param ctClass the javassist class representation 
+     * Test if a class has the provided annotation
+     * @param ctClass the javassist class representation
      * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
      * @return true if class has the annotation
      * @throws java.lang.ClassNotFoundException
@@ -105,12 +105,12 @@ public abstract class Enhancer {
     }
 
     /**
-     * Test if a field has the provided annotation 
-     * @param ctField the javassist field representation 
+     * Test if a field has the provided annotation
+     * @param ctField the javassist field representation
      * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
      * @return true if field has the annotation
      * @throws java.lang.ClassNotFoundException
-     */    
+     */
     protected boolean hasAnnotation(CtField ctField, String annotation) throws ClassNotFoundException {
         for (Object object : ctField.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;
@@ -120,7 +120,7 @@ public abstract class Enhancer {
         }
         return false;
     }
-    
+
     /**
      * Test if a method has the provided annotation
 	 * @param ctMethod the javassist method representation
@@ -151,7 +151,7 @@ public abstract class Enhancer {
 
     /**
      * Create a new annotation to be dynamically inserted in the byte code.
-     */    
+     */
     protected static void createAnnotation(AnnotationsAttribute attribute, Class<? extends Annotation> annotationType) {
         createAnnotation(attribute, annotationType, new HashMap<String, MemberValue>());
     }
@@ -170,7 +170,7 @@ public abstract class Enhancer {
 
     /**
      * Retrieve all field annotations.
-     */    
+     */
     protected static AnnotationsAttribute getAnnotations(CtField ctField) {
         AnnotationsAttribute annotationsAttribute = (AnnotationsAttribute) ctField.getFieldInfo().getAttribute(AnnotationsAttribute.visibleTag);
         if (annotationsAttribute == null) {
@@ -182,7 +182,7 @@ public abstract class Enhancer {
 
     /**
      * Retrieve all method annotations.
-     */    
+     */
     protected static AnnotationsAttribute getAnnotations(CtMethod ctMethod) {
         AnnotationsAttribute annotationsAttribute = (AnnotationsAttribute) ctMethod.getMethodInfo().getAttribute(AnnotationsAttribute.visibleTag);
         if (annotationsAttribute == null) {
@@ -208,5 +208,5 @@ public abstract class Enhancer {
     boolean isAnon(ApplicationClass app) {
         return app.name.contains("$anonfun$") || app.name.contains("$anon$");
     }
-    
+
 }

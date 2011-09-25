@@ -60,7 +60,7 @@ public class FixturesTest extends UnitTest {
         }
 
     }
-    
+
     @Test
 	public void loadTemplateData() throws Exception {
         Fixtures.load("vendor-data-template.yml");
@@ -70,13 +70,13 @@ public class FixturesTest extends UnitTest {
         assertEquals(2, FunctionTag.findAll().size());
         assertEquals(2, VenueVendor.findAll().size());
 	}
-    
+
     @Test
     public void checkEmptyReferences() {
-        Fixtures.load("refs.yml");        
+        Fixtures.load("refs.yml");
         assertEquals(1, Referenced.count());
         assertEquals(2, Base.count());
-        
+
         Base b1 = Base.find("byName", "Base1").first();
         Referenced r = Referenced.all().first();
         assertNotNull(b1);

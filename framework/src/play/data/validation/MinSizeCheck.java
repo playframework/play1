@@ -33,5 +33,5 @@ public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
         messageVariables.put("minSize", Integer.toString(minSize));
         return messageVariables;
     }
-   
+
 }

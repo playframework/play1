@@ -36,7 +36,7 @@ public class SmartFuture<V> implements Future<V>, Action<V> {
     }
 
     // Callbacks
-    
+
     private List<Action<V>> callbacks = new ArrayList<Action<V>>();
     private boolean invoked = false;
     private V result = null;
@@ -52,7 +52,7 @@ public class SmartFuture<V> implements Future<V>, Action<V> {
             callback.invoke(result);
         }
     }
-    
+
     public void onCompletion(Action<V> callback) {
         synchronized(this) {
             if(!invoked) {

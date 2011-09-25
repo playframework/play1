@@ -89,7 +89,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Map<String, Object> unBind(Object src, String name) {
         return null;
     }
-    
+
     /**
      * Translate the given key for the given locale and arguments.
      * If null is returned, Play's normal message translation mechanism will be
@@ -263,7 +263,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onRoutesLoaded() {
     }
 
-    /** 
+    /**
      * Event may be sent by plugins or other components
      * @param message convention: pluginClassShortName.message
      * @param context depends on the plugin
@@ -352,5 +352,5 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Object willBeValidated(Object value) {
         return null;
     }
-    
+
 }

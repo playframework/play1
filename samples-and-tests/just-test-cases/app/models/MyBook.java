@@ -8,5 +8,5 @@ import play.db.jpa.Model;
 public class MyBook extends OptimisticLockingModel {
     public String text;
     public String excludedProperty;
-    
+
 }

@@ -19,8 +19,8 @@ public class OptimisticLockingModelTest {
     public void testSetVersion() {
         final TestModel testModel = new TestModel();
         final OptimisticLockingCheck check = new OptimisticLockingCheckWithoutMessage();
-        
-        testModel.setVersion(Long.valueOf(2));        
+
+        testModel.setVersion(Long.valueOf(2));
         assertTrue(check.isSatisfied(testModel, ""));
         testModel.setVersion(Long.valueOf(2));
         assertTrue(check.isSatisfied(testModel, ""));
@@ -29,13 +29,13 @@ public class OptimisticLockingModelTest {
         testModel.setVersion(Long.valueOf(1));
         assertFalse(check.isSatisfied(testModel, ""));
     }
-    
+
     public static class TestModel extends models.OptimisticLockingModel {
         public String text;
     }
 
     private static final class OptimisticLockingCheckWithoutMessage extends models.OptimisticLockingModel.OptimisticLockingCheck {
-        
+
         {
             checkWithCheck= new CheckWithCheck();
             checkWithCheck.setMessage("optimisticLocking.modelHasChanged");
@@ -44,7 +44,7 @@ public class OptimisticLockingModelTest {
         @Override
         public void setMessage(String message, String... vars) {
         }
-        
-        
+
+
     }
 }

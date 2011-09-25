@@ -8,40 +8,40 @@ import java.util.Stack;
  * Tag Context (retrieve who call you)
  */
 public class TagContext {
-    
+
     static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<Stack<TagContext>>();
-    
+
     public String tagName;
     public Map<String, Object> data = new HashMap<String, Object>();
 
     public TagContext(String tagName) {
         this.tagName = tagName;
     }
-    
+
     public static void init() {
         currentStack.set(new Stack<TagContext>());
         enterTag("ROOT");
     }
-    
+
     public static void enterTag(String name) {
         currentStack.get().add(new TagContext(name));
     }
-    
+
     public static void exitTag() {
         currentStack.get().pop();
     }
-    
+
     public static TagContext current() {
         return currentStack.get().peek();
     }
-    
+
     public static TagContext parent() {
         if(currentStack.get().size() < 2) {
             return null;
         }
         return currentStack.get().get(currentStack.get().size()-2);
     }
-    
+
     public static boolean hasParentTag(String name) {
         for(int i=currentStack.get().size()-1; i>=0; i--) {
             if(name.equals(currentStack.get().get(i).tagName)) {
@@ -50,7 +50,7 @@ public class TagContext {
         }
         return false;
     }
-    
+
     public static TagContext parent(String name) {
         for(int i=currentStack.get().size()-1; i>=0; i--) {
             if(name.equals(currentStack.get().get(i).tagName)) {

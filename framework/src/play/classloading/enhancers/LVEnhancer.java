@@ -184,7 +184,7 @@ public class LVEnhancer extends Enhancer {
             getCurrentMethodParams().peek().currentNestedMethodCall = new MethodExecution(subject, paramNames, nbParams);
             Logger.trace("initMethodCall for '" + method + "' with " + Arrays.toString(paramNames));
         }
-        
+
         /**
          * Replace the current methodParams stack by the given one.
          * Don't use it unless you know exactly what you do.
@@ -193,7 +193,7 @@ public class LVEnhancer extends Enhancer {
         public static void reinitRuntime(Stack<MethodExecution> init) {
             methodParams.set(init);
         }
-        
+
         /**
          * Get the current stack of methodExecutions.
          * This should not be altered unless you know exactly what you do.
@@ -250,7 +250,7 @@ public class LVEnhancer extends Enhancer {
                 this.params = params;
                 this.varargs = varargs;
             }
-            
+
             @Override
             public String toString() {
                 return "Params: subject=" + subject + ", params=" + Arrays.toString(params) + ", varargs=" + Arrays.toString(varargs);

@@ -24,7 +24,7 @@ import com.jamonapi.MonitorFactory;
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     public static final String invocationType = "Job";
-    
+
     protected ExecutorService executor;
     protected long lastRun = 0;
     protected boolean wasError = false;
@@ -36,7 +36,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public InvocationContext getInvocationContext() {
         return new InvocationContext(invocationType, this.getClass().getAnnotations());
     }
-    
+
     /**
      * Here you do the job
      */
@@ -67,7 +67,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 smartFuture.invoke(result);
                 return result;
             }
-            
+
         });
 
         return smartFuture;

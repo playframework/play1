@@ -60,7 +60,7 @@
         </style>
     </head>
     <body>
-        
+
         <div id="header" class="block ${results.passed ? 'success' : 'failed'}">
             <h1>
                 ${test}
@@ -69,7 +69,7 @@
                 ${results.passed ? 'SUCCESS' : 'FAILED'}
             </p>
         </div>
-        
+
         <div id="results">
             <table>
                 #{list items:results.results, as:'result'}
@@ -108,6 +108,6 @@
                 #{/list}
             </table>
         </div>
-        
+
     </body>
 </html>

@@ -5,7 +5,7 @@ import controllers.CRUD.ObjectType;
 import controllers.OptimisticLockingCRUD.CustomizableObjectType;
 import models.MyBook;
 
-@CRUD.For(MyBook.class) 
+@CRUD.For(MyBook.class)
 public class MyBookCustomCrud extends OptimisticLockingCRUD {
     public static CustomizableObjectType createObjectType(Class<? extends Model> entityClass) {
         final CustomizableObjectType type = OptimisticLockingCRUD.createObjectType(entityClass);

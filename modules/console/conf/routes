@@ -4,11 +4,11 @@
 
 # Home page
 GET     /java                   JavaConsole.index
-POST    /java			JavaConsole.index	
+POST    /java			JavaConsole.index
 GET     /scala                  ScalaConsole.index
-POST    /scala			ScalaConsole.index	
+POST    /scala			ScalaConsole.index
 GET     /db                   	DbConsole.index
-POST    /db			DbConsole.index	
+POST    /db			DbConsole.index
 GET    /			InfoConsole.index
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

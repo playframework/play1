@@ -45,7 +45,7 @@ public class ConfigurablePluginDisablingPluginTest {
         pc.addPlugin( p );
 
         internalTest(config, pc, Arrays.asList(p));
-        
+
     }
 
     private void internalTest(Properties config, PluginCollection pc, List<? extends PlayPlugin> correctPluginListAfter) {

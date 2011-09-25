@@ -85,5 +85,5 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
         messageVariables.put("to", otherKey);
         return messageVariables;
     }
-   
+
 }

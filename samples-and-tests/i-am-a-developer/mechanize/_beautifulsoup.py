@@ -165,7 +165,7 @@ class PageElement:
         if l:
             r = l[0]
         return r
-    
+
     def _fetch(self, name, attrs, text, limit, generator):
         "Iterates over a generator looking for things that match."
         if not hasattr(attrs, 'items'):
@@ -192,7 +192,7 @@ class PageElement:
                             found = i
             elif text:
                 if self._matches(i, text):
-                    found = i                    
+                    found = i
             if found:
                 results.append(found)
                 if limit and len(results) >= limit:
@@ -200,7 +200,7 @@ class PageElement:
         return results
 
     #Generators that can be used to navigate starting from both
-    #NavigableTexts and Tags.                
+    #NavigableTexts and Tags.
     def nextGenerator(self):
         i = self
         while i:
@@ -268,7 +268,7 @@ class NavigableText(PageElement):
             return self
         else:
             raise AttributeError, "'%s' object has no attribute '%s'" % (self.__class__.__name__, attr)
-        
+
 class NavigableString(str, NavigableText):
     pass
 
@@ -293,7 +293,7 @@ class Tag(PageElement):
         """Returns the value of the 'key' attribute for the tag, or
         the value given for 'default' if it doesn't have that
         attribute."""
-        return self._getAttrMap().get(key, default)    
+        return self._getAttrMap().get(key, default)
 
     def __getitem__(self, key):
         """tag[key] returns the value of the 'key' attribute for the tag,
@@ -315,7 +315,7 @@ class Tag(PageElement):
         "A tag is non-None even if it has no contents."
         return True
 
-    def __setitem__(self, key, value):        
+    def __setitem__(self, key, value):
         """Setting tag[key] sets the value of the 'key' attribute for the
         tag."""
         self._getAttrMap()
@@ -384,7 +384,7 @@ class Tag(PageElement):
         NOTE: since Python's HTML parser consumes whitespace, this
         method is not certain to reproduce the whitespace present in
         the original string."""
-        
+
         attrs = []
         if self.attrs:
             for key, val in self.attrs:
@@ -395,12 +395,12 @@ class Tag(PageElement):
             close = ' /'
         else:
             closeTag = '</%s>' % self.name
-        indentIncrement = None        
+        indentIncrement = None
         if showStructureIndent != None:
             indentIncrement = showStructureIndent
             if not self.hidden:
                 indentIncrement += 1
-        contents = self.renderContents(indentIncrement, needUnicode=needUnicode)        
+        contents = self.renderContents(indentIncrement, needUnicode=needUnicode)
         if showStructureIndent:
             space = '\n%s' % (' ' * showStructureIndent)
         if self.hidden:
@@ -409,7 +409,7 @@ class Tag(PageElement):
             s = []
             attributeString = ''
             if attrs:
-                attributeString = ' ' + ' '.join(attrs)            
+                attributeString = ' ' + ' '.join(attrs)
             if showStructureIndent:
                 s.append(space)
             s.append('<%s%s%s>' % (self.name, attributeString, close))
@@ -429,7 +429,7 @@ class Tag(PageElement):
         return self.__str__(needUnicode, showStructureIndent=True)
 
     def renderContents(self, showStructureIndent=None, needUnicode=None):
-        """Renders the contents of this tag as a (possibly Unicode) 
+        """Renders the contents of this tag as a (possibly Unicode)
         string."""
         s=[]
         for c in self:
@@ -447,7 +447,7 @@ class Tag(PageElement):
                     if text[-1] == '\n':
                         text = text[:-1]
                 s.append(text)
-        return ''.join(s)    
+        return ''.join(s)
 
     #Soup methods
 
@@ -491,7 +491,7 @@ class Tag(PageElement):
             generator = self.childGenerator
         return self._fetch(name, attrs, text, limit, generator)
     fetchChildren = fetch
-    
+
     #Utility methods
 
     def isSelfClosing(self):
@@ -514,7 +514,7 @@ class Tag(PageElement):
         if not getattr(self, 'attrMap'):
             self.attrMap = {}
             for (key, value) in self.attrs:
-                self.attrMap[key] = value 
+                self.attrMap[key] = value
         return self.attrMap
 
     #Generator methods
@@ -522,12 +522,12 @@ class Tag(PageElement):
         for i in range(0, len(self.contents)):
             yield self.contents[i]
         raise StopIteration
-    
+
     def recursiveChildGenerator(self):
         stack = [(self, 0)]
         while stack:
             tag, start = stack.pop()
-            if isinstance(tag, Tag):            
+            if isinstance(tag, Tag):
                 for i in range(start, len(tag.contents)):
                     a = tag.contents[i]
                     yield a
@@ -569,7 +569,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
     """This class contains the basic parser and fetch code. It defines
     a parser that knows nothing about tag behavior except for the
     following:
-   
+
       You can't close a tag without closing all the tags it encloses.
       That is, "<foo><bar></foo>" actually means
       "<foo><bar></bar></foo>".
@@ -661,7 +661,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         Tag.__init__(self, self.ROOT_TAG_NAME)
         if avoidParserProblems \
            and not isList(avoidParserProblems):
-            avoidParserProblems = self.PARSER_MASSAGE            
+            avoidParserProblems = self.PARSER_MASSAGE
         self.avoidParserProblems = avoidParserProblems
         SGMLParser.__init__(self)
         self.quoteStack = []
@@ -698,14 +698,14 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         self.endData() #NEW
         while self.currentTag.name != self.ROOT_TAG_NAME:
             self.popTag()
-            
+
     def reset(self):
         SGMLParser.reset(self)
         self.currentData = []
         self.currentTag = None
         self.tagStack = []
-        self.pushTag(self)        
-    
+        self.pushTag(self)
+
     def popTag(self):
         tag = self.tagStack.pop()
         # Tags with just one string-owning child get the child as a
@@ -752,7 +752,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         stack up to but *not* including the most recent instqance of
         the given tag."""
         if name == self.ROOT_TAG_NAME:
-            return            
+            return
 
         numPops = 0
         mostRecentTag = None
@@ -765,7 +765,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
 
         for i in range(0, numPops):
             mostRecentTag = self.popTag()
-        return mostRecentTag    
+        return mostRecentTag
 
     def _smartPop(self, name):
 
@@ -802,7 +802,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
                 and p.name in nestingResetTriggers) \
                 or (nestingResetTriggers == None and isResetNesting
                     and self.RESET_NESTING_TAGS.has_key(p.name)):
-                
+
                 #If we encounter one of the nesting reset triggers
                 #peculiar to this tag, or we encounter another tag
                 #that causes nesting to reset, pop up to but not
@@ -826,13 +826,13 @@ class BeautifulStoneSoup(Tag, SGMLParser):
         self.endData()
         if not name in self.SELF_CLOSING_TAGS and not selfClosing:
             self._smartPop(name)
-        tag = Tag(name, attrs, self.currentTag, self.previous)        
+        tag = Tag(name, attrs, self.currentTag, self.previous)
         if self.previous:
             self.previous.next = tag
         self.previous = tag
         self.pushTag(tag)
         if selfClosing or name in self.SELF_CLOSING_TAGS:
-            self.popTag()                
+            self.popTag()
         if name in self.QUOTE_TAGS:
             #print "Beginning quote (%s)" % name
             self.quoteStack.append(name)
@@ -868,7 +868,7 @@ class BeautifulStoneSoup(Tag, SGMLParser):
     def handle_entityref(self, ref):
         "Propagate entity refs right through."
         self.handle_data('&%s;' % ref)
-        
+
     def handle_decl(self, data):
         "Propagate DOCTYPEs and the like right through."
         self.handle_data('<!%s>' % data)
@@ -944,7 +944,7 @@ class BeautifulSoup(BeautifulStoneSoup):
                                            'spacer', 'link', 'frame', 'base'])
 
     QUOTE_TAGS = {'script': None}
-    
+
     #According to the HTML standard, each of these inline tags can
     #contain another tag of the same type. Furthermore, it's common
     #to actually use these tags this way.
@@ -956,7 +956,7 @@ class BeautifulSoup(BeautifulStoneSoup):
     #to actually use these tags this way.
     NESTABLE_BLOCK_TAGS = ['blockquote', 'div', 'fieldset', 'ins', 'del']
 
-    #Lists can contain other lists, but there are restrictions.    
+    #Lists can contain other lists, but there are restrictions.
     NESTABLE_LIST_TAGS = { 'ol' : [],
                            'ul' : [],
                            'li' : ['ul', 'ol'],
@@ -964,8 +964,8 @@ class BeautifulSoup(BeautifulStoneSoup):
                            'dd' : ['dl'],
                            'dt' : ['dl'] }
 
-    #Tables can contain other tables, but there are restrictions.    
-    NESTABLE_TABLE_TAGS = {'table' : [], 
+    #Tables can contain other tables, but there are restrictions.
+    NESTABLE_TABLE_TAGS = {'table' : [],
                            'tr' : ['table', 'tbody', 'tfoot', 'thead'],
                            'td' : ['tr'],
                            'th' : ['tr'],
@@ -982,7 +982,7 @@ class BeautifulSoup(BeautifulStoneSoup):
 
     NESTABLE_TAGS = buildTagMap([], NESTABLE_INLINE_TAGS, NESTABLE_BLOCK_TAGS,
                                 NESTABLE_LIST_TAGS, NESTABLE_TABLE_TAGS)
-    
+
 class ICantBelieveItsBeautifulSoup(BeautifulSoup):
 
     """The BeautifulSoup class is oriented towards skipping over
@@ -1048,7 +1048,7 @@ class BeautifulSOAP(BeautifulStoneSoup):
             parent = self.tagStack[-2]
             parent._getAttrMap()
             if (isinstance(tag, Tag) and len(tag.contents) == 1 and
-                isinstance(tag.contents[0], NavigableText) and 
+                isinstance(tag.contents[0], NavigableText) and
                 not parent.attrMap.has_key(tag.name)):
                 parent[tag.name] = tag.contents[0]
         BeautifulStoneSoup.popTag(self)

@@ -21,5 +21,5 @@ public class MyTags extends FastTags {
         }
         out.println("Hello " + name);
     }
-    
+
 }

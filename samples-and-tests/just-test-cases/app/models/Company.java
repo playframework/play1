@@ -14,10 +14,10 @@ public class Company extends GenericModel {
     @GeneratedValue(generator="system-uuid")
     @org.hibernate.annotations.GenericGenerator(name="system-uuid", strategy = "uuid")
     public String id;
-    
+
     @Version
     public int version;
-    
+
     @CRUD.Exclude
     public String b = "YOP";
 

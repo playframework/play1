@@ -14,25 +14,25 @@ public class Forum extends Model {
     public String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "forum")
     public List<Topic> topics;
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public Forum(String name, String description) {
         this.name = name;
         this.description = description;
         create();
     }
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public Topic newTopic(User by, String subject, String content) {
         Topic t = new Topic(this, by, subject, content);
         this.refresh();
         return t;
     }
-    
-    // ~~~~~~~~~~~~ 
-    
+
+    // ~~~~~~~~~~~~
+
     public long getTopicsCount() {
         return Topic.count("forum", this);
     }
@@ -48,6 +48,6 @@ public class Forum extends Model {
     public Post getLastPost() {
         return Post.find("topic.forum = ? order by postedAt desc", this).first();
     }
-    
+
 }
 

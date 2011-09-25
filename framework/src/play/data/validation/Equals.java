@@ -18,7 +18,7 @@ import net.sf.oval.configuration.annotation.Constraint;
 public @interface Equals {
 
     String message() default EqualsCheck.mes;
-    
+
     /**
      * The other field name
      */

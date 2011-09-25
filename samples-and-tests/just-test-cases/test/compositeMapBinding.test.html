@@ -11,11 +11,11 @@
 	type('composite_phone3', '333')
 
 	//Map binding: Map<String, String>, taking "items" as identifier (non composite value)
-	
+
 	type('items_first', 'curly')
 	type('items_second', 'larry')
 	type('items_third', 'moe')
-	
+
 	//Map binding: Map<String, ComplexModel>, taking "models" as identifier
 	type('models_first_name', 'woody')
 	type('models_first_surname', 'allen')
@@ -26,7 +26,7 @@
 	type('models_second_phone', '555')
 
 	clickAndWait('go')
-	
+
 	assertText('composite_size', '3')
 	assertText('composite_name', 'tom')
 	assertText('composite_surname', 'hanks')

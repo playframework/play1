@@ -13,12 +13,12 @@ public class Application extends Controller {
         Date now = new Date();
         render(now);
     }
-    
+
     public static void list() {
         List<Contact> contacts = Contact.find("order by name, firstname").fetch();
         render(contacts);
     }
-    
+
     public static void form(Long id) {
         if(id == null) {
             render();
@@ -26,7 +26,7 @@ public class Application extends Controller {
         Contact contact = Contact.findById(id);
         render(contact);
     }
-    
+
     public static void save(@Valid Contact contact) {
         if(validation.hasErrors()) {
             if(request.isAjax()) error("Invalid value");

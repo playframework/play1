@@ -12,5 +12,5 @@ diff -u -r1.25 AbstractJdbc2ResultSetMetaData.java
 -        return "";
 +        return getBaseTableName(column);
      }
- 
+
      public String getBaseTableName(int column) throws SQLException

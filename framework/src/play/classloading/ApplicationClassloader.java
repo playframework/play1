@@ -32,7 +32,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.IO;
 
 /**
- * The application classLoader. 
+ * The application classLoader.
  * Load the classes from the application Java sources files.
  */
 public class ApplicationClassloader extends ClassLoader {

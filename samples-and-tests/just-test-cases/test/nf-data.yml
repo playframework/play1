@@ -3,8 +3,8 @@
 
 Nose(nose):
     title:  Nose
-    
+
 Face(bob):
     name:   Bob
     nose:   nose
-    
+

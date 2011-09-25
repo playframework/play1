@@ -42,5 +42,5 @@ public class Application extends Controller {
         List jobs = Job.search(by);
         render(jobs, by);
     }
-    
+
 }

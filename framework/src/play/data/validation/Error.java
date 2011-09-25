@@ -16,21 +16,21 @@ public class Error {
         this.key = key;
         this.variables = variables;
     }
-    
+
     /**
      * @return The translated message
      */
     public String message() {
         return message(key);
     }
-    
+
     /**
      * @return The field name
      */
     public String getKey() {
         return key;
     }
-    
+
     /**
      * @param key Alternate field name (default to java variable name)
      * @return The translated message

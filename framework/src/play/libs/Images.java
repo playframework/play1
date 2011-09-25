@@ -45,7 +45,7 @@ public class Images {
     public static void resize(File originalImage, File to, int w, int h) {
       resize(originalImage, to, w, h, false);
     }
-    
+
     /**
      * Resize an image
      * @param originalImage The image file
@@ -60,10 +60,10 @@ public class Images {
             int owidth = source.getWidth();
             int oheight = source.getHeight();
             double ratio = (double) owidth / oheight;
-            
+
             int maxWidth = w;
             int maxHeight = h;
-            
+
             if (w < 0 && h < 0) {
                 w = owidth;
                 h = oheight;
@@ -74,7 +74,7 @@ public class Images {
             if (w > 0 && h < 0) {
                 h = (int) (w / ratio);
             }
-            
+
             if(keepRatio) {
                 h = (int) (w / ratio);
                 if(h > maxHeight) {

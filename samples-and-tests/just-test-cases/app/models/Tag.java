@@ -8,8 +8,8 @@ import java.util.*;
 
 @Entity
 public class Tag extends Model {
-    
+
     public String name;
-    
+
 }
 

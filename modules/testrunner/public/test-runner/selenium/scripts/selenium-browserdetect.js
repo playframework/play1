@@ -37,7 +37,7 @@ var BrowserVersion = function() {
         this.isOpera = true;
         return;
     }
-    
+
     var _getQueryParameter = function(searchKey) {
         var str = location.search.substr(1);
         if (str == null) return null;
@@ -51,9 +51,9 @@ var BrowserVersion = function() {
         }
         return null;
     };
-    
+
     var self = this;
-    
+
     var checkChrome = function() {
         var loc = window.document.location.href;
         try {
@@ -72,11 +72,11 @@ var BrowserVersion = function() {
                 self.isChrome = false;
             }
         }
-        
-        
+
+
     }
-    
-    
+
+
 
     if (this.name == "Microsoft Internet Explorer") {
         this.browser = BrowserVersion.IE;

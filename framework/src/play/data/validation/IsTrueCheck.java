@@ -41,5 +41,5 @@ public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
         }
         return false;
     }
-   
+
 }

@@ -9,9 +9,9 @@ import java.util.Map;
  */
 public abstract class DataParser {
 
-    // ~~~~~~~~ Repository 
-    public abstract Map<String, String[]> parse(InputStream is);    
-    public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();    
+    // ~~~~~~~~ Repository
+    public abstract Map<String, String[]> parse(InputStream is);
+    public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();
 
     // These are our injected Parser. Maybe we later want to allow dynamic injection
     static {

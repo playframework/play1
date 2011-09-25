@@ -12,7 +12,7 @@
         open('@{UsingFinally.onlytest('waxzce')}')
 	assertTextNotPresent('onlynotwork')
 	assertTextPresent('onlywork')
-	
+
 	//test @Finally with or without Throwable
 	//without error
 	open('@{UsingFinallyWithThrowable.noError()}')
@@ -23,5 +23,5 @@
 	open('@{UsingFinallyWithThrowable.withError()}')
 	open('@{UsingFinallyWithThrowable.get_results()}')
 	assertTextPresent('true true true true')
-	
+
 #{/selenium}

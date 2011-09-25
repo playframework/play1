@@ -23,12 +23,12 @@ def test(projectName):
 
 	for item in project.GetVersions(constants.VSSFLAG_RECURSYES):
 		print item.VSSItem.Name, item.VersionNumber, item.Action
-		
+
 
 #	item=i.Versions[0].VSSItem
 #	for h in i.Versions:
 #		print `h.Comment`, h.Action, h.VSSItem.Name
-	
+
 
 def SubstituteInString(inString, evalEnv):
 	substChar = "$"
@@ -86,7 +86,7 @@ def VssLog(project, linePrefix = "", noLabels = 5, maxItems=150):
 		if labelNum > noLabels:
 			break
 	return string.join(lines,"\n")
-	
+
 def SubstituteVSSInFile(projectName, inName, outName):
 	import win32api
 	if win32api.GetFullPathName(inName)==win32api.GetFullPathName(outName):
@@ -106,8 +106,8 @@ def SubstituteVSSInFile(projectName, inName, outName):
 	vss_date = time.asctime(time.localtime(int(version.Date)))
 	now = time.asctime(time.localtime(time.time()))
 	SubstituteInFile(inName, outName, (locals(),globals()))
-	
-			
+
+
 def CountCheckouts(item):
 	num = 0
 	if item.Type==constants.VSSITEM_PROJECT:

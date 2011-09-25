@@ -11,7 +11,7 @@ html, body {
 }
 
 html {
-    border-top: 5px solid #67A927;    
+    border-top: 5px solid #67A927;
 }
 
 a {
@@ -22,7 +22,7 @@ a {
     padding: 20px 0;
     width: 900px;
     margin: auto;
-    position: relative; 
+    position: relative;
 }
 
 .wrapped {

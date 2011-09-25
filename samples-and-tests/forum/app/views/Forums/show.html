@@ -43,7 +43,7 @@
 				${topic.views}
 			</td>
 			<td class="infos">
-				${topic.lastPost.postedAt.since()} <br /> 
+				${topic.lastPost.postedAt.since()} <br />
 				by <strong>${forum.lastPost.postedBy.name}</strong> (<a href="@{Topics.show(topic.forum.id, topic.id, topic.postsCount.page(pageSize))}">view</a>)
 			</td>
 		</tr>

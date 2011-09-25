@@ -13,7 +13,7 @@ def BrandProject(vssProjectName, descFile, stampPath, filesToSubstitute, buildDe
 	# descFile -- A test file containing descriptions of the files in the release.
 	# stampPath -- The full path to where the files referenced in descFile can be found.
 	path=win32api.GetFullPathName(stampPath)
-	
+
 	build = vssutil.MakeNewBuildNo(vssProjectName, buildDesc, auto, bRebrand)
 	if build is None:
 		print "Cancelled"

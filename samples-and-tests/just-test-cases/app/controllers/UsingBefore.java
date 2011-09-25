@@ -37,17 +37,17 @@ public class UsingBefore extends Controller {
     public static void onlytest(String name) {
         renderText("onlynotwork :  " + name);
     }
-    
+
     public static void fight(String name) {
         name.toString();
         renderText(9/0);
     }
-    
+
     @Catch(ArithmeticException.class)
     static void catchDivByZero(Exception e) {
         renderText("Oops, got " + e);
     }
-    
+
     @Catch(NullPointerException.class)
     static void catchNull(Exception e) {
         renderText("Hey!, got " + e);

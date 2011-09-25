@@ -28,6 +28,6 @@ public class StaticContentTest extends UnitTest {
         // default response encoding in play, bu this should not affect the bytes transfered..
         assertEquals("NorwegianLetters: æøåÆØÅ", WS.url("http://localhost:9003/public/fileWithNoneStandardLetters_stored_in_iso_8859_1.html").get().getString("iso-8859-1"));
     }
-    
+
 
 }

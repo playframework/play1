@@ -16,7 +16,7 @@ import play.data.binding.Binder;
  * <p>
  * translation are defined as properties in /conf/messages.<em>locale</em> files
  * with locale being the i18n country code fr, en, fr_FR
- * 
+ *
  * <pre>
  * # /conf/messages.fr
  * hello=Bonjour, %s !
@@ -24,7 +24,7 @@ import play.data.binding.Binder;
  * <code>
  * Messages.get( "hello", "World"); // => "Bonjour, World !"
  * </code>
- * 
+ *
  */
 public class Messages {
 
@@ -40,7 +40,7 @@ public class Messages {
      * Given a message code, translate it using current locale.
      * If there is no message in the current locale for the given key, the key
      * is returned.
-     * 
+     *
      * @param key the message code
      * @param args optional message format arguments
      * @return translated message
@@ -88,7 +88,7 @@ public class Messages {
         if(message != null) {
             return message;
         }
-    
+
         String value = null;
         if( key == null ) {
             return "";

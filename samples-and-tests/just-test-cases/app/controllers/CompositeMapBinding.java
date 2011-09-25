@@ -12,8 +12,8 @@ public class CompositeMapBinding extends Controller {
 	public static void index() {
 		render();
 	}
-	
-	public static void submit( 
+
+	public static void submit(
 			Map<String, String> composite,
 			Map<String, String> items,
 			Map<String, ComplexModel> models ) {

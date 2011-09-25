@@ -101,7 +101,7 @@ public class SessionTest {
 
     @After
     public void restoreDefault() {
-        final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true"); 
+        final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
         setSendOnlyIfChangedConstant(SESSION_SEND_ONLY_IF_CHANGED);
     }
 }

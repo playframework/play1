@@ -121,7 +121,7 @@ public class GroovyTemplate extends BaseTemplate {
                     }
                 });
                 compilationUnit.compile();
-                // ouf 
+                // ouf
 
                 // Define script classes
                 StringBuilder sb = new StringBuilder();

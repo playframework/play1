@@ -27,7 +27,7 @@ import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
- * 
+ *
  * <p/>
  * Get latest BBC World news as a RSS content
  * <pre>
@@ -36,7 +36,7 @@ import java.util.*;
  *    // the real pain begins here...
  * </pre>
  * <p/>
- * 
+ *
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
  *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
@@ -132,7 +132,7 @@ public class WS extends PlayPlugin {
     public static WSWithEncoding withEncoding(String encoding ) {
         return wsWithDefaultEncoding.withEncoding(encoding);
     }
-    
+
     @Override
     public void onApplicationStop() {
         if (wsImpl != null) {
@@ -255,7 +255,7 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * define client authentication for a server host 
+         * define client authentication for a server host
          * provided credentials will be used during the request
          * @param username
          * @param password
@@ -386,7 +386,7 @@ public class WS extends PlayPlugin {
         /**
          * Add parameters to request.
          * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
-         * For any other method, those params are appended to the queryString. 
+         * For any other method, those params are appended to the queryString.
          * @return the WSRequest for chaining.
          */
         public WSRequest params(Map<String, Object> parameters) {
@@ -397,7 +397,7 @@ public class WS extends PlayPlugin {
         /**
          * Add parameters to request.
          * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
-         * For any other method, those params are appended to the queryString. 
+         * For any other method, those params are appended to the queryString.
          * @return the WSRequest for chaining.
          */
         public WSRequest setParameters(Map<String, String> parameters) {
@@ -460,7 +460,7 @@ public class WS extends PlayPlugin {
         public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
-        
+
         protected String basicAuthHeader() {
             return  "Basic " + Codec.encodeBASE64(this.username + ":" + this.password);
         }

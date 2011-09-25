@@ -105,7 +105,7 @@ public class ServletWrapperTest {
 
 		@Override
 		public Enumeration getHeaders(final String arg0) {
-			
+
 			return new Enumeration<Object>() {
 				String element = headers.get(arg0);
 
@@ -120,7 +120,7 @@ public class ServletWrapperTest {
 					current = null;
 					return current;
 				}
-			}; 
+			};
 		}
 
 		@Override

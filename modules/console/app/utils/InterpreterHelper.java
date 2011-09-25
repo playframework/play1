@@ -16,7 +16,7 @@ public class InterpreterHelper {
 	public static List findAll(Class kl) {
 		return underlying.findAll(kl.getName().substring(kl.getName().lastIndexOf(".")+1));
 	}
-	public static long count(Class kl) { 
+	public static long count(Class kl) {
 		return underlying.count(kl.getName().substring(kl.getName().lastIndexOf(".")+1));
 	}
 
@@ -30,7 +30,7 @@ public class InterpreterHelper {
 
 	public static List findBy(Class kl, String query, Object[] params) {
 		return underlying.findBy(kl.getName().substring(kl.getName().lastIndexOf(".")+1),query,params);
-	} 
+	}
 
 	public static JPAQuery find(Class kl, String query, Object[] params) {
 		return underlying.find(kl.getName().substring(kl.getName().lastIndexOf(".")+1),query,params);

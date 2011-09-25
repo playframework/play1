@@ -1,6 +1,6 @@
 package play;
 /**
- * 
+ *
  */
 
 
@@ -27,17 +27,17 @@ import static org.junit.Assert.*;
 public class LoggerTest {
 
     private static final String APPLICATION_LOG_PATH_PROPERTYNAME = "application.log.path";
-    
+
 //    private static String applicationLogPath;
-    
+
     private static Properties playConfig;
-    
+
     private static File applicationPath;
-    
+
     private static String id;
-    
+
     private static org.apache.log4j.Logger log4j;
-    
+
     /**
      * Safes the original configuration and log.
      * @throws java.lang.Exception
@@ -47,7 +47,7 @@ public class LoggerTest {
         playConfig = Play.configuration;
         applicationPath = Play.applicationPath;
         id = Play.id;
-        log4j = Logger.log4j;        
+        log4j = Logger.log4j;
     }
 
     /**
@@ -64,12 +64,12 @@ public class LoggerTest {
                 Logger.init();
         }
     }
-    
+
     @Before
     public void setUp() throws Exception {
         Play.configuration = new Properties();
         Play.applicationPath = new File(".");
-        Play.id="test";   
+        Play.id="test";
     }
 
     @After
@@ -81,7 +81,7 @@ public class LoggerTest {
      * Test method for {@link play.Logger#init()}.
      */
     @Test
-    public void testInitWithProperties() {        
+    public void testInitWithProperties() {
         Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, "/play/testlog4j.properties");
         Logger.log4j=null;
         Logger.init();
@@ -93,7 +93,7 @@ public class LoggerTest {
      * Test method for {@link play.Logger#init()}.
      */
     @Test
-    public void testInitWithXML() {        
+    public void testInitWithXML() {
         Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, "/play/testlog4j.xml");
         Logger.log4j=null;
         Logger.init();

@@ -29,7 +29,7 @@ public class MessagesPlugin extends PlayPlugin {
         for(VirtualFile module : Play.modules.values()) {
             VirtualFile messages = module.child("conf/messages");
             if(messages != null && messages.exists()) {
-                Messages.defaults.putAll(read(messages)); 
+                Messages.defaults.putAll(read(messages));
             }
         }
         VirtualFile appDM = Play.getVirtualFile("conf/messages");
@@ -41,7 +41,7 @@ public class MessagesPlugin extends PlayPlugin {
             for(VirtualFile module : Play.modules.values()) {
                 VirtualFile messages = module.child("conf/messages." + locale);
                 if(messages != null && messages.exists()) {
-                    properties.putAll(read(messages)); 
+                    properties.putAll(read(messages));
                 }
             }
             VirtualFile appM = Play.getVirtualFile("conf/messages." + locale);
@@ -49,7 +49,7 @@ public class MessagesPlugin extends PlayPlugin {
                 properties.putAll(read(appM));
             } else {
                 Logger.warn("Messages file missing for locale %s", locale);
-            }     
+            }
             Messages.locales.put(locale, properties);
         }
         lastLoading = System.currentTimeMillis();

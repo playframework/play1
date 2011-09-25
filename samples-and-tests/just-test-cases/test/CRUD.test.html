@@ -1,15 +1,15 @@
 #{fixture delete:'all' /}
 
 #{selenium 'Test the CRUD module'}
-	
+
 	open('@{CRUD.index()}')
-	
+
 	// Create a company
 	clickAndWait('link=AdminCompany')
 	assertTextPresent('0 AdminCompany')
 	clickAndWait('link=Add Company')
 	assertTextPresent('version')
-    assertElementPresent('object_version')	
+    assertElementPresent('object_version')
 	type('object_name', 'Zenexity')
 	clickAndWait('css=input[name=_save]')
 	assertTextPresent('has been created')
@@ -17,8 +17,8 @@
 	clickAndWait('link=Zenexity')
 	assertTextPresent('Edit Company')
 	assertTextPresent('version')
-    assertElementPresent('object_version')  
-	
+    assertElementPresent('object_version')
+
 	// Create a project
 	clickAndWait('link=Home')
 	clickAndWait('link=Projects')
@@ -31,7 +31,7 @@
 	assertTextPresent('Play belongs to Zenexity')
 	clickAndWait('link=Play belongs to Zenexity')
 	assertTextPresent('Edit Project')
-	
+
 	// Create a factory
 	clickAndWait('link=Home')
 	clickAndWait('link=Factories')
@@ -46,7 +46,7 @@
 	type('object_name', 'Cars !!!!')
 	clickAndWait('css=input[name=_save]')
 	assertTextPresent('Cars !!!!')
-	
+
 	// Update te project
 	clickAndWait('link=Home')
 	clickAndWait('link=Projects')
@@ -60,7 +60,7 @@
 	clickAndWait('link=Projects')
 	assertTextPresent('Play belongs to Zenexity')
 	assertTextNotPresent('Poupou')
-	
+
 	// Create an item
 	clickAndWait('link=Home')
 	clickAndWait('link=Items')
@@ -76,7 +76,7 @@
     clickAndWait('css=input[name=_save]')
     clickAndWait('link=Item[607]')
     assertSelected('object_factory', 'Cars !!!!')
-    
+
     // Create a company
     open('@{CRUD.index()}')
     clickAndWait('link=CustomAdminCompany')
@@ -94,6 +94,6 @@
     assertNotVisible('object_version')
     assertTextNotPresent('version')
     assertElementPresent('object_version')
-    
-		
+
+
 #{/selenium}

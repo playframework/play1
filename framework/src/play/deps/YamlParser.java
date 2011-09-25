@@ -94,7 +94,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             descriptor.setLastModified(rsrc.getLastModified());
 
             boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
-            
+
             if (data.containsKey("require")) {
                 if (data.get("require") instanceof List) {
 

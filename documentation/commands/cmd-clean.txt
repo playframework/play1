@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ clean -- Delete temporary files (including the bytecode cache)
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play clean [app_path]
@@ -9,7 +9,7 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Delete the application's tmp directory hosted at the app_path directory.
-~ If app_path is omitted, the current directory is used. 
+~ If app_path is omitted, the current directory is used.
 ~
 ~ The tmp directory of any application contains the compiled bytecode cache, used to
 ~ speed up application start. If you feel that the Play compiler do weird things you can try

@@ -15,21 +15,21 @@ public class UsingBeforeWithPriority extends Controller {
     @Before(priority=12)
     static void yip() {
         response.print("yip");
-    }    
-    
+    }
+
     public static void index() {
         response.print("done");
     }
-    
+
     @Before(priority=2)
     static void yup() {
         response.print("yup");
     }
-    
+
     @Before(priority=1000)
     static void yap() {
         response.print("yap");
     }
-    
+
 }
 

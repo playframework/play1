@@ -110,7 +110,7 @@ TestLoop.prototype = {
         command.value = selenium.preprocessParameter(command.value);
         LOG.debug("Command found, going to execute " + command.command);
         this.result = handler.execute(selenium, command);
-        
+
 
         this.waitForCondition = this.result.terminationCondition;
 

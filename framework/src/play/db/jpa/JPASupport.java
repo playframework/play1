@@ -13,7 +13,7 @@ public class JPASupport extends GenericModel {
      */
     @Deprecated
     public static class JPAQuery extends GenericModel.JPAQuery {
-        
+
         public JPAQuery(String sq, Query query) {
             super(sq, query);
         }

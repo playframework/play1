@@ -61,13 +61,13 @@
             }
             #tests h2 {
                 color: #333;
-                font-weight: normal;               	
-                border-left: 4px solid #ccc; 
-                padding-left: 5px;  
-                -moz-user-select: none;   	
+                font-weight: normal;
+                border-left: 4px solid #ccc;
+                padding-left: 5px;
+                -moz-user-select: none;
             }
             #tests h2 span {
-                cursor: pointer;   
+                cursor: pointer;
             }
             ul {
                 list-style: none;
@@ -81,10 +81,10 @@
             .test a {
                 background: #fafafa;
                 padding: 3px 6px;
-                color: #666;   
+                color: #666;
                 font-weight: bold;
-                text-decoration: none;   
-                cursor: pointer;  
+                text-decoration: none;
+                cursor: pointer;
                 -moz-user-select: none;
             }
             .selected a {
@@ -158,7 +158,7 @@
                 color: #EF6868 !important;
             }
             .touch {
-                color: #bbb;				
+                color: #bbb;
                 padding: 2px 10px 2px 5px;
                 cursor: default;
                 font-family: monospace;
@@ -187,7 +187,7 @@
             }
             .testResult .status_done {
                 background: #EFEFD1 !important;
-            }            
+            }
             .testResult table {
                 width: 100%;
                 border: none;
@@ -282,21 +282,21 @@
         </style>
         <script type="text/javascript">
             $(function() {
-	
+
 		var title = window.top.document.title;
-                
+
                 $('#loading').ajaxStart(function() {
                     $(this).show();
                 }).ajaxStop(function() {
                     $(this).hide();
                 });
-                
+
                 var testError = function(msg) {
                     window.location = bookmark()
                     stop();
                     updateSelected();
                 }
-                        
+
                 var run = function() {
                     updateSelected();
                     $(document.body).addClass('running');
@@ -322,9 +322,9 @@
                         } else {
                             result();
                         }
-                    }					
+                    }
                 }
-                                
+
                 var result = function() {
                     $('#selenium-mask, #selenium').hide();
                     $('#selenium-runner').attr('src', 'about:blank');
@@ -348,7 +348,7 @@
                         $.scrollTo($('.test.failed').offset().top - skip, 500);
                     }
                 };
-                                
+
                 var runTest = function(testId, test) {
 					test.addClass('passing');
                     $('.touch', test).html('&nbsp;');
@@ -400,7 +400,7 @@
                         }, 2000);
                     }
                 };
-                                
+
                 var testSuccess = function(test, result) {
                     test.removeClass('passing').addClass('passed');
                     $('.touch', test).html('+');
@@ -408,7 +408,7 @@
 					window.top.document.title = title;
                     runNextTest();
                 };
-                                
+
                 var testFail = function(test, result) {
                     test.removeClass('passing').addClass('failed');
                     $('.touch', test).html('-');
@@ -416,11 +416,11 @@
 					window.top.document.title = title;
                     stop();
                 };
-                        
+
                 var stop = function() {
                     result();
                 };
-                        
+
                 var updateSelected = function() {
                     var nb = $('.test.selected').size();
                     if(nb) {
@@ -452,13 +452,13 @@
                     var v = false;
                     $('.test.selected').each(function() {
                         if(v) url += ',';
-                        url += $(this).attr('id');	
-                        v = true;					
+                        url += $(this).attr('id');
+                        v = true;
                     });
                     if(url)
                         return url;
                 }
-                        
+
                 $('.test a').click(function(e) {
                     e.preventDefault();
                     if($(document.body).is('.running')) return;
@@ -474,7 +474,7 @@
                         $(this).html( $(this).html() == '-' ? '+' : '-' );
                     }
                 });
-                        
+
                 $('#tests h2 span').click(function() {
                     if($(document.body).is('.running')) return;
                     var ul = $(this).parent().next('ul');
@@ -485,12 +485,12 @@
                     }
                     updateSelected();
                 });
-                        
+
                 $('#start').click(function() {
                     if($(this).is('.disabled')) return;
                     run();
                 });
-                        
+
                 $('#stop').click(function() {
                     stop();
                 });
@@ -520,19 +520,19 @@
                     $('.test').removeClass('selected');
 					updateSelected();
                 });
-                
+
                 $('#ra').click(function() {
                     $('.test').addClass('selected');
                     updateSelected();
                     run();
                 });
-                
+
                 updateSelected();
 
                 if(/auto=yes/.exec(document.location.search)) {
                     run();
                 }
-                        
+
             });
             function toggle_trace(link){
             	var $link = jQuery(link);
@@ -553,37 +553,37 @@
         <div id="header" class="block">
             <h1>
                 Tests runner
-            </h1>           
+            </h1>
             <p>
                 <strong>Select the tests to run</strong>, then click [Start] and pray
             </p>
             <div id="loading">working ...</div>
         </div>
         <div id="results" class="block">
-            
+
             <div id="stopped">
                 <span id="start">Start !</span>
                 &nbsp;
                 <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>) - <span id="unselectAll"><a id="" href="#">Unselect all</a></span></span>
-				
+
                 <span id="quickLinks">
                     <span id="sa">(<a id="" href="#">Select all</a></span> -
                     <span id="ra"><a id="" href="#">Run all</a>)</span>
                 </span>
             </div>
-            
+
             <div id="started">
                 <span id="stop">Stop ...</span>
                 &nbsp;(running <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span>)
             </div>
-            
+
             <div id="finished">
-                
+
             </div>
-            
+
         </div>
         <div id="tests" class="block">
-            
+
             #{if unitTests}
             <h2><span>There ${unitTests.size().pluralize('is', 'are')} ${unitTests.size()} unit test${unitTests.size().pluralize()},</span></h2>
             <ul>
@@ -598,7 +598,7 @@
             </ul>
             %{ tis = true; }%
             #{/if}
-            
+
             #{if functionalTests}
             <h2><span>${tis ? '' : 'There '+functionalTests.size().pluralize('is', 'are')} ${tis && !seleniumTests ? 'and' : ''} ${functionalTests.size()} functional test${functionalTests.size().pluralize()},</span></h2>
             <ul>
@@ -613,7 +613,7 @@
             </ul>
             %{ tis = true; }%
             #{/if}
-            
+
             #{if seleniumTests}
             <h2><span>${tis ? '' : 'There '+seleniumTests.size().pluralize('is', 'are')} ${tis ? 'and' : ''} ${seleniumTests.size()} selenium test${seleniumTests.size().pluralize()},</span></h2>
             <ul>
@@ -637,11 +637,11 @@
                 #{/list}
             </ul>
             #{/if}
-            
+
             #{if !functionalTests && !unitTests && !seleniumTests}
             <h2><span>There is no test to run</span></h2>
             #{/if}
-            
+
         </div>
         <div id="selenium-mask"></div>
         <div id="selenium">

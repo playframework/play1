@@ -17,9 +17,9 @@ import play.utils.Utils;
  * Parse url-encoded requests.
  */
 public class UrlEncodedParser extends DataParser {
-    
+
     boolean forQueryString = false;
-    
+
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
             final String encoding = Http.Request.current().encoding;
@@ -28,7 +28,7 @@ public class UrlEncodedParser extends DataParser {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     public static Map<String, String[]> parseQueryString(InputStream is) {
         UrlEncodedParser parser = new UrlEncodedParser();
         parser.forQueryString = true;

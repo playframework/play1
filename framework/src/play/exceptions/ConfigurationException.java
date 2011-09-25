@@ -18,5 +18,5 @@ public class ConfigurationException extends PlayException {
     public String getErrorTitle() {
         return "Configuration error.";
     }
-    
+
 }

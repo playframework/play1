@@ -5,7 +5,7 @@
 ~ Alias:
 ~ ~~~~~
 ~ idea
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play idealize [app_path] [--deps] [--%fwk_id]
@@ -17,7 +17,7 @@
 ~
 ~ Options:
 ~ ~~~~~~~~~
-~ --deps: 
+~ --deps:
 ~ Resolve and install dependencies before running the command.
 ~
 ~ --%fwk_id:

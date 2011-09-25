@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ id -- Define the framework ID
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play id
@@ -12,6 +12,6 @@
 ~
 ~ IDs can be used in applications configuration files to specify different settings for different environments
 ~ or different developers.
-~ 
+~
 ~ Setting a framework ID is totally optional.
 ~

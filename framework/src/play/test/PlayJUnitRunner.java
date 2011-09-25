@@ -19,7 +19,7 @@ public class PlayJUnitRunner extends Runner {
     public static final String invocationType = "JUnitTest";
 
     public static boolean useCustomRunner = false;
-    
+
     // *******************
     JUnit4 jUnit4;
 

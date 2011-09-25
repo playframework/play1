@@ -9,9 +9,9 @@ import play.mvc.Http.Response;
  * 200 OK with a text/plain
  */
 public class RenderText extends Result {
-    
+
     String text;
-    
+
     public RenderText(CharSequence text) {
         this.text = text.toString();
     }

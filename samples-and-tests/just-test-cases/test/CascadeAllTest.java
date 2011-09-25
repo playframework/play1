@@ -21,7 +21,7 @@ public class CascadeAllTest extends UnitTest {
         Customer actual = Customer.find("byName", "frank").first();
         assertEquals(frank, actual);
     }
-    
+
     @Test
     public void update() {
         Customer bob = Customer.find("byName", "bob").first();

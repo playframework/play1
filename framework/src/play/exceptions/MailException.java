@@ -10,15 +10,15 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  * Error while sending an email
  */
 public class MailException extends PlayException implements SourceAttachment {
-    
+
     String sourceFile;
     List<String> source;
-    Integer line;    
-    
+    Integer line;
+
     public MailException(String message) {
         super(message, null);
     }
-    
+
     public MailException(String message, Throwable cause) {
         super(message, cause);
         StackTraceElement element = getInterestingStrackTraceElement(cause);

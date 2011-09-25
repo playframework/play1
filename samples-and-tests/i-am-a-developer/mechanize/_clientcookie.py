@@ -16,7 +16,7 @@ them clearly from Python attributes.
                   |   ---MSIEBase |       \
                   |  /      |     |        \
                   | /   MSIEDBCookieJar BSDDBCookieJar
-                  |/    
+                  |/
                MSIECookieJar
 
 Comments to John J Lee <jjl@pobox.com>.
@@ -1389,7 +1389,7 @@ class CookieJar:
         for cookie in cookies:
             if cookie.version == 1:
                 cookie.rfc2109 = True
-                if rfc2109_as_netscape: 
+                if rfc2109_as_netscape:
                     # treat 2109 cookies as Netscape cookies rather than
                     # as RFC2965 cookies
                     cookie.version = 0

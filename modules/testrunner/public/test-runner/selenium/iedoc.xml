@@ -17,7 +17,7 @@ We support the following strategies for locating elements:
 </p>
 
 <ul>
-<li><strong>identifier</strong>=<em>id</em>: 
+<li><strong>identifier</strong>=<em>id</em>:
 Select the element with the specified &#064;id attribute. If no match is
 found, select the first element whose &#064;name attribute is <em>id</em>.
 (This is normally the default; see below.)</li>
@@ -37,7 +37,7 @@ Select the first element with the specified &#064;name attribute.
 <li>name=flavour value=chocolate</li>
 </ul>
 </li>
-<li><strong>dom</strong>=<em>javascriptExpression</em>: 
+<li><strong>dom</strong>=<em>javascriptExpression</em>:
 
 Find an element by evaluating the specified string.  This allows you to traverse the HTML Document Object
 Model using JavaScript.  Note that you must not return a value in this string; simply make it the last expression in the block.
@@ -49,7 +49,7 @@ Model using JavaScript.  Note that you must not return a value in this string; s
 
 </li>
 
-<li><strong>xpath</strong>=<em>xpathExpression</em>: 
+<li><strong>xpath</strong>=<em>xpathExpression</em>:
 Locate an element using an XPath expression.
 <ul class="first last simple">
 <li>xpath=//img[&#064;alt='The image alt text']</li>
@@ -642,7 +642,7 @@ two windows can share the same title.  If that happens, this locator will
 just pick one.
 </li>
 <li><strong>name</strong>=<em>myWindow</em>:
-Finds the window using its internal JavaScript "name" property.  This is the second 
+Finds the window using its internal JavaScript "name" property.  This is the second
 parameter "windowName" passed to the JavaScript method window.open(url, windowName, windowFeatures, replaceFlag)
 (which Selenium intercepts).
 </li>
@@ -771,7 +771,7 @@ By default, Selenium's overridden window.confirm() function will
 return true, as if the user had manually clicked OK; after running
 this command, the next call to confirm() will return false, as if
 the user had clicked Cancel.  Selenium will then resume using the
-default behavior for future confirmations, automatically returning 
+default behavior for future confirmations, automatically returning
 true (OK) unless/until you explicitly call this command for each
 confirmation.
 </p>
@@ -791,7 +791,7 @@ that Selenium's overridden window.confirm() function will normally automatically
 return true, as if the user had manually clicked OK, so you shouldn't
 need to use this command unless for some reason you need to change
 your mind prior to the next confirmation.  After any confirmation, Selenium will resume using the
-default behavior for future confirmations, automatically returning 
+default behavior for future confirmations, automatically returning
 true (OK) unless/until you explicitly call chooseCancelOnNextConfirmation for each
 confirmation.
 </p>
@@ -896,7 +896,7 @@ the previous action.
 <p>
 By default, the confirm function will return true, having the same effect
 as manually clicking OK. This can be changed by prior execution of the
-chooseCancelOnNextConfirmation command. 
+chooseCancelOnNextConfirmation command.
 </p>
 <p>
 If an confirmation is generated but you do not consume it with getConfirmation,
@@ -1534,7 +1534,7 @@ wait immediately after a Selenium command that caused a page-load.</p></comment>
 
 <comment>Waits for a new frame to load.
 
-<p>Selenium constantly keeps track of new pages and frames loading, 
+<p>Selenium constantly keeps track of new pages and frames loading,
 and sets a "newPageLoaded" flag when it first notices a page load.</p>
 
 See waitForPageToLoad for more information.</comment>
@@ -1622,7 +1622,7 @@ either show the log window in GUI mode, or enable browser-side logging in Seleni
 
 <param name="script">the JavaScript snippet to run</param>
 
-<comment>Creates a new "script" tag in the body of the current test window, and 
+<comment>Creates a new "script" tag in the body of the current test window, and
 adds the specified text into the body of the command.  Scripts run in
 this way can often be debugged more easily than scripts executed using
 Selenium's "getEval" command.  Beware that JS exceptions thrown in these script
@@ -1641,7 +1641,7 @@ an exception.</comment>
 <comment>Defines a new function for Selenium to locate elements on the page.
 For example,
 if you define the strategy "foo", and someone runs click("foo=blah"), we'll
-run your function, passing you the string "blah", and click on the element 
+run your function, passing you the string "blah", and click on the element
 that your function
 returns, or throw an "Element not found" error if your function returns null.
 
@@ -1764,7 +1764,7 @@ log.</comment>
 
 <param name="kwargs">A kwargs string that modifies the way the screenshot is captured. Example: "background=#CCFFDD". This may be useful to set for capturing screenshots of less-than-ideal layouts, for example where absolute positioning causes the calculation of the canvas dimension to fail and a black background is exposed  (possibly obscuring black text).</param>
 
-<comment>Downloads a screenshot of the browser current window canvas to a 
+<comment>Downloads a screenshot of the browser current window canvas to a
 based 64 encoded PNG file. The <em>entire</em> windows canvas is captured,
 including parts rendered outside of the current view port.
 
@@ -1776,7 +1776,7 @@ Currently this only works in Mozilla and when running in chrome mode.</comment>
 
 <comment>Kills the running Selenium Server and all browser sessions.  After you run this command, you will no longer be able to send
 commands to the server; you can't remotely start the server once it has been stopped.  Normally
-you should prefer to run the "stop" command, which terminates the current browser session, rather than 
+you should prefer to run the "stop" command, which terminates the current browser session, rather than
 shutting down the entire server.</comment>
 
 </function>

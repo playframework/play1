@@ -81,7 +81,7 @@ public class TestRunner extends Controller {
                 IO.writeContent(resultXunit, testXunitResults);
             } catch(Exception e) {
                 Logger.error(e, "Cannot ouput XML unit output");
-            }            
+            }
             response.contentType = "text/html";
             renderText(result);
         }
@@ -156,6 +156,6 @@ public class TestRunner extends Controller {
     	}
     	renderText(value);
     }
-	
+
 }
 

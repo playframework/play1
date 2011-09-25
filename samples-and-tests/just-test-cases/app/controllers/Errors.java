@@ -19,5 +19,5 @@ public class Errors extends Controller {
         } else {
             renderText("it works now: " + model.getMember().getName());
         }
-    }   
+    }
 }

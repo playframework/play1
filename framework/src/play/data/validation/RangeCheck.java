@@ -51,5 +51,5 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
         messageVariables.put("max", Double.toString(max));
         return messageVariables;
     }
-   
+
 }

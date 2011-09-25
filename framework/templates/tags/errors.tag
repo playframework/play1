@@ -1,8 +1,8 @@
-*{ 
+*{
     _arg: (optional) fieldname to filter errors, if not specified all
-errors are returned 
+errors are returned
     _field: (optional) fieldname to filter errors, if not specified all
-errors are returned 
+errors are returned
 }*
 
 %{

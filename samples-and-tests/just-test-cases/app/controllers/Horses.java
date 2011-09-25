@@ -15,19 +15,19 @@ public class Horses extends Controller {
         Horse existing = Horse.all().first();
         render(existing);
     }
-    
+
     public static void dontSave(Horse horse) {
         result();
     }
-    
+
     public static void save(Horse horse) {
         horse.save();
         result();
     }
-    
+
     public static void result() {
         renderText("Blups:" + BLUP.count());
     }
-    
+
 }
 

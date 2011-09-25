@@ -116,10 +116,10 @@ public class JPA {
     }
 
 
-    
+
     /*
      * Retrieve the current entityManager
-     */ 
+     */
     public static EntityManager em() {
         return getDefaultJPAConfig().getJPAContext().em();
     }
@@ -148,7 +148,7 @@ public class JPA {
     /*
      * Build a new entityManager.
      * (In most case you want to use the local entityManager with em)
-     */ 
+     */
     public static EntityManager newEntityManager() {
         return getDefaultJPAConfig().newEntityManager();
     }

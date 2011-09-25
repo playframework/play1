@@ -9,7 +9,7 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Mailer;
 
 /**
- * Enhance mailers classes. 
+ * Enhance mailers classes.
  */
 public class MailerEnhancer extends Enhancer {
 

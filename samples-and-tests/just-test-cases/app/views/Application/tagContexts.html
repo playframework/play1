@@ -1,23 +1,23 @@
 #{list 0..1}
     #{if _}
-        
+
         #{ifnot 0}
-            
+
             #{verbatim}
-                
+
                 #{if 0}
                     Yop
                 #{/if}
                 #{else}
-                    
+
                     ${play.templates.TagContext.currentStack.get()}
-                    
+
                 #{/else}
-                
+
             #{/verbatim}
-            
+
         #{/ifnot}
-        
+
     #{/if}
 #{/list}
 
@@ -28,4 +28,4 @@
 
 *{ FastTags }*
 
-#{my.tags.hello 'World' /}   #{my.tags.hello name:'Bab' /}   #{my.tags.hello}Coucou#{/my.tags.hello}  
+#{my.tags.hello 'World' /}   #{my.tags.hello name:'Bab' /}   #{my.tags.hello}Coucou#{/my.tags.hello}

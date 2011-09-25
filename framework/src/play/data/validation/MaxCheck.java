@@ -47,5 +47,5 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
         messageVariables.put("max", Double.toString(max));
         return messageVariables;
     }
-   
+
 }

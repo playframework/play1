@@ -21,6 +21,6 @@ public class LocaleBinder implements TypeBinder<Locale> {
         }
         return Locale.getDefault();
     }
-    
+
 }
 

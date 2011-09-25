@@ -1,7 +1,7 @@
 ~ Name:
 ~ ~~~~~
 ~ new -- Create a new application
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play new app_path [--with module_list]

@@ -56,16 +56,16 @@ public class DependenciesManager {
     File framework;
     File userHome;
     HumanReadyLogger logger;
-    
+
     final FileFilter dirsToTrim = new FileFilter() {
-    
+
         @Override
         public boolean accept(File file) {
             return file.isDirectory() && isDirToTrim(file.getName());
         }
-        
+
         private boolean isDirToTrim(String fileName) {
-            return "documentation".equals(fileName) || "src".equals(fileName) || 
+            return "documentation".equals(fileName) || "src".equals(fileName) ||
                    "tmp".equals(fileName) || fileName.contains("sample") ||
                    fileName.contains("test");
         }
@@ -242,13 +242,13 @@ public class DependenciesManager {
                     Files.unzip(from, to);
                     System.out.println("~ \tmodules/" + to.getName());
                 }
-                
+
                 if (trim) {
                     for (File dirToTrim : to.listFiles(dirsToTrim)) {
                         Files.deleteDirectory(dirToTrim);
                     }
                 }
-                
+
                 return to;
             }
         } catch (Exception e) {
@@ -291,7 +291,7 @@ public class DependenciesManager {
 
         // Variables
         System.setProperty("play.path", framework.getAbsolutePath());
-        
+
         // Ivy
         Ivy ivy = configure();
 
@@ -311,11 +311,11 @@ public class DependenciesManager {
 
            System.out.println("~");
          }
-        
+
 
         System.out.println("~ Resolving dependencies using " + ivyModule.getAbsolutePath() + ",");
         System.out.println("~");
-        
+
         // Resolve
         ResolveEngine resolveEngine = ivy.getResolveEngine();
         ResolveOptions resolveOptions = new ResolveOptions();

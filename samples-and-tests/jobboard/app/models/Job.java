@@ -14,32 +14,32 @@ public class Job extends Model {
 
     @Required
     public String title;
-    
+
     public String place;
-    
+
     public Date postedAt = new Date();
-    
+
     @Required
     @MaxSize(20000)
     @Lob
     public String detail;
-    
+
     @Lob
     // Rename to avoir mysql being lost
     @Column(name = "jobboard_index")
     public String index;
-    
+
     @ManyToOne
     @Required
     public Category category;
-    
+
     @ManyToOne
     @Required
     public Company company;
-    
+
     @ManyToMany
     public List<Tag> tags;
-    
+
     public Boolean online = false;
 
     public static List findByCategoryAndTags(String category, String[] tags) {
@@ -72,9 +72,9 @@ public class Job extends Model {
     public String toString() {
         return title;
     }
-    
+
     // ~~~~~~ Indexation
-    
+
     @PreUpdate
     @PrePersist
     void index() {
@@ -83,6 +83,6 @@ public class Job extends Model {
         this.index += JavaExtensions.noAccents(this.detail).toLowerCase() + " ";
         this.index += JavaExtensions.noAccents(this.place).toLowerCase();
     }
-    
+
 }
 

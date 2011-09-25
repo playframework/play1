@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Chat room' /}
 
-<h1>WebSocket — You are now chatting as ${user} <a href="@{Application.index()}">Leave the chat room</a></h1> 
+<h1>WebSocket — You are now chatting as ${user} <a href="@{Application.index()}">Leave the chat room</a></h1>
 
 <div id="thread">
     <script type="text/html" id="message_tmpl">
@@ -49,13 +49,13 @@
 
     // Create a socket
     var socket = new WebSocket('@@{WebSocket.ChatRoomSocket.join(user)}')
-    
+
     // Display a message
     var display = function(event) {
         $('#thread').append(tmpl('message_tmpl', {event: event}));
         $('#thread').scrollTo('max')
     }
-    
+
     // Message received on the socket
     socket.onmessage = function(event) {
         var parts = /^([^:]+):([^:]+)(:(.*))?$/.exec(event.data)
@@ -65,18 +65,18 @@
             text: parts[4]
         })
     }
-    
+
     $('#send').click(function(e) {
         var message = $('#message').val()
         $('#message').val('')
         socket.send(message)
     });
-    
+
     $('#message').keypress(function(e) {
         if(e.charCode == 13 || e.keyCode == 13) {
             $('#send').click()
             e.preventDefault()
         }
     })
-    
+
 </script>

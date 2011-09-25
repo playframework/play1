@@ -13,7 +13,7 @@ import play.vfs.VirtualFile;
 import java.io.*;
 
 public class Binary extends Controller {
-	
+
 	public static void deleteAll(){ // see Bug #491403
 		Fixtures.deleteAll();
 	}
@@ -41,7 +41,7 @@ public class Binary extends Controller {
 	}
 
      public static void uploadFile(File file) {
-        
+
         Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(file.length())));
         renderBinary(file);
     }
@@ -57,10 +57,10 @@ public class Binary extends Controller {
         Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(files.get(1).length())));
         renderBinary(files.get(1));
     }
-    
+
     public static void getBinaryWithCustomContentType() throws Exception{
         InputStream inStream = new ByteArrayInputStream( "hello".getBytes("utf-8"));
         renderBinary(inStream, "filename.customContentType");
-        
+
     }
 }

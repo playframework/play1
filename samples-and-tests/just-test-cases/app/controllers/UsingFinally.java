@@ -14,11 +14,11 @@ public class UsingFinally extends Controller {
         response.print("Yop");
         response.contentType = "text/plain";
     }
-    
+
     public static void a() {
         renderText("Youhou");
     }
-    
+
     public static void b() {
         renderText("Youhou");
     }
@@ -33,6 +33,6 @@ public class UsingFinally extends Controller {
     public static void onlytest(String name) {
         renderText("onlynotwork :  " + name);
     }
-  
+
 }
 

@@ -36,6 +36,6 @@ public class Jobs extends Administration {
         params.put("object.company.id", company.id + "");
         parent();
     }
-    
+
 }
 

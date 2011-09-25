@@ -12,6 +12,6 @@ public class MappingRules extends Controller {
     public static void index() {
         render();
     }
-    
+
 }
 

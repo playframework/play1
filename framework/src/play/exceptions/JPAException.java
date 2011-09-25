@@ -34,7 +34,7 @@ public class JPAException extends PlayException implements SourceAttachment {
     @Override
     public boolean isSourceAvailable() {
         return getCause() != null && getCause() instanceof GenericJDBCException;
-    }   
+    }
 
     @Override
     public Integer getLineNumber() {
@@ -52,8 +52,8 @@ public class JPAException extends PlayException implements SourceAttachment {
     @Override
     public String getSourceFile() {
         return "SQL Statement";
-    }   
-    
-    
-    
+    }
+
+
+
 }
