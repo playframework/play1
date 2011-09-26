@@ -60,6 +60,7 @@ public abstract class Enhancer {
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
+
             if(Play.usePrecompiled) {
                 try {
                     File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
@@ -68,7 +69,13 @@ public abstract class Enhancer {
                     Logger.error("Missing class %s", className);
                 }
             }
-            return new ByteArrayInputStream(Play.classes.getApplicationClass(className).enhancedByteCode);
+            ApplicationClass appClass = Play.classes.getApplicationClass(className);
+
+            if ( appClass.enhancedByteCode == null) {
+                throw new RuntimeException("Trying to visit uncompiled class while enhancing. Uncompiled class: " + className);
+            }
+
+            return new ByteArrayInputStream(appClass.enhancedByteCode);
         }
 
         public URL find(String className) {
