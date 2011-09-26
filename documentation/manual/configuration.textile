@@ -261,8 +261,6 @@ If you specify a @Datasource@, the database plugin detects the pattern @db=java:
 
 Default: none.
 
-See also: "Support for multiple databases":model#multiple.
-
 
 h3(#db.destroyMethod). db.destroyMethod
 
@@ -378,8 +376,6 @@ h2(#hibernate). Hibernate
 You can specify additional Hibernate properties. For example, to enable SQL comments:
 
 bc. hibernate.use_sql_comments=true
-
-See also: "Using JPA with multiple databases":jpa#multiple.
 
 
 h3(#hibernate.connection.datasource). hibernate.connection.datasource
