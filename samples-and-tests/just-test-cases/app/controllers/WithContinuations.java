@@ -29,8 +29,8 @@ public class WithContinuations extends Controller {
         await(100);
     }
     
-    protected static void doAwait2() {
-        String s = await(new jobs.DoSomething(100).now());
+    protected static String doAwait2() {
+        return await(new jobs.DoSomething(100).now());
     }
 
     public static void loopWithWait() {
@@ -323,6 +323,14 @@ public class WithContinuations extends Controller {
         }
     }
     
+    public static class ControllerWhichUsesAwaitViaInheritance extends WithContinuations {
+
+        public static void useAwaitViaInheritance() {
+            String res = WithContinuations.doAwait2();
+            renderText(res != null);
+        }
+    }
+
     
     // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
     // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.

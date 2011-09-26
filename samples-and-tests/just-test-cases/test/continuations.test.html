@@ -89,6 +89,9 @@
 	open('/useAwaitViaOtherClass')
     assertTextPresent('failCount: 2')
 
+    open('@{WithContinuations.ControllerWhichUsesAwaitViaInheritance.useAwaitViaInheritance}')
+    assertTextPresent('true')
+
 	open('@{WithContinuations.useAwaitInWebSocketControllerWithContinuations()}')
     assertTextPresent('ok')
 
