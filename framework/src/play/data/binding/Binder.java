@@ -81,6 +81,16 @@ public abstract class Binder {
         }
     }
 
+    /**
+     * Deprecated. Use bindBean() instead.
+     */
+    @Deprecated
+    public static Object bind(Object o, String name, Map<String, String[]> params) {
+		RootParamNode parentParamNode = RootParamNode.convert(params);
+		Binder.bindBean(parentParamNode, name, o);
+		return o;
+	}
+
     @Deprecated
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
         RootParamNode parentParamNode = RootParamNode.convert(params);
