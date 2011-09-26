@@ -47,7 +47,7 @@ public class GenericModel extends JPABase {
     @Deprecated
     public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return create(rootParamNode, name, type, annotations);
+        return (T)create(rootParamNode, name, type, annotations);
     }
 
     public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
@@ -71,7 +71,7 @@ public class GenericModel extends JPABase {
     @Deprecated
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return edit( rootParamNode, name, o, annotations);
+        return (T)edit( rootParamNode, name, o, annotations);
     }
 
     @SuppressWarnings("deprecation")
@@ -185,7 +185,7 @@ public class GenericModel extends JPABase {
     @Deprecated
     public <T extends GenericModel> T edit(String name, Map<String, String[]> params) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return edit(rootParamNode, name, this, null);
+        return (T)edit(rootParamNode, name, this, null);
     }
 
     public <T extends GenericModel> T edit(ParamNode rootParamNode, String name) {
