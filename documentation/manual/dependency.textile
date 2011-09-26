@@ -349,7 +349,7 @@ bc. Example3, reuse local maven repo and repository manager
         <ivy pattern="${local-maven2-pattern}.pom" />
         <artifact pattern="${local-maven2-pattern}(-[classifier]).[ext]" />
       </filesystem>
-      <!-- use repository manager as proxy to maven-central (and alle other repositories)--> 
+      <!-- use repository manager as proxy to maven-central (and all other repositories)--> 
       <ibiblio name="repomanager" m2compatible="true"root="http://your.repomanager.intra/path/to/repo" cache="default"/>
     </chain>
   </resolvers>
