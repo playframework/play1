@@ -174,11 +174,10 @@ bc. public class BasicTest extends UnitTest {
  
     @Before
     public void setup() {
-        Fixtures.deleteAll();
+        Fixtures.deleteDatabase();
     }
-    
-    ...
  
+    …
 }
 
 p(note). The <code>@Before</code> concept is a core concept of the JUnit testing tool.

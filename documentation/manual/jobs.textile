@@ -120,14 +120,13 @@ h2. <a name="concepts">Stopping the application</a>
 Because you sometimes need to perform some action before the application shutdown, Play also provides a <code>@OnApplicationStop</code> annotation.
 
 bc. import play.jobs.*;
-
+ 
 @OnApplicationStop
 public class Bootstrap extends Job {
-
+ 
     public void doJob() {
         Fixture.deleteAll();
     }
-
 }
 
 p(note). **Continuing the discussion**

@@ -147,8 +147,8 @@ validation.past(expectedDepartureDate, expectedArrivalDate);
 
 Annotation syntax:
 
-bc. @Past String actualDepartureDate
-@Past("1980-01-01") String birthDate
+bc. @InPast String actualDepartureDate
+@InPast("1980-01-01") String birthDate
 
 Message key: @validation.past@
 

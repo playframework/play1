@@ -13,6 +13,9 @@ In the @/conf/dependencies.yml@ file, enable the CRUD module by adding a line af
 bc. require:
     - play -> crud
 
+Now run the @play dependencies@ command to resolve the new module dependency.
+
+
 h3. <a name="routes">Import default CRUD routes</a>
 
 In the @conf/routes@ file, import the default module routes by adding this line:

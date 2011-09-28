@@ -138,7 +138,7 @@ bc. #{extends 'main.html' /}
     </div>
 #{/else}
 
-You can read about this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the @?:@ operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
+You can read about how this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the @?:@ operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
 
 OK, now refresh the blog home page.
 
