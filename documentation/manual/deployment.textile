@@ -18,12 +18,20 @@ h2. <a name="appservers">Java EE application servers</a>
 
 Your Play application can also run inside your favorite application server. Most application servers are supported out of the box.
 
-h3. Application server compatibility matrix
+h3. Supported application servers
 
-|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glassfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
-|| ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ ||  ✓ || ✓  ||                                                                                                                                                            
+The following application servers are known to work with Play. Please feel free to report any other working deployment.
 
-These application server are known to work with Play but feel free to report any other working deployment.
+* JBoss 4.2.x
+* JBoss 5.x
+* JBoss 6M2
+* Glassfish v3
+* IBM Websphere 6.1
+* IBM Websphere 7
+* Geronimo 2.x
+* Tomcat 6.x
+* Jetty 7.x
+* Resin 4.0.5
 
 h3. Deploying
 
