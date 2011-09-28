@@ -61,7 +61,9 @@ public class Application extends Controller {
     }
 }
 
-h2. <a>Adding authorization check</a>
+h2. <a name="auth">Adding authorization check</a>
+
+h3. <a name="authcontroller">Controller annotation</a>
 
 You can use the <code>@Check</code> annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
 
@@ -71,7 +73,7 @@ bc. @With(Secure.class)
 public class Application extends Controller { 
    …
    
-   @Check("isAdmin")
+   @Check("administrator")
    public static void delete(Long id) {
        …
    }
@@ -86,7 +88,7 @@ public class Security extends Secure.Security {
     
     static boolean check(String profile) {
         User user = User.find("byEmail", connected()).first();
-        if ("isAdmin".equals(profile)) {
+        if ("administrator".equals(profile)) {
             return user.admin;
         }
         else {
@@ -94,3 +96,13 @@ public class Security extends Secure.Security {
         }
     }    
 }
+
+h3. <a name="authtag">Template tag</a>
+
+You can also use the @secure.check@ tag for authorization checks in templates. This is useful to conditionally display user-interface controls for operations that are protected by controller annotations. For example:
+
+bc. #{secure.check "administrator"}
+    <a href="@{delete(item.id)}">Delete</a>
+#{/secure.check}
+
+The tag only renders its body for authorised users, so the ‘Delete’ link is only displayed when the user is authorised to execute the @delete@ controller action.
