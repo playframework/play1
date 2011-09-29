@@ -17,6 +17,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
         ChannelPipeline pipeline = pipeline();
         PlayHandler playHandler = new PlayHandler();
         
+        pipeline.addLast("flashPolicy", new FlashPolicyHandler()); 
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new StreamChunkAggregator(max));
         pipeline.addLast("encoder", new HttpResponseEncoder());
