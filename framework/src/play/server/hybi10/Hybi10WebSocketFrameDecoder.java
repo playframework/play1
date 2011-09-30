@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocketFrameDecoder.State> {
+
     private static final byte OPCODE_CONT = 0x0;
     private static final byte OPCODE_TEXT = 0x1;
     private static final byte OPCODE_BINARY = 0x2;
@@ -85,7 +86,6 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
                 }
 
                 int length = (byte) (b & 0x7F);
-
                 if (length < 126) {
                     currentFrameLength = length;
                     checkpoint(State.MASKING_KEY);
@@ -96,18 +96,20 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
                 }
                 return null;
             case PARSING_LENGTH_2:
-                currentFrameLength = buffer.readShort();
+                int s =  buffer.readUnsignedShort();
+                currentFrameLength = s;
                 checkpoint(State.MASKING_KEY);
                 return null;
             case PARSING_LENGTH_3:
-                currentFrameLength = buffer.readInt();
+                currentFrameLength = (int)buffer.readLong();
                 checkpoint(State.MASKING_KEY);
                 return null;
             case MASKING_KEY:
                 maskingKey = buffer.readBytes(4);
                 checkpoint(State.PAYLOAD);
             case PAYLOAD:
-                checkpoint(State.FRAME_START);
+                if (currentFrameLength < 126)
+                    checkpoint(State.FRAME_START);
                 ChannelBuffer frame = buffer.readBytes(currentFrameLength);
                 unmask(frame);
 
@@ -125,10 +127,12 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
                     frames.clear();
                 }
 
+
                 if (this.opcode == OPCODE_TEXT) {
-                    if (frame.readableBytes() > MAX_LENGTH) {
-                        throw new TooLongFrameException();
-                    }
+                    // TODO: This is only for the old hybri76?
+                    // if (frame.readableBytes() > MAX_LENGTH) {
+                       // throw new TooLongFrameException();
+                    //}
                     return new DefaultWebSocketFrame(0x00, frame);
                 } else if (this.opcode == OPCODE_BINARY) {
                     return new DefaultWebSocketFrame(0xFF, frame);
@@ -149,7 +153,8 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
     private void unmask(ChannelBuffer frame) {
         byte[] bytes = frame.array();
         for (int i = 0; i < bytes.length; i++) {
-            frame.setByte(i, frame.getByte(i) ^ maskingKey.getByte(i % 4));
+            int b = frame.getByte(i) ^ maskingKey.getByte(i % 4);
+            frame.setByte(i, b);
         }
     }
 

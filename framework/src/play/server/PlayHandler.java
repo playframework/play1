@@ -47,6 +47,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1250,6 +1251,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 if (!isOpen()) {
                     throw new IllegalStateException("The outbound channel is closed");
                 }
+
                 writeAndClose(ctx.getChannel().write(new DefaultWebSocketFrame(opcode, wrappedBuffer(data, offset, length))));
             }
 
