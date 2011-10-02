@@ -38,7 +38,7 @@ Please refer to the "jQuery":http://docs.jquery.com/Main_Page documentation for 
 
 Also please note that we could perform a POST; the jQuery method should then be changed to:
 
-bc. $.post(listAction, function(data) {
+bc. $.post(listAction(), function(data) {
   $('#result').html(data);
 });
 

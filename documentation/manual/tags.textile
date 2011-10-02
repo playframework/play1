@@ -285,7 +285,7 @@ h2. <a name="if">if</a>
 
 Evaluates the given test, and if true, evaluates the tag body.
 
-bc. #{if user.countryCode == 'en"' }
+bc. #{if user.countryCode == 'en' }
     Connected user is ${user}
 #{/if}
 

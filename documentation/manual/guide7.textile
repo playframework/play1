@@ -8,10 +8,12 @@ A Play application can be assembled from several application modules. This lets 
 
 The CRUD module is a generic application that introspects the model classes to create simple lists and forms.
 
-To enable the CRUD module, add this line to the @/yabe/conf/application.conf@ file:
+To enable the CRUD module, add a line in the @/conf/dependencies.yml@ file, after @require:@
 
-bc. # Import the crud module
-module.crud=${play.path}/modules/crud
+bc. require:
+    - play -> crud
+
+Now run the @play dependencies@ command to resolve the new module dependency.
 
 Then this module comes with a generic set of **routes** that we can reuse for now. To import these routes just add this line to the @/yabe/conf/routes@ file:
 

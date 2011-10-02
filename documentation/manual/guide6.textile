@@ -150,7 +150,7 @@ bc. public static List<Map> getCloud() {
     return result;
 }
 
-Here we use a handy Hibernate feature that allows us to return a custom object from a JPA query. This results in a @List@ containing a @Map@ for each tag with two attributes: @name@ for the tag name and @pound@ for the tag count.
+Here we use a handy Hibernate feature that allows us to return a custom object from a JPA query. This results in a @List@ containing a @Map@ for each tag with two keys: @tag@ for the tag name and @pound@ for the tag count.
 
 Let’s test it by adding one more check to our tags test:
 
