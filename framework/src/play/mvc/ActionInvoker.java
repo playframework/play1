@@ -614,24 +614,27 @@ public class ActionInvoker {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
 
-        RootParamNode root = Scope.Params.current().getRootParamNode();
-
         Object[] rArgs = new Object[method.getParameterTypes().length];
-        for (int i = 0; i < method.getParameterTypes().length; i++) {
+        if (method.getParameterTypes().length>0) {
+        
+            RootParamNode root = Scope.Params.current().getRootParamNode();
 
-             Class<?> type = method.getParameterTypes()[i];
+            for (int i = 0; i < method.getParameterTypes().length; i++) {
 
-            if (Logger.isTraceEnabled()) {
-                Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+                 Class<?> type = method.getParameterTypes()[i];
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+                }
+
+                rArgs[i] = Binder.bind(
+                        root,
+                        paramsNames[i],
+                        method.getParameterTypes()[i],
+                        method.getGenericParameterTypes()[i],
+                        method.getParameterAnnotations()[i],
+                        new Binder.MethodAndParamInfo(o, method, i + 1));
             }
-
-            rArgs[i] = Binder.bind(
-                    root,
-                    paramsNames[i],
-                    method.getParameterTypes()[i],
-                    method.getGenericParameterTypes()[i],
-                    method.getParameterAnnotations()[i],
-                    new Binder.MethodAndParamInfo(o, method, i + 1));
         }
         return rArgs;
     }
