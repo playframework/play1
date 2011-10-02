@@ -164,8 +164,8 @@ h2. <a name="references">References</a>
 
 Extended references for day-to-day hacking.
 
-# "Quick index":index
-# "API documentation (Javadoc)":/@api/index.html
+# <a class="navigation" href="index">Quick index</a>
+# <a class="navigation" href="/@api/index.html">API documentation (Javadoc)</a>
 # "Cheat sheets":cheatsheet/commandLine
 ## "Command Line":cheatsheet/commandLine
 ## "Controllers":cheatsheet/controllers
@@ -177,7 +177,7 @@ Extended references for day-to-day hacking.
 ## "Template tags":tags
 ## "Java extensions":javaextensions
 ## "Validations":validation-builtin
-# "Configuration reference":configuration
+# <a class="navigation" href="configuration">Configuration reference</a>
 
 h2. <a name="modules">Distribution Modules</a>
 
