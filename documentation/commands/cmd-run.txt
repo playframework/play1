@@ -34,3 +34,6 @@
 ~ --deps: 
 ~ Resolve and install dependencies before running the command.
 ~
+~ --silent: 
+~ Suppress output of the Play ASCII art logo and framework version information.
+~
