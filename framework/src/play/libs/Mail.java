@@ -77,7 +77,10 @@ public class Mail {
         } else if (email.getFromAddress() == null) {
             throw new MailException("Please define a 'from' email address", new NullPointerException());
         }
-        if (email.getToAddresses() == null || email.getToAddresses().size() == 0) {
+        if ((email.getToAddresses() == null || email.getToAddresses().size() == 0) &&
+            (email.getCcAddresses() == null || email.getCcAddresses().size() == 0)  &&
+            (email.getBccAddresses() == null || email.getBccAddresses().size() == 0)) 
+        {
             throw new MailException("Please define a recipient email address", new NullPointerException());
         }
         if (email.getSubject() == null) {
