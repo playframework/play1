@@ -321,27 +321,26 @@ public abstract class CRUD extends Controller {
 
             @SuppressWarnings("deprecation")
             public ObjectField(Model.Property property) {
-                Field field = property.field;
                 this.property = property;
-                if (CharSequence.class.isAssignableFrom(field.getType())) {
+                if (CharSequence.class.isAssignableFrom(property.getType())) {
                     type = "text";
-                    if (field.isAnnotationPresent(MaxSize.class)) {
-                        int maxSize = field.getAnnotation(MaxSize.class).value();
+                    if (property.isAnnotationPresent(MaxSize.class)) {
+                        int maxSize = property.getAnnotation(MaxSize.class).value();
                         if (maxSize > 100) {
                             type = "longtext";
                         }
                     }
-                    if (field.isAnnotationPresent(Password.class)) {
+                    if (property.isAnnotationPresent(Password.class)) {
                         type = "password";
                     }
                 }
-                if (Number.class.isAssignableFrom(field.getType()) || field.getType().equals(double.class) || field.getType().equals(int.class) || field.getType().equals(long.class)) {
+                if (Number.class.isAssignableFrom(property.getType()) || property.getType().equals(double.class) || property.getType().equals(int.class) || property.getType().equals(long.class)) {
                     type = "number";
                 }
-                if (Boolean.class.isAssignableFrom(field.getType()) || field.getType().equals(boolean.class)) {
+                if (Boolean.class.isAssignableFrom(property.getType()) || property.getType().equals(boolean.class)) {
                     type = "boolean";
                 }
-                if (Date.class.isAssignableFrom(field.getType())) {
+                if (Date.class.isAssignableFrom(property.getType())) {
                     type = "date";
                 }
                 if (property.isRelation) {
@@ -350,28 +349,28 @@ public abstract class CRUD extends Controller {
                 if (property.isMultiple) {
                     multiple = true;
                 }
-                if(Model.BinaryField.class.isAssignableFrom(field.getType()) || /** DEPRECATED **/ play.db.jpa.FileAttachment.class.isAssignableFrom(field.getType())) {
+                if(Model.BinaryField.class.isAssignableFrom(property.getType()) || /** DEPRECATED **/ play.db.jpa.FileAttachment.class.isAssignableFrom(property.getType())) {
                     type = "binary";
                 }
-                if (field.getType().isEnum()) {
+                if (property.getType().isEnum()) {
                     type = "enum";
                 }
                 if (property.isGenerated) {
                     type = null;
                 }
-                if (field.isAnnotationPresent(Required.class)) {
+                if (property.isAnnotationPresent(Required.class)) {
                     required = true;
                 }
-                if (field.isAnnotationPresent(Hidden.class)) {
+                if (property.isAnnotationPresent(Hidden.class)) {
                     type = "hidden";
                 }
-                if (field.isAnnotationPresent(Exclude.class)) {
+                if (property.isAnnotationPresent(Exclude.class)) {
                     type = null;
                 }
-                if (java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
+                if (java.lang.reflect.Modifier.isFinal(property.getModifiers())) {
                     type = null;
                 }
-                name = field.getName();
+                name = property.getName();
             }
 
             public List<Object> getChoices() {
