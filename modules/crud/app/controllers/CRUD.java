@@ -4,6 +4,8 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
 
+import org.apache.commons.lang.StringUtils;
+
 import play.*;
 import play.data.binding.*;
 import play.mvc.*;
@@ -243,8 +245,21 @@ public abstract class CRUD extends Controller {
             try {
                 return (Class<? extends Model>) Play.classloader.loadClass(name);
             } catch (ClassNotFoundException e) {
+                if (hasSubPackages(controllerClass)) {
+                    name = controllerClass.getName().replace("$", "");
+                    name = "models." + name.substring(name.indexOf(".") + 1, name.length() - 1);
+
+                    try {
+                        return (Class<? extends Model>) Play.classloader.loadClass(name);
+                    } catch (ClassNotFoundException e1) {
+                    }
+                }
                 return null;
             }
+        }
+        
+        public static boolean hasSubPackages(Class clazz) {
+            return StringUtils.countMatches(clazz.getName(), ".") > 1;
         }
 
         public Object getListAction() {
