@@ -16,9 +16,16 @@ def execute(**kargs):
     play_env = kargs.get("env")
 
     is_application = os.path.exists(os.path.join(app.path, 'conf', 'application.conf'))
-    app.check()
     if is_application:
+        app.check()
         app.check_jpda()
+    else:
+      if not(isModule(app.path)):
+          print "~ Oops."
+          print "~ %s does not seem to be a valid module." % os.path.normpath(app.path)
+          print "~"
+          sys.exit(-1)
+          
     modules = app.modules()
     classpath = app.getClasspath()
 

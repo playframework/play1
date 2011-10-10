@@ -226,3 +226,12 @@ def copy_directory(source, target, exclude = None):
 
 def isTestFrameworkId( framework_id ):
     return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
+
+def isModule(path):
+    if os.path.exists(os.path.join(path, 'build.xml')) and os.path.exists(os.path.join(path, 'src')):
+        return True
+    if os.path.exists(os.path.join(path, 'commands.py')):
+        return True
+    if os.path.exists(os.path.join(path, 'app')):
+        return True
+    return False
