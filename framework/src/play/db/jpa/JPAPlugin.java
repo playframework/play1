@@ -1,43 +1,14 @@
 package play.db.jpa;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.EmbeddedId;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.Transient;
-
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
+import org.apache.log4j.config.PropertyGetter;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
-
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
@@ -51,6 +22,15 @@ import play.db.Model;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
+
+import javax.persistence.*;
+import java.beans.PropertyDescriptor;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 /**
  * JPA Plugin
@@ -67,11 +47,16 @@ public class JPAPlugin extends PlayPlugin {
             ParamNode paramNode = rootParamNode.getChild(name, true);
 
             String keyName = Model.Manager.factoryFor(clazz).keyName();
-            String id = paramNode.getChild(keyName, true).getFirstValue(null);
-            if (id != null && id.trim().length()>0) {
+            String[] ids = paramNode.getChild(keyName, true).getValues();
+            if (ids != null && ids.length > 0) {
                 try {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, Binder.directBind(annotations, id + "", Model.Manager.factoryFor(clazz).keyType(), null));
+                    // The primary key can be a composite.
+                    int i = 1;
+                    Class pk = Model.Manager.factoryFor(clazz).keyType();
+                    for (String id : ids) {
+                        query.setParameter(i++, Binder.directBind(annotations, id, pk, null));
+                    }
                     Object o = query.getSingleResult();
                     return GenericModel.edit(rootParamNode, name, o, annotations);
                 } catch (NoResultException e) {
@@ -331,7 +316,7 @@ public class JPAPlugin extends PlayPlugin {
 
     /**
      * initialize the JPA context and starts a JPA transaction
-     * 
+     *
      * @param readonly true for a readonly transaction
      * @param autoCommit true to automatically commit the DB transaction after each JPA statement
      */
@@ -414,17 +399,19 @@ public class JPAPlugin extends PlayPlugin {
     public static class JPAModelLoader implements Model.Factory {
 
         private Class<? extends Model> clazz;
+        private Map<String, Model.Property> properties;
+
 
         public JPAModelLoader(Class<? extends Model> clazz) {
             this.clazz = clazz;
         }
 
         public Model findById(Object id) {
-            if (id == null) {
-                return null;
-            }
             try {
-                return JPA.em().find(clazz, Binder.directBind(null, id.toString(), Model.Manager.factoryFor(clazz).keyType(), null));
+                if (id == null) {
+                    return null;
+                }
+                return JPA.em().find(clazz, id);
             } catch (Exception e) {
                 // Key is invalid, thus nothing was found
                 return null;
@@ -516,12 +503,153 @@ public class JPAPlugin extends PlayPlugin {
             return keyField().getType();
         }
 
+        public Class<?>[] keyTypes() {
+            Field[] fields = keyFields();
+            Class<?>[] types = new Class<?>[fields.length];
+            int i = 0;
+            for (Field field : fields) {
+                types[i++] = field.getType();
+            }
+            return types;
+        }
+
+        public String[] keyNames() {
+            Field[] fields = keyFields();
+            String[] names = new String[fields.length];
+            int i = 0;
+            for (Field field : fields) {
+                names[i++] = field.getName();
+            }
+            return names;
+        }
+
+        private Class<?> getCompositeKeyClass() {
+            Class<?> tclazz = clazz;
+            while (!tclazz.equals(Object.class)) {
+                // Only consider mapped types
+                if (tclazz.isAnnotationPresent(Entity.class)
+                        || tclazz.isAnnotationPresent(MappedSuperclass.class)) {
+                    IdClass idClass = tclazz.getAnnotation(IdClass.class);
+                    if (idClass != null)
+                        return idClass.value();
+                }
+                tclazz = tclazz.getSuperclass();
+            }
+            throw new UnexpectedException("Invalid mapping for class " + clazz + ": multiple IDs with no @IdClass annotation");
+        }
+
+
+        private void initProperties() {
+            synchronized(this){
+                if(properties != null)
+                    return;
+                properties = new HashMap<String,Model.Property>();
+                Set<Field> fields = getModelFields(clazz);
+                for (Field f : fields) {
+                    if (Modifier.isTransient(f.getModifiers())) {
+                        continue;
+                    }
+                    if (f.isAnnotationPresent(Transient.class)) {
+                        continue;
+                    }
+                    Model.Property mp = buildProperty(f);
+                    if (mp != null) {
+                        properties.put(mp.name, mp);
+                    }
+                }
+            }
+        }
+
+        private Object makeCompositeKey(Model model) throws Exception {
+            initProperties();
+            Class<?> idClass = getCompositeKeyClass();
+            Object id = idClass.newInstance();
+            PropertyDescriptor[] idProperties = PropertyUtils.getPropertyDescriptors(idClass);
+            if(idProperties == null || idProperties.length == 0)
+                throw new UnexpectedException("Composite id has no properties: "+idClass.getName());
+            for (PropertyDescriptor idProperty : idProperties) {
+                // do we have a field for this?
+                String idPropertyName = idProperty.getName();
+                // skip the "class" property...
+                if(idPropertyName.equals("class"))
+                    continue;
+                Model.Property modelProperty = this.properties.get(idPropertyName);
+                if(modelProperty == null)
+                    throw new UnexpectedException("Composite id property missing: "+clazz.getName()+"."+idPropertyName
+                            +" (defined in IdClass "+idClass.getName()+")");
+                // sanity check
+                Object value = modelProperty.field.get(model);
+
+                if(modelProperty.isMultiple)
+                    throw new UnexpectedException("Composite id property cannot be multiple: "+clazz.getName()+"."+idPropertyName);
+                // now is this property a relation? if yes then we must use its ID in the key (as per specs)
+                    if(modelProperty.isRelation){
+                    // get its id
+                    if(!Model.class.isAssignableFrom(modelProperty.type))
+                        throw new UnexpectedException("Composite id property entity has to be a subclass of Model: "
+                                +clazz.getName()+"."+idPropertyName);
+                    // we already checked that cast above
+                    @SuppressWarnings("unchecked")
+                    Model.Factory factory = Model.Manager.factoryFor((Class<? extends Model>) modelProperty.type);
+                    if(factory == null)
+                        throw new UnexpectedException("Failed to find factory for Composite id property entity: "
+                                +clazz.getName()+"."+idPropertyName);
+                    // we already checked that cast above
+                    if(value != null)
+                        value = factory.keyValue((Model) value);
+                }
+                // now affect the composite id with this id
+                PropertyUtils.setSimpleProperty(id, idPropertyName, value);
+            }
+            return id;
+        }
+
+
+
         public Object keyValue(Model m) {
             try {
-                return keyField().get(m);
+                if (m == null) {
+                    return null;
+                }
+
+                // Do we have a @IdClass or @Embeddable?
+                if (m.getClass().isAnnotationPresent(IdClass.class)) {
+                    return makeCompositeKey(m);
+                }
+
+                // Is it a composite key? If yes we need to return the matching PK
+                final Field[] fields = keyFields();
+                final Object[] values = new Object[fields.length];
+                int i = 0;
+                for (Field f : fields) {
+                    final Object o = f.get(m);
+                    if (o != null) {
+                        values[i++] = o;
+                    }
+                }
+
+                // If we have only one id return it
+                if (values.length == 1) {
+                    return values[0];
+                }
+
+                return values;
             } catch (Exception ex) {
                 throw new UnexpectedException(ex);
             }
+        }
+
+        public static Set<Field> getModelFields(Class<?> clazz){
+            Set<Field> fields = new LinkedHashSet<Field>();
+            Class<?> tclazz = clazz;
+            while (!tclazz.equals(Object.class)) {
+                // Only add fields for mapped types
+                if(tclazz.isAnnotationPresent(Entity.class)
+                        || tclazz.isAnnotationPresent(MappedSuperclass.class))
+                    Collections.addAll(fields, tclazz.getDeclaredFields());
+                tclazz = tclazz.getSuperclass();
+            }
+            return fields;
         }
 
         //
@@ -541,6 +669,29 @@ public class JPAPlugin extends PlayPlugin {
                 throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
             }
             throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+        }
+
+        Field[] keyFields() {
+            Class c = clazz;
+            try {
+                List<Field> fields = new ArrayList<Field>();
+                while (!c.equals(Object.class)) {
+                    for (Field field : c.getDeclaredFields()) {
+                        if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                            field.setAccessible(true);
+                            fields.add(field);
+                        }
+                    }
+                    c = c.getSuperclass();
+                }
+                final Field[] f = fields.toArray(new Field[fields.size()]);
+                if (f.length == 0) {
+                    throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+                }
+                return f;
+            } catch (Exception e) {
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            }
         }
 
         String getSearchQuery(List<String> searchFields) {
@@ -632,6 +783,13 @@ public class JPAPlugin extends PlayPlugin {
             }
             if (field.isAnnotationPresent(GeneratedValue.class)) {
                 modelProperty.isGenerated = true;
+            }
+            if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                // Look if the target is an embeddable class
+                if (field.getType().isAnnotationPresent(Embeddable.class) || field.getType().isAnnotationPresent(IdClass.class) ) {
+                    modelProperty.isRelation = true;
+                    modelProperty.relationType =  field.getType();
+                }
             }
             return modelProperty;
         }

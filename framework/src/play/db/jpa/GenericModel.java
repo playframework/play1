@@ -1,25 +1,5 @@
 package play.db.jpa;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.Query;
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
@@ -27,10 +7,13 @@ import play.data.binding.ParamNode;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
+
+import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 /**
  * A super class for JPA entities 
@@ -76,7 +59,6 @@ public class GenericModel extends JPABase {
 
     @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
-
         ParamNode paramNode = rootParamNode.getChild(name, true);
 
         try {
@@ -118,7 +100,7 @@ public class GenericModel extends JPABase {
                             } else if (Set.class.isAssignableFrom(field.getType())) {
                                 l = new HashSet();
                             }
-                            String[] ids = fieldParamNode.getChild(keyName, true).getValue();
+                            String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null) {
                                 // Remove it to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName);
@@ -130,6 +112,7 @@ public class GenericModel extends JPABase {
                                     q.setParameter(1, Binder.directBind(null, _id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                     try {
                                         l.add(q.getSingleResult());
+
                                     } catch (NoResultException e) {
                                         Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
                                     }
@@ -137,7 +120,7 @@ public class GenericModel extends JPABase {
                                 bw.set(field.getName(), o, l);
                             }
                         } else {
-                            String[] ids = fieldParamNode.getChild(keyName, true).getValue();
+                            String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null && ids.length > 0 && !ids[0].equals("")) {
 
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");

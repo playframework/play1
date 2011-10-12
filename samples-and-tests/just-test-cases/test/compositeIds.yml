@@ -1,0 +1,48 @@
+
+CompositeIdForeignA(a1):
+    testId: a1
+
+CompositeIdForeignA(a2):
+    testId: a2
+
+CompositeIdForeignB(b1):
+    testId: b1
+
+CompositeIdForeignB(b2):
+    testId: b2
+
+CompositeIdForeignB(b3):
+    testId: b3
+
+CompositeIdForeignB(b4):
+    testId: b4
+
+CompositeIdEntity(e1):
+    compositeIdForeignA: a1
+    compositeIdForeignB: b1
+
+CompositeIdEntity(e2):
+    compositeIdForeignA: a1
+    compositeIdForeignB: b2
+
+CompositeIdEntity(e3):
+    compositeIdForeignA: a2
+    compositeIdForeignB: b3
+
+CompositeIdEntity(e4):
+    compositeIdForeignA: a2
+    compositeIdForeignB: b4
+
+
+UserId(nicolasId):
+    firstName: nicolas
+    lastName: leroux
+
+UserCompositeId(nicolas):
+    id: nicolasId
+    age: 25
+
+UserCompositeId(Morten):
+    id.firstName: morten
+    id.lastName: kjetland
+    age: 25

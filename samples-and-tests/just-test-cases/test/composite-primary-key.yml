@@ -1,0 +1,17 @@
+RegionalArticle(a1):
+     pk.key1: 1
+     pk.key2: 1
+     name: honey
+
+RegionalArticle(a2):
+     pk.key1: 1
+     pk.key2: 2
+     name: sugar
+
+RegionalArticlePk(pk1):
+    key1: 2
+    key2: 1
+
+RegionalArticle(a3):
+    pk: pk1
+    name: nutella

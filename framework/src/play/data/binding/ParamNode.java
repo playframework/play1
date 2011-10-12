@@ -10,7 +10,7 @@ import java.util.Set;
 public class ParamNode {
     private final String name;
     private final Map<String, ParamNode> _children = new HashMap<String, ParamNode>(8);
-    private String[] value = null;
+    private String[] values = null;
     private String originalKey;
 
     // splits a string on one-ore-more instances of .[]
@@ -30,20 +30,20 @@ public class ParamNode {
         return name;
     }
 
-    public String[] getValue() {
-        return value;
+    public String[] getValues() {
+        return values;
     }
 
     public String getFirstValue(Class<?> type) {
-        if (value == null) {
+        if (values == null) {
             return null;
         }
 
-        if (value.length>1 && String.class.equals(type)) {
+        if (values.length>1 && String.class.equals(type)) {
             // special handling for string - when multiple values, concatenate them with comma..
-            return Utils.join(value, ", ");
+            return Utils.join(values, ", ");
         } else {
-            return value[0];
+            return values[0];
         }
     }
 
@@ -87,7 +87,7 @@ public class ParamNode {
     }
 
     public void setValue(String[] value, String originalKey) {
-        this.value = value;
+        this.values = value;
         this.originalKey = originalKey;
     }
 
@@ -120,7 +120,7 @@ public class ParamNode {
                 currentParent = paramNode;
             }
 
-            // currentParent is now the last node where we should place the value
+            // currentParent is now the last node where we should place the values
             currentParent.setValue( values, key);
 
         }
