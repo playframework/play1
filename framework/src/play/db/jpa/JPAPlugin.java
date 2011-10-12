@@ -1,12 +1,15 @@
 package play.db.jpa;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
+import org.apache.log4j.config.PropertyGetter;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -34,20 +37,14 @@ import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.Transient;
+import javax.persistence.*;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * JPA Plugin
@@ -64,12 +61,17 @@ public class JPAPlugin extends PlayPlugin {
             ParamNode paramNode = rootParamNode.getChild(name, true);
 
             String keyName = Model.Manager.factoryFor(clazz).keyName();
-            String id = paramNode.getChild(keyName, true).getFirstValue(null);
-            if (id != null && id.trim().length()>0) {
+            String[] ids = paramNode.getChild(keyName, true).getValues();
+            if (ids != null && ids.length > 0) {
                 try {
                     EntityManager em = JPABase.getJPAConfig(clazz).getJPAContext().em();
                     Query query = em.createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, Binder.directBind(annotations, id + "", Model.Manager.factoryFor(clazz).keyType(), null));
+                    // The primary key can be a composite.
+                    int i = 1;
+                    Class pk = Model.Manager.factoryFor(clazz).keyType();
+                    for (String id : ids) {
+                        query.setParameter(i++, Binder.directBind(annotations, id, pk, null));
+                    }
                     Object o = query.getSingleResult();
                     return GenericModel.edit(rootParamNode, name, o, annotations);
                 } catch (NoResultException e) {
@@ -105,7 +107,7 @@ public class JPAPlugin extends PlayPlugin {
         if (DBConfig.defaultDbConfigName.equals(configName)) {
             return "";
         } else {
-            return " (jpa config name: "+configName+")";
+            return " (jpa config name: " + configName + ")";
         }
     }
 
@@ -120,23 +122,23 @@ public class JPAPlugin extends PlayPlugin {
             // is JPA already configured?
             String configName = dbConfig.getDBConfigName();
 
-            if (JPA.getJPAConfig(configName, true)==null) {
+            if (JPA.getJPAConfig(configName, true) == null) {
                 //must configure it
 
                 // resolve prefix for hibernate config..
                 // should be nothing for default, and db_<name> for others
                 String propPrefix = "";
                 if (!DBConfig.defaultDbConfigName.equalsIgnoreCase(configName)) {
-                   propPrefix = "db_"+configName+".";
+                    propPrefix = "db_" + configName + ".";
                 }
                 List<Class> classes = findEntityClassesForThisConfig(configName, propPrefix);
                 if (classes == null) continue;
 
                 // we're ready to configure this instance of JPA
-                final String hibernateDataSource = Play.configuration.getProperty(propPrefix+"hibernate.connection.datasource");
+                final String hibernateDataSource = Play.configuration.getProperty(propPrefix + "hibernate.connection.datasource");
 
                 if (StringUtils.isEmpty(hibernateDataSource) && dbConfig == null) {
-                    throw new JPAException("Cannot start a JPA manager without a properly configured database"+getConfigInfoString(configName),
+                    throw new JPAException("Cannot start a JPA manager without a properly configured database" + getConfigInfoString(configName),
                             new NullPointerException("No datasource configured"));
                 }
 
@@ -146,15 +148,15 @@ public class JPAPlugin extends PlayPlugin {
                     cfg.setDataSource(dbConfig.getDatasource());
                 }
 
-                if (!Play.configuration.getProperty(propPrefix+"jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
-                    cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty(propPrefix+"jpa.ddl", "update"));
+                if (!Play.configuration.getProperty(propPrefix + "jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
+                    cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty(propPrefix + "jpa.ddl", "update"));
                 }
 
                 String driver = null;
                 if (StringUtils.isEmpty(propPrefix)) {
                     driver = Play.configuration.getProperty("db.driver");
                 } else {
-                    driver = Play.configuration.getProperty(propPrefix+"driver");
+                    driver = Play.configuration.getProperty(propPrefix + "driver");
                 }
                 cfg.setProperty("hibernate.dialect", getDefaultDialect(propPrefix, driver));
                 cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
@@ -164,20 +166,20 @@ public class JPAPlugin extends PlayPlugin {
 
                 // This setting is global for all JPAs - only configure if configuring default JPA
                 if (StringUtils.isEmpty(propPrefix)) {
-                    if (Play.configuration.getProperty(propPrefix+"jpa.debugSQL", "false").equals("true")) {
+                    if (Play.configuration.getProperty(propPrefix + "jpa.debugSQL", "false").equals("true")) {
                         org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
                     } else {
                         org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
                     }
                 }
                 // inject additional  hibernate.* settings declared in Play! configuration
-                Properties additionalProperties = (Properties)Utils.Maps.filterMap(Play.configuration, "^"+propPrefix+"hibernate\\..*");
+                Properties additionalProperties = (Properties) Utils.Maps.filterMap(Play.configuration, "^" + propPrefix + "hibernate\\..*");
                 // We must remove prefix from names
                 Properties transformedAdditionalProperties = new Properties();
                 for (Map.Entry<Object, Object> entry : additionalProperties.entrySet()) {
                     Object key = entry.getKey();
                     if (!StringUtils.isEmpty(propPrefix)) {
-                        key = ((String)key).substring(propPrefix.length()); // chop off the prefix
+                        key = ((String) key).substring(propPrefix.length()); // chop off the prefix
                     }
                     transformedAdditionalProperties.put(key, entry.getValue());
                 }
@@ -199,7 +201,7 @@ public class JPAPlugin extends PlayPlugin {
                         Logger.trace("JPA Model : %s", clazz);
                     }
                 }
-                String[] moreEntities = Play.configuration.getProperty(propPrefix+"jpa.entities", "").split(", ");
+                String[] moreEntities = Play.configuration.getProperty(propPrefix + "jpa.entities", "").split(", ");
                 for (String entity : moreEntities) {
                     if (entity.trim().equals("")) {
                         continue;
@@ -220,19 +222,19 @@ public class JPAPlugin extends PlayPlugin {
                     cfg.addPackage(p.getName());
                 }
 
-                String mappingFile = Play.configuration.getProperty(propPrefix+"jpa.mapping-file", "");
+                String mappingFile = Play.configuration.getProperty(propPrefix + "jpa.mapping-file", "");
                 if (mappingFile != null && mappingFile.length() > 0) {
                     cfg.addResource(mappingFile);
                 }
 
                 if (Logger.isTraceEnabled()) {
-                    Logger.trace("Initializing JPA"+getConfigInfoString(configName)+" ...");
+                    Logger.trace("Initializing JPA" + getConfigInfoString(configName) + " ...");
                 }
 
                 try {
                     JPA.addConfiguration(configName, cfg);
                 } catch (PersistenceException e) {
-                    throw new JPAException(e.getMessage()+getConfigInfoString(configName), e.getCause() != null ? e.getCause() : e);
+                    throw new JPAException(e.getMessage() + getConfigInfoString(configName), e.getCause() != null ? e.getCause() : e);
                 }
 
             }
@@ -243,8 +245,8 @@ public class JPAPlugin extends PlayPlugin {
         List<Class> allEntityClasses = Play.classloader.getAnnotatedClasses(Entity.class);
         for (Class clazz : allEntityClasses) {
             String configName = Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz);
-            if (JPA.getJPAConfig(configName, true)==null) {
-                throw new JPAException("Found Entity-class ("+clazz.getName()+") referring to none-existing JPAConfig" + getConfigInfoString(configName) + ". " +
+            if (JPA.getJPAConfig(configName, true) == null) {
+                throw new JPAException("Found Entity-class (" + clazz.getName() + ") referring to none-existing JPAConfig" + getConfigInfoString(configName) + ". " +
                         "Is JPA properly configured?");
             }
         }
@@ -257,13 +259,13 @@ public class JPAPlugin extends PlayPlugin {
         // filter list on Entities meant for us..
         List<Class> filteredClasses = new ArrayList<Class>(classes.size());
         for (Class clazz : classes) {
-            if ( configName.equals(Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz))) {
+            if (configName.equals(Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz))) {
                 filteredClasses.add(clazz);
             }
         }
 
 
-        if (!Play.configuration.getProperty(propPrefix+"jpa.entities", "").equals("")) {
+        if (!Play.configuration.getProperty(propPrefix + "jpa.entities", "").equals("")) {
             return filteredClasses;
         }
 
@@ -275,9 +277,8 @@ public class JPAPlugin extends PlayPlugin {
     }
 
 
-
     static String getDefaultDialect(String propPrefix, String driver) {
-        String dialect = Play.configuration.getProperty(propPrefix+"jpa.dialect");
+        String dialect = Play.configuration.getProperty(propPrefix + "jpa.dialect");
         if (dialect != null) {
             return dialect;
         } else if (driver.equals("org.h2.Driver")) {
@@ -354,12 +355,12 @@ public class JPAPlugin extends PlayPlugin {
     /**
      * initialize the JPA context and starts a JPA transaction
      * if not already started.
-     *
+     * <p/>
      * This method is not needed since transaction is created
      * automatically on first use.
-     *
+     * <p/>
      * It is better to specify readonly like this: @Transactional(readOnly=true)
-     * 
+     *
      * @param readonly true for a readonly transaction
      * @deprecated use @Transactional with readOnly-property instead
      */
@@ -374,6 +375,7 @@ public class JPAPlugin extends PlayPlugin {
      * When using multiple databases in the same request this method
      * tries to commit/rollback as many transactions as possible,
      * but there is not guaranteed that all transactions are committed.
+     *
      * @param rollback shall current transaction be committed (false) or cancelled (true)
      */
     protected static void closeTx(boolean rollback) {
@@ -400,6 +402,8 @@ public class JPAPlugin extends PlayPlugin {
         private final Class<? extends Model> clazz;
         private final String jpaConfigName;
         private JPAConfig _jpaConfig;
+        private Map<String, Model.Property> properties;
+
 
         public JPAModelLoader(Class<? extends Model> clazz) {
             this.clazz = clazz;
@@ -409,18 +413,20 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         protected JPAContext getJPAContext() {
-            if (_jpaConfig==null) {
+            if (_jpaConfig == null) {
                 _jpaConfig = JPA.getJPAConfig(jpaConfigName);
             }
             return _jpaConfig.getJPAContext();
         }
 
         public Model findById(Object id) {
-            if (id == null) {
-                return null;
-            }
             try {
-                return getJPAContext().em().find(clazz, Binder.directBind(null, id.toString(), Model.Manager.factoryFor(clazz).keyType(), null));
+
+                if (id == null) {
+                    return null;
+                }
+                return getJPAContext().em().find(clazz, id);
+
             } catch (Exception e) {
                 // Key is invalid, thus nothing was found
                 return null;
@@ -512,12 +518,152 @@ public class JPAPlugin extends PlayPlugin {
             return keyField().getType();
         }
 
+        public Class<?>[] keyTypes() {
+            Field[] fields = keyFields();
+            Class<?>[] types = new Class<?>[fields.length];
+            int i = 0;
+            for (Field field : fields) {
+                types[i++] = field.getType();
+            }
+            return types;
+        }
+
+        public String[] keyNames() {
+            Field[] fields = keyFields();
+            String[] names = new String[fields.length];
+            int i = 0;
+            for (Field field : fields) {
+                names[i++] = field.getName();
+            }
+            return names;
+        }
+
+        private Class<?> getCompositeKeyClass() {
+            Class<?> tclazz = clazz;
+            while (!tclazz.equals(Object.class)) {
+                // Only consider mapped types
+                if (tclazz.isAnnotationPresent(Entity.class)
+                        || tclazz.isAnnotationPresent(MappedSuperclass.class)) {
+                    IdClass idClass = tclazz.getAnnotation(IdClass.class);
+                    if (idClass != null)
+                        return idClass.value();
+                }
+                tclazz = tclazz.getSuperclass();
+            }
+            throw new UnexpectedException("Invalid mapping for class " + clazz + ": multiple IDs with no @IdClass annotation");
+        }
+
+
+        private void initProperties() {
+            synchronized (this) {
+                if (properties != null)
+                    return;
+                properties = new HashMap<String, Model.Property>();
+                Set<Field> fields = getModelFields(clazz);
+                for (Field f : fields) {
+                    if (Modifier.isTransient(f.getModifiers())) {
+                        continue;
+                    }
+                    if (f.isAnnotationPresent(Transient.class)) {
+                        continue;
+                    }
+                    Model.Property mp = buildProperty(f);
+                    if (mp != null) {
+                        properties.put(mp.name, mp);
+                    }
+                }
+            }
+        }
+
+        private Object makeCompositeKey(Model model) throws Exception {
+            initProperties();
+            Class<?> idClass = getCompositeKeyClass();
+            Object id = idClass.newInstance();
+            PropertyDescriptor[] idProperties = PropertyUtils.getPropertyDescriptors(idClass);
+            if (idProperties == null || idProperties.length == 0)
+                throw new UnexpectedException("Composite id has no properties: " + idClass.getName());
+            for (PropertyDescriptor idProperty : idProperties) {
+                // do we have a field for this?
+                String idPropertyName = idProperty.getName();
+                // skip the "class" property...
+                if (idPropertyName.equals("class"))
+                    continue;
+                Model.Property modelProperty = this.properties.get(idPropertyName);
+                if (modelProperty == null)
+                    throw new UnexpectedException("Composite id property missing: " + clazz.getName() + "." + idPropertyName
+                            + " (defined in IdClass " + idClass.getName() + ")");
+                // sanity check
+                Object value = modelProperty.field.get(model);
+
+                if (modelProperty.isMultiple)
+                    throw new UnexpectedException("Composite id property cannot be multiple: " + clazz.getName() + "." + idPropertyName);
+                // now is this property a relation? if yes then we must use its ID in the key (as per specs)
+                if (modelProperty.isRelation) {
+                    // get its id
+                    if (!Model.class.isAssignableFrom(modelProperty.type))
+                        throw new UnexpectedException("Composite id property entity has to be a subclass of Model: "
+                                + clazz.getName() + "." + idPropertyName);
+                    // we already checked that cast above
+                    @SuppressWarnings("unchecked")
+                    Model.Factory factory = Model.Manager.factoryFor((Class<? extends Model>) modelProperty.type);
+                    if (factory == null)
+                        throw new UnexpectedException("Failed to find factory for Composite id property entity: "
+                                + clazz.getName() + "." + idPropertyName);
+                    // we already checked that cast above
+                    if (value != null)
+                        value = factory.keyValue((Model) value);
+                }
+                // now affect the composite id with this id
+                PropertyUtils.setSimpleProperty(id, idPropertyName, value);
+            }
+            return id;
+        }
+
+
         public Object keyValue(Model m) {
             try {
-                return keyField().get(m);
+                if (m == null) {
+                    return null;
+                }
+
+                // Do we have a @IdClass or @Embeddable?
+                if (m.getClass().isAnnotationPresent(IdClass.class)) {
+                    return makeCompositeKey(m);
+                }
+
+                // Is it a composite key? If yes we need to return the matching PK
+                final Field[] fields = keyFields();
+                final Object[] values = new Object[fields.length];
+                int i = 0;
+                for (Field f : fields) {
+                    final Object o = f.get(m);
+                    if (o != null) {
+                        values[i++] = o;
+                    }
+                }
+
+                // If we have only one id return it
+                if (values.length == 1) {
+                    return values[0];
+                }
+
+                return values;
             } catch (Exception ex) {
                 throw new UnexpectedException(ex);
             }
+        }
+
+        public static Set<Field> getModelFields(Class<?> clazz) {
+            Set<Field> fields = new LinkedHashSet<Field>();
+            Class<?> tclazz = clazz;
+            while (!tclazz.equals(Object.class)) {
+                // Only add fields for mapped types
+                if (tclazz.isAnnotationPresent(Entity.class)
+                        || tclazz.isAnnotationPresent(MappedSuperclass.class))
+                    Collections.addAll(fields, tclazz.getDeclaredFields());
+                tclazz = tclazz.getSuperclass();
+            }
+            return fields;
         }
 
         //
@@ -537,6 +683,29 @@ public class JPAPlugin extends PlayPlugin {
                 throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
             }
             throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+        }
+
+        Field[] keyFields() {
+            Class c = clazz;
+            try {
+                List<Field> fields = new ArrayList<Field>();
+                while (!c.equals(Object.class)) {
+                    for (Field field : c.getDeclaredFields()) {
+                        if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                            field.setAccessible(true);
+                            fields.add(field);
+                        }
+                    }
+                    c = c.getSuperclass();
+                }
+                final Field[] f = fields.toArray(new Field[fields.size()]);
+                if (f.length == 0) {
+                    throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+                }
+                return f;
+            } catch (Exception e) {
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            }
         }
 
         String getSearchQuery(List<String> searchFields) {
@@ -628,6 +797,13 @@ public class JPAPlugin extends PlayPlugin {
             }
             if (field.isAnnotationPresent(GeneratedValue.class)) {
                 modelProperty.isGenerated = true;
+            }
+            if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                // Look if the target is an embeddable class
+                if (field.getType().isAnnotationPresent(Embeddable.class) || field.getType().isAnnotationPresent(IdClass.class)) {
+                    modelProperty.isRelation = true;
+                    modelProperty.relationType = field.getType();
+                }
             }
             return modelProperty;
         }

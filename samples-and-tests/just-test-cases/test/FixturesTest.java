@@ -16,6 +16,7 @@ import models.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.Logger;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -34,6 +35,9 @@ public class FixturesTest extends UnitTest {
         assertEquals(2, AreaTag.findAll().size());
         assertEquals(2, FunctionTag.findAll().size());
         assertEquals(2, VenueVendor.findAll().size());
+
+        VenueVendor vendor = VenueVendor.all().first();
+        assertEquals(4, vendor.tags.size());
 
         Fixtures.load("vendor-data1.yml", "vendor-data2.yml");
         assertEquals(4, VenueVendor.findAll().size());
@@ -58,6 +62,7 @@ public class FixturesTest extends UnitTest {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+
 
     }
     
@@ -95,5 +100,21 @@ public class FixturesTest extends UnitTest {
 		assertNotNull(parent.children);
 		assertFalse(parent.children.isEmpty());
 	}
+
+    @Test
+    public void withEmbeddedCompositePrimaryKey() {
+        Fixtures.loadModels("composite-primary-key.yml");
+        assertEquals(3, RegionalArticle.count());
+        RegionalArticle a = RegionalArticle.all().first();
+        assertEquals("1", a.pk.key1);
+        assertEquals("1", a.pk.key2);
+
+        RegionalArticle b = RegionalArticle.findById(new RegionalArticlePk("1","2"));
+        assertEquals("sugar", b.name);
+
+        RegionalArticle c = RegionalArticle.findById(new RegionalArticlePk("2","1"));
+        assertEquals("nutella", c.name);
+    }
+
 
 }

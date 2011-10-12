@@ -175,7 +175,7 @@ public abstract class Binder {
             return MISSING;
         }
 
-        if (paramNode.getValue() == null && paramNode.getAllChildren().size() == 0) {
+        if (paramNode.getValues() == null && paramNode.getAllChildren().size() == 0) {
             return MISSING;
         }
 
@@ -220,23 +220,23 @@ public abstract class Binder {
         int invalidItemsCount = 0;
         int size;
         Object array;
-        String[] value = paramNode.getValue();
-        if ( value != null) {
+        String[] values = paramNode.getValues();
+        if ( values != null) {
 
             if (bindingAnnotations.annotations != null) {
                 for( Annotation annotation : bindingAnnotations.annotations) {
                     if (annotation.annotationType().equals(As.class)) {
                         As as = ((As) annotation);
                         final String separator = as.value()[0];
-                        value = value[0].split(separator);
+                        values = values[0].split(separator);
                     }
                 }
             }
 
-            size = value.length;
+            size = values.length;
             array = Array.newInstance(componentType, size);
             for (int i=0; i < size; i++) {
-                String thisValue = value[i];
+                String thisValue = values[i];
                 try {
                     Array.set(array, i-invalidItemsCount, directBind( thisValue, componentType));
                 } catch(Exception e) {
@@ -339,7 +339,7 @@ public abstract class Binder {
 
     @SuppressWarnings("unchecked")
     private static Object bindEnum( Class<?> clazz, ParamNode paramNode) throws Exception {
-        if (paramNode.getValue() == null) {
+        if (paramNode.getValues() == null) {
             return MISSING;
         }
 
@@ -398,7 +398,7 @@ public abstract class Binder {
 
         if (paramNode.getAllChildren().isEmpty()) {
             // should use value-array as collection
-            String[] values = paramNode.getValue();
+            String[] values = paramNode.getValues();
 
             if (values == null) {
                 return MISSING;
@@ -428,7 +428,7 @@ public abstract class Binder {
 
         Collection r = (Collection) clazz.newInstance();
 
-        if ( List.class.isAssignableFrom(clazz)) {
+        if (List.class.isAssignableFrom(clazz)) {
             // Must add items at position resolved from each child's key
             List l = (List)r;
 
@@ -447,8 +447,8 @@ public abstract class Binder {
                     // must check if we must add empty elements before adding this item
                     int paddingCount = (l.size()-pos)*-1;
                     if (paddingCount > 0) {
-                        for (int p=0; p< paddingCount; p++) {
-                            l.add( null );
+                        for (int p = 0; p < paddingCount; p++) {
+                            l.add(null);
                         }
                     }
                     l.add(childValue);
@@ -458,6 +458,7 @@ public abstract class Binder {
             return l;
 
         }
+
         for (ParamNode child : paramNode.getAllChildren()) {
             Object childValue = internalBind(child, componentClass, componentClass, bindingAnnotations);
             if (childValue != NO_BINDING && childValue != MISSING) {

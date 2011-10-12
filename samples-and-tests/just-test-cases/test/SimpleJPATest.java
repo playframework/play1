@@ -170,6 +170,11 @@ public class SimpleJPATest extends UnitTest {
         
         assertEquals(2l, DataWithCompositeKey.count());
         assertEquals(2l, DataWithCompositeKey.count(""));
+
+        d =  DataWithCompositeKey.findById(new DataWithCompositeKey("1", "2"));
+        assertEquals("1", d.key1);
+        assertEquals("2", d.key2);
+
     }
     
 }
