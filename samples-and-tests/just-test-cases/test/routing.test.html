@@ -146,4 +146,15 @@
     open('/client')
     assertTextPresent('localhost')
 
+
+    // jsRoute tag
+    open('@{Application.jsRoute()}')
+    assertText('a-url', '/')
+    assertText('a-method', 'GET')
+    assertText('b-url', '/sayHello')
+    assertText('b-method', 'PUT')
+    assertText('c', '/ressource/foo')
+
+    open('@{Application.jsRouteError()}')
+    assertTextPresent('Wrong parameter type')
 #{/selenium}    

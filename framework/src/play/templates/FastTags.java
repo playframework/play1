@@ -59,6 +59,22 @@ public class FastTags {
         out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "'; for(key in options) { pattern = pattern.replace(':'+key, options[key]); } return pattern }");
     }
 
+    public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        final Object arg = args.get("arg");
+        if (!(arg instanceof ActionDefinition)) {
+            throw new TemplateExecutionException(template.template, fromLine, "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
+        }
+        final ActionDefinition action = (ActionDefinition)arg;
+        out.print("{");
+        if (action.args.isEmpty()) {
+            out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");
+        } else {
+            out.print("url: function(args) { var pattern = '" + action.url.replace("&amp;", "&") + "'; for (var key in args) { pattern = pattern.replace(':'+key, args[key]); } return pattern; },");
+        }
+        out.print("method: '" + action.method + "'");
+        out.print("}");
+    }
+
     public static void _authenticityToken(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken() + "\">");
     }

@@ -323,7 +323,7 @@ public class JavaExtensions {
 
     public static String pluralize(Number n, String plural) {
         long l = n.longValue();
-        if (l < 2) {
+        if (l != 1) {
             return plural;
         }
         return "";

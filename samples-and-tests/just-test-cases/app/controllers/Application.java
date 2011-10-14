@@ -158,6 +158,14 @@ public class Application extends Controller {
         renderText(def);
     }
 
+    public static void jsRoute() {
+        render();
+    }
+
+    public static void jsRouteError() {
+        render();
+    }
+
     public static void mail() {
         notifiers.Welcome.welcome();
         renderText("OK");

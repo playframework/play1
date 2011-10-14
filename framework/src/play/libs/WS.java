@@ -358,7 +358,7 @@ public class WS extends PlayPlugin {
          * @return the WSRequest for chaining.
          */
         public WSRequest setHeader(String name, String value) {
-            this.headers.put(name, value);
+            this.headers.put( HTTP.fixCaseForHttpHeader(name), value);
             return this;
         }
 

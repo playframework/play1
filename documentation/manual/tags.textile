@@ -352,6 +352,26 @@ bc. <script type="text/javascript">
 </script>
 
 
+h2. <a name="jsroute">jsRoute</a>
+
+The @#{jsRoute /}@ tag is similar to the @#{jsAction /}@ tag, it returns an object containing both the function which consctructs the URL based on the server action, and the corresponding HTTP method (GET, POST, etc.).
+
+Example:
+
+bc. PUT     /users/{id}        Users.update
+
+Then, in a template:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
+</script>
+
+
 h2. <a name="list">list</a>
 
 Iterates over an object collection.
