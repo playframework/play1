@@ -128,7 +128,10 @@ public class ValidationPlugin extends PlayPlugin {
             return;
         }
         if (Validation.errors().isEmpty()) {
-            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            // Only send "delete cookie" header when the cookie was present in the request
+            if(Http.Request.current().cookies.containsKey(Scope.COOKIE_PREFIX + "_ERRORS") || !Scope.SESSION_SEND_ONLY_IF_CHANGED) {
+                Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            }
             return;
         }
         try {
