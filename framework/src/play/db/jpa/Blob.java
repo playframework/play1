@@ -67,6 +67,10 @@ public class Blob implements BinaryField, UserType {
         }
         return file;
     }
+    
+    public String getUUID()  {
+        return UUID;
+    }
 
     //
 
