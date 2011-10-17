@@ -15,6 +15,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
+import play.data.binding.NoBinding;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
 import play.db.DB;
@@ -501,6 +502,13 @@ public class JPAPlugin extends PlayPlugin {
                 }
                 if (f.isAnnotationPresent(Transient.class)) {
                     continue;
+                }
+                if (f.isAnnotationPresent(NoBinding.class)) {
+                    NoBinding a = f.getAnnotation(NoBinding.class);
+                    List<String> values = Arrays.asList(a.value());
+                    if (values.contains("*")) {
+                        continue;
+                    }
                 }
                 Model.Property mp = buildProperty(f);
                 if (mp != null) {
