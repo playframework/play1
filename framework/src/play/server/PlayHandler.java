@@ -83,12 +83,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
+    public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent messageEvent) throws Exception {
         if (Logger.isTraceEnabled()) {
             Logger.trace("messageReceived: begin");
         }
 
-        final Object msg = e.getMessage();
+        final Object msg = messageEvent.getMessage();
 
         // Http request
         if (msg instanceof HttpRequest) {
@@ -97,13 +97,13 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             // Websocket upgrade
             if (HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(nettyRequest.getHeader(HttpHeaders.Names.UPGRADE))) {
-                websocketHandshake(ctx, nettyRequest, e);
+                websocketHandshake(ctx, nettyRequest, messageEvent);
                 return;
             }
 
             // Plain old HttpRequest
             try {
-                final Request request = parseRequest(ctx, nettyRequest);
+                final Request request = parseRequest(ctx, nettyRequest, messageEvent);
 
                 final Response response = new Response();
                 Http.Response.current.set(response);
@@ -129,7 +129,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 } else {
 
                     // Deleguate to Play framework
-                    Invoker.invoke(new NettyInvocation(request, response, ctx, nettyRequest, e));
+                    Invoker.invoke(new NettyInvocation(request, response, ctx, nettyRequest, messageEvent));
 
                 }
 
@@ -499,8 +499,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    static String getRemoteIPAddress(ChannelHandlerContext ctx) {
-        String fullAddress = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
+
+    static String getRemoteIPAddress(MessageEvent e) {
+        String fullAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress().getHostAddress();
         if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
             fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
@@ -510,7 +511,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         return fullAddress;
     }
 
-    public Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
+    public Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest, MessageEvent messageEvent) throws Exception {
         if (Logger.isTraceEnabled()) {
             Logger.trace("parseRequest: begin");
             Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
@@ -542,7 +543,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             querystring = uri.substring(i + 1);
         }
 
-        String remoteAddress = getRemoteIPAddress(ctx);
+        String remoteAddress = getRemoteIPAddress(messageEvent);
         String method = nettyRequest.getMethod().getName();
 
         if (nettyRequest.getHeader("X-HTTP-Method-Override") != null) {
@@ -571,7 +572,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String host = nettyRequest.getHeader(HOST);
         boolean isLoopback = false;
         try {
-            isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
+            isLoopback = ((InetSocketAddress) messageEvent.getRemoteAddress()).getAddress().isLoopbackAddress() && host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
         } catch (Exception e) {
             // ignore it
         }
@@ -1167,7 +1168,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
     }
     
-    private void websocketHandshake(final ChannelHandlerContext ctx, HttpRequest req, MessageEvent e) throws Exception {
+    private void websocketHandshake(final ChannelHandlerContext ctx, HttpRequest req, MessageEvent messageEvent) throws Exception {
 
         // Create the WebSocket handshake response.
         HttpResponse res = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
@@ -1190,7 +1191,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         // Keep the original request
-        Http.Request request = parseRequest(ctx, req);
+        Http.Request request = parseRequest(ctx, req, messageEvent);
 
         // Route the websocket request
         request.method = "WS";
@@ -1275,7 +1276,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         };
 
-        Invoker.invoke(new WebSocketInvocation(route, request, inbound, outbound, ctx, e));
+        Invoker.invoke(new WebSocketInvocation(route, request, inbound, outbound, ctx, messageEvent));
     }
 
     @Override
