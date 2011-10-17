@@ -105,6 +105,9 @@ public class Fixtures {
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
             classes.add((Class<? extends Model>)c.javaClass);
         }
+        for (DBConfig dbConfig : DB.getDBConfigs()) {
+            disableForeignKeyConstraints(dbConfig);
+        }
         Fixtures.delete(classes);
     }
 
