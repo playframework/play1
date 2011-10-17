@@ -397,7 +397,7 @@ public class Evolutions extends PlayPlugin {
                     StringBuffer sql_up = new StringBuffer();
                     StringBuffer sql_down = new StringBuffer();
                     StringBuffer current = new StringBuffer();
-                    for (String line : sql.split("\n")) {
+                    for (String line : sql.split("\r?\n")) {
                         if (line.trim().matches("^#.*[!]Ups")) {
                             current = sql_up;
                         } else if (line.trim().matches("^#.*[!]Downs")) {
