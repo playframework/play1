@@ -31,10 +31,7 @@ def execute(**kargs):
     replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_NAME%', application_name)
     replaceAll(os.path.join(nbproject, 'project.xml'), r'%ANT_SCRIPT%', os.path.normpath(os.path.join(play_env["basedir"], 'framework/build.xml')))
     replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_PATH%', os.path.normpath(app.path))
-    if os.name == 'nt':
-        replaceAll(os.path.join(nbproject, 'project.xml'), r'%PLAY_CLASSPATH%', ';'.join(classpath + ['nbproject\\classes']))
-    else:
-        replaceAll(os.path.join(nbproject, 'project.xml'), r'%PLAY_CLASSPATH%', ':'.join(classpath + ['nbproject/classes']))
+    replaceAll(os.path.join(nbproject, 'project.xml'), r'%PLAY_CLASSPATH%', ';'.join(classpath + ['nbproject%sclasses'%os.sep, '%s%sframework%ssrc'%(play_env["basedir"], os.sep, os.sep)]))
     mr = ""
     for module in modules:
         mr += "<package-root>%s</package-root>" % os.path.normpath(os.path.join(module, 'app'))
