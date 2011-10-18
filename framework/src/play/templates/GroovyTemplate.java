@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -401,6 +402,11 @@ public class GroovyTemplate extends BaseTemplate {
                 if (val instanceof RawData) {
                     return ((RawData) val).data;
                 } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+                    if (template.name.endsWith(".xml")) {
+                        return StringEscapeUtils.escapeXml(val.toString());
+                    } else if (template.name.endsWith(".csv")) {
+                         return StringEscapeUtils.escapeCsv(val.toString());
+                    }
                     return val.toString();
                 } else {
                     return HTML.htmlEscape(val.toString());
