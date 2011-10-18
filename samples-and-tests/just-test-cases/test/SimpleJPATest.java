@@ -14,6 +14,8 @@ public class SimpleJPATest extends UnitTest {
 
     @Test
     public void testImport() {
+        List<User> f = User.find("byNameLike", "%").fetch();
+        assertEquals(2, f.size());
         assertEquals(2, User.count());
         List<User> users = User.findAll();
         User a = users.get(0);
