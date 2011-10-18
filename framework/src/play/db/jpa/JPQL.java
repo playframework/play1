@@ -243,10 +243,19 @@ public class JPQL {
                 jpql.append(prop + " < ? AND " + prop + " > ?");
             } else if (part.endsWith("Like")) {
                 String prop = extractProp(part, "Like");
-                jpql.append("LOWER(" + prop + ") like ?");
+                // HSQL -> LCASE, all other dbs lower
+                if (isHSQL()) {
+                    jpql.append("LCASE(" + prop + ") like ?");
+                } else {
+                    jpql.append("LOWER(" + prop + ") like ?");
+                }
             } else if (part.endsWith("Ilike")) {
                 String prop = extractProp(part, "Ilike");
-                jpql.append("LOWER(" + prop + ") like LOWER(?)");
+                 if (isHSQL()) {
+                    jpql.append("LCASE(" + prop + ") like LCASE(?)");
+                 } else {
+                    jpql.append("LOWER(" + prop + ") like LOWER(?)");
+                 }
             } else if (part.endsWith("Elike")) {
                 String prop = extractProp(part, "Elike");
                 jpql.append(prop + " like ?");
@@ -259,6 +268,11 @@ public class JPQL {
             }
         }
         return jpql.toString();
+    }
+
+    private boolean isHSQL() {
+        String db = Play.configuration.getProperty("db");
+        return ("mem".equals(db) || "fs".equals(db) || "org.hsqldb.jdbcDriver".equals(Play.configuration.getProperty("db.driver")));
     }
 
     protected static String extractProp(String part, String end) {
