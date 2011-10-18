@@ -844,7 +844,8 @@ public class Router {
                         }
                         try {
                             String root = new File(staticDir).getCanonicalPath();
-                            String childResourceName = staticDir + (staticFile ? "" : "/" + resource);
+                            String urlDecodedResource = Utils.urlDecodePath(resource);
+                            String childResourceName = staticDir + (staticFile ? "" : "/" + urlDecodedResource);
                             String child = new File(childResourceName).getCanonicalPath();
                             if (child.startsWith(root)) {
                                 throw new RenderStatic(childResourceName);
@@ -858,14 +859,7 @@ public class Router {
                             // FIXME: Careful with the arguments that are not matching as they are part of the hostname
                             // Defaultvalue indicates it is a one of these urls. This is a trick and should be changed.
                             if (arg.defaultValue == null) {
-                                String encoding = Http.Response.current() == null ? Play.defaultWebEncoding : Http.Response.current().encoding;
-                                Charset charset = null;
-                                try {
-                                    charset = Charset.forName(encoding.toUpperCase());
-                                } catch(Exception e) {
-                                     charset =  Charset.forName("UTF-8");
-                                }
-                                localArgs.put(arg.name, Utils.decodeBytes(matcher.group(arg.name), charset.newDecoder()));
+                               localArgs.put(arg.name, Utils.urlDecodePath(matcher.group(arg.name)));
                             }
                         }
                         if (hostArg != null && domain != null) {
