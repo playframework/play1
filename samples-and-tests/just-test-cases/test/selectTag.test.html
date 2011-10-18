@@ -9,6 +9,7 @@
 	assertElementPresent('css=#select2 option')
 	assertText('css=#select2 option[value="User-9"]', 'User-9')
 	assertElementPresent('css=#select2 option[value="User-5"][selected]')
+	assertText('css=#select2 option[value="&lt;All&gt;"]', '&lt;All&gt;')
 #{/selenium}
 #{selenium 'Check #select tag with plain content'}
 	open('@{Application.selectTag()}')

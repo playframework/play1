@@ -400,7 +400,7 @@ public class GroovyTemplate extends BaseTemplate {
             if (val != null) {
                 if (val instanceof RawData) {
                     return ((RawData) val).data;
-                } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+                } else if (!Request.current().format.equals("html") || TagContext.hasParentTag("verbatim")) {
                     return val.toString();
                 } else {
                     return HTML.htmlEscape(val.toString());

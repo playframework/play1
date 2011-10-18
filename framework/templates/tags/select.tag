@@ -21,7 +21,7 @@
     serializedAttrs  = play.templates.FastTags.serialize(_attrs, "size", "name", "items", "labelProperty", "value", "valueProperty")
 }%
 
-<select name="${_name}" size="${_size?:1}" ${serializedAttrs}>
+<select name="${_name}" size="${_size?:1}" ${serializedAttrs.raw()}>
     #{doBody /}
     #{list items:_items, as:'i'}
         #{option _valueProperty && i.hasProperty(_valueProperty) ? i[_valueProperty] : i}${_labelProperty && i.hasProperty(_labelProperty) ? i[_labelProperty] : i}#{/option}
