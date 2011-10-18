@@ -523,12 +523,15 @@ public abstract class Binder {
             }
         }
 
-        // application custom types have higher priority
+        // application custom types have higher priority. If unable to bind proceed with the next one
         for (Class<TypeBinder<?>> c : Play.classloader.getAssignableClasses(TypeBinder.class)) {
             if (c.isAnnotationPresent(Global.class)) {
                 Class<?> forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
                 if (forType.isAssignableFrom(clazz)) {
-                    return c.newInstance().bind(null, annotations, value, clazz, type);
+                    Object result = c.newInstance().bind(null, annotations, value, clazz, type);
+                    if (result != null) {
+                        return result;
+                    }
                 }
             }
         }
