@@ -24,7 +24,7 @@
 <select name="${_name}" size="${_size?:1}" ${serializedAttrs}>
     #{doBody /}
     #{list items:_items, as:'i'}
-        #{option _valueProperty && i.hasProperty(_valueProperty) ? i[_valueProperty] : i}${_labelProperty && i.hasProperty(_labelProperty) ? i[_labelProperty] : i}#{/option}
+        #{option _valueProperty && i.hasProperty(_valueProperty) ? i[_valueProperty] : i}${_labelProperty && i.hasProperty(_labelProperty) ? play.utils.HTML.htmlEscape(i[_labelProperty]) : i}#{/option}
     #{/list}
 </select>
 
