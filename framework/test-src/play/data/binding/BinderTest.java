@@ -66,10 +66,18 @@ public class BinderTest {
         data2.a = "aaa";
         data2.b = false;
         data2.c = 12;
+        
+        Data1 data1_1 = new Data1();
+        data1_1.a = "aAaA";
+        data1_1.b = 13;
 
-        data2.data1 = new Data1();
-        data2.data1.a = "aAaA";
-        data2.data1.b = 13;
+        Data1 data1_2 = new Data1();
+        data1_2.a = "bBbB";
+        data1_2.b = 14;
+        
+        data2.datas = new ArrayList<Data1>(2);
+        data2.datas.add(data1_1);
+        data2.datas.add(data1_2);
 
 
 
