@@ -152,8 +152,8 @@ public class TestEngine {
                 current.error = "Failure, " + failure.getMessage();
             } else {
                 current.error = "A " + failure.getException().getClass().getName() + " has been caught, " + failure.getMessage();
-                current.trace = failure.getTrace();
             }
+            current.trace = failure.getTrace();
             for (StackTraceElement stackTraceElement : failure.getException().getStackTrace()) {
                 if (stackTraceElement.getClassName().equals(className)) {
                     current.sourceInfos = "In " + Play.classes.getApplicationClass(className).javaFile.relativePath() + ", line " + stackTraceElement.getLineNumber();
