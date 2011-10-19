@@ -108,9 +108,33 @@ bc. <?xml version="1.0" ?>
   </resource-ref>
 </web-app>
 
-h2. <a name="heroku">Heroku</a>
 
-To deploy and run your Play application on the cloud with "Heroku cloud application platform":http://www.heroku.com/, follow these steps:
+h2. <a name="cloud">Cloud-based hosting</a>
+
+
+h3. <a name="elasticbeanstalk">AWS Elastic Beanstalk</a>
+
+"AWS Elastic Beanstalk":http://aws.amazon.com/en/elasticbeanstalk/ is Amazon’s Java hosting platform, based on their Amazon Web Services infrastructure. For more information about deploying a Play application, see "Java development 2.0: Play-ing with Amazon RDS":http://www.ibm.com/developerworks/java/library/j-javadev2-19/.
+
+
+h3. <a name="cloudbees">CloudBees</a>
+
+"CloudBees":http://www.cloudbees.com/ is a Java application hosting platform. For more information, see the "CloudBees module":http://www.playframework.org/modules/cloudbees.
+
+
+h3. <a name="cloudfondry">Cloud Foundry</a>
+
+"Cloud Foundry":http://www.cloudfoundry.com/ is VMware’s cloud provider. For more information, see "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html and the "CloudFoundry module":http://www.playframework.org/modules/cloudfoundry.
+
+
+h3. <a name="gae">Google App Engine (GAE)</a>
+
+The "Google App Engine":http://code.google.com/appengine/ is one of the first cloud hosting platforms, which has different pros and cons compared to generic hosting solutions. In particular, GAE does not support JPA persistence. For more information, see the "GAE module":http://www.playframework.org/modules/gae.
+
+
+h3. <a name="heroku">Heroku</a>
+
+The "Heroku cloud application platform":http://www.heroku.com/ has Play-specific application hosting support. To deploy and run your Play application, use the following steps.
 
 1. Install the Heroku command line client on "Linux":http://toolbelt.herokuapp.com/linux/readme, "Mac":http://toolbelt.herokuapp.com/osx/download, or "Windows":http://toolbelt.herokuapp.com/windows/download.
 2. Install "git":http://git-scm.com/ and setup your SSH key.
@@ -163,23 +187,9 @@ bc. %prod.db=${DATABASE_URL}
 %prod.jpa.dialect=org.hibernate.dialect.PostgreSQLDialect
 %prod.jpa.ddl=update
 
-Learn more in the "Heroku Dev Center":http://devcenter.heroku.com.
+For more information, see the "Heroku Dev Center":http://devcenter.heroku.com.
 
 
-h2. <a name="gae">Google Application Engine (GAE)</a>
+h3. <a name="playapps">playapps.net</a>
 
-A Play application can very easily be deployed to the GAE. It is a matter of installing the relevant "GAE module.":http://playframework.org/modules/gae
-
-bc. play install gae
-
-Deploying to the Google Application Engine is again really easy:
-
-bc. play gae:deploy myapp
-
-Refer to the "module documentation":http://playframework.org/modules/gae-1.0.2/home for more information.
-
-h2. <a name="stax">Stax</a>
-
-Easy deployment to the "Stax cloud hosting platform":http://www.stax.net: again nothing could be easier. Install the Stax module and deploy within seconds.
-
-Refer to the "module documentation":http://www.playframework.org/modules/stax-1.0.1/home for more information.
+"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":http://www.playframework.org/modules/playapps.
