@@ -132,12 +132,16 @@ public class OpenID {
             url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
 
-            if (returnAction != null && returnAction.startsWith("http://")) {
+            if (returnAction != null && (
+                        returnAction.startsWith("http://") ||
+                        returnAction.startsWith("https://"))) {
                 url += "&openid.return_to=" + URLEncoder.encode(returnAction, "utf8");
             } else {
                 url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
             }
-            if (realmAction != null && realmAction.startsWith("http://")) {
+            if (realmAction != null && (
+                        realmAction.startsWith("http://") ||
+                        realmAction.startsWith("https://"))) {
                 url += "&openid.realm=" + URLEncoder.encode(realmAction, "utf8");
             } else {
                 url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
@@ -148,16 +152,16 @@ public class OpenID {
             }
             String sregO = "";
             for (String a : sregOptional) {
-               sregO += URLEncoder.encode(a, "UTF-8") + ",";
+                sregO += URLEncoder.encode(a, "UTF-8") + ",";
             }
             if (!StringUtils.isEmpty(sregO)) {
-               url += "&openid.sreg.optional=" + sregO.substring(0, sregO.length() - 1);
+                url += "&openid.sreg.optional=" + sregO.substring(0, sregO.length() - 1);
             }
             String sregR = "";
             for (String a : sregRequired) {
-               sregR +=  URLEncoder.encode(a, "UTF-8") + ",";
+                sregR +=  URLEncoder.encode(a, "UTF-8") + ",";
             }
-             if (!StringUtils.isEmpty(sregR)) {
+            if (!StringUtils.isEmpty(sregR)) {
                 url += "&openid.sreg.required=" + sregR.substring(0, sregR.length() - 1);
             }
 
@@ -189,10 +193,8 @@ public class OpenID {
             }
 
 
-            if (Logger.isTraceEnabled()) {
-                // Debug
-                Logger.trace("Send request %s", url);
-            }
+            // Debug
+            Logger.trace("Send request %s", url);
 
             throw new Redirect(url);
         } catch (Redirect e) {
@@ -265,7 +267,15 @@ public class OpenID {
                     server = discoverServer(id);
                 }
 
-                String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
+                Params newParams = new Params();
+                for(String key : Params.current().all().keySet()) {
+                    if (key.startsWith("openid.")) {
+                        newParams.put(key, Params.current().get(key));
+                    }
+                }
+                newParams.put("openid.mode", "check_authentication");
+                String fields = newParams.urlEncode();
+                //String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
                 WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post();
                 if (response.getStatus() == 200 && response.getString().contains("is_valid:true")) {
                     UserInfo userInfo = new UserInfo();
@@ -339,8 +349,9 @@ public class OpenID {
         public Map<String, String> extensions = new HashMap<String, String>();
 
         @Override
-        public String toString() {
-            return id + " " + extensions;
-        }
+            public String toString() {
+                return id + " " + extensions;
+            }
     }
 }
+
