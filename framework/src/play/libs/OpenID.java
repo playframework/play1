@@ -193,8 +193,10 @@ public class OpenID {
             }
 
 
-            // Debug
-            Logger.trace("Send request %s", url);
+	    if (Logger.isTraceEnabled()) {
+                // Debug
+                Logger.trace("Send request %s", url);
+	    }
 
             throw new Redirect(url);
         } catch (Redirect e) {
@@ -275,7 +277,6 @@ public class OpenID {
                 }
                 newParams.put("openid.mode", "check_authentication");
                 String fields = newParams.urlEncode();
-                //String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
                 WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post();
                 if (response.getStatus() == 200 && response.getString().contains("is_valid:true")) {
                     UserInfo userInfo = new UserInfo();
@@ -349,9 +350,9 @@ public class OpenID {
         public Map<String, String> extensions = new HashMap<String, String>();
 
         @Override
-            public String toString() {
-                return id + " " + extensions;
-            }
+        public String toString() {
+            return id + " " + extensions;
+        }
     }
 }
 
