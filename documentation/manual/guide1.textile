@@ -190,6 +190,8 @@ bc. db=mem
 
 As you can see in the comments, you can easily set-up any JDBC compliant database and even configure the connection pool.
 
+p(note). This tutorial is designed to work with the in-memory database; instructions for using JPA with other databases is outside the scope of this tutorial.	
+
 Now, go back to your browser and refresh the welcome page. Play will automatically start the database. Check for this line in the application logs:
 
 bc. INFO  ~ Connected to jdbc:h2:mem:play
