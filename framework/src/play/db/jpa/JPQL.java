@@ -185,11 +185,15 @@ public class JPQL {
         }
         return q;
     }
-
-    public String findByToJPQL(String findBy) {
+	
+	public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
-        StringBuffer jpql = new StringBuffer();
-        String[] parts = findBy.split("And");
+        StringBuilder jpql = new StringBuilder();
+        String subRequest;
+        if (findBy.contains("OrderBy"))
+            subRequest = findBy.split("OrderBy")[0];
+        else subRequest = findBy;
+        String[] parts = subRequest.split("And");
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             if (part.endsWith("NotEqual")) {
@@ -236,9 +240,25 @@ public class JPQL {
                 jpql.append(" AND ");
             }
         }
+		//ORDER BY clause
+	if (findBy.contains("OrderBy")) {
+            jpql.append(" ORDER BY ");
+            String orderQuery = findBy.split("OrderBy")[1];
+            parts = orderQuery.split("And");
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                String orderProp;
+                if (part.endsWith("Desc"))
+                    orderProp = extractProp(part, "Desc") + " DESC";
+                else orderProp = part.toLowerCase();
+                if(i>0)
+                    jpql.append(", ");
+                jpql.append(orderProp);
+            }
+        }
         return jpql.toString();
     }
-
+	
     protected static String extractProp(String part, String end) {
         String prop = part.substring(0, part.length() - end.length());
         prop = (prop.charAt(0) + "").toLowerCase() + prop.substring(1);
