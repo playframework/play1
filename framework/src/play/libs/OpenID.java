@@ -132,12 +132,12 @@ public class OpenID {
             url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
 
-            if (returnAction != null && returnAction.startsWith("http://")) {
+            if (returnAction != null && (returnAction.startsWith("http://") || returnAction.startsWith("https://"))) {
                 url += "&openid.return_to=" + URLEncoder.encode(returnAction, "utf8");
             } else {
                 url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
             }
-            if (realmAction != null && realmAction.startsWith("http://")) {
+            if (realmAction != null && (realmAction.startsWith("http://") || realmAction.startsWith("https://"))) {
                 url += "&openid.realm=" + URLEncoder.encode(realmAction, "utf8");
             } else {
                 url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
