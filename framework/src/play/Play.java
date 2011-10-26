@@ -337,7 +337,7 @@ public class Play {
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
     public static void readConfiguration() {
-        configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
+        configuration = new Configuration(VirtualFile.open(Play.applicationPath), "conf/application.conf");
         // Plugins
         pluginCollection.onConfigurationRead();
     }
