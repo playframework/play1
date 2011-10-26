@@ -39,7 +39,8 @@ import java.util.regex.Pattern;
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
-    static Map<String, Object> idCache = new HashMap<String, Object>();
+    // Allows people to clear the cache, so Fixture is not stateful
+    public static Map<String, Object> idCache = new HashMap<String, Object>();
 
     public static void executeSQL(String sqlScript) {
         for(String sql: sqlScript.split(";")) {
