@@ -38,8 +38,8 @@ public class FixturesTest extends UnitTest {
 
         VenueVendor vendor = VenueVendor.all().first();
         assertEquals(4, vendor.tags.size());
-
-        Fixtures.load("vendor-data1.yml", "vendor-data2.yml");
+        Fixtures.deleteAllModels();
+        Fixtures.load("vendor-data.yml", "vendor-data1.yml", "vendor-data2.yml");
         assertEquals(4, VenueVendor.findAll().size());
 
         assertEquals(3, Vendor.find(
