@@ -25,7 +25,7 @@ import play.data.binding.Binder;
  */
 public class Messages {
 
-    private static final Object[] NO_ARGS = new Object[]{""};
+    private static final Object[] NO_ARGS = new Object[]{null};
 
     static public Properties defaults;
 
@@ -120,7 +120,7 @@ public class Messages {
     static Object[] coolStuff(String pattern, Object[] args) {
     	// when invoked with a null argument we get a null args instead of an array with a null value.
 
-    	if(args == null || args.length == 0)
+    	if(args == null)
     		return NO_ARGS;
 
         Class<? extends Number>[] conversions = new Class[args.length];
@@ -143,25 +143,24 @@ public class Messages {
             }
         }
 
-        List<Object> result = new ArrayList<Object>();
-        for(int i = 0; i < args.length; i++) {
+        Object[] result = new Object[args.length];
+        for(int i=0; i<args.length; i++) {
             if(args[i] == null) {
                 continue;
             }
             if(conversions[i] == null) {
-                result.add(args[i]);
+                result[i] = args[i];
             } else {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive and object binder
-                    result.add(Binder.directBind(null, args[i] + "", conversions[i], null));
+                    result[i] = Binder.directBind(null, args[i] + "", conversions[i], null);
                 } catch(Exception e) {
                     // Ignore
+                    result[i] = null;
                 }
             }
         }
-        if (result.size() > 0)
-            return result.toArray(new Object[result.size()]);
-        return NO_ARGS;
+        return result;
     }
 
     /**
