@@ -33,11 +33,11 @@ Support for the latest draft specification has been added, namely hybi-00 to hyb
 
 h2. Support for composite ids
 
-Composite Ids supported with Fixtures. The following annotations on your model are supported:  <code>@IdClass</code>, <code>@EmbeddedId</code>. Please refer to the "hibernate documentation":http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html#d0e2177 for more information.
+Composite Ids are now supported with Fixtures. The following annotations on your model are also supported:  <code>@IdClass</code>, <code>@EmbeddedId</code> and directly from the fixtures. Please refer to the "hibernate documentation":http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html#d0e2177 for more information.
 
 h2. Better IntelliJ support
 
-<code>play idealize</code> now creates a complete intelliJ project. You can directly open your play project on IntelliJ.
+<code>play idealize</code> now creates a complete IntelliJ project. You can directly open your play project from IntelliJ.
 
 h2. Other small features
 
