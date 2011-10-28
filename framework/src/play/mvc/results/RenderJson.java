@@ -40,8 +40,15 @@ public class RenderJson extends Result {
     public void apply(Request request, Response response) {
         try {
             String encoding = getEncoding();
-            setContentTypeIfNotSet(response, "application/json; charset="+encoding);
-            response.out.write(json.getBytes(encoding));
+            // JSONP response if the parameter callback is present 
+            if (request.params._contains("callback")) {
+              setContentTypeIfNotSet(response, "application/javascript; charset="+encoding);
+              String callback = request.params.get("callback");
+              response.out.write(new String(callback + "(" + json + ")").getBytes(encoding));
+            } else {
+              setContentTypeIfNotSet(response, "application/json; charset="+encoding);
+              response.out.write(json.getBytes(encoding));
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
