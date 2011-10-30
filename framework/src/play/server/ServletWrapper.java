@@ -5,6 +5,7 @@ import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
+import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -159,6 +160,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Scope.Flash.current.remove();
             Scope.RenderArgs.current.remove();
             Scope.RouteArgs.current.remove();
+            CachedBoundActionMethodArgs.clear();
         }
     }
 

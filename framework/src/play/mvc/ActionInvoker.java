@@ -19,6 +19,7 @@ import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
+import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.binding.RootParamNode;
 import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
@@ -64,6 +65,7 @@ public class ActionInvoker {
         Scope.RouteArgs.current.set(new Scope.RouteArgs());
         Scope.Session.current.set(Scope.Session.restore());
         Scope.Flash.current.set(Scope.Flash.restore());
+        CachedBoundActionMethodArgs.init();
 
         ControllersEnhancer.currentAction.set(new Stack<String>());
 
@@ -614,9 +616,17 @@ public class ActionInvoker {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
 
-        Object[] rArgs = new Object[method.getParameterTypes().length];
+        // Check if we have already performed the bind operation
+        Object[] rArgs = CachedBoundActionMethodArgs.current().retrieveActionMethodArgs( method );
+        if ( rArgs != null) {
+            // We have already performed the binding-operation for this method
+            // in this request.
+            return rArgs;
+        }
+
+        rArgs = new Object[method.getParameterTypes().length];
         if (method.getParameterTypes().length>0) {
-        
+
             RootParamNode root = Scope.Params.current().getRootParamNode();
 
             for (int i = 0; i < method.getParameterTypes().length; i++) {
@@ -636,6 +646,10 @@ public class ActionInvoker {
                         new Binder.MethodAndParamInfo(o, method, i + 1));
             }
         }
+
+        // Store the bind-result in case we need it again in the same request
+        CachedBoundActionMethodArgs.current().storeActionMethodArgs(method, rArgs);
+
         return rArgs;
     }
 }

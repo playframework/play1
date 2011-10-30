@@ -63,7 +63,9 @@ public class GenericModel extends JPABase {
     @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
         ParamNode paramNode = rootParamNode.getChild(name, true);
-
+        // #1195 - Needs to keep track of whick keys we remove so that we can restore it before
+        // returning from this method.
+        List<ParamNode.RemovedNode> removedNodesList = new ArrayList<ParamNode.RemovedNode>();
         try {
             BeanWrapper bw = BeanWrapper.forClass(o.getClass());
             // Start with relations
@@ -107,7 +109,7 @@ public class GenericModel extends JPABase {
                             String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null) {
                                 // Remove it to prevent us from finding it again later
-                                fieldParamNode.removeChild(keyName);
+                                fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
                                     if (_id.equals("")) {
                                         continue;
@@ -133,16 +135,16 @@ public class GenericModel extends JPABase {
                                     Object to = q.getSingleResult();
                                     edit(paramNode, field.getName(), to, field.getAnnotations());
                                     // Remove it to prevent us from finding it again later
-                                    paramNode.removeChild( field.getName());
+                                    paramNode.removeChild( field.getName(), removedNodesList);
                                     bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
                                     Validation.addError(fieldParamNode.getOriginalKey(), "validation.notFound", ids[0]);
                                     // Remove only the key to prevent us from finding it again later
                                     // This how the old impl does it..
-                                    fieldParamNode.removeChild(keyName);
+                                    fieldParamNode.removeChild(keyName, removedNodesList);
                                     if (fieldParamNode.getAllChildren().size()==0) {
                                         // remove the whole node..
-                                        paramNode.removeChild( field.getName());
+                                        paramNode.removeChild( field.getName(), removedNodesList);
                                     }
 
                                 }
@@ -150,7 +152,7 @@ public class GenericModel extends JPABase {
                             } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
                                 bw.set(field.getName(), o, null);
                                 // Remove it to prevent us from finding it again later
-                                paramNode.removeChild( field.getName());
+                                paramNode.removeChild(field.getName(), removedNodesList);
                             }
                         }
                     }
@@ -161,6 +163,9 @@ public class GenericModel extends JPABase {
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
+        } finally {
+            // restoring changes to paramNode
+            ParamNode.restoreRemovedChildren( removedNodesList );
         }
     }
 
