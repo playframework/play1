@@ -1,6 +1,7 @@
 package play.mvc;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;

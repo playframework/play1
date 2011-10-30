@@ -4,6 +4,7 @@ import play.utils.Utils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,8 +64,40 @@ public class ParamNode {
         return child;
     }
 
-    public boolean removeChild(String name) {
-        return _children.remove(name) != null;
+    public static class RemovedNode {
+        public final ParamNode removedFrom;
+        public final ParamNode removedNode;
+
+        public RemovedNode(ParamNode removedFrom, ParamNode removedNode) {
+            this.removedFrom = removedFrom;
+            this.removedNode = removedNode;
+        }
+    }
+
+    /**
+     * Removes a child from this node, but stores what is removed to list.
+     * The we can later call which will add it back again.
+     * This is a "hack" related to #1195 which makes it possible to reuse the RootParamsNode-structure
+     * if you want to perform the bind-operation multiple times.
+     *
+     * @param name the name of the child-node in this paramNode which should be removed.
+     * @param removedNodesList a list where info about what is removed where is stored.
+     * @return true if anything was removed.
+     */
+    public boolean removeChild(String name, List<RemovedNode> removedNodesList) {
+        ParamNode removedNode = _children.remove(name);
+        if ( removedNode != null) {
+            removedNodesList.add( new RemovedNode(this, removedNode));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static void restoreRemovedChildren( List<RemovedNode> removedNodesList ) {
+        for ( RemovedNode rn : removedNodesList) {
+            rn.removedFrom._children.put( rn.removedNode.name, rn.removedNode);
+        }
     }
 
     private ParamNode getChild(String[] nestedNames) {
