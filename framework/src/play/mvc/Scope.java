@@ -432,7 +432,7 @@ public class Scope {
             try {
                 checkAndParse();
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.bind(rootParamNode, key, type, type, null);
+                return (T) Binder.bind(getRootParamNode(), key, type, type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
