@@ -88,9 +88,10 @@ To register a new module, the following are required.
 
 # A Google account, to post on the Google Group.
 # An OpenID for your developer log-in (you can use your Google account for this).
-# A module name that matches <code>[a-zA-Z]+</code> regular expression.
-# The module must include "documentation":#documentation.
+# A module name that matches the regular expression <code>[a-zA-Z]+</code>.
+# "Module documentation":#documentation that explains what the module is for and how to use it.
 # A module home page with the source code available and a way to report bugs, e.g. a <a href="http://github.com/">GitHub</a>, <a href="http://code.google.com/">Google Code</a> or <a href="http://launchpad.net/">Launchpad</a> project.
+# A license file, such as the open-source license in the Play distribution’s @COPYING@ file.
 
 h3. <a name="register">Module registration</a>
 
