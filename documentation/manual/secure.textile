@@ -12,6 +12,9 @@ In the @/conf/dependencies.yml@ file, enable the Secure module by adding a line 
 bc. require:
     - play -> secure
 
+Then run the @play dependencies@ command to add the module to your application.
+
+
 h3. <a name="routes">Import default Secure routes</a>
 
 In the @conf/routes@ file, import the default module routes by adding this line:
