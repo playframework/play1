@@ -71,9 +71,7 @@ Resources stored in the @public@ directory are static assets and are served dire
 
 This directory is split into three standard sub-directories: for images, CSS stylesheets and JavaScript files. You should try to organize your static assets like this to keep all Play applications consistent.
 
-p(note). **Tip**
- 
-By default the @/public@ directory is mapped to the @/public@ URL path, but you can easily change that, or even use several directories for your static assets.
+p(note). By default the @/public@ directory is mapped to the @/public@ URL path, but you can easily change that, or even use several directories for your static assets.
 
 
 h3(#conf). The **conf** directory
@@ -89,7 +87,11 @@ If you need to add some configuration options specific to your application, itâ€
 
 If any library needs a specific configuration file, try to file it under the @conf@ directory: **this directory is included in the Java ClassPath**.
 
-You can add additional configuration files to the Play configuration by specifying a file name in @application.conf@ as the value of a configuration option that has <code>@include.</code> at the start of the key. For example, if you define additional MIME types in a @conf/mime-types.conf@
+You can add additional configuration files to the Play configuration by specifying a file name in @application.conf@ as the value of a configuration option with <code>@include.</code> at the start of the key.
+
+p(note). This is an experimental feature that does not yet work properly. In particular, placeholders and framework IDs are not handled properly.
+
+For example, if you define additional MIME types in a @conf/mime-types.conf@
 
 bc. # Web fonts
 mimetype.eot = application/vnd.ms-fontobject

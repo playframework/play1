@@ -15,7 +15,7 @@ Play is a pure Java framework and allows you to keep your preferred development 
 
 h2. <a name="reload">Fix the bug and hit Reload</a>
 
-The Java platform is infamous for its low productivity, mainly due to repeated and tedious compile-package-deploy cycles.
+The Java EE platform is infamous for low-productivity web application development, mainly due to repeated and tedious compile-package-deploy cycles.
 
 That’s why we rethought the development cycle to make developing with Play an efficient process.
 

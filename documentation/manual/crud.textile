@@ -217,7 +217,7 @@ public class Account extends Model {
       @CollectionOfElements
       public Set<String> usernames;
  
-      public Account(Set<String> usernames {
+      public Account(Set<String> usernames) {
             super();
             this.usernames = usernames;
       }
