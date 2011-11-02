@@ -4,7 +4,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.CorruptedFrameException;
-import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 
@@ -19,8 +18,6 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
     private static final byte OPCODE_CLOSE = 0x8;
     private static final byte OPCODE_PING = 0x9;
     private static final byte OPCODE_PONG = 0xA;
-
-    public static final int MAX_LENGTH = 16384;
 
     private Byte fragmentOpcode;
     private Byte opcode = null;
@@ -96,20 +93,17 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
                 }
                 return null;
             case PARSING_LENGTH_2:
-                int s =  buffer.readUnsignedShort();
+                int s = buffer.readUnsignedShort();
                 currentFrameLength = s;
                 checkpoint(State.MASKING_KEY);
                 return null;
             case PARSING_LENGTH_3:
-                currentFrameLength = (int)buffer.readLong();
+                currentFrameLength = (int) buffer.readLong();
                 checkpoint(State.MASKING_KEY);
-                return null;
             case MASKING_KEY:
                 maskingKey = buffer.readBytes(4);
                 checkpoint(State.PAYLOAD);
             case PAYLOAD:
-                if (currentFrameLength < 126)
-                    checkpoint(State.FRAME_START);
                 ChannelBuffer frame = buffer.readBytes(currentFrameLength);
                 unmask(frame);
 
@@ -125,29 +119,29 @@ public class Hybi10WebSocketFrameDecoder extends ReplayingDecoder<Hybi10WebSocke
 
                     this.fragmentOpcode = null;
                     frames.clear();
+                    checkpoint(State.FRAME_START);
+                    return null;
                 }
 
-
-                if (this.opcode == OPCODE_TEXT) {
-                    // TODO: This is only for the old hybri76?
-                    // if (frame.readableBytes() > MAX_LENGTH) {
-                       // throw new TooLongFrameException();
-                    //}
-                    return new DefaultWebSocketFrame(0x00, frame);
-                } else if (this.opcode == OPCODE_BINARY) {
-                    return new DefaultWebSocketFrame(0xFF, frame);
-                } else if (this.opcode == OPCODE_PING) {
-                    channel.write(new Pong(0x00, frame));
-                    return null;
-                } else if (this.opcode == OPCODE_PONG) {
-                    return new Pong(0x00, frame);
-                } else if (this.opcode == OPCODE_CLOSE) {
-                    // TODO
-                    return null;
+                try {
+                    if (this.opcode == OPCODE_TEXT) {
+                        return new DefaultWebSocketFrame(0x00, frame);
+                    } else if (this.opcode == OPCODE_BINARY) {
+                        return new DefaultWebSocketFrame(0xFF, frame);
+                    } else if (this.opcode == OPCODE_PING) {
+                        return new Pong(0x00, frame);
+                    } else if (this.opcode == OPCODE_PONG) {
+                        return null;
+                    } else if (this.opcode == OPCODE_CLOSE) {
+                        return null;
+                    }
+                } finally {
+                    checkpoint(State.FRAME_START);
                 }
             default:
                 throw new Error("Shouldn't reach here.");
         }
+
     }
 
     private void unmask(ChannelBuffer frame) {
