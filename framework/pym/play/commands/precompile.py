@@ -27,6 +27,5 @@ def execute(**kargs):
         return subprocess.call(java_cmd, env=os.environ)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
-        sys.exit(-1)
-    finally:
         print
+        sys.exit(-1)
