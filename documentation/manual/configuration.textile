@@ -282,6 +282,15 @@ Default:
 * @org.h2.Driver@ when "db":#db is set to @mem@ or @fs@, or if "db.url":#db.url  starts with @jdbc:h2:mem:@
 * @com.mysql.jdbc.Driver@ if "db":#db is a @mysql:…@ configuration.
 
+h3(#db.isolation). db.isolation
+
+Database transaction isolation level. For example:
+
+bc. db.isolation=SERIALIZABLE
+
+Valid values are @NONE@, @READ_UNCOMMITTED@, @READ_COMMITTED@, @REPEATABLE_READ@, @SERIALIZABLE@, or an integer value to be passed to @java.sql.Connection.setTransactionIsolation()@. Note that not all databases support all transaction isolation levels.
+
+Default: database dependent, usually @READ_COMMITTED@
 
 h3(#db.pass). db.pass
 
