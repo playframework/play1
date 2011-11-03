@@ -276,7 +276,13 @@ public class WSUrlFetch implements WSImpl {
             try {
                 this.status = connection.getResponseCode();
                 this.headersMap = connection.getHeaderFields();
-                this.body = IO.readContentAsString(connection.getInputStream(), getEncoding());
+                InputStream is = null;
+                try {
+                    is = connection.getInputStream();
+                } catch (IOException ex) {
+                    is = connection.getErrorStream();
+                }
+                if (is != null) this.body = IO.readContentAsString(is, getEncoding());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             } finally {
