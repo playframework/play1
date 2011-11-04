@@ -1,11 +1,14 @@
 package play.server.hybi10;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import play.Logger;
 
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 
 /**
@@ -18,99 +21,73 @@ public class Hybi10WebSocketFrameEncoder extends OneToOneEncoder {
     private static final byte OPCODE_PING = 0x9;
     private static final byte OPCODE_PONG = 0xA;
 
-    private void mask(byte[] mask, byte[] target, int location, byte[] bytes) {
-        if (bytes != null && target != null) {
-            int index = 0;
-            for (int i = 0; i < bytes.length; i++) {
-                target[location + i] = mask == null
-                        ? bytes[i]
-                        : (byte) (bytes[i] ^ mask[index++ % 4]);
-            }
-        }
-    }
-
-    private static byte[] toArray(long length) {
-        long value = length;
-        byte[] b = new byte[8];
-        for (int i = 7; i >= 0 && value > 0; i--) {
-            b[i] = (byte) (value & 0xFF);
-            value >>= 8;
-        }
-        return b;
-    }
-
-    private byte[] encodeLength(final long length) {
-        byte[] lengthBytes;
-        if (length <= 125) {
-            lengthBytes = new byte[1];
-            lengthBytes[0] = (byte) length;
-        } else {
-            byte[] b = toArray(length);
-            if (length <= 0xFFFF) {
-                lengthBytes = new byte[3];
-                lengthBytes[0] = 126;
-                System.arraycopy(b, 6, lengthBytes, 1, 2);
-            } else {
-                lengthBytes = new byte[9];
-                lengthBytes[0] = 127;
-                System.arraycopy(b, 0, lengthBytes, 1, 8);
-            }
-        }
-        return lengthBytes;
-    }
-
-
     @Override
     protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
 
-        // TODO: work with channel buffer instead of byte[]
         if (msg instanceof DefaultWebSocketFrame) {
             final DefaultWebSocketFrame frame = (DefaultWebSocketFrame) msg;
-            byte type;
-            // Text frame
-            ChannelBuffer buffer = frame.getBinaryData();
-            buffer.clear();
 
-            final byte[] bytes = buffer.array();
-            final byte[] lengthBytes = encodeLength(bytes.length);
+            ChannelBuffer data = frame.getBinaryData();
+			if (data == null) {
+				data = ChannelBuffers.EMPTY_BUFFER;
+			}
 
-            final int length = 1 + lengthBytes.length + bytes.length + 4;
-            final int payloadStart = 1 + lengthBytes.length + 4;
-            final byte[] packet = new byte[length];
-
+            byte opcode;
+            // TODO: Close and CONTINUATION
             if(frame instanceof Ping) {
-                type = OPCODE_PING;
+                opcode = OPCODE_PING;
             } else if(frame instanceof Pong) {
-                type = OPCODE_PONG;
+                opcode = OPCODE_PONG;
             } else {
-                type = frame.isText() ? OPCODE_TEXT : OPCODE_BINARY;
+                opcode = frame.isText() ? OPCODE_TEXT : OPCODE_BINARY;
             }
 
-            // Is this a final packet?
-            packet[0] = (byte)(type | 0x80);
-            System.arraycopy(lengthBytes, 0, packet, 1, lengthBytes.length);
+            int length = data.readableBytes();
 
-            // Mask, yes please
-            packet[1] |= 0x80;
+			int b0 = 0;
+		    b0 |= (1 << 7);
+            // TODO: RSV, for now it is set to 0
+			b0 |= (0 % 8) << 4;
+			b0 |= opcode % 128;
 
-            byte[] mask = generateMask();
-            mask(mask, packet, payloadStart, bytes);
-            System.arraycopy(mask, 0, packet, payloadStart - 4,
-                    4);
-
-            ChannelBuffer encoded =
-                    channel.getConfig().getBufferFactory().getBuffer(packet.length);
-            encoded.writeBytes(packet);
+            ChannelBuffer header;
+            ChannelBuffer body;
 
 
-            return encoded;
+            // TODO: if there is no mask
+            int maskLength = 4;
+            if (length <= 125) {
+                header = ChannelBuffers.buffer(2 + maskLength);
+                header.writeByte(b0);
+                byte b = (byte) (0x80 | (byte) length);
+                header.writeByte(b);
+            } else if (length <= 0xFFFF) {
+                header = ChannelBuffers.buffer(4 + maskLength);
+                header.writeByte(b0);
+                header.writeByte(0x80 | 126);
+                header.writeByte((length >>> 8) & 0xFF);
+                header.writeByte((length) & 0xFF);
+            } else {
+                header = ChannelBuffers.buffer(10 + maskLength);
+                header.writeByte(b0);
+                header.writeByte(0x80 | 127);
+                header.writeLong(length);
+            }
+
+            Integer random = (int) (Math.random() * Integer.MAX_VALUE);
+            byte[] mask = ByteBuffer.allocate(4).putInt(random).array();
+            header.writeBytes(mask);
+
+            body = ChannelBuffers.buffer(length);
+            int counter = 0;
+            while (data.readableBytes() > 0) {
+                byte byteData = data.readByte();
+                body.writeByte(byteData ^ mask[+counter++ % 4]);
+            }
+            return ChannelBuffers.wrappedBuffer(header, body);
         }
+
         return msg;
     }
 
-    private byte[] generateMask() {
-        byte[]  mask = new byte[4];
-        new SecureRandom().nextBytes(mask);
-        return mask;
-    }
 }
