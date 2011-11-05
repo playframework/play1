@@ -231,8 +231,12 @@ public class JavaExtensions {
         return format(new Date(timestamp), pattern, lang, timezone);
     }
 
-    public static RawData nl2br(Object data) {
+    public static RawData nl2br(RawData data) {
         return new RawData(data.toString().replace("\n", "<br/>"));
+    }
+
+    public static RawData nl2br(Object data) {
+        return new RawData(HTML.htmlEscape(data.toString()).replace("\n", "<br/>"));
     }
 
     public static String urlEncode(String entity) {
