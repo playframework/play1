@@ -144,7 +144,7 @@ public class Messages {
         }
 
         Object[] result = new Object[args.length];
-        for(int i=0; i<args.length; i++) {
+        for(int i=0; i < args.length; i++) {
             if(args[i] == null) {
                 continue;
             }

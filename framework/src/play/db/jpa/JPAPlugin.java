@@ -56,7 +56,7 @@ public class JPAPlugin extends PlayPlugin {
                     int i = 1;
                     Class pk = Model.Manager.factoryFor(clazz).keyType();
                     for (String id : ids) {
-                        query.setParameter(i++, Binder.directBind(annotations, id, pk, null));
+                        query.setParameter(i++, Binder.directBind(rootParamNode.getOriginalKey(), annotations, id, pk, null));
                     }
                     Object o = query.getSingleResult();
                     return GenericModel.edit(rootParamNode, name, o, annotations);

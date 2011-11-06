@@ -111,7 +111,7 @@ public class GenericModel extends JPABase {
                                         continue;
                                     }
                                     Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                    q.setParameter(1, Binder.directBind(null, _id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
+                                    q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations, _id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                     try {
                                         l.add(q.getSingleResult());
 
@@ -126,7 +126,7 @@ public class GenericModel extends JPABase {
                             if (ids != null && ids.length > 0 && !ids[0].equals("")) {
 
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                q.setParameter(1, Binder.directBind(null, ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
+                                q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations, ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                 try {
                                     Object to = q.getSingleResult();
                                     edit(paramNode, field.getName(), to, field.getAnnotations());
