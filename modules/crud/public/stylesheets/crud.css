@@ -91,6 +91,7 @@
 	border: 1px solid #ddd;
 	border-top: none;
 	border-collapse: collapse;
+	table-layout: fixed;
 }
 
 #crud #crudContent table thead tr {

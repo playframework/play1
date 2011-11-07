@@ -32,7 +32,7 @@ public void setName(String value) {
     name = value;
 }
 
-The Model portion of the Play framework automatically generates this pattern while keeping your code clean. Effectively, all public variables become instance properties. The convention is that any **public**, **non static**, **non final** field of a class is seen as a property.
+The Model portion of the Play framework automatically generates this pattern while keeping your code clean. Effectively, all public variables become instance properties. The convention is that any **public**, **non-static**, **non-final** field of a class is seen as a property.
 
 For example, when you define a class like this:
 
@@ -40,7 +40,6 @@ bc. public class Product {
  
     public String name;
     public Integer price;
- 
 }
 
 The loaded class will be:
@@ -62,10 +61,9 @@ bc. public class Product {
         return price;
     }
  
-    public void setPrice(Integer name) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
- 
 }
 
 Then when you want to access a property you can just write:
@@ -97,7 +95,6 @@ bc. public class Product {
         }
         this.price = price;
     }
- 
 }
 
 Then if you try to set a property to a negative value an exception will be thrown:
@@ -149,34 +146,20 @@ h2. <a name="database">Set-up a database to persist your model objects</a>
 
 Most of the time you will need to save the model object data permanently. The most natural way is to save this data into a database. 
 
-During development, you can quickly set up an embedded database either in-memory or save it in a sub-directory within your application.
+During development, you can quickly set up an embedded database either in-memory or save it in a sub-directory within your application using the "db configuration":configuration#db.
 
-To start an in-memory H2 database instance, just add this line to your **conf/application.conf** file:
+The Play distribution includes JDBC drivers for H2 and MySQL in the @$PLAY_HOME/framework/lib/@ directory. If you are using a PostgreSQL or Oracle database, for example, then you should add the JDBC driver library there, or in your application’s @lib/@ directory.
 
-bc. db=mem
-
-If your prefer to save the database in the file system, use:
-
-bc. db=fs
-
-If you want to connect to an existing **MySQL5 server**, use the following:
-
-bc. db=mysql:user:pwd@database_name
-
-The Play distribution includes JDBC drivers for H2 and MySQL in the **$PLAY_HOME/framework/lib/** directory. If you are using a PostgreSQL or Oracle database, for example, then you should add the JDBC driver library there, or in your application’s **lib/** directory.
-
-To connect to any JDBC compliant database. Just add the driver library to and define JDBC properties in the application.conf:
+To connect to any JDBC compliant database. Just add the driver library to and define the JDBC properties "db.url":configuration#db.url, "db.driver":configuration#db.driver, "db.user":configuration#db.user and "db.pass":configuration#db.pass:
 
 bc. db.url=jdbc:mysql://localhost/test
 db.driver=com.mysql.jdbc.Driver
 db.user=root
 db.pass=
 
-You can also specify a JPA dialect with the configuration option:
+You can also configure a JPA dialect with "jpa.dialect":configuration#jpa.dialect.
 
-bc. jpa.dialect=<dialect>
-
-From your code, you can then obtain a **java.sql.Connection** from the **play.db.DB** and use it in the standard way.
+From your code, you can then obtain a @java.sql.Connection@ from the @play.db.DB@ and use it in the standard way.
 
 bc. Connection conn = DB.getConnection();
 conn.createStatement().execute("select * from products");
@@ -185,37 +168,35 @@ h2. <a name="hibernate">Persist your object model with Hibernate</a>
 
 You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
 
-When you define JPA entities by adding **@javax.persistence.Entity** annotations to any Java object, Play will automatically start a JPA entity manager.
+When you define JPA entities by adding <code>@javax.persistence.Entity</code> annotations to any Java object, Play will automatically start a JPA entity manager.
 
 bc. @Entity
 public class Product {
  
     public String name;
     public Integer price;
- 
 }
 
 p(note). **Warning!**
  
-A common mistake is to use the hibernate @Entity annotation instead of the JPA one. Remember that Play uses Hibernate through the JPA API.
+A common mistake is to use the Hibernate <code>@Entity</code> annotation instead of the JPA one. Remember that Play uses Hibernate through the JPA API.
 
-You can then obtain the EntityManager from the **play.db.jpa.JPA** object:
+You can then obtain the EntityManager from the @play.db.jpa.JPA@ object:
 
 bc. EntityManager em = JPA.em();
 em.persist(product);
 em.createQuery("from Product where price > 50").getResultList();
 
-Play provides a nice support class to help you to deal with JPA. Just extend **play.db.jpa.Model**.
+Play provides a nice support class to help you to deal with JPA. Just extend @play.db.jpa.Model@.
 
 bc. @Entity
 public class Product extends Model {
  
     public String name;
     public Integer price;
- 
 }
 
-And then manipulate the Product object using simple methods on the Product instances:
+And then manipulate the @Product@ object using simple methods on the @Product@ instances:
 
 bc. Product.find("price > ?", 50).fetch();
 Product product = Product.findById(2L);
@@ -226,7 +207,7 @@ h3. <a name="multiple">Support for multiple databases</a>
 
 You can configure Play to use multiple (separate) databases.
 
-The default database is configured by configuration parameters in **conf/application.conf** whose keys start with ‘db.’ (e.g: **db.url**). To configure an additional database, add an underscore and a suffix to the ‘db’ part of the key, like this:
+The default database is configured by configuration parameters in @conf/application.conf@ whose keys start with ‘db.’ (e.g: @db.url@). To configure an additional database, add an underscore and a suffix to the ‘db’ part of the key, like this:
 
 bc. db_other.url=jdbc:mysql://localhost/test
 db_other.driver=com.mysql.jdbc.Driver
@@ -241,7 +222,7 @@ You can then access this configuration from your application’s Java code like 
 
 bc. Connection conn = DB.getDBConfig("other").getConnection()
 
-@DB.getDBConfig(configName)@ returns an Object with all the methods you usually find as statics methods in the **play.db.DB** class.
+@DB.getDBConfig(configName)@ returns an Object with all the methods you usually find as statics methods in the @play.db.DB@ class.
 
 h2. <a name="stateless">Keep the model stateless</a>
 
@@ -251,20 +232,16 @@ What are the common traps you should avoid to keep the model stateless? **Do not
 
 h4. When you want to keep data across multiple requests you have several choices:
 
-1. If data is small and simple enough, store it into the flash or the session scope. However these scopes are limited to about 4 KB each, and allow only String data.
-
-2. Save the data permanently into persistent storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
-
-* Initialize and persist the object into the database at the first request.
-* Save the newly-created object’s ID into the flash scope.
-* During successive requests, retrieve the object from the database using the object ID, update it, and save it again. 
-
-3. Save the data temporarily into a transient storage (such as the Cache). For example if you need to create an object with a "wizard" that spans multiple requests:
-
-* Initialize the object and save it into the Cache at the first request.
-* Save the newly-created object’s key into the flash scope
-* During successive requests, retrieve the object from the cache (with the correct key), update it, and save it into the cache again. 
-* At the end of the last request in the chain, save the object permanently (into the database for example)
+# If data is small and simple enough, store it into the flash or the session scope. However these scopes are limited to about 4 KB each, and allow only String data.
+# Save the data permanently into persistent storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
+#* Initialize and persist the object into the database at the first request.
+#* Save the newly-created object’s ID into the flash scope.
+#* During successive requests, retrieve the object from the database using the object ID, update it, and save it again. 
+# Save the data temporarily into a transient storage (such as the Cache). For example if you need to create an object with a "wizard" that spans multiple requests:
+#* Initialize the object and save it into the Cache at the first request.
+#* Save the newly-created object’s key into the flash scope
+#* During successive requests, retrieve the object from the cache (with the correct key), update it, and save it into the cache again. 
+#* At the end of the last request in the chain, save the object permanently (into the database for example)
 
 The Cache is not a reliable storage but if you put an object in the cache you should be able to retrieve it. Depending on your requirements, the Cache can be a very good choice and a good replacement for the Java Servlet session.
 

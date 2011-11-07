@@ -1,27 +1,49 @@
 h1. Installation guide
 
 
-h2. <a>Prerequisites</a>
+h2. <a name="prerequisites">Prerequisites</a>
 
 To run the Play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
 
-p(note). If you are using MacOS, Java is just built-in. If you are using Linux, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default Java command on many Linux distros). If you are using Windows, just download and install the latest JDK package.
+Be sure to have Java in the current path (enter @java -version@ to check). Play will use the default Java or the one available at the @$JAVA_HOME@ path if defined.
 
-Be sure to have Java in the current path (enter **java -version** to check). Play will use the default Java or the one available at the **$JAVA_HOME** path if defined.
-
-The *play* command line utility uses Python. So it should work out of the box on any UNIX system (however it requires at least Python 2.5). If you’re running Windows, don’t worry, a Python runtime is bundled with the framework.
+The *play* command line utility uses Python. So it should work out of the box on any UNIX system (however it requires at least Python 2.5).
 
 
-h2. <a>Download the binary package</a>
+h2. <a name="install">Installation from the binary package</a>
 
-Download the latest "Play binary package":http://download.playframework.org/ and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you’re on UNIX, make sure that the *play* script is runnable (otherwise simply do a **chmod +x play**). That’s all.
+h3. Generic instructions
 
-p(note). *Tip*
- 
-If you need to rebuild the framework for some reason, run **ant** in the **$PLAY_HOME/framework/** directory.
+In general, the installation instructions are as follows.
+
+# Install Java.
+# Download the latest "Play binary package":http://download.playframework.org/ and extract the archive.
+# Add the ‘play’ command to your system path and make sure it is executable.
 
 
-h2. <a>Build from the latest sources</a>
+h3. Mac OS X
+
+Java is built-in, or installed automatically, so you can skip the first step.
+
+# Download the latest "Play binary package":http://download.playframework.org/ and extract it in @/Applications@.
+# Edit @/etc/paths@ and add the line @/Applications/play-1.2.4@ (for example).
+
+An alternative on OS X is:
+
+# install "HomeBrew":http://mxcl.github.com/homebrew/
+# run @brew install play@
+
+h3. Linux
+
+To install Java, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default Java command on many Linux distros)
+
+
+h3. Windows
+
+To install Java, just download and install the latest JDK package. You do not need to install Python separately, because a Python runtime is bundled with the framework.
+
+
+h2. <a name="build">Build from the latest sources</a>
 
 To benefit from the latest improvements and bug fixes, you may want to compile Play from sources. You’ll need a "Git client":http://git-scm.com/ to fetch the sources and "Ant":http://ant.apache.org/ to build the framework.
 
@@ -34,7 +56,7 @@ bc. # git clone git://github.com/playframework/play.git
 The Play framework is ready to use.
 
 
-h2. <a>Using the play command</a>
+h2. <a name="run">Using the play command</a>
 
 When the framework is correctly installed, open a shell and execute *play*. 
 
@@ -48,9 +70,9 @@ You can get more help on any specific command using *play help any-command-name-
 
 bc. # play help run
 
-h2. <a>Creating a new application</a>
+h2. <a name="new">Creating a new application</a>
 
-Use the **new** command to create a new application. You must give a non-existent path where the application will be created.
+Use the @new@ command to create a new application. You must give a non-existent path where the application will be created.
 
 bc. # play new myApp
 

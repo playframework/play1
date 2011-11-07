@@ -2,6 +2,7 @@ package play.libs;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Key;
 import java.security.Provider;
@@ -27,6 +28,11 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -34,9 +40,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import play.Logger;
-
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-import java.io.StringReader;
 
 /**
  * XML utils
@@ -51,9 +54,14 @@ public class XML {
     public static String serialize(Document document) {
         StringWriter writer = new StringWriter();
         try {
-            new XMLSerializer(writer, null).serialize(document);
-        } catch (IOException e) {
-            Logger.warn("Error when serializing xml Document.", e);
+            TransformerFactory factory = TransformerFactory.newInstance();
+            Transformer transformer = factory.newTransformer();
+            DOMSource domSource = new DOMSource(document);
+            StreamResult streamResult = new StreamResult(writer);
+            transformer.transform(domSource, streamResult); 
+        } catch (TransformerException e) {
+            throw new RuntimeException(
+                    "Error when serializing XML document.", e);
         }
         return writer.toString();
     }

@@ -1,6 +1,7 @@
 package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.ConnectionCustomizer;
 import jregex.Matcher;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -23,6 +24,8 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class DBConfig {
@@ -233,6 +236,13 @@ public class DBConfig {
                     ds.setMaxIdleTimeExcessConnections(Integer.parseInt(p.getProperty(propsPrefix + ".pool.maxIdleTimeExcessConnections", "0")));
                     ds.setIdleConnectionTestPeriod(10);
                     ds.setTestConnectionOnCheckin(true);
+
+                    // This check is not required, but here to make it clear that nothing changes for people
+                    // that don't set this configuration property. It may be safely removed.
+                    if(p.getProperty("db.isolation") != null) {
+                        ds.setConnectionCustomizerClassName(DBConfig.PlayConnectionCustomizer.class.getName());
+                    }
+
                     datasource = ds;
                     url = ds.getJdbcUrl();
                     Connection c = null;
@@ -261,6 +271,7 @@ public class DBConfig {
 
         return dbConfigured;
     }
+
 
     /**
      * returns empty string if default config.
@@ -308,14 +319,14 @@ public class DBConfig {
 
         if ("mem".equals(p.getProperty(propsPrefix)) && p.getProperty(propsPrefix+".url") == null) {
             p.put(propsPrefix+".driver", "org.h2.Driver");
-            p.put(propsPrefix+".url", "jdbc:h2:mem:"+dbConfigName+";MODE=MYSQL");
+            p.put(propsPrefix+".url", "jdbc:h2:mem:"+dbConfigName+";MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
             p.put(propsPrefix+".user", "sa");
             p.put(propsPrefix+".pass", "");
         }
 
         if ("fs".equals(p.getProperty(propsPrefix)) && p.getProperty(propsPrefix+".url") == null) {
             p.put(propsPrefix+".driver", "org.h2.Driver");
-            p.put(propsPrefix+".url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/"+dbConfigName).getAbsolutePath()) + ";MODE=MYSQL");
+            p.put(propsPrefix+".url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/"+dbConfigName).getAbsolutePath()) + ";MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
             p.put(propsPrefix+".user", "sa");
             p.put(propsPrefix+".pass", "");
         }
@@ -399,6 +410,13 @@ public class DBConfig {
             this.driver = d;
         }
 
+        /*
+         * JDK 7 compatibility
+         */
+        public java.util.logging.Logger getParentLogger() {
+            return null;
+        }
+
         public boolean acceptsURL(String u) throws SQLException {
             return this.driver.acceptsURL(u);
         }
@@ -425,4 +443,54 @@ public class DBConfig {
     }
 
 
+    public static class PlayConnectionCustomizer implements ConnectionCustomizer {
+
+        public static Map<String, Integer> isolationLevels;
+
+        static {
+            isolationLevels = new HashMap<String, Integer>();
+            isolationLevels.put("NONE", Connection.TRANSACTION_NONE);
+            isolationLevels.put("READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED);
+            isolationLevels.put("READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED);
+            isolationLevels.put("REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ);
+            isolationLevels.put("SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE);
+        }
+
+        public void onAcquire(Connection c, String parentDataSourceIdentityToken) {
+            Integer isolation = getIsolationLevel();
+            if (isolation != null) {
+                try {
+                    Logger.trace("Setting connection isolation level to %s", isolation);
+                    c.setTransactionIsolation(isolation);
+                } catch (SQLException e) {
+                    throw new DatabaseException("Failed to set isolation level to " + isolation, e);
+                }
+            }
+        }
+
+        public void onDestroy(Connection c, String parentDataSourceIdentityToken) {}
+        public void onCheckOut(Connection c, String parentDataSourceIdentityToken) {}
+        public void onCheckIn(Connection c, String parentDataSourceIdentityToken) {}
+
+        /**
+         * Get the isolation level from either the isolationLevels map, or by
+         * parsing into an int.
+         */
+        private Integer getIsolationLevel() {
+            String isolation = Play.configuration.getProperty("db.isolation");
+            if (isolation == null) {
+                return null;
+            }
+            Integer level = isolationLevels.get(isolation);
+            if (level != null) {
+                return level;
+            }
+
+            try {
+                return Integer.valueOf(isolation);
+            } catch (NumberFormatException e) {
+                throw new DatabaseException("Invalid isolation level configuration" + isolation, e);
+            }
+        }
+    }
 }

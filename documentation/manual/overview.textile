@@ -15,11 +15,11 @@ Play is a pure Java framework and allows you to keep your preferred development 
 
 h2. <a name="reload">Fix the bug and hit Reload</a>
 
-The Java platform is infamous for its low productivity, mainly due to repeated and tedious compile-package-deploy cycles.
+The Java EE platform is infamous for low-productivity web application development, mainly due to repeated and tedious compile-package-deploy cycles.
 
 That’s why we rethought the development cycle to make developing with Play an efficient process.
 
-The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a LAMP or Rails environment. 
+The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a <a href="http://en.wikipedia.org/wiki/LAMP_(software_bundle)">LAMP</a> or <a href="http://en.wikipedia.org/wiki/Ruby_on_Rails">Rails</a> environment. 
 
 It’s so fun that you can even work with a simple text editor and skip a full-featured Java IDE if you want.
 
@@ -59,7 +59,7 @@ If Ajax, REST and managing back/forward movement between web pages are some of t
 
 h2. <a name="templates">Efficient templating engine</a>
 
-We like the idea behind JSP & Expression Language. But why do we need so many configuration files to create a tag library? Why can’t we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That’s why we’ve created a custom template system, inspired by JSP but without its constraints!
+We like the idea behind JSP and Expression Language. But why do we need so many configuration files to create a tag library? Why can’t we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That’s why we’ve created a custom template system, inspired by JSP but without its constraints!
 
 You and anyone else should be tired of writing things like this:
 
@@ -84,11 +84,11 @@ The expression language used by the play template engine is "Groovy":http://groo
 
 h2. <a>JPA on steroids</a>
 
-The Java Persistence API (JPA) is the cleanest object-relational mapping ORM) API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
+The Java Persistence API (JPA) is the cleanest object-relational mapping (ORM) API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded.
 
-Moreover if you use the provided **play.db.jpa.Model** superclass it will help make your code prettier. Have a look:
+Moreover if you use the provided @play.db.jpa.Model@ superclass it will help make your code prettier. Have a look:
 
-bc. public void messages(int page) {
+bc. public static void messages(int page) {
     User connectedUser = User.find("byEmail", connected()).first();
     List<Message> messages = Message.find(
         "user = ? and read = false order by date desc",
@@ -99,7 +99,7 @@ bc. public void messages(int page) {
 
 h2. <a>Test driven development (if you like it)</a>
 
-The integrated test runner makes it easy for you do test-driven development (TDD). You can write all kinds of tests, from simple unit tests to full acceptance tests, and run them directly in a browser using "Selenium":http://seleniumhq.org/. Code coverage is also measured.
+The integrated test runner makes it easy for you do <a href="http://en.wikipedia.org/wiki/Test-driven_development">test-driven development</a>. You can write all kinds of tests, from simple unit tests to full acceptance tests, and run them directly in a browser using "Selenium":http://seleniumhq.org/. Code coverage is also measured.
 
 !images/guide2-2!
 

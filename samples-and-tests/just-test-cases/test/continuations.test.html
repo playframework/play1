@@ -84,6 +84,27 @@
     assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
 
     open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
-    assertTextPresent('1-A-B-C-D-E')
+    assertBodyText('1-A-B-C-D-E')
+
+	open('/useAwaitViaOtherClass')
+    assertTextPresent('failCount: 2')
+
+    open('@{WithContinuations.ControllerWhichUsesAwaitViaInheritance.useAwaitViaInheritance}')
+    assertTextPresent('true')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithContinuations()}')
+    assertTextPresent('ok')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithoutContinuations()}')
+    assertTextPresent('failCount: 1')
+
+    open('@{WithContinuations.usingRenderArgsAndAwait()}')
+    assertBodyText('true')
+
+    open('@{WithContinuations.usingRenderArgsAndAwaitWithCallBack("renderArg")}')
+    assertBodyText('renderArg')
+
+	open('@{WithContinuations.usingRenderArgsAndAwaitWithFutureAndCallback("renderArg")}')
+    assertBodyText('result/renderArg')
 
 #{/selenium}

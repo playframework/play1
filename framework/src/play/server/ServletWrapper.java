@@ -5,6 +5,7 @@ import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
+import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.*;
 
@@ -61,6 +63,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     private static boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
+        Play.standalonePlayServer = false;
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         final String playId = e.getServletContext().getInitParameter("play.id");
@@ -157,6 +160,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Scope.Flash.current.remove();
             Scope.RenderArgs.current.remove();
             Scope.RouteArgs.current.remove();
+            CachedBoundActionMethodArgs.clear();
         }
     }
 

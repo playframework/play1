@@ -21,15 +21,28 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
+    force = "false"
+    trim = "false"
+    if args.count('--forceCopy') == 1:
+        args.remove('--forceCopy')
+        force = "true"
+        
+    if args.count('--forProd') == 1:
+        args.remove('--forProd')
+        force = "true"
+        trim = "true"
+
     classpath = app.getClasspath()
 
-    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
+    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version'], '-Dplay.forcedeps=%s' % (force), '-Dplay.trimdeps=%s' % (trim)]
     if args.count('--verbose'):
         add_options.append('-Dverbose')
     if args.count('--sync'):
         add_options.append('-Dsync')
     if args.count('--debug'):
         add_options.append('-Ddebug')
+    if args.count('--clearcache'):
+        add_options.append('-Dclearcache')
     if args.count('--jpda'):
         print "~ Waiting for JPDA client to continue"
         add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])

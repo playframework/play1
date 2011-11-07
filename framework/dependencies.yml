@@ -8,12 +8,12 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.6
-    - bytecodeparser 0.1
+    - bytecodeparser 0.2
     - c3p0 0.9.1.2
     - cglib -> cglib-nodep 2.2
     - com.google.code.gson -> gson 1.7.1
     - com.jamonapi -> jamon 2.7
-    - com.ning -> async-http-client 1.6.3
+    - com.ning -> async-http-client 1.6.5
     - commons-beanutils 1.8.3  
     - commons-codec 1.4
     - commons-collections 3.2.1
@@ -30,10 +30,10 @@ require:    &allDependencies
     - javax.transaction -> jta 1.1
     - javax.inject 1.0
     - jaxen 1.1
-    - joda-time 1.6
+    - joda-time 2.0 
     - junit 4.8.1
     - jregex 1.2_01
-    - log4j 1.2.15
+    - log4j 1.2.16
     - net.sf.ehcache -> ehcache-core 2.0.0
     - net.sf.ezmorph -> ezmorph 1.0.3
     - net.sf.jsr107cache -> jsr107cache 1.0
@@ -44,17 +44,18 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.2.0
     - org.bouncycastle -> bcprov-jdk15 1.45
     - org.codehaus.groovy -> groovy-all 1.7.7
-    - org.eclipse.jdt.core 3.6.0
+    - org.eclipse.jdt.core 3.8.0.v_C03
     - org.hibernate -> hibernate-core 3.6.1.Final
     - org.hibernate -> hibernate-commons-annotations 3.2.0.Final
     - org.hibernate -> hibernate-entitymanager 3.6.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.0.Final
     - org.javassist -> javassist 3.9.0.GA
-    - org.jboss.netty -> netty 3.2.4.Final
+    - org.jboss.netty -> netty 3.2.5.Final
+    - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.6.1
     - org.slf4j -> slf4j-log4j12 1.6.1
     - org.yaml -> snakeyaml 1.7
-    - spy -> memcached 2.4.2
+    - spy -> memcached 2.6
     - com.thoughtworks.xstream -> xstream 1.3
 
 # Default repositories, used for all projects

@@ -10,6 +10,7 @@ public class Topics extends Application {
         Topic topic = Topic.findById(topicId);
         notFoundIfNull(topic);
         topic.views += 1;
+        topic.save();
         render(topic, page);
     }
 

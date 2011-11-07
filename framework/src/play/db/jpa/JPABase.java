@@ -1,24 +1,5 @@
 package play.db.jpa;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.EntityManager;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PersistenceException;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.collection.PersistentMap;
 import org.hibernate.exception.GenericJDBCException;
@@ -26,8 +7,15 @@ import org.hibernate.proxy.HibernateProxy;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
+import javax.persistence.*;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.sql.SQLException;
+import java.util.*;
+
 /**
- * A super class for JPA entities 
+ * A super class for JPA entities
  */
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
@@ -53,7 +41,7 @@ public class JPABase implements Serializable, play.db.Model {
             em().persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
-        avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
         try {
             saveAndCascade(true);
         } finally {
@@ -63,12 +51,12 @@ public class JPABase implements Serializable, play.db.Model {
             em().flush();
         } catch (PersistenceException e) {
             if (e.getCause() instanceof GenericJDBCException) {
-                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(), e);
             } else {
                 throw e;
             }
         }
-        avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
         try {
             saveAndCascade(false);
         } finally {
@@ -78,7 +66,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     public void _delete() {
         try {
-            avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
                 saveAndCascade(true);
             } finally {
@@ -89,12 +77,12 @@ public class JPABase implements Serializable, play.db.Model {
                 em().flush();
             } catch (PersistenceException e) {
                 if (e.getCause() instanceof GenericJDBCException) {
-                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(), e);
                 } else {
                     throw e;
                 }
             }
-            avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
                 saveAndCascade(false);
             } finally {
@@ -114,7 +102,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static transient ThreadLocal<List<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<List<JPABase>>();
+    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<Set<JPABase>>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
@@ -205,6 +193,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     /**
      * Retrieve the current entityManager
+     *
      * @return the current entityManager
      */
     public EntityManager em() {
@@ -217,37 +206,64 @@ public class JPABase implements Serializable, play.db.Model {
 
     /**
      * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #key key} and class</strong>
-     * @param other 
+     *
+     * @param other
      * @return true if equality condition above is verified
      */
     @Override
     public boolean equals(Object other) {
+        final Object key = this._key();
+
         if (other == null) {
             return false;
         }
-        if ((this == other)) {
+        if (this == other) {
             return true;
         }
+        if (key == null) {
+            return false;
+        }
+        if (play.db.Model.class.isAssignableFrom(other.getClass()) && key.getClass().isArray()) {
+            Object otherKey = ((play.db.Model) other)._key();
+            if (otherKey.getClass().isArray()) {
+                return Arrays.deepEquals((Object[]) key, (Object[]) otherKey);
+            }
+            return false;
+        }
+
+
         if (!this.getClass().isAssignableFrom(other.getClass())) {
             return false;
         }
-        if (this._key() == null) {
-            return false;
-        }
-        return this._key().equals(((JPABase) other)._key());
+
+        return key.equals(((play.db.Model) other)._key());
     }
 
     @Override
     public int hashCode() {
-        if (this._key() == null) {
+        final Object key = this._key();
+        if (key == null) {
             return 0;
         }
-        return this._key().hashCode();
+        if (key.getClass().isArray()) {
+            return Arrays.deepHashCode((Object[]) key);
+        }
+        return key.hashCode();
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + _key() + "]";
+        final Object key = this._key();
+        String keyStr = "";
+        if (key != null && key.getClass().isArray()) {
+            for (Object object : (Object[]) key) {
+                keyStr += object.toString() + ", ";
+            }
+            keyStr = keyStr.substring(0, keyStr.length() - 2);
+        } else if (key != null) {
+            keyStr = key.toString();
+        }
+        return getClass().getSimpleName() + "[" + keyStr + "]";
     }
 
     public static class JPAQueryException extends RuntimeException {

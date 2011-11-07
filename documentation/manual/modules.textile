@@ -6,22 +6,22 @@ h2. <a name="what">What is a module?</a>
 
 A module is just another Play application; however some differences exist in the way resources are loaded for an application module:
 
-* A module does not have a **conf/application.conf** file.
-* A module can have a **conf/routes** file, but these routes will not be  loaded automatically.
+* A module does not have a @conf/application.conf@ file.
+* A module can have a @conf/routes@ file, but these routes will not be  loaded automatically.
 * All files are first searched for in the main application path, then in all loaded modules.
 * A module can contain plain Java code packaged as a JAR file in the module/lib directory.
 * A module can include a documentation page.
 * Everything in a module is optional.
 
-You can create a module with the **play new-module** command.
+You can create a module with the @play new-module@ command.
 
 h2. <a name="loading">How to load a module from an application</a>
 
-Modules are automatically loaded from the */modules* directory of the application. You can use the "dependency management system":dependency to automatically manage your application modules.
+Modules are automatically loaded from the @/modules@ directory of the application. You can use the "dependency management system":dependency to automatically manage your application modules.
 
 h2. <a name="routes">Load default routes from modules</a>
 
-A module can provide a default routes file. You can load it in the main application routes file, using a special route declaration:
+A module can provide a default @routes@ file. You can load it in the main application @routes@ file, using a special route declaration:
 
 bc. # Import the default CRUD routes
 GET     /admin	     module:crud
@@ -32,7 +32,7 @@ bc. GET     /	     module:*
 
 h2. <a name="documentation">Add documentation to a module</a>
 
-You can add a documentation page to a module simply by adding a the file **documentation/manual/home.textile** to the module. Use the same Textile syntax as the Play documentation itself, in **${play.path}/documentation/manual/**.
+You can add a documentation page to a module simply by adding a the file @documentation/manual/home.textile@ to the module. Use the same Textile syntax as the Play documentation itself, in @${play.path}/documentation/manual/@.
 
 If you are running a Play application that uses one or more modules with documentation, then the local Play documentation at "http://localhost:9000/@documentation":http://localhost:9000/@documentation will include links to their documentation pages under *Installed Modules* in the side bar.
 
@@ -40,7 +40,7 @@ h2. <a name="repository">Using the module repository</a>
 
 The "module repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
 
-You can also browse the module repository using the **play list-modules** command. 
+You can also browse the module repository using the @play list-modules@ command. 
 
 bc. gbo-mac:~ guillaume$ play list-modules
 ~        _            _ 
@@ -64,36 +64,74 @@ bc. gbo-mac:~ guillaume$ play list-modules
 ~   Versions: 1.0
 ...
 
-You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allows you to use it from several application without having to install a different copy in each application. It is useful for large modules that are more like framework extensions than extensions to your application.
+You can install a module locally using the @play install {module}-{version}@ command. Installing a module locally allows you to use it from several application without having to install a different copy in each application. It is useful for large modules that are more like framework extensions than extensions to your application.
 
 For example, to install Scala support in the framework, use:
 
 bc. play install scala-head
 
-By convention the **head** version is the unstable version of the module. You can also install the default version of a module by omitting the version information. For example:
+By convention the @head@ version is the unstable version of the module. You can also install the default version of a module by omitting the version information. For example:
 
 bc. play install scala
 
-Modules installed this way are downloaded to the **/modules** directory of your framework installation. 
+Modules installed this way are downloaded to the @/modules@ directory of your framework installation. 
 
-You can change the installation path using the **--path** option:
+You can change the installation path using the @--path@ option:
 
 bc. play install gwt --path=my-project
 
 h2. <a name="contributing">Contributing a new module to the module repository</a>
 
-First you need to have an OpenID. It will help us to authenticate you as author of your modules. Then send us a module registration request on the Google Group.
+h3. <a name="prerequisites">Prerequisites</a>
 
-Please tell us:
+To register a new module, the following are required.
 
-* More about your module. What is it?
-* Your module name. It must match the @[a-zA-Z]+@ regular expression.
-* A short description of the module.
-* Your project home page.
-* Your OpenID.
-* Your module must be hosted somewhere with the source code available and a way to report bugs. If you don’t have any idea, github, Google Code and Launchpad are good choices. 
+# A Google account, to post on the Google Group.
+# An OpenID for your developer log-in (you can use your Google account for this).
+# A module name that matches the regular expression <code>[a-zA-Z]+</code>.
+# "Module documentation":#documentation that explains what the module is for and how to use it.
+# A module home page with the source code available and a way to report bugs, e.g. a <a href="http://github.com/">GitHub</a>, <a href="http://code.google.com/">Google Code</a> or <a href="http://launchpad.net/">Launchpad</a> project.
+# A license file, such as the open-source license in the Play distribution’s @COPYING@ file.
 
-To release your module, simply use the play build-module command. Then connect to the module repository and upload the generated package.
+h3. <a name="register">Module registration</a>
+
+To use your Google account as your OpenID, you need to discover its full URL, as follows.
+
+# On "http://www.playframework.org/modules":http://www.playframework.org/modules, under _Developer login_ enter @https://www.google.com/accounts/o8/id@ and click the _Login_ button.
+# Log in to your Google account.
+# Make a note of the full Google OpenID URL under _Developer login_, e.g. @https://www.google.com/accounts/o8/id?id=BItOawk7q69CFhRarQIo@
+
+Post a module registration request on the "play-framework Google Group":https://groups.google.com/forum/#!forum/play-framework. For example:
+
+bc. Subject: Module registration request: {module name}
+ 
+Module name:
+jqueryui
+ 
+Display name:
+jQuery UI
+ 
+Description:
+Working examples of jQuery UI widgets, integrated with a Play application.
+ 
+Project home page:
+https://github.com/hilton/jqueryui-module
+ 
+OpenID:
+https://www.google.com/accounts/o8/id?id=BItOawk7q69CFhRarQIo
+
+When your module has been registered, you can publish a release.
+
+
+h3. <a name="release">Releasing your module</a>
+
+To release your module:
+
+# set the module version number in the first line of @conf/dependency.yml@, e.g. @self: play -> jqueryui 1.0@
+# build the module with the @play build-module@ command
+# log in to "http://www.playframework.org/modules":http://www.playframework.org/modules under _Developer login_
+# browse to your module’s page, via the link on "http://www.playframework.org/modules/developers":http://www.playframework.org/modules/developers under _Your modules_
+# upload the generated ZIP file from your your module’s @dist/@ directory, using the form under _Manage module releases_
 
 You can of course use the offical Google Group to provide help and share information about your work.
 

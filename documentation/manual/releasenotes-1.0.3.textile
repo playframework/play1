@@ -1,6 +1,6 @@
 h1. Play 1.0.3 -- Release notes
 
-**Play 1.0.3** is a maintenance release of the Play 1.0 branch. There is no new major feature in this version, as the development focus is now set to the 1.1 version. The documentation has been updated with missing references, the yabe tutorial now includes a new chapter about **i18n**, and a new sample application has been added.
+**Play 1.0.3** is a maintenance release of the Play 1.0 branch. There is no new major feature in this version, as the development focus is now set to the 1.1 version. The documentation has been updated with missing references, the yabe tutorial now includes a new chapter about "Internationalisation and localisation":guide12, and a new sample application has been added.
 
 p(note). **Play 1.0.3** is a maintenance release and is fully compatible with the 1.0 series. If you encounter any problems please ask us on the "Google Group":http://groups.google.com/group/play-framework.
 
@@ -12,9 +12,9 @@ A new sample application has been added. It demonstrates the different ways to c
 
 !images/validation!
 
-h2. <a>New yabe tutorial chapter: i18n</a>
+h2. <a>New yabe tutorial chapter</a>
 
-This complete the existing yabe tutorial with application internationalization and language localisation. Although we could have done this from the start, it is more realistic to build the first version of an application in a single language, and add multiple languages later.
+"Internationalisation and localisation":guide12 completes the existing yabe tutorial with application. Although we could have done this from the start, it is more realistic to build the first version of an application in a single language, and add multiple languages later.
 
 "Read the new chapter":guide12
 

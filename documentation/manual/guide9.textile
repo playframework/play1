@@ -6,18 +6,20 @@ We could easily reuse the CRUD module as a basis for this page but here we will 
 
 h2. <a>Start with the user posts list</a>
 
-We just need to retrieve and display the posts written by the connected user. Very easy. Start to enhance the **Admin.index** action:
+We just need to retrieve and display the posts written by the connected user. Very easy. Start to enhance the @Admin.index@ action:
 
 bc. public static void index() {
-    List<Post> posts = Post.find("author.email", Security.connected()).fetch();
+    String user = Security.connected();
+    List<Post> posts = Post.find("author.email", user).fetch();
     render(posts);
 }
 
-And complete the **yabe/app/views/Admin/index.html**:
+And complete the @yabe/app/views/Admin/index.html@:
 
 bc. #{extends 'admin.html' /}
  
-<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} ${posts.pluralize('post', 'posts')} so far</span></h3>
+<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} 
+${posts.pluralize('post', 'posts')} so far</span></h3>
  
 #{list items:posts, as:'post'}
     <p class="post ${post_parity}">
@@ -35,14 +37,14 @@ The first screen is ready:
 
 h2. <a>The ‘write a new post’ page</a>
 
-We will create a form to create a new post. Basically with a form you have 2 actions: one to display the form and one to handle the form submission. Let’s create the new **Admin.form** and **Admin.save** actions that will display and handle form submission:
+We will create a form to create a new post. Basically with a form you have two actions: one to display the form and one to handle the form submission. Let’s create the new @Admin.form@ and @Admin.save@ actions that will display and handle form submission:
 
-Add the routes in the **yabe/conf/routes** file:
+Add the routes in the @yabe/conf/routes@ file:
 
 bc. GET     /admin/new                          Admin.form
 POST    /admin/new                          Admin.save
 
-And add the **form()** and **save()** actions to the **Admin.java** controller:
+And add the @form()@ and @save()@ actions to the @Admin.java@ controller:
 
 bc. public static void form() {
     render();
@@ -52,7 +54,7 @@ public static void save() {
     // Not implemented yet
 }
 
-Now you have to create the **yabe/app/views/Admin/form.html** template:
+Now you have to create the @yabe/app/views/Admin/form.html@ template:
 
 bc. #{extends 'admin.html' /}
  
@@ -96,7 +98,7 @@ bc. #{extends 'admin.html' /}
     
 #{/form}
 
-Finally, edit the **yabe/app/views/Admin/index.html** template to link the **Write a new post** button to this form:
+Finally, edit the @yabe/app/views/Admin/index.html@ template to link the **Write a new post** button to this form:
 
 bc. ...
 <p id="newPost" >
@@ -108,7 +110,7 @@ You can check the result:
 
 !images/guide9-2!
 
-Now we have to complete the **Admin.save** action to handle correctly the form submission. It will create a new **Post** object, convert the tag list to a real **Tag** objects set, validate all the fields and save it. If there is any problem it will redisplay the form to show the errors.
+Now we have to complete the @Admin.save@ action to handle correctly the form submission. It will create a new @Post@ object, convert the tag list to a real @Tag@ objects set, validate all the fields and save it. If there is any problem it will redisplay the form to show the errors.
 
 bc. public static void save(String title, String content, String tags) {
     // Create post
@@ -130,7 +132,7 @@ bc. public static void save(String title, String content, String tags) {
     index();
 }
 
-p(note). Here we use render("@form") as a shortcut of render("Admin/form.html"). It just tells Play to use the form action’s default template.
+p(note). Here we use <code>==render("@form")==</code> as a shortcut for <code>==render("Admin/form.html")==</code>. It just tells Play to use the form action’s default template.
 
 Test it!
 
@@ -138,7 +140,7 @@ h2. <a>Reusing this stuff for editing Posts</a>
 
 We have defined the HTML form and the Java action able to create a new blog Post. But we also need to allow editing existing posts. We can easily reuse exactly the same code with a few modifications.
 
-First we need the **Admin.form** to retrieve an existing Post:
+First we need the @Admin.form@ to retrieve an existing @Post@:
 
 bc. public static void form(Long id) {
     if(id != null) {
@@ -148,7 +150,7 @@ bc. public static void form(Long id) {
     render();
 }
 
-As you see we made it optional, so the same action will retrieve an existing post only if the **id** parameter is filled. So you can now link the main screen’s post list to the edit form. Edit the **yabe/app/views/Admin/index.html** template:
+As you see we made it optional, so the same action will retrieve an existing post only if the @id@ parameter is filled. So you can now link the main screen’s post list to the edit form. Edit the @yabe/app/views/Admin/index.html@ template:
 
 bc. #{extends 'admin.html' /}
  
@@ -168,16 +170,16 @@ Well, very easy but we have a problem. If you look at the actual URL generated b
 
 bc. /admin/new?id=3
 
-It works, but it’s not really pretty. We will define another route that will use a different URL pattern if the **id** parameter is submitted:
+It works, but it’s not really pretty. We will define another route that will use a different URL pattern if the @id@ parameter is submitted:
 
 bc. GET     /admin/myPosts/{id}                 Admin.form
 GET     /admin/new                          Admin.form
 
-As you can see we define this route before the old one, so it has a higher priority. That means that if an **id** parameter is submitted Play will prefer this URL pattern. If not, it will still use the old route.
+As you can see we define this route before the old one, so it has a higher priority. That means that if an @id@ parameter is submitted Play will prefer this URL pattern. If not, it will still use the old route.
 
 Refresh the **My posts** page and you should get better URL on these links.
 
-Now we need to modify the **yabe/app/views/Admin/form.html** template as well:
+Now we need to modify the @yabe/app/views/Admin/form.html@ template as well:
 
 bc. #{extends 'admin.html' /}
  
@@ -226,9 +228,9 @@ bc. #{extends 'admin.html' /}
     
 #{/form}
 
-As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent the the **Admin.save** action. 
+As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent to the @Admin.save@ action. 
 
-Now we can change the **save()** method a little to handle both creation and editing cases:
+Now we can change the @save()@ method a little to handle both creation and editing cases:
 
 bc. public static void save(Long id, String title, String content, String tags) {
     Post post;
@@ -260,9 +262,9 @@ bc. public static void save(Long id, String title, String content, String tags) 
     index();
 }
 
-And for better URL we will use the same trick as before, by adding a new preferred route if an **id** parameter exist:
+And for better URL we will use the same trick as before, by adding a new preferred route if an @id@ parameter exists:
 
-bc. POST    /admin/myPosts/{id}                  Admin.save
+bc. POST    /admin/myPosts/{id}                 Admin.save
 POST    /admin/new                          Admin.save
 
 That’s done! Now we’re using the same action for both creating new blog posts and editing old ones, and the administration area is finished!

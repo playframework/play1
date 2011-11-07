@@ -96,11 +96,19 @@ public class Application extends Controller {
     }
     
     public static void dashboard(String client) {
-        
+        renderText(client);
     }
 
     public static void hello(String name) {
         render(name);
+    }
+
+    public static void helloWorld(String name) {
+        render("/Application/hello.html", name);
+    }
+
+    public static void helloSteph(String name) {
+        render("/Application/hello.html", name);
     }
 
     public static void yop() {
@@ -156,6 +164,14 @@ public class Application extends Controller {
             JPABinding.save(new Project("COLCOZ"));
         }
         renderText(def);
+    }
+
+    public static void jsRoute() {
+        render();
+    }
+
+    public static void jsRouteError() {
+        render();
     }
 
     public static void mail() {
@@ -270,5 +286,9 @@ public class Application extends Controller {
         	users.add(user);
         }
         render(users);
+    }
+    
+    public static void fastTag_render_test() {
+        render();
     }
 }

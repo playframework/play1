@@ -43,13 +43,18 @@ try:
     else:
         play_env["id"] = ''
 
-    # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
-    print r"~        _            _ "
-    print r"~  _ __ | | __ _ _  _| |"
-    print r"~ | '_ \| |/ _' | || |_|"
-    print r"~ |  __/|_|\____|\__ (_)"
-    print r"~ |_|            |__/   "
-    print r"~"
+    showLogo = sys.argv.count("--silent") == 0
+
+    if showLogo:
+        # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
+        print r"~        _            _ "
+        print r"~  _ __ | | __ _ _  _| |"
+        print r"~ | '_ \| |/ _' | || |_|"
+        print r"~ |  __/|_|\____|\__ (_)"
+        print r"~ |_|            |__/   "
+        print r"~"
+    else:
+        sys.argv.remove("--silent")
 
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
     if not os.path.exists(play_version_file):
@@ -60,7 +65,8 @@ try:
 
     play_env["version"] = open(play_version_file).readline().strip()
 
-    print "~ play! %s, http://www.playframework.org" % (play_env["version"])
+    if showLogo:
+        print "~ play! %s, http://www.playframework.org" % (play_env["version"])
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
     application_path = None
@@ -101,15 +107,16 @@ try:
     if remaining_args.count('--%%%s' % play_env["id"]) == 1:
         remaining_args.remove('--%%%s' % play_env["id"])
 
-    if play_command == 'test' or play_command == 'auto-test':
+    if play_command in ['test', 'auto-test', 'autotest'] :
         # If framework-id is not a valid test-id, force it to 'test'
         if not isTestFrameworkId( play_env["id"] ): 
             play_env["id"] = 'test'
 
-    if play_env["id"] is not '':
-        print "~ framework ID is %s" % play_env["id"]
-    print "~"
-    
+    if showLogo:
+        if play_env["id"] is not '':
+            print "~ framework ID is %s" % play_env["id"]
+        print "~"
+
     # ~~~~~~~~~~~~~~~~~ Checking for disable_check_jpda
     disable_check_jpda = False
     if remaining_args.count('-f') == 1:
@@ -124,7 +131,7 @@ try:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cmdloader = CommandLoader(play_env["basedir"])
-    
+
     # ~~~~~~~~~~~~~~~~~ Resolve dependencies if needed
     if remaining_args.count('--deps') == 1:
         cmdloader.commands['dependencies'].execute(command='dependencies', app=play_app, args=['--sync'], env=play_env, cmdloader=cmdloader)
@@ -143,12 +150,12 @@ try:
             module = cmdloader.modules[name]
             if 'before' in dir(module):
                 module.before(command=play_command, app=play_app, args=remaining_args, env=play_env)
-        cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env, cmdloader=cmdloader)
+        status = cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env, cmdloader=cmdloader)
         for name in cmdloader.modules:
             module = cmdloader.modules[name]
             if 'after' in dir(module):
                 module.after(command=play_command, app=play_app, args=remaining_args, env=play_env)
-        sys.exit(0)
+        sys.exit(status)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
     print "~ Usage: play cmd [app_path] [--options]"

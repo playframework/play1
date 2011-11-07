@@ -19,7 +19,7 @@ As you know, the Play test runner requires a browser to run application tests. T
 
 However, for continuous integration, it's sometimes difficult to automatically run a real browser on the integration server. So, since this release, Play embeds a stand-alone headless browser based on "HtmlUnit":http://htmlunit.sourceforge.net/.
 
-When you run tests with **play auto-test**, this browser will be used. 
+When you run tests with @play auto-test@, this browser will be used. 
 
 !images/auto-test!
 
@@ -35,7 +35,7 @@ h2. <a name="libs">Updated core libraries and improved naming</a>
 
 As Play framework is a full-stack framework it directly embeds the required Java libraries. All of these libraries have been updated, including the new Hibernate 3.5.x release that provides JPA 2 support.
 
-We have also adopted a better naming conventions for embedded libraries. If you look in the **framework/lib** directory you can now see what the exact version of each library is.
+We have also adopted a better naming conventions for embedded libraries. If you look in the @framework/lib@ directory you can now see what the exact version of each library is.
 
 h2. <a name="model">New database-agnostic play.db.Model API</a>
 
@@ -53,7 +53,7 @@ Play has now a native container for the "Glassfish application server":https://g
 
 !images/glassfish!
 
-The Glassfish container is hosted at "http://github.com/playframework/play-glassfish":http://github.com/playframework/play-glassfish, and should be soon available directly in the Glassfish **contrib** repository.
+The Glassfish container is hosted at "http://github.com/playframework/play-glassfish":http://github.com/playframework/play-glassfish, and should be soon available directly in the Glassfish @contrib@ repository.
 
 Because Glassfish allows to run several applications simultaneously, you can now run several Play applications in a single JVM. 
 
@@ -63,19 +63,19 @@ Note that this is different from packaging your application as a WAR file. The P
 
 h2. <a name="routeHost">Virtual hosting in routes</a>
 
-The **routes** file now supports Host matching. this can be useful if action parameters must be extracted from the host parameter. For example, for a SAAS application, you could use:
+The @routes@ file now supports Host matching. this can be useful if action parameters must be extracted from the host parameter. For example, for a SAAS application, you could use:
 
 bc. GET    {client}.mysoftware.com/         Application.index
 
-and then automatically retrieve the **client** value as for any other request parameter:
+and then automatically retrieve the @client@ value as for any other request parameter:
 
 bc. public static void index(String client) {
-    ...
+    …
 }
 
-When using the **@@{...}** notation (absolute reverse routing) in a template, the host will be used if provided by the corresponding route. This can be useful in several situations. 
+When using the <code>@@{…}</code> notation (absolute reverse routing) in a template, the host will be used if provided by the corresponding route. This can be useful in several situations. 
 
-For example, if you want to use a content distribution network to distribute your static assets in production, you could write a **routes** file like this:
+For example, if you want to use a content distribution network to distribute your static assets in production, you could write a @routes@ file like this:
 
 bc. #{if play.Play.mode.isDev()}
     GET     /public/                        staticDir:public
@@ -88,7 +88,7 @@ And in your templates:
 
 bc. <img src="@@{'/public/images/logo.png'}">
 
-This will be reversed as **http://locahost:9000/public/images/logo.png** in DEV mode, and **http://assets.myapp.com/images/logo.png** in PROD mode.
+This will be reversed as @http://locahost:9000/public/images/logo.png@ in DEV mode, and @http://assets.myapp.com/images/logo.png@ in PROD mode.
 
 
 h2. <a name="binding">Support for custom binding</a>
@@ -97,13 +97,13 @@ The binding system now supports more customization.
 
 h3. @play.data.binding.As
 
-The first thing is the new **@play.data.binding.As** annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
+The first thing is the new <code>@play.data.binding.As</code> annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the @DateBinder@:
 
 bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
-	...
+	…
 } 
 
-The **@As** annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
+The <code>@As</code> annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
 		@As(
@@ -112,20 +112,20 @@ bc. public static void update(
 		)
 		Date updatedAt
 	) {
-	...
+	…
 }
 
-The **@As** annotation can work with all binders that support it, including your own binder. For example, using the **ListBinder**:
+The <code>@As</code> annotation can work with all binders that support it, including your own binder. For example, using the @ListBinder@:
 
 bc. public static void update(@As(",") List<String> items) {
-	...
+	…
 }
 
-This binds a simple comma separated **String** as a **List**.
+This binds a simple comma separated @String@ as a @List@.
 
 h3. @play.data.binding.NoBinding
 
-The new **@play.data.binding.NoBinding** annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
+The new <code>@play.data.binding.NoBinding</code> annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
 
 bc. public class User extends Model {	
 	@NoBinding("profile") public boolean isAdmin;
@@ -134,18 +134,19 @@ bc. public class User extends Model {
 }
  
 public static void editProfile(@As("profile") User user) {
-	...
+	…
 }
 
-In this case, the **isAdmin** field will never be bound from the **editProfile** action, even if an malicious user includes a **user.isAdmin=true** field in a fake form post.
+In this case, the @isAdmin@ field will never be bound from the @editProfile@ action, even if an malicious user includes a @user.isAdmin=true@ field in a fake form post.
 
 h3. play.data.binding.TypeBinder
 
-The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of **TypeBinder** that you define in your project. For example:
+The <code>@As</code> annotation also allows you to define a completely custom binder. A custom binder is subclass of @TypeBinder@ that you define in your project. For example:
 
 bc. public class MyCustomStringBinder implements TypeBinder<String> {
  
-    public Object bind(String name, Annotation[] anns, String value, Class clazz) {
+    public Object bind(String name, Annotation[] anns, String value, 
+    Class clazz) {
         return "!!" + value + "!!";
     }
  
@@ -153,18 +154,20 @@ bc. public class MyCustomStringBinder implements TypeBinder<String> {
 
 You can use it in any action, like:
 
-bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String name) {
-	...
+bc. public static void anyAction(
+@As(binder=MyCustomStringBinder.class) String name) {
+	…
 }
 
 h3. @play.data.binding.Global
 
-Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the **java.awt.Point** class like this:
+Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the @java.awt.Point@ class like this:
 
 bc. @Global
 public class PointBinder implements TypeBinder<Point> {
  
-    public Object bind(String name, Annotation[] anns, String value, Class class) {
+    public Object bind(String name, Annotation[] anns, String value, 
+    Class class) {
 		String[] values = value.split(",");
 		return new Point(
 			Integer.parseInt(values[0]), 
@@ -174,14 +177,14 @@ public class PointBinder implements TypeBinder<Point> {
     
 } 
 
-As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
+As you see a global binder is a classical binder annotated with <code>@play.data.binding.Global</code>. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
 
 
 h2. <a name="asyncHTTP">New powerful async WS library</a>
 
-The **play.libs.WS** library allow your Play application to behaves like a web client. In this release we have introduced a new asynchronous implementation based on "AsyncHttpClient":http://github.com/AsyncHttpClient/async-http-client. This new implementation provides new **xxxAsync** methods that allow you to fetch remote resources asynchronously.
+The @play.libs.WS@ library allow your Play application to behaves like a web client. In this release we have introduced a new asynchronous implementation based on "AsyncHttpClient":http://github.com/AsyncHttpClient/async-http-client. This new implementation provides new @xxxAsync@ methods that allow you to fetch remote resources asynchronously.
 
-When combined with the **waitFor(…)** feature, you can use this to build high performance non-blocking applications that mash-up existing applications:
+When combined with the @waitFor(…)@ feature, you can use this to build high performance non-blocking applications that mash-up existing applications:
 
 bc. public static void mirrorFeed() throws Exception {
 	if (request.isNew) {
@@ -200,23 +203,23 @@ bc. public static void mirrorFeed() throws Exception {
 
 h2. <a name="oauth">OAuth support</a>
 
-There is now a **play.libs.OAuth** library that provides "OAuth":http://oauth.net/ protocol support. OAuth is an open protocol to allow secure API authorization in a simple and standard method from web applications.
+There is now a @play.libs.OAuth@ library that provides "OAuth":http://oauth.net/ protocol support. OAuth is an open protocol to allow secure API authorization in a simple and standard method from web applications.
 
-A new **twitter-oauth** sample application demonstrates the API usage by connecting securely to the twitter API.
+A new @twitter-oauth@ sample application demonstrates the API usage by connecting securely to the twitter API.
 
 !images/sample-twitter!
 
 h2. <a name="https">HTTPS support</a>
 
-The built-in server now supports the HTTPS protocol. You can of course use it in production if you want. It supports certificate management, either via the classical Java **keystore** or simple **cert** and **key** files. To start an HTTPS connector for your application, just declare the **https.port** configuration property in your **application.conf** file:
+The built-in server now supports the HTTPS protocol. You can of course use it in production if you want. It supports certificate management, either via the classical Java **keystore** or simple @cert@ and @key@ files. To start an HTTPS connector for your application, just declare the @https.port@ configuration property in your @application.conf@ file:
 
 bc. http.port=9000
 https.port=9443
 
-You need to put your certificates in the *conf* directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follow:
+You need to put your certificates in the @conf@ directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follows:
 *host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *certificate.jks*.
 
-If you are using X509 certificates, then the following parameters can be configured though your *application.conf*:
+If you are using X509 certificates, then the following parameters can be configured in your @application.conf@ file:
 
 bc. # X509 certificates
 certificate.key.file=conf/host.key
@@ -225,21 +228,20 @@ certificate.file=conf/host.cert
 certificate.password=secret
 trustmanager.algorithm=JKS
 
-In case your are using keystore:
+If you are using keystore:
 
 bc. keystore.algorithm=JKS
 keystore.password=secret
 keystore.file=conf/certificate.jks
 
-
 Note that the values above are the default values.
 
-You can generate self signed certificates using *openssl*: 
+You can generate self-signed certificates using *openssl*: 
 
 bc. openssl genrsa 1024 > host.key
 openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
 
-If you are using the java keystore mechanism, then the following properties can be configured in your *application.conf*:
+If you are using the Java keystore mechanism, then the following properties can be configured in your @application.conf@ file:
 
 bc. # Keystore 
 ssl.KeyManagerFactory.algorithm=SunX509
@@ -251,42 +253,42 @@ The values above are the default values.
 
 h2. <a name="cache">New Cache features</a>
 
-There are two new features that enable easier cache integration for actions and templates. First you can easily cache the result of an action by adding the **@play.cache.CacheFor** annotation. This is very useful for pseudo static pages.
+There are two new features that enable easier cache integration for actions and templates. First you can easily cache the result of an action by adding the <code>@play.cache.CacheFor</code> annotation. This is very useful for pseudo static pages.
 
 bc. @CacheFor("1h")
 public static void index() {
 	render();
 }
 
-Second, there is now a new **#cache** tag that allows to easily cache template fragments:
+Second, there is now a new @#{cache}@ tag that allows to easily cache template fragments:
 
 bc. <h1>Very complex home page to build</h1>
  
 #{cache 'home-' + connectedUser.email, for:'15min'}
-	...
+	…
 #{/cache}
 
 These new features use the same cache implementation as the standard Play cache.
 
 h2. <a name="war">WAR archives are fully precompiled</a>
 
-The **play precompile** command now really compile your applications to static Java bytecode. This means that you can distribute a Play application fully-compiled, and that you can remove all **app/** source files, including templates.
+The @play precompile@ command now really compile your applications to static Java bytecode. This means that you can distribute a Play application fully-compiled, and that you can remove all @app/@ source files, including templates.
 
-All **WAR** files generated by the **play war** command are now automatically precompiled.
+All **WAR** files generated by the @play war@ command are now automatically precompiled.
 
-By default, when you run an application the standard way, Play will always check the application source code to detect changes. If you don't care about this step and you want to start your application from precompiled classes, you can specify the **precompiled=true** system property:
+By default, when you run an application the standard way, Play will always check the application source code to detect changes. If you don't care about this step and you want to start your application from precompiled classes, you can specify the @precompiled=true@ system property:
 
 bc. play start myApp -Dprecompiled=true
 
 h2. <a name="routeArgs">Global route arguments</a>
 
-The new **play.mvc.Controller.routeArgs** scope allow to define arguments that will be used globally for any reverse routing during the request. For example, if you have a common parameter for a lot of routes:
+The new @play.mvc.Controller.routeArgs@ scope allow to define arguments that will be used globally for any reverse routing during the request. For example, if you have a common parameter for a lot of routes:
 
 bc. GET     /{lang}/            Application.index
 GET     /{lang}/users       Application.users
 GET     /{lang}/items       Application.items
 
-You can omit the **lang** parameter for each action, and manage it in a single **@Before** filter:
+You can omit the @lang@ parameter for each action, and manage it in a single <code>@Before</code> filter:
 
 bc. @Before
 static setLang(String lang) {
@@ -294,7 +296,7 @@ static setLang(String lang) {
     routeArgs.put("lang", lang);
 }
 
-By adding the **lang** argument to the **routeArgs** scope, it will automatically be used for reverse routing, even if not specified:
+By adding the @lang@ argument to the @routeArgs@ scope, it will automatically be used for reverse routing, even if not specified:
 
 bc. <a href="@{Application.users()}">Users list</a>
 
@@ -304,16 +306,15 @@ bc. <a href="/fr/users">Users list</a>
 
 h2. <a name="commands">More flexibility to write custom commands</a>
 
-Module creators now have more flexibility to write custom Python commands. A **commands.py** file contributed by a module can hook into any existing built-in command. Also, commands contributed by modules are now listed by the **play help** command.
+Module creators now have more flexibility to write custom Python commands. A @commands.py@ file contributed by a module can hook into any existing built-in command. Also, commands contributed by modules are now listed by the @play help@ command.
 
 h2. <a name="other">Other small features</a>
 
 There are also some small new features as well as "230 fixed bugs":http://www.playframework.org/roadmap/1.1, including:
 
-* Support for namespaces in the **play.libs.XPath** library
-* Support of the **never** value in Jobs scheduling
-* Mime type to serve static resources can be defined in **application.conf**
-* Helpers for cross-domain XHR in **play.mvc.Http.Response**
-* Support for **HTTPOnly** cookies
-* New command **play check** to check for new Play framework releases
-
+* support for namespaces in the @play.libs.XPath@ library
+* support of the @never@ value in Jobs scheduling
+* mime type to serve static resources can be defined in @application.conf@
+* helpers for cross-domain XHR in @play.mvc.Http.Response@
+* support for **HTTPOnly** cookies
+* new command @play check@ to check for new Play framework releases.

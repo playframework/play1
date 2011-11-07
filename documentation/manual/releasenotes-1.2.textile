@@ -17,15 +17,15 @@ If you can't use *READ_UNCOMMITED* for your database transactions, you need to r
 
 h2. Dependency management
 
-"Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single **dependencies.yml** file. 
+"Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single @dependencies.yml@ file. 
 
 A Play application can have three kinds of dependencies:
 
 * The Play framework itself, since a Play application always depends on the Play framework.
-* Any Java library, provided as **JAR** file installed in your application’s **lib/** directory.
-* A Play module (in fact an application fragment) installed in your application’s **modules/** directory.
+* Any Java library, provided as **JAR** file installed in your application’s @lib/@ directory.
+* A Play module (in fact an application fragment) installed in your application’s @modules/@ directory.
 
-Once you have expressed these dependencies in your application’s **conf/dependencies.yml** file, Play will resolve, download and install all required dependencies.
+Once you have expressed these dependencies in your application’s @conf/dependencies.yml@ file, Play will resolve, download and install all required dependencies.
 
 For example, using this file:
 
@@ -90,11 +90,11 @@ All these features are used in the new *Chat* sample application, which demonstr
 
 h2. Routes file improvements
 
-The **routes** file now supports a set of new features. Also you can now safely use *{* and *}* characters in a route path regular expression.
+The @routes@ file now supports a set of new features. Also you can now safely use *{* and *}* characters in a route path regular expression.
 
 h3. staticFile: mapping
 
-Like the old **staticDir** mapping, you can now directly map a URL path to a static file rendering.
+Like the old @staticDir@ mapping, you can now directly map a URL path to a static file rendering.
 
 bc. # Serve index.html static file for home requests
 GET     /home                   staticFile:/public/html/index.html
@@ -108,12 +108,12 @@ GET     /favicon.ico            404
 
 h3. WS method
 
-The new **WS** method allows you to declare a route that is mapped to a WebSocket.
+The new @WS@ method allows you to declare a route that is mapped to a WebSocket.
 
 bc. # A WebSocket
 WS    /chat/messages            Chat.messages
 
-You can use the **@@{Chat.messages()}** notation to generate the reverse URL, as:
+You can use the <code>@@{Chat.messages()}</code> notation to generate the reverse URL, as:
 
 bc. ws://localhost:9000/chat/messages
 
@@ -130,7 +130,7 @@ h2. Invocation context annotations
 
 Play maps each invocation (an HTTP request, a WebSocket message, or an asynchonous job execution for example) as an **Invocation**. You can now annotate any invocation with some annotations that can be used by plugins to change the way they handle this particular invocation.
 
-For example, the **JPA Plugin** automatically opens a database transaction for each invocation if a database is configured. Now, if you don’t need a database connection for a particular invocation, you can annotate it with **@NoTransaction**:
+For example, the **JPA Plugin** automatically opens a database transaction for each invocation if a database is configured. Now, if you don’t need a database connection for a particular invocation, you can annotate it with <code>@NoTransaction</code>:
 
 bc. @NoTransaction
 public static void index() {
@@ -175,7 +175,7 @@ You can now load your fixtures from several YAML files at once, and even use the
 
 h3. Several test IDs
 
-You can also create more than one test configuration, by specifying a framework ID that matches *test-**.
+You can also create more than one test configuration, by specifying a framework ID that matches @test-*@.
 
 h2. Cheat-sheets provided with documentation
 

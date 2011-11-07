@@ -2,6 +2,7 @@ package play.data.validation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import net.sf.oval.Validator;
@@ -10,6 +11,7 @@ import net.sf.oval.context.FieldContext;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.context.OValContext;
 import play.data.binding.Binder;
+import play.data.binding.RootParamNode;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.Scope;
@@ -48,7 +50,14 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
                         return false;
                     }
                     otherKey = to;
-                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], method.getParameterAnnotations()[index], Scope.Params.current().all());
+
+                    RootParamNode rootParamNode = Scope.Params.current().getRootParamNode();
+                    Class<?> clazz = method.getParameterTypes()[index];
+                    Type type = method.getGenericParameterTypes()[index];
+
+                    otherValue = Binder.bind(rootParamNode, to, clazz, type, method.getParameterAnnotations()[index]);
+
+
                 }
                 if (context instanceof FieldContext) {
                     FieldContext ctx = (FieldContext) context;

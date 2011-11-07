@@ -21,9 +21,9 @@ class PlayApplication(object):
     def __init__(self, application_path, env, ignoreMissingModules = False):
         self.path = application_path
         if application_path is not None:
-            confpath = os.path.join(application_path, 'conf/application.conf')
+            confFolder = os.path.join(application_path, 'conf/')
             try:
-                self.conf = PlayConfParser(confpath, env["id"])
+                self.conf = PlayConfParser(confFolder, env["id"])
             except:
                 self.conf = None # No app / Invalid app
         else:
@@ -31,8 +31,6 @@ class PlayApplication(object):
         self.play_env = env
         self.jpda_port = self.readConf('jpda.port')
         self.ignoreMissingModules = ignoreMissingModules
-
-
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
@@ -114,6 +112,20 @@ class PlayApplication(object):
 
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
+    def find_and_add_all_jars(self, classpath, dir):
+
+        # ignore dirs that start with ".", example: .svn
+        if dir.find(".") == 0:
+            return
+
+        for file in os.listdir(dir):
+            fullPath = os.path.normpath(os.path.join(dir,file))
+            if os.path.isdir(fullPath):
+                self.find_and_add_all_jars(classpath, fullPath)
+            else:
+                if fullPath.endswith('.jar'):
+                    classpath.append(fullPath)
+
     def getClasspath(self):
         classpath = []
 
@@ -121,11 +133,9 @@ class PlayApplication(object):
         classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
         classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])))
 
-        # The application
+        # The application - recursively add jars to the classpath inside the lib folder to allow for subdirectories
         if os.path.exists(os.path.join(self.path, 'lib')):
-            for jar in os.listdir(os.path.join(self.path, 'lib')):
-                if jar.endswith('.jar'):
-                    classpath.append(os.path.normpath(os.path.join(self.path, 'lib/%s' % jar)))
+            self.find_and_add_all_jars(classpath, os.path.join(self.path, 'lib'))
 
         # The modules
         for module in self.modules():
@@ -202,7 +212,7 @@ class PlayApplication(object):
         self.jpda_port = self.readConf('jpda.port')
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('127.0.0.1', int(self.jpda_port)))
+            s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
@@ -224,7 +234,7 @@ class PlayApplication(object):
 
         self.jpda_port = self.readConf('jpda.port')
 
-        application_mode = self.readConf('application.mode')
+        application_mode = self.readConf('application.mode').lower()
 
         if application_mode == 'prod':
             java_args.append('-server')
@@ -244,7 +254,7 @@ class PlayApplication(object):
             
         java_args.append('-Dfile.encoding=utf-8')
 
-        if self.readConf('application.mode') == 'dev':
+        if self.readConf('application.mode').lower() == 'dev':
             if not self.play_env["disable_check_jpda"]: self.check_jpda()
             java_args.append('-Xdebug')
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
@@ -253,6 +263,18 @@ class PlayApplication(object):
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
 
+    # ~~~~~~~~~~~~~~~~~~~~~~ MISC
+
+    def toRelative(self, path):
+        return _absoluteToRelative(path, self.path, "").replace("//", "/")
+
+def _absoluteToRelative(path, reference, dots):
+    if path.find(reference) > -1:
+        ending = path.find(reference) + len(reference)
+        return dots + path[ending:]
+    else:
+        return _absoluteToRelative(path, os.path.dirname(reference), "/.." + dots)
+
 class PlayConfParser:
 
     DEFAULTS = {
@@ -260,10 +282,13 @@ class PlayConfParser:
         'jpda.port': '8000'
     }
 
-    def __init__(self, filepath, frameworkId):
+    def __init__(self, confFolder, frameworkId):
         self.id = frameworkId
-        f = file(filepath)
-        self.entries = dict()
+        self.entries = self.readFile(confFolder, "application.conf")
+
+    def readFile(self, confFolder, filename):
+        f = file(confFolder + filename)
+        result = dict()
         for line in f:
             linedef = line.strip()
             if len(linedef) == 0:
@@ -274,13 +299,43 @@ class PlayConfParser:
                 continue
             key = linedef.split('=')[0].strip()
             value = linedef[(linedef.find('=')+1):].strip()
-            self.entries[key] = value
+            result[key] = value
         f.close()
+        
+        # minimize the result based on frameworkId
+        washedResult = dict()
+        
+        # first get all keys with correct framework id
+        for (key, value) in result.items():
+            if key.startswith('%' + self.id + '.'):
+                stripedKey = key[(len(self.id)+2):]
+                washedResult[stripedKey]=value
+        # now get all without framework id if we don't already have it
+        for (key, value) in result.items():
+            if not key.startswith('%'):
+                # check if we already have it
+                if not (key in washedResult):
+                    # add it
+                    washedResult[key]=value
+                    
+        # find all @include
+        includeFiles = []
+        for (key, value) in washedResult.items():
+            if key.startswith('@include.'):
+                includeFiles.append(value)
+                
+        # process all include files
+        for includeFile in includeFiles:
+            # read include file
+            fromIncludeFile = self.readFile(confFolder, includeFile)
+
+            # add everything from include file 
+            for (key, value) in fromIncludeFile.items():
+                washedResult[key]=value
+        
+        return washedResult
 
     def get(self, key):
-        idkey = '%' + self.id + "." + key
-        if idkey in self.entries:
-            return self.entries[idkey]
         if key in self.entries:
             return self.entries[key]
         if key in self.DEFAULTS:
@@ -288,19 +343,9 @@ class PlayConfParser:
         return ''
 
     def getAllKeys(self, query):
-        # We need to take both naked and with id,
-        # BUT an entry with id should override the naked one
-        # Ex:
-        #   module.foo = "foo"
-        #   module.bar = "bar"
-        #   %dev.module.bar = "bar2"
-        #     => ["module.foo", "%dev.module.bar"]
         result = []
         for (key, value) in self.entries.items():
-            if key.startswith('%' + self.id + '.' + query):
-                result.append(key)
-        for (key, value) in self.entries.items():
-            if key.startswith(query) and not hasKey(result, '%' + self.id + "." + key):
+            if key.startswith(query):
                 result.append(key)
         return result
 

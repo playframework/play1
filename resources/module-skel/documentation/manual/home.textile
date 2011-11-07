@@ -1,0 +1,31 @@
+h1. {module name}
+
+p(note). Write your module documentation in this file, possibly linking to other Textile files, and delete these notes when you are finished.
+
+p(note). Start with a clear statement of what the module is and what it is for. Link to any third-party libraries that the module is based on.
+
+p(note). Briefly describe why you might want to use this module in a Play application.
+
+h2. Sample application
+
+p(note). Your module should contain a sample app in the @sample@ directory that demonstrates the module. Describe how to run the demo here.
+
+h2. Getting started
+
+p(note). Describe any installation that is required, beyond adding and resolving the module dependency.
+
+h2. Configuration
+
+p(note). List any configuration options that the module uses, with an @h3.@ heading for each one.
+
+h2. Usage
+
+p(note). Explain how to use the module, and describe any routes, controllers, models or views that the module provides.
+
+h2. Tags
+
+p(note). List any tags the module provides, with an @h3.@ heading for each one. Include the tags’ arguments.
+
+h2. Commands
+
+p(note). List any commands the module provides, with an @h3.@ heading for each one. Include the commands’ options.

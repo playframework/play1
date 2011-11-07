@@ -14,7 +14,8 @@ public class JPABinding extends Controller {
         render();
     }
     
-    public static void create(Project project) {
+    // #1195 Use @Valid to trigger the validation before the action-invoking 
+    public static void create(@Valid Project project) {
         System.out.println(project);
         project.create();
         show(project.id);

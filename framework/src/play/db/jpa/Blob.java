@@ -67,6 +67,10 @@ public class Blob implements BinaryField, UserType {
         }
         return file;
     }
+    
+    public String getUUID()  {
+        return UUID;
+    }
 
     //
 
@@ -106,7 +110,7 @@ public class Blob implements BinaryField, UserType {
         if(o == null) {
             return null;
         }
-        return new Blob(this.UUID, this.type);
+        return new Blob(((Blob)o).UUID, ((Blob)o).type);
     }
 
     public boolean isMutable() {

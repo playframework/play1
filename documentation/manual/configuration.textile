@@ -1,0 +1,901 @@
+h1. Configuration parameters
+
+Configure your Play application by setting values for configuration keys in @conf/application.conf@ file. See also:
+
+* "Main concepts - the conf directory":main#conf
+* "Managing application.conf in several environments":ids
+* "Put your application in production":production
+
+h2(#application). Application configuration
+
+
+h3(#application.baseUrl). application.baseUrl
+
+The application base URL used for reverse-resolving absolute URLs. This is used by the <code>@@{..}</code> template syntax and in Jobs, which do not have an inbound @Http.Request@), such as rendering e-mail. For example, for @dev@ mode:
+
+bc. application.baseUrl=http://localhost:9000/
+
+For @prod@ mode:
+
+bc. %production%.application.baseUrl=http://www.yourdomain.com/
+
+
+h3(#application.defaultCookieDomain). application.defaultCookieDomain
+
+Enables session/cookie sharing between subdomains. For example, to make cookies valid for all domains ending with ‘.example.com’, e.g. @foo.example.com@ and @bar.example.com@:
+
+bc. application.defaultCookieDomain=.example.com
+
+Default: a cookie is only valid for a specific domain.
+
+
+h3(#application.lang.cookie). application.lang.cookie
+
+The name of the cookie that is used to store the current language, set by @play.i18n.Lang.change(String locale)@, which you can change if you want separate language settings for separate Play applications. For example:
+
+bc. application.lang.cookie=MYAPP_LANG
+
+Default: @PLAY_LANG@
+
+
+h3(#application.langs). application.langs
+
+Defines locales used by your application. You can then place localised messages in @conf/messages.{locale}@ files. The value is a comma-separated list of language codes, for example:
+
+bc. application.langs=fr,en,ja
+
+Default: no additional languages.
+
+
+h3(#application.log). application.log
+
+Specifies log level for your application. For example:
+
+bc. application.log=DEBUG
+
+Default: @INFO@
+
+See also: "Logging configuration":logs.
+
+
+h3(#application.log.path). application.log.path
+
+Path to a Log4J configuration file, to customise log output. If you do not specify a path, Play will load a @log4j.properties@ file in the @conf@ directory if present.
+
+bc. application.log.path=/log4j.properties
+
+Default: @/log4j.xml@ falling back to @/log4j.properties@
+
+
+h3(#application.log.recordCaller). application.log.recordCaller
+
+Configures the value of @play.Logger.recordCaller@ to record and display the caller method. For example:
+
+bc. application.log.recordCaller=true
+
+Default: @false@
+
+
+h3(#application.mode). application.mode
+
+Application mode (case insensitive). For example:
+
+bc. application.mode=prod
+
+Values:
+
+* @DEV@ - enable instant reloading and other development help
+* @PROD@ - pre-compiles and caches Java sources and templates.
+
+Default: @DEV@
+
+
+h3(#application.name). application.name
+
+The application’s name, usually set by the @play new@ command.
+
+Default: no value.
+
+
+h3(#application.secret). application.secret
+
+The secret key is used to secure cryptographic functions, usually set by the @play new@ or @play secret@ command. If you deploy your application to several instances be sure to use the same key. For example:
+
+bc. application.secret=mNuAvlsFVjeuynN4IWZxZzFOHYVagafzjruHmWTL26VISKr46rUtyGcJuX7aYx4q
+
+If not set, @play.libs.Crypto.sign@ will not encrypt messages; in particular, sessions will not be encrypted.
+
+Default: no value.
+
+
+h3(#application.session.cookie). application.session.cookie
+
+Session cookie name. The cookies are not secured by default, only set it to true if you’re serving your pages through HTTPS. For example:
+
+bc. application.session.cookie=PLAY
+
+Default: sessions are written to the transient @PLAY_SESSION@ cookie.
+
+
+h3(#application.session.httpOnly). application.session.httpOnly
+
+Enables the ‘HTTP only’ flag on cookies, which mitigates some XSS attacks. For example:
+
+bc. application.session.httpOnly=true
+
+Default: @false@
+
+For more information see the "OWASP page on HttpOnly":http://www.owasp.org/index.php/HttpOnly.
+
+
+h3(#application.session.maxAge). application.session.maxAge
+
+Session time-out, i.e. the maximum age of the session cookie. If not set, the session expires when you close your web browser. For example, to set the session to one hour:
+
+bc. application.session.maxAge=1h
+
+Remember the session for one week:
+
+bc. application.session.maxAge=7d
+
+Default: the session is based on a transient cookie expires when the browser is closed.
+
+
+h3(#application.session.secure). application.session.secure
+
+Enables Cookie-based sessions for HTTPS connections. For example:
+
+bc. application.session.secure=true
+
+Default: @false@
+
+
+h3(#application.session.sendOnlyIfChanged). application.session.sendOnlyIfChanged
+
+Avoid sending the session cookie if there were no changes to the session. For example:
+
+bc. application.session.sendOnlyIfChanged=true
+
+Default: @false@
+
+
+h3(#application.web_encoding). application.web_encoding
+
+The text encoding that Play uses when communicating with the web browser and for the "Web Service client":libs#WebServiceclient. You do not normally need to set this, since Play defaults to using @UTF-8@. For example:
+
+bc. application.web_encoding=ISO-8859-1
+
+Default: @UTF-8@
+
+Changing @application.web_encoding@ affects the @charset@ part of the @Content-type@ HTTP header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play serves static content: So, if you have modified the default response encoding and you have static text-files (in the @public/@ folder) that contain special characters, you must make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
+
+
+h2(#attachments). Attachments
+
+
+h3(#attachments.path). attachments.path
+
+Storage path for @play.db.jpa.Blob@ content. This can be an absolute path, or a relative path to a folder inside the Play application folder. For example:
+
+bc. attachments.path=data/attachments
+
+Default: @attachments@
+
+
+h2(#certificate). X509 certificates
+
+
+h3(#certificate.key.file). certificate.key.file
+
+Specifies an X509 certificate key, for HTTPS support. The file must be named @host.key@. For example:
+
+bc. certificate.key.file=/certificates/host.key
+
+Default: @conf/host.key@
+
+
+h3(#certificate.file). certificate.file
+
+Specifies an X509 certificate file, for HTTPS support. The file must be named @host.cert@. For example:
+
+bc. certificate.file=/certificates/host.cert
+
+Default: @conf/host.cert@
+
+
+h3(#certificate.password). certificate.password
+
+Password for a password-protected X509 certificate key file, for use with the "certificate.key.file":#certificate.key.file configuration. For example:
+
+bc. certificate.password=secret
+
+Default: @secret@
+
+
+h2(#cron). Scheduled jobs
+
+You can configure cron expressions for scheduled jobs as configuration keys that start with @cron.@ and use the key as the value of a <code>@play.jobs.On</code> or <code>@Every</code> annotation. For example, <code>@On(cron.noon)</code> refers to:
+
+bc. cron.noon=0 0 12 * * ?
+
+
+h2(#date). Date formats
+
+
+h3(#date.format). date.format
+
+Sets the default date format, using a @java.text.SimpleDateFormat@ pattern. For example:
+
+bc. date.format=dd-MM-yyyy
+
+This property also affects how @${date.format()}@ renders dates in templates. It also set the default date format when binding a date parameter.
+
+Default: @yyyy-MM-dd@
+
+You can also set a different date format for specific languages that you have configured with "application.langs":#application.langs, for example:
+
+bc. date.format.fr=dd-MM-yyyy
+
+
+h2(#dbconf). Database configuration
+
+h3(#db). db
+
+Database engine configuration. To quickly set up a development database use a transient in memory database (H2 in memory):
+
+bc. db=mem
+
+For a simple file written database (H2 file stored):
+
+bc. db=fs
+
+For a local MySQL5 database:
+
+bc. db=mysql:user:pwd@database_name
+
+To reuse an existing Datasource from your application server:
+
+bc. db=java:/comp/env/jdbc/myDatasource@
+
+If you specify a @Datasource@, the database plugin detects the pattern @db=java:@ and will de-activate the default JDBC system.
+
+Default: none.
+
+See also: "Support for multiple databases":model#multiple.
+
+
+h3(#db.destroyMethod). db.destroyMethod
+
+A generic ‘destroy’ method name. When using an existing Datasource, this is sometimes needed to destroy it when the application is stopped. For example:
+
+bc. db.destroyMethod=close
+
+Default: none.
+
+
+h3(#db.driver). db.driver
+
+Database driver class name, for use with "db.url":#db.url. For example:
+
+bc. db.driver=org.postgresql.Driver
+
+Default:
+
+* @org.h2.Driver@ when "db":#db is set to @mem@ or @fs@, or if "db.url":#db.url  starts with @jdbc:h2:mem:@
+* @com.mysql.jdbc.Driver@ if "db":#db is a @mysql:…@ configuration.
+
+h3(#db.isolation). db.isolation
+
+Database transaction isolation level. For example:
+
+bc. db.isolation=SERIALIZABLE
+
+Valid values are @NONE@, @READ_UNCOMMITTED@, @READ_COMMITTED@, @REPEATABLE_READ@, @SERIALIZABLE@, or an integer value to be passed to @java.sql.Connection.setTransactionIsolation()@. Note that not all databases support all transaction isolation levels.
+
+Default: database dependent, usually @READ_COMMITTED@
+
+h3(#db.pass). db.pass
+
+Database connection password, used with "db.url":#db.url.
+
+Default: no value, or an empty string when "db":#db is set to @mem@ or @fs@. 
+
+
+h3(#db.pool.maxIdleTimeExcessConnections). db.pool.maxIdleTimeExcessConnections
+
+The number of seconds before idle connections beyond "db.pool.minSize":#db.pool.minSize are ‘culled’. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#maxIdleTimeExcessConnections.
+
+Default: @0@ - ‘no enforcement’.
+
+
+h3(#db.pool.maxSize). db.pool.maxSize
+
+Connection pool maximum size (number of connections). See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#maxPoolSize. For example:
+
+bc. db.pool.maxSize=60
+
+Default: @30@
+
+
+h3(#db.pool.minSize). db.pool.minSize
+
+Connection pool minimum size (number of connections). See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#minPoolSize. For example:
+
+bc. db.pool.minSize=10
+
+Default: @1@
+
+
+h3(#db.pool.timeout). db.pool.timeout
+
+Connection pool time-out in milliseconds. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout. For example:
+
+bc. db.pool.timeout=10000
+
+Default: @5000@
+
+
+h3(#db.url). db.url
+
+A full JDBC configuration, in combination with "db.user":#db.user, "db.pass":#db.pass and "db.driver":#db.driver. For example:
+
+bc. db.url=jdbc:postgresql:database_name
+
+Default: none.
+
+
+h3(#db.user). db.user
+
+Database connection user name, used with "db.url":#db.url.
+
+Default: none, or @sa@ when "db":#db is set to @mem@ or @fs@. 
+
+
+h2(#evolutions). Database evolutions
+
+
+h3(#evolutions.enabled). evolutions.enabled
+
+Used to disable "database evolutions":evolutions.
+
+bc. evolutions.enabled=false
+
+Default: @true@
+
+
+h2(#test). Test runner
+
+h3(#headlessBrowser). headlessBrowser
+
+Specifies the web browser compatibility mode for the HtmlUnit headless web browser used when running @play auto-test@.
+
+bc. headlessBrowser=INTERNET_EXPLORER_7
+
+Values:
+
+* @FIREFOX_3@
+* @FIREFOX_3_6@
+* @INTERNET_EXPLORER_6@
+* @INTERNET_EXPLORER_7@
+* @INTERNET_EXPLORER_8@
+
+Default: @INTERNET_EXPLORER_8@
+
+
+h2(#hibernate). Hibernate
+
+You can specify additional Hibernate properties. For example, to enable SQL comments:
+
+bc. hibernate.use_sql_comments=true
+
+See also: "Using JPA with multiple databases":jpa#multiple.
+
+
+h3(#hibernate.connection.datasource). hibernate.connection.datasource
+
+Hibernate datasource configuration.
+
+
+h2(#http). Server configuration
+
+
+h3(#http.address). http.address
+
+HTTP listener address, to restrict addresses the server listens on. For example:
+
+bc. http.address=127.0.0.1
+
+Default: the server listens for HTTP on the wildcard address.
+
+
+h3(#http.cacheControl). http.cacheControl
+
+HTTP Response headers control for static files: sets the default max-age in seconds, telling the user’s browser how long it should cache the page. This is only read in @prod@ mode, in @dev@ mode the cache is disabled. For example, to send @no-cache@:
+
+bc. http.cacheControl=0
+
+Default: @3600@ - set cache expiry to one hour.
+
+
+h3(#http.exposePlayServer). http.exposePlayServer
+
+Disable the HTTP response header that identifies the HTTP server as Play. For example:
+
+bc. http.exposePlayServer=false
+
+Default: @true@
+
+
+h3(#http.path). http.path
+
+The URL path where the application runs on the server: use this if you do not host your Play application at the root of the domain you’re serving it from. This parameter has no effect when deployed as a WAR, because the path will be handled by the application server. For example:
+
+bc. http.path=/myapp/
+
+Default: @/@
+
+
+h3(#http.port). http.port
+
+The port that the HTTP server listens on.
+
+Default: @9000@
+
+
+h3(#http.proxyHost). http.proxyHost
+
+Proxy server for web services requests. For example:
+
+bc. http.proxyHost=localhost
+
+Default: @http.proxyHost@ system property.
+
+
+h3(#http.proxyPassword). http.proxyPassword
+
+Proxy password for web services requests.
+
+Default: @http.proxyPassword@ system property.
+
+
+h3(#http.proxyPort). http.proxyPort
+
+Proxy port for web services requests. For example:
+
+bc. http.proxyPort=3128
+
+Default: @http.proxyPort@ system property.
+
+
+h3(#http.proxyUser). http.proxyUser
+
+Proxy user for web services requests.
+
+Default: @http.proxyUser@ system property.
+
+
+
+h3(#http.useETag). http.useETag
+
+If enabled, Play will generate entity tags automatically and send a 304 when needed. For example, to deactivate use of entity tags:
+
+bc. http.useETag=false
+
+Default: @true@
+
+
+h3(#http.userAgent). http.userAgent
+
+Custom @USER_AGENT@ header value for web services requests. For example:
+
+bc. http.userAgent=myApp 1.0
+
+Default: none.
+
+
+h3(#https.port). https.port
+
+Enables an HTTPS connector, listening on the specified port. For example:
+
+bc. https.port=9443
+
+Default: none - no HTTPS configuration.
+
+
+h2(#java). Java source
+
+
+h3(#java.source). java.source
+
+Java source level, which overrides the @java.version@ system property. For example:
+
+bc. java.source=1.6
+
+Values:  @1.5@, @1.6@, @1.7@ (experimental).
+
+Default: @1.5@
+
+
+h2(#jpa). JPA
+
+
+h3(#jpa.dialect). jpa.dialect
+
+Specify the custom JPA dialect to use here. For example:
+
+bc. jpa.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+Default: Play will guess the dialect based on the "db.driver":#db.driver configuration.
+
+
+h3(#jpa.ddl). jpa.ddl
+
+Specify the DDL generation pattern to use. For example, to enable automatic database structure updates. For example:
+
+bc. jpa.ddl=create-drop
+
+Default: @update@ (@dev@ mode) or @none@ (@prod@ mode).
+
+
+h3(#jpa.debugSQL). jpa.debugSQL
+
+Debug SQL statements (logged using DEBUG level). For example:
+
+bc. jpa.debugSQL=true
+
+Default: @false@
+
+
+h3(#jpa.entities). jpa.entities
+
+Comma-separated list of names of additional JPA entity classes to load. This is useful when you have additional entities that are not in the @models@ package, such as model classes in a separate JAR. For example:
+
+bc. org.example.model.Person, org.example.model.Organisation
+
+Default: none.
+
+
+h3(#jpa.mapping-file). jpa.mapping-file
+
+JPA mapping file.
+
+Default: none.
+
+
+h2(#jpda). JVM
+
+
+h3(#jpda.port). jpda.port
+
+Defines which port is used by JPDA when application is in debug mode. For example:
+
+Default: @8000@
+
+
+h2(#keystore). keystore
+
+
+h3(#keystore.algorithm). keystore.algorithm
+
+A JDK Security API standard algorithm name, for use with the "keystore.file":#keystore.file configuration.
+
+bc. keystore.algorithm=pkcs12
+
+Values - ‘standard names’ from the JDK Security API:
+
+* @jceks@ (‘SunJCE’ provider)
+* @jks@ (‘SUN" provider)
+* @pkcs12@
+
+Default: @JKS@
+
+
+h3(#keystore.file). keystore.file
+
+Specifies a keystore certificate, for HTTPS support. The file should be named @certificate.jks@. For example:
+
+bc. keystore.file=conf/certificate.jks
+
+
+h3(#keystore.password). keystore.password
+
+Keystore configuration, for use with the "keystore.file":#keystore.file configuration.
+
+bc. keystore.password=secret
+
+Default: @secret@
+
+
+h2(#memcachedconfig). Memcached
+
+
+h3(#memcached). memcached
+
+Enable "Memcached":http://www.danga.com/memcached/; if you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap.
+
+bc. memcached=enabled
+
+Default: @disabled@
+
+See also: "using a cache":cache.
+
+
+h3(#memcached.host). memcached.host
+
+Specify memcached host. For example:
+
+bc. memcached.host=127.0.0.1:11211
+
+Default: @127.0.0.1:11211@
+
+You can specify multiple hosts to build a distributed cache. For example:
+
+bc. memcached.1.host=127.0.0.1:11211
+memcached.2.host=127.0.0.1:11212
+
+
+h2(#mimetype). Custom MIME types
+
+You can declare additional MIME types. For example:
+
+bc. mimetype.xpi=application/x-xpinstall
+
+
+h2(#webserviceconfig). Web services
+
+h3(#webservice). webservice
+
+Class name of the Web services implementation, or one of the built-in implementations. For example:
+
+bc. webservice=urlfetch
+
+Values:
+
+* @urlfetch@ - the JDK’s internal implementation
+* @async@ - the engine is Async Http Client
+* class name of a @play.libs.WS.WSImpl@ implementation
+
+Default: @async@ - the engine is Async Http Client.
+
+
+h2(#mail). Mail
+
+
+h3(#mail.debug). mail.debug
+
+Enables SMTP transaction logging; under the hood, Play uses JavaMail to perform the actual SMTP transactions.
+
+bc. mail.debug=true
+
+Default: @false@
+
+
+h3(#mail.smtp). mail.smtp
+
+Simple mail configuration key.
+
+Default: @mock@ - use a mock Mailer
+
+See also: "SMTP configuration":emails#smtp.
+
+
+h3(#mail.smtp.authenticator). mail.smtp.authenticator
+
+Class name for a custom SMTP authenticator (@javax.mail.Authenticator@) implementation.
+
+Default: none.
+
+
+h3(#mail.smtp.channel). mail.smtp.channel
+
+There are two ways to send the e-mail over an encrypted channel, which you can choose with this configuration property. Values:
+
+* @clear@ - no encryption
+* @ssl@ - SMTP-over-SSL (SMTPS) connector; an SSL socket listening on port 465
+* @starttls@ - a clear connection on port 25 that will switch to SSL/TLS, if your server supports the @starttls@ command (see: "RFC 2487":http://www.apps.ietf.org/rfc/rfc2487.html).
+
+Default: @clear@
+
+
+h3(#mail.smtp.host). mail.smtp.host
+
+Outgoing mail server. For example:
+
+bc. mail.smtp.host=127.0.0.1
+
+To use a GMail SMTP server:
+
+bc. mail.smtp.host=smtp.gmail.com
+
+Default: @localhost@
+
+
+h3(#mail.smtp.localhost). mail.smtp.localhost
+
+Local host name override for SMTP commands.
+
+Default: none - use the Java Mail default.
+
+
+h3(#mail.smtp.pass). mail.smtp.pass
+
+SMTP server password, used with "mail.smtp.host":#mail.smtp.host, e.g. a GMail password.
+
+Default: none.
+
+
+h3(#mail.smtp.port). mail.smtp.port
+
+Port for SMTP server connections, used to override the defaults. For example:
+
+bc. mail.smtp.port=2500
+
+Default:
+
+* @25@ when "mail.smtp.channel":#mail.smtp.channel is set to @clear@ or @starttls@
+* @465@ when "mail.smtp.channel":#mail.smtp.channel is set to @ssl@
+
+
+h3(#mail.smtp.protocol). mail.smtp.protocol
+
+Sets whether to use SSL. Values:
+
+* @smtp@
+* @smtps@
+
+Default: @smtp@
+
+
+
+h3(#mail.smtp.socketFactory.class). mail.smtp.socketFactory.class
+
+When using SSL connections with JavaMail, the default SSL behaviour is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behaviour is to skip that check. You can control this using this property.
+
+
+h3(#mail.smtp.user). mail.smtp.user
+
+SMTP server user name, used with "mail.smtp.host":#mail.smtp.host, e.g. a GMail user name.
+
+Default: none.
+
+
+h2(#play). Play run-time
+
+
+h3(#play.bytecodeCache). play.bytecodeCache
+
+Used to disable the bytecode cache in @dev@ mode; has no effect in @prod@ mode.
+
+bc. play.bytecodeCache=false
+
+Default: @true@
+
+
+h3(#play.editor). play.editor
+
+Open file from error pages. If your text editor supports opening files by URL, Play will dynamically link error pages to files. For Textmate, for example:
+
+bc. play.editor=txmt://open?url=file://%s&line=%s
+
+
+h3(#play.jobs.pool). play.jobs.pool
+
+Size of the Jobs pool. For example:
+
+bc. play.jobs.pool=20
+
+Default: @10@
+
+
+h3(#play.netty.clientAuth). play.netty.clientAuth
+
+Configures @javax.net.ssl.SSLEngine@ client authentication. For example:
+
+bc. play.netty.clientAuth=need
+
+Values:
+
+* @want@ - the server will _request_ client authentication
+* @need@ - the server will _require_ client authentication
+* @none@ - no client authentication
+
+Default: @none@
+
+
+h3(#play.netty.maxContentLength). play.netty.maxContentLength
+
+HTTP server maximum content length for response streaming, in bytes.
+
+Default: none - no maximum.
+
+
+h3(#play.pool). play.pool
+
+Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialise all requests (very useful for debugging purpose). For example:
+
+bc. play.pool=10
+
+Default: @1@ (in @dev@ mode), number of processors + 1 (in @prod@ mode).
+
+
+h3(#play.tmp). play.tmp
+
+Folder used to store temporary files. For example:
+
+bc. play.tmp=/tmp/play
+
+Values:
+
+* an absolute path
+* a relative path, relative to the application directory
+* @none@ so that no temporary directory will be used 
+
+Default: @tmp@
+
+
+h2(#ssl). SSL
+
+See also: "https.port":#https.port.
+
+
+h3(#ssl.KeyManagerFactory.algorithm). ssl.KeyManagerFactory.algorithm
+
+The standard name of a Java Secure Socket Extension (JSSE) trust management algorithm, for use with the "keystore.file":#keystore.file configuration.
+
+bc. ssl.KeyManagerFactory.algorithm=SunX509
+
+Default: @SunX509@
+
+
+h2(#trustmanager). trustmanager
+
+
+h3(#trustmanager.algorithm). trustmanager.algorithm
+
+A JDK Security API standard algorithm name, for use with "X509 certificates":#certificate and "keystore":#keystore configurations.
+
+bc. trustmanager.algorithm=pkcs12
+
+Values - ‘standard names’ from the JDK Security API:
+
+* @jceks@ (‘SunJCE’ provider)
+* @jks@ (‘SUN" provider)
+* @pkcs12@
+
+Default: @JKS@
+
+
+h2(#upload). File upload
+
+h3(#upload.threshold). upload.threshold
+
+The threshold in bytes at which upload files will be written to disk, for @org.apache.commons.io.output.DeferredFileOutputStream@. For example:
+
+bc. upload.threshold=20480
+
+Default: @10240@
+
+
+h2(#xforwarded). Proxy forwarding
+
+h3(#XForwardedHost). XForwardedHost
+
+Overrides the @X-Forwarded-Host@ HTTP header value - the original host requested by the client, for use with proxy servers.
+
+Default: @X-Forwarded-Host@ HTTP header value.
+
+
+h3(#XForwardedProto). XForwardedProto
+
+Sets the proxy request to SSL, overriding the @X-Forwarded-Proto@ and @X-Forwarded-SSL@ HTTP header values - the protocol originally requested by the client. For example:
+
+bc. XForwardedProto=https
+
+
+h3(#XForwardedSupport). XForwardedSupport
+
+A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server.
+
+Default: @127.0.0.1@
+
+

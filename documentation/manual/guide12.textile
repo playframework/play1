@@ -1,6 +1,6 @@
 h1. Internationalisation and localisation
 
-Having built our fully-functional blog engine, we will now consider an optional extra: web application  internationalization and language  localisation. Although we could have done this from the start, it is more realistic to build the first version of an application in a single language, and add multiple languages later.
+Having built our fully-functional blog engine, we will now consider an optional extra: web application internationalisation and language  localisation. Although we could have done this from the start, it is more realistic to build the first version of an application in a single language, and add multiple languages later.
 
 h2. <a>Internationalisation and localisation</a>
 
@@ -8,15 +8,15 @@ There are two steps to perform: "internationalisation":http://en.wikipedia.org/w
 
 *Internationalisation*, in programming terms, is a refactoring to remove locale-specific code from the application code. In a web application, this is almost entirely about replacing user-interface text in view templates with references to messages. It also includes formatting non-text data types: dates, currency and other numbers. 
 
-*Localisation* is making a locale-specific version of an application. If the application is internationlised, this means having one or more selectable locale-specific versions. In a web application, this localisation is mostly about translating the user-interface text into the chosen natural language. Language selection is typically a combination of language preferences set in the web browser, and a language selection user-interface in the application itself. 
+*Localisation* is making a locale-specific version of an application. If the application is internationalised, this means having one or more selectable locale-specific versions. In a web application, this localisation is mostly about translating the user-interface text into the chosen natural language. Language selection is typically a combination of language preferences set in the web browser, and a language selection user-interface in the application itself.
 
 In practice, the two steps go together: you both internationalise and localise one part of the application at a time. 
 
 h2. <a>Yet Another Blog Engine</a>
 
-p(note). The starting point for this section is the finished tutorial code, which you can find in the Play distribution's **samples-and-tests/yabe** directory. The goal is to fully internationalise the application, and add French and Dutch language localisations.
+p(note). The starting point for this section is the finished tutorial code, which you can find in the Play distribution's @samples-and-tests/yabe@ directory. The goal is to fully internationalise the application, and add French and Dutch language localisations.
 
-To get started, first edit **conf/application.conf** and uncomment (in the default configuration file) or add a line with three supported languages: 
+To get started, first edit @conf/application.conf@ and uncomment (in the default configuration file) or add a line with three supported languages: 
 
 bc. # Localisations for English, Dutch and French. 
 application.langs=en,nl,fr 
@@ -29,11 +29,11 @@ bc. 16:19:04,728 WARN ~ Messages file missing for locale en
 
 h2. <a>UTF-8 message files</a>
 
-The warnings above mean that you need to replace the existing **conf/messages** file with one message file for each language: 
+The warnings above mean that you need to replace the existing @conf/messages@ file with one message file for each language: 
 
-* **messages.en** 
-* **messages.nl** 
-* **messages.fr** 
+* @messages.en@ 
+* @messages.nl@ 
+* @messages.fr@ 
 
 At this point we encounter the first improvement over the normal Java way of doing things. These files use the same syntax as Java properties files, but they are not properties files because they must use UTF-8 encoding. Java "Properties":http://java.sun.com/javase/6/docs/api/java/util/Properties.html, on the other hand, specifies ISO-8859-1 'Latin-1' character encoding for streaming to and from text files. 
 
@@ -51,7 +51,7 @@ For the rest of this tutorial, code samples will either define messages in one o
 
 h2. <a>Simple messages</a>
 
-The simple case is a text string that does not change, and that is not interrupted by other markup. For example, the first such text in the **yabe/app/views/main.html** template, in the **tools** list: 
+The simple case is a text string that does not change, and that is not interrupted by other markup. For example, the first such text in the @yabe/app/views/main.html@ template, in the @tools@ list: 
 
 bc. <ul id="tools"> 
 <li> 
@@ -59,7 +59,7 @@ bc. <ul id="tools">
 </li> 
 </ul> 
 
-To internationalise this, we replace the text with a message look-up, using the **&{'key'**} syntax: 
+To internationalise this, we replace the text with a message look-up, using the @&{'key'}@ syntax: 
 
 bc. <ul id="tools"> 
 <li> 
@@ -67,21 +67,21 @@ bc. <ul id="tools">
 </li> 
 </ul> 
 
-To add the localisations, add the corresponding line in each of the three message files. In **conf/messages.en** 
+To add the localisations, add the corresponding line in each of the three message files. In @conf/messages.en@ 
 
 bc. views.main.tools.login = Log in to write something 
 
-In **conf/messages.nl** 
+In @conf/messages.nl@ 
 
 bc. views.main.tools.login = Inloggen om iets te schrijven 
 
-In **conf/messages.fr** 
+In @conf/messages.fr@ 
 
 bc. views.main.tools.login = Connectez-vous pour écrire quelque chose 
 
-The message key can be anything you like; in this example I have used a key to indicate the location **views/main.html#tools** 
+The message key can be anything you like; in this example I have used a key to indicate the location @views/main.html#tools@ 
 
-Once you have saved these changes, you can see the different language versions in your web browser by changing the setting that results in a different **Accept-Language** HTTP request header. In Firefox, select _Preferences » Content » Languages » Choose…_, add _French \[fr]_ and _Dutch \[nl]_ if they are not already in the list, change which one is at the top of the list, close the dialogue box and reload the page. 
+Once you have saved these changes, you can see the different language versions in your web browser by changing the setting that results in a different @Accept-Language@ HTTP request header. In Firefox, select _Preferences » Content » Languages » Choose…_, add _French [fr]_ and _Dutch [nl]_ if they are not already in the list, change which one is at the top of the list, close the dialogue box and reload the page. 
 
 !images/guide12-1! 
 
@@ -92,7 +92,7 @@ If you use that link to log in to the blog's 'admin' pages, you can access lists
 
 The CRUD module internationalises these names using the JavaBean class or property name as the message key, which means you can localise them with messages such as the following. 
 
-In **conf/messages.nl** 
+In @conf/messages.nl@ 
 
 bc. post = artikel 
 Post = Artikel 
@@ -107,7 +107,7 @@ User = Gebruiker
 users = gebruikers 
 Users = Gebruikers 
 
-In **conf/messages.fr** 
+In @conf/messages.fr@ 
 
 bc. post = article 
 Post = Article 
@@ -126,7 +126,7 @@ You will notice that this does not change the rounded purple navigation links:
 
 !images/guide12-2! 
 
-Those are defined **views/admin.html** which you can internationalise to use the same localisations simply by surrounding the existing text with **&{'…'**} as follows: 
+Those are defined in @views/admin.html@ which you can internationalise to use the same localisations simply by surrounding the existing text with @&{'…'}@ as follows:
 
 bc. <a href="@{Posts.list()}">&{'Posts'}</a> 
 … 
@@ -160,18 +160,18 @@ In this example, we would also like to use the correct plural form for the word 
 
 bc. views.Admin.index.welcome = Welcome %1$s, <span>you have written %2$s %3$s so far</span> 
 
-… and use the **pluralize** extension in the template 
+… and use the @pluralize@ extension in the template 
 
 bc. &{'views.Admin.index.welcome', user, posts.size(), posts.pluralize(messages.get('post'), messages.get('posts'))} 
 
-Note that we have to use **messages.get** to look up the localised singular and plural. 
+Note that we have to use @messages.get@ to look up the localised singular and plural. 
 
 
 h2. <a>Play module localisation</a>
 
-Play module localisation works the same was as localisation within your application. This application uses the CRUD and Secure modules, which means that we must localise the messages in **play/modules/crud/conf/messages** and **play/modules/secure/conf/messages** that our application uses. 
+Play module localisation works the same way as localisation within your application. This application uses the CRUD and Secure modules, which means that we must localise the messages in @play/modules/crud/conf/messages@ and @play/modules/secure/conf/messages@ that our application uses.
 
-In **conf/messages.nl** 
+In @conf/messages.nl@ 
 
 bc. # play/modules/crud (administration) 
 crud.title = Beheer 
@@ -221,7 +221,7 @@ secure.username = Uw e-mailadres:
 secure.password = Uw wachtwoord: 
 secure.signin = Nu inloggen 
 
-In **conf/messages.fr** 
+In @conf/messages.fr@ 
 
 bc. # play/modules/crud (administration) 
 crud.title = Administration 
@@ -276,7 +276,7 @@ Of course, once you have done this it is also a good idea to contribute the loca
 
 h2. <a>Special cases</a>
 
-When you are localising a web application, there are a few special cases that be awkward to implement if you are using a component-based web application framework, such as JavaServer Faces:
+When you are localising a web application, there are a few special cases that can be awkward to implement if you are using a component-based web application framework, such as JavaServer Faces:
 
 # <span>Parameterised message used in an attribute value</span>
 # <span>Formatted message parameter</span>
@@ -292,7 +292,7 @@ This is a problem in JSF, because you would normally use an XML tag to perform t
 
 bc. <a href="@{Application.show(_post.id)}" title="&{'views.tags.display.author', _post.author.fullname}"> 
 
-The second case is when you want to format a value, such as a date, for use as a message parameter in a phrase like **By Bob on 2009-06-14**. Again, the problem in JSF is caused by having to an XML tag to format the value, while needing to be able to use the result in an XML attribute value. In Play the formatting extensions do not get in the way of the message parameter syntax, so you can do: 
+The second case is when you want to format a value, such as a date, for use as a message parameter in a phrase like @By Bob on 2009-06-14@. Again, the problem in JSF is caused by having to use an XML tag to format the value, while needing to be able to use the result in an XML attribute value. In Play the formatting extensions do not get in the way of the message parameter syntax, so you can do:
 
 bc. <span>&{'views.tags.display.author', _post.author.fullname, comment.postedAt.format('yyyy-MM-dd')}"}</span> 
 
@@ -300,9 +300,9 @@ You can, of course, localise the format pattern as well:
 
 bc. <span>&{'views.tags.display.author', _post.author.fullname, comment.postedAt.format(messages.get('views.dateFormat'))}"}</span> 
 
-The third case typically occurs when you want part of a localised message to be a hyperlink, as in the message **+Log in+ to write something**. This is a problem in JSF because the hyperlink is a JSF component that is rendered in a way that means the link's mark-up cannot be in the message file. Play on the other hand, lets you use plain HTML in your templates, so you can just put the mark-up in your message with a parameter for the URL: 
+The third case typically occurs when you want part of a localised message to be a hyperlink, as in the message <code><u>Log in</u> to write something</code>. This is a problem in JSF because the hyperlink is a JSF component that is rendered in a way that means the link's mark-up cannot be in the message file. Play, on the other hand, lets you use plain HTML in your templates, so you can just put the mark-up in your message with a parameter for the URL:
 
-bc. logIn = <a href="%s">Log in</a> to write something 
+bc. logIn = <a href="%s">Log in</a> to write something
 
 bc. &{'logIn', '/admin'} 
 

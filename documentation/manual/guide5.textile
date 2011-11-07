@@ -6,9 +6,9 @@ h2. <a>Generating the captcha image</a>
 
 We’ll start to see how we can easily generate a captcha image using Play. Basically we will just use another action, except that it will return a binary stream instead of the HTML responses like we’ve returned so far.
 
-Since Play is a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
+Since Play is a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the @play.libs.Images@ utility to simply generate a captcha image, and then write it to the HTTP response. 
 
-As usual, we will start with a simple implementation. Add the **captcha** action to the **Application** controller:
+As usual, we will start with a simple implementation. Add the @captcha@ action to the @Application@ controller:
 
 bc. public static void captcha() {
     Images.Captcha captcha = Images.captcha();
@@ -17,13 +17,13 @@ bc. public static void captcha() {
 
 Note that we can pass the captcha object directly to the renderBinary() method because the Images.Captcha class implements java.io.InputStream. 
 
-p(note). **Don’t forget** to import **play.libs.***.
+p(note). **Don’t forget** to import @play.libs.*@.
 
-Now add a new route to the **/yabe/conf/routes** file:
+Now add a new route to the @/yabe/conf/routes@ file:
 
 bc. GET     /captcha                                Application.captcha
 
-And try the **captcha** action by opening "http://localhost:9000/captcha":http://localhost:9000/captcha.
+And try the @captcha@ action by opening "http://localhost:9000/captcha":http://localhost:9000/captcha.
 
 !images/guide5-1!
 
@@ -39,11 +39,11 @@ Of course we could just put the text to the user session at the image generation
 
 **Second**, remember that Play is a **stateless** framework. We want to manage things in a purely stateless way. Typically, what happens if a user simultaneously opens two different blog pages with two different captcha images? We have to track the captcha code for each form.
 
-So to resolve the problem we need two things. We will store the captcha secret key on the server side. Because it is transient data we can easily use the Play **Cache**. Moreover because cached data have a limited life time it will add one more security mechanism (let’s say that a captcha code will be available for only 10mn). Then to resolve the code later we need to generate a **unique ID**. This unique ID will be added to each form as an hidden field and implicitely references a generated captcha code.
+So to resolve the problem we need two things. We will store the captcha secret key on the server side. Because it is transient data we can easily use the Play **Cache**. Moreover because cached data have a limited life time it will add one more security mechanism (let’s say that a captcha code will be available for only 10mn). Then to resolve the code later we need to generate a **unique ID**. This unique ID will be added to each form as an hidden field and implicitly references a generated captcha code.
 
 This way we elegantly solve our state problem.
 
-Modify the **captcha** action as is:
+Modify the @captcha@ action as is:
 
 bc. public static void captcha(String id) {
     Images.Captcha captcha = Images.captcha();
@@ -52,15 +52,15 @@ bc. public static void captcha(String id) {
     renderBinary(captcha);
 }
 
-Note that the **getText()** method takes any color as parameter. It will use this color to draw the text.
+Note that the @getText()@ method takes any color as parameter. It will use this color to draw the text.
 
-p(note). **Don’t forget** to import **play.cache.***.
+p(note). **Don’t forget** to import @play.cache.*@.
 
 h2. <a>Adding the captcha image to the comment form</a>
 
 Now, before displaying a comment form we will generate a unique ID. Then we will modify the HTML form to integrate a captcha image using this ID, and add the ID to another hidden field.
 
-Let’s rewrite the **Application.show** action:
+Let’s rewrite the @Application.show@ action:
 
 bc. public static void show(Long id) {
     Post post = Post.findById(id);
@@ -68,9 +68,9 @@ bc. public static void show(Long id) {
     render(post, randomID);
 }
 
-And now the form in the **/yable/app/views/Application/show.html** template:
+And now the form in the @/yable/app/views/Application/show.html@ template:
 
-bc. ...
+bc. …
 <p>
     <label for="content">Your message: </label>
     <textarea name="content" id="content">${params.content}</textarea>
@@ -85,7 +85,7 @@ bc. ...
 <p>
     <input type="submit" value="Submit your comment" />
 </p>
-...
+…
 
 Good start. The comment form now has a captcha image.
 
@@ -93,9 +93,9 @@ Good start. The comment form now has a captcha image.
 
 h2. <a>Validating the captcha</a>
 
-Now we just have to validate the captcha. We have added the **randomID** as an hidden field right? So we can retrieve it in the **postComment** action, then retrieve the actual code from Cache and finally compare it to the submitted code.
+Now we just have to validate the captcha. We have added the @randomID@ as an hidden field right? So we can retrieve it in the @postComment@ action, then retrieve the actual code from Cache and finally compare it to the submitted code.
 
-Not that difficult. Let’s modify the **postComment** action.
+Not that difficult. Let’s modify the @postComment@ action.
 
 bc. public static void postComment(
         Long postId, 
@@ -117,7 +117,7 @@ bc. public static void postComment(
     show(postId);
 }
 
-Because we now have more error messages, modify the way we display errors in the **show.html** template (yes we will just display the first error, it’s good enough):
+Because we now have more error messages, modify the way we display errors in the @show.html@ template (yes we will just display the first error, it’s good enough):
 
 bc. .. 
 #{ifErrors}
@@ -125,9 +125,9 @@ bc. ..
         ${errors[0]}
     </p>
 #{/ifErrors}
-...
+…
 
-p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file and each error is printed inside the corresponding field.
+p(note). Typically for more complex forms, error messages are not managed this way but externalized in the @messages@ file and each error is printed inside the corresponding field.
 
 Check that the captcha is now fully functional.
 

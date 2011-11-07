@@ -1,6 +1,7 @@
 package play.mvc;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -12,6 +13,8 @@ import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.data.parsing.DataParser;
 import play.data.parsing.TextParser;
 import play.data.validation.Validation;
@@ -64,7 +67,9 @@ public class Scope {
                 return;
             }
             if (out.isEmpty()) {
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                }
                 return;
             }
             try {
@@ -198,7 +203,13 @@ public class Scope {
                         // Just restored. Nothing changed. No cookie-expire.
                         session.changed = false;
                     }
+                } else {
+                    // no previous cookie to restore; but we may have to set the timestamp in the new cookie
+                    if (COOKIE_EXPIRE != null) {
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    }
                 }
+
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
@@ -246,7 +257,9 @@ public class Scope {
             }
             if (isEmpty()) {
                 // The session is empty: delete the cookie
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_SESSION") || !SESSION_SEND_ONLY_IF_CHANGED) {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                }
                 return;
             }
             try {
@@ -347,6 +360,18 @@ public class Scope {
         boolean requestIsParsed;
         private Map<String, String[]> data = new HashMap<String, String[]>();
 
+        boolean rootParamsNodeIsGenerated = false;
+        private RootParamNode rootParamNode = null;
+
+        public RootParamNode getRootParamNode() {
+            checkAndParse();
+            if (!rootParamsNodeIsGenerated) {
+                rootParamNode = ParamNode.convert(data);
+                rootParamsNodeIsGenerated = true;
+            }
+            return rootParamNode;
+        }
+
         public void checkAndParse() {
             if (!requestIsParsed) {
                 Http.Request request = Http.Request.current();
@@ -373,16 +398,22 @@ public class Scope {
         public void put(String key, String value) {
             checkAndParse();
             data.put(key, new String[]{value});
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public void put(String key, String[] values) {
             checkAndParse();
             data.put(key, values);
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public void remove(String key) {
             checkAndParse();
             data.remove(key);
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public String get(String key) {
@@ -397,9 +428,10 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
+            checkAndParse();
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.directBind(key, null, get(key), type);
+                return (T) Binder.bind(getRootParamNode(), key, type, type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
@@ -408,12 +440,15 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
+            throw new RuntimeException("method not yet supported after refactoring Binding-code");
+            /**
             try {
-                return (T) Binder.directBind(key, annotations, get(key), type);
+                return (T) Binder.directBind(annotations, get(key), type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
+             */
         }
 
         public boolean _contains(String key) {

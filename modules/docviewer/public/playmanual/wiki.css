@@ -16,8 +16,8 @@
 .wikistyle table td:first-child{padding-left:0!important;}
 .wikistyle table td:last-child{padding-right:0!important;}
 .wikistyle pre{margin:1em 0 2em 0!important;font-size:90%!important;background-color:#f8f8ff!important;border-left:4px solid #e0e0e0!important;padding:.5em!important;line-height:1.5em!important;color:#444!important;overflow:auto!important;}
-.wikistyle pre code{font-weight: normal; color: #444; display:block;padding:0!important;padding-left:10px!important;font-size:100%!important;background-color:#f8f8ff!important;border:none!important;}
-.wikistyle code{font-weight: bold; font-size:90%!important;color:#444!important;padding:0 .2em!important;}
+.wikistyle code{font-family:Consolas,"Andale Mono",monospace;font-size:90%;color:#444;background-color:#f8f8ff;border:1px solid #e0e0e0;padding:0 0.2em!important;}
+.wikistyle pre code{display:block;padding:0!important;padding-left:10px!important;font-size:100%!important;border:none!important;}
 .wikistyle pre.console{margin:1em 0!important;font-size:90%!important;background-color:black!important;padding:.5em!important;line-height:1.5em!important;color:white!important;}
 .wikistyle pre.console code{padding:0!important;font-size:100%!important;background-color:black!important;border:none!important;color:white!important;}
 .wikistyle pre.console span{color:#888!important;}

@@ -10,7 +10,7 @@ For example, with this request:
 
 bc. /articles/archive?date=08/01/08&page=2
 
-You can retrieve the **date** and **page** parameters by declaring them as Java method parameters:
+You can retrieve the @date@ and @page@ parameters by declaring them as Java method parameters:
 
 bc. public static void archive(Date date, Integer page) {
     List<Article> articles = Articles.fromArchive(date, page);
@@ -42,7 +42,7 @@ bc. <form action="/Directory/add" method="POST">
 
 h2. <a>Redirect to an action by calling the corresponding Java method</a>
 
-There is no equivalent to the Java Servlet **forward** command with Play. But redirecting to another action is really simple. Just call the corresponding Java method and Play will generate the correct HTTP ‘Redirect’ response.
+There is no equivalent to the Java Servlet @forward@ command with Play. But redirecting to another action is really simple. Just call the corresponding Java method and Play will generate the correct HTTP ‘redirect’ response.
 
 bc. public static void show(Long id) {
     Article article = Article.findById(id);
@@ -91,7 +91,7 @@ h2. <a>JPA on steroids</a>
 
 JPA is surely the best object-relational mapping (ORM) API available for Java. If you know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager using Hibernate and magically synchronize it when code is reloaded.
 
-Moreover, if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
+Moreover, if you use the provided @play.db.jpa.Model@ superclass it will help to make your code prettier. Take a look:
 
 bc. public void messages(int page) {
     User connectedUser = User.find("byEmail", connected()).first();

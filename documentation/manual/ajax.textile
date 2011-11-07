@@ -6,7 +6,7 @@ The Play framework also comes with the handy "jsAction":tags#jsaction tag to tra
 
 h2. <a name="jsaction">Using jQuery with the jsAction tag</a>
 
-The **#{jsAction /}** tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
+The @#{jsAction /}@ tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
 Let's see an example:
 
@@ -24,7 +24,7 @@ bc. <script type="text/javascript">
    )
 </script>
 
-In this example we are requesting the list method from the default Application controller. We are also passing three parameters: search, size and page. The request we perform is then saved into the listAction variable. Now using jQuery and the **load** function we are performing a request (an HTTP GET request in fact).
+In this example we are requesting the list method from the default Application controller. We are also passing three parameters: search, size and page. The request we perform is then saved into the listAction variable. Now using jQuery and the @load@ function we are performing a request (an HTTP GET request in fact).
 
 In fact, the following request is sent:
 
@@ -38,7 +38,7 @@ Please refer to the "jQuery":http://docs.jquery.com/Main_Page documentation for 
 
 Also please note that we could perform a POST; the jQuery method should then be changed to:
 
-bc. $.post(listAction, function(data) {
+bc. $.post(listAction(), function(data) {
   $('#result').html(data);
 });
 

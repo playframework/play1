@@ -122,9 +122,9 @@
 
     // Host
     open('/')
-    assertTextPresent('1: http://static.foo.com/assets/hello.html')
+    assertTextPresent('1: http://static.foo.com:9003/assets/hello.html')
     assertTextPresent('2: /assets/hello.html')
-    assertTextPresent('3: http://static2.foo.com/x/hello.html')
+    assertTextPresent('3: http://static2.foo.com:9003/x/hello.html')
     assertTextPresent('4: /x/hello.html')
     assertTextPresent('5: http://localhost:9003/public/image.gif')
     assertTextPresent('6: /public/image.gif')
@@ -141,4 +141,20 @@
     assertTextPresent('17: http://localhost:9003/application/ok?re=A')
     assertTextPresent('18: http://localhost:9003/re/TITI')
     assertTextPresent('19: http://assets.localhost:9003/images')
+
+
+    open('/client')
+    assertTextPresent('localhost')
+
+
+    // jsRoute tag
+    open('@{Application.jsRoute()}')
+    assertText('a-url', '/')
+    assertText('a-method', 'GET')
+    assertText('b-url', '/sayHello')
+    assertText('b-method', 'PUT')
+    assertText('c', '/ressource/foo')
+
+    open('@{Application.jsRouteError()}')
+    assertTextPresent('Wrong parameter type')
 #{/selenium}    

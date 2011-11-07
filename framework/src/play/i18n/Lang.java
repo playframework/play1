@@ -3,6 +3,7 @@ package play.i18n;
 import java.util.Locale;
 import play.Logger;
 import play.Play;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -18,8 +19,24 @@ public class Lang {
      * @return The current language (fr, ja, it ...) or null
      */
     public static String get() {
-        return current.get();
+        String locale = current.get();
+        if (locale == null) {
+            // don't have current locale for this request - must try to resolve it
+            Http.Request currentRequest = Http.Request.current();
+            if (currentRequest!=null) {
+                // we have a current request - lets try to resolve language from it
+                resolvefrom( currentRequest );
+            } else {
+                // don't have current request - just use default
+                setDefaultLocale();
+            }
+            // get the picked locale
+            locale = current.get();
+        }
+        return locale;
     }
+
+
 
     /**
      * Force the current language
@@ -35,6 +52,15 @@ public class Lang {
             return false;
         }
     }
+
+    /**
+     * Clears the current language - This wil trigger resolving language from request
+     * if not manually set.
+     */
+    public static void clear() {
+        current.remove();
+    }
+
 
     /**
      * Change language for next requests 
@@ -55,14 +81,21 @@ public class Lang {
      * </ol>
      * @param request
      */
-    public static void resolvefrom(Request request) {
+    private static void resolvefrom(Request request) {
         // Check a cookie
         String cn = Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG");
         if (request.cookies.containsKey(cn)) {
-            if (!set(request.cookies.get(cn).value)) {
+            String localeFromCookie = request.cookies.get(cn).value;
+            if (localeFromCookie != null && localeFromCookie.trim().length()>0) {
+                if (set(localeFromCookie)) {
+                    // we're using locale from cookie
+                    return;
+                }
+                // could not use locale from cookie - clear the locale-cookie
                 Response.current().setCookie(cn, "");
+
             }
-            return;
+
         }
         // Try from accept-language - look for an exact match
         for (String a: request.acceptLanguage()) {
@@ -87,6 +120,10 @@ public class Lang {
             }
         }
         // Use default
+        setDefaultLocale();
+    }
+
+    public static void setDefaultLocale() {
         if (Play.langs.isEmpty()) {
             set("");
         } else {

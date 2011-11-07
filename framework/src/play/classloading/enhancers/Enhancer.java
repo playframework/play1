@@ -1,8 +1,10 @@
 package play.classloading.enhancers;
 
+import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +20,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.MemberValue;
 import play.Play;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -57,7 +60,22 @@ public abstract class Enhancer {
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
-            return new ByteArrayInputStream(Play.classes.getApplicationClass(className).enhancedByteCode);
+
+            if(Play.usePrecompiled) {
+                try {
+                    File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
+                    return new FileInputStream(file);
+                } catch(Exception e) {
+                    Logger.error("Missing class %s", className);
+                }
+            }
+            ApplicationClass appClass = Play.classes.getApplicationClass(className);
+
+            if ( appClass.enhancedByteCode == null) {
+                throw new RuntimeException("Trying to visit uncompiled class while enhancing. Uncompiled class: " + className);
+            }
+
+            return new ByteArrayInputStream(appClass.enhancedByteCode);
         }
 
         public URL find(String className) {
@@ -102,6 +120,23 @@ public abstract class Enhancer {
      */    
     protected boolean hasAnnotation(CtField ctField, String annotation) throws ClassNotFoundException {
         for (Object object : ctField.getAvailableAnnotations()) {
+            Annotation ann = (Annotation) object;
+            if (ann.annotationType().getName().equals(annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Test if a method has the provided annotation
+	 * @param ctMethod the javassist method representation
+	 * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
+	 * @return true if field has the annotation
+	 * @throws java.lang.ClassNotFoundException
+	 */
+    protected boolean hasAnnotation(CtMethod ctMethod, String annotation) throws ClassNotFoundException {
+        for (Object object : ctMethod.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;
             if (ann.annotationType().getName().equals(annotation)) {
                 return true;

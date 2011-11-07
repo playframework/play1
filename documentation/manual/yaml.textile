@@ -4,7 +4,7 @@ h2. <a name="syntax">YAML syntax</a>
 
 Your application tests will often use data structures that consist of related model objects, which can be tedious to create programmatically in Java. Play includes a "YAML":http://en.wikipedia.org/wiki/YAML parser which makes the task much simpler.
 
-Create a YAML file like the following, in the **conf** directory.
+Create a YAML file like the following, in the @conf@ directory.
 
 bc.. City(capitalfederal):
     name: Capital Federal
@@ -34,7 +34,7 @@ Neighborhood(coghlan):
     tags: "cafes, bars"
     users: [john]
 
-p. Play’s YAML syntax varies slightly from the standard. Each stanza must start with the name of the model class (eg **Neighborhood**) and be followed by an identifier in brackets (eg **villalugano**), which you can use to reference the object elsewhere in the file. This is different to standard YAML syntax, which uses the ampersand character to indicate a reference.
+p. Play’s YAML syntax varies slightly from the standard. Each stanza must start with the name of the model class (eg @Neighborhood@) and be followed by an identifier in brackets (eg @villalugano@), which you can use to reference the object elsewhere in the file. This is different to standard YAML syntax, which uses the ampersand character to indicate a reference.
 
 Play uses "SnakeYAML":http://code.google.com/p/snakeyaml/, which has an excellent "documentation page":http://code.google.com/p/snakeyaml/wiki/Documentation#YAML_syntax with many examples.
 
@@ -42,7 +42,7 @@ h2. <a name="model">Model classes</a>
 
 The YAML file can contain one-to-many, many-to-one and many-to-many relationships. These relationships must be explicity annotated in the model classes, and you must indicate which is the "owning side" of the relationship.
 
-p. **City.java**
+p. @City.java@
 
 bc.. package models;
 
@@ -60,7 +60,7 @@ public class City extends Model {
     public List<Neighborhood> neighborhoods;
 }
 
-p. **Neighborhood.java**
+p. @Neighborhood.java@
 
 bc.. package models;
 
@@ -83,7 +83,7 @@ public class Neighborhood extends Model {
     public List<User> users;
 }
 
-p. **User.java**
+p. @User.java@
 
 bc.. package models;
 
@@ -105,7 +105,7 @@ public class User extends Model {
 }
 
 
-p(note). Note that if you are using PostgreSQL you may need to explicitly set the name of the **user** table with escape characters because **user** is a reserved word.
+p(note). Note that if you are using PostgreSQL you may need to explicitly set the name of the @user@ table with escape characters because @user@ is a reserved word.
 
 h2. <a name="loading">Loading the data structure in your application</a>
 
@@ -121,7 +121,7 @@ public class Bootstrap extends Job {
     public void doJob() {
         // Check if the database is empty
         if(User.count() == 0) {
-            Fixtures.load("initial-data.yml");
+            Fixtures.loadModels("initial-data.yml");
         }
     }
 }

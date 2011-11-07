@@ -1,26 +1,32 @@
 h1. Secure module
 
-The simple **Secure** module helps you to set-up basic authentication and authorization management in your application. It provides a simple **controllers.Secure** controller that defines a set of interceptors that you can easily add to your own controllers using the **@With** annotation.
+The simple **Secure** module helps you to set-up basic authentication and authorization management in your application. It provides a simple @controllers.Secure@ controller that defines a set of interceptors that you can easily add to your own controllers using the <code>@With</code> annotation.
 
-h2. <a>Enable the Secure module for the application</a>
 
-In the **/conf/application.conf** file, enable the Secure module by adding this line:
+h2. <a name="setup">Module set-up</a>
 
-bc. # The secure module
-module.secure=${play.path}/modules/secure
+h3. <a name="enable">Enable the Secure module for the application</a>
 
-h2. <a>Import default Secure routes</a>
+In the @/conf/dependencies.yml@ file, enable the Secure module by adding a line after @require:@
 
-In the **conf/routes** file, import the default module routes by adding this line:
+bc. require:
+    - play -> secure
+
+Then run the @play dependencies@ command to add the module to your application.
+
+
+h3. <a name="routes">Import default Secure routes</a>
+
+In the @conf/routes@ file, import the default module routes by adding this line:
 
 bc. # Import Secure routes
 *      /                module:secure
 
 p(note). **Note** that it’s not required to use the default routes file. You can also define your own routes, or mix the two.
 
-h2. <a>Protecting a controller</a>
+h2. <a name="controller">Protecting a controller</a>
 
-To protect a controller you just have to annotate it using **@With**. For example:
+To protect a controller you just have to annotate it using <code>@With</code>. For example:
 
 bc. @With(Secure.class)
 public class Application extends Controller {
@@ -28,14 +34,13 @@ public class Application extends Controller {
     public static void index() {
         render();
     }
-    
 }
 
 This controller will be automatically protected with the default authentication page.
 
-h2. <a>Customize the authentication mechanism</a>
+h2. <a name="custom">Customizing the authentication mechanism</a>
 
-By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the **controllers** package that extends the **controllers.Secure.Security** class. Then you can override the **authenticate(String username, String password)** method.
+By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the @controllers@ package that extends the @controllers.Secure.Security@ class. Then you can override the @authenticate(String username, String password)@ method.
 
 bc. package controllers;
  
@@ -44,13 +49,12 @@ public class Security extends Secure.Security {
     static boolean authenticate(String username, String password) {
         User user = User.find("byEmail", username).first();
         return user != null && user.password.equals(password);
-    }    
-    
+    }
 }
 
 p(note). **Note** that you can also override other methods to customize how the application should react to authentication events (onAuthenticated, onDisconnected).
 
-h2. <a>Retrieving the connected user</a>
+h2. <a name="user">Retrieving the connected user</a>
 
 From your application code, you can reuse the Security helper that you’ve just created to retrieve the connected user.
 
@@ -61,43 +65,66 @@ public class Application extends Controller {
         String user = Security.connected();
         render(user);
     }
-    
 }
 
-h2. <a>Adding authorization check</a>
+h2. <a name="auth">Adding authorization checks</a>
 
-You can use the **@Check** annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
+h3. <a name="authcontroller">Controller annotation</a>
 
-For example:
+You can use the <code>@Check</code> annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
+
+For example, to restrict an action method to authorized users:
 
 bc. @With(Secure.class)
-public class Application extends Controller {
-    
-   ...
+public class Application extends Controller { 
+   …
    
-   @Check("isAdmin")
+   @Check("administrator")
    public static void delete(Long id) {
-       ...
+       …
    }
-    
 }
 
-By default the secure module will always authorize all checks. You have to customize by overriding one more method in your **Security** class.
+To restrict all of the action methods in one controller, use the <code>@Check</code> annotation either on the controller class:
+
+bc. @With(Secure.class)
+@Check("administrator")
+public class Application extends Controller { 
+   …
+   
+   public static void delete(Long id) {
+       …
+   }
+   
+   public static void edit(Long id) {
+       …
+   }
+}
+
+By default the secure module will always authorize all checks. You have to customize by overriding one more method in your @Security@ class.
 
 bc. package controllers;
  
 public class Security extends Secure.Security {
-    
-    ...
+    …
     
     static boolean check(String profile) {
         User user = User.find("byEmail", connected()).first();
-        if ("isAdmin".equals(profile)) {
+        if ("administrator".equals(profile)) {
             return user.admin;
         }
         else {
             return false;
         }
     }    
-    
 }
+
+h3. <a name="authtag">Template tag</a>
+
+You can also use the @secure.check@ tag for authorization checks in templates. This is useful to conditionally display user-interface controls for operations that are protected by controller annotations. For example:
+
+bc. #{secure.check "administrator"}
+    <a href="@{delete(item.id)}">Delete</a>
+#{/secure.check}
+
+The tag only renders its body for authorised users, so the ‘Delete’ link is only displayed when the user is authorised to execute the @delete@ controller action.

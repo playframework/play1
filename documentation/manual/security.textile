@@ -12,7 +12,7 @@ h3. Keep your secret… secret
 
 The session is a hash of key/values, signed but not encrypted. That means that as long as your secret is safe, it is not possible for a third-party to forge sessions.
 
-The secret is stored in conf/application.conf. It is very important to keep it private: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command "play secret".
+The secret is stored in @conf/application.conf@. It is very important to keep it private: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command @play secret@.
 
 h3. Don’t store critical data
 
@@ -31,11 +31,7 @@ Let’s say you’re writing a blog, and anyone can add a comment. If you blindl
 
 Consequently it is very important to be protected from those attacks.
 
-Since version 1.0.1, Play’s template engine automatically escapes strings. For that, you need to ensure escapeInTemplates is enabled in your application.conf. It is by default in newly created applications. If your application was created prior to 1.0.1 release, it may not be enabled.
-
-bc. future.escapeInTemplates=true
-
-It is strongly recommended to enable this option. When you really need to insert unescaped HTML in your templates, you can do so using the raw() method on the string. But if the string comes from a user input, you need to make sure it is sanitized first.
+Play’s template engine automatically escapes strings. If you really need to insert unescaped HTML in your templates, you can do so using the "raw()":javaextensions#raw Java extension on the string. But if the string comes from a user input, you need to make sure it is sanitized first.
 
 When sanitizing user inputs, always prefer whitelisting (only allow a list of safe tags) to blacklisting (forbid a list of unsafe tags and allow all the rest).
 
@@ -47,7 +43,7 @@ SQL injection is an exploit consisting in using user input to execute a SQL quer
 
 !http://imgs.xkcd.com/comics/exploits_of_a_mom.png!
 
-When you are using high level "find" methods, you should be covered against SQL injection. When you build your own queries manually, you need to be careful not to concatenate strings with + but use "?" marks.
+When you are using high level "find" methods, you should be covered against SQL injection. When you build your own queries manually, you need to be careful not to concatenate strings with @+@ but use @?@ placeholders.
 
 This is good:
 
@@ -65,27 +61,33 @@ bq. This attack method works by including malicious code or a link in a page tha
 
 To prevent this attack, the first thing to do is to use GET and POST methods appropriately. That means that only the POST method should be used to change the application’s state.
 
-For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
+For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play now has a built-in helper to handle that:
 
-* a new **checkAuthenticity()** method available in controllers, that checks for a valid authenticity token in the request parameters and sends a forbidden response if something is bad.
-* **session.getAuthenticityToken()** generates an authenticity token only valid for the current session.
-* **#{authenticityToken /}** creates a hidden input field that you can add to any form.
+* a @checkAuthenticity()@ method available in controllers, that checks for a valid authenticity token in the request parameters and sends a forbidden response if something is bad.
+* @session.getAuthenticityToken()@ generates an authenticity token only valid for the current session.
+* @#{authenticityToken /}@ creates a hidden input field that you can add to any form.
 
 So for example:
 
 bc. public static destroyMyAccount() {
     checkAuthenticity();
-    ...
+    …
 }
 
 Will only work when called from a form including a proper authenticity token:
 
-bc. #{form @ destroyMyAccount()}
+bc. <form method="post" action="/account/destroy">
     #{authenticityToken /}
+    <input type="submit" value="destroy my account">
+</form>
+
+For POST requests, Play’s "form tag":tags#form automatically generates the authenticity token:
+
+bc. #{form @destroyMyAccount()}
     <input type="submit" value="destroy my account">
 #{/form}
 
-You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers.
+You can of course add the @checkAuthenticity()@ method call as a "before filter":controllers#before if you want to protect all actions of a hierarchy of controllers.
 
 "More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery
 

@@ -14,29 +14,29 @@ public class Rest extends Controller {
     // to replace strings that does work in utf-8 but not in iso-8859-1.
     // This enables us to run this testsuite when Play! is using different encoding..
     public static String filterString(String s) {
-        if (!play.Play.defaultWebEncoding.equalsIgnoreCase("utf-8")) {
-            if ("ééééééçççççç汉语漢語".equals(s)) {
-                return "æøå1";
-            }
-            if ("对!".equals(s)) {
-                return "æøå2";
-            }
-            if ("名字".equals(s)) {
-                return "æøå3";
-            }
-            if ("dobrodošli".equals(s)) {
-                return "æøå4";
-            }
-            if ("欢迎".equals(s)) {
-                return "æøå5";
-            }
-            if ("ยินดีต้อนรับ".equals(s)) {
-                return "æøå6";
-            }
-            if ("éç欢迎".equals(s)) {
-                return "æøå7";
-            }
-        }
+//        if (!play.Play.defaultWebEncoding.equalsIgnoreCase("utf-8")) {
+//            if ("ééééééçççççç汉语漢語".equals(s)) {
+//                return "æøå1";
+//            }
+//            if ("对!".equals(s)) {
+//                return "æøå2";
+//            }
+//            if ("名字".equals(s)) {
+//                return "æøå3";
+//            }
+//            if ("dobrodošli".equals(s)) {
+//                return "æøå4";
+//            }
+//            if ("欢迎".equals(s)) {
+//                return "æøå5";
+//            }
+//            if ("ยินดีต้อนรับ".equals(s)) {
+//                return "æøå6";
+//            }
+//            if ("éç欢迎".equals(s)) {
+//                return "æøå7";
+//            }
+//        }
         return s;
     }
 
@@ -102,5 +102,31 @@ public class Rest extends Controller {
 	    Logger.info("Serverside: params: " + param);
 	    renderText("param: " + param);
 	}
+	
+	public static void echo(String id) {
+        String r = id;
+
+        for ( String key : params.all().keySet()) {
+            String[] values = params.all().get(key);
+            for( String v : values) {
+                if ( v == null) {
+                    v = "flag";
+                }
+                r += "|" + key + "|" + v; 
+            }
+        }
+        renderText(r);
+    }
+
+    public static void echoHttpMethod(String a, String b) {
+        String r = request.method;
+        if (a != null) {
+            r += " a="+a;
+        }
+        if (b != null) {
+            r += " b="+b;
+        }
+        renderText(r);
+    }
 	
 }

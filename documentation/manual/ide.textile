@@ -5,9 +5,11 @@ Working with Play is easy. You don’t even need a sophisticated IDE as Play com
 However, using a modern Java IDE provides cool productivity features like auto-completion, on-the-fly compilation, assisted refactoring and debugging. Play supports the "NetBeans":http://www.netbeans.org, "IntelliJ IDEA":http://www.jetbrains.com/idea/index.html and "Eclipse":http://www.eclipse.org platforms.
 
 
-h2(#eclipse). <a>Generate configuration files for Eclipse</a>
+h2(#eclipse). <a>Eclipse</a>
 
-Play provides a command to simplify Eclipse configuration. To transform a Play application into a working Eclipse project, use the **eclipsify** command:
+h3. Generate configuration
+
+Play provides a command to simplify Eclipse configuration. To transform a Play application into a working Eclipse project, use the @eclipsify@ command:
 
 bc. # play eclipsify myApp
 
@@ -15,19 +17,24 @@ You then need to import the application into your Workspace with the **File/Impo
 
 !images/eclipse!
 
-The **eclipsify** command generates several launchers for the application. The main launcher in only usable with the **Run As** Eclipse command. You can then use the *Connect JPDA launcher* using *Debug As* to start a debugging session at any time. Stopping the debugging session will not stop the server.
+The @eclipsify@ command generates several launchers for the application. The main launcher in only usable with the **Run As** Eclipse command. You can then use the *Connect JPDA launcher* using *Debug As* to start a debugging session at any time. Stopping the debugging session will not stop the server.
 
-If you make any important changes to your application, such as changing the classpath, use **eclipsify** again to regenerate the configuration files.
-
-Additionally, an Eclipse plugin is available in your Play distribution, in the **support/eclipse/** directory. To install it, simply copy the JAR file you will find to your Eclipse installation’s **dropins** folder.
+If you make any important changes to your application, such as changing the classpath, use @eclipsify@ again to regenerate the configuration files.
 
 p(note). **Do not commit Eclipse configuration files when you work in a team!**
 
 The generated configuration files contain absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his Eclipse configuration files private. 
 
-h2(#netbeans). <a>Generate configuration files for NetBeans</a>
+h3. Play Eclipse plug-in
 
-Play provides a command to simplify NetBeans configuration. To transform an existing application to a valid NetBeans project, use the **netbeansify** command:
+Additionally, Play comes with an Eclipse plug-in that provides editors for HTML view templates, @application.conf@ and the @routes@ file.
+
+To install, copy the JAR file from @$PLAY_HOME/support/eclipse@ to @$ECLIPSE_HOME/dropins@.
+
+
+h2(#netbeans). <a>NetBeans</a>
+
+Play provides a command to simplify NetBeans configuration. To transform an existing application to a valid NetBeans project, use the @netbeansify@ command:
 
 bc. # play netbeansify myApp
 
@@ -37,23 +44,41 @@ Then you can just open the application as a NetBeans project.
 
 Use the standard *Run* button to start the application. When the application is started you can attach a debugging session at any time using the *Debug* button. Stopping the debugging session doesn’t stop the server.
 
-If you make any important change to your application such as changing the classpath, use **netbeansify** again to regenerate the configuration files. 
+If you make any important change to your application such as changing the classpath, use @netbeansify@ again to regenerate the configuration files. 
 
-p(note). **Do not commit the nbproject/ directory when you work in a team!**
+p(note). **Do not commit the @nbproject/@ directory when you work in a team!**
  
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his NetBeans configuration files private.
 
-h2(#intellij). <a>Generate configuration files for IntelliJ IDEA</a>
+h2(#intellij). <a>IntelliJ IDEA</a>
 
-Play provides a command to simplify IntelliJ IDEA configuration. To transform an existing application to a valid IntelliJ IDEA module/project, use the **idealize** command:
+Play provides a command to simplify IntelliJ IDEA configuration. To transform an existing application to a valid IntelliJ IDEA module, use the @idealize@ command:
 
 bc. # play idealize myApp
 
-Then you can just import the application in IntelliJ using the import module facility.
+To create a single module project, do the following in IntelliJ IDEA.
+
+# On the command line, use the @play new@ command to create the Play project.
+# On the command line, use the @play idealize@ command to create an IntelliJ IDEA module.
+# In IntelliJ IDEA, on the *File* menu, select *Open Project…* and select the generated @.ipr@ file.
 
 !images/intellij!
 
-You can use the *Run* and *Debug* using the context menu. 
+To add a run configuration:
+
+# In IntelliJ IDEA, on the *Run* menu, select *Edit Configurations*.
+# Right-click on *Application* under *Defaults* and select *Add New Configuration*.
+# Under *Main class*, enter @play.server.Server@.
+# Under *VM parameters*, enter @-Dapplication.path="."@.
+# Under *Working directory*, enter the application path.
+
+To run Play in test mode in IntelliJ:
+
+# Edit the run configuration and in *VM parameters*, append *-Dplay.id=test*.
+# Right-click on your module and select *Open Module Settings*.
+# Select the *Dependencies* tab.
+# Click *Add…* and select *Single-Entry Module Library*.
+# Select @$PLAY_HOME/modules/testrunner/lib/play-testrunner.jar@ and click *OK*.
 
 p(note). **Do not commit the .iml files when you work in a team!**
  
@@ -62,41 +87,46 @@ The generated configuration files contains absolute references to your framework
 
 h2(#textmate). <a>Textmate</a>
 
-Download and install the bundle provided for "Textmate":http://macromates.com/ to enable syntax coloring and auto-completion. The bundle also eases navigation between controllers and views.
+Install the "Textmate":http://macromates.com/ bundle provided at @$PLAY_HOME/support/textmate.zip@ to enable syntax coloring and auto-completion. The bundle also eases navigation between controllers and views.
 
 !images/editor!
 
 
-h2(#custom). <a>Manually configure your preferred editor</a>
+h2(#vim). <a>Vim</a>
 
-As Play applications are standard Java applications, you don’t need a specific plug-in to work with your preferred editor.  This, however, requires a little bit of knowledge of how Play works.
+Inspired by Textmate, the "snipMate":http://www.vim.org/scripts/script.php?script_id=2540 plug-in provides keyword auto-completion in "Vim":http://www.vim.org/. Play provides snippets files for HTML and Java: to use them, install snipMate and copy @$PLAY_HOME/support/vim/*.snippets@ to @~/.vim/snippets/@.
+
+
+h2(#custom). <a>Custom configuration</a>
+
+As Play applications are standard Java applications, you don’t need a specific plug-in to work with your preferred editor. This, however, requires a little bit of knowledge of how Play works.
 
 h3. Classpath settings
 
 A Play application classpath is built as follows (in this order): 
 
-* The **conf/** directory for the application
-* The **$PLAY_PATH/framework/play-$version.jar**
-* All JAR files found in your application’s **lib/** directory
-* All JAR files found in the **$PLAY_PATH/framework/lib/** directory
+* The @conf/@ directory for the application
+* The @$PLAY_PATH/framework/play-$version.jar@
+* All JAR files found in your application’s @lib/@ directory
+* All JAR files found in the @$PLAY_PATH/framework/lib/@ directory
 
 p(note). *Tip*
  
-If you have any modules enabled, you will need to add all modules’ libraries (from the **$module/lib/** directory) to the classpath as well.
+If you have any modules enabled, you will need to add all modules’ libraries (from the @$module/lib/@ directory) to the classpath as well.
 
 
 h3. Main class to run
 
-To start a Play application, just run the **play.server.Server** class. Play uses the **"application.path"** system property to locate the application to run. Typically you pass this value with:
+To start a Play application, just run the @play.server.Server@ class. Play uses the @"application.path"@ system property to locate the application to run. Typically you pass this value with:
 
-bc. java -Dapplication.path="/app/path"...
+bc. java -Dapplication.path="/app/path"…
 
 
 h3. Java agent
 
-To enable HotSwap reloading you have to load a Java agent packaged in the **play.jar** library. Typically like this:
+To enable HotSwap reloading you have to load a Java agent packaged in the @play.jar@ library. Typically like this:
 
-bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
+bc. java -javaagent:"$PLAY_PATH/framework/play.jar" …
 
 It’s not required, but will speed-up class reloading when it is possible.
 

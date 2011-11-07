@@ -9,10 +9,13 @@ import static play.libs.F.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.*;
 
 import models.*;
 
 import play.jobs.*;
+
+import play.exceptions.*;
 
 public class WithContinuations extends Controller {
     
@@ -20,6 +23,14 @@ public class WithContinuations extends Controller {
     static void intercept() {
         // just to check
         Logger.info("Before continuation");
+    }
+    
+    protected static void doAwait() {
+        await(100);
+    }
+    
+    protected static String doAwait2() {
+        return await(new jobs.DoSomething(100).now());
     }
 
     public static void loopWithWait() {
@@ -237,6 +248,36 @@ public class WithContinuations extends Controller {
         });
     }
     
+    
+    public static class CompletedFuture<T> implements Future {
+
+        private final T data;
+        
+        public CompletedFuture(T data) {
+            this.data = data;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
+
+        public T get() throws InterruptedException, ExecutionException {
+            return data;
+        }
+
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return data;
+        }
+    }
+    
     public static void renderTemplateWithVariablesAssignedBeforeAwait() {
         int n = 1;
         String a = "A";
@@ -254,12 +295,139 @@ public class WithContinuations extends Controller {
         
         String d = "D";
         
-        //await("1s");
+        await( new CompletedFuture<Boolean>(true));
         
         String e = "E";
         
         render(n,a,b,c,d,e);
     }
     
+    // This class does not use await() directly and therefor is not enhanched for Continuations
+    public static class ControllerWithoutContinuations extends Controller{
+        
+        public static void useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            try {
+                WithContinuations.doAwait2();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            renderText("failCount: " + failCount);
+        }
+    }
+    
+    public static class ControllerWhichUsesAwaitViaInheritance extends WithContinuations {
+
+        public static void useAwaitViaInheritance() {
+            String res = WithContinuations.doAwait2();
+            renderText(res != null);
+        }
+    }
+
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithContinuations() {
+        WebSocketControllerWithContinuations.useAwait();
+        renderText("ok");
+    }
+    
+    // This is a WebSocketController, but since I'm not sre how to test a WebSocket,
+    // I'll just call a protected static method in it doing continuations.
+    // I'm doing this just to make sure that the enhancing is working for WebSocketControllers as well
+    public static class WebSocketControllerWithContinuations extends WebSocketController {
+        
+        protected static void useAwait() {
+            await(100);
+        }
+    }
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithoutContinuations() {
+        renderText( WebSocketControllerWithoutContinuations.useAwaitViaOtherClass() );
+    }
+
+
+    public static class WebSocketControllerWithoutContinuations extends WebSocketController {
+        
+        protected static String useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            return "failCount: " + failCount;
+        }
+    }
+    
+    
+    public static void usingRenderArgsAndAwait() {
+        renderArgs.put("a", "1");
+        int size = Scope.RenderArgs.current().data.size();
+        await(10);
+        renderArgs.put("b", "2");
+        size++;
+        
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        renderArgs.put("c", "3");
+        size++;
+        
+        await( new CompletedFuture<Boolean>(true));
+        
+        renderArgs.put("d", "4");
+        size++;
+        
+        boolean res = "1234".equals(""+renderArgs.get("a")+renderArgs.get("b")+renderArgs.get("c")+renderArgs.get("d")) && size == Scope.RenderArgs.current().data.size();
+        
+        renderText( res );
+    }
+    
+    public static void usingRenderArgsAndAwaitWithCallBack(String arg) {
+         renderArgs.put("arg", arg);
+
+         await("1s", new F.Action0() {
+
+             @Override
+             public void invoke() {
+                 renderText(renderArgs.get("arg"));
+             }
+         });
+    }
+
+    public static void usingRenderArgsAndAwaitWithFutureAndCallback(final String arg) {
+        renderArgs.put("arg", arg);
+
+        Promise<String> promise = new Job() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return "result";
+        }
+
+        }.now();
+        await(promise, new F.Action<String>() {
+
+            @Override
+            public void invoke(String result) {
+                renderText(result + "/" + renderArgs.get("arg"));
+            }
+        });
+    }
 }
 

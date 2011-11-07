@@ -2,9 +2,9 @@ h1. Put your application in production
 
 Here some simple tips to optimize your application for production.
 
-h2. <a name="application">Configure your application.conf</a>
+h2. <a name="application">application.conf</a>
 
-First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
+First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick @production@ as an example. Refer "manage application.conf in several environments":ids to see how.
 
 h3. Set the framework in prod mode:
 
@@ -14,7 +14,7 @@ In this mode, the framework will pre-compile all Java sources and templates. If 
 
 h3. Define a real database:
 
-If you have used a development database (either **db=mem** or **db=fs**), you should configure a more robust database engine:
+If you have used a development database (either @db=mem@ or @db=fs@), you should configure a more robust database engine:
 
 bc. %production.db.url=jdbc:mysql://localhost/prod
 %production.db.driver=com.mysql.jdbc.Driver
@@ -37,14 +37,14 @@ The Play secret key is used to secure cryptographic functions, like the session 
 
 bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
 
-You can use the **play secret** command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances!
+You can use the @play secret@ command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the @same key@ for all application instances!
 
 
-h2. <a name="logging">Configure logging</a>
+h2. <a name="logging">Logging configuration</a>
 
-For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the **logs/system.out** file and it will grow without bound!
+For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the @logs/system.out@ file and it will grow without bound!
 
-Create a custom **log4j.properties** in the **conf/** directory:
+Create a custom @log4j.properties@ in the @conf/@ directory:
 
 bc. log4j.rootLogger=ERROR, Rolling
  
@@ -58,9 +58,9 @@ log4j.appender.Rolling.MaxBackupIndex=100
 log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
 log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
-h2. <a name="server">Set-up a front-end HTTP server</a>
+h2. <a name="server">Front-end HTTP server</a>
 
-You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80**:
+You can easily deploy your application as a stand-alone server by setting the application HTTP port to @80@:
 
 bc. %production.http.port=80
 
@@ -72,14 +72,14 @@ h3. Set-up with lighttpd
 
 This example shows you how to configure "lighttpd":http://www.lighttpd.net/ as a front-end web server. Note that you can do the same with Apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure!
 
-The **/etc/lighttpd/lighttpd.conf** file should define things like this:
+The @/etc/lighttpd/lighttpd.conf@ file should define things like this:
 
 bc. server.modules = (
       "mod_access",
       "mod_proxy",
       "mod_accesslog" 
 )
-...
+…
 $HTTP["host"] =~ "www.myapp.com" {
     proxy.balance = "round-robin" proxy.server = ( "/" =>
         ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
@@ -97,7 +97,7 @@ h3. Set-up with Apache
 The example below shows a simple set-up with "Apache httpd server":http://httpd.apache.org/ running in front of a standard Play configuration. 
 
 bc. LoadModule proxy_module modules/mod_proxy.so
-...
+…
 <VirtualHost *:80>
   ProxyPreserveHost On
   ServerName www.loadbalancedapp.com
@@ -108,11 +108,11 @@ bc. LoadModule proxy_module modules/mod_proxy.so
 
 h3. Apache as a front proxy to allow transparent upgrade of your application
 
-The basic idea is to run 2 Play instances of your web application and let the front-end proxy load-balance them. In case one is not available, it will forward all the requests to the available one.
+The basic idea is to run two Play instances of your web application and let the front-end proxy load-balance them. In case one is not available, it will forward all the requests to the available one.
 
 Let’s start the same Play application two times: one on port 9999 and one on port 9998.
 
-Copy the application 2 times and edit the application.conf in the conf directory to change the port numbers.
+Make a copy of the application and edit the @application.conf@ in the @conf@ directory to change the port numbers.
 
 For each web application directory:
 
@@ -165,17 +165,55 @@ h3. Advanced proxy settings
 
 When using an HTTP frontal server, request addresses are seen as coming from the HTTP server. In a usual set-up, where you both have the Play app and the proxy running on the same machine, the Play app will see the requests coming from 127.0.0.1.
 
-Proxy servers can add a specific header to the request to tell the proxied application where the request came from. Most web servers will add an X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in your Play app configuration:
-
-bc. XForwardedSupport=127.0.0.1,10.0.0.25
-
-Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
+Proxy servers can add a specific header to the request to tell the proxied application where the request came from. Most web servers will add an X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in the "XForwardedSupport configuration":configuration#XForwardedSupport, Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
 
 However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
 
 bc. ProxyPreserveHost on
 
 The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.
+
+h2. <a name="https">HTTPS configuration</a>
+
+The built-in server supports the HTTPS protocol, which you can use it in production. It supports certificate management, either via the classical Java **keystore** or simple @cert@ and @key@ files. To start an HTTPS connector for your application, just declare the @https.port@ configuration property in your @application.conf@ file:
+
+bc. http.port=9000
+https.port=9443
+
+You need to put your certificates in the @conf@ directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follows:
+*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *certificate.jks*.
+
+If you are using X509 certificates, then the following parameters can be configured in your @application.conf@ file:
+
+bc. # X509 certificates
+certificate.key.file=conf/host.key
+certificate.file=conf/host.cert
+# In case your key file is password protected
+certificate.password=secret
+trustmanager.algorithm=JKS
+
+If you are using keystore:
+
+bc. keystore.algorithm=JKS
+keystore.password=secret
+keystore.file=conf/certificate.jks
+
+Note that the values above are the default values.
+
+You can generate self-signed certificates using *openssl*: 
+
+bc. openssl genrsa 1024 > host.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
+
+If you are using the Java keystore mechanism, then the following properties can be configured in your @application.conf@ file:
+
+bc. # Keystore 
+ssl.KeyManagerFactory.algorithm=SunX509
+trustmanager.algorithm=JKS
+keystore.password=secret
+keystore.file=certificate.jks
+
+The values above are the default values.
 
 h2. <a name="nopython">Deploying Without Python</a>
 
@@ -187,13 +225,13 @@ From the application folder, you can start the server using:
 
 bc. ant start -Dplay.path=/path/to/playdirectory
 
-Warning: using the play command the output will be redirected to system.out; however using ant the standard output is not accessible. It is necessary to provide a log4j properties file where you specify a file appended.
+Warning: using the @play@ command the output will be redirected to @System.out@; however using Ant the standard output is not accessible. It is necessary to provide a Log4j properties file where you specify a file appended.
 
 To stop the server:
 
 bc. ant stop -Dplay.path=/path/to/playdirectory
 
-Note that you can also specify the path to Play framework in an environment variable or directly in your application's build.xml.
+Note that you can also specify the path to Play framework in an environment variable or directly in your application's @build.xml@.
 
 p(note). **Continuing the discussion**
  

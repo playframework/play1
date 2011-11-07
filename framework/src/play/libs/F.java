@@ -44,22 +44,40 @@ public class F {
 
         public V get() throws InterruptedException, ExecutionException {
             taskLock.await();
+            if (exception != null) {
+                // The result of the promise is an exception - throw it
+                throw new ExecutionException(exception);
+            }
             return result;
         }
 
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             taskLock.await(timeout, unit);
+            if (exception != null) {
+                // The result of the promise is an exception - throw it
+                throw new ExecutionException(exception);
+            }
             return result;
         }
         List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
         boolean invoked = false;
         V result = null;
+        Throwable exception = null;
 
         public void invoke(V result) {
+            invokeWithResultOrException(result, null);
+        }
+
+        public void invokeWithException(Throwable t) {
+            invokeWithResultOrException(null, t);
+        }
+
+        protected void invokeWithResultOrException(V result, Throwable t) {
             synchronized (this) {
                 if (!invoked) {
                     invoked = true;
                     this.result = result;
+                    this.exception = t;
                     taskLock.countDown();
                 } else {
                     return;
@@ -560,7 +578,6 @@ public class F {
                 }
                 if (filter.trigger()) {
                     it.remove();
-                    break;
                 }
             }
         }

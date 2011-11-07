@@ -7,7 +7,7 @@ p(note). There is a separate %(next)"Java extensions":javaextensions% manual pag
 
 h2. <a name="a">a</a>
 
-The **a** tag inserts an HTML link to a controller action.
+The @a@ tag inserts an HTML link to a controller action.
 
 bc. #{a @Application.logout()}Disconnect#{/a}
 
@@ -20,24 +20,25 @@ If the action you try to call does not have any route able to invoke it using a 
 
 h2. <a name="authenticityToken">authenticityToken</a>
 
-Renders a hidden input field containing a generated token that you can use in any form. See the "Cross-Site Request Forgery":security#csrf section.
+Renders a hidden input field containing a generated token that you can use in any form, to prevent "Cross-Site Request Forgery":security#csrf.
 
 bc. #{authenticityToken /}
 
 Rendered as:
 
-bc. <input type="hidden" name="authenticityToken" value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
+bc. <input type="hidden" name="authenticityToken"
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
 
 
 h2. <a name="cache">cache</a>
 
-Caches the tag body using the **play.cache.Cache** API, for the cache key specified by the tag parameter.
+Caches the tag body using the @play.cache.Cache@ API, for the cache key specified by the tag parameter.
 
 bc. #{cache 'startTime'}
    ${new java.util.Date()}
 #{/cache}
 
-The body is cached indefinitely by default, but you can specify an expiration duration with the **for** parameter.
+The body is cached indefinitely by default, but you can specify an expiration duration with the @for@ parameter.
 
 bc. #{cache 'currentTime', for:'3s'}
    ${new java.util.Date()}
@@ -57,7 +58,7 @@ bc. <!-- common header here -->
 
 h2. <a name="else">else</a>
 
-Of course used with the **if** tag.
+Of course used with the @if@ tag.
 
 bc. #{if user}
     Connected user is ${user}
@@ -66,7 +67,7 @@ bc. #{if user}
     Please log in
 #{/else}
 
-However, you can also use it with the **list** tag and it will be executed if the list is empty.
+However, you can also use it with the @list@ tag and it will be executed if the list is empty.
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
@@ -91,7 +92,7 @@ bc. #{if tasks.size() > 1}
     Nothing to do
 #{/else}
 
-As for **else**, you can use it with the **list** tag.
+As for @else@, you can use it with the @list@ tag.
 
 
 h2. <a name="error">error</a>
@@ -100,7 +101,7 @@ Outputs the validation error message, if present, for the field specified by the
 
 bc. #{error 'user.name'/}
 
-You can use the optional **field** parameter to use a different field’s error message. This is useful when you want several fields to share a common error message.
+You can use the optional @field@ parameter to use a different field’s error message. This is useful when you want several fields to share a common error message.
 
 bc. #{error 'contact.street',  field:'contact.address'/}
 #{error 'contact.city',    field:'contact.address'/}
@@ -109,7 +110,7 @@ bc. #{error 'contact.street',  field:'contact.address'/}
 
 h2. <a name="errorClass">errorClass</a>
 
-Outputs the text **hasError** if there is a validation error for the field specified by the tag parameter. This is useful for setting a CSS class for input fields with errors:
+Outputs the text @hasError@ if there is a validation error for the field specified by the tag parameter. This is useful for setting a CSS class for input fields with errors:
 
 bc. <input name="name" class="#{errorClass 'name'/}">
 
@@ -130,11 +131,11 @@ bc. <ul>
 
 The tag defines implicit variables in its body.
 
-* **error**, the error
-* **error_index**, the error’s index, starting at 1
-* **error_isLast**, true for the last element
-* **error_isFirst**, true for the first element
-* **error_parity**, alternates between **odd** and **even**
+* @error@, the error
+* @error_index@, the error’s index, starting at 1
+* @error_isLast@, true for the last element
+* @error_isFirst@, true for the first element
+* @error_parity@, alternates between @odd@ and @even@
 
 bc. <table>
 <tr><th>#</th><th>Error</th></tr>
@@ -182,18 +183,50 @@ bc. #{field 'user.name'}
 </p>
 #{/}
 
-So you don’t repeat **user.name** again and again.
+So you don’t repeat @user.name@ again and again.
 
 
 h2. <a name="form">form</a>
 
-Inserts a **form** tag. Play will guess the HTTP method from the route, with POST as the default. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.
+Inserts a @form@ tag. Play will guess the HTTP method from the route, with POST as the default. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.
 
-* Optional **method** either POST or GET.
-* Optional **id** attribute sets an ID to the form element.
-* Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
+* Optional @method@ either POST or GET.
+* Optional @id@ attribute sets an ID to the form element.
+* Optional @enctype@ attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
 
 Charset encoding is always **utf-8**.
+
+bc. #{form @Client.details(), method:'GET', id:'detailsForm'}
+   ...
+#{/form}
+
+Rendered as:
+
+bc. <form action="/client/details" id="detailsForm" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+You can also specify a target entity as part of the action method:
+
+bc. #{form @Client.details(client.id)}
+   ...
+#{/form}
+
+The HTTP parameter name name is detected from what you declared in your action method.
+
+bc. public static void details(String clientId){
+       // ...
+}
+
+Play will create an action URL with clientId:
+
+bc. <form action="/client/details?clientId=3442" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+The @form@ tag also automatically includes an "authenticity token":#authenticityToken, for methods other than GET.
 
 bc. #{form @Client.create(), method:'POST', id:'creationForm',
        enctype:'multipart/form-data' }
@@ -204,35 +237,17 @@ Rendered as:
 
 bc. <form action="/client/create" id="creationForm" method="POST"
       accept-charset="utf-8" enctype="multipart/form-data">
- ...
-</form>
-
-You can also specify a target entity as part of the action method:
-
-bc. #{form @Client.update(client.id)}
-   ...
-#{/form}
-
-The HTTP parameter name name is detected from what you declared in your action method.
-
-bc. public static void update(String clientId){
-       // ...
-}
-
-Play will create an action URL with clientId:
-
-bc. <form action="/client/update?clientId=3442" method="POST"
-      accept-charset="utf-8" enctype="multipart/form-data">
+<input type="hidden" name="authenticityToken" 
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
  ...
 </form>
 
 If your form updates a resource on the server-side, you _should_ use the **POST** method. If your form is used to filter data and does not update your domain, you can use a GET. Please read about "idempotence":http://en.wikipedia.org/wiki/Idempotence. POST is not idempotent, whereas GET, PUT and DELETE are.
 
 
-
 h2. <a name="get">get</a>
 
-Retrieves a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
+Retrieves a value defined with a "set":#set tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
 
 bc. <head>
     <title>#{get 'title' /}
@@ -246,9 +261,9 @@ bc. <head>
 
 h2. <a name="i18n">i18n</a>
 
-Exports localized messages in JavaScript. Localized messages are available from your JavaScript code using the **i18n()** function.
+Exports localized messages in JavaScript. Localized messages are available from your JavaScript code using the @i18n()@ function.
 
-Define your translations in the **conf/messages** file.
+Define your translations in the @conf/messages@ file.
 
 bc. hello_world=Hello, World !
 hello_someone=Hello %s !
@@ -270,7 +285,7 @@ h2. <a name="if">if</a>
 
 Evaluates the given test, and if true, evaluates the tag body.
 
-bc. #{if user.countryCode == 'en"' }
+bc. #{if user.countryCode == 'en' }
     Connected user is ${user}
 #{/if}
 
@@ -320,7 +335,7 @@ bc. <div id="tree">
 
 h2. <a name="jsaction">jsAction</a>
 
-The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
+The @#{jsAction /}@ tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
 Let’s see an example:
 
@@ -337,6 +352,26 @@ bc. <script type="text/javascript">
 </script>
 
 
+h2. <a name="jsroute">jsRoute</a>
+
+The @#{jsRoute /}@ tag is similar to the @#{jsAction /}@ tag, it returns an object containing both the function which consctructs the URL based on the server action, and the corresponding HTTP method (GET, POST, etc.).
+
+Example:
+
+bc. PUT     /users/{id}        Users.update
+
+Then, in a template:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
+</script>
+
+
 h2. <a name="list">list</a>
 
 Iterates over an object collection.
@@ -349,10 +384,10 @@ bc. <ul>
 
 The tag defines implicit variables in its body. The variable names are prefixed with the loop variable name.
 
-* **name_index**, the item’s index, starting at 1
-* **name_isLast**, true for the last element
-* **name_isFirst**, true for the first element
-* **name_parity**, alternates between **odd** and **even**
+* @name_index@, the item’s index, starting at 1
+* @name_isLast@, true for the last element
+* @name_isFirst@, true for the first element
+* @name_parity@, alternates between @odd@ and @even@
 
 bc. <ul>
 #{list items:products, as:'product'}
@@ -361,7 +396,7 @@ bc. <ul>
 #{/list}
 </ul>
 
-The **items** parameter is optional and can be replaced by the default **arg** argument.
+The @items@ parameter is optional and can be replaced by the default @arg@ argument.
 
 So you can rewrite:
 
@@ -385,7 +420,7 @@ bc. #{list items:'a'..'z', as:'letter'}
     ${letter} ${letter_isLast ? '' : '|' }
 #{/list}
 
-The **as** parameter is optional as well. It uses **_** as default variable name:
+The @as@ parameter is optional as well. It uses @_@ as default variable name:
 
 bc. #{list users}
     <li>${_}</li>
@@ -394,9 +429,9 @@ bc. #{list users}
 
 h2. <a name="option">option</a>
 
-Insert an **option** tag in the template.
+Insert an @option@ tag in the template.
 
-* **value** - option's value
+* @value@ - option's value
 
 bc. #{option user.id} ${user.name} #{/option}
 
@@ -406,13 +441,13 @@ bc. <option value="42">jto</option>
 
 h2. <a name="script">script</a>
 
-Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
+Inserts a @script@ tag in the template. By convention, the tag refers to a script in @/public/javascripts@
 
-* **src** (required) - script file name, without the leading path **/public/javascripts**
-* **id** (optional) - an **id** attribute value for the generated **script** tag
-* **charset** (optional) - sets source encoding - defaults to UTF-8
+* @src@ (required) - script file name, without the leading path @/public/javascripts@
+* @id@ (optional) - an @id@ attribute value for the generated @script@ tag
+* @charset@ (optional) - sets source encoding - defaults to UTF-8
 
-The **src** parameter can be replaced by the default **arg** argument.
+The @src@ parameter can be replaced by the default @arg@ argument.
 
 bc. #{script 'jquery-1.4.2.min.js' /}
 #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
@@ -420,18 +455,18 @@ bc. #{script 'jquery-1.4.2.min.js' /}
 
 h2. <a name="render">render</a>
 
-Renders the template specified by the path in the tag parameter. The path is either absolute, or relative to **/app/views**
+Renders the template specified by the path in the tag parameter. The path is either absolute, or relative to @/app/views@
 
 bc. #{render 'Application/other.html'/}
 
 
 h2. <a name="select">select</a>
 
-Insert a **select** tag in the template.
+Insert a @select@ tag in the template.
 
-* **name** (required) - attribute sets a name to the select element.
+* @name@ (required) - attribute sets a name to the select element.
 
-Any unknow attribute will be considered as an HTML attribute, and rendered "as is"
+Any unknown attribute will be considered as an HTML attribute, and rendered "as is"
 
 bc. #{select 'booking.beds', value:2, id:'select1'}
 	#{option 1}One king-size bed#{/option}
@@ -448,14 +483,14 @@ bc. <select name="booking.beds" size="1" id="select1" >
 </select>
 
 
-This tag can generate options using **items** attribute.
+This tag can generate options using @items@ attribute.
 
-* **items** (optional) - list of objects, used to create **options**
-* **value** (optional) - selected element in **items**
-* **labelProperty** (optional) - for each item, attribute used as option's label 
-* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default
+* @items@ (optional) - list of objects, used to create @options@
+* @value@ (optional) - selected element in @items@ (note that multiple selections are not supported)
+* @labelProperty@ (optional) - for each item, attribute used as option's label 
+* @valueProperty@ (optional) - for each item, attribute used as option's value. @id@ is used by default
 
-p(note). The **labelProperty** and **valueProperty** shouldn't be primitives value. So, for example, instead of using **int** or **long** use an **Integer** or **Long** variable.
+p(note). The @labelProperty@ and @valueProperty@ shouldn't be primitive values. So, for example, use an @Integer@ or @Long@ variable instead of an @int@ or @long@.
 
 For example, giving a list of User, each having a name attribute:
 
@@ -474,7 +509,7 @@ bc. <select name="users" size="1" class="test" id="select2" >
 
 h2. <a name="set">set</a>
 
-Define a value which can be retrieved in the same template or any layout with the **get** tag.
+Define a value which can be retrieved in the same template or any layout with the @get@ tag.
 
 bc. #{set title:'Admin' /}
 #{set style:'2columns' /}
@@ -492,14 +527,14 @@ bc. #{set 'title'}
 
 h2. <a name="stylesheet">stylesheet</a>
 
-Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/stylesheets**
+Inserts a @link@ tag in the template. By convention, the tag refers to a CSS file in @/public/stylesheets@
 
-* **src** (required) - file name, without the leading path **/public/stylesheets**
-* **id** (optional) - an **id** attribute value for the generated **link** tag
-* **media** (optional) - a **media** attribute value: screen, print, aural, projection…
-* **title** (optional) - **title** attribute value (or description)
+* @src@ (required) - file name, without the leading path @/public/stylesheets@
+* @id@ (optional) - an @id@ attribute value for the generated @link@ tag
+* @media@ (optional) - a @media@ attribute value: screen, print, aural, projection…
+* @title@ (optional) - @title@ attribute value (or description)
 
-The **src** parameter can be replaced by the default **arg** argument.
+The @src@ parameter can be replaced by the default @arg@ argument.
 
 bc. #{stylesheet 'default.css' /}
 #{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
@@ -512,6 +547,6 @@ Disables HTML escaping in template output, like the "raw()":javaextensions#arawa
 bc. ${'&amp;'}
 #{verbatim}${'&amp;'}#{/verbatim}
 
-In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
+In this example, the first line outputs @&amp;@ while the second line outputs an ampersand. 
 
 

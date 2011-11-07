@@ -69,6 +69,12 @@ public class DB {
 
         // names left in oldNames should be removed
         for (String nameToRemove : oldNames) {
+            // must delete the removed DBConfig
+            DBConfig dbConfig = dbConfigs.get(nameToRemove);
+            if (dbConfig != null) {
+                dbConfig.destroy();
+            }
+            // remove it from the list
             dbConfigs.remove(nameToRemove);
         }
     }
@@ -178,15 +184,6 @@ public class DB {
             dbConfig.destroy();
         }
         dbConfigs.clear();
-    }
-
-    /**
-     * Detects changes and reconfigures all dbConfigs
-     */
-    protected static void configure() {
-        for (DBConfig dbConfig : dbConfigs.values()) {
-            dbConfig.configure();
-        }
     }
 
     /**

@@ -1,11 +1,11 @@
 package play.data.binding.types;
 
+import play.data.binding.Binder;
 import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 import play.data.Upload;
-import play.data.binding.Binder;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;

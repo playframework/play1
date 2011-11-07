@@ -79,13 +79,13 @@
 		assertTextPresent('Booked at 04/04/61 !!')
 		
 		<!-- Binding internal enum with empty string -->
-		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=RED')
+		open('/databinding/createFactory?factory.name=Nestle&factory.color=RED')
 		assertTextPresent('false -> Nestle,Color RED')
 		
-		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=REDX')
+		open('/databinding/createFactory?factory.name=Nestle&factory.color=REDX')
 		assertTextPresent('true -> Nestle,null')
 		
-		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
+		open('/databinding/createFactory?factory.name=Nestle&factory.color=')
 		assertTextPresent('false -> Nestle,null')
 
         <!-- Test that value-less params are noticed -->

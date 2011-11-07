@@ -1,53 +1,73 @@
 package play.db.jpa;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 
 import play.Play;
 import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import play.utils.Utils;
+
 
 /**
- * A super class for JPA entities 
+ * A super class for JPA entities
  */
 @MappedSuperclass
 @SuppressWarnings("unchecked")
 public class GenericModel extends JPABase {
 
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations)
+     */
+    @Deprecated
     public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return (T)create(rootParamNode, name, type, annotations);
+    }
+
+    public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
             Object model = c.newInstance();
-            return (T) edit(model, name, params, annotations);
+            return (T) edit(rootParamNode, name, model, annotations);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings("deprecation")
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations)
+     *
+     * @return
+     */
+    @Deprecated
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return (T)edit( rootParamNode, name, o, annotations);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
+        ParamNode paramNode = rootParamNode.getChild(name, true);
+        // #1195 - Needs to keep track of whick keys we remove so that we can restore it before
+        // returning from this method.
+        List<ParamNode.RemovedNode> removedNodesList = new ArrayList<ParamNode.RemovedNode>();
         try {
-            BeanWrapper bw = new BeanWrapper(o.getClass());
+            BeanWrapper bw = BeanWrapper.forClass(o.getClass());
             // Start with relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
@@ -72,6 +92,9 @@ public class GenericModel extends JPABase {
                 }
 
                 if (isEntity) {
+
+                    ParamNode fieldParamNode = paramNode.getChild(field.getName(), true);
+
                     Class<Model> c = (Class<Model>) Play.classloader.loadClass(relation);
                     if (JPABase.class.isAssignableFrom(c)) {
                         String keyName = Model.Manager.factoryFor(c).keyName();
@@ -83,17 +106,19 @@ public class GenericModel extends JPABase {
                             } else if (Set.class.isAssignableFrom(field.getType())) {
                                 l = new HashSet();
                             }
-                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
+                            String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null) {
-                                params.remove(name + "." + field.getName() + "." + keyName);
+                                // Remove it to prevent us from finding it again later
+                                fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
                                     if (_id.equals("")) {
                                         continue;
                                     }
                                     Query q = em.createQuery("from " + relation + " where " + keyName + " = ?");
-                                    q.setParameter(1, Binder.directBind(_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
+                                    q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations,_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                     try {
                                         l.add(q.getSingleResult());
+
                                     } catch (NoResultException e) {
                                         Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
                                     }
@@ -101,58 +126,62 @@ public class GenericModel extends JPABase {
                                 bw.set(field.getName(), o, l);
                             }
                         } else {
-                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
+                            String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                                params.remove(name + "." + field.getName() + "." + keyName);
+
                                 Query q = em.createQuery("from " + relation + " where " + keyName + " = ?");
-                                q.setParameter(1, Binder.directBind(ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
+                                q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations, ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                 try {
-                                    String localName = name + "." + field.getName();
                                     Object to = q.getSingleResult();
-                                    edit(to, localName, params, field.getAnnotations());
-                                    params = Utils.filterMap(params, localName);
+                                    edit(paramNode, field.getName(), to, field.getAnnotations());
+                                    // Remove it to prevent us from finding it again later
+                                    paramNode.removeChild( field.getName(), removedNodesList);
                                     bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
-                                    Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
+                                    Validation.addError(fieldParamNode.getOriginalKey(), "validation.notFound", ids[0]);
+                                    // Remove only the key to prevent us from finding it again later
+                                    // This how the old impl does it..
+                                    fieldParamNode.removeChild(keyName, removedNodesList);
+                                    if (fieldParamNode.getAllChildren().size()==0) {
+                                        // remove the whole node..
+                                        paramNode.removeChild( field.getName(), removedNodesList);
+                                    }
+
                                 }
+
                             } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
                                 bw.set(field.getName(), o, null);
-                                params.remove(name + "." + field.getName() + "." + keyName);
+                                // Remove it to prevent us from finding it again later
+                                paramNode.removeChild(field.getName(), removedNodesList);
                             }
                         }
                     }
                 }
-                // ----- THIS CODE IS DEPRECATED AND WILL BE REMOVED IN NEXT VERSION -----
-                if (field.getType().equals(FileAttachment.class) && Params.current() != null) {
-                    FileAttachment fileAttachment = ((FileAttachment) field.get(o));
-                    if (fileAttachment == null) {
-                        fileAttachment = new FileAttachment(o, field.getName());
-                        bw.set(field.getName(), o, fileAttachment);
-                    }
-                    File file = Params.current().get(name + "." + field.getName(), File.class);
-                    if (file != null && file.exists() && file.length() > 0) {
-                        fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
-                        fileAttachment.filename = file.getName();
-                    } else {
-                        String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
-                        if (df != null && df.equals("true")) {
-                            fileAttachment.delete();
-                            bw.set(field.getName(), o, null);
-                        }
-                    }
-                    params.remove(name + "." + field.getName());
-                }
-                // -----
             }
-            bw.bind(name, o.getClass(), params, "", o, annotations);
+            ParamNode beanNode = rootParamNode.getChild(name, true);
+            Binder.bindBean(beanNode, o, annotations);
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
+        } finally {
+            // restoring changes to paramNode
+            ParamNode.restoreRemovedChildren( removedNodesList );
         }
     }
 
+    /**
+     * This method is deprecated. Use this instead:
+     *
+     *  public <T extends GenericModel> T edit(ParamNode rootParamNode, String name)
+     */
+    @Deprecated
     public <T extends GenericModel> T edit(String name, Map<String, String[]> params) {
-        edit(this, name, params, new Annotation[0]);
+        ParamNode rootParamNode = ParamNode.convert(params);
+        return (T)edit(rootParamNode, name, this, null);
+    }
+
+    public <T extends GenericModel> T edit(ParamNode rootParamNode, String name) {
+        edit(rootParamNode, name, this, null);
         return (T) this;
     }
 

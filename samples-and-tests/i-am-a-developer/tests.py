@@ -135,7 +135,7 @@ class IamADeveloper(unittest.TestCase):
         insert(app, 'app/jobs/Job1.java', 5, "public class Job1 extends Job {")
         insert(app, 'app/jobs/Job1.java', 6, "  public void doJob() throws Exception{")
         insert(app, 'app/jobs/Job1.java', 7, '      Logger.info("Job starting");')
-        insert(app, 'app/jobs/Job1.java', 8, '      Thread.sleep(1 * 1000);')
+        insert(app, 'app/jobs/Job1.java', 8, '      Thread.sleep(2000);')
         insert(app, 'app/jobs/Job1.java', 9, '      Logger.info("Job done");')
         insert(app, 'app/jobs/Job1.java', 10, '  }')
         insert(app, 'app/jobs/Job1.java', 11, '}')

@@ -59,6 +59,22 @@ public class FastTags {
         out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "'; for(key in options) { pattern = pattern.replace(':'+key, options[key]); } return pattern }");
     }
 
+    public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        final Object arg = args.get("arg");
+        if (!(arg instanceof ActionDefinition)) {
+            throw new TemplateExecutionException(template.template, fromLine, "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
+        }
+        final ActionDefinition action = (ActionDefinition)arg;
+        out.print("{");
+        if (action.args.isEmpty()) {
+            out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");
+        } else {
+            out.print("url: function(args) { var pattern = '" + action.url.replace("&amp;", "&") + "'; for (var key in args) { pattern = pattern.replace(':'+key, args[key]); } return pattern; },");
+        }
+        out.print("method: '" + action.method + "'");
+        out.print("}");
+    }
+
     public static void _authenticityToken(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken() + "\">");
     }
@@ -67,7 +83,7 @@ public class FastTags {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && (selectedValue.toString()).equals(value.toString());
-        out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + "" + serialize(args, "selected", "value") + ">");
+        out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + " " + serialize(args, "selected", "value") + ">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
@@ -365,7 +381,8 @@ public class FastTags {
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
-            out.println(t.internalRender(newArgs));
+            newArgs.put("out", out);
+            t.internalRender(newArgs);
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }

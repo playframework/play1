@@ -5,6 +5,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
@@ -83,40 +84,94 @@ public class PluginCollection {
         return Collections.unmodifiableList( new ArrayList<PlayPlugin>( list ));
     }
 
+
+    private static class LoadingPluginInfo implements Comparable<LoadingPluginInfo> {
+        public final String name;
+        public final int index;
+        public final URL url;
+
+        private LoadingPluginInfo(String name, int index, URL url) {
+            this.name = name;
+            this.index = index;
+            this.url = url;
+        }
+
+        @Override
+        public String toString() {
+            return "LoadingPluginInfo{" +
+                    "name='" + name + '\'' +
+                    ", index=" + index +
+                    ", url=" + url +
+                    '}';
+        }
+
+        public int compareTo(LoadingPluginInfo o) {
+            int res = index < o.index ? -1 : (index == o.index ? 0 : 1);
+            if (res != 0) {
+                return res;
+            }
+
+            // index is equal in both plugins.
+            // sort on name to get consistent order
+            return name.compareTo(o.name);
+        }
+    }
     /**
      * Enable found plugins
      */
     public void loadPlugins() {
         Logger.trace("Loading plugins");
-        // Play! plugings
+        // Play! plugins
         Enumeration<URL> urls = null;
         try {
             urls = Play.classloader.getResources( play_plugins_resourceName);
         } catch (Exception e) {
             Logger.error("Error loading play.plugins", e);
+            return ;
         }
+
+        // First we build one big list of all plugins to load, then we sort it based
+        // on index before we load the classes.
+        // This must be done to make sure the enhancing is happening
+        // when loading plugins using other classes that must be enhanced.
+        List<LoadingPluginInfo> pluginsToLoad = new ArrayList<LoadingPluginInfo>();
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             Logger.trace("Found one plugins descriptor, %s", url);
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
-                String line = null;
+                String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] infos = line.split(":");
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
-
-                    plugin.index = Integer.parseInt(infos[0]);
-                    if( addPlugin(plugin) ){
-                        Logger.trace("Loaded plugin %s", plugin);
-                    }else{
-                        Logger.warn("Did not load plugin %s. Already loaded", plugin);
+                    if (line.trim().length() == 0) {
+                        continue;
                     }
+                    String[] lineParts = line.split(":");
+                    LoadingPluginInfo info = new LoadingPluginInfo(lineParts[1].trim(), Integer.parseInt(lineParts[0]), url);
+                    pluginsToLoad.add(info);
                 }
-            } catch (Exception ex) {
-                Logger.error(ex, "Cannot load %s", url);
+            } catch (Exception e) {
+                Logger.error("Error interpreting %s", url );
             }
+
         }
 
+        // sort it
+        Collections.sort(pluginsToLoad);
+
+        for ( LoadingPluginInfo info : pluginsToLoad) {
+            Logger.trace("Loading plugin %s", info.name);
+            try {
+                PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(info.name).newInstance();
+                plugin.index = info.index;
+                if( addPlugin(plugin) ){
+                    Logger.trace("Loaded plugin %s", plugin);
+                }else{
+                    Logger.warn("Did not load plugin %s. Already loaded", plugin);
+                }
+            } catch (Exception ex) {
+                Logger.error(ex, "Error loading plugin %s", info.toString());
+            }
+        }
         //now we must call onLoad for all plugins - and we must detect if a plugin
         //disables another plugin the old way, by removing it from Play.plugins.
         for( PlayPlugin plugin : getEnabledPlugins()){
@@ -480,9 +535,9 @@ public class PluginCollection {
         }
     }
 
-    public Object bind(String name, Object o, Map<String, String[]> params){
+    public Object bind(RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, o, params);
+            Object result = plugin.bind(rootParamNode, name, clazz, type, annotations);
             if (result != null) {
                 return result;
             }
@@ -490,9 +545,9 @@ public class PluginCollection {
         return null;
     }
 
-    public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params){
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, clazz, type, annotations, params);
+            Object result = plugin.bindBean(rootParamNode, name, bean);
             if (result != null) {
                 return result;
             }
