@@ -2,7 +2,7 @@ h1. Ajax in the Play framework
 
 The Play framework allows you to easily perform Ajax requests, and is shipped with "jQuery":http://jquery.com by default. This section describes how to effectively use "jQuery":http://jquery.com within the framework.
 
-The Play framework also comes with the handy @jsAction@ tag to transparently get a method definition from the controller.
+The Play framework also comes with the handy "jsAction":tags#jsaction tag to transparently get a method definition from the controller.
 
 h2. <a name="jsaction">Using jQuery with the jsAction tag</a>
 
@@ -41,6 +41,27 @@ Also please note that we could perform a POST; the jQuery method should then be 
 bc. $.post(listAction(), function(data) {
   $('#result').html(data);
 });
+
+h2. <a name="jsaction">Using jQuery with the jsRoute tag</a>
+
+To have more control on the generated route, you also have the "jsRoute":tags#jsroute tag, which is similar to the **#{jsAction /}** tag but it returns an object containing both the function which consctructs the URL based on the server action, and the corresponding HTTP method (GET, POST, etc.).
+
+Example:
+
+bc. PUT     /users/{id}        Users.update
+
+Then, in a template:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
+</script>
+
+With this approach, you won't have to update your templates in case you decide to change the HTTP method in the routes file.
 
 p(note). **Continuing the discussion**
  
