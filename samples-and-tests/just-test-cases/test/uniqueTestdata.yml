@@ -1,0 +1,21 @@
+# Test data
+
+Author(anton):
+    name:          Anton
+    birthday:      01.04.1960
+
+Author(bob):
+    name:          Bob
+    birthday:      01.04.1970
+
+Book(AntonsBook):
+    author: anton
+    title: MyBook
+    isbn: 1
+
+Book(BobsBook):
+    author: bob
+    title: MyBook
+    isbn: 2
+    
+    
