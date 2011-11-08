@@ -1,5 +1,26 @@
 package play.test;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -24,18 +45,8 @@ import play.libs.IO;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
@@ -116,19 +127,34 @@ public class Fixtures {
     public static void deleteDatabase() {
         try {
             idCache.clear();
+
             List<String> names = new ArrayList<String>();
-            ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
-            while (rs.next()) {
-                String name = rs.getString("TABLE_NAME");
-                names.add(name);
+
+            if (DBPlugin.url.startsWith("jdbc:solid:")) {
+                // Retrieves the list of schemas available before retrieving the list of the corresponding tables when
+                // using Solid as database. This is a workaround to prevent the Solid driver (at least in its 2.0
+                // version) to also returns system tables in the case where no schema is specified (i.e. when it is
+                // null).
+                ResultSet schemas = DB.getConnection().getMetaData().getSchemas();
+
+                while (schemas.next()) {
+                    String schema = schemas.getString("TABLE_SCHEM");
+
+                    addTables(names, schema);
+                }
+            } else {
+                addTables(names, null);
             }
+
             disableForeignKeyConstraints();
+
             for (String name : names) {
-                if(Arrays.binarySearch(dontDeleteTheseTables, name) < 0) {
+                if (Arrays.binarySearch(dontDeleteTheseTables, name) < 0) {
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("Dropping content of table %s", name);
                     }
-                    DB.execute(getDeleteTableStmt(name) + ";");
+
+                    DB.execute(getDeleteTableStmt(name));
                 }
             }
             enableForeignKeyConstraints();
@@ -486,6 +512,23 @@ public class Fixtures {
         return resolvedYml;
     }
 
+    /**
+     * Retrieves the names of the tables available in the specified schema and adds them to the given list.
+     *
+     * @param names list of table names to update
+     * @param schema optional schema name
+     * @throws SQLException in case of error
+     */
+    private static void addTables(List<String> names, String schema) throws SQLException {
+        ResultSet tables = DB.getConnection().getMetaData().getTables(null, schema, null, new String[] { "TABLE" });
+
+        while (tables.next()) {
+            String name = tables.getString("TABLE_NAME");
+
+            names.add(name);
+        }
+    }
+
     private static void disableForeignKeyConstraints() {
         if (DBPlugin.url.startsWith("jdbc:oracle:")) {
             DB.execute("begin\n"
@@ -610,15 +653,23 @@ public class Fixtures {
         Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + DBPlugin.url);
     }
 
+    /**
+     * Retrieves the SQL statement to delete the specified table.
+     *
+     * @param name name of the table to delete
+     * @return the corresponding SQL statement
+     */
     static String getDeleteTableStmt(String name) {
-        if (DBPlugin.url.startsWith("jdbc:mysql:") ) {
-            return "TRUNCATE TABLE " + name;
+        if (DBPlugin.url.startsWith("jdbc:mysql:") || DBPlugin.url.startsWith("jdbc:oracle:")) {
+            return "TRUNCATE TABLE " + name + ';';
         } else if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
-            return "TRUNCATE TABLE " + name + " cascade";
-        } else if (DBPlugin.url.startsWith("jdbc:oracle:")) {
-            return "TRUNCATE TABLE " + name;
+            return "TRUNCATE TABLE " + name + " cascade" + ';';
+        } else if (DBPlugin.url.startsWith("jdbc:solid:")) {
+            // Returns a SQL statement without any semicolon appended as otherwise Solid will throw an 'Illegal DOUBLE
+            // PREC constant ;' parse error
+            return "DELETE FROM " + name;
+        } else {
+            return "DELETE FROM " + name + ';';
         }
-        return "DELETE FROM " + name;
     }
-
 }
