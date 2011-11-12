@@ -1,5 +1,6 @@
 package play.classloading.enhancers;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -11,8 +12,8 @@ import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.Opcode;
 import javassist.compiler.CompileError;
-import javassist.compiler.Javac;
 import bytecodeparser.analysis.decoders.DecodedMethodInvocationOp;
 import bytecodeparser.analysis.decoders.DecodedMethodInvocationOp.MethodParams;
 import bytecodeparser.analysis.opcodes.ExitOpcode;
@@ -22,22 +23,25 @@ import bytecodeparser.analysis.stack.StackAnalyzer.Frames;
 import bytecodeparser.analysis.stack.StackAnalyzer.Frames.FrameIterator;
 import bytecodeparser.utils.Utils;
 import play.Logger;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.libs.Codec;
 
 public class LVEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass)
             throws Exception {
         CtClass ctClass = makeClass(applicationClass);
+        if(ctClass.isAnnotation() || ctClass.isInterface())
+            return;
         for(CtBehavior behavior : ctClass.getDeclaredMethods()) {
             try {
-                if(behavior.isEmpty())
+                if(behavior.isEmpty() || behavior.getMethodInfo().getCodeAttribute() == null || Utils.getLocalVariableAttribute(behavior) == null) {
+                    CtField signature = CtField.make("public static String[] $" + behavior.getName() + "0 = new String[0];", ctClass);
+                    ctClass.addField(signature);
                     continue;
-                if(behavior.getMethodInfo().getCodeAttribute() == null)
-                    continue;
-                if(Utils.getLocalVariableAttribute(behavior) == null)
-                    continue;
+                }
 
                 StackAnalyzer parser = new StackAnalyzer(behavior);
 
@@ -80,27 +84,29 @@ public class LVEnhancer extends Enhancer {
                     }
                     if(frame.decodedOp instanceof DecodedMethodInvocationOp) {
                         DecodedMethodInvocationOp dmio = (DecodedMethodInvocationOp) frame.decodedOp;
-                        StringBuffer stmt = new StringBuffer("{");
-                        MethodParams methodParams = DecodedMethodInvocationOp.resolveParameters(frame);
-                        stmt.append("String[] $$paramNames = new String[").append(methodParams.params.length + (methodParams.varargs != null ? methodParams.varargs.length : 0)).append("];");
-                        for(int i = 0; i < methodParams.params.length; i++)
-                            if(methodParams.params[i] != null && methodParams.params[i].name != null)
-                                stmt.append("$$paramNames[").append(i).append("] = \"").append(methodParams.params[i].name).append("\";");
-                        if(methodParams.varargs != null)
-                            for(int i = 0, j = methodParams.params.length; i < methodParams.varargs.length; i++, j++)
-                                if(methodParams.varargs[i] != null && methodParams.varargs[i].name != null)
-                                    stmt.append("$$paramNames[").append(j).append("] = \"").append(methodParams.varargs[i].name).append("\";");
+                        if(!dmio.getDeclaringClassName().equals("org.apache.commons.javaflow.bytecode.StackRecorder") &&
+                                !dmio.getDeclaringClassName().startsWith("java.")) { // no need to track non-user method calls
+                            MethodParams methodParams = DecodedMethodInvocationOp.resolveParameters(frame);
+                            
+                            String[] paramsNames = new String[methodParams.params.length + (methodParams.varargs != null ? methodParams.varargs.length : 0)];
+                            for(int i = 0; i < methodParams.params.length; i++)
+                                if(methodParams.params[i] != null && methodParams.params[i].name != null)
+                                    paramsNames[i] = methodParams.params[i].name;
+                            if(methodParams.varargs != null)
+                                for(int i = 0, j = methodParams.params.length; i < methodParams.varargs.length; i++, j++)
+                                    if(methodParams.varargs[i] != null && methodParams.varargs[i].name != null)
+                                        paramsNames[j] = methodParams.varargs[i].name;
 
-                        stmt.append("play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime.initMethodCall(\"" + dmio.getName() + "\", " + dmio.getNbParameters() + ", " + (methodParams.subject != null ? ("\"" + methodParams.subject + "\"") : "null") + ", $$paramNames);");
-                        stmt.append("}");
-
-                        insert(stmt.toString(), ctClass, behavior, codeAttribute, iterator, frame, false);
+                            Bytecode b = makeInitMethodCall(behavior, dmio.getName(), dmio.getNbParameters(), methodParams.subject != null ? methodParams.subject.name : null, paramsNames);
+                            insert(b, ctClass, behavior, codeAttribute, iterator, frame, false);
+                        }
                     }
                     if(frame.decodedOp.op instanceof ExitOpcode) {
-                        insert("play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime.exitMethod(\""+ ctClass.getName() + "\", \"" + behavior.getName() + "\", \"" + behavior.getSignature() + "\");", ctClass, behavior, codeAttribute, iterator, frame, false);
+                        Bytecode b = makeExitMethod(behavior, ctClass.getName(), behavior.getName(), behavior.getSignature());
+                        insert(b, ctClass, behavior, codeAttribute, iterator, frame, false);
                     }
                     if(iterator.isFirst()) {
-                        insert("play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime.enterMethod(\""+ ctClass.getName() + "\", \"" + behavior.getName() + "\", \"" + behavior.getSignature() + "\");", ctClass, behavior, codeAttribute, iterator, frame, false);
+                        insert(makeEnterMethod(behavior, ctClass.getName(), behavior.getName(), behavior.getSignature()), ctClass, behavior, codeAttribute, iterator, frame, false);
                     }
                 }
             } catch(Exception e) {
@@ -110,19 +116,76 @@ public class LVEnhancer extends Enhancer {
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
     }
-
-    private static void insert(String stmt, CtClass ctClass, CtBehavior behavior, CodeAttribute codeAttribute, FrameIterator iterator, Frame frame, boolean after) throws CompileError, BadBytecode, NotFoundException {
-        Javac jv = new Javac(ctClass);
-        jv.recordLocalVariables(codeAttribute, frame.index);
-        jv.recordParams(behavior.getParameterTypes(), Modifier.isStatic(behavior.getModifiers()));
-        jv.setMaxLocals(codeAttribute.getMaxLocals());
-        jv.compileStmnt(stmt);
-
-        Bytecode b = jv.getBytecode();
+    
+    private static final long startedAt = System.currentTimeMillis();
+    
+    private static Bytecode makeInitMethodCall(CtBehavior behavior, String method, int nbParameters, String subject, String... names) {
+        Bytecode b = new Bytecode(behavior.getMethodInfo().getConstPool());
+        b.addLdc(method);
+        b.addIconst(nbParameters);
+        if(subject == null)
+            b.add(Opcode.ACONST_NULL);
+        else b.addLdc(subject);
+        b.addIconst(names.length);
+        b.addAnewarray("java.lang.String");
+        for(int i = 0; i < names.length; i++) {
+            if(names[i] != null)
+                b.add(Opcode.DUP);
+        }
+        for(int i = 0; i < names.length; i++) {
+            if(names[i] != null) {
+                b.addIconst(i);
+                b.addLdc(names[i]);
+                b.add(Opcode.AASTORE);
+            }
+        }
+        b.addInvokestatic("play.classloading.enhancers.LVEnhancer$LVEnhancerRuntime", "initMethodCall", "(Ljava/lang/String;ILjava/lang/String;[Ljava/lang/String;)V");
+        return b;
+    }
+    
+    private static Bytecode makeExitMethod(CtBehavior behavior, String className, String methodName, String signature) {
+        Bytecode b = new Bytecode(behavior.getMethodInfo().getConstPool());
+        b.addLdc(className);
+        b.addLdc(methodName);
+        b.addLdc(signature);
+        b.addInvokestatic("play.classloading.enhancers.LVEnhancer$LVEnhancerRuntime", "exitMethod", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        return b;
+    }
+    
+    private static Bytecode makeEnterMethod(CtBehavior behavior, String className, String methodName, String signature) {
+        Bytecode b = new Bytecode(behavior.getMethodInfo().getConstPool());
+        b.addLdc(className);
+        b.addLdc(methodName);
+        b.addLdc(signature);
+        b.addInvokestatic("play.classloading.enhancers.LVEnhancer$LVEnhancerRuntime", "enterMethod", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        return b;
+    }
+    
+    private static void insert(Bytecode b, CtClass ctClass, CtBehavior behavior, CodeAttribute codeAttribute, FrameIterator iterator, Frame frame, boolean after) throws CompileError, BadBytecode, NotFoundException {
         int locals = b.getMaxLocals();
-        codeAttribute.setMaxLocals(locals);
-        iterator.insert(b.get(), after);
-        codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
+        int maxLocals = codeAttribute.getMaxLocals();
+        codeAttribute.setMaxLocals(locals > maxLocals ? locals : maxLocals);
+        File debugDir = new File(Play.applicationPath, "lvenhancer-debug-" + startedAt);
+        if(!debugDir.exists())
+            debugDir.mkdir();
+        debugDir = new File(debugDir, ctClass.getName() + "." + behavior.getName() + "-" + Codec.UUID());
+        debugDir.mkdir();
+        ctClass.debugWriteFile(debugDir.getAbsolutePath());
+        try {
+            iterator.insert(b.get(), after);
+        } catch (BadBytecode bb) {
+            Logger.error(bb, "(check in lvenhancer-debug-%s) error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
+            Logger.error("with statement: \n\tUnknown\n\nproduced:\n\t%s", Codec.byteToHexString(b.get()));
+            throw bb;
+        }
+        try {
+            codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
+        } catch (BadBytecode bb) {
+            Logger.error(bb, "(check in lvenhancer-debug-%s) [computeMaxStack] error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
+            Logger.error("with statement: \n\tUnknown\n\nproduced:\n\t%s", Codec.byteToHexString(b.get()));
+            throw bb;
+        }
+        debugDir.delete();
     }
 
     private static Integer computeMethodHash(CtClass[] parameters) {
@@ -182,7 +245,6 @@ public class LVEnhancer extends Enhancer {
 
         public static void initMethodCall(String method, int nbParams, String subject, String[] paramNames) {
             getCurrentMethodParams().peek().currentNestedMethodCall = new MethodExecution(subject, paramNames, nbParams);
-            Logger.trace("initMethodCall for '" + method + "' with " + Arrays.toString(paramNames));
         }
         
         /**

@@ -211,9 +211,16 @@ public class Java {
      */
     public static String[] parameterNames(Method method) throws Exception {
         try {
+            /*System.out.println("searching for " + "$" + method.getName() + LVEnhancer.computeMethodHash(method.getParameterTypes()));
+            for(Field f : method.getDeclaringClass().getDeclaredFields()) {
+                System.out.println(f.getName() + " : " + Modifier.toString(f.getModifiers()));
+            }
+            for(Field f : method.getDeclaringClass().getFields()) {
+                System.out.println(f.getName() + " : " + Modifier.toString(f.getModifiers()));
+            }*/
             return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LVEnhancer.computeMethodHash(method.getParameterTypes())).get(null);
         } catch (Exception e) {
-            throw new UnexpectedException("Cannot read parameter names for " + method);
+            throw new UnexpectedException("Cannot read parameter names for " + method, e);
         }
     }
 
