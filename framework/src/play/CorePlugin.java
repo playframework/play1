@@ -289,8 +289,9 @@ public class CorePlugin extends PlayPlugin {
         Class<?>[] enhancers = new Class[]{
             SigEnhancer.class,
             ControllersEnhancer.class,
-            LVEnhancer.class,
+            
             ContinuationEnhancer.class,
+            LVEnhancer.class,
             MailerEnhancer.class,
             PropertiesEnhancer.class
         };
