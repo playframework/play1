@@ -35,9 +35,12 @@ def secretKey():
     return ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
 def isParentOf(path1, path2):
-    relpath = os.path.relpath(path1, path2)
-    ptn = '^\.\.(' + ('\\\\' if os.sep == '\\' else os.sep)  + '\.\.)*$'
-    return re.match(ptn, relpath) != None
+    try:
+        relpath = os.path.relpath(path1, path2)
+        ptn = '^\.\.(' + ('\\\\' if os.sep == '\\' else os.sep)  + '\.\.)*$'
+        return re.match(ptn, relpath) != None
+    except:
+        return False
 
 def getWithModules(args, env):
     withModules = []
