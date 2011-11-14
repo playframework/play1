@@ -264,4 +264,17 @@ public abstract class BeanWrapper {
         }
 
     }
+
+    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Annotation[] annotations) throws Exception {
+        Object instance = newBeanInstance();
+        return bind(name, type, params, prefix, instance, annotations);
+    }
+
+    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance, Annotation[] annotations) throws Exception {
+        RootParamNode paramNode = RootParamNode.convert( params);
+        // when looking at the old code in BeanBinder and Binder.bindInternal, I
+        // think it is correct to use 'name+prefix'
+        Binder.bindBean( paramNode.getChild(name+prefix), instance, annotations);
+        return instance;
+    }
 }
