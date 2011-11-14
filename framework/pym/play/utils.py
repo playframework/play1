@@ -39,6 +39,14 @@ def isParentOf(path1, path2):
     ptn = '^\.\.(' + ('\\\\' if os.sep == '\\' else os.sep)  + '\.\.)*$'
     return re.match(ptn, relpath) != None
 
+def isExcluded(path, exclusion_list = None):
+    if exclusion_list is None:
+        return False
+    for exclusion in exclusion_list:
+        if isParentOf(exclusion, path):
+            return True
+    return False
+
 def getWithModules(args, env):
     withModules = []
     try:
@@ -85,8 +93,10 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
         print "~"
         sys.exit(-1)
 
-    if isParentOf(app.path, war_path):
+    if isParentOf(app.path, war_path) and not isExcluded(war_path, war_exclusion_list):
         print "~ Oops. Please specify a destination directory outside of the application"
+        print "~ or exclude war destination directory using the --exclude option and ':'-separator "
+        print "~ (eg: --exclude .svn:target:logs:tmp)."
         print "~"
         sys.exit(-1)
 
@@ -194,9 +204,13 @@ def copy_directory(source, target, exclude = None):
         os.makedirs(target)
     for root, dirs, files in os.walk(source):
         path_from_source = root[len(source):]
-        if path_from_source.find('/.') > -1 or path_from_source.find('\\.') > -1:
+        # Ignore path containing '.' in path
+        # But keep those with relative path '..'
+        if re.search(r'/\.[^\.]|\\\.[^\.]', path_from_source):
             continue
         for file in files:
+            if root.find('/.') > -1 or root.find('\\.') > -1:
+                continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
 
