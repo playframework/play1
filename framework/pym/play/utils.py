@@ -36,7 +36,10 @@ def secretKey():
 
 def isParentOf(path1, path2):
     relpath = os.path.relpath(path1, path2)
-    ptn = '^\.\.(' + ('\\\\' if os.sep == '\\' else os.sep)  + '\.\.)*$'
+    sep = os.sep
+    if sep == '\\':
+        sep = '\\\\'
+    ptn = '^\.\.(' + sep + '\.\.)*$'
     return re.match(ptn, relpath) != None
 
 def getWithModules(args, env):
