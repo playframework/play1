@@ -542,7 +542,12 @@ public abstract class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-
+        
+        // Handles the case where the model property is a sole character
+        if (clazz.equals(Character.class)) {
+            return value.charAt(0);
+        }
+        
         // Enums
         if (Enum.class.isAssignableFrom(clazz)) {
             return nullOrEmpty ? null : Enum.valueOf((Class<Enum>) clazz, value);
