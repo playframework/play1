@@ -240,7 +240,8 @@ class PlayApplication(object):
 
         if application_mode == 'prod':
             java_args.append('-server')
-
+	# JDK 7 compat
+	java_args.append('-XX:-UseSplitVerifier')
         java_policy = self.readConf('java.policy')
         if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)
