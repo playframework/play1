@@ -104,10 +104,19 @@ public class UrlEncodedParser extends DataParser {
             // We're ready to decode the params
             Map<String, String[]> decodedParams = new HashMap<String, String[]>(params.size());
             for (Map.Entry<String, String[]> e : params.entrySet()) {
-                String key = URLDecoder.decode(e.getKey(),charset);
+                String key = e.getKey();
+                try {
+                    key = URLDecoder.decode(e.getKey(), charset);
+                } catch (Throwable z) {
+                    // Nothing we can do about, ignore
+                }
                 for (String value : e.getValue()) {
-
-                    Utils.Maps.mergeValueInMap(decodedParams, key, (value==null ? null : URLDecoder.decode(value,charset)));
+                    try {
+                        Utils.Maps.mergeValueInMap(decodedParams, key, (value == null ? null : URLDecoder.decode(value, charset)));
+                    } catch (Throwable z) {
+                        // Nothing we can do about, lets fill in with the non decoded value
+                        Utils.Maps.mergeValueInMap(decodedParams, key, value);
+                    }
                 }
             }
 
