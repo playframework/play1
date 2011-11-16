@@ -251,7 +251,7 @@ public class Play {
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
-        javaPath = new ArrayList<VirtualFile>(2);
+        javaPath = Collections.synchronizedList(new ArrayList<VirtualFile>(2));
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
