@@ -11,19 +11,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
+import javassist.NotFoundException;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.Opcode;
-import javassist.compiler.Javac;
-import javassist.compiler.NoFieldException;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
@@ -34,7 +34,7 @@ import play.libs.F.T2;
  */
 public class LocalvariablesNamesEnhancer extends Enhancer {
 
-    public static List<String> lookupParameterNames(Constructor constructor) {
+    public static List<String> lookupParameterNames(Constructor<?> constructor) {
         try {
             List<String> parameters = new ArrayList<String>();
 
@@ -124,10 +124,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
             List<T2<Integer,String>> parameterNames = new ArrayList<T2<Integer,String>>();
-            if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length) {
-                if(method.getParameterTypes().length > 0) {
-                    continue;
-                }
+            if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1)) {
+                Logger.debug("skipping method %s %s as it has no LocalVariableTable or number of local variables is incorrect", method.getReturnType().getName(), method.getLongName());
+                continue;
             } else {
                 for(int i=0; i<localVariableAttribute.tableLength(); i++) {
                     if (!localVariableAttribute.variableName(i).equals("__stackRecorder")) {
@@ -175,13 +174,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iv.append("};");
             }
-
-            CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
-            ctClass.addField(signature);
-
-            // No variable name, skip...
-            if (localVariableAttribute == null) {
-                continue;
+            
+            String sigField = "$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes());
+            try { // #1198
+                ctClass.getDeclaredField(sigField);
+            } catch (NotFoundException nfe) {
+                CtField signature = CtField.make("public static String[] " + sigField + " = " + iv.toString(), ctClass);
+                ctClass.addField(signature);
             }
 
             if (isScala(applicationClass)) {
@@ -220,31 +219,12 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     Integer pc = localVariableAttribute.startPc(i);
 
                     // Move to the next instruction (insertionPc)
-                    CodeIterator iterator = codeAttribute.iterator();
-                    iterator.move(pc);
-                    Integer insertionPc = iterator.next();
-
-                    Javac jv = new Javac(ctClass);
-
-                    // Compile the code snippet
-                    jv.recordLocalVariables(codeAttribute, insertionPc);
-                    jv.recordParams(method.getParameterTypes(), Modifier.isStatic(method.getModifiers()));
-                    jv.setMaxLocals(codeAttribute.getMaxLocals());
-                    jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + aliasedName + "\", " + name + ");");
-
-                    Bytecode b = jv.getBytecode();
-                    int locals = b.getMaxLocals();
-                    int stack = b.getMaxStack();
-                    codeAttribute.setMaxLocals(locals);
-                    if (stack > codeAttribute.getMaxStack()) {
-                        codeAttribute.setMaxStack(stack);
-                    }
-                    iterator.insert(insertionPc, b.get());
-                    iterator.insert(b.getExceptionTable(), insertionPc);
-
-
-                    // Then we need to trace each affectation to the variable
                     CodeIterator codeIterator = codeAttribute.iterator();
+                    codeIterator.move(pc);
+                    
+                    Bytecode b = makeBytecodeForLVStore(method, localVariableAttribute.signature(i), name, localVariableAttribute.index(i));
+                    codeIterator.insertEx(b.get());
+                    codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
 
                     // Bon chaque instruction de cette méthode
                     while (codeIterator.hasNext()) {
@@ -267,26 +247,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                         // et que c'est dans la frame d'utilisation de cette variable on trace l'affectation.
                         // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
                         //  mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à localVariableAttribute.startPc(i))
-                        if (varNumber == localVariableAttribute.index(i) && index >= localVariableAttribute.startPc(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
-
-                            jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + aliasedName + "\", " + name + ");");
-
-                            b = jv.getBytecode();
-                            locals = b.getMaxLocals();
-                            stack = b.getMaxStack();
-                            codeAttribute.setMaxLocals(locals);
-
-                            if (stack > codeAttribute.getMaxStack()) {
-                                codeAttribute.setMaxStack(stack);
-                            }
-                            codeIterator.insert(b.get());
-
+                        if (varNumber == localVariableAttribute.index(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
+                            b = makeBytecodeForLVStore(method, localVariableAttribute.signature(i), aliasedName, varNumber);
+                            codeIterator.insertEx(b.get());
+                            codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
                         }
-
                     }
-
-
-                } catch (NoFieldException e) {
+                } catch (Exception e) {
                     // Well probably a compiled optimizer (I hope so)
                 }
 
@@ -302,6 +269,32 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
 
+    }
+    
+    private static Bytecode makeBytecodeForLVStore(CtMethod method, String sig, String name, int slot) {
+        Bytecode b = new Bytecode(method.getMethodInfo().getConstPool());
+        b.addLdc(name);
+        if("I".equals(sig) || "B".equals(sig) || "C".equals(sig) || "S".equals(sig) || "Z".equals(sig))
+            b.addIload(slot);
+        else if("F".equals(sig))
+            b.addFload(slot);
+        else if("J".equals(sig))
+            b.addLload(slot);
+        else if("D".equals(sig))
+            b.addDload(slot);
+        else
+            b.addAload(slot);
+        
+        String localVarDescriptor = sig;
+        if(!"B".equals(sig) && !"C".equals(sig) && !"D".equals(sig) && !"F".equals(sig) &&
+           !"I".equals(sig) && !"J".equals(sig) && !"S".equals(sig) && !"Z".equals(sig))
+            localVarDescriptor = "Ljava/lang/Object;";
+
+        Logger.trace("for variable '%s' in slot=%s, sig was '%s' and is now '%s'", name, slot, sig, localVarDescriptor);
+
+        b.addInvokestatic("play.classloading.enhancers.LocalvariablesNamesEnhancer$LocalVariablesNamesTracer", "addVariable", "(Ljava/lang/String;"+localVarDescriptor+")V");
+        
+        return b;
     }
 
     /**
