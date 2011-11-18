@@ -320,17 +320,7 @@ bc. #{crud.form}
         <label for="tags">
             &{'tags'}
         </label>
-        <style type="text/css">
-	        .tags-list .tag {
-	            cursor: pointer;
-	            padding: 1px 4px;
-	        }
-	        .tags-list .selected {
-	            background: #222;
-	            color: #fff;
-	        }
-	    </style>
-	    <script type="text/javascript">
+       	    <script type="text/javascript">
 	        var toggle = function(tagEl) {
 	            var input = document.getElementById('h'+tagEl.id);
 	            if(tagEl.className.indexOf('selected') > -1) {
@@ -358,6 +348,24 @@ bc. #{crud.form}
 This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of JavaScript:
 
 !images/guide7-6!
+
+To customize the appearance of the tag list, create a new css file in @public/stylesheets/tags.css@ with the following content:
+
+bc.  .tags-list .tag {
+     cursor: pointer;
+     padding: 1px 4px;
+}
+.crudField .tags-list .selected {
+     background: #222;
+     color: #fff;
+}
+
+Then, in @views/CRUD/layout.html@, change the @#{set 'moreStyles'}@ block to make it look like the following:
+
+bc. #{set 'moreStyles'}
+    <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/crud.css'}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/tags.css'}" />
+#{/set}
 
 This is a good start for the administration area!
 
