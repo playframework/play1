@@ -91,7 +91,7 @@ bc. #{extends 'main.html' /}
                 ${frontPost.comments.size() ?: 'no'} 
                 comment${frontPost.comments.size().pluralize()}
                 #{if frontPost.comments}
-                    , latest by ${frontPost.comments[0].author}
+                    , latest by ${frontPost.comments[-1].author}
                 #{/if}
             </span>
         </div>
@@ -120,7 +120,7 @@ bc. #{extends 'main.html' /}
                             ${oldPost.comments.size() ?: 'no'} 
                             comment${oldPost.comments.size().pluralize()}
                             #{if oldPost.comments}
-                                - latest by ${oldPost.comments[0].author}
+                                - latest by ${oldPost.comments[-1].author}
                             #{/if}
                         </div>
                     </div>
@@ -164,7 +164,7 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
                 &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
                 comment${_post.comments.size().pluralize()}
                 #{if _post.comments}
-                    , latest by ${_post.comments[0].author}
+                    , latest by ${_post.comments[-1].author}
                 #{/if}
             </span>
         #{/if}
