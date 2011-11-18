@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -34,7 +35,7 @@ import play.libs.F.T2;
  */
 public class LocalvariablesNamesEnhancer extends Enhancer {
 
-    public static List<String> lookupParameterNames(Constructor constructor) {
+    public static List<String> lookupParameterNames(Constructor<?> constructor) {
         try {
             List<String> parameters = new ArrayList<String>();
 
@@ -242,7 +243,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     iterator.insert(insertionPc, b.get());
                     iterator.insert(b.getExceptionTable(), insertionPc);
 
-
                     // Then we need to trace each affectation to the variable
                     CodeIterator codeIterator = codeAttribute.iterator();
 
@@ -268,19 +268,27 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                         // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
                         //  mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à localVariableAttribute.startPc(i))
                         if (varNumber == localVariableAttribute.index(i) && index >= localVariableAttribute.startPc(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
+                            b = new Bytecode(method.getMethodInfo().getConstPool());
+                            b.addLdc(aliasedName);
+                            String sig = localVariableAttribute.signature(i);
+                            if("I".equals(sig) || "B".equals(sig) || "C".equals(sig) || "S".equals(sig) || "Z".equals(sig))
+                                b.addIload(varNumber);
+                            else if("F".equals(sig))
+                                b.addFload(varNumber);
+                            else if("J".equals(sig))
+                                b.addLload(varNumber);
+                            else if("D".equals(sig))
+                                b.addDload(varNumber);
+                            else
+                                b.addAload(varNumber);
 
-                            jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + aliasedName + "\", " + name + ");");
+                            if(!"B".equals(sig) && !"C".equals(sig) && !"D".equals(sig) && !"F".equals(sig) &&
+                               !"I".equals(sig) && !"J".equals(sig) && !"S".equals(sig) && !"Z".equals(sig))
+                                sig = "Ljava/lang/Object;";
 
-                            b = jv.getBytecode();
-                            locals = b.getMaxLocals();
-                            stack = b.getMaxStack();
-                            codeAttribute.setMaxLocals(locals);
-
-                            if (stack > codeAttribute.getMaxStack()) {
-                                codeAttribute.setMaxStack(stack);
-                            }
+                            b.addInvokestatic("play.classloading.enhancers.LocalvariablesNamesEnhancer$LocalVariablesNamesTracer", "addVariable", "(Ljava/lang/String;"+sig+")V");
                             codeIterator.insert(b.get());
-
+                            codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
                         }
 
                     }
