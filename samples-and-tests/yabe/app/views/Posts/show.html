@@ -1,4 +1,7 @@
 #{extends 'CRUD/layout.html' /}
+#{set 'moreStyles'}
+  <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/tags.css'}" />
+#{/set}
 
 <div id="crudShow" class="${type.name}">
 	
@@ -11,16 +14,6 @@
 		        <label for="tags">
         		    &{'tags'}
         	    </label>
-        	    <style type="text/css">
-        	        .tags-list .tag {
-        	            cursor: pointer;
-        	            padding: 1px 4px;
-        	        }
-        	        .tags-list .selected {
-        	            background: #222;
-        	            color: #fff;
-        	        }
-        	    </style>
         	    <script type="text/javascript">
         	        var toggle = function(tagEl) {
         	            var input = document.getElementById('h'+tagEl.id);
