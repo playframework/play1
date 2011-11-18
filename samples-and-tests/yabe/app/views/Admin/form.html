@@ -19,7 +19,8 @@
         #{field 'title'}
         <label>Post title:</label>
         <input type="text" name="${field.name}" 
-            value="${post?.title}" class="${field.errorClass}" />
+           value="${post?.title}" class="${field.errorClass}" />
+        <span class="error">#{error 'post.title'/}</span>
         #{/field}
     </p>
  
@@ -28,6 +29,7 @@
         <label>Write here:</label>
         <textarea name="${field.name}" 
             class="${field.errorClass}">${post?.content}</textarea>
+        <span class="error">#{error 'post.content'/}</span>
         #{/field}
     </p>
  
