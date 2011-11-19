@@ -29,8 +29,8 @@ public class UniqueTest extends UnitTest {
         firstBook.isbn = "2";
         ValidationResult res = Validation.current().valid(firstBook);
         assertFalse(res.ok);
-        assertNotNull(Validation.errors(".isbn"));
-        Error error = Validation.errors(".isbn").get(0);
+        assertNotNull(Validation.errors("firstBook.isbn"));
+        Error error = Validation.errors("firstBook.isbn").get(0);
         assertEquals("validation.unique", error.message());
     }
 
@@ -41,8 +41,8 @@ public class UniqueTest extends UnitTest {
         firstBook.author = bob;
         ValidationResult res = Validation.current().valid(firstBook);
         assertFalse(res.ok);
-        assertNotNull(Validation.errors(".title"));
-        Error error = Validation.errors(".title").get(0);
+        assertNotNull(Validation.errors("firstBook.title"));
+        Error error = Validation.errors("firstBook.title").get(0);
         assertEquals("validation.unique", error.message());
 
         Validation.clear();

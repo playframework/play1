@@ -464,6 +464,9 @@ public class Validation {
         }
     }
 
+    // This does not make a lot of sense to not use Object
+    // And this not backward compatible as previously is was returning an empty
+    // string instead of the object name.
     static String getLocalName(Object o) {
         String[] names = LVEnhancerRuntime.getParamNames().params;
         if(names.length > 0 && names[0] != null)
