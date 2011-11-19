@@ -51,18 +51,18 @@ public class BeanWrapperTest {
         m.put("b.i", new String[]{"2"});
 
         Bean b = new Bean();
-        new BeanWrapper(Bean.class).bind("b", null, m, "", b, null);
+        BeanWrapper.forClass(Bean.class).bind("b", null, m, "", b, null);
         assertThat(b.a).isEqualTo("a1");
         assertThat(b.b).isEqualTo("b1");
         assertThat(b.i).isEqualTo(2);
 
         b = new Bean();
-        new BeanWrapper(Bean.class).bind("", null, m, "b", b, null);
+        BeanWrapper.forClass(Bean.class).bind("", null, m, "b", b, null);
         assertThat(b.a).isEqualTo("a1");
         assertThat(b.b).isEqualTo("b1");
         assertThat(b.i).isEqualTo(2);
 
-        b = (Bean)new BeanWrapper(Bean.class).bind("b", null, m, "", null);
+        b = (Bean)BeanWrapper.forClass(Bean.class).bind("b", null, m, "", null);
         assertThat(b.a).isEqualTo("a1");
         assertThat(b.b).isEqualTo("b1");
         assertThat(b.i).isEqualTo(2);
