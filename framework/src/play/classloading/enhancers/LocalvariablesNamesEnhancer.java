@@ -18,6 +18,7 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
+import javassist.NotFoundException;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
@@ -123,10 +124,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
             List<T2<Integer,String>> parameterNames = new ArrayList<T2<Integer,String>>();
-            if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length) {
-                if(method.getParameterTypes().length > 0) {
-                    continue;
-                }
+            if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1)) {
+                Logger.debug("skipping method %s %s as it has no LocalVariableTable or number of local variables is incorrect", method.getReturnType().getName(), method.getLongName());
+                continue;
             } else {
                 for(int i=0; i<localVariableAttribute.tableLength(); i++) {
                     if (!localVariableAttribute.variableName(i).equals("__stackRecorder")) {
@@ -174,13 +174,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iv.append("};");
             }
-
-            CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
-            ctClass.addField(signature);
-
-            // No variable name, skip...
-            if (localVariableAttribute == null) {
-                continue;
+            
+            String sigField = "$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes());
+            try { // #1198
+                ctClass.getDeclaredField(sigField);
+            } catch (NotFoundException nfe) {
+                CtField signature = CtField.make("public static String[] " + sigField + " = " + iv.toString(), ctClass);
+                ctClass.addField(signature);
             }
 
             if (isScala(applicationClass)) {
