@@ -197,6 +197,8 @@ When all tests are passed, stop the application and cobertura will then generate
 
 !images/guide10-4!
 
+If you start the application again, you can also view it at "http://localhost:9000/@cobertura":http://localhost:9000/@cobertura.
+
 As you see we’re far from testing all of the application’s cases. A good testing suite should approach 100%, even if it is of course nearly impossible to check all the code. Typically because we often need to hack in test mode, like we did for the captcha.
 
 p(note). Next: %(next)"Preparing for production":guide11%. 
