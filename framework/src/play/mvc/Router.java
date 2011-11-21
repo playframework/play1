@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The router matches HTTP requests to action invocations
@@ -228,7 +229,7 @@ public class Router {
     /**
      * All the loaded routes.
      */
-    public static List<Route> routes = Collections.synchronizedList(new ArrayList<Route>(500));
+    public static List<Route> routes = new CopyOnWriteArrayList<Route>();
 
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
