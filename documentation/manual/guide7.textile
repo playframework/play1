@@ -257,11 +257,13 @@ bc. #{extends 'CRUD/layout.html' /}
  
 </div>
 
-The @#{crud.table /}@ actually generates the table. We can customize it using the @fields@ parameter to add more columns. Try this:
+The first new thing here is @&{'crud.list.title', type.name}@, which outputs the localized message whose key is @crud.list.title@, using @type.name@ as a message parameter. The CRUD module’s @conf/messages@ file contains the entry @crud.list.title=&{%s}@, in which the parameter is used as the key for another message look-up, i.e. @&{'Comments'}@ in this case, because @type@ is a @CRUD.ObjectType@ for @models.Comments@. This defaults to outputting the message key - @Comments@, since we have not defined a corresponding message file entry. You will learn more about localized messages in the section on "internationalisation and localisation":guide12 at the end of the tutorial.
+
+The @#{crud.table /}@ tag actually generates the table. We can customize it using the @fields@ parameter to add more columns. Try this:
 
 bc. #{crud.table fields:['content', 'post', 'author'] /}
 
-And now we have 3 columns in the table:
+And now we have three columns in the table:
 
 !images/guide7-5!
 
