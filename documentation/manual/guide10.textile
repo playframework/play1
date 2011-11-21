@@ -1,4 +1,4 @@
-loadModels:h1. Completing the application tests
+h1. Completing the application tests
 
 We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
 

@@ -1,4 +1,4 @@
-loadModels:h1. Test your application
+h1. Test your application
 
 Creating automatic test suites for your application is a good way to make it robust. It allows you to work in a very agile way.
 
