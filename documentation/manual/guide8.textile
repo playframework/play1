@@ -103,6 +103,8 @@ bc. # Administration
 GET     /admin/?                                Admin.index
 *       /admin                                  module:crud
 
+Remember that order matters in the routes file; the first line that matches the incoming HTTP request is used. This means that the entries that map to the @Admin@ controller must come before the second line above, which maps all other @/admin@ requests to CRUD module pages. Otherwise, @/admin/@ will map to @CRUD.index@ instead of @Admin.index@.
+
 Now link the ‘Log in to write something’ text from the @yabe/app/views/main.html@ template to this controller:
 
 bc. …
