@@ -128,3 +128,21 @@ bc. #{secure.check "administrator"}
 #{/secure.check}
 
 The tag only renders its body for authorised users, so the ‘Delete’ link is only displayed when the user is authorised to execute the @delete@ controller action.
+
+h2. <a name="commands">Commands</a>
+
+The Secure module provides a @play secure:override@ that you can use to override the log in page, so you can customize it for your application. This works by copying the corresponding file from the module to a file in your application that will be used instead.
+
+You can abbreviate @play secure:override@ to @play secure:ov@.
+
+h3. <a name="css">CSS override</a>
+
+Use the @play secure:override --css@ command to copy a CSS file to your application that you can edit to customise the log in page look and feel.
+
+h3. <a name="login">Log in template override</a>
+
+Use the @play secure:override --login@ command to copy a log in page view template to your application that overrides the default log in page template.
+
+h3. <a name="layout">Main layout override</a>
+
+Use the @play secure:override --layout@ command to copy a main layout template to your application that overrides the layout used by the log in page.
