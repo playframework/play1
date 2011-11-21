@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -250,7 +251,7 @@ public class Play {
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
-        javaPath = Collections.synchronizedList(new ArrayList<VirtualFile>(2));
+        javaPath = new CopyOnWriteArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
