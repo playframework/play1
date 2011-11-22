@@ -1,6 +1,7 @@
 package play.i18n;
 
 import java.util.Locale;
+
 import play.Logger;
 import play.Play;
 import play.mvc.Http;
@@ -152,35 +153,32 @@ public class Lang {
         if(lang == null) {
             return null;
         }
-        
-        //Only language (eg. fr)
-        if (lang.length() == 2) {
-            lang = lang.toLowerCase();
-            for (Locale locale : Locale.getAvailableLocales()) {
-                if(locale.getLanguage().equals(lang) && 
-                   "".equals(locale.getCountry()))
-                {
-                    return locale;
-                }
-            }
+
+        String country = "";
+        String language = "";
+
+        // Only language (eg. fr)
+        if(lang.length() == 2) {
+            language = lang.toLowerCase();
         }
-        
-        //language and country (eg. fr_FR)
-        if (lang.length() == 5) {
+
+        // language and country (eg. fr_FR)
+        if(lang.length() == 5) {
             if(lang.charAt(2) != '_') {
                 return null;
             }
-            String language = lang.substring(0, 2).toLowerCase();
-            String country = lang.substring(3, 5).toUpperCase();
-            for (Locale locale : Locale.getAvailableLocales()) {            
-                if(locale.getLanguage().equals(language) &&
-                   locale.getCountry().equals(country))
-                {
-                    return locale;
-                }
+
+            language = lang.substring(0, 2).toLowerCase();
+            country = lang.substring(3, 5).toUpperCase();
+        }
+
+        for(Locale locale : Locale.getAvailableLocales()) {
+            if(locale.getLanguage().equals(language)
+                && locale.getCountry().equals(country)) {
+                return locale;
             }
         }
-        
+
         return null;
     }
 }
