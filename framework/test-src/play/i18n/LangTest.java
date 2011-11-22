@@ -10,19 +10,17 @@ import java.util.Locale;
 
 import org.junit.Test;
 
-public class LangTest
-{
+public class LangTest {
+    
     @Test
-    public void testGetLocaleLanguage()
-    {
+    public void testGetLocaleLanguage() {
         Locale locale = Lang.getLocale("de");
         assertThat(locale.getCountry(), is(""));
         assertThat(locale.getLanguage(), is("de"));
     }
     
     @Test
-    public void testGetLocaleCountry()
-    {
+    public void testGetLocaleCountry() {
         Locale locale = Lang.getLocale("en_US");
         assertThat(locale.getCountry(), is("US"));
         assertThat(locale.getLanguage(), is("en"));
