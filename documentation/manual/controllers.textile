@@ -397,6 +397,48 @@ bc. public static void countUnreadMessages() {
     renderText("There are %s unread messages", unreadMessages);
 }
 
+h3. <a name="renderjson">Return JSON String</a>
+
+Play comes equiped with a method to simply return a JSON string, by making use of the @renderJSON(…)@ methods. These methods return a JSON string and set the content type as @application/json@. 
+
+You can specify your own JSON string, or you can pass in an Object, which will get serialised by the @GsonBuilder@.
+
+Example:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderJSON("{\"messages\": " + unreadMessages +"}");
+}
+
+Alternatively, if you had a more complex object structure, you may wish to build the JSON using the GSONBuilder.
+
+bc. public static void getUnreadMessages() {
+    List<Message> unreadMessages = MessagesBox.unreadMessages();
+    renderJSON(unreadMessages);
+}
+
+If you need more control over the JSON builder when passing in an Object to the @renderJSON(…)@ method, you can also pass in GSON serialisers and @Type@ objects to customise the output of the GSONBuilder. 
+
+h3. <a name="renderxml">Return an XML String</a>
+
+Similar to the JSON methods, there are also several methods for rendering XML directly from the controller. The @renderXml(…)@ methods return XML strings with the content type set as @text/xml@.
+
+Here you can specify your own XML string, pass in a Document object, or pass in a POJO which will be serialised by the XStream serialiser.
+
+Example:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderXml("<unreadmessages>"+unreadMessages+"</unreadmessages>");
+}
+
+Alternatively, you can use a Document object.
+
+bc. public static void getUnreadMessages() {
+    Document unreadMessages = MessagesBox.unreadMessagesXML();
+    renderXml(unreadMessages);
+}
+
 h3. <a name="binary">Return binary content</a>
 
 To serve binary data, such as a "file stored on the server":jpa#file, use the @renderBinary@ method. For example, if you have a @User@ model with a @play.db.jpa.Blob photo@ property, add a controller method to load the model object and render the image with the stored MIME type:
