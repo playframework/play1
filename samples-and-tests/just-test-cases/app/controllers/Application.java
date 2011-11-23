@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -291,4 +292,5 @@ public class Application extends Controller {
     public static void fastTag_render_test() {
         render();
     }
+
 }
