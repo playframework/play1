@@ -358,7 +358,7 @@ public class Scope {
             return current.get();
         }
         boolean requestIsParsed;
-        private Map<String, String[]> data = new HashMap<String, String[]>();
+        public Map<String, String[]> data = new HashMap<String, String[]>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
@@ -370,6 +370,10 @@ public class Scope {
                 rootParamsNodeIsGenerated = true;
             }
             return rootParamNode;
+        }
+
+        public RootParamNode getRootParamNodeFromRequest() {
+            return ParamNode.convert(data);
         }
 
         public void checkAndParse() {
@@ -428,7 +432,6 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
-            checkAndParse();
             try {
                 checkAndParse();
                 // TODO: This is used by the test, but this is not the most convenient.
@@ -441,15 +444,12 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
-            throw new RuntimeException("method not yet supported after refactoring Binding-code");
-            /**
             try {
                 return (T) Binder.directBind(annotations, get(key), type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
-             */
         }
 
         public boolean _contains(String key) {

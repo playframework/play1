@@ -7,6 +7,7 @@ import java.util.Map;
 import java.text.SimpleDateFormat;
 
 import models.Person;
+import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.data.binding.As;
 import play.i18n.Lang;
@@ -14,7 +15,7 @@ import play.mvc.Controller;
 
 public class DataBinding extends Controller {
     
-    @play.mvc.Before static void lang(String lang) {
+    @play.mvc.Before(unless = "myInputStream") static void lang(String lang) {
         System.out.println(lang);
     }
 
@@ -95,6 +96,11 @@ public class DataBinding extends Controller {
             out += key + " " + paramMap.get(key) + "\n";
         }
         renderText(out);
+    }
+
+
+    public static void myInputStream(String productCode) throws Exception {
+        renderText(productCode + " - " + IOUtils.toString(request.body));
     }
 }
 
