@@ -44,7 +44,8 @@ public class OAuth2 {
      */
     public void retrieveVerificationCode(String callbackURL) {
         throw new Redirect(authorizationURL
-                + "?client_id=" + clientid
+                + (authorizationURL.contains("?") ? "&" : "?")
+                + "client_id=" + clientid
                 + "&redirect_uri=" + callbackURL);
     }
 
