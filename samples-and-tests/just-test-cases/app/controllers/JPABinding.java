@@ -75,5 +75,10 @@ public class JPABinding extends Controller {
         aSaveForm();
     }
     
+    public static void echoEntityBinding(@Valid A a) {
+        renderText(String.format("a.id=%d, a.b.id=%d, a.b.name=%s", a.id, a.b.id, a.b.name));
+    }
+    
+    
 }
 

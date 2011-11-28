@@ -86,5 +86,8 @@
     clickAndWait('go')
     assertTextPresent('it works now: Youpi')
 
+	open('@{JPABinding.echoEntityBinding}?a.b.name=Morten&a.b.id=')
+	assertTextPresent('a.id=null, a.b.id=null, a.b.name=Morten')
+
 
 #{/selenium}
