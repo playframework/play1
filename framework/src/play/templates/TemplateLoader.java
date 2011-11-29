@@ -66,7 +66,11 @@ public class TemplateLoader {
         final String key = getUniqueNumberForTemplateFile(file.relativePath());
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
-                BaseTemplate template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
+                String source = "";
+                if (file.exists()) {
+                    source = file.contentAsString();
+                }
+                BaseTemplate template = new GroovyTemplate(precompiledName(file), source);
                 try {
                     template.loadPrecompiled();
                     templates.put(key, template);
@@ -91,6 +95,10 @@ public class TemplateLoader {
             throw new TemplateNotFoundException(file.relativePath());
         }
         return templates.get(key);
+    }
+
+    private static String precompiledName(VirtualFile file) {
+        return file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent");
     }
 
     /**
@@ -163,7 +171,22 @@ public class TemplateLoader {
      */
     public static Template load(String path) {
         Template template = null;
-        for (VirtualFile vf : Play.templatesPath) {
+
+        final List<VirtualFile> templatesPath;
+        if (Play.usePrecompiled) {
+            // [#806]
+            // If app/views is not present (because we're running on an installation with no source)
+            // then Play does not add it to the templatesPath during initialisation. However, in order
+            // for the discovery of the precompiled templates to work we need to act as if app/views
+            // is there, so I'm adding it back to the list here. I could change Play.init, but I'd
+            // rather keep the changes localised to this file if I can.
+            templatesPath = new ArrayList<VirtualFile>(Play.templatesPath);
+            templatesPath.add(VirtualFile.open(Play.applicationPath).child("app/views"));
+        } else {
+            templatesPath = Play.templatesPath;
+        }
+
+        for (VirtualFile vf : templatesPath) {
             if (vf == null) {
                 continue;
             }
@@ -171,8 +194,24 @@ public class TemplateLoader {
             if (tf.exists()) {
                 template = TemplateLoader.load(tf);
                 break;
+            } else if (Play.usePrecompiled) {
+                // [#806]
+                // We couldn't find a source file for the template in this template location so work
+                // out what name it would have if precompiled and see if that file exists. If it does,
+                // I still pass the VirtualFile representing the source into TemplateLoader.load(VirtualFile)
+                // as that method will also work out the precompiled file from the source file. Ideally we
+                // would not have this duplication of logic, but I'm trying to minimise the change to existing
+                // code.
+                String pcfName = precompiledName(tf);
+                VirtualFile pcf = VirtualFile.open(Play.applicationPath).child("precompiled/templates" + pcfName);
+
+                if (pcf.exists()) {
+                    template = TemplateLoader.load(tf);
+                    break;
+                }
             }
         }
+
         /*
         if (template == null) {
         //When using the old 'key = (file.relativePath().hashCode() + "").replace("-", "M");',
