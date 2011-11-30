@@ -151,8 +151,8 @@ public class GenericModel extends JPABase {
 
                             } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
                                 bw.set(field.getName(), o, null);
-                                // Remove it to prevent us from finding it again later
-                                paramNode.removeChild(field.getName(), removedNodesList);
+                                // Remove the key to prevent us from finding it again later
+                                fieldParamNode.removeChild(keyName, removedNodesList);
                             }
                         }
                     }
