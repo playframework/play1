@@ -11,11 +11,14 @@ import play.Play;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
+import play.templates.loadingStrategies.*;
 
 /**
  * Load templates
  */
 public class TemplateLoader {
+
+    private static TemplateLoadingStrategy loadingStrategy = null;
 
     protected static Map<String, BaseTemplate> templates = new HashMap<String, BaseTemplate>();
     /**
@@ -24,22 +27,36 @@ public class TemplateLoader {
     private static AtomicLong nextUniqueNumber = new AtomicLong(1000);//we start on 1000
     private static Map<String, String> templateFile2UniqueNumber = new HashMap<String, String>();
 
+    private static TemplateLoadingStrategy getTemplateLoadingStrategy() {
+        if (loadingStrategy == null) {
+            if (Play.usePrecompiled) {
+                loadingStrategy = new LoadPrecompiledTemplates();
+            } else {
+                loadingStrategy = new LoadTemplatesFromSource();
+            }
+        }
+        return loadingStrategy;
+    }
+
+    public static void addTemplatePath(VirtualFile path) {
+        getTemplateLoadingStrategy().addTemplatePath(path);
+    }
+
     /**
-     * All loaded templates is cached in the templates-list using a key.
-     * This key is included as part of the classname for the generated class for a specific template.
-     * The key is included in the classname to make it possible to resolve the original template-file
-     * from the classname, when creating cleanStackTrace
-     *
+     * All loaded templates are cached in the templates-list using a key. This key is included as part of the classname for the
+     * generated class for a specific template. The key is included in the classname to make it possible to resolve the original
+     * template-file from the classname, when creating cleanStackTrace
+     * 
      * This method returns a unique representation of the path which is usable as part of a classname
-     *
+     * 
      * @param path
      * @return
      */
     public static String getUniqueNumberForTemplateFile(String path) {
-        //a path cannot be a valid classname so we have to convert it somehow.
-        //If we did some encoding on the path, the result would be at least as long as the path.
-        //Therefor we assign a unique number to each path the first time we see it, and store it..
-        //This way, all seen paths gets a unique number. This number is our UniqueValidClassnamePart..
+        // a path cannot be a valid classname so we have to convert it somehow.
+        // If we did some encoding on the path, the result would be at least as long as the path.
+        // Therefore we assign a unique number to each path the first time we see it, and store it..
+        // This way, all seen paths gets a unique number. This number is our UniqueValidClassnamePart..
 
         String uniqueNumber = templateFile2UniqueNumber.get(path);
         if (uniqueNumber == null) {
@@ -56,88 +73,30 @@ public class TemplateLoader {
      * @return The executable template
      */
     public static Template load(VirtualFile file) {
-        // Try with plugin
         Template pluginProvided = Play.pluginCollection.loadTemplate(file);
         if (pluginProvided != null) {
             return pluginProvided;
         }
-
-        // Use default engine
+        
         final String key = getUniqueNumberForTemplateFile(file.relativePath());
-        if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
-            if (Play.usePrecompiled) {
-                String source = "";
-                if (file.exists()) {
-                    source = file.contentAsString();
-                }
-                BaseTemplate template = new GroovyTemplate(precompiledName(file), source);
-                try {
-                    template.loadPrecompiled();
-                    templates.put(key, template);
-                    return template;
-                } catch(Exception e) {
-                    Logger.warn("Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
-                }
-            }
-            BaseTemplate template = new GroovyTemplate(file.relativePath(), file.contentAsString());
-            if (template.loadFromCache()) {
+
+        BaseTemplate template = templates.get(key);
+        if (template == null || getTemplateLoadingStrategy().needsReloading(template, file)) {
+            template = getTemplateLoadingStrategy().load(file);
+
+            if (template != null) {
                 templates.put(key, template);
             } else {
-                templates.put(key, new GroovyTemplateCompiler().compile(file));
-            }
-        } else {
-            BaseTemplate template = templates.get(key);
-            if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
-                templates.put(key, new GroovyTemplateCompiler().compile(file));
+                throw new TemplateNotFoundException(file.relativePath());
             }
         }
-        if (templates.get(key) == null) {
-            throw new TemplateNotFoundException(file.relativePath());
-        }
-        return templates.get(key);
+        return template;
     }
 
     private static String precompiledName(VirtualFile file) {
         return file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent");
     }
 
-    /**
-     * Load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
-     * @param source The template source
-     * @return A Template
-     */
-    public static BaseTemplate load(String key, String source) {
-        if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
-            BaseTemplate template = new GroovyTemplate(key, source);
-            if (template.loadFromCache()) {
-                templates.put(key, template);
-            } else {
-                templates.put(key, new GroovyTemplateCompiler().compile(template));
-            }
-        } else {
-            BaseTemplate template = new GroovyTemplate(key, source);
-            if (Play.mode == Play.Mode.DEV) {
-                templates.put(key, new GroovyTemplateCompiler().compile(template));
-            }
-        }
-        if (templates.get(key) == null) {
-            throw new TemplateNotFoundException(key);
-        }
-        return templates.get(key);
-    }
-
-    /**
-     * Clean the cache for that key
-     * Then load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
-     * @param source The template source
-     * @return A Template
-     */
-    public static BaseTemplate load(String key, String source, boolean reload) {
-        cleanCompiledCache(key);
-        return load(key, source);
-    }
 
     /**
      * Load template from a String, but don't cache it
@@ -170,68 +129,13 @@ public class TemplateLoader {
      * @return The executable template
      */
     public static Template load(String path) {
-        Template template = null;
+        VirtualFile resolvedTemplateFile = getTemplateLoadingStrategy().resolveTemplateName(path);
 
-        final List<VirtualFile> templatesPath;
-        if (Play.usePrecompiled) {
-            // [#806]
-            // If app/views is not present (because we're running on an installation with no source)
-            // then Play does not add it to the templatesPath during initialisation. However, in order
-            // for the discovery of the precompiled templates to work we need to act as if app/views
-            // is there, so I'm adding it back to the list here. I could change Play.init, but I'd
-            // rather keep the changes localised to this file if I can.
-            templatesPath = new ArrayList<VirtualFile>(Play.templatesPath);
-            templatesPath.add(VirtualFile.open(Play.applicationPath).child("app/views"));
+        if (resolvedTemplateFile != null) {
+            return load(resolvedTemplateFile);
         } else {
-            templatesPath = Play.templatesPath;
+            throw new TemplateNotFoundException(path);
         }
-
-        for (VirtualFile vf : templatesPath) {
-            if (vf == null) {
-                continue;
-            }
-            VirtualFile tf = vf.child(path);
-            if (tf.exists()) {
-                template = TemplateLoader.load(tf);
-                break;
-            } else if (Play.usePrecompiled) {
-                // [#806]
-                // We couldn't find a source file for the template in this template location so work
-                // out what name it would have if precompiled and see if that file exists. If it does,
-                // I still pass the VirtualFile representing the source into TemplateLoader.load(VirtualFile)
-                // as that method will also work out the precompiled file from the source file. Ideally we
-                // would not have this duplication of logic, but I'm trying to minimise the change to existing
-                // code.
-                String pcfName = precompiledName(tf);
-                VirtualFile pcf = VirtualFile.open(Play.applicationPath).child("precompiled/templates" + pcfName);
-
-                if (pcf.exists()) {
-                    template = TemplateLoader.load(tf);
-                    break;
-                }
-            }
-        }
-
-        /*
-        if (template == null) {
-        //When using the old 'key = (file.relativePath().hashCode() + "").replace("-", "M");',
-        //the next line never return anything, since all values written to templates is using the
-        //above key.
-        //when using just file.relativePath() as key, the next line start returning stuff..
-        //therefor I have commented it out.
-        template = templates.get(path);
-        }
-         */
-        //TODO: remove ?
-        if (template == null) {
-            VirtualFile tf = Play.getVirtualFile(path);
-            if (tf != null && tf.exists()) {
-                template = TemplateLoader.load(tf);
-            } else {
-                throw new TemplateNotFoundException(path);
-            }
-        }
-        return template;
     }
 
     /**
@@ -240,7 +144,7 @@ public class TemplateLoader {
      */
     public static List<Template> getAllTemplate() {
         List<Template> res = new ArrayList<Template>();
-        for (VirtualFile virtualFile : Play.templatesPath) {
+        for (VirtualFile virtualFile : getTemplateLoadingStrategy().getTemplatesPath()) {
             scan(res, virtualFile);
         }
         for (VirtualFile root : Play.roots) {

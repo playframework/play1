@@ -1,10 +1,10 @@
 package play;
 
-import java.io.File;
-import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.LineNumberReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -105,10 +105,6 @@ public class Play {
      * All paths to search for Java files
      */
     public static List<VirtualFile> javaPath;
-    /**
-     * All paths to search for templates files
-     */
-    public static List<VirtualFile> templatesPath;
     /**
      * Main routes file
      */
@@ -257,12 +253,7 @@ public class Play {
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
-        if (appRoot.child("app/views").exists()) {
-            templatesPath = new ArrayList<VirtualFile>(2);
-            templatesPath.add(appRoot.child("app/views"));
-        } else {
-            templatesPath = new ArrayList<VirtualFile>(1);
-        }
+        TemplateLoader.addTemplatePath(appRoot.child("app/views"));
 
         // Main route file
         routes = appRoot.child("conf/routes");
@@ -274,7 +265,7 @@ public class Play {
         loadModules();
 
         // Load the templates from the framework after the one from the modules
-        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
+        TemplateLoader.addTemplatePath(VirtualFile.open(new File(frameworkPath, "framework/templates")));
 
         // Enable a first classloader
         classloader = new ApplicationClassloader();
@@ -745,9 +736,7 @@ public class Play {
         if (root.child("app").exists()) {
             javaPath.add(root.child("app"));
         }
-        if (root.child("app/views").exists()) {
-            templatesPath.add(root.child("app/views"));
-        }
+        TemplateLoader.addTemplatePath(root.child("app/views"));
         if (root.child("conf/routes").exists()) {
             modulesRoutes.put(name, root.child("conf/routes"));
         }
