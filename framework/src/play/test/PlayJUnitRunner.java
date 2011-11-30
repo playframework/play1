@@ -5,6 +5,9 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.Filterable;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 import org.junit.runners.model.FrameworkMethod;
@@ -14,7 +17,7 @@ import play.Invoker;
 import play.Invoker.DirectInvocation;
 import play.Play;
 
-public class PlayJUnitRunner extends Runner {
+public class PlayJUnitRunner extends Runner implements Filterable {
 
     public static final String invocationType = "JUnitTest";
 
@@ -53,6 +56,12 @@ public class PlayJUnitRunner extends Runner {
     @Override
     public void run(final RunNotifier notifier) {
         jUnit4.run(notifier);
+    }
+    
+    @Override
+    public void filter(Filter toFilter) throws NoTestsRemainException {
+    	jUnit4.filter(toFilter);
+    	
     }
 
     // *********************
