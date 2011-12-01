@@ -47,16 +47,34 @@ public class JPAPlugin extends PlayPlugin {
 
             ParamNode paramNode = rootParamNode.getChild(name, true);
 
-            String keyName = Model.Manager.factoryFor(clazz).keyName();
-            String[] ids = paramNode.getChild(keyName, true).getValues();
+            String[] keyNames = new JPAModelLoader(clazz).keyNames();
+            ParamNode[] ids = new ParamNode[keyNames.length];
+            // Collect the matching ids
+            int i = 0;
+            for (String keyName : keyNames) {
+                ids[i++] = paramNode.getChild(keyName, true);
+            }
             if (ids != null && ids.length > 0) {
                 try {
-                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
+                    EntityManager em = JPA.em();
+                    String q = "from " + clazz.getName() + " o where";
+                    for (String keyName : keyNames) {
+                            q += " o." + keyName + " = ? and " ;
+                    }
+                    if (q.length() > 4) {
+                        q = q.substring(0, q.length() - 4);
+                    }
+                    Query query = em.createQuery(q);
                     // The primary key can be a composite.
-                    int i = 1;
-                    Class pk = Model.Manager.factoryFor(clazz).keyType();
-                    for (String id : ids) {
-                        query.setParameter(i++, Binder.directBind(rootParamNode.getOriginalKey(), annotations, id, pk, null));
+                    Class[] pk = new JPAModelLoader(clazz).keyTypes();
+                    int j = 0;
+                    for (ParamNode id : ids) {
+                        if (id.getValues() == null || id.getValues().length == 0) {
+                            // We have no ids, it is a new entity
+                            return GenericModel.create(rootParamNode, name, clazz, annotations);
+                        }
+                        query.setParameter(j + 1, Binder.directBind(id.getOriginalKey(), annotations, id.getValues()[0], pk[j++], null));
+
                     }
                     Object o = query.getSingleResult();
                     return GenericModel.edit(rootParamNode, name, o, annotations);
