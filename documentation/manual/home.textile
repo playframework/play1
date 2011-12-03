@@ -1,8 +1,6 @@
 h1. Documentation
 
-Welcome to the Play framework documentation. This documentation is intended for the *1.2.2 release* and may significantly differ from previous framework versions’ documentation. 
-
-Check the "version 1.2.4 release notes":releasenotes-1.2.4.
+Welcome to the *Play framework 1.2.4* documentation. Check the "version 1.2.4 release notes":releasenotes-1.2.4.
 
 h2. <a name="started">Getting started</a>
 
