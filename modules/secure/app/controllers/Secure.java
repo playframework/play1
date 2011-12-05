@@ -2,11 +2,14 @@ package controllers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
 import play.Play;
-import play.mvc.*;
-import play.data.validation.*;
-import play.libs.*;
-import play.utils.*;
+import play.data.validation.Required;
+import play.libs.Crypto;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.utils.Java;
 
 public class Secure extends Controller {
 
@@ -17,6 +20,7 @@ public class Secure extends Controller {
         	if (! request.invokedMethod.isAnnotationPresent(AjaxRequest.class)) {
 	        	if (flash.get("url") == null) {
 	        		flash.put("url", getRedirectUrl()); // seems a good default
+	        		flash.keep();
 	        	}
 	            login();
         	} else {
