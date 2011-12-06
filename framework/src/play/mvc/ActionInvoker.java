@@ -509,6 +509,7 @@ public class ActionInvoker {
     static final String F = "__future";
     static final String CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES = "__CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES";
     static final String CONTINUATIONS_STORE_RENDER_ARGS = "__CONTINUATIONS_STORE_RENDER_ARGS";
+    static final String CONTINUATIONS_STORE_PARAMS = "__CONTINUATIONS_STORE_PARAMS";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case

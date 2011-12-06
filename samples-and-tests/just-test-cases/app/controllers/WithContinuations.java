@@ -16,6 +16,7 @@ import models.*;
 import play.jobs.*;
 
 import play.exceptions.*;
+import play.utils.*;
 
 public class WithContinuations extends Controller {
     
@@ -429,5 +430,20 @@ public class WithContinuations extends Controller {
             }
         });
     }
+
+    public static void echoParamsAfterAwait(String a, Integer b) {
+        String beforeString = "before await: " + getEchoString(a,b);
+        await(1);
+        String afterString = "after await: " + getEchoString(a,b);
+        
+        System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n" + beforeString + "\n" + afterString);
+        renderText(beforeString + "\n" + afterString);
+    }
+
+    private static String getEchoString(String a, Integer b) {
+        return "a: " + a + " b: " + b + " params[a]: " + Utils.join(params.getAll("a"),",") + " params[b]: " + Utils.join(params.getAll("b"), ",");
+    }    
+    
+    
 }
 
