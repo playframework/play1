@@ -1,0 +1,35 @@
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import play.Logger;
+import play.libs.WS;
+import play.libs.WS.FileParam;
+import play.libs.WS.HttpResponse;
+import play.mvc.Http.Header;
+import play.test.UnitTest;
+
+public class ContinuationsUnitTest extends UnitTest {
+
+
+    @Test
+    public void testParamsAfterAwait() throws Exception {
+        
+        // test POST
+        Map<String, Object> p = new HashMap<String, Object>();
+        p.put("a", "morten");
+        p.put("b","34");
+        assertEquals("before await: a: morten b: 34 params[a]: morten params[b]: 34\nafter await: a: morten b: 34 params[a]: morten params[b]: 34", 
+            WS.url("http://localhost:9003/withContinuations/echoParamsAfterAwait").params(p).post().getString());
+            
+        // Test GET
+        assertEquals("before await: a: morten b: 34 params[a]: morten params[b]: 34\nafter await: a: morten b: 34 params[a]: morten params[b]: 34", 
+            WS.url("http://localhost:9003/withContinuations/echoParamsAfterAwait?a=morten&b=34").get().getString());
+
+    }
+    
+}

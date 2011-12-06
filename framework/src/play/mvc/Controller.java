@@ -942,6 +942,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
             Scope.RenderArgs.current.set( renderArgs);
 
+            // Params
+            // We know that the params are partially reprocessed during awake(Before now), but here we restore the correct values as
+            // they where when we performed the await();
+            Map params = (Map) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
+            Scope.Params.current().all().clear();
+            Scope.Params.current().all().putAll(params);
+
+
         } else {
             // we are storing before suspend
 
@@ -950,6 +958,10 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
             // renderArgs
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+
+             // Params
+             // Store the actual params values so we can restore the exact same state when awaking.
+             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
         }
     }
 
