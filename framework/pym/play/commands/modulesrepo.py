@@ -270,8 +270,12 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         deps = yaml.load(f.read())
-        versionCandidate = deps["self"].split(" ").pop()
-        version = versionCandidate
+        splitted = deps["self"].split(" -> ")
+        if len(splitted) == 2:
+            nameAndVersion = splitted.pop().strip()
+            splitted = nameAndVersion.split(" ")
+            if len(splitted) == 2:
+                version = splitted.pop()
         for dep in deps["require"]:
             if isinstance(dep, basestring):
                 splitted = dep.split(" ")
