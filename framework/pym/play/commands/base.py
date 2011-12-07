@@ -204,6 +204,11 @@ def autotest(app, args):
     except Exception, e:
         pass
 
+    # Do not run the app if SSL is configured and no cert store is configured
+    keystore = app.readConf('keystore.file')
+    if protocol == 'https' and not keystore:
+      print "https without keystore configured. play auto-test will fail. Exiting now."
+      sys.exit(-1)
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
@@ -245,6 +250,8 @@ def autotest(app, args):
     if os.name == 'nt':
         cp_args = ';'.join(fpcp)    
     java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
+    if protocol == 'https':
+        java_cmd.insert(-1, '-Djavax.net.ssl.trustStore=' + app.readConf('keystore.file'))
     try:
         subprocess.call(java_cmd, env=os.environ)
     except OSError:
@@ -255,7 +262,6 @@ def autotest(app, args):
     time.sleep(1)
     
     # Kill if exists
-    http_port = app.readConf('http.port')
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
