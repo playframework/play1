@@ -250,6 +250,7 @@ def list(app, args):
 def build(app, args, env):
     ftb = env["basedir"]
     version = None
+    name = None
     fwkMatch = None
 
     try:
@@ -270,7 +271,9 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         deps = yaml.load(f.read())
-        versionCandidate = deps["self"].split(" ").pop()
+        self = deps["self"].split(" ")
+        versionCandidate = self.pop()
+        name = self.pop()
         version = versionCandidate
         for dep in deps["require"]:
             if isinstance(dep, basestring):
@@ -279,6 +282,8 @@ def build(app, args, env):
                     fwkMatch = splitted[1]
         f.close
 
+    if name is None:
+        name = os.path.basename(app.path)
     if version is None:
         version = raw_input("~ What is the module version number? ")
     if fwkMatch is None:
@@ -292,7 +297,7 @@ def build(app, args, env):
         os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
         print "~"
 
-    mv = '%s-%s' % (os.path.basename(app.path), version)
+    mv = '%s-%s' % (name, version)
     print("~ Packaging %s ... " % mv)
 
     dist_dir = os.path.join(app.path, 'dist')
