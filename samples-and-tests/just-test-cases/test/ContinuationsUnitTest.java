@@ -32,4 +32,10 @@ public class ContinuationsUnitTest extends UnitTest {
 
     }
     
+    @Test
+    public void testValidationAndAwait() throws Exception {
+        assertEquals("beforeErrors: a=Required,b=someError afterErrors: a=Required,b=someError", 
+            WS.url("http://localhost:9003/withContinuations/validationAndAwait").get().getString());
+    }
+    
 }

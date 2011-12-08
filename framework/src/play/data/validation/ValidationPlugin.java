@@ -28,14 +28,44 @@ public class ValidationPlugin extends PlayPlugin {
 
     static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
 
+    private boolean isAwakingFromAwait() {
+        Http.Request request = Http.Request.current();
+        if (request == null) {
+            return false;
+        }
+
+        // if CONTINUATIONS_STORE_VALIDATIONS is present we know that
+        // we are awaking from await()
+        return request.args.containsKey(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
+    }
+
     @Override
     public void beforeInvocation() {
+
+        // when using await, this code get called multiple times.
+        // When  recovering from await() we're going to restore (overwrite) validation.current
+        // with the object-instance from the previous part of the execution.
+        // If this is happening it is no point in doing anything here, since
+        // we overwrite it later on.
+        if (isAwakingFromAwait()) {
+            return ;
+        }
         keys.set(new HashMap<Object, String>());
         Validation.current.set(new Validation());
     }
 
     @Override
     public void beforeActionInvocation(Method actionMethod) {
+
+        // when using await, this code get called multiple times.
+        // When  recovering from await() we're going to restore (overwrite) validation.current
+        // with the object-instance from the previous part of the execution.
+        // If this is happening it is no point in doing anything here, since
+        // we overwrite it later on.
+        if (isAwakingFromAwait()) {
+            return ;
+        }
+
         try {
             Validation.current.set(restore());
             boolean verify = false;

@@ -949,6 +949,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Scope.Params.current().all().clear();
             Scope.Params.current().all().putAll(params);
 
+            // Validations
+            Validation validation = (Validation) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
+            Validation.current.set(validation);           
 
         } else {
             // we are storing before suspend
@@ -962,6 +965,10 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
              // Params
              // Store the actual params values so we can restore the exact same state when awaking.
              Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
+
+            // Validations
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS, Validation.current());
+
         }
     }
 

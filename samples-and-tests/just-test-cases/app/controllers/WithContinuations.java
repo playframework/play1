@@ -17,6 +17,7 @@ import play.jobs.*;
 
 import play.exceptions.*;
 import play.utils.*;
+import play.data.validation.*;
 
 public class WithContinuations extends Controller {
     
@@ -441,7 +442,24 @@ public class WithContinuations extends Controller {
 
     private static String getEchoString(String a, Integer b) {
         return "a: " + a + " b: " + b + " params[a]: " + Utils.join(params.getAll("a"),",") + " params[b]: " + Utils.join(params.getAll("b"), ",");
-    }    
+    }
+    
+    
+    private static List<String> getErrorStringList(List<play.data.validation.Error> errorList) {
+        List<String> list = new ArrayList<String>();
+        for ( play.data.validation.Error e : errorList ) {
+            list.add(e.getKey()+"="+e.message());
+        }
+        return list;
+    }
+    
+    public static void validationAndAwait(@Required String a, Integer b) {
+        validation.addError("b", "someError");
+        String beforeErrors = Utils.join(getErrorStringList(validation.errors()), ",");
+        await(1);
+        String afterErrors = Utils.join(getErrorStringList(validation.errors()), ",");
+        renderText("beforeErrors: " + beforeErrors + " afterErrors: " + afterErrors);
+    }
     
     
 }
