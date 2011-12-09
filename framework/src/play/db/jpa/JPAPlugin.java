@@ -69,7 +69,8 @@ public class JPAPlugin extends PlayPlugin {
                     Class[] pk = new JPAModelLoader(clazz).keyTypes();
                     int j = 0;
                     for (ParamNode id : ids) {
-                        if (id.getValues() == null || id.getValues().length == 0) {
+                	// Need to test if the value are not empty
+                        if (id.getValues() == null || id.getValues().length == 0 || id.getFirstValue(null).trim().isEmpty() ) {
                             // We have no ids, it is a new entity
                             return GenericModel.create(rootParamNode, name, clazz, annotations);
                         }
