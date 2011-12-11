@@ -20,7 +20,7 @@ require:    &allDependencies
     - commons-email 1.2
     - commons-fileupload 1.2.2
     - commons-io 2.0.1
-    - commons-javaflow 1066591
+    - commons-javaflow 1209105
     - commons-lang 2.6
     - commons-logging 1.1.1
     - dom4j 1.6.1
