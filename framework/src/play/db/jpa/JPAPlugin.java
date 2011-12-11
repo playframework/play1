@@ -83,8 +83,8 @@ public class JPAPlugin extends PlayPlugin {
                     Class[] pk = new JPAModelLoader(clazz).keyTypes();
                     int j = 0;
                     for (ParamNode id : ids) {
-                        if (id.getValues() == null || id.getValues().length == 0) {
-                            // We have no ids, it is a new entity
+                        if (id.getValues() == null || id.getValues().length == 0 || id.getFirstValue(null)== null || id.getFirstValue(null).trim().length() <= 0 ) {
+                             // We have no ids, it is a new entity
                             return GenericModel.create(rootParamNode, name, clazz, annotations);
                         }
                         query.setParameter(j + 1, Binder.directBind(id.getOriginalKey(), annotations, id.getValues()[0], pk[j++], null));
