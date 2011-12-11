@@ -124,10 +124,14 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
             List<T2<Integer,String>> parameterNames = new ArrayList<T2<Integer,String>>();
-            if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1)) {
-                Logger.debug("skipping method %s %s as it has no LocalVariableTable or number of local variables is incorrect", method.getReturnType().getName(), method.getLongName());
-                continue;
+            
+            if (localVariableAttribute == null) {
+                if(method.getParameterTypes().length > 0)
+                    continue;
             } else {
+                if(localVariableAttribute.tableLength() < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1)) {
+                    Logger.warn("weird: skipping method %s %s as its number of local variables is incorrect (lv=%s || lv.length=%s || params.length=%s || (isStatic? %s)", method.getReturnType().getName(), method.getLongName(), localVariableAttribute, localVariableAttribute != null ? localVariableAttribute.tableLength() : -1, method.getParameterTypes().length, Modifier.isStatic(method.getModifiers()));
+                }
                 for(int i=0; i<localVariableAttribute.tableLength(); i++) {
                     if (!localVariableAttribute.variableName(i).equals("__stackRecorder")) {
                         parameterNames.add(new T2<Integer,String>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
@@ -183,7 +187,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 ctClass.addField(signature);
             }
 
-            if (isScala(applicationClass)) {
+            if (localVariableAttribute == null || isScala(applicationClass)) {
                 continue;
             }
 
