@@ -111,6 +111,8 @@
     assertText('g', '/aGetForm?name=Yop')
     assertText('h', '/aGetForm/?name=Yop')
     assertText('i', '/optionalSlash')
+    assertText('j', '/withQueryParam')
+    assertText('k', '/withQueryParam?lucky=duck')
     
     // Reverse
     open('@{Application.reverserouting2()}')
