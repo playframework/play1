@@ -29,6 +29,18 @@ public abstract class Binder {
 
     static final Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
 
+    // Custom comparator build to sort Strings as Integers
+    static class StringAsIntegerComparator implements Comparator<String> {
+        @Override
+        public int compare(String arg0, String arg1) {
+            try {
+                return Integer.parseInt(arg0) - Integer.parseInt(arg1);
+            } catch (NumberFormatException e) {
+                return arg0.compareTo(arg1);
+            }
+        }
+    }
+
     // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -413,10 +425,19 @@ public abstract class Binder {
             List l = (List) r;
 
             // must get all indexes and sort them so we add items in correct order.
-            Set<String> indexes = new TreeSet<String>(paramNode.getAllChildrenKeys());
+            Set<String> indexes = new TreeSet<String>(new Comparator<String>() {
+                @Override
+                public int compare(String arg0, String arg1) {
+                    try {
+                        return Integer.parseInt(arg0) - Integer.parseInt(arg1);
+                    } catch (NumberFormatException e) {
+                        return arg0.compareTo(arg1);
+                    }
+                }
+            });
+            indexes.addAll(paramNode.getAllChildrenKeys());
 
             // get each value in correct order with index
-
             for (String index : indexes) {
                 ParamNode child = paramNode.getChild(index);
                 Object childValue = internalBind(child, componentClass, componentClass, bindingAnnotations);
@@ -542,12 +563,12 @@ public abstract class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-        
+
         // Handles the case where the model property is a sole character
         if (clazz.equals(Character.class)) {
             return value.charAt(0);
         }
-        
+
         // Enums
         if (Enum.class.isAssignableFrom(clazz)) {
             return nullOrEmpty ? null : Enum.valueOf((Class<Enum>) clazz, value);
