@@ -424,6 +424,13 @@ public class Evolutions extends PlayPlugin {
         try {
             connection = getNewConnection();
             ResultSet rs = connection.getMetaData().getTables(null, null, "play_evolutions", null);
+            if (!rs.next()) {
+                // oracle gives table names in upper case
+                Logger.trace("Checking PLAY_EVOLUTIONS");
+                rs.close();
+                rs = connection.getMetaData().getTables(null, null, "PLAY_EVOLUTIONS", null);
+            }
+
             if (rs.next()) {
                 ResultSet databaseEvolutions = connection.createStatement().executeQuery("select id, hash, apply_script, revert_script from play_evolutions");
                 while (databaseEvolutions.next()) {
@@ -431,7 +438,18 @@ public class Evolutions extends PlayPlugin {
                     evolutions.add(evolution);
                 }
             } else {
-                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script text, revert_script text, state varchar(255), last_problem text)");
+                // If you are having problems with the default datatype text (clob for Oracle), you can
+                // specify your own datatype using the 'evolution.PLAY_EVOLUTIONS.textType'-property
+                String textDataType = Play.configuration.getProperty("evolution.PLAY_EVOLUTIONS.textType");
+                if (textDataType == null) {
+                    if (isOracleDialectInUse()) {
+                        textDataType = "clob";
+                    } else {
+                        textDataType = "text";
+                    }
+                }
+
+                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ")");
             }
         } catch (SQLException e) {
             Logger.error(e, "SQL error while checking play evolutions");
@@ -440,6 +458,24 @@ public class Evolutions extends PlayPlugin {
         }
         Collections.sort(evolutions);
         return evolutions;
+    }
+
+    private synchronized static boolean isOracleDialectInUse() {
+        boolean isOracle = false;
+
+        String jpaDialect = Play.configuration.getProperty("jpa.dialect");
+        if (jpaDialect != null) {
+            try {
+                Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
+			
+                // Oracle 8i dialect is the base class for oracle dialects (at least for now)
+                isOracle = org.hibernate.dialect.Oracle8iDialect.class.isAssignableFrom(dialectClass);
+            } catch (ClassNotFoundException e) {
+                // swallow
+                Logger.warn("jpa.dialect class %s not found", jpaDialect);
+            }
+        }
+        return isOracle;
     }
 
     public static class Evolution implements Comparable<Evolution> {
