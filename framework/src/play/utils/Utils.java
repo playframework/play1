@@ -120,7 +120,7 @@ public class Utils {
     }
 
     public static Map<String, String[]> filterMap(Map<String, String[]> map, String prefix) {
-        Map<String, String[]> newMap = new HashMap<String, String[]>();
+        Map<String, String[]> newMap = new LinkedHashMap<String, String[]>();
         for (String key : map.keySet()) {
             if (!key.startsWith(prefix + ".")) {
                 newMap.put(key, map.get(key));
