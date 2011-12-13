@@ -225,9 +225,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     // Move to the next instruction (insertionPc)
                     CodeIterator codeIterator = codeAttribute.iterator();
                     codeIterator.move(pc);
+                    pc = codeIterator.next();
                     
                     Bytecode b = makeBytecodeForLVStore(method, localVariableAttribute.signature(i), name, localVariableAttribute.index(i));
-                    codeIterator.insertEx(b.get());
+                    codeIterator.insert(pc, b.get());
                     codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
 
                     // Bon chaque instruction de cette méthode
