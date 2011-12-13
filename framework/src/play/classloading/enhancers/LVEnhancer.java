@@ -1,6 +1,5 @@
 package play.classloading.enhancers;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -165,27 +164,18 @@ public class LVEnhancer extends Enhancer {
         int locals = b.getMaxLocals();
         int maxLocals = codeAttribute.getMaxLocals();
         codeAttribute.setMaxLocals(locals > maxLocals ? locals : maxLocals);
-        File debugDir = new File(Play.applicationPath, "lvenhancer-debug-" + startedAt);
-        if(!debugDir.exists())
-            debugDir.mkdir();
-        debugDir = new File(debugDir, ctClass.getName() + "." + behavior.getName() + "-" + Codec.UUID());
-        debugDir.mkdir();
-        ctClass.debugWriteFile(debugDir.getAbsolutePath());
         try {
             iterator.insert(b.get(), after);
         } catch (BadBytecode bb) {
-            Logger.error(bb, "(check in lvenhancer-debug-%s) error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
-            Logger.error("with statement: \n\tUnknown\n\nproduced:\n\t%s", Codec.byteToHexString(b.get()));
+            Logger.error(bb, "error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
             throw bb;
         }
         try {
             codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
         } catch (BadBytecode bb) {
-            Logger.error(bb, "(check in lvenhancer-debug-%s) [computeMaxStack] error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
-            Logger.error("with statement: \n\tUnknown\n\nproduced:\n\t%s", Codec.byteToHexString(b.get()));
+            Logger.error(bb, "[computeMaxStack] error while applying LVEnhancer on %s", startedAt, behavior.getLongName());
             throw bb;
         }
-        debugDir.delete();
     }
 
     private static Integer computeMethodHash(CtClass[] parameters) {
