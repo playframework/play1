@@ -59,9 +59,14 @@ def execute(**kargs):
         sys.exit(-1)
 
     # Precompile first
-    play.commands.precompile.execute(command=command, app=app, args=args, env=env)
+    precompilation_result = play.commands.precompile.execute(command=command, app=app, args=args, env=env)
 
-    # Package 
+    if precompilation_result != 0:
+        print "~ Please fix compilation errors before packaging WAR"
+        print "~"
+        sys.exit(precompilation_result)
+
+    # Package
     package_as_war(app, env, war_path, war_zip_path, war_exclusion_list)
 
     print "~ Done !"
