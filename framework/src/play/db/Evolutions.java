@@ -423,6 +423,13 @@ public class Evolutions extends PlayPlugin {
         try {
             connection = getNewConnection();
             ResultSet rs = connection.getMetaData().getTables(null, null, "play_evolutions", null);
+            if (!rs.next()) {
+                // oracle gives table names in upper case
+                Logger.debug("Checking PLAY_EVOLUTIONS");
+                rs.close();
+                rs = connection.getMetaData().getTables(null, null, "PLAY_EVOLUTIONS", null);
+            }
+
             if (rs.next()) {
                 ResultSet databaseEvolutions = connection.createStatement().executeQuery("select id, hash, apply_script, revert_script from play_evolutions");
                 while (databaseEvolutions.next()) {
@@ -430,7 +437,7 @@ public class Evolutions extends PlayPlugin {
                     evolutions.add(evolution);
                 }
             } else {
-                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script text, revert_script text, state varchar(255), last_problem text)");
+                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script varchar(4000), revert_script varchar(4000), state varchar(255), last_problem varchar(4000))");
             }
         } catch (SQLException e) {
             Logger.error(e, "SQL error while checking play evolutions");
