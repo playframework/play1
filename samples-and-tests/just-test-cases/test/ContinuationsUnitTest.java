@@ -38,4 +38,10 @@ public class ContinuationsUnitTest extends UnitTest {
             WS.url("http://localhost:9003/withContinuations/validationAndAwait").get().getString());
     }
     
+    @Test
+    public void testParamsLocalVariableTracerAndAwait() {
+        assertEquals("a:12-aa:12", 
+            WS.url("http://localhost:9003/withContinuations/paramsLocalVariableTracerAndAwait?a=12").get().getString());
+    }
+    
 }

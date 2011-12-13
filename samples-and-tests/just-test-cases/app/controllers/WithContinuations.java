@@ -462,6 +462,13 @@ public class WithContinuations extends Controller {
         renderText("beforeErrors: " + beforeErrors + " afterErrors: " + afterErrors);
     }
     
+    public static void paramsLocalVariableTracerAndAwait(int a) {
+        int aa = a;
+        await("1s");
+        render(a,aa);
+        
+    }
+    
     
 }
 
