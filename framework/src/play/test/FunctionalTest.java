@@ -408,8 +408,10 @@ public abstract class FunctionalTest extends BaseTest {
      * @param response server response
      */
     public static void assertContentType(String contentType, Response response) {
-        assertTrue("Response contentType unmatched : '" + contentType + "' !~ '" + response.contentType + "'",
-                response.contentType.startsWith(contentType));
+        String responseContentType = response.contentType;
+        assertNotNull("Response contentType missing", responseContentType);
+        assertTrue("Response contentType unmatched : '" + contentType + "' !~ '" + responseContentType + "'",
+                responseContentType.startsWith(contentType));
     }
 
     /**
