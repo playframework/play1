@@ -83,7 +83,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public Object bindBean(RootParamNode rootParamNode, String name, Object bean) {
         // call old method to be backward compatible.
-        return bind( rootParamNode.getOriginalKey(), bean, rootParamNode.originalParams);
+        return bind(name, bean, rootParamNode.originalParams);
     }
 
     public Map<String, Object> unBind(Object src, String name) {
