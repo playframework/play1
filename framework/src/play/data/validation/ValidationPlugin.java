@@ -26,7 +26,7 @@ import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
 
-    static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
+    public static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
 
     private boolean isAwakingFromAwait() {
         Http.Request request = Http.Request.current();

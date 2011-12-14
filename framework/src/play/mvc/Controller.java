@@ -25,6 +25,7 @@ import play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime;
 import play.classloading.enhancers.LVEnhancer.MethodExecution;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
+import play.data.validation.ValidationPlugin;
 import play.exceptions.*;
 import play.libs.Time;
 import play.mvc.Http.Request;
@@ -948,7 +949,8 @@ public class Controller implements ControllerSupport {
 
             // Validations
             Validation validation = (Validation) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
-            Validation.current.set(validation);           
+            Validation.current.set(validation);
+            ValidationPlugin.keys.set( (Map<Object, String>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS) );
 
         } else {
             // we are storing before suspend
@@ -967,6 +969,8 @@ public class Controller implements ControllerSupport {
 
             // Validations
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS, Validation.current());
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS, ValidationPlugin.keys.get());
+
 
         }
     }

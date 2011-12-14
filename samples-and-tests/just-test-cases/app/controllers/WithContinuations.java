@@ -454,10 +454,17 @@ public class WithContinuations extends Controller {
         return list;
     }
     
+    public static class SomeBean {
+        @Required
+        public String prop;
+    }
+    
     public static void validationAndAwait(@Required String a, Integer b) {
         validation.addError("b", "someError");
         String beforeErrors = Utils.join(getErrorStringList(validation.errors()), ",");
         await(1);
+        SomeBean sb = new SomeBean();
+        validation.valid(sb);
         String afterErrors = Utils.join(getErrorStringList(validation.errors()), ",");
         renderText("beforeErrors: " + beforeErrors + " afterErrors: " + afterErrors);
     }
