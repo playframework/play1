@@ -243,7 +243,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void startTag() {
         tagIndex++;
-        String tagText = parser.getToken().trim().replaceAll("\n", " ");
+        String tagText = parser.getToken().trim().replaceAll("\r", "").replaceAll("\n", " ");
         String tagName = "";
         String tagArgs = "";
         boolean hasBody = !parser.checkNext().endsWith("/");
