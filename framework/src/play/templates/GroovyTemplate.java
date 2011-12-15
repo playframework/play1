@@ -526,7 +526,7 @@ public class GroovyTemplate extends BaseTemplate {
                         if (absolute) {
                             def.absolute();
                         }
-                        if (template.template.name.endsWith(".xml")) {
+                        if (template.template.name.endsWith(".xml") || template.template.name.endsWith(".html")) {
                             def.url = def.url.replace("&", "&amp;");
                         }
                         return def;
