@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class GroovyTemplateTest {
 
@@ -92,5 +93,37 @@ public class GroovyTemplateTest {
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo(longString+": Morten");
     }
+  
+    // [#107] caused any tag broken with a CR to fail. (It would be compiled to list arg:items:....).
+    @Test
+    public void verifyCompilingWithCR() {
+        final String source = "#{list items:1..3,\ras:'i'}${i}#{/list}";
+        GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_CR", source);
+        new GroovyTemplateCompiler().compile(groovyTemplate);
+        assertEquals("123",groovyTemplate.render());
+    }
 
+    @Test
+    public void verifyCompilingWithLF() {
+        final String source = "#{list items:1..3,\nas:'i'}${i}#{/list}";
+        GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_LF", source);
+        new GroovyTemplateCompiler().compile(groovyTemplate);
+        assertEquals("123", groovyTemplate.render());
+    }
+
+    @Test
+    public void verifyCompilingWithCRLF() {
+        final String source = "#{list items:1..3,\r\nas:'i'}${i}#{/list}";
+        GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_CRLF", source);
+        new GroovyTemplateCompiler().compile(groovyTemplate);
+        assertEquals("123", groovyTemplate.render());
+    }
+
+    @Test
+    public void verifyCompilingWithMultipleCRandLF() {
+        final String source = "#{list items:1..3,\r\n\r\r\n\nas:'i'}${i}#{/list}";
+        GroovyTemplate groovyTemplate = new GroovyTemplate("Broken_with_multiple_CR_and_LF", source);
+        new GroovyTemplateCompiler().compile(groovyTemplate);
+        assertEquals("123", groovyTemplate.render());
+    }
 }
