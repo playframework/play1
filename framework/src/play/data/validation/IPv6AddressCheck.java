@@ -18,7 +18,6 @@ public class IPv6AddressCheck extends AbstractAnnotationCheck<IPv6Address> {
         setMessage(phone.message());
     }
 
-    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator)
     throws OValException {
         if (value == null || value.toString().length() == 0) {
