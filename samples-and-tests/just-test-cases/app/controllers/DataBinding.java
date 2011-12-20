@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.text.SimpleDateFormat;
 
+import models.MyBook;
 import models.Person;
 import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.data.binding.As;
 import play.i18n.Lang;
 import play.mvc.Controller;
+import play.utils.Utils;
 
 public class DataBinding extends Controller {
     
@@ -101,6 +103,10 @@ public class DataBinding extends Controller {
 
     public static void myInputStream(String productCode) throws Exception {
         renderText(productCode + " - " + IOUtils.toString(request.body));
+    }
+
+    public static void myList(List<MyBook> items) {
+        renderText(Utils.join(items, ","));
     }
 }
 

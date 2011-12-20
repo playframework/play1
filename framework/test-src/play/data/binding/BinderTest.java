@@ -14,6 +14,10 @@ public class BinderTest {
 
     final Annotation[] noAnnotations = new Annotation[]{};
 
+    // provider of generic typed collection
+    private class GenericListProvider {
+        private List<Data2> listOfData2 = new ArrayList<Data2>();
+    }
 
     @Before
     public void setup() {
@@ -109,6 +113,42 @@ public class BinderTest {
         assertThat(data3.map.size()).isEqualTo(2);
         assertThat(data3.map.get("abc")).isEqualTo("ABC");
         assertThat(data3.map.get("def")).isEqualTo("DEF");
+    }
+
+     @Test
+	    public void verify_binding_of_simple_bean_collections() throws Exception {
+
+	        Map<String, String[]> params = new HashMap<String, String[]>();
+
+	        Data2 data2;
+	        List<Data2> lst = new ArrayList<Data2>();
+			// build the parameters
+	        params.put("data2[0].a", new String[] { "a0" });
+	        params.put("data2[1].a", new String[] { "a1" });
+	        params.put("data2[2].a", new String[] { "a2" });
+	        params.put("data2[3].a", new String[] { "a3" });
+	        params.put("data2[4].a", new String[] { "a4" });
+	        params.put("data2[5].a", new String[] { "a5" });
+	        params.put("data2[6].a", new String[] { "a6" });
+	        params.put("data2[7].a", new String[] { "a7" });
+	        params.put("data2[8].a", new String[] { "a8" });
+	        params.put("data2[9].a", new String[] { "a9" });
+	        params.put("data2[10].a", new String[] { "a10" });
+	        params.put("data2[12].a", new String[] { "a12" });
+
+	        RootParamNode rootParamNode = ParamNode.convert(params);
+
+	        lst = (List<Data2>) Binder.bind(rootParamNode, "data2", lst.getClass(), GenericListProvider.class.getDeclaredFields()[0].getGenericType(),
+	                noAnnotations);
+			//check the size and the order
+	        assertThat(lst.size()).isEqualTo(13);
+	        assertThat(lst.get(0).a).isEqualTo("a0");
+	        assertThat(lst.get(1).a).isEqualTo("a1");
+	        assertThat(lst.get(9).a).isEqualTo("a9");
+	        assertThat(lst.get(10).a).isEqualTo("a10");
+	        assertThat(lst.get(10).a).isEqualTo("a10");
+	        assertThat(lst.get(11)).isNull(); //check for null item
+	        assertThat(lst.get(12).a).isEqualTo("a12");
     }
 
 
