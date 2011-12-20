@@ -401,15 +401,16 @@ public class GroovyTemplate extends BaseTemplate {
             if (val != null) {
                 if (val instanceof RawData) {
                     return ((RawData) val).data;
-                } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
-                    if (template.name.endsWith(".xml")) {
-                        return StringEscapeUtils.escapeXml(val.toString());
-                    } else if (template.name.endsWith(".csv")) {
-                         return StringEscapeUtils.escapeCsv(val.toString());
-                    }
+                } else if (TagContext.hasParentTag("verbatim")) {
                     return val.toString();
-                } else {
+                } else if (template.name.endsWith(".xml")) {
+                    return StringEscapeUtils.escapeXml(val.toString());
+                } else if (template.name.endsWith(".csv")) {
+                    return StringEscapeUtils.escapeCsv(val.toString());
+                } else if (template.name.endsWith(".html")) {
                     return HTML.htmlEscape(val.toString());
+                } else {
+                    return val.toString();
                 }
             } else {
                 return "";
