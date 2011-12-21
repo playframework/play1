@@ -138,7 +138,9 @@ def run(app, args):
     try:
         process = subprocess.Popen (java_cmd, env=os.environ)
         signal.signal(signal.SIGTERM, handle_sigterm)
-        process.wait()
+        return_code = process.wait()
+        if 0 != return_code:
+            sys.exit(return_code)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
@@ -172,7 +174,9 @@ def test(app, args):
     print "~ "
 
     try:
-        subprocess.call(java_cmd, env=os.environ)
+        return_code = subprocess.call(java_cmd, env=os.environ)
+        if 0 != return_code:
+            sys.exit(return_code)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
