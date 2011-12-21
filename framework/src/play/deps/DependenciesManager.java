@@ -287,6 +287,7 @@ public class DependenciesManager {
         File ivyModule = new File(application, "conf/dependencies.yml");
         if(!ivyModule.exists()) {
             System.out.println("~ !! " + ivyModule.getAbsolutePath() + " does not exist");
+			System.exit(-1);
             return null;
         }
 
