@@ -349,7 +349,7 @@ public abstract class Binder {
             valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
         }
 
-        Map<Object, Object> r = new HashMap<Object, Object>();
+        Map<Object, Object> r = new LinkedHashMap<Object, Object>();
 
         for (ParamNode child : paramNode.getAllChildren()) {
             try {
