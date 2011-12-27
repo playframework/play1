@@ -3,6 +3,8 @@ package play.data.binding;
 import org.junit.Before;
 import org.junit.Test;
 import play.PlayBuilder;
+import play.data.validation.Validation;
+import play.data.validation.ValidationPlugin;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -151,6 +153,51 @@ public class BinderTest {
 	        assertThat(lst.get(12).a).isEqualTo("a12");
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    public void verify_binding_of_root_parameters() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("a", new String[] {"foo"});
+        params.put("b", new String[] {"2"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data1 data1 = new Data1();
+        Binder.bindBean(rootParamNode, "", data1);
+
+        assertThat(data1.a).isEqualTo("foo");
+        assertThat(data1.b).isEqualTo(2);
+
+        // Also test with the old deprecated but shorter form
+        data1 = new Data1();
+        Binder.bind(data1, null, params);
+        assertThat(data1.a).isEqualTo("foo");
+        assertThat(data1.b).isEqualTo(2);
+
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void verify_validation_error_of_root_parameters() throws Exception {
+        // Initialize Validation.current()
+        new ValidationPlugin().beforeInvocation();
+
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("a", new String[] {"foo"});
+        params.put("b", new String[] {"bar"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data1 data1 = new Data1();
+        Binder.bindBean(rootParamNode, null, data1);
+
+        assertThat(Validation.error("a")).isNull();
+        assertThat(Validation.error("b")).isNotNull();
+
+        // Also test with the old deprecated but shorter form
+        data1 = new Data1();
+        Binder.bind(data1, null, params);
+        assertThat(Validation.error("a")).isNull();
+        assertThat(Validation.error("b")).isNotNull();
+    }
 
     /**
      * Transforms map from Unbinder to Binder

@@ -282,7 +282,7 @@ public abstract class Binder {
             return;
         }
 
-        ParamNode paramNode = rootParamNode.getChild(name);
+        ParamNode paramNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name);
 
         try {
             internalBindBean(paramNode, bean, new BindingAnnotations());
@@ -561,12 +561,12 @@ public abstract class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-        
+
         // Handles the case where the model property is a sole character
         if (clazz.equals(Character.class)) {
             return value.charAt(0);
         }
-        
+
         // Enums
         if (Enum.class.isAssignableFrom(clazz)) {
             return nullOrEmpty ? null : Enum.valueOf((Class<Enum>) clazz, value);
