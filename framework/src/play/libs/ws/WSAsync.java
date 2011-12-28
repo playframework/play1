@@ -205,7 +205,6 @@ public class WSAsync implements WSImpl {
             try {
                 return new HttpAsyncResponse(prepare(prepareGet()).execute().get());
             } catch (Exception e) {
-                Logger.error(e.toString());
                 throw new RuntimeException(e);
             }
         }
