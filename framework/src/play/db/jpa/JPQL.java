@@ -205,7 +205,7 @@ public class JPQL {
     
 	public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
-        StringBuilder jpql = new StringBuilder();
+        StringBuffer jpql = new StringBuffer();
         String subRequest;
         if (findBy.contains("OrderBy"))
             subRequest = findBy.split("OrderBy")[0];
