@@ -203,7 +203,7 @@ public class JPQL {
         return q;
     }
     
-	public String findByToJPQL(String findBy) {
+    public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
         StringBuffer jpql = new StringBuffer();
         String subRequest;
