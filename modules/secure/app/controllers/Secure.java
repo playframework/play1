@@ -95,6 +95,7 @@ public class Secure extends Controller {
             response.setCookie("rememberme", Crypto.sign(username) + "-" + username, "30d");
         }
         // Redirect to the original URL (or /)
+        flash.keep();
         redirectToOriginalURL();
     }
 
