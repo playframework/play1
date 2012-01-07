@@ -214,7 +214,7 @@ Default: @secret@
 
 h2(#cron). Scheduled jobs
 
-You can configure cron expressions for scheduled jobs as configuration keys that start with @cron.@ and use the key as the value of a <code>@play.jobs.On</code> or <code>@Every</code> annotation. For example, <code>@On(cron.noon)</code> refers to:
+You can configure cron expressions for scheduled jobs as configuration keys that start with @cron.@ and use the key as the value of a <code>@play.jobs.On</code> or <code>@Every</code> annotation. For example, <code>@On("cron.noon")</code> refers to:
 
 bc. cron.noon=0 0 12 * * ?
 
