@@ -206,6 +206,17 @@ bc. @Required String value
 
 Message key: @validation.required@
 
+<h2><a name="unique">unique</a></h2>
+
+Checks that the value of the column which has the annotation is unique, by querying the database. (This only works with JPA.) You can define additional columns as a comma-separated list of annotation values. So annotating a property called @c@ with <code>@Unique("a, b")</code> will check that the combination of the values of properties @a@, @b@ and @c@ is unique.   
+
+Annotation syntax:
+
+bc. @Unique(additionalColumns) String productCode
+@Unique("postCode") String houseNumber
+
+Message key: @validation.unique@
+
 <h2><a name="url">url</a></h2>
 
 Checks that the value is a valid URL; empty strings are considered valid. Note that not all valid URLs (as defined by RFC 1738) are accepted; only URLs with an @http@, @https@ or @ftp@ scheme are considered valid.
