@@ -205,7 +205,7 @@ bc. static boolean check(String profile) {
     return false;
 }
 
-Now we can show an administration menu if the user has the admin role. Update @views/admin.html@ to integrate a top level menu:
+Now we can show an administration menu if the user has the admin role. Update @app/views/admin.html@ to integrate a top level menu:
 
 bc. …
 <div id="main">
