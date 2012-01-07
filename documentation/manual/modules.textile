@@ -32,7 +32,7 @@ bc. GET     /	     module:*
 
 h2. <a name="documentation">Add documentation to a module</a>
 
-You can add a documentation page to a module simply by adding a the file @documentation/manual/home.textile@ to the module. Use the same Textile syntax as the Play documentation itself, in @${play.path}/documentation/manual/@.
+You can add a documentation page to a module simply by adding a file @documentation/manual/home.textile@ to the module. Use the same Textile syntax as the Play documentation itself, in @${play.path}/documentation/manual/@.
 
 If you are running a Play application that uses one or more modules with documentation, then the local Play documentation at "http://localhost:9000/@documentation":http://localhost:9000/@documentation will include links to their documentation pages under *Installed Modules* in the side bar.
 
