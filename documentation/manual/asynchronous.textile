@@ -184,8 +184,8 @@ bc. public static void echo() {
              disconnect();
          }
  
-         for(String msg: TextFrame.match(e)) {
-             outbound.send("Echo: %s", frame.textData);
+         for(String message: TextFrame.match(e)) {
+             outbound.send("Echo: %s", message);
          }
          
          for(WebSocketClose closed: SocketClosed.match(e)) {

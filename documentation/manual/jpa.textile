@@ -41,7 +41,7 @@ This is the main helper class for JPA. If you make one of your JPA entities exte
 
 For example, look at this Post model object:
 
-bc. @Entity
+bc.. @Entity
 public class Post extends Model {
 
     public String title;
@@ -65,7 +65,7 @@ Nothing forces you to base your entities on @play.db.jpa.Model@. Your JPA entiti
 
 For example, here is a mapping for a very simple @User@ entity. The @id@ is a UUID, the @name@ and @mail@ properties are required, and we use Play Validation to enforce simple business rules.
 
-bc. @Entity
+bc.. @Entity
 public class User extends GenericModel {
     @Id
     @GeneratedValue(generator = "system-uuid")
