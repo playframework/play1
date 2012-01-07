@@ -218,3 +218,16 @@ bc. @URL String address
 
 Message key: @validation.url@
 
+<h2><a name="unique">unique</a></h2>
+
+Checks that the value of the column which has the annotation is unqiue 
+in the database (only works with JPA). You can define additional columns as a 
+comma-separated list. So @Unique("a, b") at property c will check that
+the combintion of the values of column a, b, c will be unique.   
+
+Annotation syntax:
+
+bc. @Unique(additionalColumns) columnname
+
+Message key: @validation.unique@
+
