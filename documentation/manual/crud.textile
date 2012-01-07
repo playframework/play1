@@ -282,6 +282,15 @@ bc.   public class CustomAdminCompany extends CRUD {
 
 This is not the end; you can also customize @findPage@ and other methods. Have a look at the source code.
 
+h2. <a name="l10n">Localisation</a>
+
+You can localise the user-interface text by overriding the CRUD module’s messages in your application’s @conf/messages@ file.
+
+bc. crud.add=Create new &{%s}
+
+To see which message keys are used, look in the CRUD module’s own message file: @$PLAY_HOME/modules/crud/conf/messages@.
+
+
 h2. <a name="commands">Commands</a>
 
 The CRUD module provides a *crud:override* command that you use on the command line to override the default templates. This works because the CRUD module loads templates from your application if they are present, instead of its own. You can also use @crud:ov@ instead of @crud:override@.

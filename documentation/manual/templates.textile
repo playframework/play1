@@ -344,7 +344,7 @@ Each extension method is a static method and should return a @java.lang.String@ 
 
 Use your formatter like this:
 
-bc. <em>Price: ${123456.324234.ccyAmount()}</em>
+bc. <em>Price: ${123456.324234.ccyAmount("€")}</em>
 
 Template extension classes are automatically detected by Play at start-up. You just have to restart your application to make them available.
 

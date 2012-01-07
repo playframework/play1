@@ -95,7 +95,7 @@ This would result in the output:
 bc. Customer name is required
 age is required
 
-You can change also override the error key using the @error.message(String key)@ method. For example:
+You can also override the error key using the @error.message(String key)@ method. For example:
 
 bc. Error error = validation.required(name).error;
 if(error != null) {

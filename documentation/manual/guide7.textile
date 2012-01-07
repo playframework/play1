@@ -13,7 +13,7 @@ To enable the CRUD module, add a line in the @/conf/dependencies.yml@ file, afte
 bc. require:
     - play -> crud
 
-Now run the @play dependencies@ command to resolve the new module dependency.
+Now run the @play dependencies@ command to resolve the new module dependency. If you are using an IDE then you should also update its project, to include the new module dependency: for example, run `play eclipsify` again, and refresh the project in Eclipse.
 
 Then this module comes with a generic set of **routes** that we can reuse for now. To import these routes just add this line to the @/yabe/conf/routes@ file:
 

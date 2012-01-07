@@ -181,7 +181,7 @@ bc. #{field 'user.name'}
   <input type="text" id="${field.id}" name="${field.name}" value="${field.value}" class="${field.errorClass}">
   <span class="error">${field.error}</span>
 </p>
-#{/}
+#{/field}
 
 So you don’t repeat @user.name@ again and again.
 
@@ -250,14 +250,20 @@ h2. <a name="get">get</a>
 Retrieves a value defined with a "set":#set tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
 
 bc. <head>
-    <title>#{get 'title' /}
+    <title>#{get 'title' /}</title>
 </head>
 
 You can also use the get tag in the following way, which will display "Homepage" if title has not been specified.
 
 bc. <head>
-    <title>#{get 'title'}Homepage #{/} 
+    <title>#{get 'title'}Homepage #{/get}</title>
 </head>
+
+You can test whether a variable is set using the @if@ tag:
+
+bc. #{if get('title')}
+    <h1>#{get 'title' /}</h1>
+#{/if}
 
 h2. <a name="i18n">i18n</a>
 
