@@ -1011,7 +1011,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if (nextChunks.isEmpty()) {
                 return null;
             }
-            return wrappedBuffer(((String) nextChunks.poll()).getBytes());
+            return wrappedBuffer(((String) nextChunks.poll()).getBytes(Response.current().encoding));
         }
 
         public boolean isEndOfInput() throws Exception {
