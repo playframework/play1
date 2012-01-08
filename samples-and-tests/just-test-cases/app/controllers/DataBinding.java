@@ -108,5 +108,22 @@ public class DataBinding extends Controller {
     public static void myList(List<MyBook> items) {
         renderText(Utils.join(items, ","));
     }
+
+    public static class BeanWithByteArray {
+        public byte[] ba;
+    }
+    
+    public static void bindBeanWithByteArray(BeanWithByteArray b) {
+        if ( b == null) {
+            renderText("b==null");
+        }
+        
+        if ( b.ba == null) {
+            renderText("b.ba==null");
+        }
+        
+        renderText("b.ba.length=" + b.ba.length);
+    }
+
 }
 
