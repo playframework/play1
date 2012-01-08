@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Logger;
+import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
 import play.utils.Utils;
@@ -67,6 +68,18 @@ public class UrlEncodedParser extends DataParser {
             // NB: _charset_ must always be used with accept-charset and it must have the same value
 
             String[] keyValues = data.split("&");
+
+            String maxParamsString = Play.configuration.getProperty("http.maxParams", "1000");
+            try {
+                int maxParams = Integer.parseInt(maxParamsString);
+                if(maxParams != 0 && keyValues.length > maxParams) {
+                    Logger.warn("Number of request parameters %s is higher than maximum of %s, aborting.", keyValues.length, maxParams);
+                    throw new RuntimeException("Too many parameters!");
+                }
+            } catch (NumberFormatException e) {
+                Logger.warn("Invalid value '%s' for http.maxParams", maxParamsString);
+            }
+
             for (String keyValue : keyValues) {
                 // split this key-value on the first '='
                 int i = keyValue.indexOf('=');
