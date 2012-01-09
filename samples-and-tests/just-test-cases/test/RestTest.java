@@ -151,4 +151,21 @@ public class RestTest extends UnitTest {
         assertEquals("ok", res);
     }
 
+    // Test our "Denial of Service through hash table multi-collisions"-protection
+    @Test
+    public void testPostHashCollisionProtection() {
+        // generate some post data with 1000 params
+        // PS: these keys does not have hash-colition, but our protection is only looking at the count
+        Map<String, Object> manyParams = new HashMap<String, Object>();
+        for ( int i=0; i < 1000; i++) {
+            manyParams.put("a"+i, ""+i);
+        }
+
+        assertEquals("POST", WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getString());
+
+        // now add one more to push the limit
+        manyParams.put("anotherone", "x");
+        assertEquals(500, (int)WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getStatus());
+    }
+
 }
