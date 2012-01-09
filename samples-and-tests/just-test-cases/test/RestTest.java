@@ -165,7 +165,8 @@ public class RestTest extends UnitTest {
 
         // now add one more to push the limit
         manyParams.put("anotherone", "x");
-        assertEquals(500, (int)WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getStatus());
+        // 413 Request Entity Too Large
+        assertEquals(413, (int)WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getStatus());
     }
 
 }

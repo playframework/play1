@@ -12,6 +12,7 @@ import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
+import play.mvc.results.Status;
 import play.utils.Utils;
 
 /**
@@ -77,7 +78,7 @@ public class UrlEncodedParser extends DataParser {
             // we should by default not parse the params into HashMap if the count exceeds a maximum limit
             if(maxParams != 0 && keyValues.length > maxParams) {
                 Logger.warn("Number of request parameters %d is higher than maximum of %d, aborting. Can be configured using 'http.maxParams'", keyValues.length, maxParams);
-                throw new RuntimeException("Too many parameters!");
+                throw new Status(413); //413 Request Entity Too Large
             }
 
             for (String keyValue : keyValues) {
@@ -139,6 +140,9 @@ public class UrlEncodedParser extends DataParser {
             }
 
             return decodedParams;
+        } catch (Status s) {
+            // just pass it along
+            throw s;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
