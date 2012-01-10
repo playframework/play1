@@ -239,6 +239,12 @@ public class Fixtures {
                                 if (f.getType().isAssignableFrom(Map.class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
                                 }
+                                if (f.getType().isAssignableFrom(List.class)) {
+				    // Each element of values is likely a LinkedHashMap.
+				    @SuppressWarnings("unchecked")
+				    List values = (List) objects.get(key).get(f.getName());
+                                    f.set(model, values);
+                                }
                                 if (f.getType().equals(byte[].class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
                                 }
