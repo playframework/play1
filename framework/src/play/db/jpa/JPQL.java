@@ -248,7 +248,11 @@ public class JPQL {
     public String findByToJPQL(String dbName, String findBy) {
         findBy = findBy.substring(2);
         StringBuilder jpql = new StringBuilder();
-        String[] parts = findBy.split("And");
+        String subRequest;
+        if (findBy.contains("OrderBy"))
+        	subRequest = findBy.split("OrderBy")[0];
+        else subRequest = findBy;
+        String[] parts = subRequest.split("And");
         int index = 1;
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
@@ -305,6 +309,22 @@ public class JPQL {
                 jpql.append(" AND ");
             }
         }
+		// ORDER BY clause
+		if (findBy.contains("OrderBy")) {
+			jpql.append(" ORDER BY ");
+			String orderQuery = findBy.split("OrderBy")[1];
+			parts = orderQuery.split("And");
+			for (int i = 0; i < parts.length; i++) {
+				String part = parts[i];
+				String orderProp;
+				if (part.endsWith("Desc"))
+					orderProp = extractProp(part, "Desc") + " DESC";
+				else orderProp = part.toLowerCase();
+				if (i > 0)
+					jpql.append(", ");
+				jpql.append(orderProp);
+			}
+		}
         return jpql.toString();
     }
 
