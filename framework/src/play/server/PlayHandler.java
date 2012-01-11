@@ -15,10 +15,13 @@ import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
+
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
+import play.data.parsing.DataParser;
+import play.data.parsing.DirectStreamingParser;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -516,7 +519,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("parseRequest: begin");
             Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         }
-        final int index = nettyRequest.getUri().indexOf("?");
+
         String uri = nettyRequest.getUri();
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
@@ -563,10 +566,15 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
 
         } else {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IOUtils.copy(new ChannelBufferInputStream(b), out);
-            byte[] n = out.toByteArray();
-            body = new ByteArrayInputStream(n);
+            DataParser parser = DataParser.parsers.get(contentType);
+            if(parser instanceof DirectStreamingParser && (nettyRequest.getMethod().equals(HttpMethod.POST) || nettyRequest.getMethod().equals(HttpMethod.PUT)) ){
+                body = new ChannelBufferInputStream(b);
+            }else{
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                IOUtils.copy(new ChannelBufferInputStream(b), out);
+                byte[] n = out.toByteArray();
+                body = new ByteArrayInputStream(n);
+            }
         }
 
         String host = nettyRequest.getHeader(HOST);
@@ -841,7 +849,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if ((file == null || !file.exists())) {
                 serve404(new NotFound("The file " + renderStatic.file + " does not exist"), ctx, request, nettyRequest);
             } else {
-                boolean raw = Play.pluginCollection.serveStatic(file, request, response);
+                boolean raw = Play.pluginCollection.serveStatic(file, Request.current(), Response.current());
                 if (raw) {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {
@@ -1080,7 +1088,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         p.replace("encoder", "wsencoder", new WebSocketFrameEncoder());
     }
 
-    protected void adjustPipelineToHybi(ChannelHandlerContext ctx) {    	
+    protected void adjustPipelineToHybi(ChannelHandlerContext ctx) {        
         ChannelPipeline p = ctx.getChannel().getPipeline();
         p.remove("aggregator");
         p.replace("decoder", "wsdecoder", new Hybi10WebSocketFrameDecoder());
