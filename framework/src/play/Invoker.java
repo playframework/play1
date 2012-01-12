@@ -384,7 +384,10 @@ public class Invoker {
                         executor.submit(invocation);
                     }
                 });
-            } else {
+            } 
+            /**
+             * all suspend task need to be added to the queue and re-invoke later.
+             */
                 synchronized (WaitForTasksCompletion.class) {
                     if (instance == null) {
                         instance = new WaitForTasksCompletion();
@@ -393,7 +396,7 @@ public class Invoker {
                     }
                     instance.queue.put(task, invocation);
                 }
-            }
+           
         }
 
         @Override
