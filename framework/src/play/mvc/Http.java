@@ -374,7 +374,7 @@ public class Http {
 
         protected void parseXForwarded() {
             if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
-                if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
+                if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split("[\\s,]+")).contains(remoteAddress)) {
                     throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
                 } else {
                     secure = isRequestSecure();
