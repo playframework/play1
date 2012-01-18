@@ -1105,16 +1105,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             return;
         }
 
-        if ("8".equals(version)) {
-            res.addHeader(SEC_WEBSOCKET_ORIGIN, req.getHeader(ORIGIN));
-        } else if ("13".equals(version)) {
-            res.addHeader(ORIGIN, req.getHeader(ORIGIN));
-        } else {
-            if (Logger.isDebugEnabled()) {
-                Logger.debug("Client request does not have origin header");
-            }
-        }
-
         String key = req.getHeader("Sec-WebSocket-Key");
         if(key == null) {
             res.setStatus(HttpResponseStatus.BAD_REQUEST);
