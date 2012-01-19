@@ -51,6 +51,7 @@ public class FileService  {
             }
 
             nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            nettyResponse.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
 
             // Write the initial line and the header.
             ChannelFuture writeFuture;
@@ -109,8 +110,8 @@ public class FileService  {
             this.raf = raf;
             this.request = request;
             fileLength = raf.length();
-            initRanges();
             this.contentType = contentType;
+            initRanges();
             if(Logger.isDebugEnabled())
                 Logger.debug("Invoked ByteRangeServer, found byteRanges: %s (with header Range: %s)", Arrays.toString(byteRanges), request.getHeader("range"));
         }
@@ -207,7 +208,7 @@ public class FileService  {
                 ByteRange[] byteRanges = new ByteRange[reducedRanges.length];
                 for(int i = 0; i < reducedRanges.length; i++) {
                     long[] range = reducedRanges[i];
-                    byteRanges[i] = new ByteRange(range[0], range[1], fileLength, "application/octet-stream", reducedRanges.length > 1);
+                    byteRanges[i] = new ByteRange(range[0], range[1], fileLength, contentType, reducedRanges.length > 1);
                 }
                 this.byteRanges = byteRanges;
                 if(this.byteRanges.length == 0)
