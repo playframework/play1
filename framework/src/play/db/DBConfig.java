@@ -194,10 +194,21 @@ public class DBConfig {
                 }
 
                 if (p.getProperty(propsPrefix, "").startsWith("java:")) {
-
+                    String datasourceName = p.getProperty(propsPrefix);
+                    
+                    try {
+                        // Check if on glassfish by trying to load a
+                        // glassfish specific API 
+                        Class.forName("org.glassfish.api.naming.GlassfishNamingManager");
+                        
+                        // Strip java: from datasource name
+                        datasourceName = datasourceName.substring("java:".length());
+                    } catch (Exception e) {
+                        // Class not found means we are not on glassfish
+                    }
+                    
                     Context ctx = new InitialContext();
-                    datasource = (DataSource) ctx.lookup(p.getProperty(propsPrefix));
-
+                    datasource = (DataSource) ctx.lookup(datasourceName);
                 } else {
 
                     // Try the driver
