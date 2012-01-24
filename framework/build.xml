@@ -168,6 +168,9 @@
                 <fileset dir="${application.path}/lib">
                     <include name="*.jar"/>
                 </fileset>
+                <fileset dir="${application.path}/modules">
+                    <include name="**/*.jar"/>
+                </fileset>
                 <path refid="project.classpath"/>
             </classpath>
             <sysproperty key="application.path" value="${application.path}" />
@@ -190,18 +193,28 @@
         <loadfile property="version" srcFile="src/play/version"/>
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />
-        <java classname="play.test.TestRunner" dir="${basedir}" fork="true">
+        <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
+                <fileset dir="${basedir}/../modules/testrunner/lib">
+                    <include name="play-testrunner.jar"/>
+                </fileset>
+                <fileset dir="${application.path}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${application.path}/modules">
+                    <include name="**/*.jar"/>
+                </fileset>
                 <path refid="project.classpath"/>
             </classpath>
             <sysproperty key="application.path" value="${application.path}" />
             <sysproperty key="play.id" value="test" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <sysproperty key="play.debug" value="true" />
             <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
-        </java>
+        </java>	
     </target>
 
     <target name="test-in-nb" depends="test">
