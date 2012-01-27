@@ -1087,7 +1087,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         p.replace("encoder", "wsencoder", new Hybi10WebSocketFrameEncoder());
     }
     
-    private boolean isHybi10WebSocketRequest(HttpRequest req) {
+    private boolean isHybi10orHybi13WebSocketRequest(HttpRequest req) {
         return req.containsHeader("Sec-WebSocket-Version");
     }
 
@@ -1095,11 +1095,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         return req.containsHeader(SEC_WEBSOCKET_KEY1) && req.containsHeader(SEC_WEBSOCKET_KEY2);
     }
 
-    private void upgradeResponseHybi10(HttpRequest req, HttpResponse res) {
+    private void upgradeResponseHybi10orHybi13(HttpRequest req, HttpResponse res) {
         String version = req.getHeader("Sec-WebSocket-Version");
-        if(!"8".equals(version)) {
+        if(!"8".equals(version) && !"13".equals(version)) {
+            Logger.error("Unsupported WebsSocket version %s", version);
             res.setStatus(HttpResponseStatus.UPGRADE_REQUIRED);
-            res.setHeader("Sec-WebSocket-Version", "8");
+            res.setHeader("Sec-WebSocket-Version", version);
            
             return;
         }
@@ -1176,8 +1177,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         res.addHeader(CONNECTION, HttpHeaders.Values.UPGRADE);
 
         // Fill in the headers and contents depending on handshake method.
-        if (isHybi10WebSocketRequest(req)) {
-            upgradeResponseHybi10(req, res);
+        if (isHybi10orHybi13WebSocketRequest(req)) {
+            upgradeResponseHybi10orHybi13(req, res);
             ctx.getChannel().write(res);
             adjustPipelineToHybi(ctx);
         } else if (isHixie76WebSocketRequest(req)) {
