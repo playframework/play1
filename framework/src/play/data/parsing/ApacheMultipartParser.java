@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -540,7 +541,7 @@ public class ApacheMultipartParser extends DataParser {
     }
 
     public Map<String, String[]> parse(InputStream body) {
-        Map<String, String[]> result = new HashMap<String, String[]>();
+        Map<String, String[]> result = new LinkedHashMap<String, String[]>();
         try {
             FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), Request.current().encoding);
             while (iter.hasNext()) {

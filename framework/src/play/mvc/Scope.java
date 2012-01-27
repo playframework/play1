@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -358,7 +359,7 @@ public class Scope {
             return current.get();
         }
         boolean requestIsParsed;
-        public Map<String, String[]> data = new HashMap<String, String[]>();
+        public Map<String, String[]> data = new LinkedHashMap<String, String[]>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
@@ -470,7 +471,7 @@ public class Scope {
 
         public Map<String, String[]> sub(String prefix) {
             checkAndParse();
-            Map<String, String[]> result = new HashMap<String, String[]>();
+            Map<String, String[]> result = new LinkedHashMap<String, String[]>();
             for (String key : data.keySet()) {
                 if (key.startsWith(prefix + ".")) {
                     result.put(key.substring(prefix.length() + 1), data.get(key));
@@ -481,7 +482,7 @@ public class Scope {
 
         public Map<String, String> allSimple() {
             checkAndParse();
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new LinkedHashMap<String, String>();
             for (String key : data.keySet()) {
                 result.put(key, data.get(key)[0]);
             }

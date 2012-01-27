@@ -4,13 +4,14 @@ import play.utils.Utils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class ParamNode {
     private final String name;
-    private final Map<String, ParamNode> _children = new HashMap<String, ParamNode>(8);
+    private final Map<String, ParamNode> _children = new LinkedHashMap<String, ParamNode>(8);
     private String[] values = null;
     private String originalKey;
 
