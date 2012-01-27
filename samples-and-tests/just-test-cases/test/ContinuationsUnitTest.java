@@ -44,4 +44,10 @@ public class ContinuationsUnitTest extends UnitTest {
             WS.url("http://localhost:9003/withContinuations/paramsLocalVariableTracerAndAwait?a=12").get().getString());
     }
     
+    @Test
+    public void testInvalidBindingAndAwait() {
+        assertEquals("beforeErrors: b=Incorrect value,b=someError afterErrors: b=Incorrect value,b=someError,sb.prop=Required,sb=Validation failed",
+            WS.url("http://localhost:9003/WithContinuations/validationAndAwait?a=morten&b=x").get().getString());
+    }
+    
 }
