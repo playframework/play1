@@ -11,7 +11,6 @@ import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrame;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameDecoder;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
-import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
@@ -430,38 +429,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
                 } else {
-                    nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
-                    final RandomAccessFile raf = new RandomAccessFile(file, "r");
                     try {
-                        long fileLength = raf.length();
-
-                        if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
-                            if (Logger.isTraceEnabled()) {
-                                Logger.trace("file length is [" + fileLength + "]");
-                            }
-                            setContentLength(nettyResponse, fileLength);
-                        }
-
-                        Channel ch = ctx.getChannel();
-
-                        // Write the initial line and the header.
-                        ChannelFuture writeFuture = ch.write(nettyResponse);
-
-                        // Write the content.
-                        // If it is not a HEAD
-                        if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
-                            writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
-                        } else {
-                            raf.close();
-                        }
-                        if (!keepAlive) {
-                            // Close the connection when the whole content is written out.
-                            writeFuture.addListener(ChannelFutureListener.CLOSE);
-                        }
+                        FileService.serve(file, nettyRequest, nettyResponse, ctx, request, response, ctx.getChannel());
                     } catch (Throwable exx) {
-                        try {
-                            raf.close();
-                        } catch (Throwable ex) { /* Left empty */ }
+                        
                         try {
                             ctx.getChannel().close();
                         } catch (Throwable ex) { /* Left empty */ }
@@ -516,7 +487,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("parseRequest: begin");
             Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         }
-        final int index = nettyRequest.getUri().indexOf("?");
         String uri = nettyRequest.getUri();
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
@@ -820,7 +790,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("serve500: end");
         }
     }
-
+    
     public void serveStatic(RenderStatic renderStatic, ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest, MessageEvent e) {
         if (Logger.isTraceEnabled()) {
             Logger.trace("serveStatic: begin");
@@ -850,7 +820,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     nettyResponse = addEtag(nettyRequest, nettyResponse, localFile);
 
                     if (nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
-
                         Channel ch = e.getChannel();
 
                         // Write the initial line and the header.
@@ -860,50 +829,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                             writeFuture.addListener(ChannelFutureListener.CLOSE);
                         }
                     } else {
-
-                        final RandomAccessFile raf = new RandomAccessFile(localFile, "r");
-                        try {
-                            long fileLength = raf.length();
-
-                            if (Logger.isTraceEnabled()) {
-                                Logger.trace("keep alive " + keepAlive);
-                                Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
-                            }
-
-                            if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
-                                // Add 'Content-Length' header only for a keep-alive connection.
-                                if (Logger.isTraceEnabled()) {
-                                    Logger.trace("file length " + fileLength);
-                                }
-                                setContentLength(nettyResponse, fileLength);
-                            }
-
-                            nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
-
-                            Channel ch = e.getChannel();
-
-                            // Write the initial line and the header.
-                            ChannelFuture writeFuture = ch.write(nettyResponse);
-
-                            // Write the content.
-                            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
-                                writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
-                            } else {
-                                raf.close();
-                            }
-
-                            if (!keepAlive) {
-                                // Close the connection when the whole content is written out.
-                                writeFuture.addListener(ChannelFutureListener.CLOSE);
-                            }
-                        } catch (Throwable exx) {
-                            try {
-                                raf.close();
-                            } catch (Throwable ex) { /* Left empty */ }
-                            try {
-                                ctx.getChannel().close();
-                            } catch (Throwable ex) { /* Left empty */ }
-                        }
+                        FileService.serve(localFile, nettyRequest, nettyResponse, ctx, request, response, e.getChannel());
                     }
                 }
 
