@@ -8,6 +8,7 @@ import play.data.Upload;
 import play.data.binding.types.*;
 import play.data.validation.Validation;
 import play.db.Model;
+import play.exceptions.BinderException;
 import play.exceptions.UnexpectedException;
 
 import java.io.File;
@@ -195,6 +196,8 @@ public abstract class Binder {
             }
 
             return null; // give up
+        } catch (BinderException e) {
+            throw e; // allow binder to throw an exception that propagates
         } catch (Exception e) {
             Validation.addError(paramNode.getOriginalKey(), "validation.invalid");
         }
