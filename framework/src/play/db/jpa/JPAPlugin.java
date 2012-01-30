@@ -313,8 +313,8 @@ public class JPAPlugin extends PlayPlugin {
             return "org.hibernate.dialect.DB2400Dialect";
         } else if (driver.equals("com.ibm.as400.access.AS390JDBCDriver")) {
             return "org.hibernate.dialect.DB2390Dialect";
-        } else if (driver.equals("oracle.jdbc.driver.OracleDriver")) {
-            return "org.hibernate.dialect.Oracle9iDialect";
+        } else if (driver.equals("oracle.jdbc.OracleDriver")) {
+            return "org.hibernate.dialect.Oracle10gDialect";
         } else if (driver.equals("com.sybase.jdbc2.jdbc.SybDriver")) {
             return "org.hibernate.dialect.SybaseAnywhereDialect";
         } else if ("com.microsoft.jdbc.sqlserver.SQLServerDriver".equals(driver)) {
