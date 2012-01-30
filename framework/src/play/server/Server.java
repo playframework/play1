@@ -71,6 +71,7 @@ public class Server {
         try {
             if (httpPort != -1) {
                 bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
+
                 bootstrap.bind(new InetSocketAddress(address, httpPort));
                 bootstrap.setOption("child.tcpNoDelay", true);
 
