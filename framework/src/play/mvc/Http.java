@@ -365,6 +365,10 @@ public class Http {
 
             newRequest.parseXForwarded();
 
+	    if (!newRequest.host.equals(_host)){
+		newRequest.domain = newRequest.host;
+	    }
+
             newRequest.resolveFormat();
 
             newRequest.authorizationInit();
@@ -383,6 +387,12 @@ public class Http {
                     } else if (headers.get("x-forwarded-host") != null) {
                         host = headers.get("x-forwarded-host").value();
                     }
+                    if (headers.get("x-forwarded-port") != null) {
+                        port = Integer.parseInt(headers.get("x-forwarded-port").value());
+                    } else {
+                        port = 80;
+                    }
+
                     if (headers.get("x-forwarded-for") != null) {
                         remoteAddress = headers.get("x-forwarded-for").value();
                     }
