@@ -1078,9 +1078,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "65345"));
 
         // Upgrade the pipeline as the handshaker needs the HttpStream Aggregator
-        ctx.getPipeline().remove("aggregator");
-        ctx.getPipeline().addLast("aggregator", new HttpChunkAggregator(max));
-
+        ctx.getPipeline().addLast("fake-aggregator", new HttpChunkAggregator(max));
+	try {
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
                 this.getWebSocketLocation(req), null, false);
         this.handshaker = wsFactory.newHandshaker(req);
@@ -1093,6 +1092,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 e.printStackTrace();
 
             }
+        }
+        } finally {
+           // Remove fake aggregator in case handshake was not a sucess, it is still lying around
+           try { ctx.getPipeline().remove("fake-aggregator"); } catch(Exception e) {}
         }
         Http.Request request = parseRequest(ctx, req, messageEvent);
 
