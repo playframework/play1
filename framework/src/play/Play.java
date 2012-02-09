@@ -708,6 +708,10 @@ public class Play {
         if (localModules.exists() && localModules.isDirectory()) {
             for (File module : localModules.listFiles()) {
                 String moduleName = module.getName();
+		if (moduleName.startsWith(".")) {
+			Logger.info("Module %s is ignored, name starts with a dot", moduleName);
+			continue;
+		}
                 if (moduleName.contains("-")) {
                     moduleName = moduleName.substring(0, moduleName.indexOf("-"));
                 }
