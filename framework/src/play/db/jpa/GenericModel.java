@@ -160,6 +160,7 @@ public class GenericModel extends JPABase {
             }
             ParamNode beanNode = rootParamNode.getChild(name, true);
             Binder.bindBean(beanNode, o, annotations);
+            o = ((GenericModel)o).merge();
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);

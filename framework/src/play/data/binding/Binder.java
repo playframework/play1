@@ -13,6 +13,7 @@ import play.exceptions.UnexpectedException;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -311,7 +312,22 @@ public abstract class Binder {
                 Object value = internalBind(propParamNode, prop.getType(), prop.getGenericType(), propBindingAnnotations);
                 if (value != MISSING) {
                     if (value != NO_BINDING) {
-                        prop.setValue(bean, value);
+                        // If the property is a collection, it should not be ovewritten
+                        // by a new one. Instead it should be cleaned and the objects
+                        // should be re-inserted. This will fix issue #1395 by not
+                        // replacing a Persistent collection by a regular one.
+                        if (Collection.class.isAssignableFrom(prop.getType())) {
+                            Field field = bean.getClass().getDeclaredField(prop.getName());
+                            Collection collection = (Collection) field.get(bean);
+                            if (collection == null) {
+                                prop.setValue(bean, value);
+                            } else {
+                                collection.clear();
+                                collection.addAll((Collection) value);
+                            }
+                        } else {
+                            prop.setValue(bean, value);
+                        }
                     }
                 } else {
                     // retry without annotations resolved from property, but use input-annotations instead..
