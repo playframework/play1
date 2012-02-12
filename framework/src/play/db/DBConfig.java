@@ -193,10 +193,19 @@ public class DBConfig {
                     destroy();
                 }
 
-                if (p.getProperty(propsPrefix, "").startsWith("java:")) {
-
+                boolean isJndiDatasource = false;
+                String datasourceName = p.getProperty(propsPrefix, "");
+                
+                // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
+                if (datasourceName.startsWith("jndi:")) {
+                    datasourceName = datasourceName.substring("jndi:".length());
+                    isJndiDatasource = true;
+                }
+                
+                if (isJndiDatasource || datasourceName.startsWith("java:")) {
+                    
                     Context ctx = new InitialContext();
-                    datasource = (DataSource) ctx.lookup(p.getProperty(propsPrefix));
+                    datasource = (DataSource) ctx.lookup(datasourceName);
 
                 } else {
 
