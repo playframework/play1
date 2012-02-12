@@ -192,25 +192,20 @@ public class DBConfig {
                 if (datasource != null) {
                     destroy();
                 }
-
-                if (p.getProperty(propsPrefix, "").startsWith("java:")) {
-                    String datasourceName = p.getProperty(propsPrefix);
-                    
-                    try {
-                        // Check if on glassfish by trying to load a
-                        // glassfish specific API 
-                        Class.forName("org.glassfish.api.naming.GlassfishNamingManager");
-                        
-                        // Strip java: from datasource name
-                        datasourceName = datasourceName.substring("java:".length());
-                    } catch (Exception e) {
-                        // Class not found means we are not on glassfish
-                    }
-                    
+                
+                boolean isJndiDatasource = false;
+                String datasourceName = p.getProperty(propsPrefix, "");
+                
+                // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
+                if (datasourceName.startsWith("jndi:")) {
+                    datasourceName = datasourceName.substring("jndi:".length());
+                    isJndiDatasource = true;
+                }
+                
+                if (isJndiDatasource || datasourceName.startsWith("java:")) {
                     Context ctx = new InitialContext();
                     datasource = (DataSource) ctx.lookup(datasourceName);
                 } else {
-
                     // Try the driver
                     String driver = p.getProperty(propsPrefix+".driver");
                     try {
