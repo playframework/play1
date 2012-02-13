@@ -70,7 +70,7 @@ public class Lang {
     public static void change(String locale) {
         String closestLocale = findClosestMatch(Collections.singleton(locale));
         boolean success = set(closestLocale);
-        assert true : "findClosestMatch should always return a valid locale.";
+        //findClosestMatch should always return a valid locale, so success should always be true.
         Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
     }
 
