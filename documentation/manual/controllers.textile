@@ -364,6 +364,9 @@ public class PointBinder implements TypeBinder<Point> {
 
 As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
 
+h4. Exception throwing in TypeBinders
+
+If a typebinder throws an exception, by default the exception is trapped and the object that was bound is null.  If a TypeBinder author wants an Exception to propagate instead, a BinderException should be thrown which will not be trapped by the Binder.
 
 h2. <a name="result">Result types</a>
 
