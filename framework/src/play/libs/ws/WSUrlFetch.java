@@ -266,6 +266,7 @@ public class WSUrlFetch implements WSImpl {
 
         private String body;
         private Integer status;
+        private String statusText;
         private Map<String, List<String>> headersMap;
 
         /**
@@ -275,6 +276,7 @@ public class WSUrlFetch implements WSImpl {
         public HttpUrlfetchResponse(HttpURLConnection connection) {
             try {
                 this.status = connection.getResponseCode();
+                this.statusText = connection.getResponseMessage();
                 this.headersMap = connection.getHeaderFields();
                 InputStream is = null;
                 if (this.status >= HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -298,6 +300,15 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public Integer getStatus() {
             return status;
+        }
+
+        /**
+         * the HTTP status text
+         * @return the status text of the http response
+         */
+        @Override
+        public String getStatusText() {
+            return statusText;
         }
 
         @Override

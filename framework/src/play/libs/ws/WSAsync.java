@@ -562,6 +562,15 @@ public class WSAsync implements WSImpl {
             return this.response.getStatusCode();
         }
 
+        /**
+         * the HTTP status text
+         * @return the status text of the http response
+         */
+        @Override
+        public String getStatusText() {
+            return this.response.getStatusText();
+        }
+
         @Override
         public String getHeader(String key) {
             return response.getHeader(key);
