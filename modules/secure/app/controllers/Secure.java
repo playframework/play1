@@ -22,7 +22,9 @@ public class Secure extends Controller {
 	        		flash.put("url", getRedirectUrl()); // seems a good default
 	        		flash.keep();
 	        	}
-	            login();
+	        	boolean allowed = doTrust();
+	        	if (! allowed)
+        			login();
         	} else {
         		flash.keep();
         	}
@@ -37,6 +39,17 @@ public class Secure extends Controller {
             check(check);
         }
     }
+
+	private static boolean doTrust() throws Throwable {
+		boolean allowed = false;
+		if ((Boolean) Trust.invoke("trustPhaseDone")) {
+			String username = (String) Trust.invoke("trustedUser");
+			if (username != null) {
+				allowed = (Boolean) Security.invoke("trustAuthentication", username);
+			}
+		}
+		return allowed;
+	}
 
 	private static String getRedirectUrl() {
 		return "GET".equals(request.method) ? request.url : "/";
@@ -63,8 +76,12 @@ public class Secure extends Controller {
                 redirectToOriginalURL();
             }
         }
-        if((Boolean)Security.invoke("isConnected")) {
-                redirectToOriginalURL();
+        
+        if(!(Boolean)Security.invoke("isConnected")) {
+        	if (doTrust())
+        		redirectToOriginalURL();
+        } else {
+        	redirectToOriginalURL();
         }
         
         flash.keep("url");
@@ -74,22 +91,17 @@ public class Secure extends Controller {
     public static void authenticate(@Required String username, String password, boolean remember) throws Throwable {
         // Check tokens
         Boolean allowed = false;
-        try {
-            // This is the deprecated method name
-            allowed = (Boolean)Security.invoke("authentify", username, password);
-        } catch (UnsupportedOperationException e ) {
-            // This is the official method name
-            allowed = (Boolean)Security.invoke("authenticate", username, password);
-        }
+        
+        // This is the official method name
+        allowed = (Boolean)Security.invoke("authenticate", username, password);
+        
         if(validation.hasErrors() || !allowed) {
             flash.keep("url");
             flash.error("secure.error");
             params.flash();
             login();
         }
-        // Mark user as connected if not previously done by authenticate
-	if (session.get("username") == null)
-	        session.put("username", username);
+	        
         // Remember if needed
         if(remember) {
             response.setCookie("rememberme", Crypto.sign(username) + "-" + username, "30d");
@@ -104,6 +116,7 @@ public class Secure extends Controller {
         session.clear();
         response.removeCookie("rememberme");
         Security.invoke("onDisconnected");
+        Trust.invoke("onDisconnected");
         flash.success("secure.logout");
         login();
     }
@@ -119,18 +132,36 @@ public class Secure extends Controller {
         redirect(url);
     }
 
-    public static class Security extends Controller {
+    public static class Trust extends Controller {
 
-        /**
-         * @Deprecated
-         * 
-         * @param username
-         * @param password
-         * @return
-         */
-        static boolean authentify(String username, String password) {
-            throw new UnsupportedOperationException();
+    	static boolean trustPhaseDone() {
+    		return true;
+    	}
+
+    	static String trustedUser() {
+    		return null;
+    	}
+
+    	static void onDisconnected() {
+    	}
+    	
+    	private static Object invoke(String m, Object... args) throws Throwable {
+            Class trust = null;
+            List<Class> classes = Play.classloader.getAssignableClasses(Trust.class);
+            if(classes.size() == 0) {
+                trust = Trust.class;
+            } else {
+                trust = classes.get(0);
+            }
+            try {
+                return Java.invokeStaticOrParent(trust, m, args);
+            } catch(InvocationTargetException e) {
+                throw e.getTargetException();
+            }
         }
+    }
+    
+    public static class Security extends Controller {
 
         /**
          * This method is called during the authentication process. This is where you check if
@@ -142,9 +173,22 @@ public class Secure extends Controller {
          * @return true if the authentication process succeeded
          */
         static boolean authenticate(String username, String password) {
+        	session.put("username", username);
             return true;
         }
 
+
+        /**
+         * This method is called during the authentication process if we use Trust.
+         *
+         * @param username
+         * @param password
+         * @return true if the authentication process succeeded
+         */
+        static boolean trustAuthentication(String username) {
+            return authenticate(username, null);
+        }
+        
         /**
          * This method checks that a profile is allowed to view this page/method. This method is called prior
          * to the method's controller annotated with the @Check method. 
