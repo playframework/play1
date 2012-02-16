@@ -340,8 +340,8 @@ public class Play {
     public static void readConfiguration() {
         configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
         extractHttpPort();
-         // Plugins
-         pluginCollection.onConfigurationRead();
+        // Plugins
+        pluginCollection.onConfigurationRead();
      }
 
     private static void extractHttpPort() {
