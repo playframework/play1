@@ -15,6 +15,7 @@ import play.data.binding.RootParamNode;
 import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
+import play.db.SQLSplitter;
 import play.db.Model;
 import play.db.jpa.JPAPlugin;
 import play.exceptions.DatabaseException;
@@ -43,9 +44,10 @@ public class Fixtures {
     public static Map<String, Object> idCache = new HashMap<String, Object>();
 
     public static void executeSQL(String sqlScript) {
-        for(String sql: sqlScript.split(";")) {
-            if(sql.trim().length() > 0) {
-                DB.execute(sql);
+        for(CharSequence sql : new SQLSplitter(sqlScript)) {
+            final String s = sql.toString().trim();
+            if(s.length() > 0) {
+                DB.execute(s);
             }
         }
     }

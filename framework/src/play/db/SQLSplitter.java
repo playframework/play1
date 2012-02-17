@@ -2,7 +2,7 @@ package play.db;
 
 import java.util.*;
 
-class SQLSplitter implements Iterable<CharSequence> {
+public class SQLSplitter implements Iterable<CharSequence> {
 
 	/**
 	 * Skips the index past the quote. 
