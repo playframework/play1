@@ -470,6 +470,18 @@ Proxy user for web services requests.
 Default: @http.proxyUser@ system property.
 
 
+h3(#http.nonProxyHosts). http.nonProxyHosts
+
+Indicates the hosts which should be connected to directly and not through the proxy server.
+The value can be a list of hosts, each seperated by a @|@, and in addition a wildcard character @*@ can be used for matching.
+
+For example:
+
+bc. http.nonProxyHosts=localhost|*.example.com
+
+Default: @http.nonProxyHosts@ system property.
+
+
 
 h3(#http.useETag). http.useETag
 
