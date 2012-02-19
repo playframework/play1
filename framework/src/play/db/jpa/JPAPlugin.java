@@ -855,42 +855,18 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         @Override
-        public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
-            if (collection instanceof PersistentCollection) {
-                Object o = ((PersistentCollection) collection).getOwner();
-                if (o instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved;
-                }
-            } else {
-                System.out.println("HOO: Case not handled !!!");
-            }
-            return super.onCollectionUpdate(collection, key);
+        public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+            super.onCollectionUpdate(collection, key);
         }
 
         @Override
-        public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
-            if (collection instanceof PersistentCollection) {
-                Object o = ((PersistentCollection) collection).getOwner();
-                if (o instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved;
-                }
-            } else {
-                System.out.println("HOO: Case not handled !!!");
-            }
-            return super.onCollectionRecreate(collection, key);
+        public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+            super.onCollectionRecreate(collection, key);
         }
 
         @Override
-        public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
-            if (collection instanceof PersistentCollection) {
-                Object o = ((PersistentCollection) collection).getOwner();
-                if (o instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved;
-                }
-            } else {
-                System.out.println("HOO: Case not handled !!!");
-            }
-            return super.onCollectionRemove(collection, key);
+        public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+            super.onCollectionRemove(collection, key);
         }
     }
 }
