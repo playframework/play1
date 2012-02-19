@@ -19,6 +19,7 @@ import play.libs.Mail;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 /**
@@ -280,7 +281,7 @@ public class Mailer {
                 try {
                     InternetAddress iAddress = new InternetAddress(from.toString());
                     email.setFrom(iAddress.getAddress(), iAddress.getPersonal());
-                } catch (Exception e) {
+                } catch (AddressException e) {
                     email.setFrom(from.toString());
                 }
 
@@ -290,7 +291,7 @@ public class Mailer {
                 try {
                     InternetAddress iAddress = new InternetAddress(replyTo.toString());
                     email.addReplyTo(iAddress.getAddress(), iAddress.getPersonal());
-                } catch (Exception e) {
+                } catch (AddressException e) {
                     email.addReplyTo(replyTo.toString());
                 }
 
@@ -301,7 +302,7 @@ public class Mailer {
                     try {
                         InternetAddress iAddress = new InternetAddress(recipient.toString());
                         email.addTo(iAddress.getAddress(), iAddress.getPersonal());
-                    } catch (Exception e) {
+                    } catch (AddressException e) {
                         email.addTo(recipient.toString());
                     }
                 }
@@ -324,7 +325,7 @@ public class Mailer {
                     try {
                         InternetAddress iAddress = new InternetAddress(bcc.toString());
                         email.addBcc(iAddress.getAddress(), iAddress.getPersonal());
-                    } catch (Exception e) {
+                    } catch (AddressException e) {
                         email.addBcc(bcc.toString());
                     }
                 }
