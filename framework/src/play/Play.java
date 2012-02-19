@@ -340,8 +340,17 @@ public class Play {
      */
     public static void readConfiguration() {
         configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
+        extractHttpPort();
         // Plugins
         pluginCollection.onConfigurationRead();
+     }
+
+    private static void extractHttpPort() {
+        final String javaCommand = System.getProperty("sun.java.command", "");
+        jregex.Matcher m = new jregex.Pattern(".* --http.port=({port}\\d+)").matcher(javaCommand);
+        if (m.matches()) {
+            configuration.setProperty("http.port", m.group("port"));
+        }
     }
 
 
