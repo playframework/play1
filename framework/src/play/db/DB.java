@@ -12,6 +12,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+
+import org.hibernate.internal.SessionImpl;
+import play.db.jpa.JPA;
+import play.exceptions.DatabaseException;
+import play.Logger;
 
 /**
  * Database connection utilities.
