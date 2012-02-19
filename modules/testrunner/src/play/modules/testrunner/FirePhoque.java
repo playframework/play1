@@ -50,7 +50,11 @@ public class FirePhoque {
             System.out.println("~ The application does not start. There are errors: " + e);
             System.exit(-1);
         }
+        
+	boolean skipSeleniumTests = true;
 
+	tests = removeUnwantedTests(tests, skipSeleniumTests);
+ 
         // Let's tweak WebClient
 
         String headlessBrowser = System.getProperty("headlessBrowser", "INTERNET_EXPLORER_8");
@@ -189,4 +193,16 @@ public class FirePhoque {
         firephoque.openWindow(new URL(app + "/@tests/end?result=" + (ok ? "passed" : "failed")), "headless");
 
     }
+
+    private static List<String> removeUnwantedTests(List<String> tests, boolean skipSeleniumTests) {
+	if (skipSeleniumTests) {
+	    for (String test : tests) {
+		if (test.endsWith(".test.html")) {
+		    tests.remove(test);
+		}
+	    }
+	}
+	return tests;
+    }
+    
 }
