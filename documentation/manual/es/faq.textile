@@ -1,0 +1,53 @@
+h1. Preguntas frecuentes
+
+h2. <a>¿A dónde puedo hacer preguntas que no son respondidas aquí?</a>
+
+La página de la "comunidad":http://www.playframework.org/community contiene links a varios lugares en los cuales puede leer y enviar preguntas acerca de Play. En general, el mejor lugar para plantear dudas es en el "grupo google del framework play":http://groups.google.com/group/play-framework.
+
+h2. <a>¿Cómo se compara Play con el framework X?</a>
+
+Hoy en día, hay un gran número de opciones a la hora de desarrollar aplicaciones web. Dado que Play es un framework de aplicaciones web basado en Java, comparémoslo con otros framework de Java. Play está construido con una arquitectura de "nada compartido" (share nothing), se trata de un framework que no mantiene estado (statless framework), de manera que es muy distinto a todos los frameworks Java que mantienen el estado y que están basados en componentes, como Seam, Tapestry o Wicket. Es mucho más similar a Spring MVC o Struts (o Struts 2), pero mucho más influenciado por la opinión de la comunidad.
+
+Sin embargo Play es único en su clase. No se basa en lo que se conoce como estándares empresariales de Java. Usa Java, pero intenta traer al mundo de Java todas las cosas buenas que surgieron de los frameworks basados en leguajes de scripting, como Ruby on Rails, Django, Pylons, Symfony, Grails y Cake PHP. Intentamos conservar lo mejor de la plataforma Java sin las inconveniencias del desarrollo web tradicional en Java: un ciclo de desarrollo lento y farragoso, demasiadas capas de abstracción y ciertamente demasiados archivos de configuración.
+
+h2. <a>¿Por qué no cambian el nombre del paquete ‘play’ a ‘org.playframework’?!</a>
+
+Play no es una librería más que usted agrega a su contenedor de Servlets. Es realmente un framework que provee un stack completo que le permite correr su aplicación de manera autónoma e independiente. Las convenciones de los paquetes de Java existen para evitar colisiones de nombres cuando utiliza diversas librerías de diferentes proveedores. Pero, y le pedimos que confíe en nosotros, usted nunca pondrá su **play.jar** en sus propios proyectos. Esta no es la manera en que Play funciona, porque Play **es la plataforma**. No se preocupe por ello.
+
+h2. <a>¿Para qué usan Python? (¿No sería mejor Maven?)</a>
+
+Necesitamos una gran cantidad de scripts para manejar las aplicaciones Play, para crear una nueva aplicación, para ejecutarla, lanzar un explorar web, etc. Por supuesto que podríamos haber escrito estos scripts directamente en Java. Pero correr una JVM para simples tareas como la creación de un proyecto es muy lento. Y Java es muy limitado en lo que se refiere a la interacción con el sistema operativo.
+
+Utilizar Python nos ha permitido escribir estos scripts de una manera totalmente portable. Es rápido para ejecutar, fácil de escribir y viene instalado en la mayor parte de los sistemas operativos. No viene con windows, es cierto, y es por eso que hemos incluido una versión de Python para windows junto con el framework.
+
+h2. <a>¿Es Play un framework para Groovy?</a>
+
+No. Si bien Groovy es la base que utilizamos para desarrollar el sistema de templates de Play, es totalmente transparente para el framework. Además, no puede escribir ninguna otra parte de la aplicación (como los controladores, modelos u otras utilidades) en Groovy. Si anda buscando un framework basado en Groovy debería echarle un vistazo a Grails.
+
+h2. <a>Ja, ustedes no tienen idea de lo que es programar en Java</a>
+
+Somos completamente conscientes de que hemos tomado varias decisiones que son poco comunes en el mundo de Java, y de hecho Play no sigue ciegamente todas las denominadas ‘buenas prácticas’. Pero todos los miembros del equipo de Play tenemos vasta experiencia en el desarrollo de aplicaciones en Java, y estamos totalmente al tanto de las elecciones que hacemos y las reglas que rompemos.
+
+Java mismo es un lenguaje de programación de uso genérico y no fue originalmente concebido para el desarrollo de aplicaciones web. Es una cosa muy distinta desarrollar una librería en Java genérica y reutilizable a desarrollar una aplicación web. De hecho una aplicación web no tiene por qué ser diseñada para ser reutilizable. Se precisa menos abastracción, menos configuración. La reusabilidad debe ser contemplada para las apliaciones web, pero a través de APIs de servicios web en vez de integraciones al nivel del lenguaje.
+
+Cuando el tiempo de desarrollo tiende a cero, usted puede concentrarse en la funcionalidad de su aplicación y experimentar rápidamente, en vez de crear capas y capas de abstracción para futuros desarrollos.
+
+h2. <a>¿Play es rápido?</a>
+
+Sí, el framework Play en sí es rápido. Pero eso no significa que cualquier aplicación hecha con Play será rápida. El servidor HTTP integrado, el routeo de URLs y la llamada al controlador son extremadamente rápidos. Combinados con la tecnología de la JVM y las ventajas de la compilación justo a tiempo (Just In Time compilation) puede fácilmente dar respuesta a miles de llamadas por segundo. Desafortunadamente su aplicación seguramente utilizará una base de datos, que por lo general se convertirá en el cuello de botella de su aplicación.
+
+Actualmente el mayor consumidor de CPU en el stack de Play el el sistema de templates basado en Groovy. Pero dado que las aplicaciones Play son fácilmente escalables, no es realmente un problema si precisa manejar un tráfico verdaderamente alto: puede balancear la carga de trabajo entre varios servidores. También confiamos en lograr una mejora en la performance con la llegada de JDK7 y su soporte mejorado para lenguajes dinámicos.
+
+h2. <a>¿Puedo utilizar Play para una aplicación en producción?</a>
+
+Seguro, "muchas personas":http://www.playframework.org/community/testimonials están utilizando Play en producción. La rama de la versión 1.0 ya ha entrado en mantenimiento, lo que significa que tan sólo arreglaremos bugs y mantendremos la compatibilidad de la API en esa rama.
+
+h2. <a>¿Tiene soporte para la librería X?</a>
+
+Play es código Java estándar, así que cualquier librería Java puede ser usada fácilmente. Sin embargo, tenga presente que Play no utiliza la API de los Servlet (si bien puede hacer funcionar en un contenedor estándar de Servlets usando la funcionalidad de exportar su aplicación en un archivo WAR). Así que a menos que la librería que desea utilizar dependa de la API de los Servlet, no tendrá ninguna problema.
+
+h2. <a>¿Cómo puedo contribuir?</a>
+
+Utilizamos "GitHub":http://github.com/playframework/play como nuestra herramienta de desarrollo principal, y GitHub mismo es sumamente abierto. Puede registrar una cuenta en GitHub y comenzar a contribuir haciendo un fork del código del framework. Consulte la "guía para contribuir":http://play.lighthouseapp.com/projects/57987/contributor-guide.
+
+Incluso la documentación está almacenada como un archivo "Textile":http://en.wikipedia.org/wiki/Textile_(markup_language%29 en el repositorio con los fuentes del framework, de manera que puede editarla y contribuir tal como lo haría con el código.

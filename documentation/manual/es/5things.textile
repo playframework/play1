@@ -1,0 +1,122 @@
+h1. Cinco cosas en las que Play le facilita la vida
+
+Cinco ejemplos para mostrarle la filosofía de Play.
+
+h2. <a>Vincular un parámetro HTTP a un parámetro de un método Java</a>
+
+Acceder a los parámetros HTTP desde el código Java es muy fácil con Play. Simplemente declare un método con parámetros cuyos nombres coincidan con los del parámetro HTTP.
+
+Por ejemplo, con este url:
+
+bc. /articles/archive?date=08/01/08&page=2
+
+Puede acceder a los parámetros **date** y **page** declarándolos como parámetros de un método Java:
+
+bc. public static void archive(Date date, Integer page) {
+    List<Article> articles = Articles.fromArchive(date, page);
+    render(articles);
+}
+
+Play utilizará el tipo de dato del parámetro del método para traducir el valor HTTP a un objeto de Java.
+
+Lo que es mejor, esta vinculación inteligente funcionará **con cualquier clase.**
+
+bc. public class Person {
+    public String name;
+    public Integer age;
+}
+
+Un controlador básico que permita agregar una persona se verá así:
+
+bc. public static void add(Person p) {
+    p.save();
+}
+
+El formulario HTML define campos con nombres compuestos.
+
+bc. <form action="/Directory/add" method="POST">
+    Name: <input type="text" name="p.name" />
+    Age: <input type="text" name="p.age" />
+</form>
+
+
+h2. <a>Hacer un redirect a una acción llamando a un método de Java</a>
+
+No existe el equivalente al comando **forward** de los Servlets de Java en Play. Pero hacer un redirect hacia otra acción es realmente muy simple, tan sólo es preciso llamar al correspondiente método de Java y Play generará el mensaje HTTP "Redirect" por usted.
+
+bc. public static void show(Long id) {
+    Article article = Article.findById(id);
+    render(article);
+}
+ 
+public static void edit(Long id, String title) {
+    Article article = Article.findById(id);
+    article.title = title;
+    article.save();
+    show(id);
+}
+
+Preste atención a la manera en que al finalizar la acción "edit", efectuamos un redirect a la acción "show":
+
+A su vez, en cualquier template puede utilizar la siguiente sintaxis para generar un link:
+
+bc. <a href="@{Article.show(article.id)}">${article.title}</a>
+
+Lo cual generará el siguiente código HTML:
+
+bc. <a href="/articles/15">My new article</a>
+
+
+h2. <a>No sea redundante al pasar objetos Java al template</a>
+
+En la mayor parte de los frameworks Java, a fin de pasar un objeto Java al sistema de template debe escribir algo como lo siguiente:
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+Map<String, Object> model = new HashMap<String,Object>();
+model.put("article", article);
+model.put("user", user);
+render(model);
+
+Con Play, simplemente puede escribir:
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+render(article, user);
+
+Y desde el template acceder a los objetos a partir de su nombre en el código fuente Java. Esto le ahorra muchísimas líneas de código de poca utilidad.
+
+h2. <a>JPA recargado</a>
+
+JPA es sin duda la mejor API para persistencia de objetos en base de datos relacionales (object-relational mapping ORM) existente para Java hoy en día. Si usted ya lo conoce, se sorprenderá al ver cuánto más fácil resulta con Play. Sin nada que configurar, Play automáticamente inicializará el Administrador de Entidades de JPA (JPA Entity Manager) y mágicamente se sincronizará con la base de datos cada vez que se vuelva a cargar el código fuente de la aplicación.
+
+Pero eso no es todo. Si utiliza la clase **play.db.jpa.Model** verá cómo lo ayuda a tener el código más limpio. Fíjese:
+
+bc. public void messages(int page) {
+    User connectedUser = User.find("byEmail", connected());
+    List<Message> messages = Message.find(
+        "user = ? and read = false order by date desc",
+        connectedUser
+    ).from(page * 10).fetch(10);
+    render(connectedUser, messages);
+}
+
+h2. <a>Manejo de archivos simple y directo</a>
+
+Subir un archivo es muy simple con play.
+
+El formulario HTML:
+
+bc. <form action="@{Article.uploadPhoto()}" method="POST" enctype="multipart/form-data">
+    <input type="text" name="title" />
+    <input type="file" id="photo" name="photo" />
+    <input type="submit" value="Send it..." />
+</form>
+
+Y el código Java:
+
+bc. public static void uploadPhoto(String title, File photo) {
+   ...
+}
+
+¿Cómo podría ser más fácil?

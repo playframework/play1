@@ -1,0 +1,219 @@
+h1. Iniciando el proyecto
+
+h2. <a>Introducción</a>
+
+En este tutorial aprenderá a utilizar el framework Play desarrollando una aplicación web real, de principio a fin. En esta aplicación, utilizaremos todas las prestaciones que precisaría en un proyecto real, y al mismo tiempo presentaremos las "mejores prácticas" para desarrollar una aplicación con el framework Play.
+
+Hemos dividido este tutorial en varias partes independientes. Cada parte irá introduciones prestaciones más complejas, proveyándolo de todo lo que precisa un proyecto real: validación, manejo de errores, un esquema de seguridad, una galería de pruebas automáticas, una atractiva interface web, una área de administración de datos, etc.
+
+p(note). Puede utilizar **todo el código** incluido en este tutorial para sus propios proyectos. Lo alentamos a copiar y pegar partes del código o incluso a "robarse" módulos enteros.
+
+h2. <a>El proyecto</a>
+
+Hemos elegido crear un nuevo sitio de blogs. Sabemos que no es una elección demasiado original, pero nos permitirá explorar buena parte de la funcionalidad propia de cualquier aplicación web moderna.
+
+Para hacer el tutorial más interesante, manejaremos varios usuarios con diversos roles (editor, administrador).
+
+Llamaremos a este proyecto de sistema de blog **yabe**. (Yet Another Blog Engine, que en inglés significaría algo así como "Otro motor de blogs más")
+
+!images/guide1-0!
+
+p(note). Este tutorial también es distribuido como una aplicación de ejemplo. Puede encontrar el código de la aplicación terminada en  el directorio **samples-and-tests/yabe/** de la instalación de Play.
+
+h2. <a>Prerequisitos</a>
+
+Antes que nada, asegúrese de contar con una instación de Java funcionando. Play requiere **Java 5 o superior**.
+
+Dado que a menudo utilizaremos la línea de comando, será mejor utilizar un sistema operativo al estilo de Unix. Si usted utiliza un sistema operativo Windows, también podrá trabajar cin problemas, tan sólo tendrá que tipear algunos comandos en la línea de comandos.
+
+
+Asumimos que Ud. ya posee cierto conocimiento de Java y de desarrollo de aplicaciones Web (en especial HTML, CSS y JavaScript). Sin embargo, no necesita tener conocimiento de todos los componentes de la Edición Empresarial de Java (JEE). Play es un framework 'full-stack', lo que significa que que trae todo lo necesario para desarrollar sus aplicaciones web y encapsula todas las API de Java que necesitará. No es necesario saber cómo configurar una administrador de entidades de JPA, ni tampoco saber cómo poner en producción un componente JEE.
+
+
+Claro que necesitará contar con un editor de texto. Si está acostumbrado a utilizar un IDE completo de Java como Eclipse o Netbeans por supuesto que puede utilizarlo. Sin embargo, con Play puede desarrollar aplicaciones con un simple editor como Textmate, Emacs o VI, gracias a que el framework se encarga de la compilación y puesta en producción de manera transparete, como veremos más adelante...
+
+También utilizaremos el servidor web Lighthpt y MySql para mostrar como instalar una aplicación Play en modo 'production'. Pero Play le permite trabajar sin estos componentes, así que no hay ningún problema si no puede instalarlos.
+
+h2. <a>Instalación del framework Play</a>
+
+La instalación es my simple. Tan sólo tiene que descargar la última versión de la distribución binaria del framework y descomprimirla en alguna carpeta.
+
+p(note). Si está utilizando Windows, es generalmente una buena idea evitar espacios en el camino de la carpeta, de manera que, por ejemplo, **c:\play** sería una mejor elección que **c:\Documents And Settings\user\play**.
+
+Para trabajar con mayor comodidad resulta conveniente agregar el directorio de la instalación de Play al path. Esto le permitirá tipear **play** en la línea de comandos sin tener que estar situado en la carpeta del framework ni hacer referencia a ella. Para verificar la instalación de Play, simplemente abra una línea de comandos y tipee **play**; debería aparecer la ayuda básica del comando play.
+
+h2. <a>Creando el proyecto</a>
+
+Ahora que Play ha sido instalado, es hora de crear la aplicación de blogs. Crear una aplicación de Play es muy simple, ya que la utilidad de línea de comando de play se encarga de todo. Esto permite que todas las aplicaciones de Play mantengan la misma estructura estándar de proyecto.
+
+Abra una consola de comandos y tipee:
+
+bc. ~$ play new yabe
+
+Le preguntará el nombre completo de la aplicación. Tipee **Yet Another Blog Engine**.
+
+!images/guide1-1!
+
+El comando **play new** crea un nuevo directorio **yabe/** y crea una serie de directorios y archivos en él, siendo los más importantes:
+
+**app/** contiene el núcleo de la aplicación, separado en directorios para modelos, controladores y vistas. También puede contener otros paquetes de Java. Aquí es donde residen los archivos fuentes **.java**.
+
+**conf/** contiene todos los archivos de configuración de la aplicación, en especial el archivo principal de configuración **application.conf**, el archivo **routes** que contiene la definición de las rutas HTTP y el archivo **messages** utilizado para la internacionalización de las aplicaciones.
+
+**lib/** contiene todas las librerías opcionales de java empaquetadas como archvos estándar **.jar**.
+
+**public/** contiene todos los recursos públicos de la aplicación, lo que incluye archivos JavaScript, hojas de estilo (archivo .css) y directorios con imágenes.
+
+**test/** contiene las pruebas de la aplicación. Las pruebas pueden ser escritas como pruebas unitarias de JUnit o como pruebas de Selenium.
+
+p(note). Dado que **Play utiliza UTF-8** como único estándar de codificación, es importante asegurarse de que todos los archivos de estos directorios estén codificados utilizando este juego de caracteres. Asegúrese de configurar su editor de texto de la manera correspondiente.
+
+Ahora si usted cuenta con cierta experiancia desarrollando aplicaciones en Java, seguramente se estará preguntando a dónde van a parar los archivos .class. Pues bien, a ningún lado: Play no utiliza ningún archivo .class; en cambio lo que hace es leer los archivo fuente de Java directamente. Lo que hace es utilizar el compilador Java de Eclipse para recompilar el código fuente a medida que usted lo modifica.
+
+Esto nos permite realizar dos cosas muy importantes en el proceso de desarrollo. La primera es que Play detectará cuando usted modifica algún archivo fuente y automáticamente los recompilará y volverá a cargar en tiempo de corrida. La segunda que que cuando ocurra alguna excepción de Java, Play creará un reporte de error mucho más detallado, mostrándole incluso la línes exacta de código que generó el error.
+
+p(note). De hecho play mantiene un cache del bytecode de la aplicación en la carpeta **tmp/**, pero únicamente a los efectos de acelerar el proceso de reiniciar grandes aplicaciones. Puede descartar este cache utilizando el comando **play clean** si lo precisa.
+
+h2. <a>Ejecutando la aplicación</a>
+
+Ahora podemos probar la aplicación que acabamos de crear. Vuelva a la linea de comandos, vaya a la carpeta **yabe/** que acabamos de crear, y tipee **play run**. Play cargará la aplicación e iniciará un servidor web en el puerto 9000.
+
+!images/guide1-2!
+
+Veamos cómo hace la aplicación para desplegar esta página de bienvenida.
+
+El punto de entrada a su aplicación es el archivo **conf/routes**. Este archivo define los URLs con lo cuales se puede acceder a la aplicación. Si abre el archivo **routes** verá la primera ruta definida:
+
+bc. GET		/			Application.index
+
+Esta línea simplemente le dice a play que cuando el servidor web reciba una paquete HTTP con un pedido **GET** para el camino **/**, debe ejecutar el método Java **Application.index**. En este caso **Application.index** es una manera abreviada de referirnos a **controllers.Application.index**, ya que el paquete **controllers** se encuentra implícito en este contexto.
+
+Cuando usted crea una aplicación Java de escritorio, generalmente utiliza un único punto de entrada definido por un método como:
+
+bc. public static void main(String[] args) {
+  ... 
+}
+
+Por el contrario, una aplicación hecha con Play, tiene múltiples puntos de entrada, uno por cada URL. Llamamos a estos métodos **métodos de acción** o **action methods**. Los métodos de acción son definidos en clases especiales a las que llamamos controladores.
+
+Veamos qué aspecto tiene uno de estos controladores.Abra el archivo **yabe/app/controllers/Application.java**:
+
+bc. package controllers;
+ 
+import play.mvc.*;
+ 
+public class Application extends Controller {
+ 
+	public static void index() {
+		render();
+	}
+ 
+}
+
+Note que la clase controladora hereda de la clase **play.mvc.Controller**. Esta clase provee numerosos métodos sumamente útiles para los controladores, como el método **render()** que utilizamos en la acción index.
+
+La acción index está definida como un método público, estático y que retorna void. Esta es la manera de definit métodos de acción. Dichos métodos son estáticos, porque las clases de controladores nunca son instanciadas. Son públicos para permitir al framework invocarlos en respuesta a un URL. Y siempre retornan void.
+
+La acción index es my simple: llama al método **render()** el cual le dice a play que procese un template y despliegue su resultado. Usar un template es la manera más común (si bien no es la única) de generar una respuesta HTTP.
+
+Los templates son simples archivos de texto que residen en la carpeta **/app/views**. Dado que no especificamos ningún template, utilizará el template por defecto para esta acción: **Application/index.html**
+
+Para ver cómo es el template, abra el archivo **/yabe/app/views/Application/index.html**:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{welcome /}
+
+
+El contenido del template es bastante liviando. De hecho, lo único que ve son tags de Play. Los tags de Play son similares a los de JSP. En este caso, el tag **#{welcome /}** es el encargado de generar el mensaje de bienvenida que ve en el explorador. 
+
+El tag **#{extends /} le indica a Play que este template hereda de otro llamado **main.html**. La herencia de tempaltes es un concepto sumamemente poderoso, que le permite crear páginas complejas reutilizando partes comunes a todos.
+
+Abra el template **/yabe/app/views/main.html**:
+
+bc. <!DOCTYPE html>
+<html>
+    <head>
+        <title>#{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
+    </head>
+    <body>
+        #{doLayout /} 
+    </body>
+</html>
+
+Note la llamada al tag **#{doLayout /}**. Ahí es donde será insertado el contenido de **Application/index.html**.
+ 
+Podemos editar el archivo del controlador para ver como Play automáticamente lo carga. Abra el archivo **yabe/app/controllers/Application.java** en un editor de texto y agregue un error quitando el punto y coma que se encuentra a continuación de la llamada al método **render()**.
+
+bc. public static void index() {
+    render()
+}
+
+Vaya al browser y refresque la página. Puede ver que Play detectó el cambio e intentó volver a cargar el controlador Application. Pero, debido a que usted cometió un error, recibe un mensaje de error de compilación.
+
+!images/guide1-3!
+
+Bueno, corrijamos el error e introduzcamos una modificación real:
+
+bc. public static void index() {
+    System.out.println("Yop");
+    render();
+}
+
+Esta vez Play pude volver a cargar el controlador y remplazar el anterior código en la JVM. Ahora, con cada llamado al URL **/** mostrará el mensaje 'Yop' en la consola.
+
+Ahora puede sacar esta línea, y editar el template **yabe/app/views/Application/index.html** para remplazar el mensaje de bienvenida:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+<h1>A blog will be there</h1>
+
+Al igual que con los cambios efectuados en el código fuente de Java, simplemente refresque el explorador para ver los cambios.
+
+p(note). Ahora comenzaremos a desarrollar la aplicación de blogs. Puede continuar trabajando en el editor de texto o abrir un IDE completo como Elicpse o NetBeans. Si desea configurar un IDE de Java, vea "Configurando su IDE favorito":ide.
+
+h2. <a>Configurando la base de datos</a>
+
+Una cosa más antes de enpezar a escribir código. Para almacenar la información de los blogs, precisaremos una base de datos. Para el desarrollo, Play viene con una base de datos autónoma llamada HSQLDB. Esta es la mejor manera de comenzar un proyecto antes de pasar a una base de datos más robusta en caso de ser necesario. Puede elegir trabajar con ua base de datos en memoria o en un archivo, a fin de mantener la información al reiniciar la aplicación.
+
+Al principio, haremos mútliples pruebas y cambios en el modelo de datos de la aplicación. Por esa razón, es mejor utilizar una base de datos en memorio a fin de comenzar siempre con un conjunto de datos limpio.
+
+Para configurar una base de datos abra el archivo **yabe/conf/application.conf** y descomente la siguiente línea:
+
+bc. db=mem
+
+Como puede ver en los comentarios del archivo de configuración, puede fácilmente utilizar cualquier base de datos para la cual exista un driver JDBC, e incluso configurar también un pool de conexiones.
+
+Ahora vuelva al explorador y refresque la página de bienvenida. Play automáticamente iniciará la base de datos. Verifique que la siguiente línea esté presente en el log de la aplicación:
+
+bc. INFO  ~ Connected to jdbc:hsqldb:mem:playembed
+
+h2. <a>Utilizando un sistema de control de código fuente para registrar los cambios</a>
+
+Cuando trabaja en un proyecto es recomendable que utilice un sistema de control de código fuente (version control system - VCS) para almacenar el código de la aplicación. Le permitirá volver atrás a una versión anterior si los cambios introducidos han roto algo, trabajar con un equipo de personas y brindar acceso a todas las versiones de la aplicación. Puede utilizar cualquier sistema VCS, en este tutorial utilizaremos Bazaar a modo de ejemplo."Bazaar":http://bazaar-vcs.org/ es un sistema de control de código fuente distribuido.
+
+La instalación de Bazaar está más allá del objetivo de este tutorial, pero es muy simple. Una vez que tenga una instalación de Bazaar funcionando, vaya al directorio de la aplicación, e inicialice el versionado de la aplicación tipeando:
+
+bc. $ bzr init
+
+Cuando guarda una aplicación Play en un VCS, es importante excluir las carpetas **tmp/** y **logs/**.
+
+bc. $ bzr ignore tmp
+$ bzr ignore logs
+
+Ahora podemos confirmar (commit) nuestra primera version de nuestro sistema de blogs:
+
+bc. $ bzr add
+$ bzr commit -m "YABE inital version"
+
+La versión 1 de nuestra aplicación ha sido grabada, y ya contamos con una buena base para continuar con nuestro proyecto.
+
+p(note). Vaya a %(next)"Una primera iteración con el modelo de datos":guide2%. 
+

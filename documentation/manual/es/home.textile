@@ -1,0 +1,160 @@
+h1. Documentación
+
+Bienvenido al framework de desarrollo play! Esta documentación se refiere a la **versión 1.1** y puede presentar diferencias respecto a versiones anteriores del framework.
+
+Verifique las "notas de lanzamiento de la versión 1.1":releasenotes-1.1.
+
+h2. <a name="started">Comenzando a usar play!</a>
+
+Sus primeros pasos con play! y sus primeros 5 minutos de diversión.
+
+# "Introdución al framework play":overview
+# "Mire el video":http://vimeo.com/7087610
+# "Cinco cosas en las que play le facilita la vida":5things
+# "Usabilidad - los detalles importan tanto como las prestaciones":usability
+# "Preguntas frecuentes":faq
+# %(next)"Guía de instalación":install%
+# "Configurando su IDE favorito":ide
+# "Su primera aplicación — ‘Hola mundo’ con play":firstapp
+# "Aplicaciones de ejemplo":samples
+# "Editando código 'en vivo’ - para practicar e impresionar a sus colegas":demoingplay
+
+h2. <a name="guide">Tutorial -- Guía de play, una verdadera aplicación paso a paso</a>
+
+Aprenda Play desarrollando un motor de blogs de princio a fin. Cada capítulo le permitirá ir descubriendo el poder de Play.
+
+# "Comenzando el proyecto":guide1
+# "Una primera iteración con el modelo de datos":guide2
+# "Desarrollando la primera pantalla":guide3
+# "La página de comentarios":guide4
+# "Agregando un captcha":guide5
+# "Desarrolando el soporte para tags":guide6
+# "Un área de administración básica utilizando CRUD":guide7
+# "Agregando autenticación":guide8
+# "Creando un área de editores personalizada":guide9
+# "Completando las pruebas de la aplicación":guide10
+# "Preparando la puesta en producción":guide11
+# "Internacionalización y localización":guide12
+
+h2. <a name="manual">La documentación esencial</a>
+
+Todo lo que tiene que saber sobre Play.
+
+# "Conceptos principales":main
+## "El modelo de aplicacion MVC":main#mvc
+## "El ciclo de vida de un pedido":main#request
+## "Diseño y organización de la aplicación":main#application
+## "Ciclo de vida del desarrollo":main#lifecycle
+# "Rutas HTTP":routes
+## "La sintaxis del archivo de rutas":routes#syntax
+## "Prioridad de las rutas":routes#priority
+## "Sirviendo recursos estáticos":routes#static
+## "Inversión de rutas: generando algunos URL":routes#reverse
+## "Configurando el tipo de contenido":routes#content-types
+## "Negociación de contenido":routes#content-negotiation
+# "Controladores":controllers
+## "Introducción a los controladores":controllers#overview
+## "Retornando los parámetros HTTP":controllers#params
+## "Enlazando los parámetros HTTP con nuestros objetos de Java":controllers#binding
+## "Retornando un resultado":controllers#result
+## "Interceptores":controllers#interceptions
+## "Alcance de la Session y del Flash":controllers#session
+# "El motor de templates":templates
+## "Sintaxis de los tramplates":templates#syntax
+## "Herencia de templates":templates#inheritance
+## "Creando nuestros propios tags":templates#tags
+## "Extendiendo el lenguaje de templates":templates#extensions
+## "Objetos implícitos":templates#implicits
+# "Validación de formularios HTTP":validation
+## "¿Cómo funciona?":validation#how
+## "Retornando los mensajes de error":validation#messages
+## "Mostrando los errores en el template":validation#display
+## "Uso de annotations":validation#annotations
+## "Validando objetos":validation#objects
+## "Validaciones personalizadas":validation#custom
+# "La capa de datos: el modelo de objetos":model
+## "Simulación de propiedades":model#properties
+## "Configurando una base para persistir tu modelo de objetos":model#database
+## "Persistiendo tus objetos con Hibernate":model#hibernate
+## "El modelo 'sin estado' - stateless":model#stateless
+# "Persistiendo objetos con JPA":jpa
+## "Iniciando el administrador de entidades de JPA":jpa#starting
+## "Accediendo al administrador de entidades de JPA":jpa#obtaining
+## "Manejo de transacciones":jpa#transactions
+## "La clase play.db.jpa.Model":jpa#support
+## "Encontrando objetos":jpa#finding
+## "Contando objetos":jpa#counting
+## "Guardando objetos de manera explícita":jpa#save
+## "Más acerca de los problemas con los tipos de datos genéricos":jpa#typing
+# "Configuración del log de auditoría":logs
+## "Auditando tu aplicación":logs#logging
+## "Configurando los niveles de auditoría":logs#levels
+# "Configuraciones en diversos entornos":ids
+## "El ID del framework":ids#id
+## "Especificando el ID del framework desde la línea de comandos":ids#command
+# "Probando la aplicación":test
+## "Escribiendo pruebas":test#writing
+## "Fixtures":test#fixtures
+## "Ejecutando las pruebas":test#running
+## "Integración continua":test#continuous
+# "Opciones de implementación":deployment
+## "Una aplicación Play independiente":deployment#standalone
+## "Corriendo en un servidor de aplicaciones JEE":deployment#appservers
+## "Google Application Engine":deployment#gae
+## "Stax cloud hosting platform":deployment#stax
+# "Implementación en producción":production
+## "Configurando el archivo application.conf":production#application
+## "Configurando los logs de auditoría":production#logging
+## "Configurando un servidor HTTP como front-end":production#server
+# "Los módulos y el repositorio de módulos":modules
+## "¿Qué es un módulo?":modules#what
+## "¿Cómo cargar un módulo desde una aplicación?":modules#loading
+## "Cargando las rutas por defecto de un módulo":modules#routes
+## "Uso del repostirio de módulos":modules#repository
+## "Contribuyendo con un nuevo módulo al repositorio de módulos":modules#contributing
+# "Internacionalización":i18n
+## "Use únicamente UTF-8":i18n#utf8
+## "Externalizando tus mensajes":i18n#messages
+## "Defininiendo los idiomas soportados por la aplicación":i18n#languages
+## "Definiendo el formato de fechas de acuerdo a tu configuración regional":i18n#dates
+## "Obteniendo mensajes localizados":i18n#retrieve
+# "Cache":cache
+## "La API del cache":cache#api
+## "No use la Session como cache":cache#session
+## "Configuración de memcached":cache#memcached
+# "Ejecución asincrónica de tareas":jobs
+## "Ejecutando tareas al iniciar el framework":jobs#concepts
+## "Tareas programadas":jobs#scheduling
+## "Pedidos suspendibles":jobs#suspendable
+# "Enviando mails":emails
+## "Integración del envío de correos y el patrón MVC":emails#mvc
+## "Configuración del SMTP":emails#smtp
+## "Más acerca de la configuración":emails#configuration
+## "Utilizando Gmail":emails#gmail
+# "Guía de seguridad":security
+## "Sesiones":security#sessions
+## "Cross-Site Scripting":security#xss
+## "Inyección de SQL":security#sql
+## "Cross-Site Request Forgery":security#csrf
+# "Implementando Ajax con JQuery":ajax
+# "Integración con OpenID":openid
+
+h2. <a name="modules">Módulos incluidos con el frameword</a>
+
+Estos módulos opcionales vienen incluidos en la versión standard del framework. "Más módulos":http://www.playframework.org/modules.
+
+# "CRUD":crud
+# "Secure":securec
+
+h2. <a name="references">Referencias</a>
+
+Material de referencia avanzada, para interiorizarse y contribuir con play.
+
+# "La hoja ayuda-memoria de play":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
+# "Consultando la documentación de la API":/@api/index.html
+# "Referencia de los tags de los templates y las extensiones al lenguaje":tags
+# "Extensiones a Java":javaextensions
+
+h2. <a name="versionnotes">Notas de la versiones</a>
+
+Las nuevas versiones de Play incluyen varios cambios. Consulta las notas de lanzamiento de "Play 1.1":releasenotes-1.1, "Play 1.0.3":releasenotes-1.0.3, "Play 1.0.2":releasenotes-1.0.2, y "Play 1.0.1":releasenotes-1.0.1.

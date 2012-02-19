@@ -1,0 +1,51 @@
+h1. Usabilidad - los detalles son tan importantes como las prestaciones
+
+Tal vez la cosa más sorprendente acerca del framework Play es que su mayor ventaja sobre otros frameworks de desarrollo de aplicaciones web en Java no encaja en una prolija lista de prestaciones, y sólo resulta evidente luego de haberlo utilizado para desarrollar algo. Esa ventaja es la usabilidad.
+
+Tenga en cuenta que la usabilidad es algo separado de la funcionalidad. No me refiero que esto no se pueda hacer con otro framework, simplemente sostengo que es mucho más fácil y placentero hacelo con Play. Es preciso insistir en esto porque los "tecnófilos" a menudo perdemos de vista la usabilidad, porque nos divierte desentrañar cosas complicadas, y subestimamos el valor de las cosas que "simplemente funcionan".
+
+h2. <a>Escrito por desarrolladores web para desarrolladores web</a>
+
+La primera pista de que algo diferente sucede aquí es cuando escucha por primera que que el framework Play está ‘escrito por desarrolladores web para desarrolladores web‘, un enfoque poco convencional que pone los principios de la web y sus convenciones por delante de las de Java. Específicamente esto significa que el framework Play está más alineado con la "Arquitectura de la World Wide Web":http://www.w3.org/TR/webarch/ según o postula la W3C que con las convenciones de Java Enterprise Edition (Java EE).
+
+h2. <a>URLs para perfeccionistas</a>
+
+Por ejemplo, el framework Play, como otros frameworks de aplicaciones web modernos, provee soporte de primera clase para manejar URLs ’limpios’, algo que siempre ha estado faltando en la API de los Servlet. No es coincidencia que al momento de escribir este artículo, "Struts: URLs para perfeccionistas":http://www.lunatech-research.com/archives/2005/07/29/struts-urls, un conjunto de consejos para el framework web Struts 1.0 basado en la API de los Servlet, continúe siendo uno de los tres artículos más populares entre más de 160 que hay publicados en www.lunatech-research.com, a pesar de tratarse de un artículo del 2005 acerca de una tecnología web de Java de una generación anterior.
+
+En los frameworks basados en los Servlets de Java, la API de los Servlet no provee soporte alguno para ruteo de URL, por el contrario estos frameworks utilizan un archivo web.xml para direccionar todos los pedidos HTTP a un único Servlet que hace de controlador, y luego implementan el ruteo URL en el propio framework mediante configuraciones adicionales. Llegados a este punto, ya no interesa si la API de los Servlet fue originalmente pensada para resolver el ruteo de URL y no logró su objetivo, o si su intención era ser una API de bajo nivel sobre la cual no se deberían desarrollar aplicaciones web directamente. En cualquiera de los dos casos el resultado es el mismo: los frameworks de aplicaciones web agregan un nueva capa de abstracción sobre la API de los Servlet, que a su vez es una capa de abstracción sobre el protocolo HTTP.
+
+Play combina el framework de aplicaciones web, la API de HTTP y el servidor HTTP, lo que permite proveer la misma funcionalidad de una manera más directa, con menos capas de abstracción y una única configuración del ruteo URL. Esta configuración, como en Groovy o el framework Cake hecho en php, respeta la estructura del pedido HTTP, el método HTTP, la URL, y luego la vinculación con el código Java:
+
+bc. # El archivo de configuración 'routes'…
+ 
+# Method   URL path         Controller
+ 
+GET        /                Application.index
+GET        /about           Application.about
+POST       /item            Item.addItem
+GET        /item/{id}       Item.getItem
+GET        /item/{id}.pdf   Item.getItemPdf
+
+En este ejemplo hay más de un controlador. También vemos el uso de un parámetro URL denominado id en los dos últimos URLs.
+
+h2. <a>La usabilidad no es solamente para gente 'normal'</a>
+
+Otra manera de asomarse a la idea de que Play está hecho por y para desarrolladores web, es la de considerar cómo difiere la manera en que un desarrollador web lleva adelante el diseño de software a como lo haría un desarrollador de aplicaciones empresariales de Java. Cuando usted escribe software ¿cuál es su interface? Si usted es un desarrollador web, su interface será una interface de usuario web contruida con HTML, CSS y (cada vez más) Javascript. Un desarrollador Java de aplicaciones empresariales, por el contrario, seguramente considerará que se interface será una API de Java, o tal vez la API de un servicio web, a ser utilizados por otras capas del sistema.
+
+Esta diferencia es crucial, ya que una interface de Java esta hecha para ser utilizada por otros programadores, mientras que una interface de usuario web esta hecha para ser usada por personas que NO son programadores. En ambos casos, un buen diseño implica una alta usabilidad, pero la usabilidad para gente normal no es la misma que para los programadores. En alguna medida, lograr usabilidad para todo el mundo es un standard mucho más arduo de alcanzar que hacerlo para programadores, ya que, en lo que se refiere a software, los programadores pueden arreglárselas mejor con un producto con poca usabilidad. Es un poco como la historia de aquella empresa que fabricaba utensilios de cocina, "Good Grips":http://www.designcouncil.org.uk/Case-Studies/All-Case-Studies/OXO-Good-Grips/, que originalmente pensaron en facilitarle la vida a las personas mayores que sufrían de artritis, pero al final resultó que hacer herramientas más fáciles de usar era bueno para todo el mundo.
+
+El framework Play es distinto a los demás precisamente porque la usabilidad que usted quiere lograr en su aplicación web está presente en el propio framework. Por ejemplo, la interface web de la documentación y de los mensajes de error que aparecen en el browser, simplemente tienen mayor usabilidad. En el mismo sentido, la consola de salida del servidor evita bombardearlo con páginas llenas de pilas de llamadas y logs de auditoría irrelevantes cuando hay un error, brindándole información más pertinente y más útil al desarrollador de aplicaciones web.
+
+!images/usability-trace!
+
+Intente imaginar una aplicación JSP produciendo una pila de llamadas así de corta. De hecho, Play va más allá, en vez de mostrar la pila de llamadas, la aplicación web muestra la línea de código de su aplicación que aparece en la pila de llamadas. Después de todo, lo que usted quiere saber es donde se produjo el error en su código.
+
+!images/usability-exception!
+
+Esta clase de usabilidad no surge por sí sola, el framework Play hace un esfuerzo considerabe para eliminar información que resulta redundante e irrelevante, y se concentra en lo esencial.
+
+h2. <a>La calidad está en los detalles</a>
+
+En el framework Play, buena parte de la calidad está en los detalles: individualmente pueden ser pequeñas cosas, pero tomadas en conjunto terminan dando por resultado un entorno de desarrollo más confortable y productivo. La sensación de tranquilidad que usted experimenta cuando trabaja con Play se debe a la ausencia de las frustraciones que usualmente surgen cuando dedica más tiempo a pelearse con el framework que a desarrollar su aplicación.
+
+p(note). Por "Peter Hilton":http://hilton.org.uk/about_ph.phtml, publicado originalmente en el blog de "Lunatech Research":http://www.lunatech-research.com/archives/2010/03/15/play-framework-usability.
