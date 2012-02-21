@@ -65,10 +65,18 @@ public class DBPlugin extends PlayPlugin {
                     DB.destroy();
                 }
 
-                if (p.getProperty("db", "").startsWith("java:")) {
+	        boolean isJndiDatasource = false;
+                String datasourceName = p.getProperty("db", "");
+                // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
+                if (datasourceName.startsWith("jndi:")) {
+                    datasourceName = datasourceName.substring("jndi:".length());
+                    isJndiDatasource = true;
+                }
+
+                if (isJndiDatasource || datasourceName.startsWith("java:")) {
 
                     Context ctx = new InitialContext();
-                    DB.datasource = (DataSource) ctx.lookup(p.getProperty("db"));
+                    DB.datasource = (DataSource) ctx.lookup(datasourceName);
 
                 } else {
 
@@ -202,8 +210,10 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
-
-        if (p.getProperty("db", "").startsWith("java:") && p.getProperty("db.url") == null) {
+        boolean isJndiDatasource = false;
+        String datasourceName = p.getProperty("db", "");
+             
+        if ((isJndiDatasource || datasourceName.startsWith("java:")) && p.getProperty("db.url") == null) {
             if (DB.datasource == null) {
                 return true;
             }
