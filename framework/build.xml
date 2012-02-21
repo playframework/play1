@@ -330,6 +330,7 @@
         <copy todir="test-classes">
             <fileset dir="test-src">
                 <include name="**/*.properties"/>
+                <include name="**/*.sql"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.plugins"/>
             </fileset>
