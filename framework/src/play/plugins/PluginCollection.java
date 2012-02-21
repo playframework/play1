@@ -24,7 +24,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.*;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class handling all plugins used by Play.
@@ -380,6 +390,41 @@ public class PluginCollection {
     public List<PlayPlugin> getEnabledPlugins(){
         return enabledPlugins_readOnlyCopy;
     }
+    
+    /**
+     * Returns readonly view of all enabled plugins in reversed order
+     * @return
+     */
+    public Collection<PlayPlugin> getReversedEnabledPlugins() {
+        return new AbstractCollection<PlayPlugin>() {
+			
+		    @Override public Iterator<PlayPlugin> iterator() {
+		    	final ListIterator<PlayPlugin> enabledPluginsListIt = enabledPlugins.listIterator(size() - 1);
+		        return new Iterator<PlayPlugin>() {
+
+					@Override
+					public boolean hasNext() {
+						return enabledPluginsListIt.hasPrevious();
+					}
+
+					@Override
+					public PlayPlugin next() {
+						return enabledPluginsListIt.previous();
+					}
+
+					@Override
+					public void remove() {
+						enabledPluginsListIt.remove();
+					}};
+		      }
+
+		      @Override public int size() {
+		        return enabledPlugins.size();
+		      }			
+			
+			
+		};
+    }
 
     /**
      * Returns new readonly list of all plugins
@@ -488,7 +533,7 @@ public class PluginCollection {
     }
 
     public void onApplicationStop(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for( PlayPlugin plugin : getReversedEnabledPlugins() ){
             plugin.onApplicationStop();
         }
     }
