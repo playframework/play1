@@ -405,7 +405,12 @@ public class Http {
             if (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) {
                 return true;
             }
-        	
+			
+            Header frontEndHttpsHeader = request.headers.get("front-end-https");
+            if (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())) {
+                return true;
+            }
+
             return false;
         }
 
