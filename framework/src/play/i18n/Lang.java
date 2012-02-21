@@ -107,7 +107,7 @@ public class Lang {
                 }
             }
         }
-        // now see if we have a country-only match
+        // now see if we have a language-only match
         for (String a: request.acceptLanguage()) {
             if (a.indexOf("-") > 0) {
                 a = a.substring(0, a.indexOf("-"));
