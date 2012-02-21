@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+
+import org.hibernate.internal.SessionImpl;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
 import play.Logger;
@@ -48,7 +50,7 @@ public class DB {
     public static Connection getConnection() {
         try {
             if (JPA.isEnabled()) {
-                return ((org.hibernate.ejb.EntityManagerImpl) JPA.em()).getSession().connection();
+                return ((SessionImpl)((org.hibernate.ejb.EntityManagerImpl) JPA.em()).getSession()).connection();
             }
             if (localConnection.get() != null) {
                 return localConnection.get();

@@ -1,7 +1,7 @@
 package play.db.jpa;
 
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.collection.PersistentMap;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
 import play.PlayPlugin;

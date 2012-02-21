@@ -15,9 +15,11 @@
                     if(params[pName]) {
                         selected = params.getAll(${pName}).contains(it._key().toString())
                     } else {
-                        for (it2 in _value) {
-                            if(it2._key() == it._key()) {
-                                selected = true;
+                        if (_value != null) {
+                            for (it2 in _value) {
+                                if(it2._key() == it._key()) {
+                                    selected = true;
+                                }
                             }
                         }
                     }
