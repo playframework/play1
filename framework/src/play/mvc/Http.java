@@ -392,21 +392,16 @@ public class Http {
         }
         
         private boolean isRequestSecure() {
-            if ("https".equals(Play.configuration.get("XForwardedProto"))) {
-                return true;
-            }
-        	
             Header xForwardedProtoHeader = headers.get("x-forwarded-proto");
-            if (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) {
-                return true;
-            }
-
             Header xForwardedSslHeader = headers.get("x-forwarded-ssl");
-            if (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) {
-                return true;
-            }
-        	
-            return false;
+            // Check the less common "front-end-https" header,
+            // used apparently only by "Microsoft Internet Security and Acceleration Server"
+            // and Squid when using Squid as a SSL frontend.
+            Header frontEndHttpsHeader = headers.get("front-end-https");
+            return ("https".equals(Play.configuration.get("XForwardedProto")) ||
+                    (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) ||
+                    (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) ||
+                    (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())));
         }
 
         /**
