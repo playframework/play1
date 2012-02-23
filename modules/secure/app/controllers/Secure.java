@@ -135,7 +135,7 @@ public class Secure extends Controller {
     public static class Trust extends Controller {
 
     	static boolean trustPhaseDone() {
-    		return true;
+    		return false;
     	}
 
     	static String trustedUser() {
