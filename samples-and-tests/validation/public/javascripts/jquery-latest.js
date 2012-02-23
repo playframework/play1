@@ -3251,7 +3251,7 @@ jQuery.extend({
 		*/
 		// Create the request object; Microsoft failed to properly
 		// implement the XMLHttpRequest in IE7, so we use the ActiveXObject when it is available
-		// This function can be overriden by calling jQuery.ajaxSetup
+		// This function can be overridden by calling jQuery.ajaxSetup
 		xhr:function(){
 			return window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
 		},

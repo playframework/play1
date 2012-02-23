@@ -335,7 +335,7 @@ public class Play {
     }
 
     /**
-     * Read application.conf and resolve overriden key using the play id mechanism.
+     * Read application.conf and resolve overridden key using the play id mechanism.
      */
     public static void readConfiguration() {
         configuration = readOneConfigurationFile("application.conf", new HashSet<String>());

@@ -208,7 +208,7 @@ bc. play dependencies
 ~
 ~ Some dependencies have been evicted,
 ~
-~	commons-lang 3.0 is overriden by commons-lang 2.5
+~	commons-lang 3.0 is overridden by commons-lang 2.5
 ~
 ~ Installing resolved dependencies,
 ~

@@ -252,12 +252,12 @@ public class Router {
         if (Logger.isTraceEnabled()) {
             Logger.trace("Route: " + request.path + " - " + request.querystring);
         }
-        // request method may be overriden if a x-http-method-override parameter is given
+        // request method may be overridden if a x-http-method-override parameter is given
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
             if (matcher.matches()) {
                 if (Logger.isTraceEnabled()) {
-                    Logger.trace("request method %s overriden to %s ", request.method, matcher.group("method"));
+                    Logger.trace("request method %s overridden to %s ", request.method, matcher.group("method"));
                 }
                 request.method = matcher.group("method");
             }
