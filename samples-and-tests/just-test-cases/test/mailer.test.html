@@ -52,4 +52,11 @@
 	//this regexp fails if text not present
 	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrlsInJob"])[1]}', 'body')
 
+    open('@{Application.mailWithEmbeddedImage()}')
+    assertTextPresent('OK_mailWithEmbeddedImage')
+    storeLastReceivedEmailBy('mailWithEmbeddedImage@localhost', 'mailWithEmbeddedImage')
+    //this regexp fails if text not present  
+    store('javascript{/.*(img src="cid:[a-z]*" alt="distantImage").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
+    store('javascript{/.*(img src="cid:[a-z]*" alt="LocaleImage").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
+    store('javascript{/.*(img src="cid:[a-z]*" alt="LocaleImage2" class="testClass").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
 #{/selenium}

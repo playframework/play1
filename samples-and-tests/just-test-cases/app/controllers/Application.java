@@ -271,6 +271,12 @@ public class Application extends Controller {
         renderText("OK_mailWithUrlsInJob");
     }
 
+    public static void mailWithEmbeddedImage() {
+        notifiers.Welcome.mailWithEmbeddedImage();
+        renderText("OK_mailWithEmbeddedImage");
+    }
+    
+
     public static void ifthenelse() {
         boolean a = true;
         boolean b = false;
