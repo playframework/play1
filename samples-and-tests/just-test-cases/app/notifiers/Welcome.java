@@ -57,5 +57,13 @@ public class Welcome extends Mailer {
 
         send(msg);
     }
+
+    public static void mailWithEmbeddedImage() {
+        String msg = "Welcome";
+        setFrom("x@x.com");
+        setSubject("Mail With Embedded Images");
+        addRecipient("mailWithEmbeddedImage@localhost");
+        send(msg);  
+    }
     
 }
