@@ -59,7 +59,8 @@ require:    &allDependencies
     - org.slf4j -> slf4j-log4j12 1.6.1
     - org.yaml -> snakeyaml 1.7
     - spy -> memcached 2.6
-    - com.thoughtworks.xstream -> xstream 1.3
+    - com.thoughtworks.xstream -> xstream 1.4.2
+    - xmlpull 1.1.3.1
 
 # Default repositories, used for all projects
 repositories:
