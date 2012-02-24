@@ -23,6 +23,7 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Http;
+import play.mvc.Mailer;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.Flash;
 import play.mvc.Scope.Session;
@@ -387,6 +388,35 @@ public class FastTags {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
     }
+    
+	public static void _embeddedImage(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        Map<String, String> renderArgs = new HashMap<String, String>();
+        // Copy all arguments to render arguments, except for 'src' & 'name' arguments.
+        for (final Object attribute : args.keySet()) {
+            if (!"src".equalsIgnoreCase(attribute.toString()) && !"name".equalsIgnoreCase(attribute.toString()) && (args.get(attribute) != null)) {
+            	renderArgs.put(attribute.toString(), args.get(attribute).toString());
+            }
+        }
+        
+        out.print("<img");
+        
+        Object src = args.get("src");
+        if (src != null) {
+        	Object name = args.get("name");
+        	renderArgs.put("src", Mailer.getEmbedddedSrc(src.toString(), (name != null) ? name.toString() : null));
+        }
+        
+        for (final Object attrKey : renderArgs.keySet()) {
+            if (renderArgs.get(attrKey) != null) {
+            	String value = renderArgs.get(attrKey);
+            	if (value != null) {
+            		out.print(" " + attrKey.toString() + "=\"" + value + "\"");
+            	}
+            }
+        }
+        
+        out.println("/>");
+	}
 
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuilder attrs = new StringBuilder();
