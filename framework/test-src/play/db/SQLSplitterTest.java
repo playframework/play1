@@ -69,6 +69,25 @@ public class SQLSplitterTest {
 		assertEquals(13, SQLSplitter.consumeQuote("$1$$f$\n$f$$1$a", 0));
 	}
 
+
+	@Test
+	public void verifySkipParentheses() {
+		assertEquals(4, SQLSplitter.consumeParentheses("(())", 0));
+		assertEquals(4, SQLSplitter.consumeParentheses("(())a", 0));
+		assertEquals(5, SQLSplitter.consumeParentheses("((b))a", 0));
+		assertEquals(7, SQLSplitter.consumeParentheses("(c(b)c)a", 0));
+		assertEquals(7, SQLSplitter.consumeParentheses("(c(\n)c)a", 0));
+		assertEquals(7, SQLSplitter.consumeParentheses("((')'))a", 0));
+		assertEquals(9, SQLSplitter.consumeParentheses("((/*)*/))a", 0));
+		assertEquals(14, SQLSplitter.consumeParentheses("(name varchar);", 0));
+	}
+
+	@Test
+	public void verifyTrailingParenthesis() {
+		assertEquals(1, SQLSplitter.consumeParentheses("(", 0));
+		assertEquals(3, SQLSplitter.consumeParentheses("(()", 0));
+	}
+
 	String readFile(final String filename) throws Exception {
 		final File src = new File(getClass().getResource(filename).toURI());
 		final byte [] srcbytes = new byte[(int)src.length()];
