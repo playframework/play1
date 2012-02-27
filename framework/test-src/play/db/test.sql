@@ -21,3 +21,11 @@ BEGIN
 END;
 $function$
 LANGUAGE plpgsql;
+CREATE RULE test7
+ AS ON UPDATE to titles
+ DO ALSO (
+   INSERT INTO title_acl VALUES (DEFAULT, NEW.title_id, OLD.user_id, 'editor');
+   INSERT INTO title_acl VALUES (DEFAULT, NEW.title_id, NEW.user_id, 'owner')
+ );
+ CREATE EXTENSION test8/**/;
+ CREATE TABLE test9(name varchar);
