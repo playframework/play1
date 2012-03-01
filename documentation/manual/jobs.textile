@@ -83,6 +83,10 @@ public class Bootstrap extends Job {
     
 }
 
+The above annotation is for hours, if you want to specify the time duration in minutes or seconds, you can do it in the following way:-
+i) For Minutes - @Every("3mn"),@Every("30mn")
+ii) For Seconds - @Every("35s"),@Every("56s")
+
 If the <code>@Every</code> annotation is not enough you can use the <code>@On</code> annotation to run your jobs using a CRON expression.
 
 bc. import play.jobs.*;
