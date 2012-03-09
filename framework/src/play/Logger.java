@@ -613,7 +613,7 @@ public class Logger {
      * @return the className of the class actually logging the message
      */
     static String getCallerClassName() {
-        final int level = 4;
+        final int level = 5;
         return getCallerClassName(level);
     }
 
