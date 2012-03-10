@@ -363,7 +363,9 @@ public class Play {
         Properties propsFromFile=null;
 
         VirtualFile appRoot = VirtualFile.open(applicationPath);
-        conf = appRoot.child("conf/" + filename);
+        conf = VirtualFile.open(System.getProperty("config.file", applicationPath + "/conf/" + filename));
+        Logger.info("Load application config file : %s", conf.getRealFile().getAbsolutePath());
+        
         try {
             propsFromFile = IO.readUtf8Properties(conf.inputstream());
         } catch (RuntimeException e) {

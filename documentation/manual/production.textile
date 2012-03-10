@@ -6,6 +6,16 @@ h2. <a name="application">application.conf</a>
 
 First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick @production@ as an example. Refer "manage application.conf in several environments":ids to see how.
 
+h3. Specifying an alternative configuration file
+
+To force a different @application.conf@ file you can use the @config.file@ system property.
+
+bc. play run -Dconfig.file=/etc/play/config/external-conf-file.conf
+
+These system property specify a replacement for the default @conf/application.conf@ file, not an addition.
+
+NB: Note that if you use the <code>@include</code> feature in your application.conf file, remember that they are loaded from the relative path of your @application.conf@ file.
+
 h3. Set the framework in prod mode:
 
 bc. %production.application.mode=prod
