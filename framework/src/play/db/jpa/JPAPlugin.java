@@ -206,7 +206,7 @@ public class JPAPlugin extends PlayPlugin {
 
                 try {
                     // nice hacking :) I like it..
-                    Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
+                    Field field = cfg.getClass().getDeclaredField("overriddenClassLoader");
                     field.setAccessible(true);
                     field.set(cfg, Play.classloader);
                 } catch (Exception e) {

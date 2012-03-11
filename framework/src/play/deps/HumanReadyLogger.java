@@ -69,7 +69,7 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
 
             Matcher m = evicted.matcher(msg);
             if (m.matches()) {
-                evicteds.add(m.group(2) + " " + m.group(3) + " is overriden by " + m.group(5) + " " + m.group(6));
+                evicteds.add(m.group(2) + " " + m.group(3) + " is overridden by " + m.group(5) + " " + m.group(6));
                 return;
             }
 
