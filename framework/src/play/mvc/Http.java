@@ -405,7 +405,15 @@ public class Http {
             if (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) {
                 return true;
             }
-        	
+			
+            // Check the less common "front-end-https" header,
+            // used apparently only by "Microsoft Internet Security and Acceleration Server"
+            // and Squid when using Squid as a SSL frontend.
+            Header frontEndHttpsHeader = headers.get("front-end-https");
+            if (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())) {
+                return true;
+            }
+
             return false;
         }
 
