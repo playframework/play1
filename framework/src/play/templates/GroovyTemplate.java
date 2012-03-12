@@ -343,7 +343,7 @@ public class GroovyTemplate extends BaseTemplate {
 
         public void init(GroovyTemplate t) {
             template = t;
-            int index = template.name.indexOf(".");
+            int index = template.name.lastIndexOf(".");
             if (index > 0) {
                 extension = template.name.substring(index + 1);
             }
