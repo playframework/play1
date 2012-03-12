@@ -33,15 +33,21 @@ public class DBPlugin extends PlayPlugin {
             if (h2Server != null) {
                 h2Server.stop();
             }
-            if(!request.domain.equals("localhost")) {
-                serverOptions = new String[] {"-webAllowOthers"};
-            }
-            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
-            h2Server.start();
 
+            // Determine if the host should be "localhost"
             String domain = request.domain;
             if (domain.equals(""))
               domain = "localhost";
+
+            // If the domain is not localhost, then turn on webAllowOthers
+            // so that other hosts may access the console
+            if(!domain.equals("localhost")) {
+                serverOptions = new String[] {"-webAllowOthers"};
+            }
+
+            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
+            h2Server.start();
+
             response.setHeader("Location", "http://" + domain + ":8082/");
             return true;
         }
