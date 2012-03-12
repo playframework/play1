@@ -4,6 +4,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.ConnectionCustomizer;
 import jregex.Matcher;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.internal.SessionImpl;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -90,7 +91,7 @@ public class DBConfig {
             JPAConfig jpaConfig = JPA.getJPAConfig(dbConfigName, true);
             if (jpaConfig!=null) {
                 JPAContext jpaContext = jpaConfig.getJPAContext();
-                return ((org.hibernate.ejb.EntityManagerImpl) jpaContext.em()).getSession().connection();
+                return ((SessionImpl)((org.hibernate.ejb.EntityManagerImpl) jpaContext.em()).getSession()).connection();
             }
 
             // do we have a current raw connection bound to thread?
@@ -193,10 +194,19 @@ public class DBConfig {
                     destroy();
                 }
 
-                if (p.getProperty(propsPrefix, "").startsWith("java:")) {
-
+                boolean isJndiDatasource = false;
+                String datasourceName = p.getProperty(propsPrefix, "");
+                
+                // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
+                if (datasourceName.startsWith("jndi:")) {
+                    datasourceName = datasourceName.substring("jndi:".length());
+                    isJndiDatasource = true;
+                }
+                
+                if (isJndiDatasource || datasourceName.startsWith("java:")) {
+                    
                     Context ctx = new InitialContext();
-                    datasource = (DataSource) ctx.lookup(p.getProperty(propsPrefix));
+                    datasource = (DataSource) ctx.lookup(datasourceName);
 
                 } else {
 

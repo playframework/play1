@@ -23,7 +23,7 @@ class PlayApplication(object):
         if application_path is not None:
             confFolder = os.path.join(application_path, 'conf/')
             try:
-                self.conf = PlayConfParser(confFolder, env["id"])
+                self.conf = PlayConfParser(confFolder, env)
             except:
                 self.conf = None # No app / Invalid app
         else:
@@ -283,9 +283,11 @@ class PlayConfParser:
         'jpda.port': '8000'
     }
 
-    def __init__(self, confFolder, frameworkId):
-        self.id = frameworkId
+    def __init__(self, confFolder, env):
+        self.id = env["id"]
         self.entries = self.readFile(confFolder, "application.conf")
+        if env.has_key('http.port'):
+            self.entries['http.port'] = env['http.port']
 
     def readFile(self, confFolder, filename):
         f = file(confFolder + filename)

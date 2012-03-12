@@ -263,11 +263,12 @@ public class Evolutions extends PlayPlugin {
                     }
                     // Execute script
                     if (runScript) {
-                        for (String sql : (evolution.applyUp ? evolution.sql_up : evolution.sql_down).split(";")) {
-                            if (StringUtils.isEmpty(sql.trim())) {
+                       for (CharSequence sql : new SQLSplitter((evolution.applyUp ? evolution.sql_up : evolution.sql_down))) {
+                            final String s = sql.toString().trim();
+                            if (StringUtils.isEmpty(s)) {
                                 continue;
                             }
-                            execute(sql);
+                            execute(s);
                         }
                     }
                     // Insert into logs

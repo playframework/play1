@@ -1,0 +1,141 @@
+--- hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	2012-02-08 21:25:08.000000000 +0100
++++ hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	2012-02-21 20:15:29.000000000 +0100
+@@ -111,10 +111,10 @@
+ 		return sql;
+ 	}
+ 
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException { return false; }
+ 
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException { return false; }
+ 
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException { return false; }
+ 	
+-}
+\ No newline at end of file
++}
+--- ../hibernate-hibernate-orm-e95c11e-3/hibernate-core/src/main/java/org/hibernate/Interceptor.java	2012-02-08 21:25:08.000000000 +0100
++++ hibernate-core/src/main/java/org/hibernate/Interceptor.java	2012-02-20 23:15:40.000000000 +0100
+@@ -132,7 +132,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a collection is deleted.
+@@ -142,7 +142,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a collection is updated.
+@@ -152,7 +152,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a flush
+--- ../hibernate-hibernate-orm-e95c11e-3/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	2012-02-08 21:25:08.000000000 +0100
++++ hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	2012-02-21 20:11:21.000000000 +0100
+@@ -147,6 +147,27 @@
+ 		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
+ 			EntityEntry entry = (EntityEntry) me.getValue();
+ 			Status status = entry.getStatus();
++			
++             		// This entity will be saved?
++                       boolean willBeSaved = true;
++                        try {
++                               Object o = me.getKey();
++                               Class c = o.getClass();
++                               Class jpaBase = Class.forName("play.db.jpa.JPABase");
++                               while(!c.equals(Object.class)) {
++                                       if(c.equals(jpaBase)) {
++                                               willBeSaved = (Boolean)(jpaBase.getDeclaredField("willBeSaved").get(o));
++                                               break;
++                                       }
++                                       c = c.getSuperclass();
++                               }
++                               if(!willBeSaved) {
++                                       continue;
++                               }
++                       } catch(Exception e) {
++                               e.printStackTrace();
++                       }
++
+ 			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
+ 				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
+ 			}
+@@ -258,30 +279,35 @@
+ 
+ 			if ( ce.isDorecreate() ) {
+ 				session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() );
+-				actionQueue.addAction(
+-						new CollectionRecreateAction(
+-								coll,
+-								ce.getCurrentPersister(),
+-								ce.getCurrentKey(),
+-								session
+-							)
+-					);
++				if ( session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() ) ) {
++                                       actionQueue.addAction(
++                                                       new CollectionRecreateAction(
++                                                                       coll,
++                                                                       ce.getCurrentPersister(),
++                                                                       ce.getCurrentKey(),
++                                                                       session
++                                                               )
++                                               );
++                               }
++
+ 			}
+ 			if ( ce.isDoremove() ) {
+-				session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
+-						new CollectionRemoveAction(
+-								coll,
+-								ce.getLoadedPersister(),
+-								ce.getLoadedKey(),
+-								ce.isSnapshotEmpty(coll),
+-								session
+-							)
+-					);
++				if ( session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() ) ) {
++                                       actionQueue.addAction(
++                                                       new CollectionRemoveAction(
++                                                                       coll,
++                                                                       ce.getLoadedPersister(),
++                                                                       ce.getLoadedKey(),
++                                                                       ce.isSnapshotEmpty(coll),
++                                                                       session
++                                                               )
++                                               );
++                               }
++
+ 			}
+ 			if ( ce.isDoupdate() ) {
+-				session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
++				if ( session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() ) ) {
++					actionQueue.addAction(
+ 						new CollectionUpdateAction(
+ 								coll,
+ 								ce.getLoadedPersister(),
+@@ -290,6 +316,7 @@
+ 								session
+ 							)
+ 					);
++				}
+ 			}
+ 
+ 		}
