@@ -115,10 +115,10 @@ bc. Post.find("byTitle", "My first post").fetch();
 Post.find("byTitleLike", "%hello%").fetch();
 Post.find("byAuthorIsNull").fetch();
 Post.find("byTitleLikeAndAuthor", "%hello%", connectedUser).fetch();
-Post.find("byTitleOrderByTitle", "%hello%").fetch(); //default for order is asc
-Post.find("byTitleOrderByNbCommentsDesc", "%hello%").fetch();
+Post.find("byTitleOrderByTitle", "A nice post").fetch(); //default for order is asc
+Post.find("byTitleOrderByNbCommentsDesc", "A nice post").fetch();
 
-Simple queries follow the following syntax <code>==[Property][Comparator]And?==</code> where Comparator can be the following:
+Simple queries follow the following syntax <code>==[Property][Comparator]And?OrderBy?==</code> where Comparator can be the following:
 
 * @LessThan@ - less than the given value
 * @LessThanEquals@ - less than or equal a give value
