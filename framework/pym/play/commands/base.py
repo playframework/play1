@@ -128,6 +128,21 @@ def handle_sigterm(signum, frame):
         process.terminate()
         sys.exit(0)
 
+first_sigint = True
+
+def handle_sigint(signum, frame):
+    global process
+    global first_sigint
+    if 'process' in globals():
+        if first_sigint:
+            # Prefix with new line because ^C usually appears on the terminal
+            print "\nTerminating Java process"
+            process.terminate()
+            first_sigint = False
+        else:
+            print "\nKilling Java process"
+            process.kill()
+        
 def run(app, args):
     global process
     app.check()
@@ -138,6 +153,7 @@ def run(app, args):
     try:
         process = subprocess.Popen (java_cmd, env=os.environ)
         signal.signal(signal.SIGTERM, handle_sigterm)
+        signal.signal(signal.SIGINT, handle_sigint)
         process.wait()
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
