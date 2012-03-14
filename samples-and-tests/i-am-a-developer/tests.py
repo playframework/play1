@@ -628,6 +628,50 @@ class IamADeveloper(unittest.TestCase):
         killPlay()
         self.play.wait()
 
+    def testExternalConfFile(self):
+
+        # Well
+        step('Hello, I need an external application.conf file')
+        
+        self.working_directory = bootstrapWorkingDirectory('i-need-an-external-conf-file')
+        
+        # play new yop
+        step('Create a new project')
+        
+        self.play = callPlay(self, ['new', '%s/externalconffile' % self.working_directory, '--name=EXTCONF'])
+        self.assert_(waitFor(self.play, 'The new application will be created'))
+        self.assert_(waitFor(self.play, 'OK, the application is created'))
+        self.assert_(waitFor(self.play, 'Have fun!'))
+        self.play.wait()
+        
+        self.assert_(os.path.exists(os.path.join(self.working_directory, 'externalconffile')))
+        self.assert_(os.path.exists(os.path.join(self.working_directory, 'externalconffile/conf')))
+        self.assert_(os.path.exists(os.path.join(self.working_directory, 'externalconffile/conf/application.conf')))
+
+        app = '%s/externalconffile' % self.working_directory
+
+        # Run the newly created application
+        step('Run the newly created application')
+        
+        self.play = callPlay(self, ['run', app])
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+		
+        step("stop play")
+        killPlay()
+        self.play.wait()
+		
+        # Run the newly created application
+        step('Run the newly created application with external application.conf file')
+        
+        self.play = callPlay(self, ['run', app, '-Dconfig.file=%s/../external-conf-file.conf' % self.working_directory])
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9876'))
+		
+        step("stop play")
+        killPlay()
+        self.play.wait()
+    
+        step("done testing external application.conf file")
+
     def tearDown(self):
         killPlay()
 
