@@ -463,7 +463,6 @@ public class Evolutions extends PlayPlugin {
         String jpaDialect = Play.configuration.getProperty("jpa.dialect");
         if (jpaDialect != null) {
             try {
-                //Class<?> dialectClass = Class.forName(jpaDialect);
                 Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
 			
                 // Oracle 8i dialect is the base class for oracle dialects (at least for now)
