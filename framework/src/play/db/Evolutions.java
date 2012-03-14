@@ -425,7 +425,7 @@ public class Evolutions extends PlayPlugin {
             ResultSet rs = connection.getMetaData().getTables(null, null, "play_evolutions", null);
             if (!rs.next()) {
                 // oracle gives table names in upper case
-                Logger.debug("Checking PLAY_EVOLUTIONS");
+                Logger.trace("Checking PLAY_EVOLUTIONS");
                 rs.close();
                 rs = connection.getMetaData().getTables(null, null, "PLAY_EVOLUTIONS", null);
             }
@@ -437,7 +437,16 @@ public class Evolutions extends PlayPlugin {
                     evolutions.add(evolution);
                 }
             } else {
-                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script varchar(4000), revert_script varchar(4000), state varchar(255), last_problem varchar(4000))");
+                String textDataType = Play.configuration.getProperty("evolution.PLAY_EVOLUTIONS.textType");
+                if (textDataType == null) {
+                    if (isOracleDialectInUse()) {
+                        textDataType = "varchar(4000)";
+                    } else {
+                        textDataType = "text";
+                    }
+                }
+
+                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ")");
             }
         } catch (SQLException e) {
             Logger.error(e, "SQL error while checking play evolutions");
@@ -446,6 +455,25 @@ public class Evolutions extends PlayPlugin {
         }
         Collections.sort(evolutions);
         return evolutions;
+    }
+
+    private synchronized static boolean isOracleDialectInUse() {
+        boolean isOracle = false;
+
+        String jpaDialect = Play.configuration.getProperty("jpa.dialect");
+        if (jpaDialect != null) {
+            try {
+                //Class<?> dialectClass = Class.forName(jpaDialect);
+                Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
+			
+                // Oracle 8i dialect is the base class for oracle dialects (at least for now)
+                isOracle = org.hibernate.dialect.Oracle8iDialect.class.isAssignableFrom(dialectClass);
+            } catch (ClassNotFoundException e) {
+                // swallow
+                Logger.warn("jpa.dialect class %s not found", jpaDialect);
+            }
+        }
+        return isOracle;
     }
 
     public static class Evolution implements Comparable<Evolution> {
