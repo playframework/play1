@@ -1,6 +1,8 @@
---- hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	2012-02-08 21:25:08.000000000 +0100
-+++ hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	2012-02-21 20:15:29.000000000 +0100
-@@ -111,10 +111,10 @@
+diff --git a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+index b3e0dc5..2dfc933 100755
+--- a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+@@ -111,10 +111,10 @@ public class EmptyInterceptor implements Interceptor, Serializable {
  		return sql;
  	}
  
@@ -16,9 +18,11 @@
 -}
 \ No newline at end of file
 +}
---- ../hibernate-hibernate-orm-e95c11e-3/hibernate-core/src/main/java/org/hibernate/Interceptor.java	2012-02-08 21:25:08.000000000 +0100
-+++ hibernate-core/src/main/java/org/hibernate/Interceptor.java	2012-02-20 23:15:40.000000000 +0100
-@@ -132,7 +132,7 @@
+diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
+index 7664c36..f935942 100644
+--- a/hibernate-core/src/main/java/org/hibernate/Interceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
+@@ -132,7 +132,7 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -27,7 +31,7 @@
  
  	/**
  	 * Called before a collection is deleted.
-@@ -142,7 +142,7 @@
+@@ -142,7 +142,7 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -36,7 +40,7 @@
  
  	/**
  	 * Called before a collection is updated.
-@@ -152,7 +152,7 @@
+@@ -152,7 +152,7 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -45,9 +49,11 @@
  
  	/**
  	 * Called before a flush
---- ../hibernate-hibernate-orm-e95c11e-3/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	2012-02-08 21:25:08.000000000 +0100
-+++ hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	2012-02-21 20:11:21.000000000 +0100
-@@ -147,6 +147,27 @@
+diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+index cd4155f..bb4853f 100644
+--- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
++++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+@@ -147,6 +147,27 @@ public abstract class AbstractFlushingEventListener implements Serializable {
  		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
  			EntityEntry entry = (EntityEntry) me.getValue();
  			Status status = entry.getStatus();
@@ -75,10 +81,11 @@
  			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
  				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
  			}
-@@ -258,30 +279,35 @@
+@@ -257,31 +278,35 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ 			CollectionEntry ce = me.getValue();
  
  			if ( ce.isDorecreate() ) {
- 				session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() );
+-				session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() );
 -				actionQueue.addAction(
 -						new CollectionRecreateAction(
 -								coll,
@@ -131,7 +138,7 @@
  						new CollectionUpdateAction(
  								coll,
  								ce.getLoadedPersister(),
-@@ -290,6 +316,7 @@
+@@ -290,6 +315,7 @@ public abstract class AbstractFlushingEventListener implements Serializable {
  								session
  							)
  					);
@@ -139,3 +146,6 @@
  			}
  
  		}
+-- 
+1.7.4.4
+
