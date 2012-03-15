@@ -48,7 +48,10 @@ public class DBPlugin extends PlayPlugin {
             h2Server = org.h2.tools.Server.createWebServer();
             h2Server.start();
 
-            response.setHeader("Location", "http://localhost:8082/");
+            String domain = request.domain;
+            if (domain.equals(""))
+              domain = "localhost";
+            response.setHeader("Location", "http://" + domain + ":8082/");
             return true;
         }
         return false;

@@ -152,6 +152,10 @@ public class Application extends Controller {
         renderText("OK");
     }
 
+    public static void withQueryParam(String lucky) {
+         renderText("OK");
+    }
+
     public static void reverserouting() {
         render("Application/reverse.html");
     }

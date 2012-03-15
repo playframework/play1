@@ -14,6 +14,7 @@ GET         /re/{<[0-9]{5}>re}              Application.ok
 GET         /re/{<[A-Z]{2,4}>re}            Application.ok
 
 GET         /{lucky}/doIt                   Application.showIt
+GET         /withQueryParam                 Application.withQueryParam
 
 GET         www.zenexity.com/hello          Application.helloZen
 GET         /st%C3%A9phane                  Application.helloSteph

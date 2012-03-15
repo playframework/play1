@@ -544,6 +544,12 @@ public class WS extends PlayPlugin {
         public abstract Integer getStatus();
 
         /**
+         * The HTTP status text
+         * @return the status text of the http response
+         */
+        public abstract String getStatusText();
+
+        /**
          * @return true if the status code is 20x, false otherwise
          */
         public boolean success() {

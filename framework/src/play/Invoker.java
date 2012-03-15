@@ -379,7 +379,6 @@ public class Invoker {
             if (task instanceof Promise) {
                 Promise<V> smartFuture = (Promise<V>) task;
                 smartFuture.onRedeem(new F.Action<F.Promise<V>>() {
-                    @Override
                     public void invoke(Promise<V> result) {
                         executor.submit(invocation);
                     }

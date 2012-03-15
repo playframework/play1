@@ -31,7 +31,7 @@ public class UniqueTest extends UnitTest {
         assertFalse(res.ok);
         assertNotNull(Validation.errors(".isbn"));
         Error error = Validation.errors(".isbn").get(0);
-        assertEquals("validation.unique", error.message());
+        assertEquals("Must be unique", error.message());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class UniqueTest extends UnitTest {
         assertFalse(res.ok);
         assertNotNull(Validation.errors(".title"));
         Error error = Validation.errors(".title").get(0);
-        assertEquals("validation.unique", error.message());
+        assertEquals("Must be unique", error.message());
 
         Validation.clear();
         firstBook.title = "Bobs Book";
