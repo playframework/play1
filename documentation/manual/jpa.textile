@@ -132,10 +132,14 @@ Simple queries follow the following syntax <code>==[Property][Comparator]And?[Or
 * @IsNotNull@ - Not a null value (doesn't require an argument)
 * @IsNull@ - Is a null value (doesn't require an argument)
 
-and Orderdirective can be (for a property named @property@) :
+and Orderdirective can be (e.g for a property named @name@) :
 
-* @OrderByProperty@ - default ascending order
-* @OrderByPropertyDesc@ - descending order
+* @OrderByName@ - default ascending order
+* @OrderByNameDesc@ - descending order
+
+you can also use several attributes in Orderdirective :  
+* @OrderByNameAndAge@
+* @OrderByNameAndAgeDesc@
 
 h3. Find using a JPQL query
 
