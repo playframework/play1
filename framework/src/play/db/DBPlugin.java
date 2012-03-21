@@ -27,17 +27,27 @@ public class DBPlugin extends PlayPlugin {
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (Play.mode.isDev() && request.path.equals("/@db")) {
             response.status = Http.StatusCode.MOVED;
+            String serverOptions[] = new String[] { };
 
             // For H2 embeded database, we'll also start the Web console
             if (h2Server != null) {
                 h2Server.stop();
             }
-            h2Server = org.h2.tools.Server.createWebServer();
-            h2Server.start();
 
+            // Determine if the host should be "localhost"
             String domain = request.domain;
             if (domain.equals(""))
               domain = "localhost";
+
+            // If the domain is not localhost, then turn on webAllowOthers
+            // so that other hosts may access the console
+            if(!domain.equals("localhost")) {
+                serverOptions = new String[] {"-webAllowOthers"};
+            }
+
+            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
+            h2Server.start();
+
             response.setHeader("Location", "http://" + domain + ":8082/");
             return true;
         }
