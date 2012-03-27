@@ -332,7 +332,7 @@ class PlayConfParser:
         for includeFile in includeFiles:
             # read include file
             try:
-                fromIncludeFile = self.readFile(confFolder, includeFile)
+                fromIncludeFile = self.readFile(confFolder, self._expandValue(includeFile))
 
                 # add everything from include file 
                 for (key, value) in fromIncludeFile.items():
@@ -361,6 +361,16 @@ class PlayConfParser:
         for key in self.getAllKeys(query):
             result.append(self.entries.get(key))
         return result
+
+    def _expandValue(self, value):
+        def expandvar(match):
+            key = match.group(1)
+            if key == 'play.id':
+                return self.id
+            else: # unkonwn
+                return '${%s}' % key
+
+        return re.sub('\${([a-z.]+)}', expandvar, value)
         
 def hasKey(arr, elt):
     try:
