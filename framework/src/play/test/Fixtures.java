@@ -464,10 +464,13 @@ public class Fixtures {
 
 
         // Iterate through the Entity property list
-        // @Embedded are not managed by the JPA plugin
-        // This is not the nicest way of doing things.
-         //modelFields =  Model.Manager.factoryFor(type).listProperties();
-        final List<Model.Property> modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
+	List<Model.Property> modelFields;
+
+	if ( play.db.jpa.GenericModel.class.isAssignableFrom(type) ) {
+	    modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
+	} else {
+	    modelFields =  Model.Manager.factoryFor(type).listProperties();
+	}
 
         for (Model.Property field : modelFields) {
             // If we have a relation, get the matching object
