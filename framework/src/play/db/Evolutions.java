@@ -423,15 +423,26 @@ public class Evolutions extends PlayPlugin {
         Connection connection = null;
         try {
             connection = getNewConnection();
-            ResultSet rs = connection.getMetaData().getTables(null, null, "play_evolutions", null);
+            String tableName = "play_evolutions";
+            boolean tableExists = true;
+            ResultSet rs = connection.getMetaData().getTables(null, null, tableName, null);
+
             if (!rs.next()) {
+                // Table in lowercase does not exist
                 // oracle gives table names in upper case
-                Logger.trace("Checking PLAY_EVOLUTIONS");
+                tableName = tableName.toUpperCase();
+                Logger.trace("Checking " + tableName);
                 rs.close();
-                rs = connection.getMetaData().getTables(null, null, "PLAY_EVOLUTIONS", null);
+                rs = connection.getMetaData().getTables(null, null, tableName, null);
+                // Does it exist?
+                if (!rs.next() ) {
+                    // did not find it in uppercase either
+                    tableExists = false;
+                }
             }
 
-            if (rs.next()) {
+            // Do we have a
+            if (tableExists) {
                 ResultSet databaseEvolutions = connection.createStatement().executeQuery("select id, hash, apply_script, revert_script from play_evolutions");
                 while (databaseEvolutions.next()) {
                     Evolution evolution = new Evolution(databaseEvolutions.getInt(1), databaseEvolutions.getString(3), databaseEvolutions.getString(4), false);
