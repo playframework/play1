@@ -125,7 +125,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
     if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
     for jar in classpath:
-        if jar.endswith('.jar') and jar.find('provided-') == -1:
+        if os.path.isfile(jar) and jar.find('provided-') == -1:
             shutil.copyfile(jar, os.path.join(war_path, 'WEB-INF/lib/%s' % os.path.split(jar)[1]))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))

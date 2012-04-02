@@ -123,7 +123,6 @@ class PlayApplication(object):
             if os.path.isdir(fullPath):
                 self.find_and_add_all_jars(classpath, fullPath)
             else:
-                if fullPath.endswith('.jar'):
                     classpath.append(fullPath)
 
     def getClasspath(self):
