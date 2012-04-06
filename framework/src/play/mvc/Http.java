@@ -787,7 +787,9 @@ public class Http {
         public void reset() {
             out.reset();
         }
+
         // Chunked stream
+
         public boolean chunked = false;
         final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
 
@@ -803,6 +805,67 @@ public class Http {
 
         public void onWriteChunk(F.Action<Object> handler) {
             writeChunkHandlers.add(handler);
+        }
+
+        // Multipart stream
+
+        /**
+         * Writes one part in a multipart message. To set the top level content
+         * type, call {@link #setContentTypeIfNotSet} before calling this method
+         * for the first time, e.g.,
+         * {@code setContentTypeIfNotSet("multipart/x-mixed-replace")}.
+         * Otherwise, the top level content type is assumed to be
+         * {@code "multipart/mixed"}. After sending the last part, the caller
+         * should call this method one more time with both parameters being
+         * {@code null} to signify the end of this multipart stream.
+         * <p>
+         * Example usage for sending a motion JPEG stream:
+         * <pre>
+         *    response.setContentTypeIfNotSet("multipart/x-mixed-replace");
+         *    while (hasMoreFrames()) {
+         *        byte[] frame = getNextFrame();
+         *        response.writeMultipart("image/jpeg", frame);
+         *    }
+         *    response.writeMultipart(null, null);
+         * </pre>
+         *
+         * @param contentType The content type of this part in the multipart
+         *        message.
+         * @param content The content of this part in the multipart message.
+         */
+        public void writeMultipart(String contentType, byte[] content) {
+            setContentTypeIfNotSet("multipart/mixed");
+            try {
+                javax.mail.internet.ContentType ct = new javax.mail.internet.ContentType(this.contentType);
+                if ("multipart".equalsIgnoreCase(ct.getBaseType()))
+                    throw new IllegalStateException("Top level content type is not multipart.");
+                String boundary = ct.getParameter("boundary");
+                if (boundary == null) {
+                    boundary = "boundary";
+                    ct.setParameter("boundary", boundary);
+                    this.contentType = ct.toString();
+                }
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream((content != null ? content.length : 0) + 128);
+                if (contentType != null && content != null) {
+                    outputStream.write(("--" + boundary + "\r\n").getBytes());
+                    outputStream.write(("Content-Type: " + contentType + "\r\n").getBytes());
+                    outputStream.write(("Content-Length: " + content.length + "\r\n").getBytes());
+                    outputStream.write("\r\n".getBytes());
+                    outputStream.write(content);
+                }
+                else {
+                    outputStream.write(("--" + boundary + "--\r\n").getBytes());
+                }
+                outputStream.close();
+                byte[] chunk = outputStream.toByteArray();
+                writeChunk(chunk);
+            }
+            catch (javax.mail.internet.ParseException e) {
+                throw new IllegalStateException("Top level content type cannot be parsed.");
+            }
+            catch (IOException e) {
+                throw new UnexpectedException("Unable to generate multipart message part.");
+            }
         }
     }
 
