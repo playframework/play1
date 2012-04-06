@@ -367,7 +367,7 @@ public class JavaExtensions {
         string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
         string = string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-");
         // Get rid of any - at the start and end.
-        string.replaceAll("-+$", "").replaceAll("^-+", "");
+        string = string.replaceAll("-+$", "").replaceAll("^-+", "");
 
         return (lowercase ? string.toLowerCase() : string);
     }
