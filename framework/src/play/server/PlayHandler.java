@@ -922,7 +922,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
         private boolean closed = false;
-        private ConcurrentLinkedQueue<Object> nextChunks = new ConcurrentLinkedQueue<Object>();
+        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<byte[]>();
 
         public boolean hasNextChunk() throws Exception {
             return !nextChunks.isEmpty();
@@ -932,7 +932,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if (nextChunks.isEmpty()) {
                 return null;
             }
-            return wrappedBuffer(((String) nextChunks.poll()).getBytes());
+            return wrappedBuffer(nextChunks.poll());
         }
 
         public boolean isEndOfInput() throws Exception {
@@ -941,17 +941,27 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         public void close() throws Exception {
             if (!closed) {
-                nextChunks.offer("0\r\n\r\n");
+                nextChunks.offer("0\r\n\r\n".getBytes());
             }
             closed = true;
         }
 
         public void writeChunk(Object chunk) throws Exception {
-            String message = chunk == null ? "" : chunk.toString();
-            StringWriter writer = new StringWriter();
-            Integer l = message.getBytes(Response.current().encoding).length + 2;
-            writer.append(Integer.toHexString(l)).append("\r\n").append(message).append("\r\n\r\n");
-            nextChunks.offer(writer.toString());
+            byte[] bytes;
+            if ( chunk instanceof byte[]) {
+                bytes = (byte[])chunk;
+            } else {
+                String message = chunk == null ? "" : chunk.toString();
+                bytes = message.getBytes(Response.current().encoding);
+            }
+
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            byteStream.write(Integer.toHexString(bytes.length).getBytes());
+            final byte[] crlf = new byte[]{(byte)'\r', (byte)'\n'};
+            byteStream.write(crlf);
+            byteStream.write(bytes);
+            byteStream.write(crlf);
+            nextChunks.offer( byteStream.toByteArray());
         }
     }
 
