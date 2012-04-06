@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -295,6 +296,16 @@ public class Application extends Controller {
     
     public static void fastTag_render_test() {
         render();
+    }
+    
+    public static void writeChunks() throws UnsupportedEncodingException {
+        response.contentType = "text/plain";
+        response.setHeader("Transfer-Encoding", "chunked");
+        response.writeChunk("a");
+        response.writeChunk("b");
+        response.writeChunk("c");
+        response.writeChunk("æøå");
+        response.writeChunk("æøå".getBytes("UTF-8"));
     }
 
 }
