@@ -947,6 +947,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         public void writeChunk(Object chunk) throws Exception {
+            if (closed) {
+                throw new Exception("HTTP output stream closed");
+            }
+
             byte[] bytes;
             if ( chunk instanceof byte[]) {
                 bytes = (byte[])chunk;
