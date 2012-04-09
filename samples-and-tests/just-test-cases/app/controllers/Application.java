@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -296,5 +297,41 @@ public class Application extends Controller {
     public static void fastTag_render_test() {
         render();
     }
+    
+    public static void writeChunks() throws UnsupportedEncodingException {
+        response.contentType = "text/plain";
+        response.setHeader("Transfer-Encoding", "chunked");
+        response.writeChunk("a");
+        response.writeChunk("b");
+        response.writeChunk("c");
+        response.writeChunk("æøå");
+        response.writeChunk("æøå".getBytes("UTF-8"));
+    }
 
+    private static final Object CHUNK_LOCK = new Object();
+
+    public static void writeChunks2() {
+        // Some applications may want to keep sending data to the client until
+        // the client closes the HTTP connection. To simulate this case, we have
+        // an infinite loop that terminates only when an exception occurs, and
+        // we need to ensure that an exception will occur when the client closes
+        // the HTTP connection.
+        // The purpose of the synchronization lock is to test the ability for
+        // this method to terminate. If this method does not terminate, a second
+        // call to this method will hang with no output.
+        synchronized(CHUNK_LOCK) {
+            response.contentType = "text/plain";
+            response.setHeader("Transfer-Encoding", "chunked");
+            Logger.info("Write chunks started.");
+            try {
+                while (true) {
+                    response.writeChunk("Go, Go, Igo!\n");
+                }
+            }
+            catch (Exception e) {
+                Logger.info("Write chunks exception.", e);
+            }
+            Logger.info("Write chunks stopped.");
+        }
+    }
 }

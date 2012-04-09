@@ -88,17 +88,19 @@ public class PropertiesEnhancer extends Enhancer {
                         ctClass.addMethod(getMethod);
                     }
 
-                    try {
-                        CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
-                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) || Modifier.isStatic(ctMethod.getModifiers())) {
-                            throw new NotFoundException("it's not a setter !");
+                    if (!isFinal(ctField)) {
+                        try {
+                            CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
+                            if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) || Modifier.isStatic(ctMethod.getModifiers())) {
+                                throw new NotFoundException("it's not a setter !");
+                            }
+                        } catch (NotFoundException noSetter) {
+                            // Créé le setter
+                            CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
+                            setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
+                            ctClass.addMethod(setMethod);
+                            createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                         }
-                    } catch (NotFoundException noSetter) {
-                        // Créé le setter
-                        CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
-                        setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
-                        ctClass.addMethod(setMethod);
-                        createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                     }
 
                 }
@@ -145,7 +147,7 @@ public class PropertiesEnhancer extends Enhancer {
                             String propertyName = null;
                             if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
                                 || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
-                                if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
+                                if ((ctMethod.getName().startsWith("get") || (!isFinal(fieldAccess.getField()) && ctMethod.getName().startsWith("set"))) && ctMethod.getName().length() > 3) {
                                     propertyName = ctMethod.getName().substring(3);
                                     propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
                                 }
@@ -161,7 +163,7 @@ public class PropertiesEnhancer extends Enhancer {
                                     // Réécris l'accés en lecture à la property
                                     fieldAccess.replace("$_ = ($r)play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeReadProperty($0, \"" + fieldAccess.getFieldName() + "\", \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
 
-                                } else if (fieldAccess.isWriter()) {
+                                } else if (!isFinal(fieldAccess.getField()) && fieldAccess.isWriter()) {
 
                                     // Réécris l'accés en ecriture à la property
                                     fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", " + fieldAccess.getField().getType().getName() + ".class, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
@@ -191,8 +193,14 @@ public class PropertiesEnhancer extends Enhancer {
             return false;
         }
         return Modifier.isPublic(ctField.getModifiers())
-                && !Modifier.isFinal(ctField.getModifiers())
                 && !Modifier.isStatic(ctField.getModifiers());
+    }
+
+    /**
+     * Is this field final ?
+     */
+    boolean isFinal(CtField ctField) {
+        return Modifier.isFinal(ctField.getModifiers());
     }
 
     /**
@@ -253,7 +261,7 @@ public class PropertiesEnhancer extends Enhancer {
 
         public static void invokeWriteProperty(Object o, String property, Class<?> valueType, Object value, String targetType, String invocationPoint) throws Throwable {
             if (o == null) {
-                throw new NullPointerException("Attempting to write a property  " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
+                throw new NullPointerException("Attempting to write a property " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
             }
             String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
             try {
