@@ -186,6 +186,8 @@ bc. …
     <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
 </head>
 
+p(note). Note that the current version of Play bundles a newer version of jQuery than the one used in this tutorial.
+
 Now you can add this script to the @show.html@ template (add it at the end of the page):
 
 bc. <script type="text/javascript" charset="utf-8">

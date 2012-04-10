@@ -15,7 +15,7 @@ An HTML e-mail:
 
 bc. HtmlEmail email = new HtmlEmail();
 email.addTo("info@lunatech.com");
-email.setFrom(sender@lunatech.com", "Nicolas");
+email.setFrom("sender@lunatech.com", "Nicolas");
 email.setSubject("Test email with inline image");
 // embed the image and get the content id
 URL url = new URL("http://www.zenexity.fr/wp-content/themes/images/logo.png");
@@ -37,6 +37,7 @@ Each public static method will be an e-mail sender, in a similar manner as actio
 
 bc. package notifiers;
  
+import org.apache.commons.mail.*; 
 import play.*;
 import play.mvc.*;
 import java.util.*;

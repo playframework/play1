@@ -26,9 +26,9 @@ application.log=INFO
 %scr.http.port=9500
  
 # Production configuration
-%prod.http.port=80
-%prod.application.log=INFO
-%prod.application.mode=prod
+%production.http.port=80
+%production.application.log=INFO
+%production.application.mode=prod
 
 h2. <a name="command">Setting the framework ID from the command line</a>
 

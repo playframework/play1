@@ -206,7 +206,9 @@ When you work on a project, it’s highly recommended to store your source code 
 
 When storing a Play application in a VCS, it is important to exclude the @tmp/@, @modules/@, @lib/@, @test-result/@ and @logs/@ directories.
 
-h3. <a>Bazaar</a>
+If you are using Eclipse, and the @play eclipsify@ command, then you should also exclude @.classpath@ and @eclipse/@.
+
+h3. <a name="bazaar">Bazaar</a>
 
 Here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
 
