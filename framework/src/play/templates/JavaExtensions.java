@@ -382,6 +382,22 @@ public class JavaExtensions {
         return result.toString();
     }
 
+    public static String truncate(String source, int length) {
+        return truncate(source, length, null);
+    }
+    
+    public static String truncate(String source, int length, String ending) {
+        if(source.isEmpty() || source.length() < length){
+            return source;
+        }
+        ending = (ending == null ? "\u2026" : ending);
+        int position = length - ending.length();
+        if(position < 1) {
+            throw new IllegalArgumentException(String.format("Minimum truncate length is %d", 1 + ending.length()));
+        }
+        return source.substring(0, position) + ending;
+    }
+
     public static String yesno(Object o, String[] values) {
         boolean value = play.templates.FastTags._evaluateCondition(o);
         if (value) {

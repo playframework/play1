@@ -371,6 +371,16 @@ Escapes reserved URL query string characters. Returns: @String@.
 bc. ${"!@#\$%^&()".urlEncode()}
 %21%40%23%24%25%5E%26%28%29
 
+h3. <a name="truncate">truncate(length, ending)</a>
+
+Truncates a string if it is longer than the specified length. Truncated strings will end by default with an ellipsis ("..."). Returns: @String@.
+
+bc. ${"Lorem ipsum dolor sit amet, consectetur adipiscing elit.".truncate(25)}
+Lorem ipsum dolor sit ...
+
+${"Lorem ipsum dolor sit amet, consectetur adipiscing elit.".truncate(25, "... (continued)")}
+Lorem ipsu... (continued)
+
 
 h2. <a name="string-array">String array extensions</a>
 
