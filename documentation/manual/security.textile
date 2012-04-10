@@ -51,7 +51,7 @@ bc. createQuery("SELECT * from Stuff WHERE type= ?1").setParameter(1, theType);
 
 This is NOT:
 
-bc. createQuery("SELECT * from Stuff WHERE type=" + theType;
+bc. createQuery("SELECT * from Stuff WHERE type=" + theType);
 
 h2. <a name="csrf">Cross-Site Request Forgery</a>
 
