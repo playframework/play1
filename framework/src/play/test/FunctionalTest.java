@@ -171,7 +171,8 @@ public abstract class FunctionalTest extends BaseTest {
         List<Part> parts = new ArrayList<Part>();
 
         for (String key : parameters.keySet()) {
-            parts.add(new StringPart(key, parameters.get(key)));
+            final StringPart stringPart = new StringPart(key, parameters.get(key), request.encoding);
+            parts.add(stringPart);
         }
 
         for (String key : files.keySet()) {
