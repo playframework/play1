@@ -2,6 +2,7 @@ package play.mvc.results;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
@@ -162,12 +163,19 @@ public class RenderBinary extends Result {
                         response.setHeader("Content-Length", length + "");
                         response.direct = is;
                     } else {
-                        byte[] buffer = new byte[8092];
-                        int count = 0;
-                        while ((count = is.read(buffer)) > 0) {
-                            response.out.write(buffer, 0, count);
+                        try {
+                            byte[] buffer = new byte[8192];
+                            int count = 0;
+                            while ((count = is.read(buffer)) > 0) {
+                                response.out.write(buffer, 0, count);
+                            }
                         }
-                        is.close();
+                        finally {
+                            try {
+                                is.close();
+                            } catch (IOException e) {
+                            }
+                        }
                     }
                 }
             }
