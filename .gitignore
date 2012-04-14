@@ -30,6 +30,7 @@ eclipse
 *.iml
 *.ipr
 *.iws
+atlassian-ide-plugin.xml
 
 # modules/: exclude except for core modules
 modules/*

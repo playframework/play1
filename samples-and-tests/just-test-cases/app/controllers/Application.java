@@ -129,6 +129,11 @@ public class Application extends Controller {
         render();
     }
     
+
+    public static void generateBookWithDateLink(long timeLong) {
+        render(timeLong);
+    }
+    
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
