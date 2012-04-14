@@ -17,7 +17,7 @@ bc. application.baseUrl=http://localhost:9000/
 
 For @prod@ mode:
 
-bc. %production%.application.baseUrl=http://www.yourdomain.com/
+bc. %production.application.baseUrl=http://www.yourdomain.com/
 
 
 h3(#application.defaultCookieDomain). application.defaultCookieDomain

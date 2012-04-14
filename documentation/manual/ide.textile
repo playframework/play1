@@ -17,13 +17,19 @@ You then need to import the application into your Workspace with the **File/Impo
 
 !images/eclipse!
 
-The @eclipsify@ command generates several launchers for the application. The main launcher in only usable with the **Run As** Eclipse command. You can then use the *Connect JPDA launcher* using *Debug As* to start a debugging session at any time. Stopping the debugging session will not stop the server.
-
 If you make any important changes to your application, such as changing the classpath, use @eclipsify@ again to regenerate the configuration files.
 
 p(note). **Do not commit Eclipse configuration files when you work in a team!**
 
 The generated configuration files contain absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his Eclipse configuration files private. 
+
+h3. Launchers
+
+The @eclipsify@ command generates several launchers for the application. For example, running @eclipsify@ on an application called **Nice app** (see screen shot above) will create the following launchers in the @eclipse/@ folder:
+
+* @Nice app.launch@ - the main launcher, equivalent to the @play test@ command, which you can use to run your application by right-clicking it and selecting **Run As > Nice app**
+* @Test Nice app.launch@ - the test launcher, equivalent to the @play test@ command, which you also run by right-clicking it and selecting **Run As > Test Nice app**
+* @Connect JPDA Nice app.launch@ - the JPDA debugging session connector, which you can use to connect the Eclipse debugger to an already-running Play instance and start a debugging session, by right-clicking the launch file and selecting **Debug As > Connect JPDA Nice app**. Stopping the debugging session will not stop the server.
 
 h3. Play Eclipse plug-in
 

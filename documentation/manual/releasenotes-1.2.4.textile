@@ -6,7 +6,7 @@ h2. Support for Java 7
 
 Play now supports Java 7 out-of-the-box, so you can write the following code without any problems.
 
-bc. Map<String, List<String>> map = new HashMap();
+bc. Map<String, List<String>> map = new HashMap<>();
 String version = "1.2.4";
 switch(version) {
 	 case "1.2.4":

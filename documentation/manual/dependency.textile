@@ -253,7 +253,7 @@ repositories:
     
     - zenexity:
         type:       http
-        artifact:   "http://www.zenexity.com/repo/[module]-[revision].[ext]"
+        artifact:   "http://www.zenexity.com/repo/[module]-[revision].zip"
         contains:
             - com.zenexity -> *
 
