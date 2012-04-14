@@ -69,16 +69,27 @@ public class Lang {
      */
     public static void change(String locale) {
         String closestLocale = findClosestMatch(Collections.singleton(locale));
-        boolean success = set(closestLocale);
-        //findClosestMatch should always return a valid locale, so success should always be true.
-        Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+        if ( closestLocale == null ) {
+            // Give up
+            return ;
+        }
+        if ( set(closestLocale) ) {
+            Response response = Response.current();
+            if ( response != null ) {
+                // We have a current response in scope - set the language-cookie to store the selected language for the next requests
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+            }
+        }
+
     }
 
     /**
      * Given a set of desired locales, searches the set of locales supported by this Play! application and returns the closest match.
      *
-     * @param desiredLocales a collection of desired locales. If the collection is ordered, earlier locales are preferred over later ones. Locales should be of the form "[language]_[country" or "[language]", e.g. "en_CA" or "en". The locale strings are case insensitive (e.g. "EN_CA" is considered the same as "en_ca").
-     * @return the closest matching locale. If no locales are defined in this Play! application, the empty string is returned.
+     * @param desiredLocales a collection of desired locales. If the collection is ordered, earlier locales are preferred over later ones.
+     *                       Locales should be of the form "[language]_[country" or "[language]", e.g. "en_CA" or "en".
+     *                       The locale strings are case insensitive (e.g. "EN_CA" is considered the same as "en_ca").
+     * @return the closest matching locale. If no closest match for a language/country is found, null is returned
      */
     private static String findClosestMatch(Iterable<String> desiredLocales) {
         //look for an exact match
@@ -106,12 +117,9 @@ public class Lang {
                 }
             }
         }
-        //No matches found. Return default locale
-        if (Play.langs.isEmpty()) {
-            return "";
-        } else {
-            return Play.langs.get(0);
-        }
+
+        // We did not find a anything
+        return null;
     }
 
     /**
@@ -140,7 +148,13 @@ public class Lang {
 
         }
         String closestLocaleMatch = findClosestMatch(request.acceptLanguage());
-        set(closestLocaleMatch);
+        if ( closestLocaleMatch != null ) {
+            set(closestLocaleMatch);
+        } else {
+            // Did not find anything - use default
+            setDefaultLocale();
+        }
+
     }
 
     public static void setDefaultLocale() {

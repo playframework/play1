@@ -75,8 +75,14 @@
 
 		<!-- Now unbind dates -->
         open('/databinding/changeLanguage/en/')
-        open('@{Application.book(new java.util.Date(2879877856556))}')
-		assertTextPresent('Booked at 04/04/61 !!')
+        <!-- Since it is unclear which locale is current when rendering this selenium page,
+             we cannot rely on the auto-date-unbinding when generating the url with patams here. 
+             To test the same stuff´, we therefor request a page from the server (which has the correct lang, en)
+             which generates the link we need, then we click it.
+             We end up testing the exact same stuff, only under known locale conditions. -->
+        open('@{Application.generateBookWithDateLink(2879877856556)}')
+        clickAndWait('timeLink')
+        assertTextPresent('Booked at 04/04/61 !!')
 		
 		<!-- Binding internal enum with empty string -->
 		open('/databinding/createFactory?factory.name=Nestle&factory.color=RED')

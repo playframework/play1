@@ -124,6 +124,7 @@ samples-and-tests/zencontact/logs
 samples-and-tests/zencontact/test-result
 samples-and-tests/zencontact/tmp
 modules/scala
+atlassian-ide-plugin.xml
 modules/*
 build.classes
 modules/crud/nbproject
