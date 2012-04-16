@@ -1,6 +1,7 @@
 package play.utils;
 
 import org.junit.Test;
+import play.PlayBuilder;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Finally;
@@ -17,6 +18,11 @@ import static org.junit.Assert.*;
  * To change this template use File | Settings | File Templates.
  */
 public class JavaTest {
+
+    @org.junit.Before
+    public void playBuilderBefore() {
+        new PlayBuilder().build();
+    }
 
     private static class ActionClass {
 
