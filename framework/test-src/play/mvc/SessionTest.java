@@ -7,12 +7,18 @@ import org.junit.*;
 
 import play.Play;
 import play.libs.Crypto;
+import play.PlayBuilder;
 import play.mvc.Http.*;
 import play.mvc.Scope.Session;
 
 import static org.junit.Assert.*;
 
 public class SessionTest {
+
+    @org.junit.Before
+    public void playBuilderBefore() {
+        new PlayBuilder().build();
+    }
 
     private static void mockRequestAndResponse() {
         Request.current.set(new Request());
