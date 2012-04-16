@@ -150,8 +150,12 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void plain() {
         String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
-        if (skipLineBreak && text.startsWith("\n")) {
-            text = text.substring(1);
+        if (skipLineBreak) {
+            if (text.startsWith("\n")) {
+                text = text.substring(1);
+            } else if (text.startsWith("\r\n")) {
+                text = text.substring(2);
+            }
         }
         skipLineBreak = false;
         text = text.replaceAll("\r\n", "\n").replaceAll("\n", "\\\\n");

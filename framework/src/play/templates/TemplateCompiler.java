@@ -84,7 +84,6 @@ public abstract class TemplateCompiler {
                     action(true);
                     break;
                 case COMMENT:
-                    skipLineBreak = true;
                     break;
                 case START_TAG:
                     startTag();
