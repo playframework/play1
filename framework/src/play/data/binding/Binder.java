@@ -199,7 +199,7 @@ public abstract class Binder {
         } catch (BinderException e) {
             throw e; // allow binder to throw an exception that propagates
         } catch (Exception e) {
-            if (IllegalAccessException.class.isAssignableFrom(e.getClass()) || e.getCause() != null || IllegalAccessException.class.isAssignableFrom(e.getCause().getClass())){
+            if (IllegalAccessException.class.isAssignableFrom(e.getClass()) || ( e.getCause() != null && IllegalAccessException.class.isAssignableFrom(e.getCause().getClass()))){
                 throw new RuntimeException(e);
             }
             Validation.addError(paramNode.getOriginalKey(), "validation.invalid");
