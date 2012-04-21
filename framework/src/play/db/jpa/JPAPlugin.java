@@ -3,13 +3,11 @@ package play.db.jpa;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
-import org.apache.log4j.config.PropertyGetter;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
-import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -71,14 +69,16 @@ public class JPAPlugin extends PlayPlugin {
             if (ids != null && ids.length > 0) {
                 try {
                     EntityManager em = JPABase.getJPAConfig(clazz).getJPAContext().em();
-                    String q = "from " + clazz.getName() + " o where";
+                    StringBuilder q = new StringBuilder().append("from ").append(clazz.getName()).append(" o where");
+                    int keyIdx = 1;
                     for (String keyName : keyNames) {
-                            q += " o." + keyName + " = ? and " ;
+                            q.append(" o.").append(keyName).append(" = ?").append(keyIdx).append(" and ");
+                            keyIdx++;
                     }
                     if (q.length() > 4) {
-                        q = q.substring(0, q.length() - 4);
+                        q = q.delete(q.length() - 4, q.length());
                     }
-                    Query query = em.createQuery(q);
+                    Query query = em.createQuery(q.toString());
                     // The primary key can be a composite.
                     Class[] pk = new JPAModelLoader(clazz).keyTypes();
                     int j = 0;
