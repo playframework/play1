@@ -228,7 +228,7 @@ public abstract class FunctionalTest extends BaseTest {
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(body.getBytes());
-	if (savedCookies != null) request.cookies = savedCookies;
+        if (savedCookies != null) request.cookies = savedCookies;
         return makeRequest(request);
     }
 
