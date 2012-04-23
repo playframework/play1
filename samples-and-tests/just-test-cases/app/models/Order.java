@@ -2,6 +2,8 @@ package models;
 
 import play.db.jpa.Model;
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name="customer_order")
 public class Order extends Model {
@@ -10,7 +12,7 @@ public class Order extends Model {
 
     @ManyToOne
     public Customer customer;
-
+    
     public Order() {}
 
     public Order(String product, Integer items) {
