@@ -129,6 +129,11 @@ public class Application extends Controller {
         render();
     }
     
+
+    public static void generateBookWithDateLink(long timeLong) {
+        render(timeLong);
+    }
+    
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -333,5 +338,12 @@ public class Application extends Controller {
             }
             Logger.info("Write chunks stopped.");
         }
+    }
+
+    public static void makeSureCookieSaved(){
+        if(request.cookies!=null && request.cookies.get("PLAY_TEST")!=null){
+            response.setCookie("PLAY_TEST", request.cookies.get("PLAY_TEST").value);
+        }
+        renderText("OK");
     }
 }
