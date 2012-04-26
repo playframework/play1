@@ -339,4 +339,11 @@ public class Application extends Controller {
             Logger.info("Write chunks stopped.");
         }
     }
+
+    public static void makeSureCookieSaved(){
+        if(request.cookies!=null && request.cookies.get("PLAY_TEST")!=null){
+            response.setCookie("PLAY_TEST", request.cookies.get("PLAY_TEST").value);
+        }
+        renderText("OK");
+    }
 }
