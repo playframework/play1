@@ -111,7 +111,7 @@ public class FastTags {
         if (args.containsKey("method")) {
             actionDef.method = args.get("method").toString();
         }
-        if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
+        if (!("GET".equalsIgnoreCase(actionDef.method) || "POST".equalsIgnoreCase(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
