@@ -1,8 +1,6 @@
 h1. Documentation
 
-Welcome to the *Play framework 1.2.4* documentation. Check the "version 1.2.4 release notes":releasenotes-1.2.4.
-
-Check the "version 1.2.4 release notes":releasenotes-1.2.4.
+Welcome to the *Play framework 1.2.5* documentation. See the "version 1.2.5 release notes":releasenotes-1.2.5.
 
 h2. <a name="started">Getting started</a>
 
@@ -190,6 +188,8 @@ h2. <a name="versionnotes">Version notes</a>
 
 New versions of Play include certain changes. Check older release notes for:
 
+# "Play 1.2.5":releasenotes-1.2.5
+# "Play 1.2.4":releasenotes-1.2.4
 # "Play 1.2":releasenotes-1.2
 # "Play 1.1":releasenotes-1.1
 # "Play 1.0.3":releasenotes-1.0.3
