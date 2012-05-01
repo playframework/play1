@@ -6,5 +6,5 @@ The changes in this release are listed in the "Play 1.2.5 milestone":https://pla
 * security fix for hash-colission-atack
 * JNDI DataSource under Glassfish 3
 * improved chunked transfer/streaming support
-* All libraries upgraded, including netty-3.4.1.Final
+* all libraries upgraded, including netty-3.4.2.Final
 * web socket support for all browsers.
