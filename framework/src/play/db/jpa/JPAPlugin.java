@@ -72,9 +72,11 @@ public class JPAPlugin extends PlayPlugin {
                 try {
                     EntityManager em = JPABase.getJPAConfig(clazz).getJPAContext().em();
                     String q = "from " + clazz.getName() + " o where";
+                    int index = 1;
                     for (String keyName : keyNames) {
-                            q += " o." + keyName + " = ? and " ;
+                            q += " o." + keyName + " = ?" + String.valueOf(index++) + " and " ;
                     }
+
                     if (q.length() > 4) {
                         q = q.substring(0, q.length() - 4);
                     }

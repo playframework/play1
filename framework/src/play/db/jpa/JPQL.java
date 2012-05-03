@@ -211,19 +211,22 @@ public class JPQL {
     public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
         StringBuffer jpql = new StringBuffer();
+
         String subRequest;
         if (findBy.contains("OrderBy"))
         	subRequest = findBy.split("OrderBy")[0];
         else subRequest = findBy;
         String[] parts = subRequest.split("And");
+
+        int index = 1;
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             if (part.endsWith("NotEqual")) {
                 String prop = extractProp(part, "NotEqual");
-                jpql.append(prop + " <> ?");
+                jpql.append(prop + " <> ?" + String.valueOf(index++));
             } else if (part.endsWith("Equal")) {
                 String prop = extractProp(part, "Equal");
-                jpql.append(prop + " = ?");
+                jpql.append(prop + " = ?" + String.valueOf(index++));
             } else if (part.endsWith("IsNotNull")) {
                 String prop = extractProp(part, "IsNotNull");
                 jpql.append(prop + " is not null");
@@ -235,37 +238,37 @@ public class JPQL {
                 jpql.append(prop + " < ?");
             } else if (part.endsWith("LessThanEquals")) {
                 String prop = extractProp(part, "LessThanEquals");
-                jpql.append(prop + " <= ?");
+                jpql.append(prop + " <= ?" + String.valueOf(index++));
             } else if (part.endsWith("GreaterThan")) {
                 String prop = extractProp(part, "GreaterThan");
-                jpql.append(prop + " > ?");
+                jpql.append(prop + " > ?" + String.valueOf(index++));
             } else if (part.endsWith("GreaterThanEquals")) {
                 String prop = extractProp(part, "GreaterThanEquals");
-                jpql.append(prop + " >= ?");
+                jpql.append(prop + " >= ?" + String.valueOf(index++));
             } else if (part.endsWith("Between")) {
                 String prop = extractProp(part, "Between");
-                jpql.append(prop + " < ? AND " + prop + " > ?");
+                jpql.append(prop + " < ?" + String.valueOf(index++) + " AND " + prop + " > ?" + String.valueOf(index++));
             } else if (part.endsWith("Like")) {
                 String prop = extractProp(part, "Like");
                 // HSQL -> LCASE, all other dbs lower
                 if (isHSQL()) {
-                    jpql.append("LCASE(" + prop + ") like ?");
+                    jpql.append("LCASE(" + prop + ") like ?" + String.valueOf(index++));
                 } else {
-                    jpql.append("LOWER(" + prop + ") like ?");
+                    jpql.append("LOWER(" + prop + ") like ?" + String.valueOf(index++));
                 }
             } else if (part.endsWith("Ilike")) {
                 String prop = extractProp(part, "Ilike");
                  if (isHSQL()) {
-                    jpql.append("LCASE(" + prop + ") like LCASE(?)");
+                    jpql.append("LCASE(" + prop + ") like LCASE(?" + String.valueOf(index++) + ")");
                  } else {
-                    jpql.append("LOWER(" + prop + ") like LOWER(?)");
+                    jpql.append("LOWER(" + prop + ") like LOWER(?" + String.valueOf(index++) + ")");
                  }
             } else if (part.endsWith("Elike")) {
                 String prop = extractProp(part, "Elike");
-                jpql.append(prop + " like ?");
+                jpql.append(prop + " like ?" + String.valueOf(index++));
             } else {
                 String prop = extractProp(part, "");
-                jpql.append(prop + " = ?");
+                jpql.append(prop + " = ?" + String.valueOf(index++));
             }
             if (i < parts.length - 1) {
                 jpql.append(" AND ");
