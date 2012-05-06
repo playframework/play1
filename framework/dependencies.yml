@@ -11,7 +11,7 @@ require:    &allDependencies
     - bytecodeparser 0.3
     - c3p0 0.9.1.2
     - cglib -> cglib-nodep 2.2
-    - com.google.code.gson -> gson 1.7.1
+    - com.google.code.gson -> gson 2.2 
     - com.jamonapi -> jamon 2.7
     - com.ning -> async-http-client 1.6.5
     - commons-beanutils 1.8.3  
