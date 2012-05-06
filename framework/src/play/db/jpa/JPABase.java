@@ -1,8 +1,12 @@
 package play.db.jpa;
 
+import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.collection.internal.PersistentMap;
+import org.hibernate.engine.spi.*;
+import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.exception.GenericJDBCException;
+import org.hibernate.internal.SessionImpl;
 import org.hibernate.proxy.HibernateProxy;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
@@ -131,20 +135,22 @@ public class JPABase implements Serializable, play.db.Model {
                     }
                     if (value instanceof PersistentMap) {
                         if (((PersistentMap) value).wasInitialized()) {
+
+                            cascadeOrphans(this, (PersistentCollection) value, willBeSaved);
+
                             for (Object o : ((Map) value).values()) {
-                                if (o instanceof JPABase) {
-                                    ((JPABase) o).saveAndCascade(willBeSaved);
-                                }
+                                saveAndCascadeIfJPABase(o, willBeSaved);
                             }
                         }
                         continue;
                     }
                     if (value instanceof PersistentCollection) {
                         if (((PersistentCollection) value).wasInitialized()) {
+
+                            cascadeOrphans(this, (PersistentCollection) value, willBeSaved);
+
                             for (Object o : (Collection) value) {
-                                if (o instanceof JPABase) {
-                                    ((JPABase) o).saveAndCascade(willBeSaved);
-                                }
+                                saveAndCascadeIfJPABase(o, willBeSaved);
                             }
                         }
                         continue;
@@ -163,6 +169,27 @@ public class JPABase implements Serializable, play.db.Model {
             }
         } catch (Exception e) {
             throw new UnexpectedException("During cascading save()", e);
+        }
+    }
+
+    private static void cascadeOrphans(JPABase base, PersistentCollection persistentCollection, boolean willBeSaved) {
+        PersistenceContext pc = ((SessionImpl) JPA.em().getDelegate()).getPersistenceContext();
+        CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
+
+        if (ce != null) {
+            EntityEntry entry = pc.getEntry(base);
+            if (entry != null) {
+                Collection orphans = ce.getOrphans(entry.getEntityName(), persistentCollection);
+                for (Object o : orphans) {
+                    saveAndCascadeIfJPABase(o, willBeSaved);
+                }
+            }
+        }
+    }
+
+    private static void saveAndCascadeIfJPABase(Object o, boolean willBeSaved) {
+        if (o instanceof JPABase) {
+            ((JPABase) o).saveAndCascade(willBeSaved);
         }
     }
 
