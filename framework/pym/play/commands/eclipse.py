@@ -59,9 +59,18 @@ def execute(**kargs):
         playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
     cpJarToSource = {}
+    lib_src = os.path.join(app.path, 'tmp/lib-src')
     for el in classpath:
+        # library sources jars in the lib directory
         if os.path.basename(el) != "conf" and el.endswith('-sources.jar'):
             cpJarToSource[el.replace('-sources', '')] = el
+
+        # pointers to source jars produced by 'play deps'
+        src_file = os.path.join(lib_src, os.path.basename(el) + '.src')
+        if os.path.exists(src_file):
+            f = file(src_file)
+            cpJarToSource[el] = f.readline().rstrip()
+            f.close()
 
     javadocLocation = {}
     for el in classpath:
