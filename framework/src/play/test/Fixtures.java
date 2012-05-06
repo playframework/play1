@@ -38,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.persistence.Entity;
+
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
@@ -104,7 +106,9 @@ public class Fixtures {
     public static void deleteAllModels() {
         List<Class<? extends Model>> classes = new ArrayList<Class<? extends Model>>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
-            classes.add((Class<? extends Model>)c.javaClass);
+		   if( c.javaClass.isAnnotationPresent(Entity.class) ) {
+		       classes.add((Class<? extends Model>)c.javaClass);
+		    }
         }
         for (DBConfig dbConfig : DB.getDBConfigs()) {
             disableForeignKeyConstraints(dbConfig);
