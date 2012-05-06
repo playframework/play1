@@ -1,5 +1,3 @@
-diff --git a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
-index b3e0dc5..2dfc933 100755
 --- a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
 +++ b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
 @@ -111,10 +111,10 @@ public class EmptyInterceptor implements Interceptor, Serializable {
@@ -18,8 +16,6 @@ index b3e0dc5..2dfc933 100755
 -}
 \ No newline at end of file
 +}
-diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
-index 7664c36..f935942 100644
 --- a/hibernate-core/src/main/java/org/hibernate/Interceptor.java
 +++ b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
 @@ -132,7 +132,7 @@ public interface Interceptor {
@@ -49,8 +45,6 @@ index 7664c36..f935942 100644
  
  	/**
  	 * Called before a flush
-diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
-index cd4155f..bb4853f 100644
 --- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
 +++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
 @@ -147,6 +147,27 @@ public abstract class AbstractFlushingEventListener implements Serializable {
