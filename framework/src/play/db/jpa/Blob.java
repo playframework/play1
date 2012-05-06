@@ -83,8 +83,16 @@ public class Blob implements BinaryField, UserType {
         return Blob.class;
     }
 
+    private static boolean equal(Object a, Object b) {
+      return a == b || (a != null && a.equals(b));
+    }
+
     public boolean equals(Object o, Object o1) throws HibernateException {
-        return o == null ? false : o.equals(o1);
+        if(o instanceof Blob && o1 instanceof Blob) {
+            return equal(((Blob)o).UUID, ((Blob)o1).UUID) &&
+                    equal(((Blob)o).type, ((Blob)o1).type);
+        }
+        return equal(o, o1);
     }
 
     public int hashCode(Object o) throws HibernateException {
