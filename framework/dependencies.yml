@@ -44,7 +44,7 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.2.0
     - org.bouncycastle -> bcprov-jdk15 1.45
     - org.codehaus.groovy -> groovy-all 1.8.6
-    - org.eclipse.jdt.core 3.8.0.v_C18 
+    - org.eclipse.jdt.core 3.7.1.v_B76_R37x 
     - org.hibernate -> hibernate-core 4.1.3.Final
     - org.hibernate -> hibernate-commons-annotations 4.0.1.Final
     - org.hibernate -> hibernate-entitymanager 4.1.3.Final
