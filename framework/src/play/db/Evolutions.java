@@ -279,7 +279,7 @@ public class Evolutions extends PlayPlugin {
                     SQLException ex = (SQLException) e;
                     message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
                 }
-                PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ? where id = ?");
+                PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ?1 where id = ?2");
                 ps.setString(1, message);
                 ps.setInt(2, applying);
                 ps.execute();

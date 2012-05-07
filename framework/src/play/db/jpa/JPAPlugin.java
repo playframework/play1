@@ -59,8 +59,7 @@ public class JPAPlugin extends PlayPlugin {
                     StringBuilder q = new StringBuilder().append("from ").append(clazz.getName()).append(" o where");
                     int keyIdx = 1;
                     for (String keyName : keyNames) {
-                            q.append(" o.").append(keyName).append(" = ?").append(keyIdx).append(" and ");
-                            keyIdx++;
+                            q.append(" o.").append(keyName).append(" = ?").append(keyIdx++).append(" and ");
                     }
                     if (q.length() > 4) {
                         q = q.delete(q.length() - 4, q.length());
