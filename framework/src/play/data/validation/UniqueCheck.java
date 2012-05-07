@@ -69,6 +69,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
         final Object[] values = new Object[isUpdate ? propertyNames.length + 1 :
                 propertyNames.length];
         final Class clazz = validatedObject.getClass();
+		int index = 1;
         for (int i = 0; i < propertyNames.length; i++) {
             Field field = getField(clazz, propertyNames[i]);
             field.setAccessible(true);
@@ -80,11 +81,11 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             if (i > 0) {
                 jpql.append(" And ");
             }
-            jpql.append("o.").append(propertyNames[i]).append(" = ? ");
+            jpql.append("o.").append(propertyNames[i]).append(" = ?" + String.valueOf(index++) + " ");
         }
         if (isUpdate) {
             values[propertyNames.length] = keyValue;
-            jpql.append(" and o.").append(keyProperty).append(" <>  ?");
+            jpql.append(" and o.").append(keyProperty).append(" <>  ?" + String.valueOf(index++) + " ");
         }
         return JPQL.instance.count(entityName, jpql.toString(), values) == 0L;
     }
