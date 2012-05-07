@@ -132,7 +132,7 @@ public class JPAPlugin extends PlayPlugin {
             // Explicit SAVE for JPABase is implemented here
             // ~~~~~~
             // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update,remove,recreation
-            // only if the owner will be saved.
+            // only if the owner will be saved or if the targeted entity will be saved (avoid the org.hibernate.HibernateException: Found two representations of same collection)
             // As is:
             // if (session.getInterceptor().onCollectionUpdate(coll, ce.getLoadedKey())) {
             //      actionQueue.addAction(...);
@@ -153,9 +153,13 @@ public class JPAPlugin extends PlayPlugin {
                 public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPABase) {
-                            return ((JPABase) o).willBeSaved;
-                        }
+                       	if (o instanceof JPABase) {
+							if (entities.get() != null) {
+	                           	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+							} else {
+								return ((JPABase) o).willBeSaved;
+							}
+	                    }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
                     }
@@ -166,28 +170,51 @@ public class JPAPlugin extends PlayPlugin {
                 public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPABase) {
-                            return ((JPABase) o).willBeSaved;
-                        }
-                    } else {
-                        System.out.println("HOO: Case not handled !!!");
-                    }
+  		           	 	if (o instanceof JPABase) {
+							if (entities.get() != null) {
+	                           	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+							} else {
+								return ((JPABase) o).willBeSaved;
+							}
+	                     } 
+	 				} else {
+			           	System.out.println("HOO: Case not handled !!!");
+			        }
+                    
                     return super.onCollectionRecreate(collection, key);
                 }
 
                 @Override
                 public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
-                    if (collection instanceof PersistentCollection) {
+				 	if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPABase) {
-                            return ((JPABase) o).willBeSaved;
+			            if (o instanceof JPABase) {
+							if (entities.get() != null) {
+                            	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+							} else {
+								return ((JPABase) o).willBeSaved;
+							}
                         }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
                     }
                     return super.onCollectionRemove(collection, key);
                 }
-            });
+
+				protected ThreadLocal<Object> entities = new ThreadLocal<Object>();
+				
+				@Override
+			 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)  {
+					entities.set(entity);
+					return super.onSave(entity, id, state, propertyNames, types);
+				}
+						
+				@Override
+				public void afterTransactionCompletion(org.hibernate.Transaction tx) {
+					entities.remove();
+				}
+				
+			});
             if (Play.configuration.getProperty("jpa.debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
             } else {

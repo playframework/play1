@@ -133,5 +133,9 @@
 	open('@{JPAController.createAndEditAndSave('Toto4', 'New toto4')}')
 	assertTextNotPresent('Toto4')	
 	assertTextPresent('New toto4')
+	
+	// Test hibernate bug with found two representation of the same collection
+	open('@{JPAController.testFoundTwoRepresentationOfTheSameObject()}')
+	assertTextPresent('OK')
 
 #{/selenium}
