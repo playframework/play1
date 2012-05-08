@@ -347,6 +347,8 @@ public class GenericModel extends JPABase {
 
         /**
          * Bind a JPQL named parameter to the current query.
+         * Careful, this will also bind count results. This means that Integer get transformed into long 
+         *  so hibernate can do the right thing. Use the setParameter if you just want to set parameters. 
          */
         public JPAQuery bind(String name, Object param) {
             if (param.getClass().isArray()) {
@@ -358,6 +360,14 @@ public class GenericModel extends JPABase {
             query.setParameter(name, param);
             return this;
         }
+
+		/** 
+		 * Set a named parameter for this query.
+		 **/
+  		public JPAQuery setParameter(String name, Object param) {
+			query.setParameter(name, param);
+	        return this;
+		}
 
         /**
          * Retrieve all results of the query
