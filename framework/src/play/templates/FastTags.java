@@ -56,7 +56,39 @@ public class FastTags {
     }
 
     public static void _jsAction(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "'; for(key in options) { pattern = pattern.replace(':'+key, options[key]); } return pattern }");
+      	 	out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "';");
+	        out.println("  var argsStart = pattern.indexOf('?') + 1;");
+	        out.println("  var notNullOptions = new Array();");
+	        out.println("  if (argsStart >= 0) {");
+	        out.println("    for (key in options) {");
+	        out.println("      var val = options[key];");
+	        out.println("      if (val != null) {");
+	        out.println("        notNullOptions[key] = val;");
+	        out.println("      } else {");
+	        out.println("        var nullArgPlaceHolder = key + '=:' + key;");
+	        out.println("        var argIndexInPattern = pattern.indexOf(nullArgPlaceHolder, argsStart);");
+	        out.println("        var beforeNullArg = pattern.substring(0, argIndexInPattern);");
+	        out.println("        var afterNullArg = pattern.substring(argIndexInPattern + nullArgPlaceHolder.length);");
+	        out.println("        var charBeforeNullArg = beforeNullArg.charAt(beforeNullArg.length - 1);");
+	        out.println("        if (charBeforeNullArg == '&') {");
+	        out.println("          beforeNullArg = beforeNullArg.substring(0, beforeNullArg.length - 1);");
+	        out.println("        } else if (afterNullArg.charAt(0) == '&') {");
+	        out.println("          afterNullArg = afterNullArg.substring(1);");
+	        out.println("        } else if (charBeforeNullArg == '?' && afterNullArg.length == 0) {");
+	        out.println("          beforeNullArg = beforeNullArg.substring(0, beforeNullArg.length - 1);");
+	        out.println("        }");
+	        out.println("        pattern = beforeNullArg + afterNullArg;");
+	        out.println("      }");
+	        out.println("    }");
+	        out.println("  } else {");
+	        out.println("    notNullOptions = options;");
+	        out.println("  }");
+	        out.println("  for (key in notNullOptions) {");
+	        out.println("    var val = options[key];");
+	        out.println("    pattern = pattern.replace(':' + key, options[key]);");
+	        out.println("  }");
+	        out.println("  return pattern;");
+	        out.println("}");
     }
 
     public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
