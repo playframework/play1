@@ -94,9 +94,11 @@ public class ApplicationClassloader extends ClassLoader {
     // ~~~~~~~~~~~~~~~~~~~~~~~
     public Class<?> loadApplicationClass(String name) {
 
-        Class maybeAlreadyLoaded = findLoadedClass(name);
-        if(maybeAlreadyLoaded != null) {
-            return maybeAlreadyLoaded;
+        if (ApplicationClass.isClass(name)) {
+            Class maybeAlreadyLoaded = findLoadedClass(name);
+            if(maybeAlreadyLoaded != null) {
+                return maybeAlreadyLoaded;
+            }
         }
 
         if (Play.usePrecompiled) {
