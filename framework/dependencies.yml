@@ -28,7 +28,7 @@ require:    &allDependencies
     - javax.mail -> mail 1.4.3
     - javax.inject 1.0
     - jaxen 1.1
-    - joda-time 2.0 
+    - joda-time 2.1 
     - junit 4.8.1
     - jregex 1.2_01
     - log4j 1.2.16
