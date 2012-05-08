@@ -260,8 +260,12 @@ public class ApplicationClasses {
         }
 
         public boolean isClass() {
-            return !name.endsWith("package-info");
+            return isClass(this.name);
         }
+
+	public static boolean isClass(String name) {
+            return !name.endsWith("package-info");
+	}
 
         public String getPackage() {
             int dot = name.lastIndexOf('.');
