@@ -664,7 +664,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("serve404: begin");
         }
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-        nettyResponse.setHeader(SERVER, signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
 
         nettyResponse.setHeader(CONTENT_TYPE, "text/html");
         Map<String, Object> binding = getBindingForErrors(e, false);
