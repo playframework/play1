@@ -192,6 +192,12 @@ public class Evolutions extends PlayPlugin {
         // Apply the current evolution script
         if (Play.mode.isDev() && request.method.equals("POST") && request.url.equals("/@evolutions/apply")) {
             applyScript(true);
+
+            //start to force a call to Play.stop() logic
+            Play.started = true;
+            Play.stop();
+            //end to force a call to Play.stop() logic
+
             new Redirect("/").apply(request, response);
             return true;
         }
