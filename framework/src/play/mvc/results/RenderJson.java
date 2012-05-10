@@ -50,7 +50,7 @@ public class RenderJson extends Result {
     //
     static Method getMethod(Class<?> clazz, String name) {
         for (Method m : clazz.getDeclaredMethods()) {
-            if (m.getName().equals(name)) {
+            if (m.getName().equals(name) && !m.isBridge()) {
                 return m;
             }
         }
