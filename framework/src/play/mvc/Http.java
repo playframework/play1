@@ -150,7 +150,7 @@ public class Http {
          */
         public String value;
         /**
-         * Cookie max-age
+         * Cookie max-age in second
          */
         public Integer maxAge;
         /**
