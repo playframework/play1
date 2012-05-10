@@ -159,6 +159,12 @@ public class ActionInvoker {
                     ControllerInstrumentation.initActionCall();
                     try {
                         inferResult(invokeControllerMethod(actionMethod));
+                    } catch(Result result) {
+                        actionResult = result;
+                        // Cache it if needed
+                        if (cacheKey != null) {
+                            play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
+                        }
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {
