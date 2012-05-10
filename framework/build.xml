@@ -154,6 +154,7 @@
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
             <jvmarg value="${profiler.info.jvmargs.agent}"/>
+            <jvmarg value="${jvm.memory}"/>
         </java>	
     </target>
 
@@ -177,6 +178,7 @@
             <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
+            <jvmarg value="${jvm.memory}"/>
         </java>	
     </target>
 
