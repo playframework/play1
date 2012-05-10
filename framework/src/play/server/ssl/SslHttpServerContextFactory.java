@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.net.Socket;
 import java.security.*;
 import java.util.Properties;
+import java.util.Vector;
 
 public class SslHttpServerContextFactory {
 
@@ -77,7 +78,7 @@ public class SslHttpServerContextFactory {
 
         static PEMKeyManager instance = new PEMKeyManager();
         PrivateKey key;
-        X509Certificate cert;
+        X509Certificate[] chain;
 
         public PEMKeyManager() {
             try {
@@ -93,7 +94,14 @@ public class SslHttpServerContextFactory {
                 key = ((KeyPair) keyReader.readObject()).getPrivate();
 
                 PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
-                cert = (X509Certificate) reader.readObject();
+
+		X509Certificate cert;
+		Vector chainVector = new Vector();
+
+		while ((cert = (X509Certificate) reader.readObject()) != null) {
+		    chainVector.add(cert);
+		}
+		chain = (X509Certificate[])chainVector.toArray(new X509Certificate[1]);
             } catch (Exception e) {
                 e.printStackTrace();
                 Logger.error(e, "");
@@ -121,7 +129,7 @@ public class SslHttpServerContextFactory {
         }
 
         public X509Certificate[] getCertificateChain(String s) {
-            return new X509Certificate[]{cert};
+            return chain;
         }
 
         public PrivateKey getPrivateKey(String s) {
