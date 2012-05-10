@@ -15,7 +15,7 @@ public class Secure extends Controller {
     static void checkAccess() throws Throwable {
         // Authent
         if(!session.contains("username")) {
-            flash.put("url", "GET".equals(request.method) ? request.url : "/"); // seems a good default
+            flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
             login();
         }
         // Checks
@@ -110,7 +110,7 @@ public class Secure extends Controller {
         Security.invoke("onAuthenticated");
         String url = flash.get("url");
         if(url == null) {
-            url = "/";
+            url = Play.ctxPath + "/";
         }
         redirect(url);
     }
