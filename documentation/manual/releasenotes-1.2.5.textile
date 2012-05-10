@@ -1,10 +1,13 @@
 h1. Play 1.2.5 -- Release notes
 
-The changes in this release are listed in the "Play 1.2.5 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/131471-125 on Lighthouse, including 85 resolved tickets. The most important changes are:
+The changes in this release are listed in the "Play 1.2.5 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/131471-125 on Lighthouse, including 121 resolved tickets. The most important changes are:
 
 * fixed multiple continuations/await bugs
+* fixed multiple hibernate related issues
 * security fix for hash-colission-atack
 * JNDI DataSource under Glassfish 3
 * improved chunked transfer/streaming support
-* all libraries upgraded, including netty-3.4.2.Final
-* web socket support for all browsers.
+* upgraded to hibernate 4.1
+* upgraded to netty-3.4.2.Final 
+* web socket support for all browsers
+* all libraries upgraded.
