@@ -46,7 +46,7 @@ public class Topic extends Model {
     }
 
     public Long getVoicesCount() {
-        return User.count("select count(distinct u) from User u, Topic t, Post p where p.postedBy = u and p.topic = t and t = ?", this);
+        return User.count("select count(distinct u) from User u, Topic t, Post p where p.postedBy = u and p.topic = t and t = ?1", this);
     }
 
     public Post getLastPost() {

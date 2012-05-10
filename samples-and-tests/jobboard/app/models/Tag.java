@@ -19,7 +19,7 @@ public class Tag extends Model {
         if (category == null) {
             return Tag.find("select distinct t from Tag t, Job j where t member of j.tags").fetch();
         }
-        return Tag.find("select distinct t from Tag t, Job j where j.category.code = ? and t member of j.tags and j.online = true", category).fetch();
+        return Tag.find("select distinct t from Tag t, Job j where j.category.code = ?1 and t member of j.tags and j.online = true", category).fetch();
     }
 
     public static Tag findByCode(String code) {
