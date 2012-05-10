@@ -94,6 +94,7 @@ public class Lang {
     private static String findClosestMatch(Iterable<String> desiredLocales) {
         //look for an exact match
         for (String a: desiredLocales) {
+            a = a.replace("-", "_");
             for (String locale: Play.langs) {
                 if (locale.equalsIgnoreCase(a)) {
                     return locale;

@@ -48,7 +48,7 @@ public class LangTest {
     @Test
     public void testGet() {
         new PlayBuilder().build();
-        Play.langs = Arrays.asList("no", "en", "en_uk", "fr");
+        Play.langs = Arrays.asList("no", "en", "en_GB", "fr");
         Lang.current.set(null);
 
         Http.Response.current.set( new Http.Response());
@@ -89,16 +89,16 @@ public class LangTest {
         assertThat(Lang.get()).isEqualTo("en");
 
         req = FunctionalTest.newRequest();
-        req.headers.put("accept-language", new Http.Header("accept-language", "en_uk"));
+        req.headers.put("accept-language", new Http.Header("accept-language", "en-GB"));
         Http.Request.current.set(req);
         Lang.current.set(null);
-        assertThat(Lang.get()).isEqualTo("en_uk");
+        assertThat(Lang.get()).isEqualTo("en_GB");
 
         req = FunctionalTest.newRequest();
-        req.headers.put("accept-language", new Http.Header("accept-language", "x,en_uk"));
+        req.headers.put("accept-language", new Http.Header("accept-language", "x,en-GB"));
         Http.Request.current.set(req);
         Lang.current.set(null);
-        assertThat(Lang.get()).isEqualTo("en_uk");
+        assertThat(Lang.get()).isEqualTo("en_GB");
 
         // check with cookie value
 
@@ -131,11 +131,11 @@ public class LangTest {
 
         cookie = new Http.Cookie();
         cookie.name = "PLAY_LANG";
-        cookie.value = "en_uk";
+        cookie.value = "en_GB";
         req.cookies.put(cookie.name, cookie);
         Http.Request.current.set(req);
         Lang.current.set(null);
-        assertThat(Lang.get()).isEqualTo("en_uk");
+        assertThat(Lang.get()).isEqualTo("en_GB");
 
 
     }
