@@ -177,6 +177,9 @@ public class Scope {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
+				final int duration = Time.parseDuration(COOKIE_EXPIRE) ;
+				final long expiration = (duration * 1000l);
+
                 if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
@@ -190,23 +193,23 @@ public class Scope {
                     }
                     if (COOKIE_EXPIRE != null) {
                         // Verify that the session contains a timestamp, and that it's not expired
-                        if (!session.contains(TS_KEY)) {
+					    if (!session.contains(TS_KEY)) {
                             session = new Session();
                         } else {
-                            if (Long.parseLong(session.get(TS_KEY)) < System.currentTimeMillis()) {
+					        if ((Long.parseLong(session.get(TS_KEY))) < System.currentTimeMillis()) {
                                 // Session expired
                                 session = new Session();
                             }
                         }
-                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+					    session.put(TS_KEY, System.currentTimeMillis() + expiration);
                     } else {
                         // Just restored. Nothing changed. No cookie-expire.
                         session.changed = false;
                     }
                 } else {
                     // no previous cookie to restore; but we may have to set the timestamp in the new cookie
-                    if (COOKIE_EXPIRE != null) {
-                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+			        if (COOKIE_EXPIRE != null) {	
+				        session.put(TS_KEY, (System.currentTimeMillis() + expiration));
                     }
                 }
 
