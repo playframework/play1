@@ -100,6 +100,12 @@ public class LangTest {
         Lang.current.set(null);
         assertThat(Lang.get()).isEqualTo("en_GB");
 
+        req = FunctionalTest.newRequest();
+        req.headers.put("accept-language", new Http.Header("accept-language", "x,en-US"));
+        Http.Request.current.set(req);
+        Lang.current.set(null);
+        assertThat(Lang.get()).isEqualTo("en");
+
         // check with cookie value
 
         req = FunctionalTest.newRequest();
