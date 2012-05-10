@@ -293,6 +293,10 @@ public abstract class FunctionalTest extends BaseTest {
                 // 0, they discard immediately.
                 if(e.getValue().maxAge == null || e.getValue().maxAge > 0) {
                     savedCookies.put(e.getKey(), e.getValue());
+                } else {
+                    // cookies with maxAge zero still remove a previously existing cookie,
+                    // like PLAY_FLASH.
+                    savedCookies.remove(e.getKey());
                 }
             }
             response.out.flush();
