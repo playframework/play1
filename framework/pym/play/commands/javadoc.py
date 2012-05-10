@@ -24,15 +24,15 @@ def execute(**kargs):
 
     fileList = []
     def add_java_files(path):
-		for root, subFolders, files in os.walk(path):	
+        for root, subFolders, files in os.walk(path):	
             for file in files:
-                if file.endswith(".java"):
-                    fileList.append(os.path.join(root, file))
-	add_java_files(os.path.join(app.path, "app"))
+                 if file.endswith(".java"):
+   	                fileList.append(os.path.join(root, file))
+    add_java_files(os.path.join(app.path, "app"))
     add_java_files(os.path.join(app.path, "src"))
     for module in modules:
-		add_java_files(os.path.normpath(os.path.join(module, "app")))
-		add_java_files(os.path.normpath(os.path.join(module, "src")))
+	    add_java_files(os.path.normpath(os.path.join(module, "app")))
+	    add_java_files(os.path.normpath(os.path.join(module, "src")))
     outdir = os.path.join(app.path, 'javadoc')
     sout = open(os.path.join(app.log_path(), 'javadoc.log'), 'w')
     serr = open(os.path.join(app.log_path(), 'javadoc.err'), 'w')
