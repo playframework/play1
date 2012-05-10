@@ -6,6 +6,7 @@ import fileinput
 import getopt
 import shutil
 import zipfile
+import string
 
 def playVersion(play_env):
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
@@ -225,3 +226,16 @@ def copy_directory(source, target, exclude = None):
 
 def isTestFrameworkId( framework_id ):
     return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
+
+if sys.platform == 'cygwin':
+    def normalizePath(path):
+        """Transform a possibly Windows path to a Cygwin path and escape spaces"""
+        if os.path.exists(path):
+            return string.replace(os.popen('cygpath -md "' + path + '"').read(), '\n', '').replace(' ', '\\ ')
+        else:
+            parts = os.path.split(os.path.realpath(path))
+            return os.path.join(string.replace(os.popen('cygpath -md "' + parts[0] + '"').read(), '\n', '').replace(' ', '\\ '), parts[1])
+else:
+    def normalizePath(path):
+        """Nothing to do if platform is not Cygwin"""
+        return path
