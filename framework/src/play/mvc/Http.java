@@ -688,7 +688,12 @@ public class Http {
         }
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
-            path = Play.ctxPath + path;
+            if("/".equals(path) && !Play.ctxPath.isEmpty()){
+                path = Play.ctxPath;
+            }else{
+                path = Play.ctxPath + path;
+            }
+            
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 if (maxAge != null) {
