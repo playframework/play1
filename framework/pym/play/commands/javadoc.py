@@ -16,7 +16,6 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
-    app.check()
     modules = app.modules()
     if not os.environ.has_key('JAVA_HOME'):
         javadoc_path = "javadoc"
@@ -24,14 +23,16 @@ def execute(**kargs):
         javadoc_path = os.path.normpath("%s/bin/javadoc" % os.environ['JAVA_HOME'])
 
     fileList = []
-    def add_java_files(app_path):
-        for root, subFolders, files in os.walk(os.path.join(app_path, 'app')):
+    def add_java_files(path):
+		for root, subFolders, files in os.walk(path):	
             for file in files:
                 if file.endswith(".java"):
                     fileList.append(os.path.join(root, file))
-    add_java_files(app.path)
+	add_java_files(os.path.join(app.path, "app"))
+    add_java_files(os.path.join(app.path, "src"))
     for module in modules:
-        add_java_files(os.path.normpath(module))
+		add_java_files(os.path.normpath(os.path.join(module, "app")))
+		add_java_files(os.path.normpath(os.path.join(module, "src")))
     outdir = os.path.join(app.path, 'javadoc')
     sout = open(os.path.join(app.log_path(), 'javadoc.log'), 'w')
     serr = open(os.path.join(app.log_path(), 'javadoc.err'), 'w')
