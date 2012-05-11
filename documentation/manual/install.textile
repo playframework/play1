@@ -3,7 +3,7 @@ h1. Installation guide
 
 h2. <a name="prerequisites">Prerequisites</a>
 
-To run the Play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
+To run the Play framework, you need "Java 6 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
 
 Be sure to have Java in the current path (enter @java -version@ to check). Play will use the default Java or the one available at the @$JAVA_HOME@ path if defined.
 
