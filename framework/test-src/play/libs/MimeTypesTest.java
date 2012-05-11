@@ -12,11 +12,6 @@ import play.mvc.Http.Response;
  * Tests for {@link MimeTypes} class.
  */
 public class MimeTypesTest {
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
     @Test
     public void contentTypeShouldReturnResponseCharsetWhenAvailable() throws Exception {
         String oldEncoding = Response.current().encoding;
@@ -42,5 +37,4 @@ public class MimeTypesTest {
             Response.current.set(originalResponse);
         }
     }
-
 }
