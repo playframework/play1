@@ -182,15 +182,18 @@ public class Scope {
 
                 if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;
-                    String sign = value.substring(0, value.indexOf("-"));
-                    String data = value.substring(value.indexOf("-") + 1);
-                    if (sign.equals(Crypto.sign(data, Play.secretKey.getBytes()))) {
-                        String sessionData = URLDecoder.decode(data, "utf-8");
-                        Matcher matcher = sessionParser.matcher(sessionData);
-                        while (matcher.find()) {
-                            session.put(matcher.group(1), matcher.group(2));
-                        }
-                    }
+				 	int firstDashIndex = value.indexOf("-");
+				    if(firstDashIndex > -1) {
+                    	String sign = value.substring(0, firstDashIndex);
+                    	String data = value.substring(firstDashIndex + 1);
+                    	if (sign.equals(Crypto.sign(data, Play.secretKey.getBytes()))) {
+                        	String sessionData = URLDecoder.decode(data, "utf-8");
+                        	Matcher matcher = sessionParser.matcher(sessionData);
+                        	while (matcher.find()) {
+                            	session.put(matcher.group(1), matcher.group(2));
+                        	}
+                    	}
+					} 
                     if (COOKIE_EXPIRE != null) {
                         // Verify that the session contains a timestamp, and that it's not expired
 					    if (!session.contains(TS_KEY)) {
