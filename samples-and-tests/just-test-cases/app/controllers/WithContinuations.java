@@ -337,7 +337,6 @@ public class WithContinuations extends Controller {
 
          await("1s", new F.Action0() {
 
-             @Override
              public void invoke() {
                  renderText(renderArgs.get("arg"));
              }
@@ -348,15 +347,14 @@ public class WithContinuations extends Controller {
         renderArgs.put("arg", arg);
 
         Promise<String> promise = new Job() {
-            @Override
-            public String doJobWithResult() throws Exception {
+           
+ 			public String doJobWithResult() throws Exception {
                 return "result";
         }
 
         }.now();
         await(promise, new F.Action<String>() {
 
-            @Override
             public void invoke(String result) {
                 renderText(result + "/" + renderArgs.get("arg"));
             }

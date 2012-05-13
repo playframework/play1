@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
-import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
 import play.Invoker.InvocationContext;

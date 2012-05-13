@@ -1,12 +1,11 @@
 package play.db.jpa;
 
 import org.hibernate.Session;
-import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.collection.internal.PersistentMap;
-import org.hibernate.engine.spi.*;
-import org.hibernate.engine.spi.PersistenceContext;
+import org.hibernate.collection.*;
+import org.hibernate.engine.PersistenceContext;
+import org.hibernate.engine.*;
 import org.hibernate.exception.GenericJDBCException;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.impl.SessionImpl;
 import org.hibernate.proxy.HibernateProxy;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
@@ -107,7 +106,7 @@ public class JPABase implements Serializable, play.db.Model {
             Set<Field> fields = new HashSet<Field>();
             Class clazz = this.getClass();
             while (!clazz.equals(JPABase.class)) {
-                Collections.addAll(fields, clazz.getDeclaredFields());
+                java.util.Collections.addAll(fields, clazz.getDeclaredFields());
                 clazz = clazz.getSuperclass();
             }
             for (Field field : fields) {

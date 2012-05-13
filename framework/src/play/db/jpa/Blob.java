@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.SessionImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -99,15 +99,16 @@ public class Blob implements BinaryField, UserType {
         return o.hashCode();
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor sessionImplementor, Object o) throws HibernateException, SQLException {
-       String val = (String) StringType.INSTANCE.nullSafeGet(resultSet, names[0], sessionImplementor, o);
+    public Object nullSafeGet(ResultSet resultSet, String[] names, Object o) throws HibernateException, SQLException {
+       	String val = (String) StringType.INSTANCE.get(resultSet, names[0]);
+
         if(val == null || val.length() == 0 || !val.contains("|")) {
             return new Blob();
         }
         return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
     }
 
-    public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor sessionImplementor) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement ps, Object o, int i) throws HibernateException, SQLException {
          if(o != null) {
             ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
         } else {

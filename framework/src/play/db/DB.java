@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.impl.SessionImpl;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
 import play.Logger;

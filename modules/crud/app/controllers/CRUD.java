@@ -274,7 +274,7 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-
+ 			Factory factory =  Model.Manager.factoryFor(entityClass);
             return factory.count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
         }
 
@@ -323,7 +323,10 @@ public abstract class CRUD extends Controller {
             return null;
         }
 
-        @Override
+		public int compare( ObjectType o1, ObjectType o2 ){
+		        return o1.compareTo( o2 );
+		}
+		
         public int compareTo(ObjectType other) {
             return modelName.compareTo(other.modelName);
         }
@@ -340,6 +343,10 @@ public abstract class CRUD extends Controller {
             public String name;
             public boolean multiple;
             public boolean required;
+
+			public int compareTo(Object object) {
+				return -1;
+			}
 
             @SuppressWarnings("deprecation")
             public ObjectField(Model.Property property) {
@@ -396,7 +403,7 @@ public abstract class CRUD extends Controller {
                 name = field.getName();
             }
 
-            public List<Object> getChoices() {
+		    public List<Object> getChoices() {
                 return property.choices.list();
             }
         }
