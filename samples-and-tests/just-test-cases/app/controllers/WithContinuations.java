@@ -111,7 +111,7 @@ public class WithContinuations extends Controller {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
             String r = await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
+            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 201;
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
