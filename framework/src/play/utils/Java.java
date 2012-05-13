@@ -96,22 +96,15 @@ public class Java {
     public static Method findActionMethod(String name, Class clazz) {
 	    // We don't want to check the views
 	  	while (!clazz.getName().equals("java.lang.Object")) {
-			play.Logger.info("checking " + clazz.getName());
-		try {
-            for (Method m : clazz.getDeclaredMethods()) {
-				play.Logger.info("method " + m);
-				
-                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
+		    for (Method m : clazz.getDeclaredMethods()) {
+			    if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
                     // Check that it is not an intercepter
                     if (!m.isAnnotationPresent(Before.class) && !m.isAnnotationPresent(After.class) && !m.isAnnotationPresent(Finally.class)) {
                         return m;
                     }
                 }
             }
-} catch (Throwable e) {
-	e.printStackTrace();
-}
-            clazz = clazz.getSuperclass();
+		    clazz = clazz.getSuperclass();
         }
         return null;
     }
