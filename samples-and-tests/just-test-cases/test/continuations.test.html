@@ -9,13 +9,13 @@
     assertTextPresent('Hello -> DONE:100')
 
     open('@{WithContinuations.waitFuture()}')
-    assertTextPresent('0:true[DONE:100];1:true[DONE:100];2:true[DONE:100];3:true[DONE:100];4:true[DONE:100]')
+    assertTextPresent('0:[DONE:100];1:[DONE:100];2:[DONE:100];3:[DONE:100];4:[DONE:100]')
 
     open('@{WithContinuations.waitAll()}')
-    assertTextPresent('0:true[[DONE:100, DONE:200]];1:true[[DONE:100, DONE:200]]')
+    assertTextPresent('0:[[DONE:100, DONE:200]];1:[[DONE:100, DONE:200]]')
 
     open('@{WithContinuations.waitAny()}')
-    assertTextPresent('0:true[DONE:100];1:true[DONE:100]')
+    assertTextPresent('0:[DONE:100];1:[DONE:100]')
     
     open('@{WithContinuations.withNaiveJPA()}')
     assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
