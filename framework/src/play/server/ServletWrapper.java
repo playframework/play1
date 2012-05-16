@@ -68,7 +68,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        final String playId = e.getServletContext().getInitParameter("play.id");
+        final String playId = System.getProperty("play.id", e.getServletContext().getInitParameter("play.id"));
         if (StringUtils.isEmpty(playId)) {
             throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
         }

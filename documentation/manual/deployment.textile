@@ -108,6 +108,7 @@ bc. <?xml version="1.0" ?>
   </resource-ref>
 </web-app>
 
+You can also specify the play id with the play.id system property. This is useful when you want to deploy the same war on different environments. To use it, start your application server with @-Dplay.id=test@ for example. 
 
 h2. <a name="cloud">Cloud-based hosting</a>
 
