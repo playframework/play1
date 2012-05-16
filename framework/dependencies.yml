@@ -30,7 +30,7 @@ require:    &allDependencies
     - javax.inject 1.0
     - jaxen 1.1
     - joda-time 2.1 
-    - junit 4.8.1
+    - junit 4.10
     - jregex 1.2_01
     - log4j 1.2.16
     - net.sf.ehcache -> ehcache-core 2.4.3
