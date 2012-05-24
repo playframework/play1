@@ -46,6 +46,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-core 3.6.10.Final
     - org.hibernate -> hibernate-commons-annotations 3.2.0.Final
     - org.hibernate -> hibernate-entitymanager 3.6.10.Final
+    - org.hibernate -> hibernate-validator 4.1.0.Final
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.javassist -> javassist 3.9.0.GA
