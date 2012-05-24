@@ -522,6 +522,7 @@ public class Play {
 
             // Plugins
             try {
+                Thread.currentThread().setContextClassLoader(classloader);
                 pluginCollection.onApplicationStart();
             } catch (Exception e) {
                 if (Play.mode.isProd()) {
