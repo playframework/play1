@@ -165,6 +165,10 @@ public class Fixtures {
                 yamlFile = vf.child(name);
                 if (yamlFile != null && yamlFile.exists()) {
                     break;
+                } else {
+		    // reset to null to avoid to select a wrong file if loop
+		    // over all files
+		    yamlFile = null;
                 }
             }
             if (yamlFile == null) {
