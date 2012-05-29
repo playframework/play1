@@ -88,6 +88,35 @@ public class BinderTest {
     }
 
 
+    @Test
+    public void verify_unbinding_and_binding_of_nestedBeanList() throws Exception {
+
+        Data4 data4 = new Data4();
+        data4.a = "aaa";
+        data4.b = false;
+        data4.c = 12;
+        
+        Data1 data1_1 = new Data1();
+        data1_1.a = "aAaA";
+        data1_1.b = 13;
+
+        Data1 data1_2 = new Data1();
+        data1_2.a = "bBbB";
+        data1_2.b = 14;
+        
+        data4.dataList = new ArrayList<Data1>(2);
+        data4.dataList.add(data1_1);
+        data4.dataList.add(data1_2);
+
+
+
+        Map<String, Object> r = new HashMap<String, Object>();
+        Unbinder.unBind(r, data4, "data4", noAnnotations);
+        Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
+        RootParamNode root = ParamNode.convert(r2);
+        assertThat(Binder.bind(root, "data4", Data4.class, null, null)).isEqualTo(data4);
+
+    }
      @Test
     public void verifyBindingOfStringMaps() throws Exception {
         Map<String, String[]> params = new HashMap<String, String[]>();
