@@ -145,8 +145,11 @@ def execute(**kargs):
         os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
-
-    print "~ OK, the application is ready for eclipse"
+   
+    if is_application:
+        print "~ OK, the application \"%s\" is ready for eclipse" % application_name
+    else:
+        print "~ OK, the module \"%s\" is ready for eclipse" % application_name
     print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path)
     print "~"
     print "~ Use eclipsify again when you want to update eclipse configuration files."
