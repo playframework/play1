@@ -1,0 +1,12 @@
+h2. Controller - Jobs
+
+*==@OnApplicationStart==*
+
+*==@On("0 0 12 &lowast; &lowast; ?")==*
+毎日午後 12:01
+
+*==@On("10 30 12 ? &lowast; MON-FRI")==*
+平日の午後 12:30:10
+
+*==@Every("1h")==*
+*==public class Bootstrap extends Job {public void doJob() {...} }==*

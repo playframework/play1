@@ -11,7 +11,7 @@
         <div class="wrapper">
 
             <div id="docSidebar">
-                
+
                 <div id="logo">
                     <img src="@{'/public/playmanual/logo.png'}">
                     <h2 id="version">Play ${play.version}</h2>
@@ -41,6 +41,34 @@
 
                 <h2>Contents</h2>
                 <div id="toc"></div>
+
+                <h2>Languages</h2>
+                <div id="lang">
+
+                <ul>
+                    #{list items:langMenuList, as:"langMenu"}
+                        %{
+                            currentUrl = new ArrayList()
+                            currentUrl.addAll(Arrays.asList(request.url.split("/")))
+                            if(currentUrl.size()>=4){
+                                currentUrl.set(2,langMenu.key)
+                            }else{
+                                currentUrl.add(2, langMenu.key)
+                            }
+                            urlWithLocale = currentUrl.join("/")
+                        }%
+                        #{if docLang!=null && docLang.equalsIgnoreCase(langMenu.key)}
+                            <li><a href="${urlWithLocale}"><h3>${langMenu.value}</h3></a></li>
+                        #{/if}
+                        #{elseif docLang==null && langMenu.key.equals("en")}
+                            <li><a href="${urlWithLocale}"><b>${langMenu.value}</b></a></li>
+                        #{/elseif}
+                        #{else}
+                            <li><a href="${urlWithLocale}">${langMenu.value}</a></li>
+                        #{/else}
+                    #{/list}
+                </ul>
+                </div>
 
                 <h2>Search</h2>
                 <p>Get help with google</p>

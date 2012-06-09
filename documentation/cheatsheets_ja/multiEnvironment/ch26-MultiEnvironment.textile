@@ -1,0 +1,20 @@
+h2. Multi-environment
+
+*==# Test configuration==*
+*==%test.db=mem==*
+*==%test.jpa.ddl=create-drop==*
+
+*==# Dev configuration==*
+*==%dev.http.port=8080==*
+*==%dev.application.log=DEBUG==*
+*==%dev.application.mode=dev==*
+
+*==# Production configuration==*
+*==%prod.http.port=80==*
+*==%prod.application.log=INFO==*
+*==%prod.application.mode=prod==*
+
+*==play run --%prod==*
+*==play run --%dev==*
+*==play test==*
+これは適切な設定を選びます。

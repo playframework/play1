@@ -1,0 +1,315 @@
+h1. 認証機能の追加
+
+管理機能には何らかの認証プラグインが必要です。幸いなことに、Play にはそのためのモジュールがあります。そのモジュールは **Secure** モジュールと呼ばれます。
+
+h2. <a>secure モジュールの有効化</a>
+
+@yabe/conf/application.conf@ ファイルにおいて **Secure** モジュールを有効化し、アプリケーションを再起動してください。
+
+bc. # Import the secure module
+module.secure=${play.path}/modules/secure
+
+再起動後、Play はこのモジュールがロードされたことを告げるはずです。
+
+**Secure** モジュールにはデフォルトルートがひと揃え含まれており、これは @yabe/conf/routes@ ファイルで容易に利用することができます (あるいは、独自のルートを定義することも同様に可能です):
+
+bc. # Import Secure routes
+*       /                                       module:secure
+
+h2. <a>admin コントローラの保護</a>
+
+このモジュールは、必要な全てのインターセプタを宣言する @controllers.Secure@ コントローラを提供します。もちろん、単にこのコントローラを継承することもできるのですが、Java では単一継承に制限されるので、問題となります。
+
+直接 @Secure@ を継承する代わりに、同様に関連するインターセプタを起動するよう Play に指示する <code>@With</code> アノテーションを使って管理コントローラを注釈することができます:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+@With(Secure.class)
+public class Posts extends CRUD {    
+}
+
+@Comments@ 、 @Users@ 、そして @Tags@ コントローラも同様に注釈してください。
+
+これで、どの管理アクションにアクセスしようとしても、ログインページが表示されるはずです:
+
+!images/guide8-1!
+
+実は、このままではどのようなログイン/パスワードのペアも使うことができてしまいます。ただ動いているだけです。
+
+h2. <a>認証プロセスのカスタマイズ</a>
+
+アプリケーションは、認証プロセスをカスタマイズするために @controllers.Secure.Security@ のインスタンスを提供する必要があります。このクラスの独自のバージョンを作成することで、ユーザはどのように認証されるべきなのかを指定できるようになります。
+
+@yabe/controllers/Security.java@ ファイルを作成して、 @authenticate()@ メソッドをオーバーライドしてください:
+
+bc. package controllers;
+ 
+import models.*;
+ 
+public class Security extends Secure.Security {
+	
+    static boolean authenticate(String username, String password) {
+        return true;
+    }
+    
+}
+
+ブログシステムのモデルの一部として既に User オブジェクトを用意しているので、このメソッドの動作するバージョンを実装することは簡単です:
+
+bc. static boolean authenticate(String username, String password) {
+    return User.connect(username, password) != null;
+}
+
+これで "http://localhost:9000/logout":http://localhost:9000/logout へ行き、ログアウトしてから、 <code>bob@gmail.com/secret</code> のように、 @initial-data.yml@ からインポートしたユーザのどれかひとつを使ってログインを試してみることができます。
+
+h2. <a>管理機能のリファクタリング</a>
+
+CRUD モジュールを使った管理機能を開始しましたが、まだブログの UI によく統合されていません。新しい管理機能について作業を始めましょう。この管理機能は、それぞれの投稿者に、彼/彼女自身の投稿にアクセスできるようにします。CRUD を使ったフル機能の管理機能は、引き続き管理ユーザが利用できるようにしましょう。
+
+この管理機能のための @Admin@ コントローラを作成してください:
+
+bc.  package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+import java.util.*;
+ 
+import models.*;
+ 
+@With(Secure.class)
+public class Admin extends Controller {
+    
+    @Before
+    static void setConnectedUser() {
+        if(Security.isConnected()) {
+            User user = User.find("byEmail", Security.connected()).first();
+            renderArgs.put("user", user.fullname);
+        }
+    }
+ 
+    public static void index() {
+        render();
+    }
+    
+}
+
+そして、 @yabe/conf/routes@ 内のルート定義を以下のようにリファクタリングしてください:
+
+bc. # Administration
+GET     /admin/?                                Admin.index
+*       /admin                                  module:crud
+
+ routes ファイル内にある順序を忘れないようにしてください。最初の行からマッチしている HTTP リクエストが使用されます。これは @Admin@ コントローラへのマップに対するエントリは CRUD モジュールページに @/admin@ のリクエストを行うため、2行目よりも前に来ないといけないことを意味している。しかし、 @/admin/@ は @Admin.index@ の代わりに @CRUD.index@ にマッピングされている。
+
+@yabe/app/views/main.html@ テンプレートの 'Log in to write something' 文字列から、このコントローラにリンクを貼ってください:
+
+bc. …
+<ul id="tools">
+    <li>
+        <a href="@{Admin.index()}">Log in to write something</a>
+    </li>
+</ul>
+…
+
+この新しい管理機能を動作させるための最後の作業は @yabe/app/views/Admin/index.html@ テンプレートを作成することです。シンプルなものから始めましょう:
+
+bc. Welcome ${user}!
+
+これで、ブログのトップページへ行き、'Log in to write something' リンクをクリックすると、新しい管理機能が表示されるはずです:
+
+!images/guide8-2!
+
+いいスタートです! ただ、この管理機能には複数のページを用意するつもりなので、親テンプレートが必要です。 @yabe/app/views/admin.html@ ファイルに、このテンプレートを作成しましょう:
+
+bc. <!DOCTYPE html>
+<html>
+    <head>
+        <title>Administration</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        #{get 'moreStyles' /}	
+        <link rel="stylesheet" type="text/css" media="screen" 
+                href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+                href="@{'/public/images/favicon.png'}" />
+        <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}"></script>
+        <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
+    </head>
+    <body id="admin">
+        
+        <div id="header">
+            <div id="logo">
+                yabe. <span>administration</span>
+            </div>
+            <ul id="tools">
+                <li>
+                    <a href="@{Secure.logout()}">Log out</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div id="main">
+            #{doLayout /} 
+        </div>
+        
+        <p id="footer">
+            Yabe is a (not so) powerful blog engine built with the 
+            <a href="http://www.playframework.org">Play framework</a>
+            as a tutorial application.
+        </p>
+        
+    </body>
+</html>
+
+見ての通り、これはブログエンジンのフロント部分に使用したテンプレートととても似ています。 **Log in** リンクを、secure モジュールが提供する @Secure@ コントローラの @logout@ アクションをコールする **Log out** リンクで置き換えました。
+
+それでは、これを @yabe/app/views/Admin/index.html@ テンプレート中で使用してみましょう:
+
+bc. #{extends 'admin.html' /}
+ 
+Welcome ${user}!
+
+そして、画面を更新してください!
+
+!images/guide8-3!
+
+**log out** リンクをクリックしてみると、ログインフォームに送り返されます:
+
+!images/guide8-4!
+
+これが secure モジュールがログアウトイベントを扱うデフォルトの方法です。しかし、これは @controllers.Security@ クラスで @onDisconnected()@ メソッドを単にオーバーライドすることで容易にカスタマイズすることができます:
+
+bc. static void onDisconnected() {
+    Application.index();
+}
+
+@onAuthenticated()@ イベントについても同様にカスタマイズすることができます:
+
+bc. static void onAuthenticated() {
+    Admin.index();
+}
+
+h2. <a>役割の追加</a>
+
+実際には、2 つの管理領域が必要です: 1 つは普通の投稿者向けのもので、もう 1 つは上位管理者向けのものです。これまで見てきたように、 @User@ モデルオブジェクトは、そのユーザが上位管理者権限を持つか否かを示す @isAdmin@ フィールドを持ちます。
+
+secure モジュールは @認証@ だけではなく、 @認可@ 管理も提供します。この認可管理は @プロファイル@ と呼ばれます。 @admin@ プロファイルを作成するために必要なのは、 @controllers.Security@ クラスの @check()@ メソッドをオーバーライドすることだけです:
+
+bc. static boolean check(String profile) {
+    if("admin".equals(profile)) {
+        return User.find("byEmail", connected()).<User>first().isAdmin;
+    }
+    return false;
+}
+
+これで、ユーザが admin 権限を持つ場合は管理メニューを表示することができるようになります。トップレベルメニューを統合するよう @app/views/admin.html@ を更新してください:
+
+bc. …
+<div id="main">
+    
+    <ul id="adminMenu">
+        <li class="${request.controller == 'Admin' ? 'selected' : ''}">
+            <a href="@{Admin.index()}">My posts</a>
+        </li>
+        #{secure.check 'admin'}
+            <li class="${request.controller == 'Posts' ? 'selected' : ''}">
+                <a href="@{Posts.list()}">Posts</a>
+            </li>
+            <li class="${request.controller == 'Tags' ? 'selected' : ''}">
+                <a href="@{Tags.list()}">Tags</a>
+            </li>
+            <li class="${request.controller == 'Comments' ? 'selected' : ''}">
+                <a href="@{Comments.list()}">Comments</a>
+            </li>
+            <li class="${request.controller == 'Users' ? 'selected' : ''}">
+                <a href="@{Users.list()}">Users</a>
+            </li>
+        #{/secure.check}
+    </ul>
+    
+    #{doLayout /} 
+</div>
+…
+
+どのように @#{secure.check /}@ タグを使って、このメニュー部分を @admin@ ユーザにのみ表示しているかを確認してください。
+
+!images/guide8-5!
+
+ただし、まだこのサイトの CRUD 部分のセキュリティは充分ではありません! ユーザが URL を知っていれば、依然としてアクセスすることができます。コントローラも同様に保護しなければなりません。これは <code>@Check</code> アノテーションを使うことでとても簡単に行うことができます。例えば、 @Posts@ コントローラを保護するには、以下のようにします:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+@Check("admin")
+@With(Secure.class)
+public class Posts extends CRUD {    
+}
+
+@Tags@ 、 @Comments@ 、そして @Users@ コントローラも同じように保護してください。ここで、ログアウトして (<code>jeff@gmail.com/secret</code> のような) 一般ユーザで再度ログインしてください。管理者向け CRUD リンクが表示されないはずです。そして、URL "http://localhost:9000/admin/users":http://localhost:9000/admin/users に直接アクセスしてみると、 **403 Forbidden** レスポンスが返ります。
+
+!images/guide8-6!
+
+h2. <a>CRUD レイアウトのカスタマイズ</a>
+
+楽しくなってきましたが、管理領域の CRUD 部分へ行くと管理用レイアウトが無くなってしまいます。これは CURD モジュールが自身のレイアウトを提供するからです。しかし、もちろんこれをオーバーライドすることができます。以下の Play コマンドを使用してください:
+
+bc. play crud:ov --layout
+
+新しい @/yabe/app/views/CRUD/layout.html@ テンプレートが作成されます。このテンプレートの内容を @admin.html@ レイアウトとよく馴染むように置き換えましょう:
+
+bc. #{extends 'admin.html' /}
+#{set 'moreStyles'}
+    <link rel="stylesheet" type="text/css" media="screen" 
+        href="@{'/public/stylesheets/crud.css'}" />
+#{/set}
+ 
+<div id="crud">
+ 
+    #{if flash.success}
+    	<div class="crudFlash flashSuccess">
+    		${flash.success}
+    	</div>
+    #{/if}
+    #{if flash.error || error}
+    	<div class="crudFlash flashError">
+    		${error ?: flash.error}
+    	</div>
+    #{/if}
+ 
+    <div id="crudContent">
+    	#{doLayout /}
+    </div>
+ 
+</div>
+
+見ての通り、テンプレート変数 **get/set** の仕組みを使って @crud.css@ を @admin.html@ に取り込み、再利用します。これで、管理領域の CRUD 部分にアクセスしてみると、管理領域のレイアウトと適切に統合されて表示されます:
+
+!images/guide8-7!
+
+!images/guide8-9!
+
+h2. <a>ログインページのスタイル変更</a>
+
+ここまでで、管理領域は視覚的にほぼ統一されました。スタイルについて最後にすることは、ログインページに対する作業です。いつもどおり、デフォルト CSS をオーバーライドすることで容易にカスタマイズすることができます:
+
+bc. play secure:ov --css
+
+この CSS はこのまま維持しますが、先頭部分で @main.css@ をインポートします。単に以下の最初の一行を @yabe/public/stylesheets/secure.css@ に追加してください:
+
+bc. @import url(main.css);
+…
+
+そして、 @yabe/conf/messages@ ファイルに以下の行を追加してログイン画面のメッセージをカスタマイズします:
+
+bc. secure.username=Your email:
+secure.password=Your password:
+secure.signin=Log in now
+
+!images/guide8-8!
+
+p(note). 次: %(next)"カスタムエディタの作成":guide9%

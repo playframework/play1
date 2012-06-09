@@ -1,0 +1,135 @@
+h1. YAML
+
+h2. <a name="syntax">YAML syntax</a>
+
+Your application tests will often use data structures that consist of related model objects, which can be tedious to create programmatically in Java. Play includes a "YAML":http://en.wikipedia.org/wiki/YAML parser which makes the task much simpler.
+
+Create a YAML file like the following, in the @conf@ directory.
+
+bc.. City(capitalfederal):
+    name: Capital Federal
+    state: Buenos Aires
+
+User(john):
+    name: "John Smith"
+    email: john@john.com
+    lang: es
+    created: 2007-01-01
+
+User(frank):
+    name: "Frank Franken"
+    email: frank@frank.com
+    lang: en
+    created: 2007-08-05
+
+Neighborhood(villalugano):
+    name: Villa Lugano
+    city: capitalfederal
+    tags: "shopping, cafes"
+    users: [john, frank]
+
+Neighborhood(coghlan):
+    name: Coghlan
+    city: capitalfederal
+    tags: "cafes, bars"
+    users: [john]
+
+p. Play’s YAML syntax varies slightly from the standard. Each stanza must start with the name of the model class (eg @Neighborhood@) and be followed by an identifier in brackets (eg @villalugano@), which you can use to reference the object elsewhere in the file. This is different to standard YAML syntax, which uses the ampersand character to indicate a reference.
+
+Play uses "SnakeYAML":http://code.google.com/p/snakeyaml/, which has an excellent "documentation page":http://code.google.com/p/snakeyaml/wiki/Documentation#YAML_syntax with many examples.
+
+h2. <a name="model">Model classes</a>
+
+The YAML file can contain one-to-many, many-to-one and many-to-many relationships. These relationships must be explicity annotated in the model classes, and you must indicate which is the "owning side" of the relationship.
+
+p. @City.java@
+
+bc.. package models;
+
+import java.util.List;
+import javax.persistence.*;
+import play.db.jpa.Model;
+
+@Entity
+public class City extends Model {
+    public String name;
+    public String state;
+    
+    // bi-directional one-to-many, inverse side
+    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL)
+    public List<Neighborhood> neighborhoods;
+}
+
+p. @Neighborhood.java@
+
+bc.. package models;
+
+import java.util.List;
+import javax.persistence.*;
+import play.db.jpa.Model;
+
+@Entity
+public class Neighborhood extends Model {
+    public String name;
+    
+    // bi-directional one-to-many, owning side
+    @ManyToOne
+    public City city;
+    
+    public String tags;
+    
+    // owning side
+    @ManyToMany
+    public List<User> users;
+}
+
+p. @User.java@
+
+bc.. package models;
+
+import java.util.*;
+import javax.persistence.*;
+import play.db.jpa.Model;
+
+@Entity
+//@Table(name = "`user`")
+public class User extends Model {
+    public String name;
+    public String email;
+    public String lang;
+    public Date created;
+    
+    // inverse side of the relation
+    @ManyToMany(mappedBy = "users")
+    public List<Neighborhood> neighborhoods;
+}
+
+
+p(note). Note that if you are using PostgreSQL you may need to explicitly set the name of the @user@ table with escape characters because @user@ is a reserved word.
+
+h2. <a name="loading">Loading the data structure in your application</a>
+
+Typically you will load the data structure defined in the YAML file as part of a "unit test":test#aFixturesa. But sometimes you may wish to populate the database with specific data in other circumstances, for example "when your application starts":jobs#aBootstrapjoba for the first time.
+
+bc.. import play.*;
+import play.jobs.*;
+import play.test.*;
+import models.*;
+
+@OnApplicationStart
+public class Bootstrap extends Job {
+    public void doJob() {
+        // Check if the database is empty
+        if(User.count() == 0) {
+            Fixtures.loadModels("initial-data.yml");
+        }
+    }
+}
+
+p. The objects will be created in the database, and you can then access them as you would any other model object.
+
+bc. City city = City.all().first();
+List<Neighborhood> neighborhoods = city.neighborhoods;
+
+
+ 

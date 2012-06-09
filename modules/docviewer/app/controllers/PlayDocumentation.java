@@ -1,28 +1,44 @@
 package controllers;
 
-import play.*;
-import play.mvc.*;
-import play.libs.*;
-import play.vfs.*;
-
 import helpers.CheatSheetHelper;
 
-import java.io.*;
-import java.util.*;
+import helpers.LangMenuHelper;
+import helpers.LangMenuHelper.*;
+import play.Logger;
+import play.Play;
+import play.libs.IO;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class PlayDocumentation extends Controller {
 
     public static void index() throws Exception {
-        page("home", null);
+        Http.Header header = request.headers.get("accept-language");
+        String docLang = header!=null? header.value().split(",")[0] : "";
+        docLang = docLang.length()>2? docLang.substring(0,2) : docLang;
+        page("home", null, docLang);
     }
 
-    public static void page(String id, String module) throws Exception {
-        File page = new File(Play.frameworkPath, "documentation/manual/"+id+".textile");
-        if(module != null) {
-             page = new File(Play.modules.get(module).getRealFile(), "documentation/manual/"+id+".textile");
+    public static void page(String id, String module, String docLang) throws Exception {
+        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches("en-.*") ) ) ? "_" + docLang + "/" : "/";
+
+        File page = new File(Play.frameworkPath, "documentation/manual" + docLangDir + id + ".textile");
+        if(!page.exists()){
+            page = new File(Play.frameworkPath, "documentation/manual/" + id + ".textile");
         }
-        if(!page.exists()) {
-            notFound("Manual page for "+id+" not found");
+
+        if (module != null) {
+            page = new File(Play.modules.get(module).getRealFile(), "documentation/manual/" + id + ".textile");
+        }
+
+        if (!page.exists()) {
+            notFound("Manual page for " + id + " not found");
         }
         String textile = IO.readContentAsString(page);
         String html = toHTML(textile);
@@ -30,25 +46,29 @@ public class PlayDocumentation extends Controller {
 
         List<String> modules = new ArrayList();
         List<String> apis = new ArrayList();
-        if(id.equals("home") && module == null) {
-            for(String key : Play.modules.keySet()) {
+        if (id.equals("home") && module == null) {
+            for (String key : Play.modules.keySet()) {
                 VirtualFile mr = Play.modules.get(key);
-                VirtualFile home = mr.child("documentation/manual/home.textile");
-                if(home.exists()) {
+                VirtualFile home = mr.child("documentation/manual" + docLang + "home.textile");
+                if (home.exists()) {
                     modules.add(key);
                 }
-                if(mr.child("documentation/api/index.html").exists()) {
+                if (mr.child("documentation/api/index.html").exists()) {
                     apis.add(key);
                 }
             }
         }
-
-        render(id, html, title, modules, apis, module);
+        List<LangMenu> langMenuList = LangMenuHelper.getMenuList();
+        render(id, html, title, modules, apis, module, docLang, langMenuList);
     }
 
-    public static void cheatSheet(String category) {
-        File[] sheetFiles = CheatSheetHelper.getSheets(category);
-        if(sheetFiles != null) {
+
+
+
+
+    public static void cheatSheet(String category, String docLang) {
+        File[] sheetFiles = CheatSheetHelper.getSheets(category, docLang);
+        if (sheetFiles != null) {
             List<String> sheets = new ArrayList<String>();
 
             for (File file : sheetFiles) {
@@ -56,30 +76,30 @@ public class PlayDocumentation extends Controller {
             }
 
             String title = CheatSheetHelper.getCategoryTitle(category);
-            Map<String, String> otherCategories = CheatSheetHelper.listCategoriesAndTitles();
+            Map<String, String> otherCategories = CheatSheetHelper.listCategoriesAndTitles(docLang);
 
-            render(title, otherCategories, sheets);
+            render(title, otherCategories, sheets, docLang);
         }
         notFound("Cheat sheet directory not found");
     }
 
-    public static void image(String name, String module) {
-        File image = new File(Play.frameworkPath, "documentation/images/"+name+".png");
-        if(module != null) {
-             image = new File(Play.modules.get(module).getRealFile(),"documentation/images/"+name+".png");
+    public static void image(String name, String module, String lang) {
+        File image = new File(Play.frameworkPath, "documentation/images/" + name + ".png");
+        if (module != null) {
+            image = new File(Play.modules.get(module).getRealFile(), "documentation/images/" + name + ".png");
         }
-        if(!image.exists()) {
+        if (!image.exists()) {
             notFound();
         }
         renderBinary(image);
     }
 
-    public static void file(String name, String module) {
-        File file = new File(Play.frameworkPath, "documentation/files/"+name);
-        if(module != null) {
-             file = new File(Play.modules.get(module).getRealFile(),"documentation/files/"+name);
+    public static void file(String name, String module, String lang) {
+        File file = new File(Play.frameworkPath, "documentation/files/" + name);
+        if (module != null) {
+            file = new File(Play.modules.get(module).getRealFile(), "documentation/files/" + name);
         }
-        if(!file.exists()) {
+        if (!file.exists()) {
             notFound();
         }
         renderBinary(file);
@@ -92,7 +112,7 @@ public class PlayDocumentation extends Controller {
     }
 
     static String getTitle(String textile) {
-        if(textile.length() == 0) {
+        if (textile.length() == 0) {
             return "";
         }
         return textile.split("\n")[0].substring(3).trim();

@@ -1,0 +1,430 @@
+h1. はじめてのモデル
+
+ここから、ブログエンジンのモデルを書いていきます。
+
+h2. <a class="jpa">JPA 概論</a>
+
+モデル層は、Play アプリケーション (そして、実際のところはよくデザインされたすべてのアプリケーション) において中心的な位置を占めます。モデルは、アプリケーションが操作する情報のドメインに特化した表現です。ここではブログエンジンを作りたいので、モデル層は確実に User, Post そして Comment といったクラスを含むことになるでしょう。
+
+モデルオブジェクトはアプリケーションを再起動する間も存続する必要があるので、これを永続化データストアに保存しなければなりません。一般的にはリレーショナルデータベースを使うことを選択します。しかしながら Java はオブジェクト指向言語なので、インピーダンスミスマッチの減少を手助けする "オブジェクト-リレーショナルマッピングツール":http://en.wikipedia.org/wiki/Object-relational_mapping を使用します。
+
+"Java Persistence API":http://en.wikipedia.org/wiki/Java_Persistence_API (JPA) は O/R マッピングの標準的な API を定義する Java の仕様です。JPA 実装として、Play はよく知られた "Hibernate":http://www.hibernate.org フレームワークを使用します。Hibernate API を通して JPA を使うことの 1 つの利点は、すべての 'マッピング' が直接 Java オブジェクトに定義されることです。
+
+もし Hibernate か JPA を以前に使ったことがあるなら、Play によって追加された簡潔さに驚くことでしょう。なにも設定する必要はありません; JPA は Play とともにすぐに使うことができます。
+
+もし JPA を知らないのであれば、以下を続ける前に "いくつかの簡単なプレゼンテーション":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html を読むことができます。
+
+h2. <a class="user">User クラス</a>
+
+User クラスを作成するところからブログエンジンのコーディングを始めましょう。新しく @/yabe/app/models/User.java@ ファイルを作成し、User クラスの最初の実装を定義します:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class User extends Model {
+ 
+    public String email;
+    public String password;
+    public String fullname;
+    public boolean isAdmin;
+    
+    public User(String email, String password, String fullname) {
+        this.email = email;
+        this.password = password;
+        this.fullname = fullname;
+    }
+ 
+}
+
+<code>@Entity</code> アノテーションは、このクラスが管理された JPA エンティティであることを印付けし、 @Model@ スーパークラスは後述する便利な JPA ヘルパを自動的に提供します。このクラスのすべてのフィールドは、自動的にデータベースに永続化されます。
+
+p(note). デフォルトでは、テーブルの名前は‘User’です。‘user’が予約語とされているデータベースを使うためにこの設定を変更する場合は、JPA マッピングに別のテーブル名を指定する必要があります。これをするためには、 @User@ クラスを <code>@Table(name="blog_user")</code> でアノテーションしてください。
+
+p(note). モデルオブジェクトは @play.db.jpa.Model@ クラスを継承しなければならないわけではありません。素の JPA を使うこともできます。しかし、このクラスは JPA 周りの多くの部分を簡易にするので、多くのケースにおいて、これを継承するのは良い選択です。
+
+もし以前に JPA を使ったことがあるなら、すべての JPA エンティティは <code>@Id</code> プロパティを提供しなければならないことを知っているでしょう。ここでは、Model スーパークラスが自動的に生成された数値型の id を提供しており、ほとんどの場合はこれで必要充分です。
+
+p(note). @id@ フィールドを **機能的な識別子** として考えず、 **技術的な識別子** として考えてください。これらの概念を分けて扱い、自動的に生成された数値型の ID を技術的な識別子として保持するのは、一般的に良い考えです。
+
+どのような経験があろうと、Java 開発者であれば public 変数を目にした途端に警告ベルがじゃんじゃん鳴り出すかもしれません。Java においては (他のオブジェクト指向言語と同様に) すべてのフィールドを private にして、アクセサとミューテータを提供するのを最も良い習慣としています。これは、オブジェクト指向デザインにおいて重要な概念であるカプセル化を促進するためのものです。実際のところ、Play はこれに対応しており、getter と setter を自動生成してカプセル化を保護します; これがどのようにして動作するのかについては、このチュートリアルの後半で紹介します。
+
+これでアプリケーションのホームページをリフレッシュして結果を確認することができます。なにか間違いがない限り、実は何の変化もありません: Play は User クラスを自動的にコンパイルしてロードしていますが、これはアプリケーションに対して何の新機能も追加しません。
+
+h2. <a class="test">はじめてのテストの作成</a>
+
+新規に作成した User クラスをテストする良い方法は、JUnit テストケースを書くことです。これによりアプリケーションをくり返し仕上げ、すべてがばっちりであることを確信できるようになります。
+
+テストケースを実行するには、アプリケーションを特別な 'test' モードで起動する必要があります。いま実行しているアプリケーションを停止し、コマンドラインを開いて次のようにタイプしてください:
+
+bc. ~$ play test
+
+!images/guide2-0!
+
+@play test@ コマンドは、ブラウザから直接テストスイートを実行できるテストランナーモジュールをロードすること以外は @play run@ とほとんど同じです。
+
+p(note). Paly アプリケーションを @test モード@ で実行すると、Play は自動的にフレームワーク ID を @test@ に切り替え、これに従った @application.conf@ ファイルをロードします。詳しくは "フレームワーク ID ドキュメント":ids を確認してください。
+
+ブラウザから "http://localhost:9000/@tests":http://localhost:9000/@tests を開いてテストランナーを見てみてください。すべてのデフォルトテストを選択して実行してみてください; すべてグリーンになるはずです... しかし、これらのデフォルトテストは実際には何もテストしません。
+
+!images/guide2-1!
+
+アプリケーションのモデル部分をテストするには、JUnit テストを使います。ご覧の通り @BasicTests.java@ は既に存在しますので、これ (@/yabe/test/BasicTest.java@) を開いてください:
+
+bc. import org.junit.*;
+import play.test.*;
+import models.*;
+ 
+public class BasicTest extends UnitTest {
+ 
+    @Test
+    public void aVeryImportantThingToTest() {
+        assertEquals(2, 1 + 1);
+    }
+ 
+}
+
+役に立たないデフォルトテスト (@aVeryImportantThingToTest@) を削除して、新規にユーザを作成して検索するテストを作成してみてください:
+
+bc. @Test
+public void createAndRetrieveUser() {
+    // Create a new user and save it
+    new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Retrieve the user with e-mail address bob@gmail.com
+    User bob = User.find("byEmail", "bob@gmail.com").first();
+    
+    // Test 
+    assertNotNull(bob);
+    assertEquals("Bob", bob.fullname);
+}
+
+ご覧の通り Model スーパークラスは 2 つの便利なメソッドを提供してくれています: @save()@ と @find()@ です
+
+p(note). Model クラスメソッドの更なる情報は、Play マニュアルの "JPA サポート":jpa の章で読むことができます。
+
+テストランナーで @BasicTests.java@ を選択し、スタートをクリックしてすべてがグリーンであることを確認します。
+
+User クラスには指定されたユーザ名とパスワードを持つユーザが存在するかチェックするメソッドが必要です。さっそく書いてテストしましょう。
+
+@User.java@ ソースに @connect()@ メソッドを追加します:
+
+bc. public static User connect(String email, String password) {
+    return find("byEmailAndPassword", email, password).first();
+}
+
+テストケースは以下のようになります:
+
+bc. @Test
+public void tryConnectAsUser() {
+    // Create a new user and save it
+    new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Test 
+    assertNotNull(User.connect("bob@gmail.com", "secret"));
+    assertNull(User.connect("bob@gmail.com", "badpassword"));
+    assertNull(User.connect("tom@gmail.com", "secret"));
+}
+
+変更を行うたびに Play テストランナーですべてのテストを実行し、なにも壊れていないことを確認することができます。
+
+h2. <a class="post">Post クラス</a>
+
+@Post@ クラスはブログの投稿を表現します。最初の実装を書いてみましょう:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class Post extends Model {
+ 
+    public String title;
+    public Date postedAt;
+    
+    @Lob
+    public String content;
+    
+    @ManyToOne
+    public User author;
+    
+    public Post(User author, String title, String content) {
+        this.author = author;
+        this.title = title;
+        this.content = content;
+        this.postedAt = new Date();
+    }
+ 
+}
+
+ここでは <code>@Lob</code> アノテーションを使って、投稿の内容を保持する大きな文字列型データベースを使用することを JPA に告げています。 @User@ クラスとの関連を <code>@ManyToOne</code> を使って宣言しました。これはそれぞれの @Post@ は 1 つの @User@ によって所有され、各 @User@ は複数の @Post@ インスタンスを所有することができることを意味します。
+
+p(note). 最近の PostgreSQL のバージョンは <code>@Type(type = "org.hibernate.type.TextType")</code> というアノテーションをフィールドにつけていない限り、 <code>@Log</code> アノテーションがついた @String@ フィールドをテキストとしてストアしません。 
+
+@Post@ クラスが期待通りに動作することを確認する新しいテストケースを作成しましょう。ただし、より多くのテストを書く前に JUnit クラスでやらなければならないことがあります。現在のテストでは、データベースの内容は決して削除されませんので、新たに実行するごとにオブジェクトがどんどん作成されます。これは、すべてのオブジェクトが適切であることを確認するためにオブジェクトを数え上げるようなより高度なテストを始めた途端に問題となるでしょう。
+
+このため、各テストの前にデータベースを削除する JUnit @setup()@ メソッドを書きましょう:
+
+bc. public class BasicTest extends UnitTest {
+ 
+    @Before
+    public void setup() {
+        Fixtures.deleteDatabase();
+    }
+ 
+    …
+}
+
+p(note). この <code>@Before</code> は JUnit テストツールの主要な概念です。
+
+見ての通り、 @Fixtures@ クラスはテスト中にデータベースを扱うヘルパです。再度テストを実行して何もおかしくなっていないことを確認し、次のテストを書き始めましょう:
+
+bc. @Test
+public void createPost() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Create a new post
+    new Post(bob, "My first post", "Hello world").save();
+    
+    // Test that the post has been created
+    assertEquals(1, Post.count());
+    
+    // Retrieve all posts created by Bob
+    List<Post> bobPosts = Post.find("byAuthor", bob).fetch();
+    
+    // Tests
+    assertEquals(1, bobPosts.size());
+    Post firstPost = bobPosts.get(0);
+    assertNotNull(firstPost);
+    assertEquals(bob, firstPost.author);
+    assertEquals("My first post", firstPost.title);
+    assertEquals("Hello world", firstPost.content);
+    assertNotNull(firstPost.postedAt);
+}
+
+p(note). @java.util.List@ をインポートすることを **決して忘れない** でください。さもないとコンパイルエラーが発生します。
+
+h2. <a class="comments">コメントの追加</a>
+
+このはじめてのモデルの設計に最後に追加するのは、投稿にコメントを添付する機能です。
+
+@Comment@ クラスの作成はとても単純です。
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class Comment extends Model {
+ 
+    public String author;
+    public Date postedAt;
+     
+    @Lob
+    public String content;
+    
+    @ManyToOne
+    public Post post;
+    
+    public Comment(Post post, String author, String content) {
+        this.post = post;
+        this.author = author;
+        this.content = content;
+        this.postedAt = new Date();
+    }
+ 
+}
+
+最初のテストケースを書きましょう:
+
+bc. @Test
+public void postComments() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+ 
+    // Create a new post
+    Post bobPost = new Post(bob, "My first post", "Hello world").save();
+ 
+    // Post a first comment
+    new Comment(bobPost, "Jeff", "Nice post").save();
+    new Comment(bobPost, "Tom", "I knew that !").save();
+ 
+    // Retrieve all comments
+    List<Comment> bobPostComments = Comment.find("byPost", bobPost).fetch();
+ 
+    // Tests
+    assertEquals(2, bobPostComments.size());
+ 
+    Comment firstComment = bobPostComments.get(0);
+    assertNotNull(firstComment);
+    assertEquals("Jeff", firstComment.author);
+    assertEquals("Nice post", firstComment.content);
+    assertNotNull(firstComment.postedAt);
+ 
+    Comment secondComment = bobPostComments.get(1);
+    assertNotNull(secondComment);
+    assertEquals("Tom", secondComment.author);
+    assertEquals("I knew that !", secondComment.content);
+    assertNotNull(secondComment.postedAt);
+}
+
+**Post** と **Comments** 間のナビゲーションがとても簡単ではないことが分かると思います: @Post@ に添付されたすべてのコメントを検索するクエリが必要です。これは @Post@ クラスに関連の逆端を設定することで、もっとうまくやることができます。
+
+@Post@ クラスに @comments@ フィールドを追加します:
+
+bc. ...
+@OneToMany(mappedBy="post", cascade=CascadeType.ALL)
+public List<Comment> comments;
+ 
+public Post(User author, String title, String content) { 
+    this.comments = new ArrayList<Comment>();
+    this.author = author;
+    this.title = title;
+    this.content = content;
+    this.postedAt = new Date();
+}
+...
+
+@mappedBy@ 属性を使って、 @Comment@ クラスの post フィールドが関連を管理するという側面を持っていることを JPA に伝えていることに注意してください。JPA で双方向の関連を定義する場合、どちらの端が関連を管理するかを JPA に伝えるのはとても重要です。この場合、 @Comments@ は @Post@ に従属するので、 @Comment@ クラスが関連を管理するほうがベターです。
+
+@cascade@ プロパティを設定して、JPA に @Post@ の削除を @comments@ にも連鎖するよう告げています。このようにすると、投稿を削除した場合、すべての関連するコメントが同様に削除されます。
+
+この新しい関連に伴って、コメントを追加するシンプルなヘルパメソッドを @Post@ クラスに追加します:
+
+bc. public Post addComment(String author, String content) {
+    Comment newComment = new Comment(this, author, content).save();
+    this.comments.add(newComment);
+    this.save();
+    return this;
+}
+
+これが動作することを確認する別のテストケースを書きましょう:
+
+bc. @Test
+public void useTheCommentsRelation() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+ 
+    // Create a new post
+    Post bobPost = new Post(bob, "My first post", "Hello world").save();
+ 
+    // Post a first comment
+    bobPost.addComment("Jeff", "Nice post");
+    bobPost.addComment("Tom", "I knew that !");
+ 
+    // Count things
+    assertEquals(1, User.count());
+    assertEquals(1, Post.count());
+    assertEquals(2, Comment.count());
+ 
+    // Retrieve Bob's post
+    bobPost = Post.find("byAuthor", bob).first();
+    assertNotNull(bobPost);
+ 
+    // Navigate to comments
+    assertEquals(2, bobPost.comments.size());
+    assertEquals("Jeff", bobPost.comments.get(0).author);
+    
+    // Delete the post
+    bobPost.delete();
+    
+    // Check that all comments have been deleted
+    assertEquals(1, User.count());
+    assertEquals(0, Post.count());
+    assertEquals(0, Comment.count());
+}
+
+グリーンになりましたか?
+
+!images/guide2-2!
+
+h2. <a class="fixtures">Fixture を使ったより複雑なテスト</a>
+
+より複雑なテストを書き始める場合、しばしばテストに使うデータセットが必要になります。Fixtures は、モデルを "YAML":http://en.wikipedia.org/wiki/Yaml ファイルに記述して、テストを実行する前にはいつでもロードできるようにします。
+
+@/yabe/test/data.yml@ ファイルを編集して User を定義してみましょう:
+
+bc. 
+User(bob):
+    email: bob@gmail.com
+    password: secret
+    fullname: Bob
+ 
+...
+ 
+
+ああ、 @data.yml@ ファイルは少々大きいので、"ここからダウンロード":files/data.yml することができます。
+
+このデータをロードして、それについていくつかのアサーションを実行するテストを作成してみましょう:
+
+bc. @Test
+public void fullTest() {
+    Fixtures.loadModels("data.yml");
+ 
+    // Count things
+    assertEquals(2, User.count());
+    assertEquals(3, Post.count());
+    assertEquals(3, Comment.count());
+ 
+    // Try to connect as users
+    assertNotNull(User.connect("bob@gmail.com", "secret"));
+    assertNotNull(User.connect("jeff@gmail.com", "secret"));
+    assertNull(User.connect("jeff@gmail.com", "badpassword"));
+    assertNull(User.connect("tom@gmail.com", "secret"));
+ 
+    // Find all of Bob's posts
+    List<Post> bobPosts = Post.find("author.email", "bob@gmail.com").fetch();
+    assertEquals(2, bobPosts.size());
+ 
+    // Find all comments related to Bob's posts
+    List<Comment> bobComments = Comment.find("post.author.email", "bob@gmail.com").fetch();
+    assertEquals(3, bobComments.size());
+ 
+    // Find the most recent post
+    Post frontPost = Post.find("order by postedAt desc").first();
+    assertNotNull(frontPost);
+    assertEquals("About the model layer", frontPost.title);
+ 
+    // Check that this post has two comments
+    assertEquals(2, frontPost.comments.size());
+ 
+    // Post a new comment
+    frontPost.addComment("Jim", "Hello guys");
+    assertEquals(3, frontPost.comments.size());
+    assertEquals(4, Comment.count());
+}
+
+p(note). Play と YAML については、 "YAML マニュアルページ":yaml で詳しく読むことができます。
+
+h2. <a class="save"> 作業内容の保存 </a>
+
+ここまででブログエンジンの大きな部分をやり終えました。これらを作成し、すべてテストしており、web アプリケーションそれ自身の開発を始めることができます。
+
+しかし、開発を続ける前に作業内容を Bazaar を使って保存しましょう。コマンドラインを開いて @bzr st@ とタイプし、最後のコミットから行われた変更内容を確認してください:
+
+bc. $ bzr st
+
+見ての通り、いくつかのファイルはバージョン管理されていません。 @test-result@ フォルダはバージョン管理する必要がないので、これは無視しましょう。
+
+bc. $ bzr ignore test-result
+
+その他のファイルは @bzr add@ を使って追加します。
+
+bc. $ bzr add
+
+これでプロジェクトをコミットすることができます。
+
+bc. $ bzr commit -m "The model layer is ready"
+
+p(note). %(next)"はじめての画面":guide3% に進みましょう。

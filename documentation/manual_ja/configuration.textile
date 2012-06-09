@@ -1,0 +1,916 @@
+h1. 設定パラメータ
+
+@conf/application.conf@ ファイルの設定キーに値を設定して Play のアプリケーションを設定しましょう。参照:
+
+* "主要な概念 - conf ディレクトリ":main#conf
+* "複数環境用 application.conf の管理":ids
+* "アプリケーションの本番稼動":production
+
+h2(#application). アプリケーション設定
+
+
+h3(#application.baseUrl). application.baseUrl
+
+アプリケーションベース URL は絶対 URL の逆引きに使われます。このアプリケーションベース URL は e メールのレンダリングのように @Http.Request@ を介さない <code>@@{..}</code> テンプレート構文やジョブ内で使われます。例えば @dev@ モード用の設定は次のようにし:
+
+bc. application.baseUrl=http://localhost:9000/
+
+@prod@ モード用の設定は次のようにします:
+
+bc. %production.application.baseUrl=http://www.yourdomain.com/
+
+
+h3(#application.defaultCookieDomain). application.defaultCookieDomain
+
+サブドメイン間で共有される session/cookie を有効にします。例えば、 @foo.example.com@ や @bar.example.com@ などのように ‘.example.com’ で終わる全てのドメインで有効な cookie を生成するには次のようにします:
+
+bc. application.defaultCookieDomain=.example.com
+
+デフォルト: cookie は特定のドメインでのみ有効です。
+
+
+h3(#application.lang.cookie). application.lang.cookie
+
+現在の言語を格納するために使われる cookie の名前です。言語は @play.i18n.Lang.change(String locale)@ で設定されます。Play アプリケーションと言語設定を分けたい場合に変更できます。設定例:
+
+bc. application.lang.cookie=MYAPP_LANG
+
+デフォルト: @PLAY_LANG@
+
+
+h3(#application.langs). application.langs
+
+アプリケーションで使われるロケールを定義します。 @conf/messages.{locale}@ ファイルにローカライズされたメッセージを置くことができます。設定する値はカンマ区切りの言語コードのリストです。設定例:
+
+bc. application.langs=fr,en,ja
+
+デフォルト: 追加言語はありません。
+
+
+h3(#application.log). application.log
+
+アプリケーションのログレベルを指定します。設定例:
+
+bc. application.log=DEBUG
+
+デフォルト: @INFO@
+
+関連項目: "ログの設定":logs.
+
+
+h3(#application.log.path). application.log.path
+
+ログ出力をカスタマイズするための Log4J 設定ファイルのパス。パスを指定しないとき Play は @conf@ ディレクトリに @log4j.properties@ ファイルがあればロードします。
+
+bc. application.log.path=/log4j.properties
+
+デフォルト: @/log4j.xml@ がなければ @/log4j.properties@
+
+
+h3(#application.log.recordCaller). application.log.recordCaller
+
+呼び出し元のメソッドを記録または表示するための @play.Logger.recordCaller@ の値を設定します。設定例:
+
+bc. application.log.recordCaller=true
+
+デフォルト: @false@
+
+
+h3(#application.mode). application.mode
+
+アプリケーションのモード (大文字小文字を区別します) です。設定例:
+
+bc. application.mode=prod
+
+Values:
+
+* @DEV@ - 即時リロードやその他開発のヘルプを有効にします。
+* @PROD@ - プリコンパイルや Java のソースまたはテンプレートをキャッシュします。
+
+デフォルト: @DEV@
+
+
+h3(#application.name). application.name
+
+アプリケーション名。たいていは @play new@ コマンドで設定されます。
+
+デフォルト: なし
+
+
+h3(#application.secret). application.secret
+
+暗号化に使われる秘密鍵です。たいていは @play new@ または @play secret@ コマンドで設定されます。アプリケーションを複数デプロイする場合は同じ鍵を使うようにしてください。設定例:
+
+bc. application.secret=mNuAvlsFVjeuynN4IWZxZzFOHYVagafzjruHmWTL26VISKr46rUtyGcJuX7aYx4q
+
+設定されていなければ @play.libs.Crypto.sign@ はメッセージを暗号化しません。具体的にいうと、セッションが暗号化されないということです。
+
+デフォルト: なし
+
+
+h3(#application.session.cookie). application.session.cookie
+
+セッション cookie 名です。cookie の secure 属性はデフォルトで有効ではありません。HTTPS で通信されている場合に secure 属性を true に設定します。設定例:
+
+bc. application.session.cookie=PLAY
+
+デフォルト: session は一時的な @PLAY_SESSION@ cookie に書かれます。
+
+
+h3(#application.session.httpOnly). application.session.httpOnly
+
+cookie の ‘HTTP only’ フラグを有効にします。有効にすることで XSS 攻撃の影響を受けにくくなります。設定例:
+
+bc. application.session.httpOnly=true
+
+デフォルト: @false@
+
+更に情報が必要なときは "OWASP の HttpOnly":http://www.owasp.org/index.php/HttpOnly のページを参照してください。
+
+
+h3(#application.session.maxAge). application.session.maxAge
+
+セッションタイムアウト、言い換えるとセッション cookie の最大生存期間です。設定されていない場合は、ブラウザを閉じたときにセッションが切れます。セッションの有効期間を 1 時間に設定したいときは次のようにします:
+
+bc. application.session.maxAge=1h
+
+セッションの有効期間を 1 週間にしたいときは次のようにします:
+
+bc. application.session.maxAge=7d
+
+デフォルト: ブラウザを閉じるまで
+
+
+h3(#application.session.secure). application.session.secure
+
+HTTPS 接続の cookie ベースのセッションを有効にします。設定例:
+
+bc. application.session.secure=true
+
+デフォルト: @false@
+
+
+h3(#application.session.sendOnlyIfChanged). application.session.sendOnlyIfChanged
+
+セッションに変更がない時には、セッション cookie を送らないようにします。設定例:
+
+bc. application.session.sendOnlyIfChanged=true
+
+デフォルト: @false@
+
+
+h3(#application.web_encoding). application.web_encoding
+
+Play が Web ブラウザとやり取りするときや "Web サービスクライアント":libs#WebServiceclient が使用するテキストエンコーディングです。Play はデフォルトで @UTF-8@ を使用するため、普通は設定する必要はありません。設定例:
+
+bc. application.web_encoding=ISO-8859-1
+
+デフォルト: @UTF-8@
+
+@application.web_encoding@ を変更すると HTTP ヘッダの @Content-type@ の @charset@ に影響します。また動的にレンダリングされる箇所には影響しますが、静的なコンテンツには影響 **しません**。ですから、デフォルトのレスポンスエンコーディングを変更していて、特殊文字を含む (@public/@ フォルダ内の) テキストファイルがあるときは、これらのテキストファイルのエンコーディングを指定したエンコーディングに合わせなければなりません。その他の全てのファイルは UTF-8 で保存すべきです。
+
+
+h2(#attachments). 添付ファイル
+
+
+h3(#attachments.path). attachments.path
+
+@play.db.jpa.Blob@ の内容の格納パスです。これは、絶対パス、または Play アプリケーションフォルダの中にあるフォルダへの相対パスにすることができます。設定例:
+
+bc. attachments.path=data/attachments
+
+デフォルト: @attachments@
+
+
+h2(#certificate). X509 証明書
+
+
+h3(#certificate.key.file). certificate.key.file
+
+HTTPS をサポートするための X509 証明書の秘密鍵を指定します。ファイル名は @host.key@ でなければなりません。設定例:
+
+bc. certificate.key.file=/certificates/host.key
+
+デフォルト: @conf/host.key@
+
+
+h3(#certificate.file). certificate.file
+
+HTTPS をサポートするための X509 証明書を指定します。ファイル名は @host.cert@ でなければなりません。設定例:
+
+bc. certificate.file=/certificates/host.cert
+
+デフォルト: @conf/host.cert@
+
+
+h3(#certificate.password). certificate.password
+
+パスワード保護された X509 証明書の秘密鍵のパスワードです。"certificate.key.file":#certificate.key.file で設定したものに対応するものを指定します。設定例:
+
+bc. certificate.password=secret
+
+デフォルト: @secret@
+
+
+h2(#cron). スケジューリングされたジョブ
+
+@cron.@ で始まるキーでスケジューリングされたジョブの cron 式を設定すると、<code>@play.jobs.On</code> または <code>@Every</code> アノテーションの設定値に指定したキーを使用することができます。例えば、<code>@On("cron.noon")</code> は以下の設定を参照します:
+
+bc. cron.noon=0 0 12 * * ?
+
+
+h2(#date). 日付フォーマット
+
+
+h3(#date.format). date.format
+
+@java.text.SimpleDateFormat@ パターンを使って、デフォルトの日付フォーマットを設定します。設定例:
+
+bc. date.format=dd-MM-yyyy
+
+このプロパティはテンプレート内で @${date.format()}@ がどのように日付を出力するかにも影響します。また、日付パラメータを変数にバインドするときのデフォルトの日付フォーマットも設定します。
+
+デフォルト: @yyyy-MM-dd@
+
+"application.langs":#application.langs で設定した言語ごとに異なる日付フォーマットを設定することも出来ます。設定例:
+
+bc. date.format.fr=dd-MM-yyyy
+
+
+h2(#dbconf). データベース設定
+
+h3(#db). db
+
+データベースエンジンの設定です。素早く開発用データベースをセットアップするために、一時的なインメモリデータベース (H2 インメモリデータベース) を使うには次のようにします:
+
+bc. db=mem
+
+単純なファイルに書き出すデータベース (H2 ファイルストアド) を使うには次のようにします:
+
+bc. db=fs
+
+ローカルの MySQL5 データベースを使うには次のようにします:
+
+bc. db=mysql:user:pwd@database_name
+
+アプリケーションサーバに設定されているデータソースを利用するには次のようにします:
+
+bc. db=java:/comp/env/jdbc/myDatasource@
+
+もし @Datasource@ を指定すると、データベースプラグインは @db=java:@ のパターンを検知し、デフォルトの JDBC システムを不活性化します。
+
+デフォルト: none.
+
+
+h3(#db.destroyMethod). db.destroyMethod
+
+一般的な ‘destroy’ メソッドの名前を指定します。既存のデータソースを使用するとき、アプリケーション停止時に始末する必要があることがあります。設定例:
+
+bc. db.destroyMethod=close
+
+デフォルト: なし
+
+
+h3(#db.driver). db.driver
+
+"db.url":#db.url で設定したデータベースを使うための、データベースドライバのクラス名を指定します。設定例:
+
+bc. db.driver=org.postgresql.Driver
+
+デフォルト:
+
+* @org.h2.Driver@ "db":#db が @mem@ か @fs@、または "db.url":#db.url が @jdbc:h2:mem:@ から始まっている場合
+* @com.mysql.jdbc.Driver@ "db":#db が @mysql:…@ という設定である場合
+
+h3(#db.isolation). db.isolation
+
+データベーストランザクションの隔離レベルです。設定例:
+
+bc. db.isolation=SERIALIZABLE
+
+妥当な値は @NONE@, @READ_UNCOMMITTED@, @READ_COMMITTED@, @REPEATABLE_READ@, @SERIALIZABLE@, または @java.sql.Connection.setTransactionIsolation()@ に渡される整数型の値です。すべてのデータベースがあらゆるトランザクション隔離レベルをサポートするわけではないことに注意してください。
+
+デフォルト: データベース依存、一般的には @READ_COMMITTED@
+
+h3(#db.pass). db.pass
+
+"db.url":#db.url への接続に使うデータベース接続パスワードです。
+
+デフォルト: 設定値なし、または "db":#db に @mem@ か @fs@ が設定されている場合は空文字列
+
+
+h3(#db.pool.maxIdleTimeExcessConnections). db.pool.maxIdleTimeExcessConnections
+
+"db.pool.minSize":#db.pool.minSize を超えるアイドルコネクションが ‘処分される’ までの秒数です。"c3p0 documentation":http://www.mchange.com/projects/c3p0/#maxIdleTimeExcessConnections を参照してください。
+
+デフォルト: @0@ - ‘処分されません’.
+
+
+h3(#db.pool.maxSize). db.pool.maxSize
+
+コネクションプールの最大サイズ (コネクション数) です。"c3p0 documentation":http://www.mchange.com/projects/c3p0/#maxPoolSize を参照してください。設定例:
+
+bc. db.pool.maxSize=60
+
+デフォルト: @30@
+
+
+h3(#db.pool.minSize). db.pool.minSize
+
+コネクションプールの最小サイズ (コネクション数) です。"c3p0 documentation":http://www.mchange.com/projects/c3p0/#minPoolSize を参照してください。設定例:
+
+bc. db.pool.minSize=10
+
+デフォルト: @1@
+
+
+h3(#db.pool.timeout). db.pool.timeout
+
+ミリ秒単位のコネクションプールタイムアウト時間です。"c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout を参照してください。設定例:
+
+bc. db.pool.timeout=10000
+
+デフォルト: @5000@
+
+
+h3(#db.url). db.url
+
+"db.user":#db.user と "db.pass":#db.pass と "db.driver":#db.driver との組み合わせの完全な JDBC の設定です。設定例:
+
+bc. db.url=jdbc:postgresql:database_name
+
+デフォルト: なし
+
+
+h3(#db.user). db.user
+
+"db.url":#db.url 接続時に使われるデータベース接続ユーザ名です。
+
+デフォルト: なし、または "db":#db が @mem@ か @fs@ と設定されているときは @sa@ 
+
+
+h2(#evolutions). データベースエボリューションズ
+
+
+h3(#evolutions.enabled). evolutions.enabled
+
+"データベースエボリューションズ":evolutions を無効にするときに使います。
+
+bc. evolutions.enabled=false
+
+デフォルト: @true@
+
+
+h2(#test). テストランナー
+
+h3(#headlessBrowser). headlessBrowser
+
+@play auto-test@ 実行時に使用される、 HtmlUnit ヘッドレス web ブラウザの互換モードを指定します。
+
+bc. headlessBrowser=INTERNET_EXPLORER_7
+
+値:
+
+* @FIREFOX_3@
+* @FIREFOX_3_6@
+* @INTERNET_EXPLORER_6@
+* @INTERNET_EXPLORER_7@
+* @INTERNET_EXPLORER_8@
+
+デフォルト: @INTERNET_EXPLORER_8@
+
+
+h2(#hibernate). Hibernate
+
+Hibernate のプロパティを追加で指定することも出来ます。例えば、SQL コメントを有効にするには次のようにします:
+
+bc. hibernate.use_sql_comments=true
+
+h3(#hibernate.connection.datasource). hibernate.connection.datasource
+
+Hibernate のデータソース設定
+
+
+h2(#http). サーバ設定
+
+
+h3(#http.address). http.address
+
+HTTP をリッスンするアドレスです。サーバがリッスンするアドレスを制限するときに指定します。設定例:
+
+bc. http.address=127.0.0.1
+
+デフォルト: サーバが持つ全てのアドレス
+
+
+h3(#http.cacheControl). http.cacheControl
+
+静的ファイルを制御するための HTTP レスポンスヘッダ: 秒単位でデフォルトの最大期間を設定すると、ユーザのブラウザにページをどれだけの期間キャッシュすべきかを伝えます。この値は @prod@ モードの時のみ読み取られ、 @dev@ モードではキャッシュは無効になります。例えば、 @no-cache@ を送りたいときは次のようにします:
+
+bc. http.cacheControl=0
+
+デフォルト: @3600@ - キャッシュの有効期限を 1時間に設定します。
+
+
+h3(#http.exposePlayServer). http.exposePlayServer
+
+HTTP サーバを Play と特定する HTTP レスポンスヘッダを無効にします。設定例:
+
+bc. http.exposePlayServer=false
+
+デフォルト: @true@
+
+
+h3(#http.path). http.path
+
+サーバ上でアプリケーションが動作する URL パス: Play アプリケーションをドメインのルートに置きたくないときに使います。このパラメータは WAR としてデプロイしたときには効果がありません。なぜならパスはアプリケーションサーバにハンドリングされるからです。設定例:
+
+bc. http.path=/myapp/
+
+デフォルト: @/@
+
+
+h3(#http.port). http.port
+
+HTTP サーバがリッスンするポート
+
+デフォルト: @9000@
+
+
+h3(#http.proxyHost). http.proxyHost
+
+Web サービスをリクエストする際に使用するプロキシサーバです。設定例:
+
+bc. http.proxyHost=localhost
+
+デフォルト: @http.proxyHost@ システムプロパティ
+
+
+h3(#http.proxyPassword). http.proxyPassword
+
+Web サービスをリクエストする際に使用するプロキシのパスワード
+
+デフォルト: @http.proxyPassword@ システムプロパティ
+
+
+h3(#http.proxyPort). http.proxyPort
+
+Web サービスをリクエストする際に使用するプロキシのポートです。設定例:
+
+bc. http.proxyPort=3128
+
+デフォルト: @http.proxyPort@ システムプロパティ
+
+
+h3(#http.proxyUser). http.proxyUser
+
+Web サービスをリクエストする際に使用するプロキシのユーザ
+
+デフォルト: @http.proxyUser@ システムプロパティ
+
+
+
+h3(#http.nonProxyHosts). http.nonProxyHosts
+
+プロキシサーバを通さずに直接接続するべきホストを示します。
+ホストを @|@ で区切ったリストを値とすることができるほか、ワイルドカード文字 @*@ をマッチングに使うことができます。
+
+設定例:
+
+bc. http.nonProxyHosts=localhost|*.example.com
+
+デフォルト: @http.nonProxyHosts@ システムプロパティ
+
+
+
+h3(#http.useETag). http.useETag
+
+有効にすると Play はエンティティタグを自動的に生成し、必要なときに 304 を送ります。例えば、エンティティタグの利用を停止するには次のようにします:
+
+bc. http.useETag=false
+
+デフォルト: @true@
+
+
+h3(#http.userAgent). http.userAgent
+
+Web サービスをリクエストする際に送るカスタムの @USER_AGENT@ ヘッダの値です。設定例:
+
+bc. http.userAgent=myApp 1.0
+
+デフォルト: none.
+
+
+h3(#https.port). https.port
+
+HTTPS コネクタを有効化し、指定したポートでリッスンします。設定例:
+
+bc. https.port=9443
+
+デフォルト: none - HTTPS の設定なし
+
+
+h2(#java). Java ソース
+
+
+h3(#java.source). java.source
+
+Java ソースレベルです。これは @java.version@ システムプロパティをオーバーライドします。設定例:
+
+bc. java.source=1.6
+
+Values:  @1.5@, @1.6@, @1.7@ (experimental).
+
+デフォルト: @1.5@
+
+
+h2(#jpa). JPA
+
+
+h3(#jpa.dialect). jpa.dialect
+
+使用するカスタムの JPA ダイアレクトをここで指定します。設定例:
+
+bc. jpa.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+デフォルト: Play は "db.driver":#db.driver の設定に基づいてダイアレクトを推測します。
+
+
+h3(#jpa.ddl). jpa.ddl
+
+使用する DDL 生成パターンを指定します。例えば、自動データベース構造更新を有効にするには次のようにします:
+
+bc. jpa.ddl=create-drop
+
+デフォルト: @update@ (@dev@ モード) または @none@ (@prod@ モード).
+
+
+h3(#jpa.debugSQL). jpa.debugSQL
+
+SQL 文をデバッグ (DEBUG レベルでロギング) します。設定例:
+
+bc. jpa.debugSQL=true
+
+デフォルト: @false@
+
+
+h3(#jpa.entities). jpa.entities
+
+追加でロードする JPA エンティティクラス名のカンマ区切りのリストです。分けられた JAR ファイル内のモデルクラスのように @models@ パッケージに入っていない追加のエンティティがある場合に便利です。設定例:
+
+bc. org.example.model.Person, org.example.model.Organisation
+
+デフォルト: なし
+
+
+h3(#jpa.mapping-file). jpa.mapping-file
+
+JPA マッピングファイル
+
+デフォルト: なし
+
+
+h2(#jpda). JVM
+
+
+h3(#jpda.port). jpda.port
+
+アプリケーションがデバッグモードで動作しているときに JPDA に使われるポートを定義します。設定例:
+
+デフォルト: @8000@
+
+
+h2(#keystore). キーストア
+
+
+h3(#keystore.algorithm). keystore.algorithm
+
+JDK セキュリティ API 標準アルゴリズム名です。これは "keystore.file":#keystore.file の設定とともに使われます。
+
+bc. keystore.algorithm=pkcs12
+
+Values - JDK セキュリティ API の ‘標準名’:
+
+* @jceks@ (‘SunJCE’ プロバイダ)
+* @jks@ (‘SUN" プロバイダ)
+* @pkcs12@
+
+デフォルト: @JKS@
+
+
+h3(#keystore.file). keystore.file
+
+HTTPS をサポートするための証明書を指定します。ファイル名は @certificate.jks@ にすべきです。設定例:
+
+bc. keystore.file=conf/certificate.jks
+
+
+h3(#keystore.password). keystore.password
+
+"keystore.file":#keystore.file の設定を使うためのキーストア設定です。
+
+bc. keystore.password=secret
+
+デフォルト: @secret@
+
+
+h2(#memcachedconfig). Memcached
+
+
+h3(#memcached). memcached
+
+"Memcached":http://www.danga.com/memcached/ を有効にします。Memcached を設定しなければ、Play は JVM ヒープにデータを格納するスタンドアロンのキャッシュを使います。
+
+bc. memcached=enabled
+
+デフォルト: @disabled@
+
+関連項目: "キャッシュを使う":cache.
+
+
+h3(#memcached.host). memcached.host
+
+memcached ホストを指定します。設定例:
+
+bc. memcached.host=127.0.0.1:11211
+
+デフォルト: @127.0.0.1:11211@
+
+分散キャッシュを構築するために複数のホストを指定することも出来ます。設定例:
+
+bc. memcached.1.host=127.0.0.1:11211
+memcached.2.host=127.0.0.1:11212
+
+
+h2(#mimetype). カスタム MIME タイプ
+
+MIME タイプを追加して定義できます。設定例:
+
+bc. mimetype.xpi=application/x-xpinstall
+
+
+h2(#webserviceconfig). Web サービス
+
+h3(#webservice). webservice
+
+Web サービスの実装クラス名、またはビルトインの実装。設定例:
+
+bc. webservice=urlfetch
+
+値:
+
+* @urlfetch@ - JDK の内部実装
+* @async@ - 非同期の Http クライアント
+* @play.libs.WS.WSImpl@ の実装クラス名
+
+デフォルト: @async@ - 非同期の Http クライアント
+
+
+h2(#mail). メール
+
+
+h3(#mail.debug). mail.debug
+
+SMTP トランザクションのロギングを有効にします。内部では Play は SMTP 通信をするために JavaMail を使っています。
+
+bc. mail.debug=true
+
+デフォルト: @false@
+
+
+h3(#mail.smtp). mail.smtp
+
+メールの設定キーです。
+
+デフォルト: @mock@ - モックの Mailer を使います
+
+関連項目: "SMTP の設定":emails#smtp.
+
+
+h3(#mail.smtp.authenticator). mail.smtp.authenticator
+
+カスタムの SMTP 認証 (@javax.mail.Authenticator@) 実装のクラス名です。
+
+デフォルト: なし
+
+
+h3(#mail.smtp.channel). mail.smtp.channel
+
+暗号化された経路で e メールを送信する方法は二通りあり、このプロパティで方法を選択できます。値は以下の通りです:
+
+* @clear@ - 暗号化なし
+* @ssl@ - SMTP-over-SSL (SMTPS) コネクタ; 465 番ポートでリッスンしている SSL ソケットです。
+* @starttls@ - 使用するサーバが @starttls@ コマンド (参考: "RFC 2487":http://www.apps.ietf.org/rfc/rfc2487.html) に対応していれば、SSL/TLS に切り替わる 25 番ポートの接続です。
+
+デフォルト: @clear@
+
+
+h3(#mail.smtp.host). mail.smtp.host
+
+外向きのメールサーバです。設定例:
+
+bc. mail.smtp.host=127.0.0.1
+
+GMail の SMTP サーバを使うには次のようにします:
+
+bc. mail.smtp.host=smtp.gmail.com
+
+デフォルト: @localhost@
+
+
+h3(#mail.smtp.localhost). mail.smtp.localhost
+
+SMTP コマンドで使用されるローカルホスト名
+
+デフォルト: なし - Java Mail のデフォルト値を使います。
+
+
+h3(#mail.smtp.pass). mail.smtp.pass
+
+SMTP サーバのパスワードです。"mail.smtp.host":#mail.smtp.host のものです。例えば GMail のパスワードです。
+
+デフォルト: なし
+
+
+h3(#mail.smtp.port). mail.smtp.port
+
+接続先の SMTP サーバのポート番号です。デフォルト値をオーバーライドするために使います。設定例:
+
+bc. mail.smtp.port=2500
+
+デフォルト:
+
+* @25@ "mail.smtp.channel":#mail.smtp.channel に @clear@ または @starttls@ がセットされているとき
+* @465@ "mail.smtp.channel":#mail.smtp.channel に @ssl@ がセットされているとき
+
+
+h3(#mail.smtp.protocol). mail.smtp.protocol
+
+Sets whether to use SSL. Values:
+SSL を使うかどうかを設定します。値は以下のとおりです:
+
+* @smtp@
+* @smtps@
+
+デフォルト: @smtp@
+
+
+h3(#mail.smtp.socketFactory.class). mail.smtp.socketFactory.class
+
+JavaMail で SSL 接続を使うとき、接続先のサーバの証明書がルート証明書によって署名されていなければ、デフォルトでは接続を切断します。具体的には自己署名の証明書を使っているときです。Play はデフォルトでルート証明書のチェックをスキップします。このプロパティを使って振る舞いを制御できます。
+
+
+h3(#mail.smtp.user). mail.smtp.user
+
+SMTP サーバのユーザ名です。"mail.smtp.host":#mail.smtp.host のものです。例えば GMail のユーザ名です。
+
+デフォルト: none.
+
+
+h2(#play). Play run-time
+
+
+h3(#play.bytecodeCache). play.bytecodeCache
+
+@dev@ モードでバイトコードキャッシュを無効にするときに使用します。 @prod@ モードには影響しません。
+
+bc. play.bytecodeCache=false
+
+デフォルト: @true@
+
+
+h3(#play.editor). play.editor
+
+エラーページからファイルを開きます。使用しているテキストエディタが URL からファイルを開くことが出来れば、Play はエラーページからファイルへ動的にリンクします。Textmate での具体例は以下のとおりです:
+
+bc. play.editor=txmt://open?url=file://%s&line=%s
+
+
+h3(#play.jobs.pool). play.jobs.pool
+
+ジョブプールのサイズです。設定例:
+
+bc. play.jobs.pool=20
+
+デフォルト: @10@
+
+
+h3(#play.netty.clientAuth). play.netty.clientAuth
+
+@javax.net.ssl.SSLEngine@ のクライアント認証を設定します。設定例:
+
+bc. play.netty.clientAuth=need
+
+値:
+
+* @want@ - サーバはクライアント認証を _要求します_
+* @need@ - サーバはクライアント認証を _必要とします_
+* @none@ - クライアント認証不要
+
+デフォルト: @none@
+
+
+h3(#play.netty.maxContentLength). play.netty.maxContentLength
+
+HTTP サーバがレスポンスとして返すコンテンツのバイト単位の最大長です。
+
+デフォルト: なし - 制限なし
+
+
+h3(#play.pool). play.pool
+
+実行プールサイズです。この値はできるだけ小さく抑えてください。この値を 1 スレッドに設定すると全てのリクエストは直列に処理されます (デバッグ目的には非常に有用です)。
+
+bc. play.pool=10
+
+デフォルト: @1@ (@dev@ モード), プロセッサ数 + 1 (@prod@ モード).
+
+
+h3(#play.tmp). play.tmp
+
+一時ファイルを格納するフォルダです。設定例:
+
+bc. play.tmp=/tmp/play
+
+値:
+
+* 絶対パス
+* アプリケーションディレクトリからの相対パス
+* @none@ 一時ディレクトリが使われないようにします
+
+デフォルト: @tmp@
+
+
+h2(#ssl). SSL
+
+関連項目: "https.port":#https.port.
+
+
+h3(#ssl.KeyManagerFactory.algorithm). ssl.KeyManagerFactory.algorithm
+
+"keystore.file":#keystore.file の設定に使用する Java Secure Socket Extension (JSSE) 信頼管理アルゴリズムの標準名です。
+
+bc. ssl.KeyManagerFactory.algorithm=SunX509
+
+デフォルト: @SunX509@
+
+
+h2(#trustmanager). trustmanager
+
+
+h3(#trustmanager.algorithm). trustmanager.algorithm
+
+"X509 証明書":#certificate と "キーストア":#keystore の設定で使用する JDK セキュリティ API の標準アルゴリズム名です。
+
+bc. trustmanager.algorithm=pkcs12
+
+値 - JDK セキュリティ API の ‘標準名’:
+
+* @jceks@ (‘SunJCE’ プロバイダ)
+* @jks@ (‘SUN" プロバイダ)
+* @pkcs12@
+
+デフォルト: @JKS@
+
+bc. play.netty.clientAuth
+
+値
+
+* @want@ 受け入れたサーバーモードの SSLSockets が、クライアント認証を要求するように初期設定するかどうかを制御します。
+* @need@ 受け入れたサーバーモードの SSLSockets で、クライアント認証が必須とされるように初期設定するかどうかを制御します。
+* @none@ 上記以外
+
+デフォルト: @none@
+
+h2(#upload). ファイルアップロード
+
+h3(#upload.threshold). upload.threshold
+
+ディスクに書き出されるファイルのアップロード時のバイト単位でのしきい値です。 @org.apache.commons.io.output.DeferredFileOutputStream@ に使われます。設定例:
+
+bc. upload.threshold=20480
+
+デフォルト: @10240@
+
+
+h2(#xforwarded). プロキシ転送
+
+h3(#XForwardedHost). XForwardedHost
+
+@X-Forwarded-Host@ HTTP ヘッダ値を上書きします。このヘッダ値はプロキシサーバとともに使われ、クライアントが要求した元のホストを保持しています。
+
+デフォルト: @X-Forwarded-Host@ HTTP ヘッダ値
+
+
+h3(#XForwardedProto). XForwardedProto
+
+@X-Forwarded-Proto@ と @X-Forwarded-SSL@ HTTP ヘッダ値を上書きすることで、プロキシへのリクエストを SSL だと設定します。このヘッダ値はクライアントが要求した元のプロトコルを保持します。設定例:
+
+bc. XForwardedProto=https
+
+
+h3(#XForwardedSupport). XForwardedSupport
+
+@X-Forwarded-For@ HTTP リクエストヘッダ値として許可された IP アドレスのカンマ区切りのリストです。プロキシサーバが @X-Forwarded-For@ リクエストヘッダをセットする場合、ローカルアドレスを制限するために使用します。
+
+デフォルト: @127.0.0.1@

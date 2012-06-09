@@ -1,0 +1,244 @@
+h1. コメントの閲覧と投稿
+
+ここまででブログトップページが設置されたので、続けて投稿の詳細ページを書いていきます。このページはその投稿に関するすべてのコメントを表示し、また、新しいコメントを投稿するためのフォームを含みます。
+
+h2. <a>'show' アクションの作成</a>
+
+投稿の詳細ページを表示するためには、 @Application@ コントローラに新しいアクションが必要です。これを @show()@ アクションと呼びましょう:
+
+bc. public static void show(Long id) {
+    Post post = Post.findById(id);
+    render(post);
+}
+
+見ての通り、このアクションはとてもシンプルです。HTTP の @id@ パラメータを Java の @Long@ オブジェクトとして自動的に検索できるよう、 @id@ メソッド引数を宣言します。このパラメータは、クエリ文字列か URL パス、またはリクエストボディから抽出されます。
+
+p(note). 妥当な数値でない HTTP パラメータ @id@ を送信しようとした場合、変数 @id@ は @null@ になり、Play は自動的に @errors@ コンテナにバリデーションエラーを追加します。
+
+このアクションは @/yabe/app/views/Application/show.html@ テンプレートを表示します:
+
+bc. #{extends 'main.html' /}
+#{set title:post.title /}
+ 
+#{display post:post, as:'full' /}
+
+すでに @display@ タグを作成してあるので、このページはとてもシンプルに書くことができます。
+
+h2. <a>詳細ページへのリンクの追加</a>
+
+display タグのすべてのリンクは ( @#@ を使うことで) 空のままにしてあります。ここで、これらのリンクが @Application.show@ アクションを指すようにします。Play ではテンプレートにおいて <code>@{…} 識別子</code> を使うことで容易にリンクを構築することができます。この構文は、ルータを使って指定したアクションを呼び出すために必要な URL を 'リバース' します。
+
+@/yabe/app/views/tags/display.html@ タグを編集しましょう:
+
+bc. …
+<h2 class="post-title">
+    <a href="@{Application.show(_post.id)}">${_post.title}</a>
+</h2>
+…
+
+トップページを更新したら、投稿のタイトルをクリックして詳細ページを表示してください。
+
+!images/guide4-0!
+
+よく出来ていますが、トップページへ戻るためのリンクがありません。 @/yabe/app/views/main.html@ テンプレートを編集して、タイトルへのリンクを完成させます:
+
+bc. …
+<div id="title">
+    <span class="about">About this blog</span>
+    <h1><a href="@{Application.index()}">${blogTitle}</a></h1>
+    <h2>${blogBaseline}</h2>
+</div>
+… 
+
+これで、トップページと投稿詳細ページ間を遷移することができるようになりました。
+
+h2. <a>より良い URL の指定</a>
+
+見ての通り、投稿詳細画面の URL は以下のようになっています:
+
+bc. /application/show?id=1
+
+これは Play が 'catch all' ルートを使ったためです。
+
+bc. *       /{controller}/{action}                  {controller}.{action}
+
+@Application.show@ アクションのためのカスタムパスを指定することで、より良い URL にすることができます。 @/yabe/conf/routes@ ファイルを編集して、先頭行の後に以下のルートを追加してください:
+
+bc. GET     /posts/{id}                             Application.show
+
+p(note). この方法では、 @id@ パラメータは URL パスから抽出されます。URI パターンについては、 "ルートファイル構文":routes#syntax に関するマニュアルページで、より詳しく読むことができます。
+
+ブラウザを更新して、今度は適切な URL が使用されることを確認してください。
+
+h2. <a>ページングの追加</a>
+
+ユーザが投稿を通じて容易に遷移できるようにするために、ページング機能を追加します。必要に応じて前や後の投稿を取って来られるよう Post クラスを拡張します:
+
+bc. public Post previous() {
+    return Post.find("postedAt < ? order by postedAt desc", postedAt).first();
+}
+ 
+public Post next() {
+    return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
+}
+
+あるリクエストにおいて、これらのメソッドを何度か呼ぶことになるため、これらを最適化するのもいいのですが、今のところはこれで充分です。さて、 @show.html@ テンプレートの上部 ( @#{display/}@ タグの前) にページングのリンクを追加してください:
+
+bc. <ul id="pagination">
+    #{if post.previous()}
+        <li id="previous">
+            <a href="@{Application.show(post.previous().id)}">
+                ${post.previous().title}
+            </a>
+        </li>
+    #{/if}
+    #{if post.next()}
+        <li id="next">
+            <a href="@{Application.show(post.next().id)}">
+                ${post.next().title}
+            </a>
+        </li>
+    #{/if}
+</ul>
+
+ぐっと良くなりました。
+
+h2. <a>コメントフォームの追加</a>
+
+いよいよコメントフォームを設置します。Application コントローラに @postComment@ アクションメソッドを追加することから始めましょう。
+
+bc. public static void postComment(Long postId, String author, String content) {
+    Post post = Post.findById(postId);
+    post.addComment(author, content);
+    show(postId);
+}
+
+見ての通り、以前に Post クラスに追加した @addComment()@ メソッドを再利用しただけです。
+
+@show.html@ テンプレート ( @#{display /}@ タグのすぐ後) に HTML フォームを書きましょう:
+
+bc. <h3>Post a comment</h3>
+ 
+#{form @Application.postComment(post.id)}
+    <p>
+        <label for="author">Your name: </label>
+        <input type="text" name="author" id="author" />
+    </p>
+    <p>
+        <label for="content">Your message: </label>
+        <textarea name="content" id="content"></textarea>
+    </p>
+    <p>
+        <input type="submit" value="Submit your comment" />
+    </p>
+#{/form}
+
+これで、新しいコメントの投稿を試すことができるようになりました。ばっちり動くはずです。
+
+!images/guide4-1!
+
+h2. <a>バリデーションの追加</a>
+
+現状、コメントを作成する前にフォームの内容の妥当性を確認していません。いずれのフィールドも入力必須にしたいと思います。Play のバリデーション機能を使って、HTTP パラメータが適切に入力されていることを簡単に保証することができます。 @postComment@ アクションに <code>@Required</code> アノテーションを追加して、エラーが発生していないことを確認するよう変更します:
+
+bc. public static void postComment(Long postId, @Required String author, @Required String content) {
+    Post post = Post.findById(postId);
+    if (validation.hasErrors()) {
+        render("Application/show.html", post);
+    }
+    post.addComment(author, content);
+    show(postId);
+}
+
+p(note). @play.data.validation.*@ をインポートすることも **忘れないでください** 。
+
+見ての通り、バリデーションエラーが発生した場合、投稿詳細画面を再度表示します。フォームのコードを、エラーメッセージを表示するよう変更しなければなりません:
+
+bc. <h3>Post a comment</h3>
+ 
+#{form @Application.postComment(post.id)}
+ 
+    #{ifErrors}
+        <p class="error">
+            All fields are required!
+        </p>
+    #{/ifErrors}
+ 
+    <p>
+        <label for="author">Your name: </label>
+        <input type="text" name="author" id="author" value="${params.author}" />
+    </p>
+    <p>
+        <label for="content">Your message: </label>
+        <textarea name="content" id="content">${params.content}</textarea>
+    </p>
+    <p>
+        <input type="submit" value="Submit your comment" />
+    </p>
+#{/form}
+
+HTML input の値を設定するために、投稿されたパラメータを再利用していることに注意してください。
+
+投稿者により親切な UI フィードバックを提供するために、エラーが発生した場合には、自動的にコメントフォームにフォーカスをセットする、ちょっとした JavaScript を追加します。このスクリプトは "JQuery":files/jquery-1.4.2.min.js と "JQuery Tools Expose":http://cdn.jquerytools.org/1.2.5/full/jquery.tools.min.js を補助ライブラリとして使用するので、これらを include する必要があります。これら 2 つのライブラリを @/yabe/public/javascripts@ にダウンロードしたら、これらを include するよう @main.html@ を変更してください:
+
+bc. …
+    <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}"></script>
+    <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
+</head>
+
+p(note). 現在のバージョンの Play には、このチュートリアルで使用しているものより新しいバージョンの jQuery がバンドルされていることに注意してください。
+
+これで以下のスクリプトを @show.html@ テンプレートに追加することが出来ます。 (ページの最後に追加してください):
+
+bc. <script type="text/javascript" charset="utf-8">
+    $(function() {         
+        // Expose the form 
+        $('form').click(function() { 
+            $('form').expose({api: true}).load(); 
+        }); 
+        
+        // If there is an error, focus to form
+        if($('form .error').size()) {
+            $('form').expose({api: true, loadSpeed: 0}).load(); 
+            $('form input[type=text]').get(0).focus();
+        }
+    });
+</script>
+
+!images/guide4-2!
+
+コメントフォームがずいぶんクールになりました。あと二つ追加しましょう。
+
+最初に、コメントが正常に投稿されたら成功メッセージを表示するようにします。これをするために、ひとつのアクション呼び出しから次の呼び出しにメッセージを引き渡すことができる flash スコープを使います。
+
+成功メッセージを追加するように @postComment@ アクションを修正します:
+
+bc. public static void postComment(Long postId, @Required String author, @Required String content) {
+    Post post = Post.findById(postId);
+    if(validation.hasErrors()) {
+        render("Application/show.html", post);
+    }
+    post.addComment(author, content);
+    flash.success("Thanks for posting %s", author);
+    show(postId);
+}
+
+そして、もし成功メッセージが存在する場合は @show.html@ にこれを表示します (ページの最上部に追加します) 。
+
+bc. …
+#{if flash.success}
+    <p class="success">${flash.success}</p>
+#{/if}
+ 
+#{display post:post, as:'full' /}
+…
+
+!images/guide4-3!
+
+最後は @postComment@ アクションに使われる URL を整えます。特にルートを定義していないので、このアクションはいつもどおり全てをキャッチするルートを使用します。そこで、以下のルートをアプリケーションのルートファイルに追加します:
+
+bc. POST    /posts/{postId}/comments                Application.postComment
+
+以上です。いつものようにこのバージョンを bazaar にコミットします。
+
+p(note). 次: %(next)"キャプチャの設定":guide5%. 

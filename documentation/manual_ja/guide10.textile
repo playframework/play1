@@ -1,0 +1,204 @@
+h1. テストの完了
+
+ここまでで、このチュートリアルで作成したかったブログエンジンを完成させました。ですが、プロジェクトそのものはまだ完全には終わっていません。すべてのコードに自信を持つためには、プロジェクトにより多くのテストを追加する必要があります。
+
+もちろん、yabe のすべてのモデル層の機能をテストするための単体テストは既に作成しています。この単体テストが、ブログエンジンの主要な機能がよくテストされていることを保証するのは素晴らしいことです。しかし、web アプリケーションは 'モデル' の部分だけではありません。web インタフェースが期待通り動作することを保証する必要があります。これは、yabe ブログエンジンのコントローラ層をテストすることを意味します。そして、例えば JavaScript コードのように、UI 自体もテストしなければなりません。
+
+h2. <a name="controller">コントローラのテスト</a>
+
+Play は、JUnit を使ってアプリケーションのコントローラ部分を直接テストする方法を提供します。これは **'機能テスト'** と呼ばれます。なぜなら、アプリケーションの機能性を完全にテストするからです。
+
+基本的には、機能テストは HTTP リクエストをシミュレートする Play の @ActionInvoker@ を直接呼び出します。このため、HTTP メソッドと URI、そして HTTP パラメータを指定します。その後 Play は、リクエストをルーティングして対応するアクションを起動し、値を詰めたレスポンスを返します。このレスポンスを分析し、その内容が期待したものであるかを確認することができます。
+
+最初の機能テストを書いてみましょう。 @yabe/test/ApplicationTest.java@ 単体テストを開いてください:
+
+bc. import org.junit.*;
+import play.test.*;
+import play.mvc.*;
+import play.mvc.Http.*;
+import models.*;
+ 
+public class ApplicationTest extends FunctionalTest {
+ 
+    @Test
+    public void testThatIndexPageWorks() {
+        Response response = GET("/");
+        assertIsOk(response);
+        assertContentType("text/html", response);
+        assertCharset("utf-8", response);
+    }
+    
+}
+
+今のところ、これは標準的な JUnit テストのように見えます。便利なユーティリティヘルパを取得するために、Play の @FunctionalTest@ スーパークラスを使用することに注意してください。このテストに誤りは無く、ただ単にアプリケーションのトップページ (典型的な '/' という URL は、ステータスコード **'200 OK'** と共に HTML レスポンスをレンダリングすること) を確認します。
+
+ここで、管理領域のセキュリティ機能が期待通りに動作することを確認してみましょう。 @ApplicationTest.java@ ファイルに新しいテストを追加してください:
+
+bc. …
+@Test
+public void testAdminSecurity() {
+    Response response = GET("/admin");
+    assertStatus(302, response);
+    assertHeaderEquals("Location", "/login", response);
+}
+…
+
+@play test@ コマンドを使って yabe アプリケーションを test モードで実行したら、 "http://localhost:9000/@tests":http://localhost:9000/@tests を開き、 @ApplicationTest.java@ を選択して実行します。
+
+グリーンになりましたか?
+
+!images/guide10-1!
+
+さて、このやり方でアプリケーションの全機能をテストし続けることもできますが、HTML ベースの web アプリケーションをテストする方法としては、あまり良いやり方ではありません。このブログエンジンは web ブラウザで実行するつもりなので、 **本物の web ブラウザ** で直接テストする方がより良いでしょう。そして、Play の **'Selenium テスト'** は、まさにこれを行います。
+
+これらの JUnit ベースの **'機能テスト'** は、HTTP を使って JSON や XML と言った 非 HTML なレスポンスを返す Web サービスの典型的なテストには依然として有用です。
+
+h2. <a name="selenium">Selenium テストの作成</a>
+
+"Selenium":http://seleniumhq.org は web アプリケーションのテストに特化したテストツールです。Selenium は、既存のあらゆるブラウザで直接テストスイートを実行することができる点においてクールです。Selenium は 'ブラウザシミュレータ' は一切使わないので、ユーザが使用するブラウザでテストしていることを確信することができます。
+
+通常、Selenium のテストスイートは HTML ファイルとして記述されます。Selenium が必要とする HTML の構文を書くのは (HTML のテーブル要素を使うようフォーマットされており) 少々退屈です。Play のテンプレートエンジンと Selenium シナリオの構文を簡易にするタグのセットを使うことで、Play がこれを手助けしてくれるのは良いニュースです。複雑なテストを書くために (くり返しや条件ブロックなどの) Play テンプレートの機能を使うことで、どのような '静的なシナリオ' にも縛られなくなるのは、テンプレートを使用することの興味深い副作用です。
+
+p(note). とは言え、もし必要であれば特別な Selenium タグのことは忘れて、テンプレート内に素の HTML 構文を書くことも可能です。"Selenium IDE":http://seleniumhq.org/projects/ide のような、いくつかのテストシナリオ生成ツールのうちのひとつを使ってみるのも面白いかもしれません。
+
+新規作成した Play アプリケーションのデフォルトのテストスイートには、すでに Selenium テストが含まれています。 @yabe/test/Application.test.html@ ファイルを開いてください:
+
+bc. *{ You can use plain Selenium commands using the selenium tag }*
+ 
+#{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+yabe アプリケーションでは、このテストは問題なく実行できるはずです。このテストは、単にトップページを開き、その内容に文字列 'Application error' が含まれていないことを確認します。
+
+一方で、複雑なテストなどの場合には、アプリケーションを操作してテストを実行する前に、分かりきったデータセットを設定する必要があります。もちろん、以前に使用したフィクスチャの概念と @yabe/test/data.yml@ ファイルを再利用することができます。テストスイートの前にこのデータセットをインポートするためには、ただ @#{fixtures /}@ タグを使用してください:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+確認すべきもうひとつの重要なことは、テスト開始時に新しいユーザセッションを使用することです。セッションはブラウザの永続化クッキーに保存され、ふたつの成功するテストを実行している間、同じセッションが保持されるでしょう。
+
+そこで、特別なコマンドを使ってテストを開始するようにしましょう:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    clearSession()
+ 
+    // Open the home page, and check that no error occurred
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+これを実行して何も問題が無いことを確認してください。このテストはグリーンになるはずです。
+
+これでもっと特別なテストを書くことができます。トップページを開いてデフォルトの投稿が存在することを確認しましょう:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium 'Check home page'}
+    clearSession()
+ 
+    // Open the home page
+    open('/')
+ 
+    // Check that the front post is present
+    assertTextPresent('About the model layer')
+    assertTextPresent('by Bob, 14 Jun 09')
+    assertTextPresent('2 comments , latest by Guest')
+    assertTextPresent('It is the domain-specific representation')
+ 
+    // Check older posts
+    assertTextPresent('The MVC application')
+    assertTextPresent('Just a test of YABE')
+#{/selenium}
+
+ここでは、"Selenese":http://seleniumhq.org/docs/02_selenium_ide.html#selenium-commands-selenese と呼ばれる標準的な Selenium 構文を使っています。
+
+このテストを実行してください (単にリンクを新しいウィンドウで開けば、その別のウィンドウでテストを実行することができます) 。
+
+!images/guide10-2!
+
+今度はコメントフォームをテストします。テンプレートに新しい @#{selenium /}@ タグを追加してください:
+
+bc. #{selenium 'Test comments'}
+ 
+    // Click on 'The MVC application post'
+    clickAndWait('link=The MVC application')
+    assertTextPresent('The MVC application')
+    assertTextPresent('no comments')
+    
+    // Post a new comment
+    type('content', 'Hello')
+    clickAndWait('css=input[type=submit]')
+    
+    // Should get an error
+    assertTextPresent('no comments')
+    assertTextPresent('Author is required')
+    type('author', 'Me')
+    clickAndWait('css=input[type=submit]')
+    
+    // Check
+    assertTextPresent('Thanks for posting Me')
+    assertTextPresent('1 comment')
+    assertTextPresent('Hello')
+#{/selenium}
+
+そして実行してください。はい、失敗します; ここには深刻な問題があります。
+
+!images/guide10-3!
+
+キャプチャ機能を本当の意味で正しくテストすることはできないので、ずるをしなければなりません。テストモードではどんなコードでも正しいキャプチャとして妥当性を検証するようにしましょう。ご存知のように、テストモードの場合のフレームワーク id は @test@ です。そこで、テストモードの場合は妥当性検証をスキップするよう @yabe/app/controllers/Application.java@ ファイル中の @postComment@ アクションを変更しましょう:
+
+bc. …
+if(!Play.id.equals("test")) {
+    validation.equals(code, Cache.get(randomID)).message("Invalid code. Please type it again");
+}
+…
+
+今度は、以下のように適当なコードをタイプするようテストケースを変更します:
+
+bc. …
+type('author', 'Me')
+type('code', 'XXXXX')
+clickAndWait('css=input[type=submit]')
+…
+
+これでテストを再度実行すれば、動作するはずです。
+
+h2. <a name="cobertura">コードカバレッジ計測</a>
+
+もちろん、アプリケーションに必要なすべてのテストケースを書いたわけではありません。しかし、このチュートリアルにはこれで充分です。ところで、実世界のプロジェクトの場合では、どうすれば充分なテストを書いたと知ることができるのでしょうか? これは **'コードカバレッジ'** などと呼ばれます。
+
+"Cobertura モジュール":http://www.playframework.org/modules/cobertura は "Cobertura":http://cobertura.sourceforge.net/ ツールを使ってコードカバレッジレポートを生成します。 @install@ コマンドを使ってこのモジュールをインストールしてください:
+
+bc. play install cobertura-{version}
+
+このモジュールはテストモードのときだけ有効にする必要があります。そこで、以下の行を @application.conf@ に追加し、アプリケーションをテストモードで再起動します。
+
+bc. # Import the cobertura module in test mode
+%test.module.cobertura=${play.path}/modules/cobertura
+
+ここで、ブラウザから "http://localhost:9000/@tests":http://localhost:9000/@tests URL を再度開き、すべてのテストを選択して実行してください。すべてグリーンになるはずです。
+
+!images/guide10-5!
+
+すべてのテストをパスしてからアプリケーションを停止すると、cobertura はコードカバレッジレポートを生成します。ブラウザで @yabe/test-result/code-coverage/index.html@ を開き、このレポートを確認することができます。
+
+!images/guide10-4!
+
+アプリケーションを再起動する場合、 "http://localhost:9000/@cobertura":http://localhost:9000/@cobertura でそれを参照することも可能です。
+
+見ての通り、アプリケーションの全ケースをテストするには程遠い状態です。すべてのコードを確認することがほとんど不可能だとしても、よく出来たテストスイートのカバレッジ率は 100% に近付くはずです。通常このために、キャプチャについて行ったようなテストモードにおけるハックをしばしば行うことになります。
+
+p(note). 次: %(next)"本番環境への準備":guide11%

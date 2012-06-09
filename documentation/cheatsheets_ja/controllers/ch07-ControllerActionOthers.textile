@@ -1,0 +1,15 @@
+h2. Controller.action - Others
+
+*==Logger.info("Action executed ...");==*
+*==Logger.debug("A log message");==*
+*==Logger.error(ex, "Oops");==*
+ロギングの設定は application.conf にあります。
+
+*==@CacheFor("1h") public static void index() { ... }==*
+1時間アクションの実行結果をキャッシュします。
+
+*==Play.configuration.getProperty("blog.title");==*
+設定ファイルにアクセスします。
+
+*==Query query = JPA.em().createQuery("query");==*
+永続化マネージャにアクセスします。

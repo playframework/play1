@@ -1,0 +1,77 @@
+h2. Template - Groovy extension
+
+*==${ ['red', 'green', 'blue'].join('/') }==*
+red/green/blue
+
+*==${ (["red", "green", "blue"] as String[]).add('pink').join(' ') }==*
+red green blue pink
+
+*==${ (['red', 'green', 'blue'] as String[]).contains('green') }==*
+true
+
+*==${(['red', 'gr', 'blue'] as String[]).remove('gr').join(' ')}==*
+red blue
+
+*==${ ['red', 'green', 'blue'].last() }==*
+blue
+
+*==${ new Date(new Date().getTime() - 1000000).since() }==*
+16 分前
+
+*==${new Date(1275910970000).format('dd MMMM yyyy==*
+*==hh:mm:ss')}==*
+07 June 2010 01:42:50
+
+*==${ 1275910970000.asdate('dd MMMM yyyy hh:mm:ss') }==*
+07 June 2010 01:42:50
+
+*==${726016L.formatSize()}==*
+709KB
+
+*==${ 42.formatCurrency('EUR').raw() }==*
+&euro; 42.00
+
+*==${ 42.page(10) }==*
+5
+
+*==journ${ ['cnn', 'c+', 'f2'].pluralize('al', 'aux') }==*
+journaux
+
+*==${ "lorum ipsum dolor".capAll() }==*
+Lorum Ipsum Dolor
+
+*==${ "lorum ipsum dolor".camelCase() }==*
+LorumIpsumDolor
+
+*==${ "lorum ipsum dolor".capFirst() }==*
+Lorum ipsum dolor
+
+*==${ "lorum ipsum dolor".cut('um') }==*
+lor ips dolor
+
+*==${ "The &lt;blink&gt;tag&lt;/blink&gt; is evil".escape().raw() }==*
+The &lt;blink&gt;tag&lt;/blink&gt; is evil
+
+*==${ "one\ntwo".nl2br() }==*
+==one&lt;br/&gt;two==
+
+*==${ '<' } ${ '<'.raw() }==*
+&lt; <
+
+*==${ " (') (\") ".escapeJavaScript().raw() }==*
+==(\') (\")==
+
+*==${ "".yesno('yes', 'no') }==*
+no
+
+*==${ "not empty".yesno('yes', 'no') }==*
+yes
+
+*==${"Stéphane Épardaud".noAccents()}==*
+Stephane Epardaud
+
+*==${ "The Play! frameworkʼs manual".slugify() }==*
+the-play-framework-s-manual
+
+*==${ "x".pad(4).raw() }==*
+x&nbsp;&nbsp;&nbsp;

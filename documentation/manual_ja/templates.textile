@@ -1,0 +1,374 @@
+h1. テンプレートエンジン
+
+Play には、HTML、XML、JSON、その他あらゆるテキストベースのドキュメントを動的に生成する効率的なテプレートシステムがあります。テンプレートエンジンは式言語として "Groovy":http://groovy.codehaus.org/ を使用します。タグシステムによって、再利用可能な機能を作成することができます。
+
+テンプレートは @app/views@ ディレクトリに保存されます。
+
+h2. <a name="syntax">テンプレートの構文</a>
+
+テンプレートファイルは、一部に動的に内容を生成するためのプレースホルダを持つテキストファイルです。テンプレートの動的な要素は、 "Groovy":http://groovy.codehaus.org/ 言語を使用して書かれます。Groovy の構文は Java のそれにとてもよく似ています。 
+
+動的な要素はテンプレートの実行中に解決されます。レンダリング結果は、HTTP レスポンスの一部として送信されます。
+
+h3. Expressions: ${…}
+
+動的な要素を作る最もシンプルな方法は、式を宣言することです。ここで使用する構文は @${…}@ です。この式の評価結果は、この式部分に挿入されます。
+
+例えば、以下のようにします:
+
+bc. <h1>Client ${client.name}</h1>
+
+client が null でないと確信できない場合には、Groovy のショートカットがあります:
+
+bc. <h1>Client ${client?.name}</h1>
+
+これは client が null でない場合にのみ、client の name を表示します。
+
+h3. テンプレートデコレータ : #{extends  /} と  #{doLayout  /}
+
+デコレータは複数テンプレートに渡ってページのレイアウト (またはデザイン) を共有するきれいなソリューションを提供します。
+
+p(note). テンプレートとデコレータの間で変数を共有するには、 "#{get}":tags#ageta および "#{set}":tags#aseta タグを使用してください。
+
+デコレータにページを埋め込むことは一行で行えます。
+
+bc. #{extends 'simpledesign.html' /}
+ 
+#{set title:'A decorated page' /}
+This content will be decorated.
+
+デコレータ : @simpledesign.html@
+
+bc. <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>#{get 'title' /}</title>
+  <link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/main.css'}" />
+</head>
+<body>
+  <h1>#{get 'title' /}</h1>
+  #{doLayout /}
+  <div class="footer">Built with the play! framework</div>
+</body>
+</html>
+
+h3. タグ: #{tagName /}
+
+タグは、パラメータと共に呼ぶことができるテンプレートの断片です。タグに 1 つのパラメータしかない場合、規約によりそのパラメータは "arg" と呼ばれ、省略することができます。
+
+例えば、このタグは JavaScript ファイルをロードするための SCRIPT タグを挿入します:
+
+bc. #{script 'jquery.js' /}
+
+タグは直接閉じるか、終了タグによって閉じられなければなりません:
+
+bc. #{script 'jquery.js' /}
+
+または、以下のようにします。
+
+bc. #{script 'jquery.js'}#{/script}
+
+例えば、 @list@ タグはどんなコレクションでもくり返すことができます。list タグは 2 つの必須パラメータを受け取ります:
+
+bc. <h1>Client ${client.name}</h1>
+<ul>
+    #{list items:client.accounts, as:'account' }
+        <li>${account}</li>
+    #{/list}
+</ul>
+
+すべての動的な式は、アプリケーションの XSS セキュリティ問題を回避するために、テンプレートエンジンによってエスケープされます。そのため <code>==&lt;h1>Title&lt;/h1>==</code> を含む @titile@ 変数はエスケープされてしまいます:
+
+bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
+
+エスケープせずに表示したい場合は、明示的に @raw()@ メソッドをコールする必要があります:
+
+bc. ${title.raw()} --> <h1>Title</h1>
+
+素の HTML のかなりの部分を表示したい場合は、 @#{verbatim /}@ タグを使用することができます:
+
+bc. #{verbatim}
+    ${title} --> <h1>Title</h1>
+#{/verbatim}
+
+h3. アクション: @{…} または @@{…}
+
+Router を使用することで、指定されたルートに対応する URL を (リバースして) 生成することができます。特別な <code>@{…}</code> 構文を使用して、テンプレートからこれを行うことができます。
+
+例えば、以下のようにします:
+
+bc. <h1>Client ${client.name}</h1>
+<p>
+   <a href="@{Clients.showAccounts(client.id)}">All accounts</a>
+</p>
+<hr />
+<a href="@{Clients.index()}">Back</a>
+
+<code>@@{…}</code> 構文は、(とりわけ email, … に便利な) 絶対 URL を生成する点以外は同じです。
+
+h3. メッセージ: &{…}
+
+アプリケーションを国際化する必要がある場合は、 @&{…}@ 構文を使って国際化されたメッセージを表示することができます:
+
+例えば @conf/messages@ ファイルに次のように指定した場合:
+
+bc. clientName=The client name is %s
+
+このメッセージをテンプレートに表示する使い方はシンプルです:
+
+bc. <h1>&{'clientName', client.name}</h1>
+
+h3. コメント: ==*{…}*==
+
+コメントはテンプレートエンジンによって評価されません。コメントはただのコメントです…
+
+bc. *{**** Display the user name ****}*
+<div class="name">
+    ${user.name}
+</div>
+
+h3. スクリプト: ==%{…}%==
+
+スクリプトは、より複雑な式のセットです。スクリプトは、いくつかの変数を宣言して、いくつかの命令を定義できます。 @%{…}%@ 構文を使用してスクリプトを挿入してください。
+
+bc. %{
+   fullName = client.name.toUpperCase()+' '+client.forname;
+}%
+ 
+<h1>Client ${fullName}</h1>
+
+スクリプトは、 @out@ オブジェクトを使用して、動的な内容を直接出力することができます:
+
+bc. %{
+   fullName = client.name.toUpperCase()+' '+client.forname;
+   out.print('<h1>'+fullName+'</h1>');
+}%
+
+テンプレート内においてくり返しなどの構造を作成するためにスクリプトを使用することができます:
+
+bc. <h1>Client ${client.name}</h1>
+<ul>
+%{
+     for(account in client.accounts) { 
+}%
+     <li>${account}</li>
+%{
+     }
+}%
+</ul>
+
+テンプレートが複雑なことをする場所でないことを覚えておいてください。タグを使えるところではタグを使い、そうでない場合は計算処理をコントローラかモデルオブジェクトに移動してください。
+
+h2. <a name="inheritance">テンプレートの継承</a>
+
+テンプレートは別のテンプレートを引き継ぐこと、すなわち、他のテンプレートの一部として取り込まれることができます。
+
+別のテンプレートを継承するには @extends@ タグを使用します:
+
+bc. #{extends 'main.html' /}
+ 
+<h1>Some code</h1>
+
+@main.html@ テンプレートは標準のテンプレートですが、内容を取り込むために @doLayout@ タグを使用します:
+
+bc. <h1>Main template</h1>
+ 
+<div id="content">
+    #{doLayout /}
+</div>
+
+
+h2. <a name="tags">カスタムテンプレートタグ</a>
+
+アプリケーションのための特別なタグを容易に作成することができます。タグは、 @app/views/tags@ ディレクトリに格納されるシンプルなテンプレートファイルです。テンプレートのファイル名はタグ名として使用されます。このテンプレートファイル名はタグの名前として使用されます。
+
+@hello@ タグを作成するためには、単に @app/views/tags/hello.html@ ファイルを作成してください。
+
+bc. Hello from tag!
+
+設定は一切必要ありません。このタグを直接使用することができます。
+
+bc. #{hello /}
+
+h3. タグパラメータの取得
+
+タグパラメータは、テンプレートの変数として表現されます。変数名は ‘_’ 文字をパラメータ名の前に付けた状態で構成されます。
+
+例えば、以下のようにします: 
+
+bc. Hello ${_name} !
+
+そして、この name パラメータをタグに渡すことができます:
+
+bc. #{hello name:'Bob' /}
+
+タグにパラメータが 1 つしかない場合、暗黙的な名前である @arg@ というデフォルトパラメータ名を使うことができます。
+
+例えば:
+
+bc. Hello ${_arg}!
+
+次のようにして、これを容易に使用することができます:
+
+bc. #{hello 'Bob' /}
+
+h3. タグボディの実行
+
+タグが @body@ をサポートする場合、 @doBody@ タグを使用することでタグコードの任意の位置にボディの内容を取り込むことができます。
+
+例えば、以下のようにします:
+
+bc. Hello #{doBody /}!
+
+そして、タグボディをこの名前として渡すことができます:
+
+bc. #{hello}
+   Bob
+#{/hello}
+
+h3. フォーマット特有のタグ
+
+異なる "content types":routes#content-types に違うバージョンのタグを指定することができ、Play は適切なタグを選択します。例えば、Play は @request.format@ が @html@ の場合は @app/views/tags/hello.html@ を、フォーマットが @xml@ の場合は @app/views/tags/hello.xml@ を選択します。
+
+content type が何であれ、フォーマット特有のタグが利用できない場合、Play は例えば @app/views/tags/hello.tag@ のような 拡張子 @.tag@ にフォールバックします。
+
+
+h2. <a name="fasttags">カスタム Java タグ</a>
+
+Java コードでカスタムタグを定義することも可能です。Java エクステンションが @play.templates.JavaExtensions@ クラスを継承して動作するのと同じように、FastTag を作るためには @play.templates.FastTags@ を継承するクラスにメソッドを作成する必要があります。タグとして実行するいずれのメソッドも、以下のメソッドシグネチャに従わなければなりません。
+
+bc. public static void _tagName(Map<?, ?> args, Closure body, PrintWriter out, 
+   ExecutableTemplate template, int fromLine)
+
+p(note). タグ名の前のアンダースコアに注意してください。
+
+実際のタグの作り方を理解するために、二つの組み込みタグを見てみましょう。
+
+例えば、 @verbatim@ タグは単純にタグボディを引き渡し、 Java エクステンション上で toString を呼び出す一行のメソッドとして実装されています。
+
+bc. public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, 
+   ExecutableTemplate template, int fromLine) {
+   
+   out.println(JavaExtensions.toString(body));
+}
+
+タグボディは開きタグと閉じタグの間にあるであろう何かなので
+
+bc. <verbatim>My verbatim</verbatim>
+
+ボディの値は以下のようになります。
+
+bc. My verbatim
+
+二つ目の例は、その機能が親タグに依存するため、やや複雑な @option@ タグです。
+
+bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out, 
+      ExecutableTemplate template, int fromLine) {
+ 
+   Object value = args.get("arg");
+   Object selection = TagContext.parent("select").data.get("selected");
+   boolean selected = selection != null && value != null 
+      && selection.equals(value);
+ 
+   out.print("<option value=\"" + (value == null ? "" : value) + "\" " 
+      + (selected ? "selected=\"selected\"" : "") 
+      + "" + serialize(args, "selected", "value") + ">");
+   out.println(JavaExtensions.toString(body));
+   out.print("</option>");
+}
+
+このコードは HTML の @option@ タグを出力し、親タグでどの値が選択されたかを確認して selected 値を設定します。最初の三行は出力に使う変数を設定します。その後、最後の三行でこのタグの結果を出力します。
+
+組み込みタグのソースコードに、様々な度合いの複雑さを持った多くのサンプルがあります。"github の FastTags.java":https://github.com/playframework/play/blob/master/framework/src/play/templates/FastTags.java を参照してください。
+
+h3. タグの名前空間
+
+タグが、プロジェクト間、または Play の中心的なタグと衝突しないことを保証するために、クラスレベルのアノテーション <code>@FastTags.Namespace</code> を使って名前空間を設定することができます。
+
+以下のようにして @hello@ タグの名前空間を @my.tags@ にします。
+
+bc. @FastTags.Namespace("my.tags") 
+public class MyFastTag extends FastTags {
+   public static void _hello (Map<?, ?> args, Closure body, PrintWriter out, 
+      ExecutableTemplate template, int fromLine) {
+      ...
+   }
+}
+
+そして、テンプレートから以下のようにして hello タグを参照します。
+
+bc. #{my.tags.hello/}
+
+
+
+h2. <a name="extensions">テンプレートにおける Java オブジェクトの拡張</a>
+
+テンプレートエンジン内において Java オブジェクトを使用すると、新しいメソッドが追加されます。これらのメソッドは、元の Java クラスには存在しておらず、テンプレートエンジンによって動的に追加されます。
+
+例えば、テンプレートにおいて数値を簡単にフォーマットするために、 @java.lang.Number@ に @format@ メソッドが追加されます。
+
+数値をフォーマットするのは非常に簡単です:
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <li>${product.name}. Price: ${product.price.format('## ###,00')} €</li>
+#{/list}
+</ul>
+
+@java.util.Date@ にも同様に適用することができます。
+
+型ごとに利用できるメソッドの一覧は "API ドキュメント":http://www.playframework.org/@api/play/templates/JavaExtensions.html で見つけることができます。
+
+
+h3. 独自拡張の作成
+
+プロジェクトが、特別なフォーマットを必要とする場合、独自の拡張を提供することができます。
+
+必要なのは @play.templates.JavaExtensions@ を拡張する Java クラスを作成することだけです。
+
+例えば、数値にカスタム通貨フォーマットを提供するためには、以下のようにします:
+
+bc. package ext;
+ 
+import play.templates.JavaExtensions;
+ 
+public class CurrencyExtensions extends JavaExtensions {
+ 
+  public static String ccyAmount(Number number, String currencySymbol) {
+     String format = "'"+currencySymbol + "'#####.##";
+     return new DecimalFormat(format).format(number);
+  }
+ 
+}
+
+拡張メソッドは static なメソッドであり、ページに書き戻すために @java.lang.String@ を返すべきです。最初のパラメータは拡張されるオブジェクトを保持します。
+
+このフォーマットは以下のようにして使います:
+
+bc. <em>Price: ${123456.324234.ccyAmount("€")}</em>
+
+テンプレート拡張クラスは Play によって起動時に自動的に検出されます。それらを利用可能にするために必要なのは、アプリケーションを再起動することだけです。
+
+h2. <a name="implicits">テンプレートで利用可能な暗黙オブジェクト</a>
+
+@renderArgs@ スコープに追加されたすべてのオブジェクトは、テンプレート変数として直接注入されます。
+
+例えば、コントローラからテンプレートに ‘user’ Bean を注入するためには、以下のようにします:
+
+bc. renderArgs.put("user", user );
+
+アクションからテンプレートをレンダリングするとき、フレームワークは以下の暗黙オブジェクトも追加します:
+
+|| 変数 || 説明 || API ドキュメント || 参考 ||
+| @errors@ | バリデーションエラー | "play.data.validation.Validation.errors()":/@api/play/data/validation/Validation.html#errors%28%29 | "HTTP フォームデータのバリデーション":validation |
+| @flash@ | フラッシュスコープ | "play.mvc.Scope.Flash":/@api/play/mvc/Scope.Flash.html  | "コントローラ - セッションとフラッシュのスコープ":controllers#session |
+| @lang@ | 現在の言語 | "play.i18n.Lang":/@api/play/i18n/Lang.html | "I18N の設定 - 言語の定義":i18n#languages |
+| @messages@ | メッセージのマップ | "play.i18n.Messages":/@api/play/i18n/Messages.html | "I18N の設定 - メッセージの外部化":i18n#messages |
+| @out@ | 出力ストリーム | java.io.PrintWriter |  |
+| @params@ | 現在のパラメータ | "play.mvc.Scope.Params":/@api/play/mvc/Scope.Params.html  | "コントローラ - HTTP パラメータ":controllers#params |
+| @play@ | フレームワークの中心クラス | "play.Play":/@api/play/Play.html |  |
+| @request@ | 現在の HTTP リクエスト | "play.mvc.Http.Request":/@api/play/mvc/Http.Request.html  |  |
+| @session@ | セッションスコープ | "play.mvc.Scope.Session":/@api/play/mvc/Scope.Session.html  | "コントローラ - セッションとフラッシュのスコープ":controllers#session |
+
+上記のリストに加えて @owner@, @delegate@ そして @it@ は Groovy で予約されており、テンプレート内の変数名として使うべきではありません。
+
+p(note). 次: %(next)"フォームデータのバリデーション":validation%

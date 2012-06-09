@@ -252,7 +252,8 @@ class IamADeveloper(unittest.TestCase):
         
         # Open the documentation
         step('Open the documentation')
-        
+    
+        browser.addheaders = [("Accept-Language", "en")]
         response = browser.open('http://localhost:9000/@documentation')
         self.assert_(browser.viewing_html())
         self.assert_(browser.title() == 'Play manual - Documentation')

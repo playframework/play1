@@ -1,0 +1,123 @@
+h1. Play でできる 5 つのすごいこと
+
+5 つの例を通して Play framework の背後にある哲学を見てみましょう。
+
+h2. <a>HTTP パラメータの Java メソッド引数への紐付け</a>
+
+Play では Java のコードから簡単に HTTP パラメータを探すことができます。HTTP パラメータと同じ名前でメソッド引数を宣言するだけです。
+
+例えば、このようなリクエスト場合:
+
+bc. /articles/archive?date=08/01/08&page=2
+
+Java のメソッド引数として宣言することで @data@ パラメータと @page@ パラメータを検索することができます:
+
+bc. public static void archive(Date date, Integer page) {
+    List<Article> articles = Articles.fromArchive(date, page);
+    render(articles);
+}
+
+Play は HTTP パラメータの値を Java オブジェクトに変換するために、static メソッドの引数を使用します。
+
+このスマートな紐付けは **どのようなクラス** についても動作します。
+
+bc. public class Person {
+    public String name;
+    public Integer age;
+}
+
+person を追加するシンプルなアクションコントローラはこんな感じかもしれません:
+
+bc. public static void add(Person p) {
+    p.save();
+}
+
+HTML フォームのフィールドには person を構成する名前を定義します:
+
+bc. <form action="/Directory/add" method="POST">
+    Name: <input type="text" name="p.name" />
+    Age: <input type="text" name="p.age" />
+</form>
+
+
+h2. <a>対応する Java メソッドの実行によるアクションへのリダイレクト</a>
+
+Play には Java Servlet の @forward@ コマンドに該当するものは存在しません。しかし、とてもシンプルに別のアクションへリダイレクトすることができます。単に対応する Java メソッドを実行すれば、 Play は適切な HTTP 'Redirect' レスポンスを生成します。
+
+bc. public static void show(Long id) {
+    Article article = Article.findById(id);
+    render(article);
+}
+ 
+public static void edit(Long id, String title) {
+    Article article = Article.findById(id);
+    article.title = title;
+    article.save();
+    show(id);
+}
+
+
+edit アクションの終わりの部分に注目してください。show アクションにリダイレクトします。
+
+テンプレートにおいても、同じような構文でリンクを生成することができます： 
+
+bc. <a href="@{Article.show(article.id)}">${article.title}</a>
+
+これは以下ような HTML を生成します： 
+
+bc. <a href="/articles/15">My new article</a>
+
+
+h2. <a>Java オブジェクトをテンプレートに引き渡すとき、同じことをくり返してはいけません</a>
+
+ほとんどの Java フレームワークでは、Java オブジェクトをテンプレートシステムに引き渡すためには以下のように書かなければなりません:
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+Map<String, Object> model = new HashMap<String,Object>();
+model.put("article", article);
+model.put("user", user);
+render(model);
+
+Play では単純にこのように書くことができます:
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+render(article, user);
+
+テンプレートでは Java のローカル名を使ってオブジェクトを参照してください。これで役に立たないコードを省くことができます...
+
+h2. <a>強化された JPA</a>
+
+JPA は間違いなく Java におけるベストなオブジェクト-リレーショナル マッピング (ORM) API です。もし JPA を知っているなら、Play で JPA がいとも簡単に利用できることに驚くでしょう。なんの設定も無しに Play は自動的に JPA のエンティティマネージャを起動し、コードがリロードされたときはまるで魔法のように同期を行います。
+
+さらに、スーパークラス @play.db.jpa.Model@ を使うことでコードをよりきれいにすることもできます。こんな感じです:
+
+bc. public void messages(int page) {
+    User connectedUser = User.find("byEmail", connected()).first();
+    List<Message> messages = Message.find(
+        "user = ? and read = false order by date desc",
+        connectedUser
+    ).from(page * 10).fetch(10);
+    render(connectedUser, messages);
+}
+
+h2. <a>簡単なファイルアップロード管理</a>
+
+Play におけるファイルアップロード管理は非常にシンプルです。
+
+HTML フォームはこんな感じで:
+
+bc. #{form @uploadPhoto(), enctype:'multipart/form-data'}
+    <input type="text" name="title" />
+    <input type="file" id="photo" name="photo" />
+    <input type="submit" value="Send it..." />
+#{/}
+
+Java コードはこんな感じです:
+
+bc. public static void uploadPhoto(String title, File photo) {
+   ...
+}
+
+これ以上簡単になりますかね?

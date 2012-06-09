@@ -1,0 +1,809 @@
+h1. コントローラ
+
+ビジネスロジックはドメインモデル層で管理されます。クライアント (通常は web ブラウザ) が直接このコードを呼び出すことができないことから、ドメインオブジェクトの機能性は URI によって表されたリソースとして公開されます。
+
+クライアントは、HTTP プロトコルによって提供された統一的な API を使用して、これらのリソースと、暗黙的にその下にあるビジネスロジックを操作します。しかし、ドメインオブジェクトとリソースのマッピングは一対一ではありません: 粒度は異なるレベルで表現され、あるリソースは仮想化されたものかもしれませんし、あるリソースは別名が定義されているかもしれません…
+
+これは、まさにコントローラ層によって果たされる役割です: ドメインモデルオブジェクトとトランスポート層イベントの間の **接着剤** を提供します。モデル層においては、モデルオブジェクトに容易にアクセスし変更するために、コントローラは純粋な Java で書かれます。HTTP インタフェースのように、コントローラは手続き的で、リクエスト/レスポンス指向です。
+
+コントローラ 層 は HTTP とドメインモデルの間の **インピーダンスミスマッチ** を減少させます。
+
+p(note). **注意**
+ 
+異なる戦略をもった異なるアーキテクチャモデルがあります。いくつかのプロトコルはドメインモデルオブジェクトに直接アクセスします。これは、EJB や CORBA プロトコルによく見られます。これらの場合、そのアーキテクチャスタイルは、RPC (Remote Procedure Call) を使います。これらのコミュニケーションスタイルは、web アーキテクチャとほとんど互換性がありません。
+ 
+SOAP のようないくつかの技術は Web を通してドメインモデルオブジェクトへのアクセスをていきょうします。しかし、SOAP はただのRPC スタイルプロトコルであり、この場合、HTTP はトランスポートプロトコルとして使用されます。アプリケーションプロトコルではありません。
+
+web の原則は基本的にオブジェクト指向ではありません。そのため、お気に入りの言語に HTTP を適合させる層が必要になります。
+
+
+h2. <a name="overview">コントローラの概要</a>
+
+コントローラは Java のクラスであり、 @controllers@ パッケージで管理される @play.mvc.Controller@ のサブクラスです。
+
+コントローラはこのようなものになります:
+
+bc. package controllers;
+ 
+import models.Client;
+import play.mvc.Controller;
+ 
+public class Clients extends Controller {
+ 
+    public static void show(Long id) {
+        Client client = Client.findById(id);
+        render(client);
+    }
+ 
+    public static void delete(Long id) {
+        Client client = Client.findById(id);
+        client.delete();
+    }
+ 
+}
+
+コントローラの public かつ static なそれぞれのメソッドはアクションと呼ばれます。アクションメソッドのシグネチャは以下の通りです:
+
+bc. public static void action_name(params...);
+
+アクションメソッドのシグネチャに引数を定義できます。これらのパラメタは、フレームワークによって対応する HTTP パラメタから自動的に解決されます。
+
+通常、アクションメソッドは return 構文を持ちません。アクションメソッドは **result** メソッドの起動によって終了します。今回の例では、テンプレートを実行して表示する @render(…)@ が result メソッドです。
+
+h2. <a name="params">HTTP パラメータの取得</a>
+
+HTTP リクエストはデータを含んでいます。以下のようにしてこのデータを抽出することができます:
+
+* URI パス: @/clients/1541@ という URI パターンにおいて、1541 が動的な部分です。
+* クエリ文字列: @/clients?id=1541@
+* リクエスト本文: リクエストが HTML フォームから送信される場合、そのリクエスト本文には @x-www-urlform-encoded@ としてエンコードされたフォームデータを含んでいます。
+
+いずれの場合でも、Play はデータを抽出して、すべての HTTP パラメータを含む Map<String, String[]> を構築します。このマップのキーはパラメータ名です。パラメータ名は以下のようにして導出されます。
+
+* (ルーティングで指定された) URI の動的部分の名前
+* クエリ文字列から取得される名前-値のペアの名前の部分
+* エンコードされた本文の内容
+
+h3. <a name="paramsmap">パラメータマップの使い方</a>
+
+@params@ オブジェクトはすべてのコントローラクラスで利用できます (スーパークラス @play.mvc.Controller@ で定義されています) 。このオブジェクトは、現在のリクエストから見つけられるすべての HTTP パラメータを含んでいます。
+
+例えば:
+
+bc. public static void show() {
+    String id = params.get("id");
+    String[] names = params.getAll("names");
+}
+
+Play に型変換を指示することもできます:
+
+bc. public static void show() {
+    Long id = params.get("id", Long.class);
+}
+
+でも、ちょっと待ってください。もっと良い方法があります:)
+
+h3. <a name="methodsignature">アクションメソッドのシグネチャ</a>
+
+アクションメソッドのシグネチャから HTTP パラメータを直接検索することができます。Java 引数の名前は HTTP パラメータのものと同じであるに違いありません。
+
+例えば、このリクエストでは:
+
+bc. /clients?id=1451
+
+アクションメソッドは、シグネチャにおいて @id@ 引数を宣言することによって、 @id@ パラメータの値を検索することができます:
+
+bc. public static void show(String id) {
+    System.out.println(id); 
+}
+
+String 以外の Java の型も使えます。この場合、フレームワークはパラメータの値を正しい Java 型にキャストしようとします:
+
+bc. public static void show(Long id) {
+    System.out.println(id);  
+}
+
+パラメータが多値である場合は、配列引数を宣言することができます:
+
+bc. public static void show(Long[] id) {
+    for(String anId : id) {
+        System.out.println(anid); 
+    }
+}
+
+コレクションも宣言することができます:
+
+bc. public static void show(List<Long> id) {
+    for(String anId : id) {
+        System.out.println(anid); 
+    }
+}
+
+p(note). **例外**
+ 
+アクションメソッド引数に対応する HTTP パラメータが見つからない場合、対応するメソッド引数はデフォルト値 (通常、オブジェクト型は null、基本データ型は 0) に設定されます。値が見つかっても、要求された Java 型に適切にキャストできない場合、バリデーションエラーのコレクションにエラーが追加され、デフォルト値が設定されます。
+
+h2. <a name="binding">HTTP と Java の高度な紐付け</a>
+
+h3. <a name="simpletypes">シンプルな型</a>
+
+すべての基本データ型と、そして、一般的な Java の型は自動的に紐付けられます:
+
+@int@, @long@, @boolean@, @char@, @byte@, @float@, @double@, @Integer@, @Long@, @Boolean@, @Char@, @String@, @Byte@, @Float@, @Double@.
+
+HTTP リクエスト中にパラメータが見つからないか、または自動変換に失敗した場合、オブジェクト型には null、基本データ型にはそれらのデフォルト値が設定されることに注意してください。
+
+h3. <a name="date">日付</a>
+
+日付の文字列表現が以下のパターンのいずれか 1 つにマッチする場合、自動的に日付オブジェクトに紐付けられます:
+
+* yyyy-MM-dd'T'hh:mm:ss'Z' // ISO8601 + timezone
+* yyyy-MM-dd'T'hh:mm:ss" // ISO8601
+* yyyy-MM-dd
+* yyyyMMdd'T'hhmmss
+* yyyyMMddhhmmss
+* dd'/'MM'/'yyyy
+* dd-MM-yyyy
+* ddMMyyyy
+* MMddyy
+* MM-dd-yy
+* MM'/'dd'/'yy
+
+<code>@As</code> アノテーションを使って日付フォーマットを指定することができます。
+
+例えば:
+
+bc. archives?from=21/12/1980
+
+bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
+    List<Article> articles = Article.findBy("date >= ?", from);
+    render(articles);
+}
+
+言語によって日付フォーマットを最適化することもできます。例えば:
+
+bc.  public static void articlesSince(@As(lang={"fr,de","*"}, 
+        value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
+    List<Article> articles = Article.findBy("date >= ?", from);
+    render(articles);
+}
+
+この例の場合、フランス語とドイツ語には日付フォーマットに @dd-MM-yyyy@ を指定し、その他の言語には @MM-dd-yyyy@ を指定しています。言語の値をカンマで区切れることに注意してください。言語パラメータの数と値パラメータの数を合わせることが重要です。
+
+<code>@As</code> アノテーションが指定されていない場合、Play! はロケールに従ったデフォルトの日付フォーマットを使用します。デフォルトで使用する日付フォーマットは "date.format の設定":configuration#date.format で指定します。
+
+
+h3. <a name="calendar">カレンダ</a>
+
+Play がロケールに従って Calendar オブジェクトを選択する場合を除いて、カレンダの紐付けは日付とまるっきり同じように動作します。 <code>@Bind</code> アノテーションを使用することもできます。
+
+h3. <a name="file">ファイル</a>
+
+Play によるファイルアップロードは簡単です。 @multipart/form-data@ エンコードされたリクエストを使ってサーバにファイルをポストしたら、 @java.io.File@ 型を使ってファイルオブジェクトを取得します:
+
+bc. public static void create(String comment, File attachment) {
+    String s3Key = S3.post(attachment);
+    Document doc = new Document(comment, s3Key);
+    doc.save();
+    show(doc.id);
+}
+
+作成されたファイルは、元のファイルと同じ名前になります。ファイルは一時ディレクトリに保存されて、リクエストの完了時に削除されます。このため、作成されたファイルは安全なディレクトリにコピーしなければなりません。そうでなければファイルは無くなってしまいます。
+
+通常、アップロードされたファイルの MIME タイプは HTTP リクエストの @Content-type@ ヘッダで指定されます。しかし、一般的でない種類のファイルが web ブラウザからアップロードされた場合、この MIME タイプの指定は行われない場合があります。このような場合、 @play.libs.MimeTypes@ クラスを使ってファイル名の拡張子を MIME タイプにマッピングすることができます。
+
+bc. String mimeType = MimeTypes.getContentType(attachment.getName()); 
+
+@play.libs.MimeTypes@ クラスは、与えられたファイル名拡張子の MIME タイプを @$PLAY_HOME/framework/src/play/libs/mime-types.properties@ の中から探します。
+
+"カスタム MIME タイプ設定":configuration#mimetype を使って独自の型をアプリケーションの @conf/application.conf@ ファイルに追加することもできます。
+
+
+h3. <a name="array">サポートされた型の配列またはコレクション</a>
+
+すべてのサポートされた型は配列またはオブジェクトのコレクションとして取得することができます:
+
+bc. public static void show(Long[] id) {
+    …
+}
+
+または:
+
+bc. public static void show(List<Long> id) {
+    …
+}
+
+または:
+
+bc. public static void show(Set<Long> id) {
+    …
+}
+
+Play は、以下のような特別なケースの Map<String, String> のバインディングも取り扱います:
+
+bc. public static void show(Map<String, String> client) {
+    …
+}
+
+
+クエリ文字列は以下のようになります:
+
+bc. ?client.name=John&client.phone=111-1111&client.phone=222-2222
+
+クライアントの変数は要素がふたつのマップにバインドされます。ひとつ目の要素はキーが @name@ で値が @John@, そしてふたつ目の要素はキーが @phone@ で値が @111-1111, 222-2222@ です。
+
+h3. <a name="pojo">POJO オブジェクトの紐付け</a>
+
+Play は簡単な命名規約ルールを使用することで、どんなモデルクラスでも自動的に紐付けることができます。
+
+bc. public static void create(Client client ) {
+    client.save();
+    show(client);
+}
+
+このアクションを使って client を作るクエリ文字列は次のようになるでしょう:
+
+bc. ?client.name=Zenexity&client.email=contact@zenexity.fr
+
+Play は Client インスタンスを作成し、HTTP パラメータの名前を Client オブジェクトのプロパティに解決します。解決できないパラメータ名は安全に無視されます。型のミスマッチも安全に無視されます。
+
+パラメータの紐付けは再帰的に行われるので、完全なオブジェクトグラフを扱うことができます:
+
+bc. ?client.name=Zenexity
+&client.address.street=64+rue+taitbout
+&client.address.zip=75009
+&client.address.country=France
+
+モデルオブジェクトのリストを更新するには、配列記法とオブジェクトを参照する ID を使用してください。例えば、Client モデルが @List Customer customers@ として宣言された Customer モデルのリストを持つと想像してください。Customer のリストを更新するために、以下のようなクエリ文字列を提供するでしょう:
+
+bc. ?client.customers[0].id=123
+&client.customers[1].id=456
+&client.customers[2].id=789
+
+
+h2. <a name="objectbinding">JPA オブジェクトの紐付け</a>
+
+HTTP と Java の紐付けを使って、自動的に JPA オブジェクトを紐付けることができます。
+
+HTTP パラメータ中に @user.id@ フィールドを提供することできます。Play は @id@ フィールドを見つけると、user を編集する前に、データベースからマッチするインスタンスをロードします。そして、HTTP リクエストで提供された他のパラメータを適用します。このため、直接 user を保存することができます。
+
+bc. public static void save(User user) {
+    user.save(); // ok with 1.0.1
+}
+
+POJO マッピングの動きと同じやり方で JPA バインディングを使って完全なオブジェクトグラフを変更することができますが、変更するサブオブジェクトごとに ID を供給しなければなりません:
+
+bc. user.id = 1
+&user.name=morten
+&user.address.id=34
+&user.address.street=MyStreet 
+
+h2. <a name="custombinding">カスタムバインディング</a>
+
+バインディングシステムはより多くのカスタマイズをサポートするようになりました。
+
+h3. <a name="as">@play.data.binding.As</a>
+
+最初に紹介するのは、文脈的にバインディングを構成する新しい <code>@play.data.binding.As</code> アノテーションです。これは例えば、 @DateBinder@ によって使用される日付のフォーマットを指定するために使います:
+
+bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
+    …
+}
+
+この <code>@As</code> アノテーションは国際化もサポートします。これは、ロケールごとに特定のアノテーションを提供できることを意味しています:
+
+bc. public static void update(
+        @As(
+            lang={"fr,de","en","*"},
+            value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
+        )
+        Date updatedAt
+    ) {
+    …
+}
+
+この <code>@As</code> アノテーションは、これをサポートするすべてのバインダと共に動作します。以下は、 @ListBinder@ を使用する例です:
+
+bc. public static void update(@As(",") List<String> items) {
+    …
+}
+
+このバインダは、単純にカンマで分けられた @String@ を @List@ にバイドします。
+
+h3. <a name="nobinding">@play.data.binding.NoBinding</a>
+
+新たに追加された <code>@play.data.binding.NoBinding</code> は、バインド非対象フィールドをマークし、潜在的なセキュリティ問題を解決します。以下に例を示します:
+
+bc. public class User extends Model {
+    @NoBinding("profile") public boolean isAdmin;
+    @As("dd, MM yyyy") Date birthDate;
+    public String name;
+}
+ 
+public static void editProfile(@As("profile") User user) {
+    …
+}
+
+このようにすると、例え悪意あるユーザが偽のフォームから @user.isAdmin=true@ というフィールドを含めてポストしたとしても、 @isAdmin@ フィールドは決して @editProfile@ アクションからはバインドされません。
+
+h3. <a name="typebinder">play.data.binding.TypeBinder</a>
+
+*@As* アノテーションを使って完全に独自のバインダを定義することができます。独自のバインダは、プロジェクト内にて @TypeBinder@ のサブクラスとして定義されます。以下に例を示します:
+
+bc. public class MyCustomStringBinder implements TypeBinder<String> {
+ 
+    public Object bind(String name, Annotation[] anns, String value, 
+    Class clazz) {
+        return "!!" + value + "!!";
+    }
+}
+
+以下のようにして、いずれのアクションにおいてもこのバインダを使用することができます:
+
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class)
+String name) {
+    …
+}
+
+h3. <a name="global">@play.data.binding.Global</a>
+
+対応する型にだけ適用されるグローバルなカスタムバインダを定義することもできます。例えば、以下のようにして @java.awt.Point@ クラスにバインドできるバインダを定義することができます:
+
+bc. @Global
+public class PointBinder implements TypeBinder<Point> {
+ 
+    public Object bind(String name, Annotation[] anns, String value,
+    Class class) {
+        String[] values = value.split(",");
+        return new Point(
+            Integer.parseInt(values[0]),
+            Integer.parseInt(values[1])
+        );
+    }
+}
+
+見てのとおり、グローバルバインダは *@play.data.binding.Global* でアノテーションされた古典的なバインダです。外部モジュールは再利用可能な拡張バインダを定義することで、プロジェクトにバインダを提供することができます。
+
+
+h2. <a name="result">戻り値の型</a>
+
+アクションメソッドは、HTTP レスポンスを生成しなければなりません。HTTP レスポンスを生成するもっとも簡単な方法は、Result オブジェクトを発行することです。Result オブジェクトが発行されると、通常の実行フローは中断され、メソッドはリターンされます。
+
+例えば:
+
+bc. public static void show(Long id) {
+    Client client = Client.findById(id);
+    render(client);
+    System.out.println("This message will never be displayed !");
+}
+
+@render(…)@ メソッドは Result オブジェクトを発行し、以降のメソッドは実行しません。
+
+h3. <a name="text">テキスト内容の返却</a>
+
+@renderText(…)@ メソッドは基本的な HTTP レスポンスに何らかのテキストを直接書き込むシンプルな Result イベントを発行します。
+
+例えば:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderText(unreadMessages);
+}
+
+Java 標準のフォーマット構文を使ってテキストメッセージをフォーマットすることができます:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderText("There are %s unread messages", unreadMessages);
+}
+
+h3. <a name="renderjson">JSON 文字列の返却</a>
+
+Play には @renderJSON(…)@ メソッドを使ってシンプルに JSON 文字列を返却するメソッドが備わっています。これらのメソッドは JSON 文字列を返却し、レスポンスのコンテントタイプに @application/json@ を設定します。
+
+自分で JSON 文字列を指定するか、または @GsonBuilder@ によってシリアライズされる @Object@ を渡すことができます。
+
+例えば:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderJSON("{\"messages\": " + unreadMessages +"}");
+}
+
+あるいはオブジェクトがより複雑な構造を持つ場合、 @GsonBuilder@ を使って JSON を組み立てたいと思うかもしれません。
+
+bc. public static void getUnreadMessages() {
+    List<Message> unreadMessages = MessagesBox.unreadMessages();
+    renderJSON(unreadMessages);
+}
+
+@renderJSON(…)@ メソッドに @Object@ を渡すときに JSON ビルダをより細かく制御する必要がある場合は、GSON シリアライザと @Type@ オブジェクトを渡して出力をカスタマイズすることも可能です。
+
+h3. <a name="renderxml">XML 文字列の返却</a>
+
+JSON メソッドと同様に、コントローラから直接 XML をレンダリングするいくつかのメソッドがあります。 @renderXml(…)@ メソッドは XML 文字列を返却し、コンテントタイプに @text/xml@ を設定します。
+
+ここでは、自分で XML 文字列を指定すること、 @org.w3c.dom.Document@ を渡すこと、あるいは XStream シリアライザによってシリアライズされる POJO を渡すことができます。
+
+例えば:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderXml("<unreadmessages>"+unreadMessages+"</unreadmessages>");
+}
+
+または @org.w3c.dom.Document@ オブジェクトを使うこともできます。
+
+bc. public static void getUnreadMessages() {
+    Document unreadMessages = MessagesBox.unreadMessagesXML();
+    renderXml(unreadMessages);
+}
+
+h3. <a name="binary">バイナリコンテンツの返却</a>
+
+"サーバに保存されたファイル":jpa#file のようなバイナリデータを提供する場合、 @renderBinary@ メソッドを使います。例えば、 @play.db.jpa.Blob photo@ プロパティを持つ @User@ モデルがある場合、このモデルオブジェクトをロードして、格納された MIME タイプで画像をレンダリングするために、コントローラメソッドを追加します:
+
+bc. public static void userPhoto(long id) { 
+   final User user = User.findById(id); 
+   response.setContentTypeIfNotSet(user.photo.type());
+   java.io.InputStream binaryData = user.photo.get();
+   renderBinary(binaryData);
+} 
+
+h3. <a name="attachment">添付ファイルとしてのダウンロード</a>
+
+一般的に web ブラウザがユーザのコンピュータにそのファイルをダウンロードする ‘添付ファイル’ としてバイナリレスポンスを扱うように、 HTTP ヘッダを設定して web ブラウザに指示することができます。これを行うためには、Playが @Content-Disposition@ レスポンスヘッダに与えられたファイル名を設定するよう、 @renderBinary@ メソッドの引数にファイル名を渡します。例えば、先に挙げた @User@ モデルのプロパティが @photoFileName@ だとした場合:
+
+bc. renderBinary(binaryData, user.photoFileName); 
+
+
+h3. <a name="template">テンプレートの実行</a>
+
+生成する内容が複雑である場合、レスポンスの内容を生成するためにテンプレートを使用するべきです。
+
+bc. public class Clients extends Controller {
+ 
+    public static void index() {
+        render();    
+    }
+}
+
+テンプレート名は Play の規約から自動的に推測されます。デフォルトのテンプレートのパスは、コントローラとアクションの名前を使って解決されます。
+
+この例で呼び出されるテンプレートは以下の通りです:
+
+bc. app/views/Clients/index.html
+
+h4. テンプレートスコープへの値の追加
+
+テンプレートはしばしばデータを必要とします。 @renderArgs@ オブジェクトを使用することでテンプレートスコープにこれらのデータを追加することができます:
+
+bc. public class Clients extends Controller {
+ 
+    public static void show(Long id) {
+        Client client = Client.findById(id);
+        renderArgs.put("client", client);
+        render();    
+    }
+}
+
+テンプレートが実行される間、この @client@ 変数が定義されます。
+
+例えば、以下のようになります。:
+
+bc. <h1>Client ${client.name}</h1>
+
+h4. テンプレートスコープにデータを追加するより簡単な方法
+
+@render(…)@ メソッドの引数を使って、直接テンプレートにデータを渡すことができます:
+
+bc. public static void show(Long id) {
+    Client client = Client.findById(id);
+    render(client);    
+}
+
+この場合、テンプレートからアクセスする変数は、Java のローカル変数と同じ名前になります。
+
+複数の変数を渡すこともできます:
+
+bc. public static void show(Long id) {
+    Client client = Client.findById(id);
+    render(id, client);    
+}
+
+p(note). **重要!**
+ 
+この方法で渡せるのは **ローカル変数** だけです。
+
+
+h4. 別のテンプレートの指定
+
+デフォルトのテンプレートを使用したくない場合、 @renderTemplate(…)@ メソッドの第一引数にテンプレート名を渡して使うことで、独自のテンプレートファイルを指定することができます。
+
+例えば、以下のようにします:
+
+bc. public static void show(Long id) {
+    Client client = Client.findById(id);
+    renderTemplate("Clients/showClient.html", id, client);    
+}
+
+h3. <a name="redirect">別の URL へのリダイレクト</a>
+
+@redirect(…)@ メソッドは HTTP Redirect レスポンスを生成する Redirect イベントを発行します。
+
+bc. public static void index() {
+    redirect("http://www.zenexity.fr");
+}
+
+
+h3. <a name="chaining">アクションチェーン</a>
+
+Servlet API の @forward@ に該当するものはありません。HTTP リクエストは 1 つのアクションだけを呼び出します。別のアクションを呼び出す必要がある場合は、そのアクションを呼び出すことができる URL にブラウザをリダイレクトさせなければなりません。このようにすることで、ブラウザの URL は常に実行されるアクションと一致し、 **戻る/進む/更新** の管理がはるかに簡単になります。
+
+単に Java のやり方でアクションメソッドを実行するだけで、どんなアクションに対しても Redirect レスポンスを送ることができます。Java の呼び出しはフレームワークによってインターセプトされ、適切な HTTP Redirect が生成されます。
+
+例えば:
+
+bc. public class Clients extends Controller {
+ 
+    public static void show(Long id) {
+        Client client = Client.findById(id);
+        render(client);
+    }
+ 
+    public static void create(String name) {
+        Client client = new Client(name);
+        client.save();
+        show(client.id);
+    }
+}
+
+以下のような routes ファイルの場合:
+
+bc. GET    /clients/{id}            Clients.show
+POST   /clients                 Clients.create 
+
+* ブラウザは @/clients@ URL に POST を送ります。
+* Router は @Clients@ コントローラの @create@ アクションを起動します。
+* create アクションは @show@ アクションを直接呼び出します。
+* Java 呼び出しはインターセプトされ、Router は id パラメータと共に Clients.show を実行するために必要な URL をリバース生成します。
+* HTTP レスポンスは @302 Location:/clients/3132@ です。
+* ブラウザは @GET /clients/3132@ を発行します。
+* …
+
+h3. <a name="encoding">web エンコーディングのカスタマイズ</a>
+
+Play は UTF-8 の使用を強調しますが、いくつかのレスポンス、またはアプリケーション全体が UTF-8 以外のエンコーディングを使用しなければならない状況があります。
+
+h4. 直近レスポンスのエンコーディングのカスタマイズ
+
+コントローラにおいて次のようにすることで、直近のレスポンスのエンコーディングをカスタマイズすることができます:
+
+bc. response.encoding = "ISO-8859-1";
+
+サーバのデフォルトとは異なるエンコーディングを使ってフォームを post する場合、このフォームにおいて、 @accept-charset@ 属性と、 @_charset_@ という名前の特別な hidden フィールドの両方でエンコーディング/文字セットを二回指定しなければなりません。 @accept-charset@ 属性はブラウザにフォームを post する際にどのエンコーディングを使用するかを指定し、 @_charset_@ フォームフィールドは Play にエンコーディングが何かを伝えます:
+
+bc. <form action="@{application.index}" method="POST" accept-charset="ISO-8859-1">
+    <input type="hidden" name="_charset_" value="ISO-8859-1">
+</form>
+
+h4. アプリケーション全体のエンコーディングのカスタマイズ
+
+"application.web_encoding":configuration#application.web_encoding を設定して Play がブラウザとコミュニケーションする際に使用するエンコーディングを指定します。
+
+
+h2. <a name="interceptions">インターセプション</a>
+
+コントローラにインターセプタを定義することができます。インターセプタは、コントローラクラスとその子孫におけるすべてのアクションに対して実行されます。すべてのアクションに共通する処理: ユーザ認証されていることの確認、リクエストスコープ情報のロード… を定義するのは便利なやり方です。
+
+これらのメソッドは、 @static@ ですが、 @public@ である必要はありません。適切なインターセプションマーカでこれらのメソッドを注釈しなければなりません。
+
+h3. <a name="before">@Before</a>
+
+<code>@Before</code> アノテーションで注釈されたメソッドは、このコントローラにおけるすべてのアクション呼び出しの前に実行されます。
+
+例えば、セキュリティチェックを行うには以下のようにします:
+
+bc. public class Admin extends Controller {
+ 
+    @Before
+    static void checkAuthentification() {
+        if(session.get("user") == null) login();
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+    …
+}
+
+@Before メソッドにすべてのアクション呼び出しをインターセプトさせたくない場合、除外アクションのリストを指定することができます:
+
+bc. public class Admin extends Controller {
+ 
+    @Before(unless="login")
+    static void checkAuthentification() {
+        if(session.get("user") == null) login();
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+ 
+    …
+}
+
+一連のアクション呼び出しを @Before メソッドでインターセプトさせたい場合は、only パラメータを指定することができます :
+
+bc. public class Admin extends Controller {
+ 
+    @Before(only={"login","logout"})
+    static void doSomething() {  
+        …  
+    }
+       …
+}
+
+@unless@ パラメータと @only@ パラメータは <code>@After</code>, <code>@Before</code> と <code>@Finally</code> で使うことができます。
+
+h3. <a name="after">@After</a>
+
+<code>@After</code> アノテーションで注釈されたメソッドは、このコントローラにおけるすべてのアクション呼び出しの後に実行されます。
+
+bc. public class Admin extends Controller {
+ 
+    @After
+    static void log() {
+        Logger.info("Action executed ...");
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+ 
+    …
+}
+
+h3. <a name="catch">@Catch</a>
+
+<code>@Catch</code> アノテーションで注釈されたメソッドは、別のアクションメソッドが特定の例外をスローした場合に実行されます。スローされた例外は @Catch メソッドの引数に渡されます。
+
+bc. public class Admin extends Controller {
+    
+    @Catch(IllegalStateException.class)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+    
+    public static void index() {
+        List<User> users = User.findAll();
+        if (users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
+通常の Java の例外を扱うように、より多くの型の例外をキャッチするためにスーパークラスをキャッチできます。ひとつ以上のキャッチメソッドがある場合は **priority** を指定することができるので、キャッチメソッドはこの優先度に従って実行されます (priority 1 が最初に実行されます) 。
+
+bc. public class Admin extends Controller {
+ 
+    @Catch(value = Throwable.class, priority = 1)
+    public static void logThrowable(Throwable throwable) {
+        // Custom error logging…
+        Logger.error("EXCEPTION %s", throwable);
+    }
+ 
+    @Catch(value = IllegalStateException.class, priority = 2)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        if(users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
+
+h3. <a name="finally">@Finally</a>
+
+<code>@Finally</code> アノテーションで注釈されたメソッドは、このコントローラにおけるすべてのアクション呼び出しの結果が確定された後に実行されます。
+アクションが正常に呼び出された後でも、エラーが発生した場合でも、@Finally メソッドが呼び出されます。
+
+bc. public class Admin extends Controller {
+ 
+    @Finally
+    static void log() {
+        Logger.info("Response contains : " + response.out);
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+    …
+}
+
+@Finally アノテーションで注釈されたメソッドが Throwable 型の引数をひとつだけ受け取る場合、発生した例外が引き渡されます:
+
+bc. public class Admin extends Controller {
+ 
+    @Finally
+    static void log(Throwable e) {
+        if( e == null ){
+            Logger.info("action call was successful");
+        } else{
+            Logger.info("action call failed", e);
+        }
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+    …
+}
+
+
+h3. <a name="hierarchy">コントローラ階層</a>
+
+コントローラクラスが別のコントローラのクラスのサブクラスである場合、インターセプションは完全なクラス階層に対して適用されます。
+
+h3. <a name="with">@With アノテーションによる更なるインターセプタの追加</a>
+
+Java は多重継承を認めないので、インターセプタの適用はクラス階層に制限されたとても限定的なものになりがちです。しかし、完全に異なるクラス中にいくつかのインターセプタを定義し、 <code>@With</code> アノテーションを使用していかなるコントローラにもこれらをリンクすることができます。
+
+例えば、以下のようにします:
+
+bc. public class Secure extends Controller {
+    
+    @Before
+    static void checkAuthenticated() {
+        if(!session.containsKey("user")) {
+            unAuthorized();
+        }
+    }
+}    
+
+そして、別のコントローラにおいて、以下のようにします:
+
+bc. @With(Secure.class)
+public class Admin extends Controller {
+    
+    … 
+}
+
+h2. <a name="session">Session と Flash スコープ</a>
+
+複数の HTTP リクエストにまたがってデータを保持しなければならない場合、Session または Flash スコープにそれらを保存することができます。Session に保存されたデータは、ユーザセッションにおける全ての間で利用可能であり、Flash スコープに保存されたデータは、次のリクエストにおいてのみ利用可能です。
+
+Session と Flash のデータはサーバに保存されず、Cookie メカニズムを使って次の HTTP リクエストに追加されることを理解するのは重要です。このため、そのデータサイズはとても制限 (最大で 4 KB) され、また、文字列しか保存できません。
+
+もちろん、クライアントが cookie のデータを変更できない (変更した場合は無効にされる) よう、cookie は秘密鍵で署名されます。Play の Session は、キャッシュとして使用されることを目的としません。特定のセッションに関連するいくつかのデータをキャッシュする必要がある場合は、Play 内蔵のキャッシュ機構と、特定のユーザセッションにそれらを継続して紐付けるための **session.getId()** を使用することができます。
+
+例えば、以下のようにします:
+
+bc. public static void index() {
+    List messages = Cache.get(session.getId() + "-messages", List.class);
+    if(messages == null) {
+        // Cache miss
+        messages = Message.findByUser(session.get("user"));
+        Cache.set(session.getId() + "-messages", messages, "30mn");
+    }
+    render(messages);
+}
+
+**application.session.maxAge** に値を設定していない限り、セッションはブラウザを閉じると破棄されます。
+
+キャッシュには、古典的な Servlet HTTP セッションオブジェクトとは異なる意味があります。これらのオブジェクトが常にキャッシュにあるとは仮定できません。そのため、キャッシュに失敗した場合について扱わなければなりませんが、アプリケーションは完全にステートレスであり続けます。
+
+p(note). **考察を続けます**
+ 
+MVC モデルの次の重要な層は、Play が %(next)"テンプレートエンジン":templates% により、効率的なテンプレートシステムを提供する View 層です。

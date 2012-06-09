@@ -1,0 +1,276 @@
+h1. カスタムエディタの作成
+
+これまでの部分で yabe の管理機能を作成し、'My posts' 画面の準備をしました。このページは、それぞれの投稿者に自身の投稿のリストと、これらを編集する、または新規に作成する機能も提供します。
+
+このページを作り始めるのに CRUD モジュールを再利用することもできますが、ここではスクラッチで作成してみましょう。これらのページには、パーソナライズする箇所がたくさんあります。
+
+h2. <a>ユーザの投稿一覧から始めましょう</a>
+
+まずは接続しているユーザが書いた投稿を検索し、表示しなければなりません。とても簡単です。 @Admin.index@ アクションを拡張するところから始めましょう:
+
+bc. public static void index() {
+    String user = Security.connected();  
+    List<Post> posts = Post.find("author.email", user).fetch(); 
+    render(posts);
+}
+
+そして @yabe/app/views/Admin/index.html@ を以下のように仕上げます:
+
+bc. #{extends 'admin.html' /}
+ 
+<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'}
+${posts.pluralize('post', 'posts')} so far</span></h3>
+ 
+#{list items:posts, as:'post'}
+    <p class="post ${post_parity}">
+        <a href="#">${post.title}</a>
+    </p>
+#{/list}
+ 
+<p id="newPost" >
+    <a href="#"><span>+</span> write a new post</a>
+</p>
+
+最初の画面が整いました:
+
+!images/guide9-1!
+
+h2. <a>'新規投稿作成' 画面</a>
+
+新しい投稿を作成するフォームを作ります。基本的に、フォームには 2 つのアクションがあります: 1 つはフォームを表示し、もう 1 つはフォームのサブミットを扱います。フォームの表示とサブミットを取り扱う新しい @Admin.form@ アクションと @Admin.save@ アクションを作成しましょう。
+
+@yabe/conf/routes@ ファイルにルートを追加します:
+
+bc. GET     /admin/new                          Admin.form
+POST    /admin/new                          Admin.save
+
+そして @Admin.java@ コントローラに @form()@ と @save()@ アクションを追加します:
+
+bc. public static void form() {
+    render();
+}
+ 
+public static void save() {
+    // Not implemented yet
+}
+
+ここで @yabe/app/views/Admin/form.html@ テンプレートを作成しなければなりません:
+
+bc. #{extends 'admin.html' /}
+ 
+<h3>Write, <span>a new post</span></h3>
+ 
+#{form @save()}
+ 
+    #{ifErrors}
+        <p class="error">
+            Please correct these errors.
+        </p>
+    #{/ifErrors}
+     
+    <p>
+        #{field 'title'}
+        <label>Post title:</label>
+        <input type="text" name="${field.name}" 
+            value="${post?.title}" />
+        <span class="error">#{error 'post.title' /}</span>
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'content'}
+        <label>Write here:</label>
+        <textarea name="${field.name}">${post?.content}</textarea>
+        <span class="error">#{error 'post.content' /}</span>
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'tags'}
+        <label>Enter some tags:</label>
+        <input type="text" size="50" 
+            name="${field.name}" value="${post?.tags?.join(' ')}" />
+        #{/field}
+    </p>
+    
+    <p>
+        <input type="submit" value="Publish this post to the blog" />
+    </p>
+    
+#{/form}
+
+最後に、 **Write a new post** ボタンがこのフォームにリンクするよう @yabe/app/views/Admin/index.html@ テンプレートを編集します:
+
+bc. …
+<p id="newPost" >
+    <a href="@{form()}"><span>+</span> write a new post</a>
+</p>
+…
+
+結果を確認することができます:
+
+!images/guide9-2!
+
+ここで、フォームのサブミットを適切に取り扱うよう @Admin.save@ アクションを完成させなければなりません。このアクションは、新しい @Post@ オブジェクトを作成し、タグリストを実際の @Tags@ オブジェクトのセットに変換し、全てのフィールドの妥当性を検証し、そして保存します。何らかのエラーがあった場合には、エラーを示すためにフォームを再表示します。
+
+bc. public static void save(String title, String content, String tags) {
+    // Create post
+    User author = User.find("byEmail", Security.connected()).first();
+    Post post = new Post(author, title, content);
+    // Set tags list
+    for(String tag : tags.split("\\s+")) {
+        if(tag.trim().length() > 0) {
+            post.tags.add(Tag.findOrCreateByName(tag));
+        }
+    }
+    // Validate
+    validation.valid(post);
+    if(validation.hasErrors()) {
+        render("@form", post);
+    }
+    // Save
+    post.save();
+    index();
+}
+
+p(note). ここでは <code>==render("Admin/form.html")==</code> のショートカットとして <code>==render("@form")==</code> を使用しています。このショートカットは、単に form アクションのデフォルトテンプレートを使用するよう Play に告げています。
+
+確認してみましょう!
+
+h2. <a>投稿の '編集' へ再利用しましょう</a>
+
+新しいブログを投稿できるよう HTML フォームと Java アクションを定義しました。しかし、既に存在する投稿も編集できるようにする必要があります。ほんの少しの変更でまったく同じコードを容易に再利用することができます。
+
+初めに、 @Admin.form@ で存在する @Post@ を検索する必要があります:
+
+bc. public static void form(Long id) {
+    if(id != null) {
+        Post post = Post.findById(id);
+        render(post);
+    }
+    render();
+}
+
+見てのとおり、この検索はオプション扱いにしたので、 @id@ パラメータが入力されている場合にのみ、この同じアクションは存在する投稿を検索します。これで、メイン画面の投稿リストを編集フォームにリンクすることができます。 @yabe/app/views/Admin/index.html@ テンプレートを以下のように編集してください:
+
+bc. #{extends 'admin.html' /}
+ 
+<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} ${posts.pluralize('post', 'posts')} so far</span></h3>
+ 
+#{list items:posts, as:'post'}
+    <p class="post ${post_parity}">
+        <a href="@{Admin.form(post.id)}">${post.title}</a>
+    </p>
+#{/list}
+ 
+<p id="newPost" >
+	<a href="@{form()}"><span>+</span> write a new post</a>
+</p>
+
+とても簡単ですが、問題があります。Router によって生成されたこれらのリンクの実際の URL を見てみてると、以下のようになっているはずです:
+
+bc. /admin/new?id=3
+
+これは動作しますが美しくありません。 @id@ パラメータがサブミットされた場合は違う URL を使う別のルートを定義しましょう:
+
+bc. GET     /admin/myPosts/{id}                 Admin.form
+GET     /admin/new                          Admin.form
+
+見てのとおり、このルートを古いものの前に定義したので、これはより高い優先度を持ちます。これは、もし @id@ パラメータがサブミットされた場合には、Play はこの URL を優先するということです。id パラメータがサブミットされない場合は、古いルートがそのまま使用されます。
+
+**My posts** ページを更新すれば、これらのリンクにより良い URL が設定されるはずです。
+
+ここで @yabe/app/views/Admin/form.html@ テンプレートも同様に変更しなければなりません:
+
+bc. #{extends 'admin.html' /}
+ 
+#{ifnot post?.id}
+    <h3>Write, <span>a new post</span></h3>
+#{/ifnot}
+#{else}
+    <h3>Edit, <span>this post</span></h3>
+#{/else}
+ 
+#{form @save(post?.id)}
+ 
+    #{ifErrors}
+        <p class="error">
+            Please correct these errors.
+        </p>
+    #{/ifErrors}
+     
+    <p>
+        #{field 'title'}
+        <label>Post title:</label>
+        <input type="text" name="${field.name}" 
+            value="${post?.title}" />
+        <span class="error">#{error 'post.title' /}</span>
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'content'}
+        <label>Write here:</label>
+        <textarea name="${field.name}">
+          ${post?.content}
+        </textarea>
+        <span class="error">#{error 'post.title' /}</span>
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'tags'}
+        <label>Enter some tags:</label>
+        <input type="text" size="50" 
+            name="${field.name}" value="${post?.tags?.join(' ')}" />
+        #{/field}
+    </p>
+    
+    <p>
+        <input type="submit" value="Publish this post to the blog" />
+    </p>
+    
+#{/form}
+
+見てのとおり、投稿の ID が存在する場合、これをアクションの第一引数として追加するよう、フォームの送り先となるアクションを更新しました。このため、投稿の id フィールドが設定されている (つまり、システム中に投稿が既に存在する) 場合、その id は @Admin.save@ アクションに送られます。
+
+これで、作成と編集の両方のケースを取り扱うよう、 @save()@ メソッドを少し変更することができます:
+
+bc. public static void save(Long id, String title, String content, String tags) {
+    Post post;
+    if(id == null) {
+        // Create post
+        User author = User.find("byEmail", Security.connected()).first();
+        post = new Post(author, title, content);
+    } else {
+        // Retrieve post
+        post = Post.findById(id);
+        // Edit
+        post.title = title;
+        post.content = content;
+        post.tags.clear();
+    }
+    // Set tags list
+    for(String tag : tags.split("\\s+")) {
+        if(tag.trim().length() > 0) {
+            post.tags.add(Tag.findOrCreateByName(tag));
+        }
+    }
+    // Validate
+    validation.valid(post);
+    if(validation.hasErrors()) {
+        render("@form", post);
+    }
+    // Save
+    post.save();
+    index();
+}
+
+そして、より良い URL のために、 @id@ パラメータが存在する場合に優先されるルートを追加する、先ほどと同じトリックを使用します:
+
+bc. POST    /admin/myPosts/{id}                 Admin.save
+POST    /admin/new                          Admin.save
+
+できました! これからは同じアクションを新しいブログの投稿の作成と古い投稿の編集に使用します。これで管理機能は完成です!
+
+p(note). 次: %(next)"テストの完了":guide10%

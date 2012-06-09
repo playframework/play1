@@ -1,0 +1,239 @@
+h1. アプリケーションの本番稼動
+
+アプリケーションを本番環境向けに最適化するシンプルな tips を紹介します。
+
+h2. <a name="application">本番稼動向け application.conf の設定</a>
+
+まず最初に、本番モードを指定するベストな方法は、本番環境のフレームワークに特別な ID を与えることです。例として @production@ という ID にしてみましょう。どのようにして ID を与えるかについては、"複数環境用 application.conf の管理":ids を参照してください。
+
+h3. フレームワークを本番モードに設定する:
+
+bc. %production.application.mode=prod
+
+このモードでは、フレームワークは全ての Java ソースとテンプレートをプリコンパイルします。この段階でエラーが見つかった場合、アプリケーションは開始されません。ソースの変更は動的にリロードされません。
+
+h3. 実際に利用するデータベースを定義する:
+
+もし (@db=mem@ または @db=fs@ いずれかの)  開発用データベースを使っていたのであれば、より堅牢なデータベースエンジンを設定すべきです:
+
+bc. %production.db.url=jdbc:mysql://localhost/prod
+%production.db.driver=com.mysql.jdbc.Driver
+%production.db.user=root
+%production.db.pass=1515312
+
+h3. JPA の自動スキーマ更新を無効にする:
+
+もし Hibernate が提供する自動スキーマ更新機能を使っていたのであれば、本番環境ではこの機能を無効にすべきです。
+
+本番環境サーバにおいて、Hibernate に自動的に本番環境スキーマやデータを ALTER させるというのは、一般的には悪いアイディアです…
+
+最初のデプロイについては、別の問題として考えることもできます。この場合のみを指定するには、以下のようにします:
+
+bc. %production.jpa.ddl=create
+
+h3. 安全な秘密鍵を定義する:
+
+Play の秘密鍵は、セッション署名のような暗号機能を保証するために使用されます。アプリケーションは、この秘密鍵を厳重に管理しなければなりません。
+
+bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
+
+@play secret@ コマンドを使って、安全で (少なくとも ‘本物の’ OS 上では) ランダムな新しい秘密鍵を生成することができます。アプリケーションを複数台のサーバに分散させる場合は、すべてのアプリケーションインスタンスに @同じ秘密鍵@ を使用することを忘れないでください!
+
+
+h2. <a name="logging">ログの設定</a>
+
+本番環境において、ローテーションするログファイルを使用することは良い考えです。コンソールログは @logs/system.out@ ファイルに書き込まれ、このファイルは制限無しに肥大化するので、ログをコンソールに出力してはいけません!
+
+カスタマイズした @log4j.properties@ を @conf/@ ディレクトリに作成してください:
+
+bc. log4j.rootLogger=ERROR, Rolling
+ 
+log4j.logger.play=INFO
+ 
+# Rolling files
+log4j.appender.Rolling=org.apache.log4j.RollingFileAppender
+log4j.appender.Rolling.File=application.log
+log4j.appender.Rolling.MaxFileSize=1MB
+log4j.appender.Rolling.MaxBackupIndex=100
+log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
+log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
+
+h2. <a name="server">フロントエンド HTTP サーバ</a>
+
+アプリケーションの HTTP ポートを @80@ 番に設定することで、簡単にアプリケーションをスタンドアロンサーバとしてデプロイすることができます:
+
+bc. %production.http.port=80
+
+しかし、同一サーバ上で複数のアプリケーションを管理したり、拡張性や耐障害性のために複数のアプリケーションインスタンスを負荷分散する場合、フロントエンド HTTP サーバを使用することができます。
+
+**フロントエンド HTTP サーバを使用する場合は、直接 Play サーバを使用する場合よりも決して良いパフォーマンスが得られないことに注意してください!**
+
+h3. lighttpd をセットアップする
+
+この例では、"lighttpd":http://www.lighttpd.net/ をフロントエンド web サーバとして設定する方法を紹介します。Apache でも同じことができますが、仮想ホストまたは負荷分散だけが必要な場合、lighttpd はとても良い選択であり、設定はとても簡単です!
+
+@/etc/lighttpd/lighttpd.conf@ ファイルは、以下のように定義されるでしょう:
+
+bc. server.modules = (
+      "mod_access",
+      "mod_proxy",
+      "mod_accesslog" 
+)
+…
+$HTTP["host"] =~ "www.myapp.com" {
+    proxy.balance = "round-robin" proxy.server = ( "/" =>
+        ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
+}
+ 
+$HTTP["host"] =~ "www.loadbalancedapp.com" {
+    proxy.balance = "round-robin" proxy.server = ( "/" => ( 
+          ( "host" => "127.0.0.1", "port" => 9000 ), 
+          ( "host" => "127.0.0.1", "port" => 9001 ) ) 
+    )
+}
+
+h3. Apache をセットアップする
+
+以下の例は、 標準的設定の Play の前面で動作する "Apache httpd server":http://httpd.apache.org/ のシンプルな設定を示しています。
+
+bc. LoadModule proxy_module modules/mod_proxy.so
+…
+<VirtualHost *:80>
+  ProxyPreserveHost On
+  ServerName www.loadbalancedapp.com
+  ProxyPass / http://127.0.0.1:9000/
+  ProxyPassReverse / http://127.0.0.1:9000/
+</VirtualHost>
+
+
+h3. アプリケーションの透過的な更新を可能にするプロキシサーバとしての Apache
+
+基本的なアイディアとして、web アプリケーションの 2 つの Play インスタンスを実行し、前面のプロキシにこれらを負荷分散させます。1 つのインスタンスが使用できない場合、すべてのリクエストを使用できるもう 1 つのインスタンスにフォワードします。
+
+同一の Play アプリケーションを 2 つ起動しましょう: ひとつは 9999 番ポートで、もうひとつは 9998 番ポートで実行します。
+
+アプリケーションをコピーして、 @conf@ ディレクトリにある @application.conf@ を編集してポート番号を変更してください。
+
+それぞれのアプリケーションディレクトリで、以下のように実行します:
+
+bc. play start mysuperwebapp
+
+ここで、Apache web サーバに負荷分散させるよう設定しましょう。
+
+Apache を次のように設定します:
+
+bc. <VirtualHost mysuperwebapp.com:80>
+  ServerName mysuperwebapp.com
+  <Location /balancer-manager>
+    SetHandler balancer-manager
+    Order Deny,Allow
+    Deny from all
+    Allow from .mysuperwebapp.com
+  </Location>
+  <Proxy balancer://mycluster>
+    BalancerMember http://localhost:9999
+    BalancerMember http://localhost:9998 status=+H
+  </Proxy>
+  <Proxy *>
+    Order Allow,Deny
+    Allow From All
+  </Proxy>
+  ProxyPreserveHost On
+  ProxyPass /balancer-manager !
+  ProxyPass / balancer://mycluster/
+  ProxyPassReverse / http://localhost:9999/
+  ProxyPassReverse / http://localhost:9998/
+</VirtualHost>
+
+balancer://mycluster が重要な箇所です。これが負荷分散を宣言します。+H オプションは、二番目の Play アプリケーションがスタンバイ状態にあることを意味します。しかし、負荷分散するよう指示することもできます。
+
+mysuperwebapp をアップグレードしたい場合は、毎回、以下を実行する必要があります:
+
+bc. play stop mysuperwebapp1
+
+すると、ロードバランサは全てを mysuperwebapp2 にフォワードします。その間に mysuperwebapp1 を更新してください。更新が完了したら、以下を実行してください:
+
+bc. play start mysuperwebapp1
+
+これで mysuperwebapp2 を安全に更新することができます。
+
+Apache はクラスタの状態を閲覧する方法も提供します。クラスタの現在の状態を確認するには、単純にブラウザに /balancer-manager を指定してください。
+
+Play は完全にステートレスなので、2 つのクラスタ間でセッションの管理をする必要はありません。とても簡単に 2 つ以上の Play インスタンスにスケールすることが可能です。
+
+h3. 高度なプロキシ設定
+
+フロント HTTP サーバを使用する場合、リクエストアドレスは HTTP サーバからやって来るように見えます。Play アプリケーションとプロキシを同一筐体で実行する、一般的なセットアップにおいては、Play アプリケーションからは、リクエストが 127.0.0.1 からやって来るように見えるでしょう。
+
+プロキシサーバは、プロキシされたアプリケーションにリクエストがどこからやって来たかを伝える特別なヘッダを、リクエストに追加することができます。ほとんどの web サーバは、第一引数をリモートクライアントの IP アドレスとした X-Forwarded-For ヘッダを追加します。 "XForwardedSupport 設定":configuration#XForwardedSupportPlay でのフォワードサポートを有効にするには、Play は request.remoteAddress をプロキシの IP からクライアントの IP に変更します。これが動作するよう、プロキシの IP アドレスをリストする必要があります。
+
+しかし、ホストヘッダが付加されない場合、プロキシの問題は依然として残ってしまいます。Apache 2.x を使用する場合、ディレクティブに以下のように追加することができます:
+
+bc. ProxyPreserveHost on
+
+host: ヘッダはクライアントから発行されたオリジナルのホストリクエストヘッダになります。これらふたつのテクニックを連携することで、アプリケーションはスタンドアロンと同じようになります。
+
+h2. <a name="https">HTTPS の設定</a>
+
+本番環境では、組み込みサーバーはHTTPSプロトコルをサポートしています。
+古典的なJava **キーストア** 、または、 @cert@ と @kye@ のファイルでの証明書管理をサポートしています。
+アプリケーションへのHTTPS接続が始まると、 @application.conf@ ファイルでの @https.port@ 設定プロパティを表します。
+
+bc. http.port=9000
+https.port=9443
+
+@conf@ ディレクトリに証明書をおく必要があります。Play は X509 証明書とキーストア証明書をサポートします。X509証明書は 証明書は *host.cert* , キーは *host.key* で指定しなければなりません。キーストアを使っていれば、デフォルトで *certificate.jks* を指定します。
+
+X509証明書を使っていれば、 @application.conf@ ファイルで以下の値を設定します。
+
+bc. # X509 certificates
+certificate.key.file=conf/host.key
+certificate.file=conf/host.cert
+# In case your key file is password protected
+certificate.password=secret
+trustmanager.algorithm=JKS
+
+キーストアを使っていれば:
+
+bc. keystore.algorithm=JKS
+keystore.password=secret
+keystore.file=conf/certificate.jks
+
+上記の値はデフォルト値であることに注意してください。
+
+*openssl* を使って自己署名証明書を生成できます。:
+
+bc. openssl genrsa 1024 > host.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
+
+Java キーストアを使っていれば、 @application.conf@ ファイルで以下のプロパティを設定します。
+
+bc. # Keystore 
+ssl.KeyManagerFactory.algorithm=SunX509
+trustmanager.algorithm=JKS
+keystore.password=secret
+keystore.file=certificate.jks
+
+上記の値はデフォルト値です。
+
+h2. <a name="nopython">Python を使わないデプロイ</a>
+
+ほとんどの Unix マシンにはデフォルトで Python がインストールされており、Windows 版の Play には Python が同梱されています。しかしながら、Python を一切実行することなしにアプリケーションをデプロイしなければならないケースがあるかもしれません。
+
+このため、機能を制限した build.xml が Play アプリケーションと共に提供されています。
+
+アプリケーションフォルダから、以下のようにしてサーバを開始することができます:
+
+bc. ant start -Dplay.path=/path/to/playdirectory
+
+警告: @play@ コマンドを使用した場合、出力は @System.out@ にリダイレクトされます; 一方で、ant を使用した場合は標準出力にアクセスすることができません。追記されるファイルを指定する log4j プロパティを提供する必要があります。
+
+サーバを停止するには、以下のようにします:
+
+bc. ant stop -Dplay.path=/path/to/playdirectory
+
+Play フレームワークへのパスを、環境変数、またはアプリケーションの @build.xml@ に直接指定することができることも覚えておいてください。
+
+p(note). **考察を続けます**
+ 
+次: %(next)"デプロイオプション":deployment%

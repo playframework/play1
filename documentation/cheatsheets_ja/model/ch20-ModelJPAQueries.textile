@@ -1,0 +1,12 @@
+h2. Model - JPA Queries
+
+*==@NamedQuery(name="q1", "jpql_query");==*
+永続化単位で使用される名前付き JPQL クエリを定義します。
+
+*==@NamedNativeQuery(name="q2","sql_query")==*
+永続化単位で使用されるネイティブな SQL クエリを定義します。
+
+*==@SqlResultSetMapping==*
+ネイティブな SQL クエリの実行結果をオブジェクトモデルにマッピングするために使用します。
+
+p(note). これは JPA2 アノテーションのサブセットに過ぎません。Hibernate もまた非標準のセットを持っています。

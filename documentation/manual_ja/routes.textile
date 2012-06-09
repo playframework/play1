@@ -1,0 +1,342 @@
+h1. HTTP ルーティング
+
+Router は、送り込まれた HTTP リクエストをアクション (コントローラの static で public なメソッド) の呼び出しに対応付けるコンポーネントです。
+
+HTTP リクエストは MVC フレームワークにおいてイベントと見なされます。このイベントは 2 つの主要な情報を含んでいます:
+
+* クエリ文字列を含んだ (@/clients/1542@ や @/photos/list@ のような) リクエストパス
+* HTTP メソッド (GET, POST, PUT, DELETE)
+
+h2. <a>REST について</a>
+
+REST (Representational state transfer) は、World Wide Web などの分散ハイパーメディアシステムのためのソフトウェアアーキテクチャスタイルです。
+
+REST が述べるいくつかの主要な設計原理は以下の通りです:
+
+* アプリケーションの機能はリソースに分割される
+* あらゆるリソースは URI を使用することで一意にアドレス付けられる
+* すべてのリソースはクライアントとリソースの間で状態を転送するために統一インタフェースを共有する
+
+HTTP を使用する場合は、インタフェースは利用可能な HTTP メソッドのセットとして定義されます。 リソース状態にアクセスするために使用されるプロトコルは、以下の通りです:
+
+* クライアント-サーバ
+* ステートレス
+* キャッシュ可能
+* 階層化
+
+アプリケーションが主な REST 設計原理に従うなら、そのアプリケーションは RESTful です。Play フレームワークを使うと、容易に RESTful アプリケーションを構築することができます:
+
+* Play の router は Java の呼び出しにリクエストを転送するために URI と HTTP メソッドの両方を解釈します。正規表現ベースの URI パターンは高い柔軟性を提供します。
+* プロトコルはステートレスです。これは、2 つの連続したリクエスト間において、どのような状態もサーバに保存できないことを意味します。
+* Play は HTTP を重要な特徴と見なすので、HTTP に含まれる情報への完全なアクセスを提供します。
+
+h2. <a name="syntax">routes ファイルの構文</a>
+
+@conf/routes@ ファイルは、Router が使用する設定ファイルです。このファイルはアプリケーションに必要なすべてのルートを記載します。各ルートは Java 呼び出しに関連付けられた HTTP メソッド + URI パターンで構成されます。
+
+ルート定義がどのようなものか見てみましょう:
+
+bc. GET    /clients/{id}             Clients.show           
+
+各ルートは HTTP メソッドから始まり、URI パターンが続きます。ルーティングの最後の要素は Java 呼び出しの定義です。
+
+@#@ 文字でルートファイルにコメントを追加できます。
+
+bc. # Display a client
+GET    /clients/{id}             Clients.show           
+
+h3. HTTP メソッド
+
+HTTPによってサポートされてる有効なメソッドのうち、いずれかひとつをルートの HTTP メソッドに指定することができます:
+
+* **GET**
+* **POST**
+* **PUT**
+* **DELETE**
+* **HEAD**
+
+Moreover it supports @WS@ as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
+
+HTTP メソッドに * を指定した場合、このルートはどのようなメソッドの HTTP リクエストにもマッチします。
+
+bc. *   /clients/{id}             Clients.show           
+
+このルートは以下のいずれにも適合します:
+
+bc. GET /clients/1541
+PUT /clients/1212
+
+
+h3. URI パターン
+
+URI パターンはルートのリクエストパスを定義します。ルートの一部を動的に定義することが可能です。動的部分はすべて 中括弧 {…} の中に指定しなければいけません。
+
+bc. /clients/all
+
+完全にマッチします:
+
+bc. /clients/all
+
+しかし …
+
+bc. /clients/{id}
+
+これらについてもそれぞれマッチします:
+
+bc. /clients/12121
+/clients/toto
+
+URI パターンにはより多くの動的な部分があるかもしれません:
+
+bc. /clients/{id}/accounts/{accountId}
+
+動的部分のデフォルトのマッチング方式は、正規表現  @/[^/]+/@ として定義されています。動的部分の正規表現を独自に定義することができます。
+
+この正規表現は id に数値のみを許可します:
+
+bc. /clients/{<[0-9]+>id}
+
+これは id が 4～10 文字の小文字だけを含む単語であることを保証します:
+
+bc. /clients/{<[a-z]{4,10}>id}
+
+ここではどのような正規表現も使用することができます。
+
+p(note). **注意**
+ 
+動的部分には名前が付けられます。コントローラは後から HTTP パラメータの Map から動的部分を検索することができます。
+
+デフォルトで、Play は URL のあとに続くスラッシュを重要視します。例えば次のようなルートの場合:
+
+bc. GET     /clients         Clients.index
+
+*/clients* という URL にはマッチしますが、 */clients/* にはマッチしません。スラッシュの後にクエスチョンマークを追加することで、Play に両方の URL にマッチするよう伝えることができます。例えば、次のようにします:
+
+bc. GET     /clients/?       Clients.index
+
+p(note). この URI パターンは、最後のスラッシュ以外にはどのような追加部分も持つことはできません。
+
+h3. Java の呼び出し定義
+
+ルート定義の最後の部分は Java 呼び出しです。この部分はアクションメソッドの完全修飾名で定義されます。アクションメソッドは Controller クラスの @public static void@ なメソッドでなければいけません。Controller クラスは @controllers@ パッケージに定義しなければならず、また、 @play.mvc.Controller@ のサブクラスでなければいけません。
+
+コントローラが controllers パッケージの直下に定義されていない場合は、クラス名の前に Java パッケージ名を追記することができます。 @controllers@ パッケージ自体は暗黙的なので、特に指定する必要はありません。
+
+bc. GET    /admin             admin.Dashboard.index           
+
+h3. 404 アクション
+
+アプリケーションにおいて無視されなければならない URL パスを印付けるために、 @404@ をアクションルートとして直接使用することができます。例えば:
+
+bc. # Ignore favicon requests
+GET     /favicon.ico            404
+
+h3. 静的引数の割り当て
+
+ある場合においては、アクションは再利用しても、いくつかの引数の値に基づいてより特別なルートを定義したいことがあります。
+
+これがどのようなものか、以下の例を見てみましょう:
+
+bc. public static void page(String id) {
+    Page page = Page.findById(id);
+    render(page);
+}
+
+対応するルートは次のとおりです:
+
+bc. GET    /pages/{id}        Application.page
+
+ここで、このページに 'home' という ID で別名を定義したいと思います。静的引数を使って別のルートを定義することができます:
+
+bc. GET    /home              Application.page(id:'home')
+GET    /pages/{id}        Application.page
+
+最初のルートは、ページの id が 'home' である場合、2 番目のルートと等価です。しかし、最初のルートはより高い優先度を持つので、id が 'home' である Application.page 呼び出しのデフォルト定義として使用されます。
+
+h3. 変数とスクリプト
+
+テンプレートと同様、 @routes@ ファイルにおいても変数に @${ … }@ 構文を、式に @%{ … }@ 構文を使うことができます。例えば:
+
+bc. %{ context = play.configuration.getProperty('context', '') }%
+ 
+# Home page
+GET    ${context}         Secure.login
+GET    ${context}/        Secure.login
+
+別の例として、すべての型についてコントローラルート定義を生成するために @crud.types@ タグを使ってモデルの型全体をループする CRUD モジュールの @routes@ ファイルがあります。
+
+
+h2. <a name="priority">ルーティングの優先順位</a>
+
+複数のルートが同じリクエストにマッチすることができます。競合がある場合は、(宣言した順番に従い) 最初のルートが使用されます。
+
+例えば:
+
+bc. GET    /clients/all       Clients.listAll
+GET    /clients/{id}      Clients.show
+
+これらの定義において、URI が次のとおりである場合:
+
+bc. /clients/all
+
+(2 番目のルートもリクエストにマッチするとしても) 最初のルートが適用されて、Clients.listAll をコールします。
+
+
+h2. <a name="static">静的リソースの配信</a>
+
+h3. staticDir: マッピング
+
+静的なリソースのコンテナとして公開したい場合、各フォルダを特別なアクション @staticDir@ を使って示してください。
+
+例えば:
+
+bc. GET    /public/           staticDir:public
+
+@/public/*@ パスに対するリクエストがあった場合、Play はアプリケーションの /public フォルダからファイルを配信します。
+
+優先度は通常のルートと同じように適用されます。
+
+h3. staticFile: マッピング
+
+URL パスをレンダリングする静的なファイルに直接マッピングすることもできます。
+
+bc. # Serve index.html static file for home requests
+GET     /home                   staticFile:/public/html/index.html
+
+h2. URL エンコーディング
+
+URL をデコードして再度エンコードすることは不可能 (例えば、スラッシュがスラッシュなのか %2F なのかは分かりません) なので、URL はエンコードされて表現されるべきです。UTF-8 がデフォルトのエンコーディングですが、defaultWebEncoding 設定パラメータを使って ISO-8859-1, UTF-16BE, UTF-16LE, UTF-16 のうちひとつを使うことができます。詳細は http://download.oracle.com/javase/1.4.2/docs/api/java/nio/charset/Charset.html を参照してください。
+
+例えば:
+
+# map /stéphane
+bc. GET /st%C3%A9phane Application.stephane
+
+h2. <a name="reverse">リバースルーティング : URL の生成</a>
+
+Java 呼び出し中に URL を生成するのに Router が使用できます。このため、すべての URI をただひとつの設定ファイルに集約することが可能であり、より自信をもってアプリケーションをリファクタリングすることができます。
+
+例えば、次のようなルート定義において:
+
+bc. GET    /clients/{id}      Clients.show
+
+Clients.show を起動することができる URL を、コードから生成することができます:
+
+bc. map.put("id", 1541);
+String url = Router.reverse("Clients.show", map).url;// GET /clients/1541
+
+p(note). この URL 生成機能はフレームワークの様々なコンポーネントに統合されています。決して Router.reverse を直接使用するべきではありません。
+
+URI パターンに含まれていないパラメタを加えると、これらのパラメタはクエリストリングに追加されます:
+
+bc. map.put("id", 1541);
+map.put("display", "full");
+// GET /clients/1541?display=full
+String url = Router.reverse("Clients.show", map).url;
+
+URL を生成するもっとも特別なルートを見つけるため、優先順位が再度使用されます。
+
+
+h2. <a name="content-types">content type の設定</a>
+
+Play は @request.format@ に従って HTTP レスポンスの "メディアタイプ":http://en.wikipedia.org/wiki/Internet_media_type を選択します。この値は、どの view テンプレートを使用するかをファイル拡張子によって決定し、また Play の @mime-types.properties@ ファイルがこのフォーマットにマッピングするメディアタイプを、レスポンスの @Content-type@ に設定します。
+
+Play に対するリクエストのデフォルトフォーマットは @html@ です。そのため、コントローラの @index()@ メソッド (そして @html@ フォーマット) に対するデフォルトのテンプレートは @index.html@ です。もし違うフォーマットを指定する場合、いくつかある方法のひとつとして、代替テンプレートを選択することができます。
+
+@render@ メソッドを呼び出す前に、このフォーマットをプログラム上から設定することができます。例えば、 @text/css@ メディアタイプと共に CSS を提供する場合、次のように設定します:
+
+bc. request.format = "css";  
+
+一方、 @routes@ ファイルにおいて URL を使ってフォーマットを指定する、よりきれいなアプローチもあります。コントローラのメソッドにフォーマットを指定することで、特定のルートにフォーマットを追加することができます。例えば、以下のルートは @/index.xml@ に対するリクエストをハンドリングし、フォーマットを @xml@ に設定し、 @index.xml@ テンプレートをレンダリングします。
+
+bc. GET    /index.xml         Application.index(format:'xml')  
+
+同様に:
+
+bc. GET    /stylesheets/dynamic_css   css.SiteCSS(format:'css')
+
+Play は、以下のルートのように、URL から直接フォーマットを抽出することもできます。
+
+bc. GET    /index.{format}    Application.index 
+
+このルートでは、 @index.xml@ に対するリクエストには @xml@ がフォーマットに設定されて XML テンプレートがレンダリングされますが、 @index.txt@ に対するリクエストにはプレーンテキストのテンプレートがレンダリングされます。
+
+Play は HTTP コンテントネゴシエーションを使って自動的にフォーマットを設定することもできます。
+
+
+h2. <a name="content-negotiation">HTTP コンテントネゴシエーション</a>
+
+Play が他の RESTful アーキテクチャと共通していることのうちのひとつは、HTTP を隠そうとしたり、HTTP の上に抽象層を置こうとしたりせず、HTTP の機能を直接使用するということです。"コンテントネゴシエーション":http://en.wikipedia.org/wiki/Content_negotiation は、HTTP サーバが、HTTP クライアントによりリクエストされたメディアタイプに従って、同じ URL に対して異なる "メディアタイプ":http://en.wikipedia.org/wiki/Internet_media_type を提供できるようにする HTTP の機能です。クライアントは、例えば XML レスポンスを要求する場合、以下のように @Accept@ ヘッダを使って受信できるコンテントタイプを指定します: 
+
+bc. Accept: application/xml
+
+クライアントはひとつ以上のメディアタイプを指定するかもしれませんし、ワイルドカード (@*/*@) を使用して、どのようなメディアタイプも受信できると指定するかもしれません:
+
+bc. Accept: application/xml, image/png, */*
+
+古臭い web ブラウザは、どのようなメディアタイプでも受信しようと @Accept@ ヘッダにいつでもワイルドカードを含めます: そして Play は HTML を - デフォルトの 'フォーマット' として提供します。コンテントネゴシエーションは JSON レスポンスを要求する Ajax リクエストや、PDF や EPUB バージョンのドキュメントを要求する e-book リーダのような、カスタマイズされたクライアントにおいて、より頻繁に利用されるでしょう。
+
+h3. HTTP ヘッダによるコンテントタイプの設定
+
+@Accept@ ヘッダに @text/html@ か @application/xhtml@ が含まれる場合、または ワイルドカード @*/*@ が指定されている場合、Play はデフォルトのリクエストフォーマットである @html@ を選択します。ワイルドカード値が存在しない場合はデフォルトフォーマットは選択されません。
+
+Play はいくつかのフォーマット: @html@, @txt@, @json@ と @xml@ を組み込みでサポートします。例えば、いくつかのデータをレンダリングするコントローラメソッドを定義します:
+
+bc. public static void index() { 
+   final String name = "Peter Hilton"; 
+   final String organisation = "Lunatech Research"; 
+   final String url = "http://www.lunatech-research.com/"; 
+   render(name, organisation, url); 
+} 
+
+このメソッドにマッピングされた URL (新しい Play アプリケーションの場合は @http://localhost:9000/@) を web ブラウザからリクエストすると、web ブラウザは値に @text/html@ を含む @Accept@ ヘッダを送信するので、Play は @index.html@ テンプレートをレンダリングします。
+
+Play は、リクエストフォーマットに @xml@ を設定し、例えば以下のような @index.xml@ テンプレートをレンダリングすることで、 @Accept: text/xml@ ヘッダを含むリクエストに応答します:
+
+bc. <?xml version="1.0"?> 
+<contact> 
+<name>${name}</name> 
+<organisation>${organisation}</organisation> 
+<url>${url}</url> 
+</contact> 
+
+@index()@ コントローラメソッドに対する組み込みの @Accept@ ヘッダとフォーマットのマッピングは下記のように動作します: accept ヘッダは、Play がやがてはテンプレートファイルに紐付けられることになるフォーマットにマッピングしたメディアタイプを含みます。
+
+|_. Accept header |_. Format |_. Template file name |_. Mapping | 
+| null | null | index.html | null フォーマットに対するデフォルトのテンプレート拡張 | 
+| image/png | null | index.html | フォーマットにマッピングされないメディアタイプ | 
+| ==*/*==, image/png | html | index.html | html フォーマットにマッピングされるデフォルトのメディアタイプ | 
+| text/html | html | index.html | 組み込みフォーマット | 
+| application/xhtml | html | index.html | 組み込みフォーマット | 
+| text/xml | xml | index.xml | 組み込みフォーマット | 
+| application/xml | xml | index.xml | 組み込みフォーマット | 
+| text/plain | txt | index.txt | 組み込みフォーマット | 
+| text/javascript | json | index.json | 組み込みフォーマット | 
+| application/json, ==*/*== | json | index.json | デフォルトのメディアタイプを無視する組み込みフォーマット | 
+
+
+h3. カスタムフォーマット
+
+HTTP リクエストが対応するメディアタイプを選択する場合にのみ、リクエストヘッダを調査し、それに従ってフォーマットを設定し、独自のメディアタイプについてコンテントネゴシエーションを追加することができます。例えば、"vCard":http://en.wikipedia.org/wiki/Vcard を @text/x-vcard@ メディアタイプと共に提供するには、コントローラにて全てのリクエストの前に独自のフォーマッとチェックを行います: 
+
+bc. @Before 
+static void setFormat() { 
+	if (request.headers.get("accept").value().equals("text/x-vcard")) { 
+		request.format = "vcf"; 
+	} 
+} 
+
+これで、 @Accept: text/x-vcard@ を含むリクエストは、以下のような @index.vcf@ テンプレートをレンダリングするようになります:
+
+bc. BEGIN:VCARD 
+VERSION:3.0 
+N:${name} 
+FN:${name} 
+ORG:${organisation} 
+URL:${url} 
+END:VCARD  
+
+
+p(note). **考察を続けます**
+ 
+Router が受け取った HTTP リクエストによって起動する Java 呼び出しを決定したら、Play フレームワークはその Java 呼び出しを起動します。 %(next)"コントローラ":controllers% がどのように動作するのかを見てみましょう。

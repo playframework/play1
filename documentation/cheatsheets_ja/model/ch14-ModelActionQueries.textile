@@ -1,0 +1,32 @@
+h2. Model.action - Queries
+
+*==Query query = JPA.em().createQuery("jpql_query");==*
+永続化マネージャにアクセスします。
+
+*==Post post = Post.findById(id);==*
+*==List<Post> posts = Post.findAll();==*
+find メソッド
+
+*==post.save();==*
+永続化層にオブジェクトを保存します。
+
+*==boolean post.validateAndSave();==*
+オブジェクトを検証して保存した場合に true を返します。検証はアノテーションで行われます。
+
+*==List<Post> posts = Post.all().from(50).fetch(100);==*
+50 番目から 100 番目のレコードを読み込みます。
+
+*==Post.find("select p from Post p, Comment c where c.post==*
+*=== p and c.subject like ?", "%hop%");==*
+ジョインを使ったパラメタ化された参照
+
+*==long userCount = Post.count("author=?", connectedUser);==*
+*==long postCount = Post.count();==*
+レコードをカウントします。
+
+*==JPAPlugin.startTx(boolean readonly);==*
+*==JPAPlugin.closeTx(boolean rollback);==*
+トランザクションを独自で制御するメソッド
+
+*==JPA.setRollbackOnly();==*
+トランザクションを強制的にロールバックします。

@@ -1,0 +1,13 @@
+h2. Test - Selenium Tests
+
+*==#{selenium}==*
+clearSession()
+open('/admin')
+assertTextPresent('Login')
+type('login', 'admin')
+type('password', 'secret')
+clickAndWait('signin')
+
+// ユーザが正常にログインしているか検証します。
+assertText('success', 'Welcome admin!')
+*==#{/selenium}==*

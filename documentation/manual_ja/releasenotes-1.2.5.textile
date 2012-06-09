@@ -1,0 +1,10 @@
+h1. Play 1.2.5 -- リリースノート
+
+このリリースにおける変更は Lighthouse の "Play 1.2.5 マイルストーン":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/131471-125 に、86 件の解決済みチケットを含めて一覧されています。最も重要な変更は下記のとおりです:
+
+* 複数の continuations/await に関するバグの修正
+* ハッシュ衝突攻撃に対するセキュリティ修正
+* Glassfish 3 における JNDI データソース
+* チャンク転送/ストリーミングサポートの改善
+* hibernate 4.1.1 と netty 3.4.2 を含むすべてのライブラリのアップグレード
+* すべてのブラウザにおける web socket のサポート

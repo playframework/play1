@@ -1,0 +1,27 @@
+h2. Controller - Session Management
+
+*警告: Play のセッションは J2EE のセッションではありません*
+session と flash はクッキーを使います! 4KB と 20 個の上限があります。
+
+*session.getId();*
+(たいていの場合持っておかなければいけない) セッション ID を返します。 
+
+*session.put(String key, String value);*
+*session.get("user_flag");*
+値は 4KB を上限とする文字列に限られます。
+
+*flash.put(String key, String value);*
+*flash.get(String key);*
+flash エントリは次のリクエストの終了まで廃棄されます。
+
+*Cache.set("key_" + id, product, "30mn");*
+30 分のキャッシュ値をセットします。
+
+*Cache.get("key_" + id, Product.class);*
+キャッシュ値を取得します。キーに対応する値がなければ null を返します。
+
+*Cache.delete("key_" + id);*
+ノンブロッキングのキャッシュ削除
+
+*Cache.safeDelete("key_" + id);*
+ブロッキングのキャッシュ削除

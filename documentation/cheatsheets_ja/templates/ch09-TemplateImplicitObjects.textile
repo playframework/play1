@@ -1,0 +1,28 @@
+h2. Template - Implicit objects
+
+*errors*
+コントローラで発生した検証エラー
+
+*flash*
+flash スコープ
+
+*lang*
+通信に使用されている言語
+
+*messages*
+ローカライズされたメッセージの map
+
+*out*
+The output stream writer
+
+*params*
+パラメータ
+
+*play*
+フレームワークのメインのクラス
+
+*request*
+HTTP リクエスト
+
+*session*
+セッションスコープ
