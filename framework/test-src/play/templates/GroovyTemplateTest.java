@@ -5,6 +5,8 @@ import play.PlayBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -126,4 +128,28 @@ public class GroovyTemplateTest {
         new GroovyTemplateCompiler().compile(groovyTemplate);
         assertEquals("123", groovyTemplate.render());
     }
+
+    // [#1079] #{list} should not overwrite variable outside list.
+    @Test
+    public void ListShouldNotOverrideVariableOutsideList() {
+        new PlayBuilder().build();
+
+        String groovySrc = "A: ${a}<br>List: #{list items: list, as: 'a'} ${a} #{/list}<br>A: ${a}<br>";
+
+	String a = "Not from list";
+        List<String> list = new ArrayList<String>();
+        list.add("First list item");
+        list.add("Last list item");
+
+        GroovyTemplate t = new GroovyTemplate("keep_variable_outside_list", groovySrc);
+        new GroovyTemplateCompiler().compile(t);
+
+        Map<String, Object> args = new HashMap<String,Object>();
+        args.put("a", a);
+	args.put("list", list);
+
+        assertThat( t.render( args ) ).isEqualTo("A: Not from list<br>List:  First list item  Last list item <br>A: Not from list<br>");
+
+    }
+
 }
