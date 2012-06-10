@@ -50,8 +50,7 @@ public class OptimisticLockingModelPlayTest extends UnitTest {
         Error error = Validation.errors(".version").get(0);
         System.out.println(error.getKey());
         assertEquals("The object was changed. Your version is 1 the database version is 2. " +
-                "<a href=\"/@tests/models.OptimisticLockingModelPlayTest.class\">Reload</a> " +
-                "and do your changes again.", error.message());       
+                "Reload and do your changes again.", error.message());       
     }
     
     
