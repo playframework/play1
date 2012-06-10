@@ -60,8 +60,7 @@ public class OptimisticLockingModel extends GenericModel {
      * Messagecode: optimisticLocking.modelHasChanged
      * Parameter: 2 the version of the edited model.
      * Parameter: 3 the version in the database.
-     * Parameter: 4 the request URL.
-     * Example-Message: The object was changed. <a href="%2$s">Reload</a> and do your changes again.
+     * Example-Message: The object was changed. Reload and do your changes again.
      *
      */
     public static class OptimisticLockingCheck extends Check {
@@ -76,15 +75,10 @@ public class OptimisticLockingModel extends GenericModel {
                     optimisticLockingModel.version != null) && 
                     (optimisticLockingModel.initialVersion.longValue() > 
                      optimisticLockingModel.version.longValue())) {
-                final Request request = Request.current();
                 Long version = optimisticLockingModel.version;
                 Long initialVersion = optimisticLockingModel.initialVersion ;
-                //The following doesn't work see https://bugs.launchpad.net/play/+bug/634719
-                //http://play.lighthouseapp.com/projects/57987-play-framework/tickets/116
-//                setMessage(checkWithCheck.getMessage(), version != null ? version.toString() : "", 
-//                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : "");
-                setMessage("optimisticLocking.modelHasChanged", version != null ? version.toString() : "", 
-                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : ""); 
+                setMessage(checkWithCheck.getMessage(), version != null ? version.toString() : "", 
+                        initialVersion != null ? initialVersion.toString() : "");
                 return false;
             } 
             return true;
