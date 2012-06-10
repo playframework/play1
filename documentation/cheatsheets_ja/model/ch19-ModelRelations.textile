@@ -1,0 +1,23 @@
+h2. Model - Relations
+
+*==@OneToOne(entity, fetch=[LAZY,EAGER], nullable=true)==*
+他の永続的なエンティティとの 1 対 1 の関連フィールドを定義します。
+
+*==@OneToMany(mappedBy="remote_attribute")==*
+他の永続的なエンティティとの 1 対 N の関連フィールドを定義します。
+
+*==@ManyToMany(cascade=[ALL, PERSIST, MERGE,==*
+*==REMOVE, REFRESH, DETACH])==*
+他の永続的なエンティティとの M 対 N の関連フィールドを定義します。
+
+*==@ManyToOne==*
+他の永続的なエンティティとの N 対 1 の関連フィールドを定義します。
+
+*==@JoinColumn(name = "id_connector")==*
+テーブルか外部キーとジョインするときに使用するカラムを定義します。
+
+*==@JoinTable(name = "nm_table", joinColumns ===*
+*=={ @JoinColumn(name = "id_coupon", nullable = false) },==*
+*==inverseJoinColumns = { @JoinColumn(name ===*
+*=="id_campaign", nullable = false) })==*
+ManyToMany の関連をマッピングするために使用します。

@@ -1,0 +1,154 @@
+h1. e メール送信
+
+E メール機能は、背後で "Apache Commons Email":http://commons.apache.org/email/userguide.html ライブラリを使用します。 @play.libs.Mail@ ユーティリティクラスを使って、とても簡単に e メールを送信することができます。
+
+シンプルな e メール:
+
+bc. SimpleEmail email = new SimpleEmail();
+email.setFrom("sender@zenexity.fr");
+email.addTo("recipient@zenexity.fr");
+email.setSubject("subject");
+email.setMsg("Message");
+Mail.send(email); 
+
+HTML e メール:
+
+bc. HtmlEmail email = new HtmlEmail();
+email.addTo("info@lunatech.com");
+email.setFrom("sender@lunatech.com", "Nicolas");
+email.setSubject("Test email with inline image");
+// embed the image and get the content id
+URL url = new URL("http://www.zenexity.fr/wp-content/themes/images/logo.png");
+String cid = email.embed(url, "Zenexity logo");
+// set the html message
+email.setHtmlMsg("<html>Zenexity logo - <img src=\"cid:"+cid+"\"></html>");
+// set the alternative message
+email.setTextMsg("Your email client does not support HTML, too bad :(");
+
+詳細は "Commons Email ドキュメント":http://commons.apache.org/email/userguide.html を参照してください。
+
+h2. <a name="mvc">メールと MVC の統合</a>
+
+標準的なテンプレート機構と構文を使うことで、複雑で動的なメールを送信することもできます。
+
+はじめに、アプリケーション内に **メーラ通知者** を定義してください。メーラ通知者は @play.mvc.Mailer@ のサブクラスであり、 @notifiers@ パッケージに含まれていなければなりません。
+
+MVC コントローラにおけるアクションのやり方と同じように、public かつ static なメソッドは、いずれもメールを送信します。以下に例を示します:
+
+bc. package notifiers;
+ 
+import org.apache.commons.mail.*; 
+import play.*;
+import play.mvc.*;
+import java.util.*;
+ 
+public class Mails extends Mailer {
+ 
+   public static void welcome(User user) {
+      setSubject("Welcome %s", user.name);
+      addRecipient(user.email);
+      setFrom("Me <me@me.com>");
+      EmailAttachment attachment = new EmailAttachment();
+      attachment.setDescription("A pdf document");
+      attachment.setPath(Play.getFile("rules.pdf").getPath());
+      addAttachment(attachment);
+      send(user);
+   }
+ 
+   public static void lostPassword(User user) {
+      String newpassword = user.password;
+      setFrom("Robot <robot@thecompany.com>");
+      setSubject("Your password has been reset");
+      addRecipient(user.email);
+      send(user, newpassword);
+   }
+ 
+}
+
+h3. text/html e メール
+
+@send@ の呼び出しは、メールのメッセージ本文として @app/views/Mails/welcome.html@ テンプレートをレンダリングします。
+
+bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
+...
+</html>
+
+lostPassword メソッド用のテンプレートは以下のようになるかもしれません:
+
+@app/views/Mails/lostPassword.html@
+
+bc. <html>
+<body><head>...</head><body>
+<img src="mycompany.com/images"/>
+<p>
+    Hello ${user.name}, Your new password is <b>${newpassword}</b>.
+</p>
+</body>
+</html>
+
+h3. text/plain e メール
+
+HTML テンプレートが定義されていない場合、テキストテンプレートを使った text/plain メールが送信されます。
+
+@send@ の呼び出しは、メールのメッセージ本文として @app/views/Mails/welcome.txt@ テンプレートをレンダリングします。
+
+bc. Welcome ${user.name},
+...
+
+lostPassword メソッド用のテンプレートは以下のようになるかもしれません:
+
+@app/views/Mails/lostPassword.txt@
+
+bc. Hello ${user.name},
+ 
+Your new password is ${newpassword}.
+
+h3. text/plain 代替品を使った text/html e メール
+
+HTML テンプレートが定義されていて、テキストテンプレートも存在する場合、テキストテンプレートは代替メッセージとして使用されます。先ほどの例において、 @app/views/Mails/lostPassword.html@ と @app/views/Mails/lostPassword.txt@ の両方が定義されている場合、e メールは lostPassword.txt に定義された代替部分を持つ、lostPassword.html で定義された text/html として送信されます。このため、友達にすてきな HTML メールを送ることもできますし、いまだに mutt を使っているギークな友達を喜ばせることもできます ;)
+
+h3. e メールからアプリケーションにリンクする
+
+以下のようにして e メールの中にアプリケーションへのリンクを含めることができます:
+
+bc. @@{application.index}
+
+ジョブからメールを送る場合、 アプリケーションに有効な外部基礎URLを "application.baseUrl":configuration#application.baseUrl に設定しなければなりません。
+
+例えば、playframework.org の webサイト内のジョブから e メールを送信する場合、設定は以下のようになるでしょう:
+
+bc. application.baseUrl=http://www.playframework.org/
+
+h2. <a name="smtp">SMTP の設定</a>
+
+E メール機能は それぞれ "メール設定":configuration#mail properties で設定されます。:
+
+* SMTP サーバー - "mail.smtp.host":configuration#mail.smtp.host
+* SMTP サーバー認証 - "mail.smtp.user":configuration#mail.smtp.user , "mail.smtp.pass":configuration#mail.smtp.pass
+* 暗号化チャンネル - "mail.smtp.channel":configuration#mail.smtp.channel
+* JavaMail SMTP トランザクションログ - "mail.debug":configuration#mail.debug.
+
+次の2つの追加設定は、デフォルトの振る舞いを上書きします。
+
+* "mail.smtp.socketFactory.class":configuration#mail.smtp.socketFactory.class
+* "mail.smtp.port":configuration#mail.smtp.port
+
+
+デフォルト(DEVモード)では、 E メールはコンソールに表示され、 PRODモードでは実際の SMTP サーバーで送信されます。以下の行をコメント化することで、DEVモードでのデフォルトの動作は変更可能です。
+
+bc. # デフォルトでmockメーラーを使う
+mail.smtp=mock
+
+
+h3. <a name="gmail">Gmailの使用</a>
+
+Gmailサーバーを使用するには、以下の設定を使用してください(例: "playapps":http://www.playframework.org/modules/playapps へのデプロイ): 
+
+bc. mail.smtp.host=smtp.gmail.com
+mail.smtp.user=yourGmailLogin
+mail.smtp.pass=yourGmailPassword
+mail.smtp.channel=ssl
+
+p(note). **考察を続けます**
+ 
+それでは %(next)"アプリケーションのテスト":test% に移りましょう。

@@ -23,7 +23,7 @@
                 <div class="titlebar links">
                     #{list items: otherCategories, as: 'category'}
                         #{if category.value != title}
-                            #{a @PlayDocumentation.cheatSheet(category.key)}${category.value}#{/a}
+                            #{a @PlayDocumentation.cheatSheet(category.key, docLang)}${category.value}#{/a}
                         #{/if} #{else}
                             ${category.value}
                         #{/else}

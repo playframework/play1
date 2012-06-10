@@ -1,0 +1,374 @@
+h1. CRUD による基本的な管理機能のセットアップ
+
+今のところ、ブログ UI を使って新しいブログや控えめなコメントを作る方法はありません。Play は、すぐに使えて、基本的な管理機能を素早く生成する **CRUD** モジュールを提供しています。
+
+h2. <a>CRUD モジュールの有効化</a>
+
+Play アプリケーションはいくつかのアプリケーションモジュールから組み立てることができます。これにより、複数のアプリケーションをまたいでアプリケーションコンポーネントを再利用したり、大きなアプリケーションをいくつかの、より小さなアプリケーションに分割することが可能です。
+
+CRUD モジュールは、シンプルなリストとフォームを作るためにモデルクラスに対してイントロスペクションを行う、汎用アプリケーションです。
+
+CRUD モジュールを有効にするには、 @/yabe/conf/application.conf@ ファイルの require の後に次の行を追加します:
+
+bc. require:
+    - play -> crud
+
+新たなモジュール依存を解決するために play dependencies コマンドを実行してください。IDE を使っている場合は、新しいモジュールの依存性を取り込むためにプロジェクトも更新するべきです: 例えば `play eclipsify` を再度実行し、Eclipse でプロジェクトをリフレッシュします。
+
+そして、このモジュールには、今回、再利用できる一般的な **routes** のセットが含まれています。これらのルートをインポートするには @/yabe/conf/routes@ に次の行を追加するだけです:
+
+bc. # Import CRUD routes
+*      /admin              module:crud
+
+これで、URL パスの接頭辞として @/admin@ を使用する、すべての CRUD ルートがインポートされます。
+
+新しいモジュールを認識させるために、アプリケーションを再起動する必要があります。
+
+h2. <a>CRUD コントローラの宣言</a>
+
+管理エリアに統合するどのモデルオブジェクトについても、 @controllers.CRUD@ スーパーコントローラを継承するコントローラを宣言しなければなりません。これはとても簡単です。
+
+モデルオブジェクトごとに 1 つのコントローラを作成します。例えば、 @Post@ オブジェクト用に、 @/yabe/app/controllers/Posts.java@ ファイル中に @Posts@ コントローラを作成します。
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Posts extends CRUD {    
+}
+
+p(note). 対応するコントローラを作成するためには、モデルオブジェクトの名前を複数形にすることが規約で定められています。こうすることで、Play はそれぞれのコントローラに関連するモデルオブジェクトを自動的に見つけます。もし違う名前をつける必要がある場合は、 <code>@CRUD.For</code> アノテーションを使うこともできます。"マニュアルページ":crud を確認してください。
+
+すべてのモデルオブジェクトについて同じように作りましょう:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Users extends CRUD {    
+}
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Comments extends CRUD {    
+}
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Tags extends CRUD {    
+}
+
+これで、ただ URL "http://localhost:9000/admin/":http://localhost:9000/admin/ を開くだけで、管理機能を使用することができるはずです。
+
+!images/guide7-1!
+
+管理機能をざっと見てみると、リストされたオブジェクトの名前が少し雑なことに気付くと思います。これは、デフォルトではモデルオブジェクトの判読できる表現を得るために、単純に @toString()@ を使用することが原因です。
+
+すべてのモデルオブジェクトについて、 @toString()@ の適切な実装を提供することで、簡単にこれを修正することができます。例えば、User クラスについて、以下のようにします:
+
+bc. …
+public String toString() {
+    return email;
+}
+…
+
+h2. <a>バリデーションの追加</a>
+
+生成された管理機能の主な問題は、フォームにどのようなバリデーションルールも含まれていないことです。しかし、実際には CRUD モジュールは、モデルクラスが適切にアノテーションで注釈されている場合、バリデーションルールを抽出することができます。
+
+@User@ クラスにいくつかアノテーションを追加しましょう:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class User extends Model {
+ 
+    @Email
+    @Required
+    public String email;
+    
+    @Required
+    public String password;
+    
+    public String fullname;
+    public boolean isAdmin;
+…
+
+これで、 @User@ モデルオブジェクトの編集または作成フォームにアクセスしてみると、このフォームに自動的に、魔法のようにバリデーションルールが追加されていることを見ることができます:
+
+!images/guide7-2!
+
+@Post@ クラスにも同じことをしましょう:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Post extends Model {
+ 
+    @Required
+    public String title;
+    
+    @Required
+    public Date postedAt;
+    
+    @Lob
+    @Required
+    @MaxSize(10000)
+    public String content;
+    
+    @Required
+    @ManyToOne
+    public User author;
+    
+    @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
+    public List<Comment> comments;
+    
+    @ManyToMany(cascade=CascadeType.PERSIST)
+    public Set<Tag> tags;    
+…
+
+結果を確認してみます:
+
+!images/guide7-3!
+
+ここに興味深い副作用が見られます: <code>@MaxSize</code> バリデーションルールは、Play が Post フォームを表示する方法を変更しています。今では content フィールド用に大きなテキストエリアを使用しています。
+
+最後に、 @Comment@ と @Tag@ クラスにも同様にバリデーションルールを追加しましょう:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Tag extends Model implements Comparable<Tag> {
+ 
+    @Required
+    public String name;
+…
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Comment extends Model {
+ 
+    @Required
+    public String author;
+    
+    @Required
+    public Date postedAt;
+     
+    @Lob
+    @Required
+    @MaxSize(10000)
+    public String content;
+    
+    @ManyToOne
+    @Required
+    public Post post;
+…
+
+h2. <a>より良いフォームラベル</a>
+
+見ての通り、フォームのラベルが少し雑です。Play はフォームのラベルに Java のフィールド名を使用します。これをカスタマイズするのに必要なのは、単に @/yabe/conf/messages@ により良いラベルを提供することだけです。
+
+p(note). ちなみに、アプリケーションがサポートする言語ごとに @messagaes@ ファイルを分けて作成することができます。例えば、フランス語のメッセージは @yabe/conf/messages.fr@ ファイルに書くことができます。12 章で地域化された言語を追加する方法をご覧に入れます: "国際化と地域化":guide12.
+
+これらのラベルを @messages@ ファイルに追加しましょう:
+
+bc. title=Title
+content=Content
+postedAt=Posted at
+author=Author
+post=Related post
+tags=Tags set
+name=Common name
+email=Email
+password=Password
+fullname=Full name
+isAdmin=User is admin
+
+どれかフォームをリフレッシュすれば、新しいフォームラベルが表示されます:
+
+!images/guide7-4!
+
+h2. <a>'Comments' データリストのカスタマイズ</a>
+
+CRUD モジュールは完全にカスタマイズ可能なように作られています。例えば、コメントリストのページを見てみると、データを一覧するやり方は良くありません。もっと列を、特に容易に一覧をフィルタできるようにする 'related post' 列を追加したくなります。
+
+実際のところ、アプリケーションがこのマスタを保持する限り、CRUD モジュールによって提供された **アクション** または **テンプレート** のどれでも完全に上書きすることができます。例えば、'comment list' ビューをカスタマイズする場合にしなければならないのは、別の @/yabe/app/views/Comments/list.html@ テンプレートを用意することだけです。
+
+**CRUD** モジュールが有効化されている場合、追加の Play コマンドが提供されます。 @crud:ov@ コマンドはテンプレートを上書きする手助けとなります。コマンドラインから、以下のようにタイプしてください:
+
+bc. $ play crud:ov --template Comments/list
+
+@/yabe/app/views/Comments/list.html@ に、新しいテンプレートが作成されます:
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudList" class="${type.name}">
+	
+	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
+ 
+	<div id="crudListSearch">
+		#{crud.search /}
+	</div>
+ 
+	<div id="crudListTable">
+		#{crud.table /}
+	</div>
+ 	
+	<div id="crudListPagination">
+		#{crud.pagination /}
+	</div>
+	
+	<p id="crudListAdd">
+		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
+	</p>
+ 
+</div>
+
+まず、 @{'crud.list.title', type.name}@ が新しく追加されています、これはメッセージパラメータとして @type.name@ を使用して @crud.list.title@ をキーにローカライズされたメッセージを出力します。 CRUD モジュールの @conf/messages@ ファイルは @crud.list.title=&{%s}@ エントリを含みます。そのエントリは他のメッセージを検索するためのキーとして使用されます、 ( 今回の場合は、 @&{'Comments'}@ です。これは @type@ が @models.Comments@ のための @CRUD.Object.Type@ のインスタンスであることがその理由です。 ) @Comments@ に一致するメッセージがファイルに定義されていなかった場合、メッセージキーをデフォルトで出力します。ローカライズされたメッセージについてより詳細に知りたい場合、本チュートリアルの最後、 guide12 の "国際化とローカライズ" に記載されています。
+
+まさに @#{crud.table /}@ タグがテーブルを生成します。 @fields@ パラメータを使うことで、さらに列を追加するようカスタマイズすることができます。以下のようにしてみてください:
+
+bc. #{crud.table fields:['content', 'post', 'author'] /}
+
+これでテーブルに列が 3 つ表示されます:
+
+!images/guide7-5!
+
+いくつかのコメントの @content@ フィールドはとても長くなることがあり、問題です。必要な場合はこれを切り詰められるよう、 @#{crud.table /}@ タグがこれを扱う方法を特別にしてみましょう:
+
+以下のようにして、 @#{crud.custom /}@ タグを使うあらゆるフィールドの表示方法をカスタマイズすることができます:
+
+bc. #{crud.table fields:['content', 'post', 'author']}
+ #{crud.custom 'content'}
+  <a href="@{Comments.show(object.id)}">
+   ${object.content.length() > 50 ? object.content[0..50] + '…' : object.content}
+  </a>
+ #{/crud.custom}
+#{/crud.table}
+
+p(note). はい、ここでの作業には groovy の糖衣構文が使われています。
+
+h2. <a>'Post' フォームのカスタマイズ</a>
+
+生成されたフォームについても同様にカスタマイズ可能です。例えば、Post フォームにタグを入力する方法は、とても簡単ではありません。もっと良くすることができます。 @Posts/show@ テンプレートを上書きしましょう:
+
+bc. $ play crud:ov --template Posts/show
+
+@/yabe/app/views/Posts/show.html@ に、新しいテンプレートが作成されます:
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudShow" class="${type.name}">
+	
+<h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
+ 
+<div class="objectForm">
+#{form action:@save(object.id), enctype:'multipart/form-data'}
+    #{crud.form /}
+    <p class="crudButtons">
+        <input type="submit" name="_save" 
+               value="&{'crud.save', type.modelName}" />
+        <input type="submit" name="_saveAndContinue" 
+               value="&{'crud.saveAndContinue', type.modelName}" />
+    </p>
+#{/form}
+</div>
+ 
+#{form @delete(object.id)}
+    <p class="crudDelete">
+        <input type="submit" value="&{'crud.delete', type.modelName}" />
+    </p>
+#{/form}
+ 
+</div>
+
+@tags@ フィールドをカスタマイズするために、 @Posts/show.html@ にある @#{crud.form /}@ タグのボディに @crud.custom@ タグを追加して @#{crud.form /}@ タグを変更することができます:
+
+bc. #{crud.form}
+    #{crud.custom 'tags'}
+        <label for="tags">
+            &{'tags'}
+        </label>
+	    <script type="text/javascript">
+	        var toggle = function(tagEl) {
+	            var input = document.getElementById('h'+tagEl.id);
+	            if(tagEl.className.indexOf('selected') > -1) {
+	                tagEl.className = 'tag';
+	                input.value = '';
+	            } else {
+	                tagEl.className = 'tag selected';
+	                input.value = tagEl.id;
+	            }
+	        }
+	    </script>
+	    <div class="tags-list">
+	        #{list items:models.Tag.findAll(), as:'tag'}
+	           <span id="${tag.id}" onclick="toggle(this)" 
+	                class="tag ${object.tags.contains(tag) ? 'selected' : ''}">
+	               ${tag}
+	           </span> 
+	           <input id="h${tag.id}" type="hidden" name="${fieldName}" 
+	                    value="${object.tags.contains(tag) ? tag.id : ''}" />
+	        #{/list}
+	    </div>
+    #{/crud.custom}
+#{/crud.form}
+
+これはちょっと hacky であり、もっとうまくやることもできますが、ちょっとした JavaScript を使うことでタグセレクタはよりシンプルになりました:
+
+!images/guide7-6!
+
+タグリストの外観をカスタマイズするために、下記のように @public/stylesheets/tags.css@ 内に新しい CSS ファイルを作成してください:
+
+bc.  .tags-list .tag {
+     cursor: pointer;
+     padding: 1px 4px;
+}
+.crudField .tags-list .selected {
+     background: #222;
+     color: #fff;
+}
+
+さらに、 @views/CRUD/layout.html@ 内の @#{set 'moreStyles'}@ ブロックを下記のように変更してください:
+
+bc. #{set 'moreStyles'}
+    <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/crud.css'}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/tags.css'}" />
+#{/set}
+
+管理機能のスタートは上々です!
+
+p(note). 次: %(next)"認証機能の追加":guide8%

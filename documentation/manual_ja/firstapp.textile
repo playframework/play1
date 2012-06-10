@@ -1,0 +1,328 @@
+h1. はじめてのアプリケーション -- 'Hello World' チュートリアル
+
+よくある 'Hello World' の例を使って Play フレームワークの良さを理解する、とてもシンプルなチュートリアルです。
+
+h2. <a>前提条件</a>
+
+何よりも、まず Java がインストールされていることを確認してください。Play は **Java 5 以降** を必要とします。
+
+私たちはコマンドラインを多用するので、Unix ライクな OS のほうが良いでしょう。もし Windows 上で動かす場合でも、問題なく動作します。ただコマンドプロンプトでいくつかのコマンドを実行しなければならないだけです。
+
+もちろんテキストエディタも必要です。もし Eclipse や Netbeans のようなフル機能の Java IDE に慣れているなら、もちろんそれを使用できます。しかし、Play であれば、Textmate, Emacs または VI のようにシンプルなテキストエディタでも楽しく作業できます。これは、フレームワーク自身がコンパイルとデプロイを管理するからです。間もなくその様子をご覧に入れます...
+
+
+h2. <a>Play フレームワークのインストール</a>
+
+インストールは非常に簡単です。 ダウンロードページから最新のバイナリパッケージをダウンロードして、任意のパスに展開してください。
+
+p(note). Windows を使用している場合、パスにスペースを含めないのは一般的に良い案です。例えば、 @c:\Play@ は @c:\Documents And Settings\user\play\@ よりも良い選択です。
+
+効率的に作業するためには、作業パスに Play ディレクトリを加える必要があります。パスを追加することで、コマンドプロンプトでただ @play@ とタイプすれば、Play ユーティリティを使用できるようになります。正常にインストールが完了したことを確認するには、新しいコマンドラインを開いて @play@ とタイプしてください; このコマンドは Play の基本的なヘルプを表示します。
+
+h2. <a>プロジェクトの作成</a>
+
+Play が正しくインストールされたので、いよいよ hello world アプリケーションを作成します。Play アプリケーションの作成は、Play コマンドラインユーティリティによって完全に管理されており、とても簡単です。Play コマンドラインユーティリティは、すべての Play アプリケーション間において標準的なプロジェクトレイアウトを割り当てます。
+
+新しいコマンドラインを開いて、以下をタイプしてください:
+
+bc. ~$ play new helloworld
+
+アプリケーションの完全な名前を入力するプロンプトが表示されます。 @Hello world@ とタイプしてください。
+
+!images/firstapp-1!
+
+@play new@ コマンドは @helloworld/@ ディレクトリを新規に作成し、一連のファイルやディレクトリをここに追加します。以下は、もっとも重要なディレクトリです:
+
+@app/@ ディレクトリはアプリケーションの中心部であり、モデル、コントローラ、およびビュー用のディレクトリに分けられています。 他の Java パッケージを含むこともできます。 app/ ディレクトリは @.java@ ソースファイルを保存するディレクトリです。
+
+@conf/@ ディレクトリは、特に重要な @application.conf@ ファイル、ルーティングを定義する @routes@ ファイル、国際化のための @messages@ ファイルなど、アプリケーションを設定する全てのファイルを保存します。
+
+@lib/@ は標準的な .jar ファイルとしてパッケージされたオプションの Java ライブラリを保存します。
+
+@public/@ は JavaScript、スタイルシート、および画像ディレクトリを含む公的に利用可能なリソースを保存します。
+
+@test/@ には、すべてのアプリケーションテストを保存します。テストは Java の JUnit として書かれるか、または Selenium テストとして書かれます。
+
+p(note). **Play は UTF-8** を唯一のエンコーディングとして使用するので、これらのディレクトリでホスティングされたすべてのテキストファイルが UTF-8 でエンコードされていることは非常に重要です。テキストエディタの設定がこれに従っていることを確認してください。
+
+もし、あなたが熟練した Java 開発者であれば、すべての .class ファイルがどこに行ってしまったのか不思議に思うことでしょう。実は、どこにもありません: Play はいかなる class ファイルも使用せず、java ソースファイルを直接読み込みます。舞台裏では、実行中の Java ソースをコンパイルするために Eclipse コンパイラを使用しています。
+
+これは、開発工程において 2 つの非常に重要なことを可能にします。最初の 1 つは、Play はあなたが Java ソースファイルに加えたいかなる変更をも検出して、実行時にそれを自動的にリロードするということです。 2 番目は、Java の例外が発生したとき、Play がソースコードそのものを示しながらより良いエラーレポートを作成するということです。
+
+h2. <a>アプリケーションの実行</a>
+
+ここまで来れば、新しく作成したアプリケーションを試してみることができます。コマンドラインに戻り、新たに作成された @helloworld/@ ディレクトリに移動したら、 @play run@ とタイプしてください。Play がアプリケーションをロードし、9000 番ポートで Web サーバを起動します。
+
+ブラウザから "http://localhost:9000":http://localhost:9000 を開くことで、新しいアプリケーションを閲覧することができます。新しいアプリケーションは、それが首尾よく作成されたこと示す標準のウェルカムページを表示します。
+
+!images/guide1-2!
+
+新しいアプリケーションがどのようにしてこのページを表示するのかを見てみましょう。
+
+アプリケーションのエントリーポイントは @conf/routes@ ファイルです。このファイルはアプリケーション上のアクセス可能な URL をすべて定義します。 生成された routes ファイルを開くと、最初の 'route' が確認できるでしょう:
+
+bc. GET		/			Application.index
+
+この設定は、web サーバが @/@ パスに対する @GET@ リクエストを受け取った場合には @Application.index@ という Java メソッドをコールしなければならないことを Play に伝えています。この場合、controllers パッケージが暗黙的に指定されるので、 @Application.index@ は @controllers.Application.index@ のショートカットです。
+
+スタンドアロンな Java アプリケーションを作成するとき、一般的に以下のようなメソッドを定義することで単一のエントリーポイントを設けます:
+
+bc. public static void main(String[] args) {
+  ... 
+}
+
+Play アプリケーションには、各 URL あたり 1 つのエントリーポイントがあります。 私たちは、これらのメソッドを **アクション** メソッドと呼びます。アクションメソッドは **コントローラ** と呼ぶ特別なクラスで定義されます。
+
+@controllers.Application@ コントローラがどのようなものか見てみましょう。 @helloworld/app/controllers/Application.java@ ソースファイルを開いてください:
+
+bc. package controllers;
+ 
+import play.mvc.*;
+ 
+public class Application extends Controller {
+ 
+	public static void index() {
+		render();
+	}
+ 
+}
+
+コントローラクラスは @play.mvc.Controller@ クラスを継承します。このクラスは index アクションで使用した @render()@ メソッドのような、コントローラ向けの便利なメソッドを提供します。
+
+index アクションは @public static void@ なメソッドとして定義されています。アクションメソッドはこのようにして定義されます。コントローラクラスは決してインスタンス化されないので、アクションメソッドは static です。アクションメソッドは、フレームワークがリクエストされた URL にレスポンスできるよう public として宣言されます。アクションメソッドは常に void を返します。
+
+デフォルトの index アクションはシンプルです: Play にテンプレートをレンダリングするよう指示する @render()@ メソッドをコールします。テンプレートの使用は HTTP レスポンスを生成する最も一般的な (しかし、唯一ではない) 方法です。
+
+テンプレートは @/app/views@ ディレクトリに存在するシンプルなテキストファイルです。今回はテンプレートを指定しなかったので、このアクション用のデフォルトのテンプレートが使用されます: @Application/index.html@ です。
+
+テンプレートがどのようなものかを見るには、 @helloworld/app/views/Application/index.html@ ファイルを開いてください:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{welcome /}
+
+テンプレートの内容はとても簡単に見えます。実際、ここにあるものはすべて Play のタグです。Play タグは JSP taglib にとても似ています。 @#{welcome /}@ が、ブラウザに表示されたウェルカムメッセージを生成しています。
+
+@#{extends /}@ タグは、このテンプレートが @main.html@ と呼ばれる別のテンプレートを継承することを Play に伝えます。テンプレートの継承は、共通化された部分を再利用することで複雑なウェブページを作成することができる強力な概念です。
+
+@helloworld/app/views/main.html@ テンプレートを開いていてください:
+
+bc. <!DOCTYPE html>
+<html>
+    <head>
+        <title>#{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
+    </head>
+    <body>
+        #{doLayout /} 
+    </body>
+</html>
+
+@#{doLayout /}@ タグに気付きましたか?ここに @Application/index.html@ の内容が挿入されます。
+
+h2. <a>フォームの作成</a>
+
+名前を入力できるフォームを作成するところから 'Hello World' アプリケーションを始めましょう。
+
+@helloworld/app/views/Application/index.html@ テンプレートを編集してください:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+<form action="@{Application.sayHello()}" method="GET">
+    <input type="text" name="myName" /> 
+    <input type="submit" value="Say hello!" />
+</form> 
+
+p(note). フォームの投稿はいかなる副作用も持たず、べき等なので、フォームを投稿するメソッドとして GET を使用することに注意してください。
+
+@Application.sayHello@ アクションを起動できる URL を自動的に生成するよう Play に問い合わせるには <code>@{...}</code> 記法を使用します。さあ、ブラウザ内のトップページをリフレッシュしましょう。
+
+!images/firstapp-2!
+
+おっと、エラーです。存在しない @Application.sayHello@ アクションを参照していることが原因です。 @helloworld/app/controllers/Application.java@ ファイル内にアクションを作成しましょう:
+
+bc. package controllers;
+ 
+import play.mvc.*;
+ 
+public class Application extends Controller {
+ 
+    public static void index() {
+        render();
+    }
+    
+    public static void sayHello(String myName) {
+        render(myName);
+    }
+ 
+}
+
+アクションメソッドのシグネチャに @myName@ パラメータを宣言したので、ここにはフォームから投稿される HTTP @myName@ パラメータの値が自動的に設定されます。その後、テンプレートを表示するために render をコールします。 @myName@ 変数を @render()@ の呼び出しに渡しているので、この変数はテンプレートから利用できます。
+
+!images/firstapp-3!
+
+この段階で名前を入力してフォームをサブミットすると、別のエラーが発生します:
+
+!images/firstapp3!
+
+エラーの内容はかなり明確です。Play はこのアクションメソッドのデフォルトのテンプレートをレンダリングしようとしますが、それは存在しません。 @helloworld/app/views/Application/sayHello.html@ を作成しましょう:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+<h1>Hello ${myName ?: 'guest'}!</h1>
+ 
+<a href="@{Application.index()}">Back to form</a>
+
+ページをリフレッシュします。
+
+!images/firstapp-4!
+
+Groovy の @?:@ 演算子の使い方を見てください。 @myName@ 変数に値が設定されていない場合は、デフォルト値を表示します。このため、名前を入力せずにフォームをサブミットすると、'Hello guest' を表示します。
+
+h2. <a>より良いURLの提供</a>
+
+さて、投稿した URL を見てみると、このような感じのものになっていることでしょう:
+
+bc. http://localhost:9000/application/sayhello?myName=guillaume
+
+これはあまりきれいではありません。これは Play がデフォルトの 'catch all' ルートを使用したからです。
+
+bc. *       /{controller}/{action}                  {controller}.{action}
+
+@Application.sayHello@ アクションにカスタムパスを設定する事でより良い URL を得ることができます。 @helloworld/conf/routes@ を編集して、はじめの一行の次にこのルーティングを追記してください:
+
+bc. GET     /hello                                  Application.sayHello
+
+フォームに戻ってもう一度サブミットし、新しい URL パターンが使用されることを確認してください。
+
+h2. <a>レイアウトのカスタマイズ</a>
+
+アプリケーションが使用する両方のテンプレートが、同じ @main.html@ テンプレートを継承する場合、容易にカスタムレイアウトを加えることができます。 @helloworld/app/views/main.html@ を編集してください:
+
+bc. ...
+<body>
+    The Hello world app.
+    <hr/>
+    
+    #{doLayout /}
+</body>
+...
+
+これで両方のページに共通のヘッダを持たせることができます。
+
+!images/firstapp-5!
+
+h2. <a>バリデーションの追加</a>
+
+名前欄を入力必須とするちょっとしたバリデーションをフォームに追加しましょう。Play のバリデーションフレームワークを使用できます。
+
+@helloworld/app/controllers/Application.java@ コントローラの @sayHello@ アクションを編集してください:
+
+bc. ...
+public static void sayHello(@Required String myName) {
+    if(validation.hasErrors()) {
+        flash.error("Oops, please enter your name!");
+        index();
+    }
+    render(myName);
+}
+...
+
+<code>@Required</code> アノテーションを使用するために @play.data.validation.@ をインポートするのを忘れないでください。Play は自動的に myName フィールドに値が設定されているかを確認し、設定されていない場合は **errors** スコープにエラーオブジェクトを追加します。何かエラーがある場合は、 **flash** スコープにメッセージを追加して @index@ アクションにリダイレクトするようにします。
+
+flash スコープは、アクションがリダイレクトされる間もメッセージを保持します。
+
+さて、何かエラーがあれば **error** メッセージを表示しなければなりません。 @helloworld/app/views/Application/index.html@ を編集してください:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if flash.error}
+    <p style="color:#c00">
+        ${flash.error}
+    </p>
+#{/if}
+ 
+<form action="@{Application.sayHello()}" method="GET">
+    <input type="text" name="myName" /> 
+    <input type="submit" value="Say hello!" />
+</form>
+
+これが動作する事を確認します:
+
+!images/firstapp-6!
+
+h2. <a>自動化されたテストスイートの作成</a>
+
+このアプリケーションのためのいくつかのテストを書いて、このチュートリアルを終えましょう。今はテストすべき Java のロジックが無いので、Web アプリケーションそのものをテストする必要があります。そこで、Selenium テストを書いていきましょう。
+
+まず最初に、アプリケーションを **test モード** で実行する必要があります。アプリケーションを停止し、 @test@ コマンドで再起動してください:
+
+bc. $ play test
+
+@play test@ コマンドは、ブラウザから直接テストスイートを実行することのできるテストランナーモジュールをロードすること以外は @play run@ とほとんど同じです。
+
+URL "http://localhost:9000/@tests":http://localhost:9000/@tests をブラウザで開き、テストランナーを見てみてください。デフォルトのテストをすべて選択して実行してみてください。すべてのテストはグリーンであるべきですが、実際のところ、これらのデフォルトのテストは何もテストしません。
+
+!images/guide2-1!
+
+通常、selenium のテストスイートは HTML ファイルとして記述されます。selenium が必要とする HTML の構文は (HTML のテーブル要素を使うようフォーマットされており) 少々退屈です。Play のテンプレートエンジンと selenium シナリオの構文を簡易にするタグのセットを使うことで、Play がこれを手助けしてくれるのは良いニュースです。
+
+新しく作成された Play アプリケーションのデフォルトのテストスイートには selenium テストが含まれています。 @helloworld/test/Application.test.html@ ファイルを開いてください:
+
+bc. *{ You can use plain selenium command using the selenium tag }*
+ 
+#{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    assertNotTitle('Application error')
+#{/selenium}
+
+現時点でこのテストは何も問題なく実行されるはずです。このテストは、ホームページを開いて、このページが 'Application error' というテキストを含んでいないことを確認するだけです。
+
+アプリケーションのためのテストを書きましょう。テストの内容を編集してください:
+
+bc. #{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    assertNotTitle('Application error')
+    
+    // Check that it is the Hello World application
+    assertTextPresent('The Hello world app.')
+    
+    // Submit the form
+    clickAndWait('css=input[type=submit]')
+    
+    // Check the error
+    assertTextPresent('Oops, please enter your name!')
+    
+    // Type the name and submit
+    type('css=input[type=text]', 'bob')
+    clickAndWait('css=input[type=submit]')
+    
+    // Check the result
+    assertTextPresent('Hello bob!')
+    assertTextPresent('The Hello world app.')
+    
+    // Check the back link
+    clickAndWait('link=Back to form')
+    
+    // Home page?
+    assertTextNotPresent('Hello bob!')
+#{/selenium}
+
+これでこのアプリケーションを完全にテストできました。テストランナーでこのテストを選択して 'Start' をクリックしてください。すべてがグリーンになるはずです!
+
+!images/firstapp-7!
+
+
+h2. <a>さらに詳しく</a>
+
+これは非常にばかばかしいアプリケーションに関するとても簡単なチュートリアルでした。Play についてもっと学びたいなら、 %(next)"Play guide":guide1% をチェックしてください。

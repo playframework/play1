@@ -1,0 +1,24 @@
+h2. Test - Unit Tests
+
+*==@Test public void getRental() { ... }==*
+*==@Test (expected = NumberFormatException.class )==*
+*==@Ignore==*
+全てのエラーを無視します。
+
+*==@Test (timeout=400)==*
+テストは 400 ミリ秒後に失敗します。
+
+*==@Before public void prepareRecords();==*
+各ユニットテストの前に実行されます。
+
+*==@After public void cleanupJunk()==*
+各ユニットテストの後に実行されます。
+
+*==@BeforeClass void whenTestClassInstanciated();==*
+当該テストクラスがインスタンス化されたときに一度だけ実行されます。
+
+*==@AfterClass void whenTestClassCompleted()==*
+当該テストクラスにある全てのテストが終了した時に一度だけ実行されます。
+
+*==Assert.assert==*
+たくさんのアサーションがあります。どのようなものがあるかは調べてください。

@@ -1,0 +1,328 @@
+h1. はじめての画面
+
+はじめてのデータモデルを作ったので、いよいよこのアプリケーションのはじめての画面を作り始めます。この画面はもっとも新しい投稿のみを表示し、古い投稿はリストとして表示します。
+
+以下は、実現したい画面のモックです:
+
+!images/guide-mock1!
+
+h2. <a>デフォルトデータでの起動</a>
+
+実は、はじめての画面をコーディングする前にやらなければならないことが、もうひとつあります。テストデータなしに web アプリケーションに関する作業をするのは楽しくありません。テストすることすらできません。しかし、まだ投稿画面を開発していないので、自分自身でブログに投稿を追加することもできません。
+
+ブログにデフォルトデータを投入するひとつの方法は、アプリケーション起動時にフィクスチャファイルを読み込むことです。これを行うために、Bootstrap ジョブを作りましょう。Play のジョブは一切の HTTP リクエスト無しに、例えばアプリケーション起動時や、CRON ジョブを使用した指定間隔毎に、自分自身で起動します。
+
+@Fixtures@ を使ってデフォルトデータをロードする @/yabe/app/Bootstrap.java@ ジョブを作成しましょう:
+
+bc. import play.*;
+import play.jobs.*;
+import play.test.*;
+ 
+import models.*;
+ 
+@OnApplicationStart
+public class Bootstrap extends Job {
+ 
+    public void doJob() {
+        // Check if the database is empty
+        if(User.count() == 0) {
+            Fixtures.loadModels("initial-data.yml");
+        }
+    }
+ 
+}
+
+このジョブをアプリケーションの起動と同期して実行したい旨を Play に伝えるために、 <code>@OnApplicationStart</code> アノテーションでこのジョブを注釈しました。
+
+p(note). 実際のところ、このジョブは DEV モードと PROD モードでは異なる動作をします。DEV モードの場合、Play は最初のリクエストがあるまでアプリケーションの起動を待機します。このため、このジョブは最初のリクエストと同期して実行されます。この方法では、ジョブが失敗した場合、ブラウザにエラーメッセージが表示されます。一方、PROD モードでは、このジョブはアプリケーションの起動時に ( @play run@ コマンドと同期して) 実行され、エラーが発生した場合はアプリケーションの起動を停止します。
+
+@/yabe/conf@ ディレクトリに @initial-data.yml@ を作成する必要があります。もちろん、以前にテストで使用した @data.yml@ の内容を再利用することもできます。
+
+それでは @play run@ を使ってアプリケーションを実行し、ブラウザでページ "http://localhost:9000":http://localhost:9000 を表示してみましょう。
+
+h2. <a>ブログトップページ</a>
+
+今度こそ本当にトップページのコーディングを始められます。
+
+最初の画面がどのようにして表示されるのか覚えていますか? まず最初に、routes ファイルで @/@ という URL が @controllers.Application.index()@ というアクションメソッドを起動するよう指定します。次に、このメソッドが @render()@ を呼び出して @/yabe/app/views/Application/index.html@ テンプレートを実行します。
+
+これらのコンポーネントを使いつつ、投稿リストをロードして表示するコードを追加します。
+
+@/yabe/app/controllers/Application.java@ コントローラを開いて、投稿リストをロードするよう @index()@ アクションを以下のように変更します:
+
+bc. package controllers;
+ 
+import java.util.*;
+ 
+import play.*;
+import play.mvc.*;
+ 
+import models.*;
+ 
+public class Application extends Controller {
+ 
+    public static void index() {
+        Post frontPost = Post.find("order by postedAt desc").first();
+        List<Post> olderPosts = Post.find(
+            "order by postedAt desc"
+        ).from(1).fetch(10);
+        render(frontPost, olderPosts);
+    }
+ 
+}
+
+どのようにして @render@ メソッドにオブジェクトを渡すか分かりましたか? これでテンプレートからこれらのオブジェクトに同じ名前でアクセスすることができます。この場合はテンプレートで変数 @frontPost@ と @olderPosts@ が利用できます。
+
+@/yabe/app/views/Application/index.html@ を開いて、これらのオブジェクトを表示するよう変更します:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if frontPost}
+    <div class="post">
+        <h2 class="post-title">
+            <a href="#">${frontPost.title}</a>
+        </h2>
+        <div class="post-metadata">
+            <span class="post-author">by ${frontPost.author.fullname}</span>
+            <span class="post-date">${frontPost.postedAt.format('MMM dd')}</span>
+            <span class="post-comments">
+                &nbsp;|&nbsp; 
+                ${frontPost.comments.size() ?: 'no'} 
+                comment${frontPost.comments.size().pluralize()}
+                #{if frontPost.comments}
+                    , latest by ${frontPost.comments[-1].author}
+                #{/if}
+            </span>
+        </div>
+        <div class="post-content">
+            ${frontPost.content.nl2br()}
+        </div>
+    </div>
+    
+    #{if olderPosts}
+        <div class="older-posts">    
+            <h3>Older posts <span class="from">from this blog</span></h3>
+        
+            #{list items:olderPosts, as:'oldPost'}
+                <div class="post">
+                    <h2 class="post-title">
+                        <a href="#">${oldPost.title}</a>
+                    </h2>
+                    <div class="post-metadata">
+                        <span class="post-author">
+                            by ${oldPost.author.fullname}
+                        </span>
+                        <span class="post-date">
+                            ${oldPost.postedAt.format('dd MMM yy')}
+                        </span>
+                        <div class="post-comments">
+                            ${oldPost.comments.size() ?: 'no'} 
+                            comment${oldPost.comments.size().pluralize()}
+                            #{if oldPost.comments}
+                                - latest by ${oldPost.comments[-1].author}
+                            #{/if}
+                        </div>
+                    </div>
+                </div>
+            #{/list}
+        </div>
+        
+    #{/if}
+    
+#{/if}
+ 
+#{else}
+    <div class="empty">
+        There is currently nothing to read here.
+    </div>
+#{/else}
+
+テンプレートがどのように動作しているのかについて、"テンプレートの章":templates で読むことができます。基本的に、テンプレートを使うと java オブジェクトに動的にアクセスすることができます。その背後では Groovy を使います。( **?:** 演算子のような) かわいらしい構成要素のほとんどは Groovy から来たものです。しかし Play のテンプレートを書くために本気で Groovy の勉強をする必要はありません。JSP や JSTL のようなテンプレート言語に既に慣れているのであれば、迷うことはないでしょう。
+
+OK, それではブログトップページをリフレッシュしてみましょう。
+
+!images/guide3-0!
+
+きれいな画面ではありませんが、動いています!
+
+しかし、もう既にコードの重複が始まっているのが見られます。投稿をいくつかの方法 (全文、全文とコメント、前文) で表示したいので、いくつかの画面から呼び出すことのできる関数のようなものを作るべきです。これはまさに Play タグでできることです!
+
+タグを作るためには、ただ @/yabe/app/views/tags/display.html@ ファイルを作成してください。タグは単なる別のテンプレートです。タグは (関数のように) 引数を持ちます。 @#{display /}@ タグはふたつの引数を持ちます: 表示する Post オブジェクトと、'home', 'teaser', または 'full' のうちいずれかひとつの表示モードです。
+
+bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
+ 
+<div class="post ${_as == 'teaser' ? 'teaser' : ''}">
+    <h2 class="post-title">
+        <a href="#">${_post.title}</a>
+    </h2>
+    <div class="post-metadata">
+        <span class="post-author">by ${_post.author.fullname}</span>,
+        <span class="post-date">${_post.postedAt.format('dd MMM yy')}</span>
+        #{if _as != 'full'}
+            <span class="post-comments">
+                &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
+                comment${_post.comments.size().pluralize()}
+                #{if _post.comments}
+                    , latest by ${_post.comments[-1].author}
+                #{/if}
+            </span>
+        #{/if}
+    </div>
+    #{if _as != 'teaser'}
+        <div class="post-content">
+            <div class="about">Detail: </div>
+            ${_post.content.nl2br()}
+        </div>
+    #{/if}
+</div>
+ 
+#{if _as == 'full'}
+    <div class="comments">
+        <h3>
+            ${_post.comments.size() ?: 'no'} 
+            comment${_post.comments.size().pluralize()}
+        </h3>
+        
+        #{list items:_post.comments, as:'comment'}
+            <div class="comment">
+                <div class="comment-metadata">
+                    <span class="comment-author">by ${comment.author},</span>
+                    <span class="comment-date">
+                        ${comment.postedAt.format('dd MMM yy')}
+                    </span>
+                </div>
+                <div class="comment-content">
+                    <div class="about">Detail: </div>
+                    ${comment.content.escape().nl2br()}
+                </div>
+            </div>
+        #{/list}
+        
+    </div>
+#{/if}
+
+これで、このタグを使うことでトップページをコードの重複無しに書き直すことができます:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if frontPost}
+    
+    #{display post:frontPost, as:'home' /}
+    
+    #{if olderPosts.size()}
+    
+        <div class="older-posts">
+            <h3>Older posts <span class="from">from this blog</span></h3>
+        
+            #{list items:olderPosts, as:'oldPost'}
+                #{display post:oldPost, as:'teaser' /}
+            #{/list}
+        </div>
+        
+    #{/if}
+    
+#{/if}
+ 
+#{else}
+    <div class="empty">
+        There is currently nothing to read here.
+    </div>
+#{/else}
+
+ページをリロードして、すべてがうまく行っていることを確認してください。
+
+h2. <a>レイアウトの改善</a>
+
+見ての通り、 @index.html@ テンプレートは @main.html@ を継承します。すべてのブログページに共通の、ブログタイトルと認証リンクを含んだレイアウトを提供したいので、このファイルを編集する必要があります。
+
+@/yabe/app/views/main.html@ ファイルを次のように編集します:
+
+bc. <!DOCTYPE html >
+<html>
+    <head>
+        <title>#{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
+    </head>
+    <body>
+        
+        <div id="header">
+            <div id="logo">
+                yabe.
+            </div>
+            <ul id="tools">
+                <li>
+                    <a href="#">Log in to write something</a>
+                </li>
+            </ul>
+            <div id="title">
+                <span class="about">About this blog</span>
+                <h1><a href="#">${blogTitle}</a></h1>
+                <h2>${blogBaseline}</h2>
+            </div>
+        </div>
+        
+        <div id="main">
+            #{doLayout /} 
+        </div>
+        
+        <p id="footer">
+            Yabe is a (not that) powerful blog engine built with the 
+            <a href="http://www.playframework.org">Play framework</a>
+            as a tutorial application.
+        </p>
+        
+    </body>
+</html>
+
+ページを更新して結果を確認してください。 @blogTitle@ と @blogBaseLine@ 変数が表示されないことを除けば、動作しているように見えます。これは、 @render(...)@ 呼び出しにこれらオブジェクトを引き渡していないことが原因です。もちろん @index@ アクションで @render()@ 呼び出しにこれらのオブジェクトを追加することもできます。しかし、 @main.html@ ファイルはアプリケーションのすべてのアクションにおいて主要なテンプレートとして使われるので、これらのオブジェクトを毎回追加したくありません。
+
+あるコントローラ (もしくはコントローラ階層) のそれぞれのアクションで同じコードを実行する 1 つの方法は、 <code>@Before</code> インターセプタを定義することです。
+
+Application コントローラに @addDefaults()@ メソッドを追加しましょう:
+
+bc. @Before
+static void addDefaults() {
+    renderArgs.put("blogTitle", Play.configuration.getProperty("blog.title"));
+    renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
+}
+
+p(note). @Application.java@ ファイル内で @play.Play@ をインポートする必要があります。
+
+すべての変数はテンプレートから利用することができる @renderArgs@ スコープに追加されます。そして、ご覧の通り、このメソッドは @Play.configuration@ オブジェクトから変数の値を読み込みます。このオブジェクトは @/yabe/conf/application.conf@ ファイルにあるすべての設定キーを保持します。
+
+設定ファイルにふたつのキーを追加します:
+
+bc. # Blog engine configuration
+# ~~~~~
+blog.title=Yet another blog
+blog.baseline=We will write about nothing
+
+トップページをリロードして、これが動いていることを確認しましょう!
+
+!images/guide3-1!
+
+h2. <a>いくつかのスタイルの追加</a>
+
+ここまでで、ブログのトップページはほとんど出来上がりましたが、あまりきれいではありません。これをより輝かせるいくつかのスタイルを追加します。見てのとおり、中心的なテンプレートファイルである main.html は @/public/stylesheets/main.css@ スタイルシートを読み込みます。このファイルをそのまま使い、いくつかスタイルを追加します。
+
+スタイルは "ここからダウンロード":files/main.css して @/public/stylesheets/main.css@ ファイルにコピーすることもできます。
+
+トップページを更新すると、今度はスタイルの適用されたページが表示されます。
+
+!images/guide3-2!
+
+h2. <a>作業内容のコミット</a>
+
+ブログのトップページは完成しました。いつもどおりこのバージョンのブログを bazaar にコミットすることができます:
+
+bc. $ bzr st
+$ bzr add
+$ bzr commit -m "Home page"
+
+p(note). 次: %(next)"コメント投稿ページ":guide4% 

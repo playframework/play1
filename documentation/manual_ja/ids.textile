@@ -1,0 +1,52 @@
+h1. 複数環境用 application.conf の管理
+
+チームで作業をする場合、様々な開発者がそれぞれの @application.conf@ で異なる設定キーを使用します。例えば、ログレベルやいくつかのデータベース設定… これは一般的に、使用する VCS にファイルをコミットするときのコンフリクトの再発を招きます。
+
+さらに、様々なデプロイ環境 - 例えば、開発、テスト、ステージング、本番環境 - は、それぞれ異なる設定を必要とします。
+
+h2. <a name="id">フレームワーク ID</a>
+
+この問題を解決するため、Play ではインストールしたフレームワーク毎に **ID** を与えることができます。この ID を定義するためには、play ツールの @id@ コマンドを使用してください:
+
+bc. play id
+
+!images/id!
+
+こうすることで、選択可能にしたい設定項目のキーにフレームワーク ID を接頭辞として付けることができます:
+
+bc. application.name=Cool app
+application.mode=dev
+application.log=INFO
+ 
+# Configuration for gbo
+%gbo.application.log=DEBUG
+%gbo.db=mem
+ 
+# Configuration for src
+%scr.http.port=9500
+ 
+# Production configuration
+%production.http.port=80
+%production.application.log=INFO
+%production.application.mode=prod
+
+h2. <a name="command">コマンドラインによるフレームワーク ID の設定</a>
+
+使用するフレームワーク ID を、特定のコマンドに対してコマンドラインから直接指定することができます。例えば、アプリケーションを production モードで実行するためには、以下のように使用することができます:
+
+bc. play run --%production
+
+@application.conf@ ファイルに定義されている設定行は以下のとおりです:
+
+bc. application.mode=dev
+%production.application.mode=prod
+
+これは、フレームワーク ID 情報を使用するすべてのコマンドと互換性があるはずです。デフォルトの ID は既に @play id@ コマンドを使用して定義されています。
+
+ちなみに、 @play test@ は以下と等価です:
+
+bc. play run --%test
+
+p(note). **考察を続けます**
+ 
+今度は %(next)"本番環境へのデプロイ":production% に移りましょう。

@@ -1,0 +1,68 @@
+h1. Play フレームワークにおける Ajax
+
+Play フレームワークは、はじめから "jQuery":http://jquery.com を含めてリリースされており、簡単に Ajax リクエストを行うことができます。このセクションは、どのようにして Play フレームワークにおいて "jQuery":http://jquery.com を効率的に使用するかについて記載します。
+
+Play フレームワークには、コントローラから透過的にメソッド定義を取得する、手軽な "jsAction":tags#jsaction タグも含まれています。
+
+h2. <a name="jsaction">jQuery を jsAction タグと使う</a>
+
+この @#{jsAction /}@ タグは、サーバアクションに基づいた URL と自由な変数から成る JavaScript 関数を返却します。この関数では AJAX リクエストを行わないので、返却された URL を使って手作業で Ajax リクエストを実行する必要があります。
+
+例を見てみましょう:
+
+bc. GET     /hotels/list        Hotels.list
+
+クライアント側でこのルートをインポートすることができます:
+
+bc. <script type="text/javascript">
+   var listAction = #{jsAction @list(':search', ':size', ':page') /}
+   $('#result').load(
+       listAction({search: 'x', size: '10', page: '1'}), 
+       function() {
+           $('#content').css('visibility', 'visible')
+       }
+   )
+</script>
+
+この例では、デフォルトの Application コントローラの list メソッドを指定しています。3 つの引数: search、size そして page も渡しています。この実行結果は listAction 変数に保存されます。ここで、jQuery と @load@ 関数を使ってリクエスト (実際には HTTP GET リクエスト) を実行します。
+
+実際のところ、以下のリクエストが発行されます:
+
+bc. GET /hotels/list?search=x&size=10&page=1
+
+このケースでは、発行したリクエストは HTML データを返します。
+
+jQuery にデータを解釈させるために JSON または XML を返すことも可能です。コントローラで適切な render メソッド (renderJSON、renderXML または XML テンプレート) を使用してください。
+
+より詳しい情報については、"jQuery":http://docs.jquery.com/Main_Page ドキュメントを参照してください。
+
+jQuery メソッドを以下のように変更することで POST も発行できることに注意してください:
+
+bc. $.post(listAction(), function(data) {
+  $('#result').html(data);
+});
+
+h2. <a name="jsaction">jsRoute タグを jQuery と使う</a>
+
+生成されたルートをもっと制御するために、 **#{jsAction /}** タグと似ていますが、サーバのアクションに基づく URL を構築する関数と、関連する HTTP メソッド (GET, POST, その他) の両方を含むオブジェクトを返却する "jsRoute":tags#jsroute タグがあります。
+
+例:
+
+bc. PUT     /users/{id}        Users.update
+
+その後、テンプレートでは:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
+</script>
+
+このアプローチなら、routes ファイルにて HTTP メソッドの変更を決断した場合でも、テンプレートを更新する必要はありません。
+
+p(note). **考察を続けます**
+ 
+%(next)"国際化":i18n% を取り扱ってみましょう。

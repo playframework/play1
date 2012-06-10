@@ -1,5 +1,7 @@
 package helpers;
 
+import play.Play;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
@@ -7,15 +9,18 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import play.Play;
-
 public class CheatSheetHelper {
     private static final File cheatSheetBaseDir = new File(Play.frameworkPath, "documentation/cheatsheets");
 
-    public static File[] getSheets(String category) {
-        File cheatSheetDir = new File(cheatSheetBaseDir, category);
+    public static File[] getSheets(String category, String docLang) {
+        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches("en-.*"))) ? "_" + docLang : "";
+        File cheatSheetDir = new File(cheatSheetBaseDir + docLangDir, category);
 
-        if(cheatSheetDir.exists() && cheatSheetDir.isDirectory()) {
+        if (!cheatSheetDir.exists()){
+            cheatSheetDir = new File(cheatSheetBaseDir, category);
+        }
+
+        if (cheatSheetDir.exists() && cheatSheetDir.isDirectory()) {
             File[] sheetFiles = cheatSheetDir.listFiles(new FileFilter() {
 
                 public boolean accept(File pathname) {
@@ -27,13 +32,13 @@ public class CheatSheetHelper {
             Arrays.sort(sheetFiles, new Comparator<File>() {
 
                 public int compare(File f1, File f2) {
-                    
+
                     String o1 = f1.getName();
                     String o2 = f2.getName();
-                    
+
                     if (o1.contains("-") && o2.contains("-")) {
                         return o1.substring(0, o1.indexOf("-"))
-                            .compareTo(o2.substring(0, o1.indexOf("-")));
+                                .compareTo(o2.substring(0, o1.indexOf("-")));
                     } else {
                         return o1.compareTo(o2);
                     }
@@ -48,7 +53,7 @@ public class CheatSheetHelper {
 
     public static String getCategoryTitle(String category) {
         // split camelCaseWord into separate words
-        String[] parts   = category.trim().split("(?<!^)(?=[A-Z])");
+        String[] parts = category.trim().split("(?<!^)(?=[A-Z])");
         StringBuilder title = new StringBuilder();
 
         // capitalize first char of each word
@@ -66,15 +71,24 @@ public class CheatSheetHelper {
         return title.toString().trim();
     }
 
-    public static Map<String, String> listCategoriesAndTitles() {
-        File[] categories = cheatSheetBaseDir.listFiles(new FileFilter() {
+    public static Map<String, String> listCategoriesAndTitles(String docLang) {
+        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches("en-.*"))) ? "_" + docLang : "";
+        File[] categories = new File(cheatSheetBaseDir + docLangDir).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
                 return pathname.isDirectory();
             }
         });
 
+        if(categories==null || categories.length<=0){
+            categories = cheatSheetBaseDir.listFiles(new FileFilter() {
+                public boolean accept(File pathname) {
+                    return pathname.isDirectory();
+                }
+            });
+        }
+
         Arrays.sort(categories);
-        
+
         Map<String, String> categoriesAndTitles = new LinkedHashMap<String, String>();
 
         for (File category : categories) {

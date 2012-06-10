@@ -1,0 +1,197 @@
+h1. ドキュメント
+
+Play framework 1.2.5 ドキュメントへようこそ。"バージョン 1.2.5 リリースノート":releasenotes-1.2.5 を確認してください。
+
+h2. <a name="started">はじめよう</a>
+
+Play framework のはじめの一歩を学ぶ楽しい 5 分間です。
+
+# "Play framework の概要":overview
+# "動画を観てみよう":http://vimeo.com/7087610
+# "Play でできる 5 つのすごいこと":5things
+# "利便性 - 細部は機能と同様に重要":usability
+# "よくある質問":faq
+# %(next)"インストールガイド":install%
+# "お好みの IDE を設定しよう":ide
+# "はじめてのアプリケーション － 'Hello World' チュートリアル":firstapp
+# "サンプルアプリケーション":samples
+
+
+h2. <a name="guide">チュートリアル － リアルな Play アプリケーションを一歩ずつ作成するガイド</a>
+
+**'Yet Another Blog Engine'** を最初から最後までコーディングすることで Play について学びます。各章は Play の更なるクールな機能について学ぶ機会となるでしょう。
+
+# "プロジェクトの立ち上げ":guide1
+# "はじめてのモデル":guide2
+# "はじめての画面":guide3
+# "コメント投稿ページ":guide4
+# "キャプチャの設定":guide5
+# "タグ機能のサポート":guide6
+# "CRUD モジュールによる基本的な管理機能":guide7
+# "認証機能の追加":guide8
+# "カスタムエディタの作成":guide9
+# "テストの完了":guide10
+# "本番環境への準備":guide11
+# "国際化と地域化":guide12
+
+h2. <a name="manual">重要なドキュメンテーション</a>
+
+Play について学ばなければならない全てです。
+
+# "主要な概念":main
+## "MVC アプリケーションモデル":main#mvc
+## "リクエストライフサイクル":main#request
+## "アプリケーションのレイアウトと編成":main#application
+## "開発ライフサイクル":main#lifecycle
+# "HTTP ルーティング":routes
+## "routes ファイルの構文":routes#syntax
+## "ルーティングの優先順位":routes#priority
+## "静的リソースの配信":routes#static
+## "リバースルーティング : URL の生成":routes#reverse
+## "content type の設定":routes#content-types
+## "コンテントネゴシエーション":routes#content-negotiation
+# "コントローラ":controllers
+## "コントローラの概要":controllers#overview
+## "HTTP パラメータの取得":controllers#params
+## "結果の返却":controllers#result
+## "アクションチェーン":controllers#chaining
+## "インターセプション":controllers#interceptions
+## "セッションとフラッシュのスコープ":controllers#session
+# "テンプレートエンジン":templates
+## "テンプレートの構文":templates#syntax
+## "テンプレートの継承":templates#inheritance
+## "タグの作成":templates#tags
+## "テンプレート言語の拡張":templates#extensions
+## "暗黙オブジェクト":templates#implicits
+# "HTTP フォームデータのバリデーション":validation
+## "どのように動作するのでしょうか?":validation#how
+## "エラーメッセージの取得":validation#messages
+## "テンプレートへのエラーの表示":validation#display
+## "アノテーションの使用":validation#annotations
+## "オブジェクトのバリデーション":validation#objects
+## "カスタムバリデーション":validation#custom
+# "ドメインオブジェクトモデル":model
+## "プロパティのシミュレーション":model#properties
+## "モデルを永続化するデータベースの設定":model#database
+## "Hibernate によるモデルの永続化":model#hibernate
+## "ステートレスモデル":model#stateless
+# "JPA 永続化":jpa
+## "JPA エンティティマネージャの開始":jpa#starting
+## "JPA エンティティマネージャの取得":jpa#obtaining
+## "トランザクション管理":jpa#transactions
+## "The play.db.jpa.Model サポートクラス":jpa#support
+## "オブジェクトの検索":jpa#finding
+## "オブジェクトのカウント":jpa#counting
+## "明確な保存":jpa#save
+## "ジェネリック型の問題についてもっと詳しく":jpa#typing
+# "Play ライブラリ":libs
+## "XPath を使った XML 解析":libs#ParsingXMLusingXPath
+## "Web サービスクライアント":libs#WebServiceclient
+## "Java を使った関数プログラミング":libs#FunctionalprogrammingwithJava
+## "OAuth":libs#OAuth
+## "OpenID":libs#OpenID
+# "ジョブによる非同期処理":jobs
+## "起動時に実行するジョブ":jobs#concepts
+## "スケジューリングされたジョブ":jobs#scheduling
+## "トリガータスクジョブ":jobs#tasks
+# "HTTP を使った非同期プログラミング":asynchronous
+## "HTTP リクエストの中断":asynchronous#SuspendingHTTPrequests
+## "HTTP レスポンスストリーム":asynchronous#HTTPresponsestreaming
+## "WebSockets を使う":asynchronous#UsingWebSockets
+# "Ajax リクエスト":ajax
+## "JQuery を使った Ajax リクエストの作成":ajax#jsaction
+# "国際化":i18n
+## "使用するのは UTF-8 だけ":i18n#utf8
+## "メッセージの外部化":i18n#messages
+## "アプリケーションがサポートする言語の定義":i18n#languages
+## "ロケールに依るデータフォーマットの定義":i18n#dates
+## "ローカライズされたメッセージの検索":i18n#retrieve
+# "キャッシュ":cache
+## "キャッシュ API":cache#api
+## "セッションをキャッシュとして使わない":cache#session
+## "memcached の設定":cache#memcached
+# "eメール送信":emails
+## "メールと MVC の統合":emails#mvc
+## "SMTP の設定":emails#smtp
+## "設定についてもっと詳しく":emails#configuration
+## "Gmail の使用":emails#gmail
+# "アプリケーションのテスト":test
+## "テストの記述":test#writing
+## "フィクスチャ":test#fixtures
+## "テストの実行":test#running
+## "継続的統合":test#continus
+# "セキュリティガイド":security
+## "セッション":security#sessions
+## "クロスサイトスクリプティング":security#xss
+## "SQL インジェクション":security#sql
+## "クロスサイトリクエストフォージェリ":security#csrf
+# "モジュールとモジュールリポジトリ":modules
+## "モジュールとは ?":modules#what
+## "アプリケーションからモジュールをロードする方法":modules#loading
+## "モジュールからデフォルトルートをロードする":modules#routes
+## "モジュールリポジトリの使用":modules#repository
+## "モジュールリポジトリへの新しいモジュールの寄付":modules#contributing
+# "依存性管理":dependency
+## "依存性フォーマット":dependency#format
+## "dependencies.yml":dependency#yml
+## "競合の解決":dependency#conflicts
+## "新しいリポジトリの追加":dependency#repositories
+# "データベースの変更管理":evolutions
+## "変更スクリプト":evolutions#script
+## "同時に発生した変更の同期":evolutions#Synchronizingconcurrentchanges
+## "矛盾した状態":evolutions#Inconsistentstates
+## "変更コマンド":evolutions#Evolutionscommands
+# "ログの設定":logs
+## "アプリケーションからのロギング":logs#logging
+## "ログレベルの設定":logs#levels
+# "複数環境における設定":ids
+## "フレームワーク ID":ids#id
+## "コマンドラインからのフレームワーク ID の設定":ids#command
+# "本番環境":production
+## "application.conf の設定":production#application
+## "ログの設定":production#logging
+## "フロントエンド HTTP サーバのセットアップ":production#server
+# "デプロイオプション":deployment
+## "スタンドアロン Play アプリケーション":deployment#standalone
+## "JEE アプリケーションサーバ上での実行":deployment#appservers
+## "Google App Engine":deployment#gae
+## "Stax クラウドホスティングプラットフォーム":deployment#stax
+
+
+h2. <a name="references">リファレンス</a>
+
+日々のハックのための広範囲なリファレンスです。
+
+# <a class="navigation" href="index">クイックインデックス</a>
+# <a class="navigation" href="/@api/index.html">API ドキュメント (Javadoc)</a>
+# "チートシート":cheatsheet/commandLine
+## "コマンドライン":cheatsheet/commandLine
+## "コントローラ":cheatsheet/controllers
+## "テンプレート":cheatsheet/templates
+## "モデル":cheatsheet/model
+## "テスト":cheatsheet/tests
+## "複数環境":cheatsheet/multiEnvironment
+# "組み込み拡張":tags
+## "テンプレートタグ":tags
+## "Java エクステンション":javaextensions
+## "バリデーション":validation-builtin
+# <a class="navigation" href="configuration">設定リファレンス</a>
+
+h2. <a name="modules">配布モジュール</a>
+
+これらのオプションモジュールは標準の配布物に含まれています。"その他のモジュールはこちら":/modules 。
+
+# "CRUD":crud
+# "Secure":secure
+
+h2. <a name="versionnotes">リリースノート</a>
+
+新しいバージョンの Play には、いくつかの変更点が含まれます。古いリリースノートを確認してください:
+
+# "Play 1.2.5":releasenotes-1.2.5
+# "Play 1.2.4":releasenotes-1.2.4
+# "Play 1.2":releasenotes-1.2
+# "Play 1.1":releasenotes-1.1
+# "Play 1.0.3":releasenotes-1.0.3
+# "Play 1.0.2":releasenotes-1.0.2
+# "Play 1.0.1":releasenotes-1.0.1

@@ -1,0 +1,330 @@
+h1. <a>国際化と地域化</a>
+
+完全に機能するブログエンジンを作り終えたので、オプション機能について考えてみます: web アプリケーションの国際化と言語の地域化です。初めからアプリケーションを国際化することもできたかもしれませんが、アプリケーションの最初のバージョンは単一の言語で作成し、後から複数の言語を追加するほうが、より現実的です。
+
+h2. <a>国際化と地域化</a>
+
+実行する二つのステップがあります: "国際化":http://en.wikipedia.org/wiki/Internationalization_and_localization と "地域化":http://en.wikipedia.org/wiki/Language_localisation です。両方とも、ほとんどテキストに関するものです。
+
+プログラミングにおける *国際化* とは、アプリケーションコードからロケールに特化したコードを取り除くリファクタリングです。web アプリケーションにおける国際化とは、ほぼ完全に、ビューテンプレート内のユーザインタフェース文字列をメッセージの参照へ置き換えることです。国際化は、文字列でないデータ型: 日付、通貨、その他の数字の整形も含みます。
+
+*地域化* とは、ロケールに特化したバージョンのアプリケーションを作成することです。アプリケーションが国際化されているならば、地域化とは、ひとつ以上の選択可能なロケールに特化したバージョンがあることを意味します。web アプリケーションの場合、地域化とは、ユーザインタフェース文字列を選択された自然言語に翻訳することです。言語の選択は、典型的には、web ブラウザにセットされた言語設定と、アプリケーションそのものの言語選択インタフェースの組み合わせです。
+
+実際には、これら二つのステップを一緒に進めます: アプリケーションの一部を同時に国際化し、地域化します。
+
+h2. <a>Yet Another Blog Engine</a>
+
+p(note). このセクションの出発点は、Play の配布物の @samples-and-tests/yabe@ ディレクトリにある、完成したチュートリアルコードです。このセクションのゴールは、アプリケーションを完全に国際化して、フランス語とオランダ語の地域化を追加することです。
+
+始めるには、最初に @conf/application.conf@ を編集し、三つの言語をサポートするよう、(デフォルト設定ファイルの場合は) 行を非コメント化するか、または追加します:
+
+bc. # Localisations for English, Dutch and French. 
+application.langs=en,nl,fr 
+
+ここでアプリケーションのページを読み込むと、まだロケールに特化したメッセージファイルがひとつもないので、Play コンソールに三つの警告が表示されるでしょう:
+
+bc. 16:19:04,728 WARN ~ Messages file missing for locale en 
+16:19:04,729 WARN ~ Messages file missing for locale nl 
+16:19:04,729 WARN ~ Messages file missing for locale fr 
+
+h2. <a>UTF-8 メッセージファイル</a>
+
+上記の警告は、既存の @conf/messages@ ファイルを、それぞれの言語ごとに一つのメッセージファイルとして置き換える必要があることを意味しています:
+
+* @messages.en@ 
+* @messages.nl@ 
+* @messages.fr@ 
+
+ここで、標準の Java のやり方に対する最初の改良に出会います。これらのメッセージファイルは Java のプロパティファイルと同じ構文を使用しますが、UTF-8 エンコーディングを使用しなければならないので、プロパティファイルではありません。一方、Java "プロパティ":http://java.sun.com/javase/6/docs/api/java/util/Properties.html は、テキストファイルとストリームをやり取りするためのエンコーディングに ISO-8859-1 'Latin-1' 文字符号を指定しています。
+
+UTF-8 のメッセージファイルを使用できることは、地域化された言語メッセージを 'プレーンテキスト' で書くことができることを意味しているため、言語の地域化にとって、とても大事なことです。例えば、ギリシャ語の地域化において:
+
+bc. hello.morning = \u0152\u222b\u0152\u00b1\u0152\u00aa\u0152\u2211\u0152\u00ba\u0152\u2260\u0153\u00c5\u0152\u00b1
+hello.informal = \u0152\u2265\u0152\u00b5\u0152\u03c0\u0152\u00b1 \u0153\u00c9\u0152\u00f8\u0153\u00d6 
+
+これらのユニコード文字エスケープの代わりに、ギリシャ文字を使用することができます:
+
+bc. hello.morning = καλημﾎｭρα 
+hello.informal = γεια σου 
+
+このチュートリアルの残りの部分では、コードサンプルは、これらのファイルのうちの一つでメッセージを定義するか、または HTML ビューテンプレートのうちの一つにおいて、国際化されたマークアップを示します。
+
+h2. <a>シンプルなメッセージ</a>
+
+シンプルなケースとしては、変化せず、他のマークアップから邪魔されないテキスト文字列があります。例えば、 @yabe/app/views/main.html@ テンプレートの @tools@ リストにある最初のシンプルなテキストです:
+
+bc. <ul id="tools"> 
+<li> 
+<a href="@{Admin.index()}">Log in to write something</a> 
+</li> 
+</ul> 
+
+これを国際的にするために、 @&{'key'}@ 構文を使って文字列をメッセージの参照に置き換えます:
+
+bc. <ul id="tools"> 
+<li> 
+<a href="@{Admin.index()}">&{'views.main.tools.login'}</a> 
+</li> 
+</ul> 
+
+地域化するために、対応する行を三つのメッセージファイルそれぞれに追加します。 @conf/messages.en@ は
+
+bc. views.main.tools.login = Log in to write something 
+
+@conf/messages.nl@ は
+
+bc. views.main.tools.login = Inloggen om iets te schrijven 
+
+@conf/messages.fr@ は
+
+bc. views.main.tools.login = Connectez-vous pour ﾃｩcrire quelque chose 
+
+メッセージキーはどのようなものでも構いません; この例の場合、 @views/main.html#tools@ の位置を示すキーを私用しました。
+
+これらの変更を保存したら、 @Accept-Language@ HTTP リクエストヘッダを異なるものにするよう web ブラウザの設定を変更することで、別の言語のバージョンを見ることができます。Firefox の場合、オプション ≫ コンテンツ ≫ 言語 ≫ 言語設定 を選択し、まだリストに無ければ _フランス語 \[fr]_ と _オランダ語 \[nl]_ を追加し、どちらか一つをリストのトップに変更して、ダイアログボックスを閉じたらページをリロードします。
+
+!images/guide12-1! 
+
+
+h2. <a>アプリケーションモデルの地域化</a>
+
+リンクをクリックしてブログの 'admin' ページにログインすると、ポスト、タグ、コメント、およびユーザのリストにアクセスすることができます。これらのページは "CRUD":http://www.playframework.org/documentation/1.0.1/crud によって提供されるものです。これらそれぞれのページにおいて、その (薄いピンク色の) タイトルと列ヘッダは、アプリケーションのモデル、すなわち JavaBean のクラス名と属性名から来る文字列です。
+
+CRUD モジュールは、これら JavaBean のクラス名または属性名をメッセージキーとして使用することで、これらの名前を国際化し、これは以下のようにすることでメッセージを地域化できることを意味します。
+
+@conf/messages.nl@ は以下のようにします。
+
+bc. post = artikel 
+Post = Artikel 
+posts = artikelen 
+Posts = Artikelen 
+comment = reactie 
+Comment = Reactie 
+comments = reacties 
+Comments = Reacties 
+user = gebruiker 
+User = Gebruiker 
+users = gebruikers 
+Users = Gebruikers 
+
+@conf/messages.fr@ は以下のようにします。
+
+bc. post = article 
+Post = Article 
+posts = articles 
+Posts = Articles 
+comment = commentaire 
+Comment = Commentaire 
+comments = commentaires 
+Comments = Commentaires 
+user = utilisateur 
+User = Utilisateur 
+users = utilisateur 
+Users = Utilisateurs 
+
+これだけでは、紫色で囲まれたナビゲーションリンクが変わらないことに気付くでしょう:
+
+!images/guide12-2! 
+
+これらのリンクは、以下のようにして既存の文字列を単純に @&{'…'}@ で囲むことによる地域化を同様に使用するよう国際化できる @views/admin.html@ に定義されています:
+
+bc. <a href="@{Posts.list()}">&{'Posts'}</a> 
+…
+<a href="@{Tags.list()}">&{'Tags'}</a> 
+…
+<a href="@{Comments.list()}">&{'Comments'}</a> 
+…
+<a href="@{Users.list()}">&{'Users'}</a> 
+
+h2. <a>パラメータ化されたメッセージ</a>
+
+単純なメッセージと同様に、アプリケーションは _Play によってタグ付けをされた Posts_ などの、変数を持つメッセージを含んでいます。
+
+パラメータを一つだけ含むメッセージを地域化するには、パラメータの値をメッセージに挿入する "Java フォーマット文字列":http://java.sun.com/javase/6/docs/api/java/util/Formatter.html#syntax を使用してください: 
+
+bc. views.Application.listTagged.title = Posts tagged with %s 
+
+そして、テンプレートでは、以下のようにしてパラメータを追加します: 
+
+bc. &{'views.Application.listTagged.title', tag} 
+
+メッセージが複数のパラメータを含んでいるときは、別の言語では単語の順番が変わることを考慮して、フォーマット文字列にインデックスを追加します:
+
+bc. views.Admin.index.welcome = Welcome %1$s, <span>you have written %2$s posts so far</span> 
+
+…リストがテンプレートにある状態で: 
+
+bc. &{'views.Admin.index.welcome', user, posts.size()} 
+
+また、この例では 'post' という単語に正しい複数形を使用したいので、この単語もパラメータ化します: 
+
+bc. views.Admin.index.welcome = Welcome %1$s, <span>you have written %2$s %3$s so far</span> 
+
+…そしてテンプレートで @pluralize@ エクステンションを使用します。
+
+bc. &{'views.Admin.index.welcome', user, posts.size(), posts.pluralize(messages.get('post'), messages.get('posts'))} 
+
+地域化された単数形と複数形を参照するために @messages.get@ を使用する必要があることに注意してください。
+
+
+h2. <a>Play モジュールの地域化</a>
+
+Play モジュールの地域化はアプリケーションの地域化と同じように動作します。このアプリケーションは CRUD モジュールと Secure モジュールを使用するので、これはアプリケーションが使用する @play/modules/crud/conf/messages@ と @play/modules/secure/conf/messages@ にあるメッセージを地域化しなければならないことを意味します。
+
+@conf/messages.nl@ は以下のようにします。
+
+bc. # play/modules/crud (administration) 
+crud.title = Beheer 
+crud.home = Home 
+crud.blank = Nieuw 
+crud.index.title = Kies het te bewerken object 
+crud.index.objectType = Type object 
+crud.index.action = 
+crud.index.add = Voeg toe 
+crud.add = &{%s} toevoegen 
+crud.list.title = &{%s} 
+crud.list.size = %d &{%s} 
+crud.list.totalSize = %d totaal 
+crud.pagination.previous = ≪ Vorige 
+crud.pagination.next = Volgende ≫ 
+crud.pagination.last = Laatste ≫≫ 
+crud.pagination.first = ≪≪ Eerste 
+crud.show.title = &{%s} bewerken 
+crud.save = Opslaan 
+crud.saveAndContinue = Opslaan en verder bewerken 
+crud.cancel = Annuleren 
+crud.hasErrors = Corrigeer fouten a.u.b. 
+crud.blank.title = &{%s} toevoegen 
+crud.saveAndAddAnother = Opslaan en nogmaals creeren 
+crud.delete = &{%s} verwijderen 
+crud.created = &{%s} is aangemaakt 
+crud.saved = &{%s} is opgeslagen 
+crud.deleted = &{%s} is verwijderd 
+crud.delete.error = Kan dit object niet verwijderen 
+crud.search = Zoeken 
+crud.none = (Geen) 
+crud.help.required = Verplicht. 
+crud.help.minlength = Min. lengte is %d. 
+crud.help.maxlength = Max. lengte is %d. 
+crud.help.email = Geldig e-mailadres 
+crud.help.dateformat = In de vorm YYYY-MM-DD. 
+crud.help.numeric = Numeriek. 
+crud.help.min = Moet groter daan %d zijn. 
+crud.help.future = In de toekomst. 
+crud.help.past = In het verleden. 
+crud.help.after = Na %s. 
+crud.help.before = Voor %s. 
+crud.help.range = Tussen %d en %d 
+ 
+# play/modules/secure 
+secure.username = Uw e-mailadres: 
+secure.password = Uw wachtwoord: 
+secure.signin = Nu inloggen 
+
+@conf/messages.fr@ は以下のようにします。
+
+bc. # play/modules/crud (administration) 
+crud.title = Administration 
+crud.home = Home 
+crud.blank = Nouveau 
+crud.index.title = Choisissez l'objet a modifier 
+crud.index.objectType = Type objet 
+crud.index.action = XXX 
+crud.index.add = Ajouter 
+crud.add = Ajouter &{%s} 
+crud.list.title = &{%s} 
+crud.list.size = %d &{%s} 
+crud.list.totalSize = %d total 
+crud.pagination.previous = ≪ Precedent 
+crud.pagination.next = Suivant ≫ 
+crud.pagination.last = Dernier ≫≫ 
+crud.pagination.first = ≪≪ Premier 
+crud.show.title = Modifier &{%s} 
+crud.save = Enregistrer 
+crud.saveAndContinue = Enregistrer et continuez a modifier 
+crud.cancel = Annuler 
+crud.hasErrors = Corrigez les erreurs s.v.p. 
+crud.blank.title = Ajouter &{%s} 
+crud.saveAndAddAnother = Enregistrer et ajouter un autre 
+crud.delete = Supprimer &{%s} 
+crud.created = &{%s} a ete cree 
+crud.saved = &{%s} est enregistre 
+crud.deleted = &{%s} est supprime 
+crud.delete.error = Ne peut pas supprimer l’objet 
+crud.search = Chercher 
+crud.none = (aucun) 
+crud.help.required = Obligatoire. 
+crud.help.minlength = Longeur minimum est %d. 
+crud.help.maxlength = Longeur maximum est %d. 
+crud.help.email = Adresse e-mail valide 
+crud.help.dateformat = En format YYYY-MM-DD. 
+crud.help.numeric = Numerique. 
+crud.help.min = Doit etre plus grand que %d. 
+crud.help.future = Dans le futur. 
+crud.help.past = Dans le passe. 
+crud.help.after = Apres %s. 
+crud.help.before = Avant %s. 
+crud.help.range = Entre %d et %d 
+ 
+# play/modules/secure 
+secure.username = Votre adresse e-mail: 
+secure.password = Votre mot de passe: 
+secure.signin = Connectez-vous maintenant 
+
+もちろん、この地域化を行ったあと、これをモジュールにフィードバックして貢献することは良い考えです。
+
+
+h2. <a>特別なクラス</a>
+
+web アプリケーションを地域化していく中には、例えば JavaServer Faces のようなコンポーネントベースの web アプリケーションフレームワークを使用していた場合、実装しづらいいくつかの特別なケースがあります:
+
+# <span>属性値に使用されるパラメータ化されたメッセージ</span>
+# <span>フォーマットされたメッセージパラメータ</span>
+# <span>メッセージ中のリンク</span>
+
+三つのケースすべてが Play では簡単であることが分かります。
+
+最初のケースは、以下のようにテンプレート中の属性値にパラメータを伴う句を使いたい場合です:
+
+bc. <a href="@{Application.show(_post.id)}" title="By Bob"> 
+
+これは JSF における問題です。通常、パラメータを置換するために XML タグを使用しますが、属性値ではこのような置換を行うことはできません。Play の構文は単純にこれを回避するので、そのまま実行することができます:
+
+bc. <a href="@{Application.show(_post.id)}" title="&{'views.tags.display.author', _post.author.fullname}"> 
+
+二番目のケースは、 @By Bob on 2009-06-14@ のような句においてメッセージパラメータを使うことで、例えば日付などの値をフォーマットしたい場合です。ここで、値のフォーマット結果を XML 属性値として使用できる必要があるにも関わらず、値をフォーマットするために XML タグが必要であるという JSF の問題が再び発生します。Play のフォーマット拡張はメッセージパラメータ構文を妨げないので、以下のように実行することができます:
+
+bc. <span>&{'views.tags.display.author', _post.author.fullname, comment.postedAt.format('yyyy-MM-dd')}"}</span> 
+
+もちろん、フォーマットパターンを地域化することもできます: 
+
+bc. <span>&{'views.tags.display.author', _post.author.fullname, comment.postedAt.format(messages.get('views.dateFormat'))}"}</span> 
+
+三番目のケースは、 <code><u>Log in</u> to write something</code> のようなメッセージにおいて、地域化されたメッセージの一部をハイパーリンクにしたい場合に起こります。ハイパーリンクは、そのマークアップをメッセージファイルに含められないことを意味するやり方でレンダリングされる JSF のコンポーネントであるため、この問題は JSF で起こります。一方、Play はテンプレートにプレーンな HTML を使用させるため、URL 用のパラメータを持つマークアップをそのままメッセージに指定することができます:
+
+bc. logIn = <a href="%s">Log in</a> to write something 
+
+bc. &{'logIn', '/admin'} 
+
+ブログエンジンアプリケーションでは、ハイパーリンクにおいて routes ファイルに基づく URL をフレームワークに生成させる構文を使用していました。
+
+bc. <a href="@{Admin.index()}">
+
+メッセージパラメータで同じことをするためには、以下のようにしてください: 
+
+bc. &{'logIn', actionBridge.Admin.index()} 
+
+
+h2. <a>地域化された 'Yet Another Blog Engine'</a>
+
+上記の手順を適用した最終的な結果は、英語、オランダ語、およびフランス語で動作する、地域化されたバージョンの 'Yet Another Blog Engine' です。
+
+!images/guide12-3! 
+
+'Yet Another Blog Engine' のオランダ語版 (上) とフランス語版 (下) 管理インタフェースです。
+
+!images/guide12-4! 
+
+p(note). 次: チュートリアルはこれで終わりです。本質的なドキュメント - %(next)"主要な概念":main% に進んでください。
+
+p(note). オリジナルは "Lunatech Research":http://www.lunatech-research.com/archives/2010/04/12/how-localise-play-framework-web-application ブログにて、"Peter Hilton":http://hilton.org.uk/about_ph.phtml により公開されました。

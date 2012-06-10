@@ -1,0 +1,31 @@
+h2. Template - Tag grammar
+
+*==${ client.name }==*
+変数を評価し出力します。
+
+*==${ client?.name }==*
+client が null でなければ client.name を表示します。
+
+*==@{ Controller.action() }==*
+アクションへの相対パスの URL を計算します。
+
+*==@{ Controller.action().secure() }==*
+アクションへの HTTPS での相対パスの URL を計算します。
+
+*==@@{ Controller.action() }==*
+アクションへの絶対パスの URL を計算します。
+
+*==@{'path/to/static_content'}==*
+==&lt;img src="@{'/public/images/jpdf.png'}" class="center"/&gt;==
+
+*==&{ message.key }==*
+メッセージは conf/messages で管理され、多言語対応しています。
+
+*==&lowast;{ これはコメントです }&lowast;==*
+これ以上何を言えばいい?
+
+*==%{ out.print("HelloWorld") }%==*
+UI ロジック用の Groovy スクリプト
+
+*==#{ my.custom.tag /}==*
+典型的なカスタムタグ - page コンテキストは共有しません。

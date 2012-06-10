@@ -1,0 +1,318 @@
+h1. Play 1.1 — リリースノート
+
+Play 1.1 におけるバグフィックスについては "ロードマップページ":http://www.playframework.org/roadmap/1.1 で読むことができます。このページでは重要な変更に注目します。
+
+h2. <a name="migrating">Play 1.0.x からの以降</a>
+
+Play 1.0.x からの以降は実に簡単です。アプリケーションのレイアウトはまったく変わらないので、同じアプリケーションが Play1.0.3.2 と Play1.1 の両方で動作するでしょう。しかし、アプリケーションにおいて外部のモジュールを使用している場合、Play1.1 と互換性のある、より新しいバージョンを使用しなければならないかもしれません。対応するモジュールのページをチェックしてください。
+
+* 長い間、非推奨とした後に Play 1.1 においていくつかの API を削除しましたが、ほとんどの public な API は変わりありません。どのようにして解決したらよいか分からないコンパイルエラーがあったら Google グループに尋ねてください。
+* プラグインの順序を変更しました。特定のプラグインをデフォルトのプラグインの前または後に実行する必要がある場合、プラグインのインデックスを変更する必要があるでしょう。
+* 多くのメソッドがチェック例外をスローしていた play.libs.IO は、実行時例外をスローするようになります。これらの例外をキャッチしていた場合は、キャッチする例外を変更するか、例外をキャッチしないよう変更する必要があるかもしれません。
+* 本番モードでは、モデルを変更しても自動的にデータベースを更新することはしません。自動的に更新したい場合は、 application.conf に次の一行を追加してください:
+
+bc. jpa.ddl = update
+
+h2. <a name="headless">新しいヘッドレステストランナー</a>
+
+ご存知のとおり、Play のテストランナーでアプリケーションテストを実行するためにはブラウザが必要です。これは、アプリケーションを実際のブラウザでテストできるようにする "Selenium":http://seleniumhq.org/ テストをサポートするためです。
+
+しかし、継続的統合において、CI サーバ上で自動的に実際のブラウザを実行することはしばしば困難を伴います。そこで、今回のリリース以降、Play は "HtmlUnit":http://htmlunit.sourceforge.net/ に基づく画面無しのブラウザを組み込むことにしました。
+
+@play auto-test@ コマンドにてテストを実行すると、このブラウザが使用されます。
+
+!images/auto-test!
+
+この画面無しのブラウザが Internet Explorer 8 のように振る舞おうとすることに注意してください。ほとんどの開発者は Firefox や Webki といった本物のブラウザを使用し、手元でテストするので、この画面無しブラウザが IE8 のように振る舞おうとすることは、統合されたプラットフォーム上における Javascript の互換性を明示的に確認することになるので、良いことです。
+
+h2. <a name="server">JBoss Netty ベースの新しい HTTP サーバ</a>
+
+Play 1.1 は HTTP サーバとして Apache Mina の代わりに "JBoss Netty":http://www.jboss.org/netty を使用します。このことは、あなたのアプリケーションを何も変更しませんし、HTTP 層におけるパフォーマンスも以前と同じですが、Play 1.0.x に影響していたいくつかの小さな HTTP 関連のバグが解消されます。
+
+間もなく、この新しい HTTP サーバによって WebSockets のような、より高度な HTTP の機能をサポートできるようになるでしょう。
+
+h2. <a name="libs">コアライブラリの更新と命名の改善</a>
+
+Play framework はフルスタックフレームワークなので、必要な Java ライブラリを直接組み込んでいます。JPA 2 をサポートする Hibernate 3.5.x を含むこれらすべてのライブラリを更新しました。
+
+組込みライブラリのために、より良い命名規則を採用しました。 @framework/lib@ ディレクトリの中を確認すれば、それぞれのライブラリの正確なバージョンが分かります。
+
+h2. <a name="model">データベースに捉われない play.db.Model API</a>
+
+Play 1.1 は、新しい **play.db.Model** API を導入します。この API はアプリケーションから直接使用されることを意図していませんが、(NoSQL ベースのものも含めて) どのような種類のデータベースに対しても統合を提供できるよう、モジュール作者が実装できる包括的なデータストアインタフェースを提供します。
+
+これは、Play 1.1 では JPA サポートはコアフレームワークから分離されるということを意味します。JPA サポートは依然としてデフォルトのプラグインであり、 *@Entity* クラスをひとつでも見つけると自動的に有効化されますが、 *CRUD* や *Fixtures* などは直接 JPA に依存しません。これらのコンポーネントは、例えば "MongoDB 用の play-morphia モジュール":/modules/morphia のような、 *play.db.Model* の実装を提供する、どのようなモジュールとでも動作することができます。
+
+h2. <a name="scala">Scala 言語のサポート</a>
+
+コアフレームワークの内部は、Scala 言語でも動作するようにリファクタリングされました。"Scala モジュール":http://www.playframework.org/modules/scala は Scala と Play framework の完全な統合を提供します。
+
+h2. <a name="glassfish">ネイティブな Glassfish へのデプロイサポート</a>
+
+今回の Play には "Glassfish アプリケーションサーバ":https://glassfish.dev.java.net/ 用のネイティブなコンテナが備わっています。これは、Play コンテナを追加することで、どの Glassfish サーバにおいても既存のあらゆるアプリケーションが実行できることを意味します。
+
+!images/glassfish!
+
+Glassfish コンテナは、 http://github.com/playframework/play-glassfish で管理されており、間もなく Glassfish の @contrib@ リポジトリから直接利用できるようになるはずです。
+
+Glassfish は複数のアプリケーションを同時に実行できるので、複数のアプリケーションを単一の JVM 上で実行することができます。
+
+!images/glassfish2!
+
+アプリケーションを WAR ファイルにパッケージするわけではないことに注意してください。Glassfish 用の Play コンテナはアプリケーションをネイティブ実行します: Glassfish 用の Play コンテナは Servlet コンテナを使用しませんし、アプリケーションを何か特別な方法でパッケージする必要もありません。
+
+h2. <a name="routeHost">routes におけるバーチャルホストのサポート</a>
+
+@routes@ ファイルでホストマッチングをサポートしました。これは、ホストのパラメータからアクションのパラメータを抽出しなければならない場合に便利です。例えば、ある SaaS アプリケーションにおいて、以下のように使用することができます:
+
+bc. GET    {client}.mysoftware.com/         Application.index
+
+こうすることで、他のあらゆるリクエストパラメータとも同じように @client@ の値が自動的に検索されます:
+
+bc. public static void index(String client) {
+    …
+}
+
+テンプレートにおいて (リバースルーティングを行う) <code>@@{…}</code> 記法を使用すると、ルートに対応付けられたホストが使用されます。これは、いくつかの状況で役に立つ場合があります。
+
+例えば、運用環境において静的なコンテンツを配布するためにコンテンツ配信ネットワークを使用したい場合、 @routes@ ファイルを以下のように書くことができます:
+
+bc. #{if play.Play.mode.isDev()}
+    GET     /public/                        staticDir:public
+#{/}
+#{else}
+    GET     assets.myapp.com/               staticDir:public
+#{/}
+
+そして、テンプレートに以下のように記述します:
+
+bc. <img src="@@{'/public/images/logo.png'}">
+
+これは、DEV モードでは @http://locahost:9000/public/images/logo.png@ にリバースされ、PROD モードでは @http://assets.myapp.com/images/logo.png@ にリバースされます。
+
+
+h2. <a name="binding">カスタムバインディングのサポート</a>
+
+バインディングシステムはより多くのカスタマイズをサポートするようになりました。
+
+h3. @play.data.binding.As
+
+最初に紹介するのは、文脈的にバインディングを構成できるようにする新しい <code>@play.data.binding.As</code> アノテーションです。これは例えば、 @DateBinder@ によって使用される日付のフォーマットを指定するために使います:
+
+bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
+	…
+} 
+
+この <code>@As</code> アノテーションは、ロケールごとに特定のアノテーションを提供できることを意味する国際化もサポートします:
+
+bc. public static void update(
+		@As(
+			lang={"fr,de","en","*"}, 
+			value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
+		)
+		Date updatedAt
+	) {
+	…
+}
+
+この <code>@As</code> アノテーションは、これをサポートするすべてのバインダと共に動作します。以下は、 @ListBinder@ を使用する例です:
+
+bc. public static void update(@As(",") List<String> items) {
+	…
+}
+
+このバインダは、単純にカンマで分けられた @String@ を @List@ にバインドします。
+
+h3. @play.data.binding.NoBinding
+
+新たに追加された <code>@play.data.binding.NoBinding</code> は、バインド非対象フィールドをマークし、潜在的なセキュリティ問題を解決します。以下に例を示します:
+
+bc. public class User extends Model {	
+	@NoBinding("profile") public boolean isAdmin;
+	@As("dd, MM yyyy") Date birthDate;
+	public String name;
+}
+ 
+public static void editProfile(@As("profile") User user) {
+	…
+}
+
+このようにすると、例え悪意あるユーザが偽のフォームから @user.isAdmin=true@ というフィールドを含めてポストしたとしても、 @isAdmin@ フィールドは決して @editProfile@ アクションからはバインドされません。
+
+h3. play.data.binding.TypeBinder
+
+<code>@As</code> アノテーションを使って完全に独自のバインダを定義することができます。独自のバインダは、プロジェクト内にて @TypeBinder@ のサブクラスとして定義されます。以下に例を示します:
+
+bc. public class MyCustomStringBinder implements TypeBinder<String> {
+ 
+    public Object bind(String name, Annotation[] anns, String value, Class clazz) {
+        return "!!" + value + "!!";
+    }
+ 
+}
+
+以下のようにして、いずれのアクションにおいてもこのバインダを使用することができます:
+
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String name) {
+	…
+}
+
+h3. @play.data.binding.Global
+
+対応する型にだけ適用されるグローバルなカスタムバインダを定義することもできます。例えば、以下のようにして @java.awt.Point@ クラスにバインドできるバインダを定義することができます:
+
+bc. @Global
+public class PointBinder implements TypeBinder<Point> {
+ 
+    public Object bind(String name, Annotation[] anns, String value, Class class) {
+		String[] values = value.split(",");
+		return new Point(
+			Integer.parseInt(values[0]), 
+			Integer.parseInt(values[1])
+		);
+    }
+    
+} 
+
+見てのとおり、グローバルバインダは <code>@play.data.binding.Global</code> でアノテーションされた古典的なバインダです。外部モジュールは再利用可能な拡張バインダを定義することで、プロジェクトにバインダを提供することができます。
+
+
+h2. <a name="asyncHTTP">新しく強力な非同期 WS ライブラリ</a>
+
+@play.libs.WS@ ライブラリによって、プロジェクトを web クライアントのように振る舞わせることができます。今回のリリースで "AsyncHttpClient":http://github.com/AsyncHttpClient/async-http-client をベースにした新しい非同期処理の実装を取り入れました。この新しい実装は、リモートの資源を非同期に取得する新しい @xxxAsync@ メソッドを提供します。
+
+@waitFor(…)@ メソッドと共に使用することで、既存のアプリケーションとマッシュアップする、ブロックされない高パフォーマンスのアプリケーションを作ることができます:
+
+bc. public static void mirrorFeed() throws Exception {
+	if (request.isNew) {
+		Future<HttpResponse> feed = WS.url(
+			"http://planet.playframework.org/feed"
+		).getAsync();
+		request.args.put("futureFeed", feed);
+		waitFor(feed);
+	} else {
+		HttpResponse res = (
+			(Future<HttpResponse>)request.args.get("futureFeed")
+		).get()
+		renderXml(res.getXml());	
+	}
+}
+
+h2. <a name="oauth">OAuth サポート</a>
+
+今回のリリースに "OAuth":http://oauth.net/ プロトコルをサポートする @play.libs.OAuth@ ライブラリがあります。OAuth は、web アプリケーションからシンプルで標準的な方法で、安全に認証を行う API を提供するオープンなプロトコルです。
+
+新たに用意した @twitter-oauth@ サンプルアプリケーションは、セキュアに twitter API に接続することで、この API の使い方を実演します。
+
+!images/sample-twitter!
+
+h2. <a name="https">HTTPS サポート</a>
+
+今回のリリースで組み込まれたサーバは HTTPS プロトコルをサポートします。もちろん、必要に応じて運用環境で使用することができます。このサーバは、古典的な Java の **keystore** もしくはシンプルな @cert@ と @key@ ファイルのどちらでも証明書を管理することができます。 @application.conf@ ファイルにて @https.port@ の設定プロパティを宣言するだけで、アプリケーションは HTTPS 接続を開始します:
+
+bc. http.port=9000
+https.port=9443
+
+@conf@ ディレクトリに証明書を配置する必要があります。Play は X509 証明書とキーストア証明書をサポートします。X509 証明書は次のように命名されなければなりません:
+証明書には *host.cert* と命名し、キーには *host.key* と命名します。キーストアを使用する場合、デフォルトでは *certificate.jks* という名前が付けられます。
+
+X509 証明書を使用する場合、 @application.conf@ ファイルに以下のパラメータを設定することができます:
+
+bc. # X509 certificates
+certificate.key.file=conf/host.key
+certificate.file=conf/host.cert
+# In case your key file is password protected
+certificate.password=secret
+trustmanager.algorithm=JKS
+
+キーストアを使用する場合は:
+
+bc. keystore.algorithm=JKS
+keystore.password=secret
+keystore.file=conf/certificate.jks
+
+上記の値はデフォルト値であることに注意してください。
+
+*openssl* を使って自己署名証明書を生成することができます:
+
+bc. openssl genrsa 1024 > host.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
+
+java のキーストア機能を使用する場合、 @application.conf@ ファイルに以下のパラメータを設定することができます:
+
+bc. # Keystore 
+ssl.KeyManagerFactory.algorithm=SunX509
+trustmanager.algorithm=JKS
+keystore.password=secret
+keystore.file=certificate.jks
+
+上記の値はデフォルト値です。
+
+h2. <a name="cache">新しいキャッシュ機能</a>
+
+アクションとテンプレートにより簡単にキャッシュを統合することができる 2 つの新機能を用意しました。最初に、 <code>@play.cache.CacheFor</code> アノテーションを追加することで、アクションの結果を容易にキャッシュすることができるようになりました。これは見せかけの静的ページを作るのにとても便利です。
+
+bc. @CacheFor("1h")
+public static void index() {
+	render();
+}
+
+2 番目に、 @#{cache}@ タグによってテンプレートの断片を簡単にキャッシュすることができるようになりました:
+
+bc. <h1>Very complex home page to build</h1>
+ 
+#{cache 'home-' + connectedUser.email, for:'15min'}
+	…
+#{/cache}
+
+これらの新機能は標準の Play キャッシュと同じキャッシュ実装を使用しています。
+
+h2. <a name="war">WAR アーカイブの完全プリコンパイル</a>
+
+今回のリリースから @play precompile@ コマンドは、アプリケーションを静的な Java のバイトコードに完全にコンパイルします。これは、完全にコンパイルされた Play アプリケーションを配布することができること、そしてテンプレートを含め、すべての @app/@ ソースファイルを削除できることを意味します。
+
+@play war@ コマンドで生成されたすべての **WAR** ファイルは、自動的にプリコンパイルされます。
+
+標準的な方法でアプリケーションを実行する場合、デフォルトでは、Play は変更を検出するために常にアプリケーションのソースコードをチェックします。このステップが不要であり、プリコンパイルされたクラスからアプリケーションを開始したい場合、システムプロパティに @precompiled=true@ を指定します:
+
+bc. play start myApp -Dprecompiled=true
+
+h2. <a name="routeArgs">グローバル route 引数</a>
+
+新しく追加された @play.mvc.Controller.routeArgs@ スコープには、リクエストの間において、あらゆるリバースルーティングからグローバルに使用される変数を定義することができます。例えば、多数のルートに共通のパラメータがあるとします:
+
+bc. GET     /{lang}/            Application.index
+GET     /{lang}/users       Application.users
+GET     /{lang}/items       Application.items
+
+この @lang@ パラメータをすべてのアクションから省略し、単一の <code>@Before</code> フィルタで管理することができます:
+
+bc. @Before
+static setLang(String lang) {
+    Lang.set(lang);
+    routeArgs.put("lang", lang);
+}
+
+@routeArgs@ スコープに @lang@ 引数を追加することで、特に指定しなくても自動的にリバースルーティングに使用されます:
+
+bc. <a href="@{Application.users()}">Users list</a>
+
+例えばこれは、次のようにリバースされます:
+
+bc. <a href="/fr/users">Users list</a>
+
+h2. <a name="commands">カスタムコマンドを書くための更なる柔軟性</a>
+
+モジュール作成者は、独自の Python コマンドをより柔軟に書けるようになります。モジュールが提供する @command.py@ ファイルは、既存のどの組み込みコマンドにもフックすることができます。また、モジュールが提供するコマンドは @play help@ コマンドで一覧化されます。
+
+h2. <a name="other">その他の小さな機能</a>
+
+"230 の修正されたバグ":http://www.playframework.org/roadmap/1.1 のほかにも、以下を含むいくつかの小さな新機能があります:
+
+* @play.libs.XPath@ ライブラリにおける名前空間のサポート
+* ジョブスケジューリングにおける @never@ 値のサポート
+* サーバ上の静的なリソースに対する Mime タイプを @application.conf@ に定義することができます
+* @play.mvc.Http.Response@ におけるクロスドメイン XHR ヘルパ
+* @HTTPOnly@ クッキーのサポート
+* 新しい Play framework のリリースを確認する新しい @play check@ コマンド
+
