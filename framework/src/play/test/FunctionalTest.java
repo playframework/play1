@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.net.MalformedURLException;
 
@@ -307,7 +308,9 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
-            actionCompleted.await(30, TimeUnit.SECONDS);
+            if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
+                throw new TimeoutException("Request did not complete in time");
+            }
             if (savedCookies == null) {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
