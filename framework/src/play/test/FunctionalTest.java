@@ -30,7 +30,6 @@ import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import play.Invoker;
 import play.mvc.Controller;
