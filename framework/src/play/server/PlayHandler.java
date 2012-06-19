@@ -517,8 +517,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         InputStream body = null;
         ChannelBuffer b = nettyRequest.getContent();
-        if (b instanceof FileChannelBuffer) {
-            FileChannelBuffer buffer = (FileChannelBuffer) b;
+        if (b instanceof InputStreamChannelBuffer) {
+            InputStreamChannelBuffer buffer = (InputStreamChannelBuffer) b;
             // An error occurred
             Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
 
