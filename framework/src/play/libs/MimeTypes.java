@@ -76,7 +76,7 @@ public class MimeTypes {
     		contentType =  defaultContentType;
     	}
     	if (contentType != null && contentType.startsWith("text/")){
-    		return contentType + "; charset=" + Http.Response.current().encoding;
+    		return contentType + "; charset=" + getCurrentCharset();
     	}
     	return contentType;
     }
@@ -93,6 +93,18 @@ public class MimeTypes {
         } else {
             return mimetypes().contains(mimeType);
         }
+    }
+
+    private static String getCurrentCharset() {
+        String charset;
+        Http.Response currentResponse = Http.Response.current();
+        if (currentResponse != null) {
+            charset = currentResponse.encoding;
+        }
+        else {
+            charset = Play.defaultWebEncoding;
+        }
+        return charset;
     }
 
     private static synchronized void initMimetypes() {
