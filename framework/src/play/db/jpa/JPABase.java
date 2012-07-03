@@ -1,6 +1,9 @@
 package play.db.jpa;
 
 import org.hibernate.Session;
+import org.hibernate.type.Type;
+import org.hibernate.type.EntityType;
+import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.collection.*;
 import org.hibernate.engine.PersistenceContext;
 import org.hibernate.engine.*;
@@ -172,15 +175,19 @@ public class JPABase implements Serializable, play.db.Model {
     }
 
     private static void cascadeOrphans(JPABase base, PersistentCollection persistentCollection, boolean willBeSaved) {
-        PersistenceContext pc = ((SessionImpl) JPA.em().getDelegate()).getPersistenceContext();
-        CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
+        SessionImpl session = ((SessionImpl) JPA.em().getDelegate());
+        CollectionEntry ce = session.getPersistenceContext().getCollectionEntry(persistentCollection);
 
         if (ce != null) {
-            EntityEntry entry = pc.getEntry(base);
-            if (entry != null) {
-                Collection orphans = ce.getOrphans(entry.getEntityName(), persistentCollection);
-                for (Object o : orphans) {
-                    saveAndCascadeIfJPABase(o, willBeSaved);
+            CollectionPersister cp = ce.getLoadedPersister();
+            if (cp != null) {
+                Type ct = cp.getElementType();
+                if (ct instanceof EntityType) {
+                    String entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
+                    Collection orphans = ce.getOrphans(entityName, persistentCollection);
+                    for (Object o : orphans) {
+                        saveAndCascadeIfJPABase(o, willBeSaved);
+                    }
                 }
             }
         }
