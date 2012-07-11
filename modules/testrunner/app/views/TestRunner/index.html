@@ -316,7 +316,7 @@
                 var runNextTest = function() {
                     if($(document.body).is('.running')) {
 
-                        var test = $('.test.runFirst');
+                        var test = $('.test.selected.runFirst');
                         if(!test.size()) {
                             test = $('.test.selected:not(.passed,.failed):first');
                         }
