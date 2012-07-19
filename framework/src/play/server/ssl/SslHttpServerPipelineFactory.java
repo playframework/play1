@@ -22,12 +22,17 @@ public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
 
         Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
         String mode = Play.configuration.getProperty("play.netty.clientAuth", "none");
+        String enabledCiphers = Play.configuration.getProperty("play.ssl.enabledCiphers", "");
 
         ChannelPipeline pipeline = pipeline();
 
         // Add SSL handler first to encrypt and decrypt everything.
         SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
         engine.setUseClientMode(false);
+
+        if (enabledCiphers != null && enabledCiphers.length() > 0) {
+            engine.setEnabledCipherSuites(enabledCiphers.replaceAll(" ", "").split(","));
+        }
         
         if ("want".equalsIgnoreCase(mode)) {
             engine.setWantClientAuth(true);
