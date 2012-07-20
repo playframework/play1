@@ -66,10 +66,10 @@ public class TestRunner extends Controller {
             Play.getFile("test-result").mkdir();
             final String testname = test.substring(0, test.length() - 6);
             final TestEngine.TestResults results = await(new Job<TestEngine.TestResults>() {
-              @Override
-              public TestEngine.TestResults doJobWithResult() throws Exception {
-                return TestEngine.run(testname);
-              }
+                @Override
+                public TestEngine.TestResults doJobWithResult() throws Exception {
+                    return TestEngine.run(testname);
+                }
             }.now());
             response.status = results.passed ? 200 : 500;
             Template resultTemplate = TemplateLoader.load("TestRunner/results.html");
