@@ -907,6 +907,12 @@ public class JPAPlugin extends PlayPlugin {
 		protected ThreadLocal<Object> entities = new ThreadLocal<Object>();
 		
 		@Override
+	 	public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+			entities.remove();
+			super.onDelete(entity, id, state, propertyNames, types);
+		}
+				
+		@Override
 	 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)  {
 			entities.set(entity);
 			return super.onSave(entity, id, state, propertyNames, types);
