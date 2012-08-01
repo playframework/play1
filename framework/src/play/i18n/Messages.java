@@ -171,7 +171,9 @@ public class Messages {
     public static Properties all(String locale) {
         if(locale == null || "".equals(locale))
             return defaults;
-        return locales.get(locale);
+        Properties compound = new Properties(defaults);
+        compound.putAll(locales.get(locale));
+        return compound;
     }
 
 }
