@@ -239,7 +239,6 @@ public class Fixtures {
         } catch (ScannerException e) {
             throw new YAMLException(e, yamlFile);
         } catch (Throwable e) {
-            e.printStackTrace();
             throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
         }
     }
