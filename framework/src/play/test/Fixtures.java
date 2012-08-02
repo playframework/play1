@@ -199,7 +199,7 @@ public class Fixtures {
                     break;
                 }
             }
-            if (yamlFile == null) {
+            if (yamlFile == null || !yamlFile.exists()) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
