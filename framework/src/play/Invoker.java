@@ -381,15 +381,17 @@ public class Invoker {
                         executor.submit(invocation);
                     }
                 });
-            } else {
-                synchronized (WaitForTasksCompletion.class) {
-                    if (instance == null) {
-                        instance = new WaitForTasksCompletion();
-                        Logger.warn("Start WaitForTasksCompletion");
-                        instance.start();
-                    }
-                    instance.queue.put(task, invocation);
-                }
+            } 
+            /**
+             * all suspend task need to be added to the queue and re-invoke later
+             */
+            synchronized (WaitForTasksCompletion.class) {
+                if (instance == null) {
+                   instance = new WaitForTasksCompletion();
+                   Logger.warn("Start WaitForTasksCompletion");
+                   instance.start();
+                 }
+                instance.queue.put(task, invocation);
             }
         }
 
