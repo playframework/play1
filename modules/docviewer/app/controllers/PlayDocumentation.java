@@ -49,7 +49,7 @@ public class PlayDocumentation extends Controller {
         if (id.equals("home") && module == null) {
             for (String key : Play.modules.keySet()) {
                 VirtualFile mr = Play.modules.get(key);
-                VirtualFile home = mr.child("documentation/manual" + docLang + "home.textile");
+                VirtualFile home = mr.child("documentation/manual/" + "home.textile");
                 if (home.exists()) {
                     modules.add(key);
                 }

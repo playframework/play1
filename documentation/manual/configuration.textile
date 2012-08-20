@@ -821,6 +821,15 @@ HTTP server maximum content length for response streaming, in bytes.
 Default: none - no maximum.
 
 
+h3(#play.ssl.enabledCiphers). play.ssl.enabledCiphers
+
+This setting allows to specify certain SSL ciphers to be used. This might be needed in case you have to be PCI compliant, as some ciphers in the default settings are vulnerable to the so-called BEAST attack.
+
+bc. play.ssl.enabledCiphers=SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA
+
+Default: none - the default ciphers are chosen.
+
+
 h3(#play.pool). play.pool
 
 Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialise all requests (very useful for debugging purpose). For example:
