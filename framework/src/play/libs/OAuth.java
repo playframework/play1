@@ -171,7 +171,7 @@ public class OAuth {
             return new Response(null, null, error);
         }
         @Override public String toString() {
-            return (error == null) ? ("Error: " + error)
+            return (error != null) ? ("Error: " + error)
                                     : ("Success: " + token + " - " + secret);
         }
     }
