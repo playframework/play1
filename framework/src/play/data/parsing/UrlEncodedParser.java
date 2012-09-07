@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +13,8 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http;
 import play.mvc.results.Status;
 import play.utils.Utils;
+
+import org.apache.commons.codec.net.URLCodec;
 
 /**
  * Parse url-encoded requests.
@@ -117,16 +118,17 @@ public class UrlEncodedParser extends DataParser {
 
             // We're ready to decode the params
             Map<String, String[]> decodedParams = new HashMap<String, String[]>(params.size());
+            URLCodec codec = new URLCodec();
             for (Map.Entry<String, String[]> e : params.entrySet()) {
                 String key = e.getKey();
                 try {
-                    key = URLDecoder.decode(e.getKey(), charset);
+                    key = codec.decode(e.getKey(), charset);
                 } catch (Throwable z) {
                     // Nothing we can do about, ignore
                 }
                 for (String value : e.getValue()) {
                     try {
-                        Utils.Maps.mergeValueInMap(decodedParams, key, (value == null ? null : URLDecoder.decode(value, charset)));
+                        Utils.Maps.mergeValueInMap(decodedParams, key, (value == null ? null : codec.decode(value, charset)));
                     } catch (Throwable z) {
                         // Nothing we can do about, lets fill in with the non decoded value
                         Utils.Maps.mergeValueInMap(decodedParams, key, value);
