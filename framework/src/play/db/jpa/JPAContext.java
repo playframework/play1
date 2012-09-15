@@ -14,6 +14,7 @@ public class JPAContext {
     private JPAConfig jpaConfig;
     private EntityManager entityManager;
     private boolean readonly = true;
+    private boolean beganTransaction = true;
 
     protected JPAContext(JPAConfig jpaConfig, boolean readonly, boolean beginTransaction) {
 
@@ -29,6 +30,7 @@ public class JPAContext {
 
         entityManager = manager;
         this.readonly = readonly;
+        this.beganTransaction = beginTransaction;
     }
 
     public JPAConfig getJPAConfig() {
@@ -39,9 +41,11 @@ public class JPAContext {
      * clear current JPA context and transaction
      * @param rollback shall current transaction be committed (false) or cancelled (true)
      */
-    public void closeTx(boolean rollback) {
-
+    public void closeTx(boolean rollback) {    	
         try {
+        	// We haven't started a transaction. Do nothing except finally.
+        	if (!this.beganTransaction) return;      	
+        	
             if (entityManager.getTransaction().isActive()) {
                 if (readonly || rollback || entityManager.getTransaction().getRollbackOnly()) {
                     entityManager.getTransaction().rollback();

@@ -28,9 +28,13 @@ You can also use annotations to specify how transactions should be handled.
 
 If you annotated the method in the controller with <code>@play.db.jpa.Transactional(readOnly=true)</code>, then the transaction will be read-only.
 
+If you annotated the method in the controller with <code>@play.db.jpa.NoTransaction(readOnly=true)</code>, then Play will not create a transaction but still allows read-only query.
+
 You don't have to prevent Play from starting a transaction if you don't want any. If you do not perform any JPA actions while processing the request,
 no transaction will be created. If you would like to enforce this - you can annotate your Controller method or class with <code>@play.db.jpa.NoTransaction</code>.
 If you try to perform a JPA action in a controller annotated with <code>@play.db.jpa.NoTransaction</code>, an exception will be thrown.
+
+
 
 h2. <a name="support">The **play.db.jpa.Model** support class</a>
 
