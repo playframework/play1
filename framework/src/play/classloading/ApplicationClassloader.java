@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,8 @@ public class ApplicationClassloader extends ClassLoader {
      */
     public ProtectionDomain protectionDomain;
 
+    private final Object lock = new Object(); 
+
     public ApplicationClassloader() {
         super(ApplicationClassloader.class.getClassLoader());
         // Clean the existing classes
@@ -72,22 +75,24 @@ public class ApplicationClassloader extends ClassLoader {
      * You know ...
      */
     @Override
-    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        // Loook up our cache
         Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
 
-        // First check if it's an application Class
-        Class<?> applicationClass = loadApplicationClass(name);
-        if (applicationClass != null) {
-            if (resolve) {
-                resolveClass(applicationClass);
+        synchronized( lock ) {
+             // First check if it's an application Class
+            Class<?> applicationClass = loadApplicationClass(name);
+            if (applicationClass != null) {
+                if (resolve) {
+                    resolveClass(applicationClass);
+                }
+                return applicationClass;
             }
-            return applicationClass;
         }
-
-        // Delegate to the classic classloader
+        // Delegate tothe classic classloader
         return super.loadClass(name, resolve);
     }
 
