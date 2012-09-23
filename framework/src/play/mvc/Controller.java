@@ -152,6 +152,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static Validation validation = null;
 
     /**
+     *
+     */
+    private static ITemplateNameResolver templateNameResolver = null;
+
+    /**
      * Return a 200 OK text/plain response
      * @param text The response content
      */
@@ -711,7 +716,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
-        return templateName;
+        return null == templateNameResolver ? templateName : templateNameResolver.resolveTemplateName(templateName);
     }
 
     /**
@@ -1087,4 +1092,23 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         _currentReverse.set(actionDefinition);
         return actionDefinition;
     }
+
+    /**
+     * Register a custoer template name resolver. That letter allows to override the way templates are resolved.
+     */
+    public static void registerTemplateNameResolver(ITemplateNameResolver templateNameResolver) {
+        if (null != Controller.templateNameResolver) Logger.warn("Existing tempate name resolver will be overriden!");
+        Controller.templateNameResolver = templateNameResolver;
+    }
+
+    /**
+     * This allow people that implements their own template engine to override the way template are resolved.
+     */
+    public static interface ITemplateNameResolver {
+        /**
+         * Return the template path given a template name.
+         */
+        public String resolveTemplateName(String templateName);
+    }   
+
 }
