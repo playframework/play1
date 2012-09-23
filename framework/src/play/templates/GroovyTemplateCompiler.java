@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import play.Play;
 import play.exceptions.TemplateCompilationException;
@@ -19,7 +20,7 @@ import play.templates.GroovyInlineTags.CALL;
  */
 public class GroovyTemplateCompiler extends TemplateCompiler {
 
-    public static List<String> extensionsClassnames = new ArrayList<String>();
+    protected List<String> extensionsClassnames = new ArrayList<String>();
 
     // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
     // Have to split it if it is really that big
