@@ -313,7 +313,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         for (Map.Entry<String, Http.Header> entry : headers.entrySet()) {
             Http.Header hd = entry.getValue();
             for (String value : hd.values) {
-                nettyResponse.setHeader(entry.getKey(), value);
+                nettyResponse.addHeader(entry.getKey(), value);
             }
         }
         Map<String, Http.Cookie> cookies = response.cookies;
