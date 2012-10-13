@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
 
 import play.Logger;
 import play.Play;
@@ -22,7 +23,7 @@ public class TemplateLoader {
      * See getUniqueNumberForTemplateFile() for more info
      */
     private static AtomicLong nextUniqueNumber = new AtomicLong(1000);//we start on 1000
-    private static Map<String, String> templateFile2UniqueNumber = new HashMap<String, String>();
+    private static Map<String, String> templateFile2UniqueNumber = Collections.synchronizedMap(new HashMap<String, String>());
 
     /**
      * All loaded templates is cached in the templates-list using a key.
