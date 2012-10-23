@@ -1,5 +1,7 @@
 package play.plugins;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.junit.Test;
 import play.CorePlugin;
 import play.Play;
@@ -14,6 +16,8 @@ import play.db.jpa.JPAPlugin;
 import play.i18n.MessagesPlugin;
 import play.jobs.JobsPlugin;
 import play.libs.WS;
+import play.test.TestEngine;
+import play.test.UnitTest;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -147,6 +151,25 @@ public class PluginCollectionTest {
 
     }
 
+    @Test
+    public void verifyThatPluginsCanAddUnitTests() {
+        PluginCollection pc = new PluginCollection();
+        Play.pluginCollection = pc;
+
+        assertThat(TestEngine.allUnitTests()).isEmpty();
+        assertThat(TestEngine.allFunctionalTests()).isEmpty();
+
+        PluginWithTests p1 = new PluginWithTests();
+        PluginWithTests2 p2 = new PluginWithTests2();
+        pc.addPlugin(p1);
+        pc.addPlugin(p2);
+
+        pc.initializePlugin(p1);
+        pc.initializePlugin(p2);
+
+        assertThat(TestEngine.allUnitTests()).contains(PluginUnit.class, PluginUnit2.class);
+        assertThat(TestEngine.allFunctionalTests()).contains(PluginFunc.class, PluginFunc2.class);
+    }
 }
 
 
@@ -165,4 +188,36 @@ class LegacyPlugin extends PlayPlugin {
         }
         Play.plugins.remove( pluginToRemove);
     }
+
 }
+
+class PluginWithTests extends PlayPlugin {
+
+    @Override
+    public Collection<Class> getUnitTests() {
+        return Arrays.asList(new Class[]{PluginUnit.class});
+    }
+
+    @Override
+    public Collection<Class> getFunctionalTests() {
+        return Arrays.asList(new Class[]{PluginFunc.class});
+    }
+}
+
+class PluginWithTests2 extends PlayPlugin {
+
+    @Override
+    public Collection<Class> getUnitTests() {
+        return Arrays.asList(new Class[]{PluginUnit2.class});
+    }
+
+    @Override
+    public Collection<Class> getFunctionalTests() {
+        return Arrays.asList(new Class[]{PluginFunc2.class});
+    }
+}
+
+class PluginUnit {}
+class PluginUnit2 {}
+class PluginFunc {}
+class PluginFunc2 {}
