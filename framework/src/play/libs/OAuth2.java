@@ -18,6 +18,9 @@ import com.google.gson.JsonObject;
  */
 public class OAuth2 {
 
+	private static final String CLIENT_ID_NAME = "client_id";
+	private static final String REDIRECT_URI = "redirect_uri";
+	
     public String authorizationURL;
     public String accessTokenURL;
     public String clientid;
@@ -37,17 +40,44 @@ public class OAuth2 {
         return Params.current().get("code") != null;
     }
 
-    /**
-     * First step of the OAuth2 process: redirects the user to the authorization page
-     *
-     * @param callbackURL
-     */
-    public void retrieveVerificationCode(String callbackURL) {
-        throw new Redirect(authorizationURL
-                + "?client_id=" + clientid
-                + "&redirect_uri=" + callbackURL);
-    }
+	/**
+	 * First step of the OAuth2 process: redirects the user to the authorisation page
+	 * 
+	 * @param callbackURL
+	 */
+	public void retrieveVerificationCode(String callbackURL) {
+		retrieveVerificationCode(callbackURL, new HashMap<String, String>());
+	}
 
+	/**
+	 * First step of the oAuth2 process. This redirects the user to the authorisation page on the oAuth2 provider. This is a helper method that only takes one parameter name,value pair and then
+	 * converts them into a map to be used by {@link #retrieveVerificationCode(String, Map)}
+	 * 
+	 * @param callbackURL
+	 *            The URL to redirect the user to after authorisation
+	 * @param parameters
+	 *            Any additional parameters that weren't included in the constructor. For example you might need to add a response_type.
+	 */
+	public void retrieveVerificationCode(String callbackURL, String parameterName, String parameterValue) {
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put(parameterName, parameterValue);
+		retrieveVerificationCode(callbackURL, parameters);
+	}
+	
+	/**
+	 * First step of the oAuth2 process. This redirects the user to the authorisation page on the oAuth2 provider.
+	 * 
+	 * @param callbackURL
+	 *            The URL to redirect the user to after authorisation
+	 * @param parameters
+	 *            Any additional parameters that weren't included in the constructor. For example you might need to add a response_type.
+	 */
+	public void retrieveVerificationCode(String callbackURL, Map<String, String> parameters) {
+		parameters.put(CLIENT_ID_NAME, clientid);
+		parameters.put(REDIRECT_URI, callbackURL);
+		throw new Redirect(authorizationURL, parameters);
+	}
+    
     public void retrieveVerificationCode() {
         retrieveVerificationCode(Request.current().getBase() + Request.current().url);
     }
