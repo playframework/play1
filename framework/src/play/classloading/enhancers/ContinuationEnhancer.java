@@ -84,7 +84,6 @@ public class ContinuationEnhancer extends Enhancer {
             return false;
         }
 
-        boolean needsContinuations = false;
         final boolean[] _needsContinuations = new boolean[]{false};
 
         for (CtMethod m : ctClass.getDeclaredMethods()) {

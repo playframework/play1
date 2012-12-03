@@ -262,7 +262,7 @@ public class WSUrlFetch implements WSImpl {
         private String encoding;
 
         /**
-         * you shouldnt have to create an HttpResponse yourself
+         * you shouldn't have to create an HttpResponse yourself
          * @param method
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
