@@ -128,6 +128,7 @@ public class PlayConfigurationLoadTask {
                 }
             }
             properties.putAll(idSpecific);
+            reader.close();
             return properties;
         } catch (IOException e) {
             throw new BuildException("Failed to load configuration file: " + srcFile.getAbsolutePath(), e);

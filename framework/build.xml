@@ -247,9 +247,9 @@
         
         <echo message="Testing development lifecycle (wait ...)" />
 
-        <exec executable="python" failonerror="true">
+        <!--exec executable="python" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
-        </exec>
+        </exec-->
 
         <echo message="Using ${basedir}/../play${playExtension}" />
 
