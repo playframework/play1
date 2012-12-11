@@ -91,7 +91,7 @@ public class JPAConfig {
             // This is the first time someone tries to use JPA in this thread.
             // we must initialize it
 
-            if(Invoker.InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
+            if(Invoker.InvocationContext.current() != null && Invoker.InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
                 //Called method or class is annotated with @NoTransaction telling us that
                 //we should not start a transaction
                 throw new JPAException("Cannot create JPAContext due to @NoTransaction");
@@ -101,10 +101,13 @@ public class JPAConfig {
             if (manualReadOnly!=null) {
                 readOnly = manualReadOnly;
             } else {
-                Transactional tx = Invoker.InvocationContext.current().getAnnotation(Transactional.class);
-                if (tx != null) {
-                    readOnly = tx.readOnly();
-                }
+               Invoker.InvocationContext invocationContext = Invoker.InvocationContext.current();
+               if (invocationContext != null) {
+                  Transactional tx = invocationContext.getAnnotation(Transactional.class);
+                  if (tx != null) {
+                     readOnly = tx.readOnly();
+                  }
+               }
             }
             context = new JPAContext(this, readOnly, JPAPlugin.autoTxs);
 
