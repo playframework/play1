@@ -53,29 +53,43 @@ public class Messages {
      * @returnmessages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties find(String locale, Set<String> keys) {
-        Properties result = new Properties();
-        Properties all = all(locale);
-        // Expand the set for wildcards
-        Set<String> wildcards = new HashSet<String>();
-        for (String key: keys) {
-            if (key.endsWith("*")) wildcards.add(key);
+      Properties result = new Properties();
+      Properties all = all(locale);
+      Properties defaultAll = all(null);
+      // Expand the set for wildcards
+      Set<String> wildcards = new HashSet<String>();
+      for (String key: keys) {
+          if (key.endsWith("*")) {
+            wildcards.add(key);
+          }
+      }
+      for (String key: wildcards) {
+          keys.remove(key);
+          String start = key.substring(0, key.length() - 1);
+          for (Object key2: all.keySet()) {
+              if (((String)key2).startsWith(start)) {
+                  keys.add((String)key2);
+              }
+          }
+          for(Object key2: defaultAll.keySet()) {
+              if (((String)key2).startsWith(start)) {
+                keys.add((String)key2);
+              }
+          }
+      }
+      // Build the result
+      for (Object key: all.keySet()) {
+          if (keys.contains(key)) {
+              result.put(key, all.get(key));
+              keys.remove(key);
+          }
+      }
+      for (Object key: defaultAll.keySet()) {
+        if (keys.contains(key)) {
+          result.put(key, defaultAll.get(key));
         }
-        for (String key: wildcards) {
-            keys.remove(key);
-            String start = key.substring(0, key.length() - 1);
-            for (Object key2: all.keySet()) {
-                if (((String)key2).startsWith(start)) {
-                    keys.add((String)key2);
-                }
-            }
-        }
-        // Build the result
-        for (Object key: all.keySet()) {
-            if (keys.contains(key)) {
-                result.put(key, all.get(key));
-            }
-        }
-        return result;
+      }
+      return result;
     }
 
     public static String getMessage(String locale, Object key, Object... args) {
