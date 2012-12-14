@@ -48,8 +48,11 @@ public class Lang {
      * @return false if the language is not supported by the application
      */
     public static boolean set(String locale) {
-        if (locale.equals("") || Play.langs.contains(locale)) {
+        if (Play.langs.contains(locale)) {
             current.set(locale);
+            return true;
+        } else if(locale.equals("")) {
+            current.remove();
             return true;
         } else {
             Logger.warn("Locale %s is not defined in your application.conf", locale);
