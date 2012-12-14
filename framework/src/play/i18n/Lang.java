@@ -80,7 +80,7 @@ public class Lang {
             Response response = Response.current();
             if ( response != null ) {
                 // We have a current response in scope - set the language-cookie to store the selected language for the next requests
-                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), closestLocale);
             }
         }
 
