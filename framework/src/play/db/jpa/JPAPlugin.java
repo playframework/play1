@@ -149,55 +149,58 @@ public class JPAPlugin extends PlayPlugin {
                 }
 
                 @Override
-                public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+                public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
                        	if (o instanceof JPABase) {
-							if (entities.get() != null) {
-	                           	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-							} else {
-								return ((JPABase) o).willBeSaved;
-							}
+				//			if (entities.get() != null) {
+	                        //   	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+				//			} else {
+				//				return ((JPABase) o).willBeSaved;
+				//			}
+                       	    	return;
 	                    }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
                     }
-                    return super.onCollectionUpdate(collection, key);
+                    super.onCollectionUpdate(collection, key);
                 }
 
                 @Override
-                public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+                public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
   		           	 	if (o instanceof JPABase) {
-							if (entities.get() != null) {
-	                           	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-							} else {
-								return ((JPABase) o).willBeSaved;
-							}
+//							if (entities.get() != null) {
+//	                           	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+//							} else {
+//								return ((JPABase) o).willBeSaved;
+//							}
+  		           	 	    return;
 	                     } 
 	 				} else {
 			           	System.out.println("HOO: Case not handled !!!");
 			        }
                     
-                    return super.onCollectionRecreate(collection, key);
+                    super.onCollectionRecreate(collection, key);
                 }
 
                 @Override
-                public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+                public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
 				 	if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
 			            if (o instanceof JPABase) {
-							if (entities.get() != null) {
-                            	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-							} else {
-								return ((JPABase) o).willBeSaved;
-							}
+//							if (entities.get() != null) {
+//                            	return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
+//							} else {
+//								return ((JPABase) o).willBeSaved;
+//							}
+                        return;
                         }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
                     }
-                    return super.onCollectionRemove(collection, key);
+                    super.onCollectionRemove(collection, key);
                 }
 
 				protected ThreadLocal<Object> entities = new ThreadLocal<Object>();

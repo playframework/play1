@@ -682,6 +682,12 @@ public class WSAsync implements WSImpl {
                 request.url = url;
             }
 
+	    @Override
+	    public Object unwrap() {
+		// TODO Auto-generated method stub
+		return null;
+	    }
+
         }
 
     }
