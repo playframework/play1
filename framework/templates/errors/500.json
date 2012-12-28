@@ -1,4 +1,4 @@
 {
-    type:   '${exception?.class.name}',
-    message: '${exception?.message?.replace("'", "\'")}'
+    "type":    "${exception?.class.name}",
+    "message": "${exception?.message?.replace("\"", "\\\"")}"
 }
