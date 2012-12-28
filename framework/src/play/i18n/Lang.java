@@ -48,8 +48,11 @@ public class Lang {
      * @return false if the language is not supported by the application
      */
     public static boolean set(String locale) {
-        if (locale.equals("") || Play.langs.contains(locale)) {
+        if (Play.langs.contains(locale)) {
             current.set(locale);
+            return true;
+        } else if(locale.equals("")) {
+            current.remove();
             return true;
         } else {
             Logger.warn("Locale %s is not defined in your application.conf", locale);
@@ -80,7 +83,7 @@ public class Lang {
             Response response = Response.current();
             if ( response != null ) {
                 // We have a current response in scope - set the language-cookie to store the selected language for the next requests
-                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), closestLocale);
             }
         }
 
