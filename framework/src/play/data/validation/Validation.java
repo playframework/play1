@@ -40,7 +40,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return Collections.emptyList();
-        
+
         return new ArrayList<Error>(validation.errors) {
 
             public Error forKey(String key) {
@@ -92,7 +92,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return null;
-          
+
         for (Error error : validation.errors) {
             if (error.key!=null && error.key.equals(field)) {
                 return error;
@@ -109,7 +109,7 @@ public class Validation {
         Validation validation = current.get();
         if (validation == null)
             return Collections.emptyList();
-      
+
         List<Error> errors = new ArrayList<Error>();
         for (Error error : validation.errors) {
             if (error.key!=null && error.key.equals(field)) {
@@ -466,11 +466,10 @@ public class Validation {
     }
 
     // This does not make a lot of sense to not use Object
-    // And this not backward compatible as previously is was returning an empty
+    // And this not backward compatible as previously it was returning an empty
     // string instead of the object name.
     static String getLocalName(Object o) {
         String[] names = LVEnhancerRuntime.getParamNames().params;
-        System.out.println("getLocalName " + Arrays.toString(names));
         if(names.length > 0 && names[0] != null)
             return names[0];
         return "";
