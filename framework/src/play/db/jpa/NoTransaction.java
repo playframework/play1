@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(value={ElementType.METHOD,ElementType.TYPE})
 public @interface NoTransaction {
-
+	/** For making non-transaction readOnly JPA queries */ 
+	public boolean readOnly() default false;
 }
 
