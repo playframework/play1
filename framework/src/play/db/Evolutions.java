@@ -132,6 +132,7 @@ public class Evolutions extends PlayPlugin {
                     System.out.println("~");
                     System.out.println("~ Can't apply evolutions...");
                     System.out.println("~");
+                    System.exit(-1);
                 }
 
 
@@ -143,6 +144,7 @@ public class Evolutions extends PlayPlugin {
                 } else {
                     System.out.println("~ Can't apply evolutions...");
                     System.out.println("~");
+                    System.exit(-1);
                 }
 
             } else {

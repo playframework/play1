@@ -46,5 +46,6 @@ def execute(**kargs):
 
     java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.db.Evolutions']
 
-    subprocess.call(java_cmd, env=os.environ)
-
+    return_code = subprocess.call(java_cmd, env=os.environ)
+    if 0 != return_code:
+        sys.exit(return_code);
