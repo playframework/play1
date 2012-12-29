@@ -467,6 +467,8 @@ public class Play {
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
+                // Put it in the current context for any code that relies on having it there
+                Thread.currentThread().setContextClassLoader(classloader);
                 // Reload plugins
                 pluginCollection.reloadApplicationPlugins();
 
