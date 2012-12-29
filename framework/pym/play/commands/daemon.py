@@ -33,9 +33,13 @@ def execute(**kargs):
 def start(app, args):
     app.check()
     if os.path.exists(app.pid_path()):
-        print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(app.path), os.path.normpath(app.pid_path()))
-        print "~"
-        sys.exit(1)
+        pid = open(app.pid_path()).readline().strip()
+        if process_running(pid):
+            print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(app.path), os.path.normpath(app.pid_path()))
+            print "~"
+            sys.exit(1)
+        else:
+            os.remove(app.pid_path())
 
     sysout = app.readConf('application.log.system.out')
     sysout = sysout!='false' and sysout!='off'
@@ -146,3 +150,14 @@ def kill(pid):
             print "~ Play was not running (Process id %s not found)" % pid
             print "~"
             sys.exit(-1)
+
+def process_running(pid):
+	if os.name == 'nt':
+		print "~ FIXME: process_running not implemented for nt"
+		return True
+	else:
+		try:
+			os.kill(int(pid), 0)
+			return True
+		except OSError:
+			return False
