@@ -193,7 +193,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 				while ( i < sql.length() ) {
 					if ( sql.charAt(i) == ';' ) {
 						++i;
-						CharSequence ret = sql.subSequence(prev, i);
+						CharSequence ret = sql.subSequence(prev, i - 1);
 						prev = i;
 						return ret;
 					}

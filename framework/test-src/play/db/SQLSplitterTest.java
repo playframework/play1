@@ -14,26 +14,26 @@ public class SQLSplitterTest {
 
 	@Test
 	public void verifySkipComments() {
-		assertEquals(8, SQLSplitter.consumeComment("--hello\rSELECT * from STUDENTS;", 0));
-		assertEquals(8, SQLSplitter.consumeComment("--hello\nSELECT * from STUDENTS;", 0));
+		assertEquals(8, SQLSplitter.consumeComment("--hello\rSELECT * from STUDENTS", 0));
+		assertEquals(8, SQLSplitter.consumeComment("--hello\nSELECT * from STUDENTS", 0));
 
-		assertEquals(8, SQLSplitter.consumeComment("#hello\r\nSELECT * from STUDENTS;", 0));
-		assertEquals(7, SQLSplitter.consumeComment("#hello\rSELECT * from STUDENTS;", 0));
-		assertEquals(7, SQLSplitter.consumeComment("#hello\nSELECT * from STUDENTS;", 0));
+		assertEquals(8, SQLSplitter.consumeComment("#hello\r\nSELECT * from STUDENTS", 0));
+		assertEquals(7, SQLSplitter.consumeComment("#hello\rSELECT * from STUDENTS", 0));
+		assertEquals(7, SQLSplitter.consumeComment("#hello\nSELECT * from STUDENTS", 0));
 
-		assertEquals(8, SQLSplitter.consumeComment("/*h\r\nw*/SELECT * from STUDENTS;", 0));
-		assertEquals(9, SQLSplitter.consumeComment("/*hello*/SELECT * from STUDENTS;", 0));
+		assertEquals(8, SQLSplitter.consumeComment("/*h\r\nw*/SELECT * from STUDENTS", 0));
+		assertEquals(9, SQLSplitter.consumeComment("/*hello*/SELECT * from STUDENTS", 0));
 	}
 
 	@Test
 	public void verifyDontSkipComments() {
-		assertEquals(0, SQLSplitter.consumeComment("SELECT * from STUDENTS;", 0));
-		assertEquals(0, SQLSplitter.consumeComment("SELECT * from STUDENTS; #h", 0));
-		assertEquals(0, SQLSplitter.consumeComment("-a * from STUDENTS;", 0));
-		assertEquals(0, SQLSplitter.consumeComment("a * from STUDENTS; #h", 0));
+		assertEquals(0, SQLSplitter.consumeComment("SELECT * from STUDENTS", 0));
+		assertEquals(0, SQLSplitter.consumeComment("SELECT * from STUDENTS #h", 0));
+		assertEquals(0, SQLSplitter.consumeComment("-a * from STUDENTS", 0));
+		assertEquals(0, SQLSplitter.consumeComment("a * from STUDENTS #h", 0));
 
-		assertEquals(9, SQLSplitter.consumeComment("/*hello*/SELECT * from STUDENTS;", 9));
-		assertEquals(7, SQLSplitter.consumeComment("#hello\nSELECT * from STUDENTS;", 7));
+		assertEquals(9, SQLSplitter.consumeComment("/*hello*/SELECT * from STUDENTS", 9));
+		assertEquals(7, SQLSplitter.consumeComment("#hello\nSELECT * from STUDENTS", 7));
 	}
 	
 	@Test
@@ -79,7 +79,7 @@ public class SQLSplitterTest {
 		assertEquals(7, SQLSplitter.consumeParentheses("(c(\n)c)a", 0));
 		assertEquals(7, SQLSplitter.consumeParentheses("((')'))a", 0));
 		assertEquals(9, SQLSplitter.consumeParentheses("((/*)*/))a", 0));
-		assertEquals(14, SQLSplitter.consumeParentheses("(name varchar);", 0));
+		assertEquals(14, SQLSplitter.consumeParentheses("(name varchar)", 0));
 	}
 
 	@Test
