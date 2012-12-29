@@ -18,6 +18,7 @@ import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -670,10 +671,12 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
             if (element != null) {
-                throw new TemplateNotFoundException(templateName, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
-            } else {
-                throw ex;
+                ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
+                if (applicationClass != null) {
+                    throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
+                }
             }
+            throw ex;
         }
     }
 
