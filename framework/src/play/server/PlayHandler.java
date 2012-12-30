@@ -806,6 +806,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 }
             }
             if ((file == null || !file.exists())) {
+              if (Play.pluginCollection.serveStatic(VirtualFile.open(Play.applicationPath).child(renderStatic.file), request, response))
+                copyResponse(ctx, request, response, nettyRequest);
+              else
                 serve404(new NotFound("The file " + renderStatic.file + " does not exist"), ctx, request, nettyRequest);
             } else {
                 boolean raw = Play.pluginCollection.serveStatic(file, request, response);
