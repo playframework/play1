@@ -24,7 +24,8 @@ class PlayApplication(object):
             confFolder = os.path.join(application_path, 'conf/')
             try:
                 self.conf = PlayConfParser(confFolder, env)
-            except:
+            except Exception as err:
+                print "~ Faile to parse application configuration", err
                 self.conf = None # No app / Invalid app
         else:
             self.conf = None
@@ -332,11 +333,14 @@ class PlayConfParser:
         # process all include files
         for includeFile in includeFiles:
             # read include file
-            fromIncludeFile = self.readFile(confFolder, includeFile)
+            try:
+                fromIncludeFile = self.readFile(confFolder, self._expandValue(includeFile))
 
-            # add everything from include file 
-            for (key, value) in fromIncludeFile.items():
-                washedResult[key]=value
+                # add everything from include file 
+                for (key, value) in fromIncludeFile.items():
+                    washedResult[key]=value
+            except Exception as err:
+                print "~ Failed to load included configuration %s: %s" % (includeFile, err)
         
         return washedResult
 
@@ -360,6 +364,16 @@ class PlayConfParser:
             result.append(self.entries.get(key))
         return result
 
+    def _expandValue(self, value):
+        def expandvar(match):
+            key = match.group(1)
+            if key == 'play.id':
+                return self.id
+            else: # unkonwn
+                return '${%s}' % key
+
+        return re.sub('\${([a-z.]+)}', expandvar, value)
+        
 def hasKey(arr, elt):
     try:
         i = arr.index(elt)
