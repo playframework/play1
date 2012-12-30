@@ -39,25 +39,18 @@ public class Unbinder {
         if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
-            } else {
-                @SuppressWarnings("unchecked")
-                List<Object> objects = (List<Object>) result.get(name);
-                objects.add(src != null ? src.toString() : null);
-            }
+            } 
         } else if (src.getClass().isArray()) {
-            List<Object> objects = new ArrayList<Object>();
-            result.put(name, objects);
             Class<?> clazz = src.getClass().getComponentType();
             int size = Array.getLength(src);
             for (int i = 0; i < size; i++) {
-                unBind(result, Array.get(src, i), clazz, name, annotations);
+                unBind(result, Array.get(src, i), clazz, name + "[" + (i++) + "]", annotations);
             }
         } else if (Collection.class.isAssignableFrom(src.getClass())) {
             Collection<?> c = (Collection<?>) src;
-            List<Object> objects = new ArrayList<Object>();
-            result.put(name, objects);
+            int i = 0;
             for (Object object : c) {
-                unBind(result, object, object.getClass(), name, annotations);
+                unBind(result, object, object.getClass(), name + "[" + (i++) + "]", annotations);
             }
         } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
             // We should use the @As annotation if there is one
