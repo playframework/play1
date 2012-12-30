@@ -271,7 +271,7 @@ public class JavaExtensions {
         numberFormat.setCurrency(currency);
         numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
         String s = numberFormat.format(number);
-        s = s.replace(currencyCode, I18N.getCurrencySymbol(currencyCode));
+        s = s.replace(currencyCode + " ", I18N.getCurrencySymbol(currencyCode));
         return s;
     }
 
@@ -281,7 +281,7 @@ public class JavaExtensions {
         numberFormat.setCurrency(currency);
         numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
         String s = numberFormat.format(number);
-        s = s.replace(currency.getCurrencyCode(), currency.getSymbol(locale));
+        s = s.replace(currency.getCurrencyCode() + " ", currency.getSymbol(locale));
         return s;
     }
 
