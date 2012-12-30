@@ -53,8 +53,10 @@ def execute(**kargs):
         print "~"
         sys.exit(-1)
 
-    if isParentOf(app.path, war_path):
+    if isParentOf(app.path, war_path) and not isExcluded(war_path, war_exclusion_list):
         print "~ Oops. Please specify a destination directory outside of the application"
+        print "~ or exclude war destination directory using the --exclude option and ':'-separator "
+        print "~ (eg: --exclude .svn:target:logs:tmp)."
         print "~"
         sys.exit(-1)
 
