@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.LineNumberReader;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -358,8 +359,29 @@ public class Play {
         Properties propsFromFile=null;
 
         VirtualFile appRoot = VirtualFile.open(applicationPath);
+        VirtualFile conf;
         
-        VirtualFile conf = appRoot.child("conf/" + filename);
+        // trying to find the configuration file on classpath
+        URL resource = Play.class.getResource("/" + filename);
+        
+        if (resource == null) {
+          // file not found in classpath, read it from app
+          conf = appRoot.child("conf/" + filename);
+        } else {
+          // trying to compose File object 
+          File f;
+          
+          try {
+            f = new File(resource.toURI());
+          } catch (URISyntaxException e) {
+            f = new File(resource.getPath());
+          }
+          
+          Logger.info("Reading the configuration file %s", f);
+          
+          conf = VirtualFile.open(f);
+        }
+        
         if (confs.contains(conf)) {
             throw new RuntimeException("Detected recursive @include usage. Have seen the file " + filename + " before");
         }
