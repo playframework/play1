@@ -73,6 +73,7 @@ public class GroovyInlineTags {
                 s.append("if(!attrs").append(index).append("['as']) {attrs").append(index).append("['as'] = '';};");
                 s.append("if(!attrs").append(index).append("['items']) {attrs").append(index).append("['items'] = attrs").append(index).append("['arg'];};");
                 s.append("if(attrs").append(index).append("['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
+		s.append("setProperty('template_scoped_'+attrs").append(index).append("['as'],getProperty(attrs").append(index).append("['as']));");
                 s.append("_iter").append(index).append(" = attrs").append(index).append("['items'].iterator();");
                 s.append("for (_").append(index).append("_i = 1; _iter").append(index).append(".hasNext(); _").append(index).append("_i++) {");
                 s.append("_item").append(index).append(" = _iter").append(index).append(".next();");
@@ -84,6 +85,7 @@ public class GroovyInlineTags {
                 break;
             case END:
                 s.append("};");
+		s.append("setProperty(attrs").append(index).append("['as'],getProperty('template_scoped_'+attrs").append(index).append("['as']));");
                 s.append("} else { play.templates.TagContext.parent().data.put('_executeNextElse', true); }");
                 break;
         }
