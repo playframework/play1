@@ -246,12 +246,6 @@ public class Fixtures {
                                 if (f.getType().isAssignableFrom(Map.class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
                                 }
-                                if (f.getType().isAssignableFrom(List.class)) {
-				    // Each element of values is likely a LinkedHashMap.
-				    @SuppressWarnings("unchecked")
-				    List values = (List) objects.get(key).get(f.getName());
-                                    f.set(model, values);
-                                }
                                 if (f.getType().equals(byte[].class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
                                 }
@@ -473,13 +467,10 @@ public class Fixtures {
 
 
         // Iterate through the Entity property list
-	List<Model.Property> modelFields;
-
-	if ( play.db.jpa.GenericModel.class.isAssignableFrom(type) ) {
-	    modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
-	} else {
-	    modelFields =  Model.Manager.factoryFor(type).listProperties();
-	}
+        // @Embedded are not managed by the JPA plugin
+        // This is not the nicest way of doing things.
+         //modelFields =  Model.Manager.factoryFor(type).listProperties();
+        final List<Model.Property> modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
 
         for (Model.Property field : modelFields) {
             // If we have a relation, get the matching object
