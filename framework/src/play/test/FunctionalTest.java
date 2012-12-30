@@ -67,13 +67,19 @@ public abstract class FunctionalTest extends BaseTest {
         Response response = GET(url);
         if (Http.StatusCode.FOUND == response.status && followRedirect) {
             Http.Header redirectedTo = response.headers.get("Location");
-            java.net.URL redirectedUrl = null;
-            try {
-                redirectedUrl = new java.net.URL(redirectedTo.value());
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+            String location = redirectedTo.value();
+            if(location.contains("http")){
+            	java.net.URL redirectedUrl = null;
+            	try {
+            		redirectedUrl = new java.net.URL(redirectedTo.value());
+            	} catch (MalformedURLException e) {
+            		throw new RuntimeException(e);
+            	}
+            	response = GET(redirectedUrl.getPath());
             }
-            response = GET(redirectedUrl.getPath());
+            else{
+            	response = GET(location);
+            }
         }
         return response;
     }
@@ -171,7 +177,8 @@ public abstract class FunctionalTest extends BaseTest {
         List<Part> parts = new ArrayList<Part>();
 
         for (String key : parameters.keySet()) {
-            parts.add(new StringPart(key, parameters.get(key)));
+            final StringPart stringPart = new StringPart(key, parameters.get(key), request.encoding);
+            parts.add(stringPart);
         }
 
         for (String key : files.keySet()) {
