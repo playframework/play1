@@ -315,7 +315,11 @@
 
                 var runNextTest = function() {
                     if($(document.body).is('.running')) {
-                        var test = $('.test.selected:not(.passed,.failed):first');
+
+                        var test = $('.test.selected.runFirst');
+                        if(!test.size()) {
+                            test = $('.test.selected:not(.passed,.failed):first');
+                        }
                         if(test.size()) {
                             var testId = test.attr('id');
                             runTest(testId, test);
@@ -402,7 +406,7 @@
                 };
                                 
                 var testSuccess = function(test, result) {
-                    test.removeClass('passing').addClass('passed');
+                    test.removeClass('passing').addClass('passed').removeClass('runFirst');
                     $('.touch', test).html('+');
                     $('.testResult', test).html(result);
 					window.top.document.title = title;
@@ -410,7 +414,7 @@
                 };
                                 
                 var testFail = function(test, result) {
-                    test.removeClass('passing').addClass('failed');
+                    test.removeClass('passing').addClass('failed').removeClass('runFirst');
                     $('.touch', test).html('-');
                     $('.testResult', test).html(result).show();
 					window.top.document.title = title;
@@ -437,6 +441,7 @@
                         $('#bms').hide();
                         $('#quickLinks').show();
                     }
+                    $('.test.failed').addClass('runFirst');
                     $('.test, #header').removeClass('passed').removeClass('failed');
                     $('.touch').html('&sim;');
                     $('.testResult').hide();
