@@ -53,15 +53,22 @@ def execute(**kargs):
         print "~"
         sys.exit(-1)
 
-    if isParentOf(app.path, war_path):
+    if isParentOf(app.path, war_path) and not isExcluded(war_path, war_exclusion_list):
         print "~ Oops. Please specify a destination directory outside of the application"
+        print "~ or exclude war destination directory using the --exclude option and ':'-separator "
+        print "~ (eg: --exclude .svn:target:logs:tmp)."
         print "~"
         sys.exit(-1)
 
     # Precompile first
-    play.commands.precompile.execute(command=command, app=app, args=args, env=env)
+    precompilation_result = play.commands.precompile.execute(command=command, app=app, args=args, env=env)
 
-    # Package 
+    if precompilation_result != 0:
+        print "~ Please fix compilation errors before packaging WAR"
+        print "~"
+        sys.exit(precompilation_result)
+
+    # Package
     package_as_war(app, env, war_path, war_zip_path, war_exclusion_list)
 
     print "~ Done !"
