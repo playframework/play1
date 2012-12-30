@@ -6,6 +6,7 @@ import org.apache.commons.mail.EmailException;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
+import play.libs.mail.*;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -13,6 +14,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.*;
@@ -22,9 +24,25 @@ import java.util.concurrent.*;
  */
 public class Mail {
 
-    public static Session session;
-    public static boolean asynchronousSend = true;
+    private static class StaticMailSystemFactory extends
+            AbstractMailSystemFactory {
 
+        private final MailSystem mailSystem;
+
+        public StaticMailSystemFactory(MailSystem mailSystem) {
+            this.mailSystem = mailSystem;
+        }
+
+        @Override
+        public MailSystem currentMailSystem() {
+            return mailSystem;
+        }
+
+    }
+
+    public    static Session session;
+    public    static boolean asynchronousSend = true;
+    protected static AbstractMailSystemFactory mailSystemFactory = AbstractMailSystemFactory.DEFAULT;
 
     /**
      * Send an email
@@ -32,43 +50,32 @@ public class Mail {
     public static Future<Boolean> send(Email email) {
         try {
             email = buildMessage(email);
-
-            if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
-                Mock.send(email);
-                return new Future<Boolean>() {
-
-                    public boolean cancel(boolean mayInterruptIfRunning) {
-                        return false;
-                    }
-
-                    public boolean isCancelled() {
-                        return false;
-                    }
-
-                    public boolean isDone() {
-                        return true;
-                    }
-
-                    public Boolean get() throws InterruptedException, ExecutionException {
-                        return true;
-                    }
-
-                    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                        return true;
-                    }
-                };
-            }
-
-            email.setMailSession(getSession());
-            return sendMessage(email);
+            return currentMailSystem().sendMessage(email);
         } catch (EmailException ex) {
             throw new MailException("Cannot send email", ex);
         }
     }
 
+    // Helper method for better readability
+    protected static MailSystem currentMailSystem() {
+        return mailSystemFactory.currentMailSystem();
+    }
+
     /**
+     * Through this method you can substitute the current MailSystem. This is
+     * especially helpful for testing purposes like using mock libraries.
      *
+     * @author Andreas Simon <a.simon@quagilis.de>
+     * @see    MailSystem
      */
+    public static void useMailSystem(MailSystem mailSystem) {
+        mailSystemFactory = new StaticMailSystemFactory(mailSystem);
+    }
+
+    public static void resetMailSystem() {
+        mailSystemFactory = AbstractMailSystemFactory.DEFAULT;
+    }
+
     public static Email buildMessage(Email email) throws EmailException {
 
         String from = Play.configuration.getProperty("mail.smtp.from");
@@ -241,6 +248,22 @@ public class Mail {
         }
     }
 
+    public static class LegacyMockMailSystem implements MailSystem {
+
+        @Override
+        public Future<Boolean> sendMessage(Email email) {
+            Mock.send(email);
+            return new ImmediateFuture();
+        }
+
+    }
+
+    /**
+     * Just kept for compatibility reasons, use test double substitution mechanism instead.
+     *
+     * @see    Mail#useMailSystem(MailSystem)
+     * @author Andreas Simon <a.simon@quagilis.de>
+     */
     public static class Mock {
 
         static Map<String, String> emails = new HashMap<String, String>();
@@ -304,28 +327,11 @@ public class Mail {
 
                 content.append("\n\tFrom: " + email.getFromAddress().getAddress());
                 content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
-                content.append("\n\tTo: ");
-                for (Object add : email.getToAddresses()) {
-                    content.append(add.toString() + ", ");
-                }
-                // remove the last ,
-                content.delete(content.length() - 2, content.length());
-                if (email.getCcAddresses() != null && !email.getCcAddresses().isEmpty()) {
-                    content.append("\n\tCc: ");
-                    for (Object add : email.getCcAddresses()) {
-                        content.append(add.toString() + ", ");
-                    }
-                    // remove the last ,
-                    content.delete(content.length() - 2, content.length());
-                }
-                 if (email.getBccAddresses() != null && !email.getBccAddresses().isEmpty()) {
-                    content.append("\n\tBcc: ");
-                    for (Object add : email.getBccAddresses()) {
-                        content.append(add.toString() + ", ");
-                    }
-                    // remove the last ,
-                    content.delete(content.length() - 2, content.length());
-                }
+
+                addAddresses(content, "To",  email.getToAddresses());
+                addAddresses(content, "Cc",  email.getCcAddresses());
+                addAddresses(content, "Bcc", email.getBccAddresses());
+
                 content.append("\n\tSubject: " + email.getSubject());
                 content.append("\n\t" + body);
 
@@ -341,6 +347,23 @@ public class Mail {
                 Logger.error(e, "error sending mock email");
             }
 
+        }
+
+
+        private static void addAddresses(final StringBuffer content,
+                String header, List<?> ccAddresses) {
+            if (ccAddresses != null && !ccAddresses.isEmpty()) {
+                content.append("\n\t" + header + ": ");
+                for (Object add : ccAddresses) {
+                    content.append(add.toString() + ", ");
+                }
+                removeTheLastComma(content);
+            }
+        }
+
+
+        private static void removeTheLastComma(final StringBuffer content) {
+            content.delete(content.length() - 2, content.length());
         }
 
         public static String getLastMessageReceivedBy(String email) {
