@@ -247,11 +247,13 @@ def list(app, args):
     print "~ play install module (eg: play install scala)"
     print "~"
 
+
 def build(app, args, env):
     ftb = env["basedir"]
     version = None
     name = None
     fwkMatch = None
+    origModuleDefinition = None
 
     try:
         optlist, args = getopt.getopt(args, '', ['framework=', 'version=', 'require='])
@@ -271,10 +273,13 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         deps = yaml.load(f.read())
-        self = deps["self"].split(" ")
-        versionCandidate = self.pop()
-        name = self.pop()
-        version = versionCandidate
+	if 'self' in deps:
+           splitted = deps["self"].split(" -> ")
+           if len(splitted) == 2:
+            	nameAndVersion = splitted.pop().strip()
+                splitted = nameAndVersion.split(" ")
+                if len(splitted) == 2:
+                   version = splitted.pop()
         for dep in deps["require"]:
             if isinstance(dep, basestring):
                 splitted = dep.split(" ")
@@ -288,6 +293,25 @@ def build(app, args, env):
         version = raw_input("~ What is the module version number? ")
     if fwkMatch is None:
         fwkMatch = raw_input("~ What are the playframework versions required? ")
+
+    if os.path.exists(deps_file):
+        f = open(deps_file)
+        deps = yaml.load(f.read())
+	if 'self' in deps:
+           splitted = deps["self"].split(" -> ")
+           f.close()
+           if len(splitted) == 2:
+               nameAndVersion = splitted.pop().strip()
+               splitted = nameAndVersion.split(" ")
+               if len(splitted) == 1:
+                  try:
+                    deps = open(deps_file).read()
+                    origModuleDefinition = re.search(r'self:\s*(.*)\s*', deps).group(1)
+                    modifiedModuleDefinition = '%s %s' % (origModuleDefinition, version)
+                    replaceAll(deps_file, origModuleDefinition, modifiedModuleDefinition)
+                  except:
+                    pass
+        
 
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
@@ -323,6 +347,13 @@ def build(app, args, env):
     zip.close()
 
     os.remove(manifest)
+    
+    # Reset the module definition
+    if origModuleDefinition:
+        try:
+            replaceAll(deps_file, '%s %s' % (origModuleDefinition, version), origModuleDefinition)
+        except:
+            pass
 
     print "~"
     print "~ Done!"

@@ -1,6 +1,8 @@
 package play.templates;
 
 import groovy.lang.Closure;
+
+import java.beans.PropertyDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.ElementType;
@@ -14,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Error;
@@ -146,22 +149,12 @@ public class FastTags {
         Object obj = body.getProperty(pieces[0]);
         if(obj != null){
             if(pieces.length > 1){
-                for(int i = 1; i < pieces.length; i++){
-                    try{
-                        Field f = obj.getClass().getField(pieces[i]);
-                        if(i == (pieces.length-1)){
-                            try{
-                                Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
-                                field.put("value", getter.invoke(obj, new Object[0]));
-                            }catch(NoSuchMethodException e){
-                                field.put("value",f.get(obj).toString());
-                            }
-                        }else{
-                            obj = f.get(obj);
-                        }
-                    }catch(Exception e){
-                        // if there is a problem reading the field we dont set any value
-                    }
+                try{
+                	String path = _arg.substring(_arg.indexOf(".") + 1);
+                	Object value = PropertyUtils.getProperty(obj, path);
+              		field.put("value", value);
+                }catch(Exception e){
+                	// if there is a problem reading the field we dont set any value
                 }
             }else{
                 field.put("value", obj);

@@ -174,10 +174,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 if (Play.mode == Play.Mode.DEV) {
                     Router.detectChanges(Play.ctxPath);
                 }
-                if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
+                if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.domain + " " + request.method + " " + request.path)) {
                     RenderStatic rs = null;
                     synchronized (staticPathsCache) {
-                        rs = staticPathsCache.get(request.path);
+                        rs = staticPathsCache.get(request.domain + " " + request.method + " " + request.path);
                     }
                     serveStatic(rs, ctx, request, response, nettyRequest, event);
                     if (Logger.isTraceEnabled()) {
@@ -196,7 +196,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             } catch (RenderStatic rs) {
                 if (Play.mode == Play.Mode.PROD) {
                     synchronized (staticPathsCache) {
-                        staticPathsCache.put(request.path, rs);
+                        staticPathsCache.put(request.domain + " " + request.method + " " + request.path, rs);
                     }
                 }
                 serveStatic(rs, ctx, request, response, nettyRequest, this.event);
@@ -918,9 +918,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         message.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
-    // ~~~~~~~~~~~ Chunked response
-    final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
-
+  
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
         private boolean closed = false;
@@ -979,7 +977,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 copyResponse(ctx, playRequest, playResponse, nettyRequest);
             }
             ((LazyChunkedInput) playResponse.direct).writeChunk(chunk);
-            chunkedWriteHandler.resumeTransfer();
+            if (Server.pipelines.get("ChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)Server.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
+            }
+             if (Server.pipelines.get("SslChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)Server.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -988,7 +991,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public void closeChunked(Request playRequest, Response playResponse, ChannelHandlerContext ctx, HttpRequest nettyRequest) {
         try {
             ((LazyChunkedInput) playResponse.direct).close();
-            chunkedWriteHandler.resumeTransfer();
+            if (Server.pipelines.get("ChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)Server.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
+            }
+             if (Server.pipelines.get("SslChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)Server.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

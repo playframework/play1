@@ -167,8 +167,8 @@ public class PluginCollectionTest {
         pc.initializePlugin(p1);
         pc.initializePlugin(p2);
 
-        assertThat(TestEngine.allUnitTests()).contains(PluginUnitTest.class, PluginUnitTest2.class);
-        assertThat(TestEngine.allFunctionalTests()).contains(PluginFuncTest.class, PluginFuncTest2.class);
+        assertThat(TestEngine.allUnitTests()).contains(PluginUnit.class, PluginUnit2.class);
+        assertThat(TestEngine.allFunctionalTests()).contains(PluginFunc.class, PluginFunc2.class);
     }
 }
 
@@ -195,12 +195,12 @@ class PluginWithTests extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnitTest.class});
+        return Arrays.asList(new Class[]{PluginUnit.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFuncTest.class});
+        return Arrays.asList(new Class[]{PluginFunc.class});
     }
 }
 
@@ -208,16 +208,16 @@ class PluginWithTests2 extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnitTest2.class});
+        return Arrays.asList(new Class[]{PluginUnit2.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFuncTest2.class});
+        return Arrays.asList(new Class[]{PluginFunc2.class});
     }
 }
 
-class PluginUnitTest {}
-class PluginUnitTest2 {}
-class PluginFuncTest {}
-class PluginFuncTest2 {}
+class PluginUnit {}
+class PluginUnit2 {}
+class PluginFunc {}
+class PluginFunc2 {}

@@ -12,15 +12,20 @@ import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 import play.Play;
 import play.server.FlashPolicyHandler;
 import play.server.StreamChunkAggregator;
+import play.server.HttpServerPipelineFactory;
+import org.jboss.netty.channel.ChannelHandler;
+import play.Logger;
+import play.server.Server;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
 
-public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
+public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
+
+    private String pipelineConfig = Play.configuration.getProperty("play.ssl.netty.pipeline", "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
 
     public ChannelPipeline getPipeline() throws Exception {
 
-        Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
         String mode = Play.configuration.getProperty("play.netty.clientAuth", "none");
         String enabledCiphers = Play.configuration.getProperty("play.ssl.enabledCiphers", "");
 
@@ -42,14 +47,32 @@ public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
         
         engine.setEnableSessionCreation(true);
 
-        pipeline.addLast("flashPolicy", new FlashPolicyHandler());
         pipeline.addLast("ssl", new SslHandler(engine));
-        pipeline.addLast("decoder", new HttpRequestDecoder());
-        pipeline.addLast("aggregator", new StreamChunkAggregator(max));
-        pipeline.addLast("encoder", new HttpResponseEncoder());
-        pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());
+        
+        // Get all the pipeline. Give the user the opportunity to add their own
+        String[] handlers = pipelineConfig.split(",");
+        for (int i = 0; i < handlers.length - 1; i++) {
+            String handler = handlers[i];
+            try {
+                String name = getName(handler.trim());
+                ChannelHandler instance = getInstance(handler);
+                if (instance != null) {
+                    pipeline.addLast(name, instance); 
+                    Server.pipelines.put("Ssl" + name, instance);
+                }
+            } catch(Throwable e) {
+                Logger.error(" error adding " + handler, e);
+            }
 
-        pipeline.addLast("handler", new SslPlayHandler());
+        }
+
+        // The last one is always the play handler
+        String handler = handlers[handlers.length - 1];
+        ChannelHandler instance = getInstance(handler);
+        if (instance != null) {
+            pipeline.addLast("handler", instance); 
+            Server.pipelines.put("SslHandler", instance);
+        }
 
         return pipeline;
     }
