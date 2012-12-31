@@ -56,8 +56,8 @@ public class Redirect extends Result {
 
     public void apply(Request request, Response response) {
         try {
-            if (url.startsWith("http")) {
-                //
+	    // do not touch any valid uri: http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.30 
+	    if (url.matches("^\\w+://.*")) {
             } else if (url.startsWith("/")) {
                 url = String.format("http%s://%s%s%s", request.secure ? "s" : "", request.domain, (request.port == 80 || request.port == 443) ? "" : ":" + request.port, url);
             } else {
