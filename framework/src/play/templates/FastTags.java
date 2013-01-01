@@ -114,13 +114,17 @@ public class FastTags {
         if (args.containsKey("method")) {
             actionDef.method = args.get("method").toString();
         }
+	    String name = null;
+	    if (args.containsKey("name")) {
+            name = args.get("name").toString();
+        }
         if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + (name != null?"name=\"" + name + "\"":"") +  ">");
         if (!("GET".equals(actionDef.method))) {
             _authenticityToken(args, body, out, template, fromLine);
         }
