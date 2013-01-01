@@ -48,12 +48,17 @@ public class RenderJson extends Result {
     }
 
     //
-    static Method getMethod(Class<?> clazz, String name) {
-        for (Method m : clazz.getDeclaredMethods()) {
-            if (m.getName().equals(name) && !m.isBridge()) {
-                return m;
+    static Method getMethod(Class clazz, String methodName) {
+        Method bestMatch = null;
+        for(Method m : clazz.getDeclaredMethods()) {
+            if (m.getName().equals(methodName) && !m.isBridge()) {
+                if (bestMatch == null || !Object.class.equals(m.getParameterTypes()[0])) {
+                    bestMatch = m;
+                }
             }
         }
-        return null;
+        return bestMatch;
     }
+
+
 }
