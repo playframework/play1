@@ -1,10 +1,10 @@
 package application;
 
 import org.junit.Test;
-import play.test.ApplicationTest;
+import play.test.FunctionalTest;
 import play.mvc.Http.Response;
 
-public class SomeTests extends ApplicationTest {
+public class SomeTests extends FunctionalTest {
 
   @Test
   public void fakeTest() {
@@ -22,7 +22,7 @@ public class SomeTests extends ApplicationTest {
     // check the declared charset encoding
     assertCharset(play.Play.defaultWebEncoding, response);
     // check some content in the page. may also test a regexp
-    assertContentMatch("<h1>It works !</h1>", response);
+    assertContentMatch("<h1>Validation samples</h1>", response);
   }
 }
 
