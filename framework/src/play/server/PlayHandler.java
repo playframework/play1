@@ -316,6 +316,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 nettyResponse.addHeader(entry.getKey(), value);
             }
         }
+
+        nettyResponse.setHeader(DATE, Utils.getHttpDateFormatter().format(new Date()));
+
         Map<String, Http.Cookie> cookies = response.cookies;
 
         for (Http.Cookie cookie : cookies.values()) {
