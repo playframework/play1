@@ -130,7 +130,7 @@ public class DependenciesManager {
         } else if (!notSync.isEmpty()) {
             System.out.println("~");
             System.out.println("~ *****************************************************************************");
-            System.out.println("~ WARNING: Your lib/ and modules/ directories and not synced with current dependencies (use --sync to automatically delete them)");
+            System.out.println("~ WARNING: Your lib/ and modules/ directories are not synced with current dependencies (use --sync to automatically delete them)");
             System.out.println("~");
             for (File f : notSync) {
                 System.out.println("~ \tUnknown: " + f.getAbsolutePath());
