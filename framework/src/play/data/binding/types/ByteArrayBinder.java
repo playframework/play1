@@ -18,10 +18,15 @@ public class ByteArrayBinder implements TypeBinder<byte[]> {
         if (value == null || value.trim().length() == 0) {
             return null;
         }
-        List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-        for (Upload upload : uploads) {
-            if (upload.getFieldName().equals(value)) {
-                return upload.asBytes();
+        Request req = Request.current();
+        if (req != null && req.args != null) {
+            List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
+            if(uploads != null){
+                for (Upload upload : uploads) {
+                    if (upload.getFieldName().equals(value)) {
+                        return upload.asBytes();
+                    }
+                }
             }
         }
         return null;

@@ -19,15 +19,21 @@ public class BinaryBinder implements TypeBinder<Model.BinaryField> {
             return null;
         }
         try {
-            Model.BinaryField b = (Model.BinaryField) actualClass.newInstance();
-            List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-            for (Upload upload : uploads) {
-                if (upload.getFieldName().equals(value) && upload.getSize() > 0) {
-                    b.set(upload.asStream(), upload.getContentType());
-                    return b;
+            Request req = Request.current();
+            if (req != null && req.args != null) {
+                Model.BinaryField b = (Model.BinaryField) actualClass.newInstance();
+                List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
+                if(uploads != null){
+                    for (Upload upload : uploads) {
+                        if (upload.getFieldName().equals(value) && upload.getSize() > 0) {
+                            b.set(upload.asStream(), upload.getContentType());
+                            return b;
+                        }
+                    }
                 }
             }
-            if (Params.current().get(value + "_delete_") != null) {
+
+            if (Params.current() != null && Params.current().get(value + "_delete_") != null) {
                 return null;
             }
             return Binder.MISSING;
