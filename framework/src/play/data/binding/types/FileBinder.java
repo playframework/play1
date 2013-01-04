@@ -18,14 +18,19 @@ public class FileBinder implements TypeBinder<File> {
         if (value == null || value.trim().length() == 0) {
             return null;
         }
-        List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-        for (Upload upload : uploads) {
-            if (upload.getFieldName().equals(value)) {
-                File file = upload.asFile();
-                if (file.length() > 0) {
-                    return file;
+        Request req = Request.current();
+        if (req != null && req.args != null) {
+            List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
+            if(uploads != null){
+                for (Upload upload : uploads) {
+                    if (upload.getFieldName().equals(value)) {
+                        File file = upload.asFile();
+                        if (file.length() > 0) {
+                            return file;
+                        }
+                        return null;
+                    }
                 }
-                return null;
             }
         }
         return null;
