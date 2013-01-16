@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.deps.DependenciesManager;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
@@ -718,31 +719,42 @@ public class Play {
             }
         }
 
-        // Load modules from modules/ directory
-        File localModules = Play.getFile("modules");
-        if (localModules.exists() && localModules.isDirectory()) {
-            for (File module : localModules.listFiles()) {
-                String moduleName = module.getName();
-		if (moduleName.startsWith(".")) {
-			Logger.info("Module %s is ignored, name starts with a dot", moduleName);
-			continue;
-		}
-                if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
-                }
-                if (module.isDirectory()) {
-                    addModule(moduleName, module);
-                } else {
-                    File modulePath = new File(IO.readContentAsString(module).trim());
-                    if (!modulePath.exists() || !modulePath.isDirectory()) {
-                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                    } else {
-                        addModule(moduleName, modulePath);
-                    }
+        // Load modules from modules/ directory, but get the order from the dependencies.yml file
+		// .listFiles() returns items in an OS dependant sequence, which is bad
+		// See #781
+		// the yaml parser wants play.version as an environment variable
+		System.setProperty("play.version", Play.version);
+		DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, null);
 
-                }
-            }
-        }
+		File localModules = Play.getFile("modules");
+		List<String> modules = new ArrayList<String>();
+		if (localModules.exists() && localModules.isDirectory()) {
+			try {
+				modules = dm.retrieveModules();
+			} catch (Exception e) {
+			}
+			for (Iterator iter = modules.iterator(); iter.hasNext();) {
+				String moduleName = (String) iter.next();
+
+				File module = new File(localModules, moduleName);
+
+				if (moduleName.contains("-")) {
+					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+				}
+
+				if (module.isDirectory()) {
+					addModule(moduleName, module);
+				} else {
+					File modulePath = new File(IO.readContentAsString(module).trim());
+					if (!modulePath.exists() || !modulePath.isDirectory()) {
+						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+					} else {
+						addModule(moduleName, modulePath);
+					}
+				}
+			}
+		}
+
         // Auto add special modules
         if (Play.runningInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
