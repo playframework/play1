@@ -240,8 +240,13 @@ public class Play {
         }
 
         // Mode
-        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        if (usePrecompiled || forceProd) {
+		try {
+        	mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+		} catch (IllegalArgumentException e) {
+			Logger.info("Illegal mode '%s', defaulting to DEV", configuration.getProperty("application.mode"));
+			mode = Mode.DEV;
+		}
+		if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
 
