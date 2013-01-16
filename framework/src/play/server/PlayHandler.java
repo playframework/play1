@@ -337,7 +337,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             nettyResponse.addHeader(SET_COOKIE, encoder.encode());
         }
 
-        if (!response.headers.containsKey(CACHE_CONTROL) && !response.headers.containsKey(EXPIRES)) {
+        if (!response.headers.containsKey(CACHE_CONTROL) && !response.headers.containsKey(EXPIRES) && !(response.direct instanceof File)) {
             nettyResponse.setHeader(CACHE_CONTROL, "no-cache");
         }
 
@@ -959,12 +959,15 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (Play.mode == Play.Mode.DEV) {
             httpResponse.setHeader(CACHE_CONTROL, "no-cache");
         } else {
-            String maxAge = Play.configuration.getProperty("http.cacheControl", "3600");
-            if (maxAge.equals("0")) {
-                httpResponse.setHeader(CACHE_CONTROL, "no-cache");
-            } else {
-                httpResponse.setHeader(CACHE_CONTROL, "max-age=" + maxAge);
-            }
+			// Check if Cache-Control header is not set
+			if (httpResponse.getHeader(CACHE_CONTROL) == null) {
+            	String maxAge = Play.configuration.getProperty("http.cacheControl", "3600");
+            	if (maxAge.equals("0")) {
+               		httpResponse.setHeader(CACHE_CONTROL, "no-cache");
+            	} else {
+                	httpResponse.setHeader(CACHE_CONTROL, "max-age=" + maxAge);
+            	}
+			}
         }
         boolean useEtag = Play.configuration.getProperty("http.useETag", "true").equals("true");
         long last = file.lastModified();
