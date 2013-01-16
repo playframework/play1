@@ -75,6 +75,7 @@ public class Scope {
             try {
                 StringBuilder flash = new StringBuilder();
                 for (String key : out.keySet()) {
+                    if (out.get(key) == null) continue;
                     flash.append("\u0000");
                     flash.append(key);
                     flash.append(":");
