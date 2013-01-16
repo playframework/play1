@@ -158,6 +158,39 @@ public class DependenciesManager {
         return false;
     }
 
+	public List<String> retrieveModules() throws Exception {
+		ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
+		File ivyModule = new File(application, "conf/dependencies.yml");
+		ResolveReport report;
+		List<String> modules = new ArrayList<String>();
+
+		System.setProperty("play.path", framework.getAbsolutePath());
+		Ivy ivy = configure();
+
+		ResolveEngine resolveEngine = ivy.getResolveEngine();
+		ResolveOptions resolveOptions = new ResolveOptions();
+		resolveOptions.setConfs(new String[]{"default"});
+		resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
+
+		report = resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
+
+		for (Iterator iter = report.getDependencies().iterator(); iter.hasNext(); ) {
+			IvyNode node = (IvyNode) iter.next();
+			if (node.isLoaded()) {
+				ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
+				for (ArtifactDownloadReport artifact : adr) {
+					if (artifact.getLocalFile() != null) {
+						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
+							modules.add(artifact.getLocalFile().getName());
+						}
+					}
+				}
+			}
+		}
+
+		return modules;
+	}
+
     public List<File> retrieve(ResolveReport report) throws Exception {
 
         // Track missing artifacts
