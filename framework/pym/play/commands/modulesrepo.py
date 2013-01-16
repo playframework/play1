@@ -207,8 +207,7 @@ def new(app, args, play_env):
     os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
 
     print "~ OK, the module is created."
-    print "~ Start using it by adding this line in the application.conf modules list: "
-    print "~ module.%s=%s" % (application_name, os.path.normpath(app.path))
+    print "~ Start using it by adding it to the dependencies.yml of your project, as decribed in the documentation."
     print "~"
     print "~ Have fun!"
     print "~"
