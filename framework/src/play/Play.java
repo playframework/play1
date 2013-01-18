@@ -732,6 +732,8 @@ public class Play {
 			try {
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
+				throw new UnexpectedException("There was a problem parsing dependencies.yml");
+				
 			}
 			for (Iterator iter = modules.iterator(); iter.hasNext();) {
 				String moduleName = (String) iter.next();
