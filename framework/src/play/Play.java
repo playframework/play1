@@ -243,8 +243,8 @@ public class Play {
 		try {
         	mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
 		} catch (IllegalArgumentException e) {
-			Logger.info("Illegal mode '%s', defaulting to DEV", configuration.getProperty("application.mode"));
-			mode = Mode.DEV;
+			Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
+			fatalServerErrorOccurred();
 		}
 		if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
