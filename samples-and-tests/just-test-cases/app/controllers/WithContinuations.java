@@ -41,7 +41,7 @@ public class WithContinuations extends Controller {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
             await(100);
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 1000;
+            boolean delay = System.currentTimeMillis() - s > 100;
             sb.append(i + ":" + delay);
         }
         renderText(sb);
@@ -188,7 +188,7 @@ public class WithContinuations extends Controller {
                 if(i.get() > 5) {
                     renderText(sb);
                 } else {
-                    boolean delay = System.currentTimeMillis() - s.get() > 100 && System.currentTimeMillis() - s.get() < 150;
+                    boolean delay = System.currentTimeMillis() - s.get() > 100;
                     sb.append(i + ":" + delay);
                     s.set(System.currentTimeMillis());
                     await(100, this);
