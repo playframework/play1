@@ -702,22 +702,6 @@ public class Play {
                 }
             }
         }
-        for (Object key : configuration.keySet()) {
-            String pName = key.toString();
-            if (pName.startsWith("module.")) {
-                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
-                String moduleName = pName.substring(7);
-                File modulePath = new File(configuration.getProperty(pName));
-                if (!modulePath.isAbsolute()) {
-                    modulePath = new File(applicationPath, configuration.getProperty(pName));
-                }
-                if (!modulePath.exists() || !modulePath.isDirectory()) {
-                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                } else {
-                    addModule(moduleName, modulePath);
-                }
-            }
-        }
 
         // Load modules from modules/ directory, but get the order from the dependencies.yml file
 		// .listFiles() returns items in an OS dependant sequence, which is bad
