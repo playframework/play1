@@ -538,7 +538,7 @@ public class Http {
             });
             List<String> result = new ArrayList<String>(10);
             for (String lang : languages) {
-                result.add(lang.split(";")[0]);
+                result.add(lang.trim().split(";")[0]);
             }
             return result;
         }
