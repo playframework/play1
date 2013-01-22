@@ -20,12 +20,15 @@ class PlayApplication(object):
 
     def __init__(self, application_path, env, ignoreMissingModules = False):
         self.path = application_path
-        if application_path is not None:
+        # only parse conf it is exists - if it should be there, it will be caught later 
+        # (depends on command)
+        confExists = os.path.exists(os.path.join(self.path, 'conf', 'application.conf')); 
+        if application_path is not None and confExists:
             confFolder = os.path.join(application_path, 'conf/')
             try:
                 self.conf = PlayConfParser(confFolder, env)
             except Exception as err:
-                print "~ Faile to parse application configuration", err
+                print "~ Failed to parse application configuration", err
                 self.conf = None # No app / Invalid app
         else:
             self.conf = None
