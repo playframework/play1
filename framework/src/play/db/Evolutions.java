@@ -264,7 +264,7 @@ public class Evolutions extends PlayPlugin {
                             if (StringUtils.isEmpty(s)) {
                                 continue;
                             }
-                            execute(s);
+                            connection.createStatement().execute(s);
                         }
                     }
                     // Insert into logs
