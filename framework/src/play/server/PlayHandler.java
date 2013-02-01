@@ -6,6 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.codec.http.websocketx.*;
 import org.jboss.netty.handler.stream.ChunkedFile;
@@ -628,6 +629,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         try {
+            // If we get a TooLongFrameException, we got a request exceeding 8k.
+            // Log this, we can't call serve500()
+            Throwable t = e.getCause();
+            if (t instanceof TooLongFrameException) {
+                Logger.error("Request exceeds 8192 bytes");
+            }
             e.getChannel().close();
         } catch (Exception ex) {
         }
