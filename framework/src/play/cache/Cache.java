@@ -235,7 +235,7 @@ public abstract class Cache {
             } catch (Exception e) {
                 Logger.error(e, "Error while connecting to memcached");
                 Logger.warn("Fallback to local cache");
-                cacheImpl = EhCacheImpl.getInstance();
+                cacheImpl = EhCacheImpl.newInstance();
             }
         } else {
             cacheImpl = EhCacheImpl.newInstance();
