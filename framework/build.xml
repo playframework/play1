@@ -283,12 +283,26 @@
         <echo message="*****************" />
     </target>
 
-    <target name="play-test">
-        <echo message="play auto-test ${testAppPath} (wait)" />
-        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
-            <arg value="auto-test"/>
+    <target name="check-dependencies-file">
+            <available file="${testAppPath}/conf/dependencies.yml" property="dependencies.present"/>
+    </target>
+
+    <target name="do-deps" depends="check-dependencies-file" if="dependencies.present">
+        <exec executable="${basedir}/../play${playExtension}" failonerror="false" spawn="true">
+            <arg value="deps"/>
             <arg value="${testAppPath}"/>
         </exec>
+    </target>
+
+    <target name="play-test">
+	<antcall target="do-deps">
+            <param name="testAppPath" value="${testAppPath}"/>
+	</antcall>
+        <echo message="play auto-test ${testAppPath} (wait)" />
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
+           <arg value="auto-test"/>
+           <arg value="${testAppPath}"/>
+	</exec>
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
             <condition>
