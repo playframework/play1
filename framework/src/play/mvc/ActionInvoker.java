@@ -32,6 +32,7 @@ import play.mvc.results.NoResult;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
+import play.libs.Codec;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
@@ -150,7 +151,7 @@ public class ActionInvoker {
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
                     cacheKey = actionMethod.getAnnotation(CacheFor.class).id();
                     if ("".equals(cacheKey)) {
-                        cacheKey = "urlcache:" + request.url + request.querystring;
+                        cacheKey = "urlcache:" + Codec.hexSHA1(request.url + request.querystring);
                     }
                     actionResult = (Result) play.cache.Cache.get(cacheKey);
                 }
