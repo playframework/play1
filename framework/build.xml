@@ -288,7 +288,7 @@
     </target>
 
     <target name="do-deps" depends="check-dependencies-file" if="dependencies.present">
-        <exec executable="${basedir}/../play${playExtension}" failonerror="false" spawn="true">
+        <exec executable="${basedir}/../play${playExtension}" failonerror="false" spawn="false">
             <arg value="deps"/>
             <arg value="${testAppPath}"/>
         </exec>
