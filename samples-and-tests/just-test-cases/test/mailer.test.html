@@ -34,6 +34,12 @@
     store('javascript{/name:\s+(.*)\s*/.exec(storedVars["email5"])[1]}', 'body')
 	assertEquals('fond2.png', '$[body]')
 
+    // show that
+    // https://play.lighthouseapp.com/projects/57987/tickets/1572-playmvcmailer-setsubject-fails-on-messagesget-with 
+    // is fixed
+    open('@{Application.mailwithpercentinsubject()}')
+	assertTextPresent('OKPCT')
+
 	open('@{Application.mailWithUrls()}')
 	assertTextPresent('OK_mailWithUrls')
 	storeLastReceivedEmailBy('mailWithUrls@localhost', 'mailWithUrls')
