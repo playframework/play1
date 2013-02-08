@@ -126,15 +126,21 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             depName = "play -> secure " + System.getProperty("play.version");
                         }
 
-                        Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+).*").matcher(depName);
+                        Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);
                         if (!m.matches()) {
-                            m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+).*").matcher(depName);
+                            m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);
                             if (!m.matches()) {
                                 throw new Oops("Unknown dependency format -> " + depName);
                             }
                         }
+                        HashMap extraAttributesMap = null;
+			if(m.groupCount() == 4 &&  m.group(4) != null && !m.group(4).trim().isEmpty()){
+			    // dependency has a classifier
+			    extraAttributesMap = new HashMap();
+			    extraAttributesMap.put("classifier", m.group(4).trim());
+			}
 
-                        ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3));
+                        ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3), extraAttributesMap);
 
                         boolean transitive = options.containsKey("transitive") && options.get("transitive") instanceof Boolean ? (Boolean) options.get("transitive") : transitiveDependencies;
                         boolean force = options.containsKey("force") && options.get("force") instanceof Boolean ? (Boolean) options.get("force") : false;
