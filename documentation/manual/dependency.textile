@@ -12,9 +12,9 @@ Once you have expressed these dependencies in your application’s @conf/depende
 
 h2. <a name="format">Dependency format</a>
 
-A dependency is described by an organisation a name and a revision number. In the @dependencies.yml@ file you will write it like this:
+A dependency is described by an organisation a name a revision number and optionally a classifier. In the @dependencies.yml@ file you will write it like this:
 
-bc. organisation -> name revision
+bc. organisation -> name revision [classifier]
 
 So, for instance version 1.0 of the "Play PDF module":http://www.playframework.org/modules/pdf is expressed like this:
 
@@ -27,6 +27,11 @@ bc. commons-lang -> commons-lang 2.5
 In this case, you can omit the organisation from the dependency declaration:
 
 bc. commons-lang 2.5
+
+When your dependency has a classifier, you can use this:
+
+bc. net.sf.json-lib -> json-lib 2.4 jdk15
+
 
 h3. Dynamic revisions
 
