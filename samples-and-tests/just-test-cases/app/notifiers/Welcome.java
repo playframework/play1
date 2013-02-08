@@ -30,6 +30,13 @@ public class Welcome extends Mailer {
         send(msg);
     }
     
+    public static void subjectwithpercent() {
+        String msg = "Welcome";
+        setFrom("x@x.com");
+        setSubject("Yop4 % o");
+        addRecipient("toto@localhost");
+        send(msg);
+    }
     public static void seleniumTest() {
         String msg = "Selenium";
         setFrom("x@x.com");
