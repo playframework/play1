@@ -34,7 +34,10 @@ public class Mailer implements LocalVariablesSupport {
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
-        map.put("subject", String.format(subject, args));
+	if(args.length != 0){
+	    subject = String.format(subject, args);
+	}
+        map.put("subject", subject);
         infos.set(map);
     }
 

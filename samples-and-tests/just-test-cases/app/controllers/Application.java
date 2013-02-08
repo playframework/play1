@@ -224,6 +224,12 @@ public class Application extends Controller {
         renderText("OK5");
     }
     
+
+    public static void mailwithpercentinsubject() {
+        notifiers.Welcome.subjectwithpercent();
+        renderText("OKPCT");
+    }
+
     public static void mailWithUrls() {
         notifiers.Welcome.welcome_mailWithUrls(false);
         renderText("OK_mailWithUrls");
