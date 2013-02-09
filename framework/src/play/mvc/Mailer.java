@@ -28,6 +28,11 @@ public class Mailer {
 
     protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
 
+    /**
+     * Set subject of mail, optionally providing formatting arguments
+     * @param subject plain String or formatted string - interpreted as formatted string only if aguments are provided
+     * @param args optional arguments for formatting subject
+     */
     public static void setSubject(String subject, Object... args) {
         HashMap<String, Object> map = infos.get();
         if (map == null) {
