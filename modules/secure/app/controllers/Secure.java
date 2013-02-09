@@ -86,8 +86,8 @@ public class Secure extends Controller {
         // Remember if needed
         if(remember) {
             Date expiration = new Date();
-            String duration = "30d";  // maybe make this override-able 
-            expiration.setTime(expiration.getTime() + Time.parseDuration(duration));
+            String duration = Play.configuration.getProperty("secure.rememberme.duration","30d"); 
+            expiration.setTime(expiration.getTime() + Time.parseDuration(duration) * 1000 );
             response.setCookie("rememberme", Crypto.sign(username + "-" + expiration.getTime()) + "-" + username + "-" + expiration.getTime(), duration);
 
         }
