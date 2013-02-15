@@ -46,10 +46,10 @@ def execute(**kargs):
             srcpath = os.path.join(module, 'src')
             lXML += '        <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
             if os.path.exists(srcpath):
-                msXML += '                    <root url="file://$MODULE_DIR$%s"/>\n' % (app.toRelative(srcpath).replace('\\', '/'))
+                msXML += '                    <root url="file://$MODULE_DIR$/%s"/>\n' % (app.toRelative(srcpath).replace('\\', '/'))
             if os.path.exists(libpath):
-                mlXML += '                    <root url="file://$MODULE_DIR$%s"/>\n' % (app.toRelative(libpath).replace('\\', '/'))
-                jdXML += '                <jarDirectory url="file://$MODULE_DIR$%s" recursive="false"/>\n' % (app.toRelative(libpath).replace('\\', '/'))
+                mlXML += '                    <root url="file://$MODULE_DIR$/%s"/>\n' % (app.toRelative(libpath).replace('\\', '/'))
+                jdXML += '                <jarDirectory url="file://$MODULE_DIR$/%s" recursive="false"/>\n' % (app.toRelative(libpath).replace('\\', '/'))
     replaceAll(imlFile, r'%LINKS%', lXML)
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
     replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', msXML)
