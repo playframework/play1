@@ -1,16 +1,14 @@
 package play.deps;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.cache.DefaultRepositoryCacheManager;
-import org.apache.ivy.core.cache.RepositoryCacheManager;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -181,13 +179,16 @@ public class DependenciesManager {
 				for (ArtifactDownloadReport artifact : adr) {
 					if (artifact.getLocalFile() != null) {
 						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
-							modules.add(artifact.getLocalFile().getName());
+						    String mName = artifact.getLocalFile().getName();
+						    if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+							mName = mName.substring(0, mName.length() - 4);
+						    }                          
+						    modules.add(mName);
 						}
 					}
 				}
 			}
 		}
-
 		return modules;
 	}
 
