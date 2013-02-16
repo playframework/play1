@@ -1,16 +1,14 @@
 package play.deps;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.cache.DefaultRepositoryCacheManager;
-import org.apache.ivy.core.cache.RepositoryCacheManager;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -158,38 +156,41 @@ public class DependenciesManager {
         return false;
     }
 
-	public List<String> retrieveModules() throws Exception {
-		ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
-		File ivyModule = new File(application, "conf/dependencies.yml");
-		ResolveReport report;
-		List<String> modules = new ArrayList<String>();
+    public List<String> retrieveModules() throws Exception {
+        ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
+        File ivyModule = new File(application, "conf/dependencies.yml");
+        ResolveReport report;
+        List<String> modules = new ArrayList<String>();
 
-		System.setProperty("play.path", framework.getAbsolutePath());
-		Ivy ivy = configure();
+        System.setProperty("play.path", framework.getAbsolutePath());
+        Ivy ivy = configure();
 
-		ResolveEngine resolveEngine = ivy.getResolveEngine();
-		ResolveOptions resolveOptions = new ResolveOptions();
-		resolveOptions.setConfs(new String[]{"default"});
-		resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
+        ResolveEngine resolveEngine = ivy.getResolveEngine();
+        ResolveOptions resolveOptions = new ResolveOptions();
+        resolveOptions.setConfs(new String[]{"default"});
+        resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
 
-		report = resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
+        report = resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
 
-		for (Iterator iter = report.getDependencies().iterator(); iter.hasNext(); ) {
-			IvyNode node = (IvyNode) iter.next();
-			if (node.isLoaded()) {
-				ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
-				for (ArtifactDownloadReport artifact : adr) {
-					if (artifact.getLocalFile() != null) {
-						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
-							modules.add(artifact.getLocalFile().getName());
-						}
-					}
-				}
-			}
-		}
-
-		return modules;
-	}
+        for (Iterator iter = report.getDependencies().iterator(); iter.hasNext(); ) {
+            IvyNode node = (IvyNode) iter.next();
+            if (node.isLoaded()) {
+                ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
+                for (ArtifactDownloadReport artifact : adr) {
+                    if (artifact.getLocalFile() != null) {
+                        if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
+                            String mName = artifact.getLocalFile().getName();
+                            if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+                                mName = mName.substring(0, mName.length() - 4);
+                            }                          
+                            modules.add(mName);
+                        }
+                    }
+                }
+            }
+        }
+        return modules;
+    }
 
     public List<File> retrieve(ResolveReport report) throws Exception {
 
