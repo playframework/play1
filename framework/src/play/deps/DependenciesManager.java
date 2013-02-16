@@ -1,8 +1,8 @@
 package play.deps;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -179,13 +179,16 @@ public class DependenciesManager {
 				for (ArtifactDownloadReport artifact : adr) {
 					if (artifact.getLocalFile() != null) {
 						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
-							modules.add(artifact.getLocalFile().getName());
+						    String mName = artifact.getLocalFile().getName();
+						    if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+							mName = mName.substring(0, mName.length() - 4);
+						    }                          
+						    modules.add(mName);
 						}
 					}
 				}
 			}
 		}
-
 		return modules;
 	}
 
