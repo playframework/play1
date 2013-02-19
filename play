@@ -71,6 +71,8 @@ try:
     # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
     application_path = None
     remaining_args = []
+    if len(sys.argv) == 1:
+        application_path = os.getcwd()
     if len(sys.argv) == 2:
         application_path = os.getcwd()
         remaining_args = sys.argv[2:]
