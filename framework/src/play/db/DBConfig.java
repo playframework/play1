@@ -19,12 +19,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -119,10 +114,14 @@ public class DBConfig {
      * @return false if update failed
      */
     public boolean execute(String SQL) {
+        Statement statement = null;
         try {
-            return getConnection().createStatement().execute(SQL);
+            statement = getConnection().createStatement();
+            return statement.execute(SQL);
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseStatement(statement);
         }
     }
 
@@ -132,10 +131,22 @@ public class DBConfig {
      * @return The query resultSet
      */
     public ResultSet executeQuery(String SQL) {
+        Statement statement = null;
         try {
-            return getConnection().createStatement().executeQuery(SQL);
+            statement = getConnection().createStatement();
+            return statement.executeQuery(SQL);
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseStatement(statement);
+        }
+    }
+
+    private static void safeCloseStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {}
         }
     }
 
