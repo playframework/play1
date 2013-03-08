@@ -55,8 +55,8 @@ Using the @renderArgs()@ method, you can also get direct access to the arguments
 
 bc. @Test
 public void testUserIsFoundAndPassedToView() {
-    Response response = POST("/user/find?name=mark&dob=18011977")
-    assertThat(renderArgs("user"), is(notNullValue());
+    Response response = POST("/user/find?name=mark&dob=18011977");
+    assertThat(renderArgs("user"), is(notNullValue()));
     User user = (User) renderArgs("user");
     assertThat(user.name, is("mark"));
 }
