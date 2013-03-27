@@ -1,6 +1,8 @@
 package play.templates;
 
 import groovy.lang.Closure;
+
+import java.beans.PropertyDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.ElementType;
@@ -14,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Error;
@@ -111,13 +114,20 @@ public class FastTags {
         if (args.containsKey("method")) {
             actionDef.method = args.get("method").toString();
         }
+	    String name = null;
+	    if (args.containsKey("name")) {
+            name = args.get("name").toString();
+        }
+        String id = args.containsKey("id") ? " id=\"" + args.get("id") + "\"" : "";
+        String clz = args.containsKey("class") ? " class=\"" + args.get("class") + "\"" : "";
+ 
         if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + (name != null?"name=\"" + name + "\"":"") + id + clz + ">");
         if (!("GET".equals(actionDef.method))) {
             _authenticityToken(args, body, out, template, fromLine);
         }
@@ -146,22 +156,12 @@ public class FastTags {
         Object obj = body.getProperty(pieces[0]);
         if(obj != null){
             if(pieces.length > 1){
-                for(int i = 1; i < pieces.length; i++){
-                    try{
-                        Field f = obj.getClass().getField(pieces[i]);
-                        if(i == (pieces.length-1)){
-                            try{
-                                Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
-                                field.put("value", getter.invoke(obj, new Object[0]));
-                            }catch(NoSuchMethodException e){
-                                field.put("value",f.get(obj).toString());
-                            }
-                        }else{
-                            obj = f.get(obj);
-                        }
-                    }catch(Exception e){
-                        // if there is a problem reading the field we dont set any value
-                    }
+                try{
+                	String path = _arg.substring(_arg.indexOf(".") + 1);
+                	Object value = PropertyUtils.getProperty(obj, path);
+              		field.put("value", value);
+                }catch(Exception e){
+                	// if there is a problem reading the field we dont set any value
                 }
             }else{
                 field.put("value", obj);

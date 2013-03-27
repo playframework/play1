@@ -2,6 +2,8 @@ import os, os.path
 import subprocess
 from play.utils import *
 import time
+if os.name == 'nt':
+    import win32pdh, string, win32api
 
 COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 
@@ -33,9 +35,14 @@ def execute(**kargs):
 def start(app, args):
     app.check()
     if os.path.exists(app.pid_path()):
-        print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(app.path), os.path.normpath(app.pid_path()))
-        print "~"
-        sys.exit(1)
+        pid = open(app.pid_path()).readline().strip()
+        if process_running(pid):
+            print "~ Oops. %s is already started (pid:%s)! (or delete %s)" % (os.path.normpath(app.path), pid, os.path.normpath(app.pid_path()))
+            print "~"
+            sys.exit(1)
+        else:
+            print "~ removing pid file %s for not running pid %s" % (os.path.normpath(app.pid_path()), pid)
+            os.remove(app.pid_path())
 
     sysout = app.readConf('application.log.system.out')
     sysout = sysout!='false' and sysout!='off'
@@ -146,3 +153,43 @@ def kill(pid):
             print "~ Play was not running (Process id %s not found)" % pid
             print "~"
             sys.exit(-1)
+
+def process_running(pid):
+	if os.name == 'nt':
+                return process_running_nt(pid)   
+	else:
+		try:
+			os.kill(int(pid), 0)
+			return True
+		except OSError:
+			return False
+
+# loosely based on http://code.activestate.com/recipes/303339/
+def process_list_nt():
+    #each instance is a process, you can have multiple processes w/same name
+    junk, instances = win32pdh.EnumObjectItems(None,None,'process', win32pdh.PERF_DETAIL_WIZARD)
+    proc_ids={}
+    proc_dict={}
+    for instance in instances:
+        if instance in proc_dict:
+            proc_dict[instance] = proc_dict[instance] + 1
+        else:
+            proc_dict[instance]=0
+    for instance, max_instances in proc_dict.items():
+        for inum in xrange(max_instances+1):
+            hq = win32pdh.OpenQuery() # initializes the query handle 
+            path = win32pdh.MakeCounterPath( (None,'process',instance, None, inum,'ID Process') )
+            counter_handle=win32pdh.AddCounter(hq, path) 
+            win32pdh.CollectQueryData(hq) #collects data for the counter 
+            type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG)
+            proc_ids[str(val)]=instance;
+            win32pdh.CloseQuery(hq) 
+
+    return proc_ids
+
+
+def process_running_nt(pid):
+    if process_list_nt().get(pid,"") != "":
+        return True
+    else:
+        return False

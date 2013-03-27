@@ -129,6 +129,18 @@ bc. #{secure.check "administrator"}
 
 The tag only renders its body for authorised users, so the ‘Delete’ link is only displayed when the user is authorised to execute the @delete@ controller action.
 
+h2. <a name="configuration">Configuration</a>
+
+You can override default settings by adding them to your applications application.conf.
+
+h3. <a name="rememberme">secure.rememberme.duration</a>
+
+The expiration duration of the secure rememberme cookie.
+
+Default: 30d
+
+bc.  secure.rememberme.duration=30d 
+
 h2. <a name="commands">Commands</a>
 
 The Secure module provides a @play secure:override@ that you can use to override the log in page, so you can customize it for your application. This works by copying the corresponding file from the module to a file in your application that will be used instead.

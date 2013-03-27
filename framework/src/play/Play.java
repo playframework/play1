@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.deps.DependenciesManager;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
@@ -240,8 +241,13 @@ public class Play {
         }
 
         // Mode
-        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        if (usePrecompiled || forceProd) {
+		try {
+        	mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+		} catch (IllegalArgumentException e) {
+			Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
+			fatalServerErrorOccurred();
+		}
+		if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
 
@@ -466,6 +472,8 @@ public class Play {
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
+                // Put it in the current context for any code that relies on having it there
+                Thread.currentThread().setContextClassLoader(classloader);
                 // Reload plugins
                 pluginCollection.reloadApplicationPlugins();
 
@@ -699,48 +707,45 @@ public class Play {
                 }
             }
         }
-        for (Object key : configuration.keySet()) {
-            String pName = key.toString();
-            if (pName.startsWith("module.")) {
-                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
-                String moduleName = pName.substring(7);
-                File modulePath = new File(configuration.getProperty(pName));
-                if (!modulePath.isAbsolute()) {
-                    modulePath = new File(applicationPath, configuration.getProperty(pName));
-                }
-                if (!modulePath.exists() || !modulePath.isDirectory()) {
-                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                } else {
-                    addModule(moduleName, modulePath);
-                }
-            }
-        }
 
-        // Load modules from modules/ directory
-        File localModules = Play.getFile("modules");
-        if (localModules.exists() && localModules.isDirectory()) {
-            for (File module : localModules.listFiles()) {
-                String moduleName = module.getName();
-		if (moduleName.startsWith(".")) {
-			Logger.info("Module %s is ignored, name starts with a dot", moduleName);
-			continue;
+        // Load modules from modules/ directory, but get the order from the dependencies.yml file
+		// .listFiles() returns items in an OS dependant sequence, which is bad
+		// See #781
+		// the yaml parser wants play.version as an environment variable
+		System.setProperty("play.version", Play.version);
+		DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, null);
+
+		File localModules = Play.getFile("modules");
+		List<String> modules = new ArrayList<String>();
+		if (localModules.exists() && localModules.isDirectory()) {
+			try {
+				modules = dm.retrieveModules();
+			} catch (Exception e) {
+				throw new UnexpectedException("There was a problem parsing dependencies.yml");
+				
+			}
+			for (Iterator iter = modules.iterator(); iter.hasNext();) {
+				String moduleName = (String) iter.next();
+
+				File module = new File(localModules, moduleName);
+
+				if (moduleName.contains("-")) {
+					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+				}
+
+				if (module.isDirectory()) {
+					addModule(moduleName, module);
+				} else {
+					File modulePath = new File(IO.readContentAsString(module).trim());
+					if (!modulePath.exists() || !modulePath.isDirectory()) {
+						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+					} else {
+						addModule(moduleName, modulePath);
+					}
+				}
+			}
 		}
-                if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
-                }
-                if (module.isDirectory()) {
-                    addModule(moduleName, module);
-                } else {
-                    File modulePath = new File(IO.readContentAsString(module).trim());
-                    if (!modulePath.exists() || !modulePath.isDirectory()) {
-                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                    } else {
-                        addModule(moduleName, modulePath);
-                    }
 
-                }
-            }
-        }
         // Auto add special modules
         if (Play.runningInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));

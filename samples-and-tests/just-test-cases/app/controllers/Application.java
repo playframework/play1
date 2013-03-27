@@ -136,7 +136,6 @@ public class Application extends Controller {
     
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
         renderText("Booked at %s !!", df.format(at));
     }
 
@@ -225,6 +224,12 @@ public class Application extends Controller {
         renderText("OK5");
     }
     
+
+    public static void mailwithpercentinsubject() {
+        notifiers.Welcome.subjectwithpercent();
+        renderText("OKPCT");
+    }
+
     public static void mailWithUrls() {
         notifiers.Welcome.welcome_mailWithUrls(false);
         renderText("OK_mailWithUrls");

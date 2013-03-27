@@ -199,7 +199,7 @@ public class Fixtures {
                     break;
                 }
             }
-            if (yamlFile == null) {
+            if (yamlFile == null || !yamlFile.exists()) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
@@ -420,7 +420,7 @@ public class Fixtures {
                 continue;
             }
             if (value instanceof Map<?, ?>) {
-                serialized.putAll(serialize((Map<?, ?>) value, prefix + "." + key));
+                serialized.putAll(serialize((Map<?, ?>) value, prefix + "[" + key.toString() +"]"));
             } else if (value instanceof Date) {
                 serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat(DateBinder.ISO8601).format(((Date) value))});
             } else if (Collection.class.isAssignableFrom(value.getClass())) {

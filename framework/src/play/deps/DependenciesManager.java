@@ -1,8 +1,8 @@
 package play.deps;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -130,7 +130,7 @@ public class DependenciesManager {
         } else if (!notSync.isEmpty()) {
             System.out.println("~");
             System.out.println("~ *****************************************************************************");
-            System.out.println("~ WARNING: Your lib/ and modules/ directories and not synced with current dependencies (use --sync to automatically delete them)");
+            System.out.println("~ WARNING: Your lib/ and modules/ directories are not synced with current dependencies (use --sync to automatically delete them)");
             System.out.println("~");
             for (File f : notSync) {
                 System.out.println("~ \tUnknown: " + f.getAbsolutePath());
@@ -155,6 +155,42 @@ public class DependenciesManager {
         }
         return false;
     }
+
+	public List<String> retrieveModules() throws Exception {
+		ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
+		File ivyModule = new File(application, "conf/dependencies.yml");
+		ResolveReport report;
+		List<String> modules = new ArrayList<String>();
+
+		System.setProperty("play.path", framework.getAbsolutePath());
+		Ivy ivy = configure();
+
+		ResolveEngine resolveEngine = ivy.getResolveEngine();
+		ResolveOptions resolveOptions = new ResolveOptions();
+		resolveOptions.setConfs(new String[]{"default"});
+		resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
+
+		report = resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
+
+		for (Iterator iter = report.getDependencies().iterator(); iter.hasNext(); ) {
+			IvyNode node = (IvyNode) iter.next();
+			if (node.isLoaded()) {
+				ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
+				for (ArtifactDownloadReport artifact : adr) {
+					if (artifact.getLocalFile() != null) {
+						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
+						    String mName = artifact.getLocalFile().getName();
+						    if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+							mName = mName.substring(0, mName.length() - 4);
+						    }                          
+						    modules.add(mName);
+						}
+					}
+				}
+			}
+		}
+		return modules;
+	}
 
     public List<File> retrieve(ResolveReport report) throws Exception {
 

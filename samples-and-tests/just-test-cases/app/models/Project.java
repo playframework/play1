@@ -29,6 +29,8 @@ public class Project extends Model {
     @MapKey(name="name")
     public Map<String,Company> companies;
     
+    private String observation;
+    
     public String toString() {
         return name + " belongs to " + company;
     }
@@ -39,5 +41,12 @@ public class Project extends Model {
         this.name = name;
     }
     
+    public String getObservation() {
+    	return this.observation;
+    }
+    
+    public void setObservation(String observation) {
+    	this.observation = observation;
+    }
 }
 

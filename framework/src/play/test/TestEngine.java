@@ -3,6 +3,7 @@ package play.test;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,8 @@ public class TestEngine {
 
     public static List<Class> allUnitTests() {
         List<Class> classes = Play.classloader.getAssignableClasses(Assert.class);
+        Collection<Class> pluginClasses = Play.pluginCollection.getUnitTests();
+        classes.addAll(pluginClasses);
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             Class c = it.next();
             if (Modifier.isAbstract(c.getModifiers())) {
@@ -52,6 +55,8 @@ public class TestEngine {
 
     public static List<Class> allFunctionalTests() {
         List<Class> classes = Play.classloader.getAssignableClasses(FunctionalTest.class);
+        Collection<Class> pluginClasses = Play.pluginCollection.getFunctionalTests();
+        classes.addAll(pluginClasses);
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             if (Modifier.isAbstract(it.next().getModifiers())) {
                 it.remove();

@@ -11,6 +11,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Date;
+import play.utils.Utils;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -33,7 +35,7 @@ public class ServletWrapperTest {
 
 	@Test
 	public void isNotModifiedHTTP11ClientTest() {
-		assertFalse(ServletWrapper.isModified(browserEtag, 0,
+		assertFalse(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
 				new HttpServletStub(createHeaderMap())));
 	}
 
@@ -41,7 +43,7 @@ public class ServletWrapperTest {
 	public void isNotModifiedHTTP10ClientTest() {
 		HashMap<String, String> headers = createHeaderMap();
 		headers.remove(ServletWrapper.IF_NONE_MATCH);
-		assertFalse(ServletWrapper.isModified(browserEtag, 0,
+		assertFalse(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
 				new HttpServletStub(headers)));
 	}
 
@@ -49,13 +51,13 @@ public class ServletWrapperTest {
 	public void isModifiedHTTP10ClientTest() {
 		HashMap<String, String> headers = createHeaderMap();
 		headers.remove(ServletWrapper.IF_NONE_MATCH);
-		assertTrue(ServletWrapper.isModified(browserEtag, Long.MAX_VALUE,
+		assertTrue(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(Long.MAX_VALUE)),
 				new HttpServletStub(headers)));
 	}
 
 	@Test
 	public void browserHasNoCache() {
-		assertTrue(ServletWrapper.isModified(browserEtag, 0,
+		assertTrue(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
 				new HttpServletStub(new HashMap<String, String>())));
 	}
 

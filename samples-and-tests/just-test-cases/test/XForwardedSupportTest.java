@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import play.Play;
 import play.Logger;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
@@ -12,9 +13,10 @@ import play.test.FunctionalTest;
 
 
 public class XForwardedSupportTest extends FunctionalTest {
-	private static final String xForwardedFor = "10.10.10.10";
-	private static final String PAGE_URL = "/users/list";
-	private static final String HEADER_XFORWARDED_FOR = "x-forwarded-for";
+    private static final String xForwardedFor = "10.10.10.10";
+    private static final String PAGE_URL = "/users/list";
+    private static final String HEADER_XFORWARDED_FOR = "x-forwarded-for";
+    private static final String CONFIG_XFORWARD_SUPPORT = "XForwardedSupport"; 
 
     @Test
     public void testValidXForwards() throws Exception {
@@ -39,6 +41,30 @@ public class XForwardedSupportTest extends FunctionalTest {
 
   		remoteAddress = "6.6.6.6";
 		assertInvalidTest(remoteAddress, xForwardedFor);
+    }
+
+    @Test
+    public void testAllForwardSupoprt(){
+	// modify play configuration, to test ALL
+	String prev = null;
+	try{
+	    prev = Play.configuration.getProperty(CONFIG_XFORWARD_SUPPORT);
+	    Play.configuration.setProperty(CONFIG_XFORWARD_SUPPORT, "ALL");
+
+	    // These are valid if you set XFowardedSupport to ALL 
+	    String remoteAddress = "1.2.3.5";
+	    assertValidTest(remoteAddress, xForwardedFor);
+
+	    remoteAddress = "6.6.6.6";
+	    assertValidTest(remoteAddress, xForwardedFor);
+
+	    remoteAddress = "16.16.16.16";
+	    assertValidTest(remoteAddress, xForwardedFor);
+
+	}finally{
+	    //restore
+	    Play.configuration.setProperty(CONFIG_XFORWARD_SUPPORT, prev);
+	}
     }
 
 	private void assertValidTest(String remoteAddress, String xForwardedFor) {

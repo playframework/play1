@@ -52,7 +52,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Job job : scheduledJobs) {
                 out.print(job.getClass().getName());
-                if (job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
+                if (job.getClass().isAnnotationPresent(OnApplicationStart.class) && !(job.getClass().isAnnotationPresent(On.class) || job.getClass().isAnnotationPresent(Every.class))) {
                     OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
                     out.print(" run at application start" + (appStartAnnotation.async()?" (async)" : "") + ".");
                 }

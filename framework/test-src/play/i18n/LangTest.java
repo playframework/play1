@@ -107,6 +107,14 @@ public class LangTest {
         Lang.current.set(null);
         assertLocale(new Locale("en"));
 
+	
+	// prove lighthouse fix https://play.lighthouseapp.com/projects/57987/tickets/1302
+	// space in accept language header
+        req = FunctionalTest.newRequest();
+        req.headers.put("accept-language", new Http.Header("accept-language", "nl, en;q=0.8"));
+        Http.Request.current.set(req);
+        Lang.current.set(null);
+        assertLocale(new Locale("en"));
         // check with cookie value
 
         req = FunctionalTest.newRequest();
