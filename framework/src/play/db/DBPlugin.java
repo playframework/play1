@@ -186,7 +186,9 @@ public class DBPlugin extends PlayPlugin {
         out.println("Jdbc url: " + datasource.getJdbcUrl());
         out.println("Jdbc driver: " + datasource.getDriverClass());
         out.println("Jdbc user: " + datasource.getUser());
-        out.println("Jdbc password: " + datasource.getPassword());
+	if (Play.mode.isDev()) {
+          out.println("Jdbc password: " + datasource.getPassword());
+        }
         out.println("Min pool size: " + datasource.getMinPoolSize());
         out.println("Max pool size: " + datasource.getMaxPoolSize());
         out.println("Initial pool size: " + datasource.getInitialPoolSize());
