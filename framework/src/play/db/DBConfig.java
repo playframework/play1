@@ -322,7 +322,9 @@ public class DBConfig {
         out.println("Jdbc url: " + ds.getJdbcUrl());
         out.println("Jdbc driver: " + ds.getDriverClass());
         out.println("Jdbc user: " + ds.getUser());
-        out.println("Jdbc password: " + ds.getPassword());
+        if (Play.mode.isDev()) {
+            out.println("Jdbc password: " + ds.getPassword());
+        }
         out.println("Min pool size: " + ds.getMinPoolSize());
         out.println("Max pool size: " + ds.getMaxPoolSize());
         out.println("Initial pool size: " + ds.getInitialPoolSize());

@@ -250,7 +250,7 @@ def autotest(app, args):
         line = soutint.readline().strip()
         if line:
             print line
-            if line.find('Go to ') > -1: # This line is written out by the test runner to system.out and is not log file dependent
+            if line.find('Server is up and running') > -1: # This line is written out by Server.java to system.out and is not log file dependent
                 soutint.close()
                 break
 
