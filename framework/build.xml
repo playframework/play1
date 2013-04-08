@@ -64,7 +64,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="1.5" target="1.5">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="1.6" target="1.6">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -283,12 +283,26 @@
         <echo message="*****************" />
     </target>
 
-    <target name="play-test">
-        <echo message="play auto-test ${testAppPath} (wait)" />
-        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
-            <arg value="auto-test"/>
+    <target name="check-dependencies-file">
+            <available file="${testAppPath}/conf/dependencies.yml" property="dependencies.present"/>
+    </target>
+
+    <target name="do-deps" depends="check-dependencies-file" if="dependencies.present">
+        <exec executable="${basedir}/../play${playExtension}" failonerror="false" spawn="false">
+            <arg value="deps"/>
             <arg value="${testAppPath}"/>
         </exec>
+    </target>
+
+    <target name="play-test">
+	<antcall target="do-deps">
+            <param name="testAppPath" value="${testAppPath}"/>
+	</antcall>
+        <echo message="play auto-test ${testAppPath} (wait)" />
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
+           <arg value="auto-test"/>
+           <arg value="${testAppPath}"/>
+	</exec>
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
             <condition>
@@ -339,7 +353,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" target="1.5">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="1.6" target="1.6">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">
