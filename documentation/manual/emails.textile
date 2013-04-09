@@ -120,7 +120,7 @@ bc. application.baseUrl=http://www.playframework.org/
 
 h3. Links to embedded images
 
-You can link to embedded images by using the embeddedImage tag like this:
+You can add links to embedded images by using the embeddedImage tag like this:
 
 bc. #{embeddedImage src:'public/images/image1/jpg' name:'myImage' /}
 
