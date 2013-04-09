@@ -123,7 +123,7 @@ h3. Links to embedded images
 
 You can add links to embedded images by using the embeddedImage tag like this:
 
-bc. #{embeddedImage src:'public/images/image1/jpg' name:'myImage' /}
+bc. #{embeddedImage src:'public/images/image1.jpg' name:'myImage' /}
 
 This will attach the image to the email and create an internal reference inside the the html/text content.
 
