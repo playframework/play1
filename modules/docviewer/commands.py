@@ -4,7 +4,7 @@ import getopt
 import sys
 import subprocess
 
-MODULE = 'db'
+MODULE = 'docviewer'
 
 # Commands that are specific to your module
 
@@ -19,7 +19,7 @@ def execute(**kargs):
     if command == "doc:export":
         print "~ Generating project documentation"
         print "~ "
-        java_cmd = app.java_cmd([], None, "play.modules.docviewer.DocumentationGenerator", args)
+        java_cmd = app.java_cmd([], None, "play.modules.docviewer.ExportDocumentationGenerator", args)
         try:
             subprocess.call(java_cmd, env=os.environ)
         except OSError:

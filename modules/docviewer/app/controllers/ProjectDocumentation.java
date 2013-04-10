@@ -1,9 +1,9 @@
 package controllers;
 
+import play.modules.docviewer.DocumentationGenerator;
 import play.mvc.Controller;
-import java.io.File;
 
-import static play.modules.docviewer.DocumentationGenerator.*;
+import java.io.File;
 
 /**
  * Controller to render project documentation.
@@ -14,18 +14,20 @@ import static play.modules.docviewer.DocumentationGenerator.*;
  */
 public class ProjectDocumentation extends Controller {
 
+    public static DocumentationGenerator generator = new DocumentationGenerator();
+
     public static void index() throws Exception {
-        String indexHtml = generateIndex(false);
-        String html = applyTemplate("index", "Project documentation", indexHtml);
+        String indexHtml = generator.generateIndex();
+
         //We need trailing slash or links won't work
-        if(!request.url.endsWith("/")) {
+        if (!request.url.endsWith("/")) {
             redirect(request.url + "/");
         }
-        renderHtml(html);
+        renderHtml(indexHtml);
     }
 
     public static void page(String id) {
-        String html = generatePage(id);
+        String html = generator.generatePage(id);
         if (html == null) {
             notFound("Documentation page for " + id + " not found");
         }
@@ -34,7 +36,7 @@ public class ProjectDocumentation extends Controller {
 
 
     public static void file(String name) {
-        File file = new File(projectDocsPath, "files/" + name);
+        File file = new File(generator.projectDocsPath, "files/" + name);
         if (!file.exists()) {
             notFound();
         }
@@ -42,7 +44,7 @@ public class ProjectDocumentation extends Controller {
     }
 
     public static void image(String name) {
-        File image = new File(projectDocsPath, "images/" + name);
+        File image = new File(generator.projectDocsPath, "images/" + name);
 
         if (!image.exists()) {
             notFound();

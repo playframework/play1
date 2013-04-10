@@ -1,11 +1,11 @@
 package controllers;
 
 import helpers.CheatSheetHelper;
-
 import helpers.LangMenuHelper;
-import helpers.LangMenuHelper.*;
+import helpers.LangMenuHelper.LangMenu;
 import play.Play;
 import play.libs.IO;
+import play.modules.docviewer.DocumentationGenerator;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.vfs.VirtualFile;
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static play.modules.docviewer.DocumentationGenerator.*;
-
 
 public class PlayDocumentation extends Controller {
+
+    public static DocumentationGenerator generator = new DocumentationGenerator();
 
     public static void index() throws Exception {
         Http.Header header = request.headers.get("accept-language");
@@ -44,9 +44,9 @@ public class PlayDocumentation extends Controller {
             notFound("Manual page for " + id + " not found");
         }
         String textile = IO.readContentAsString(page);
-        String html = toHTML(textile);
-        html = stripBody(html);
-        String title = getTitle(textile);
+        String html = generator.toHTML(textile);
+        html = generator.stripBody(html);
+        String title = generator.getTitle(textile);
 
         List<String> modules = new ArrayList();
         List<String> apis = new ArrayList();
@@ -72,8 +72,8 @@ public class PlayDocumentation extends Controller {
             List<String> sheets = new ArrayList<String>();
 
             for (File file : sheetFiles) {
-                String html = toHTML(IO.readContentAsString(file));
-                html = stripBody(html);
+                String html = generator.toHTML(IO.readContentAsString(file));
+                html = generator.stripBody(html);
                 sheets.add(html);
             }
 
