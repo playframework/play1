@@ -2,6 +2,7 @@ package controllers;
 
 import org.junit.Assert;
 import play.Logger;
+import play.libs.F;
 import play.libs.WS;
 import play.mvc.Controller;
 
@@ -43,6 +44,29 @@ public class SlowResponseTestController extends Controller {
             await(WS.url("http://localhost:55651").getAsync());
         } catch (Exception e) {
             gotException = true;
+        }
+        Assert.assertTrue("Did not get exception!", gotException);
+
+        renderText("ok");
+    }
+
+    // check fix for http://play.lighthouseapp.com/projects/57987/tickets/1656-awaitPromise-still-suspends-indefinitely-while-timeout-occurs-if-waiting-for-multiple-promises-with-a-promise-returned-by-waitAll
+    public static void testWSAsyncAwaitAllWithException() {
+        String url = "http://localhost:9003/SlowResponseTestController/slowResponse";
+
+        // first will timeout...
+        F.Promise remoteCall1 = WS.url(url).timeout("1s").getAsync();
+        F.Promise remoteCall2 = WS.url(url).timeout("4s").getAsync();
+
+        F.Promise promises = F.Promise.waitAll(remoteCall1, remoteCall2);
+
+        // assert that we get exception if we have too short timeout
+        boolean gotException = false;
+        try {
+          await(promises);
+        } catch (Exception e) {
+           Logger.info(e, "got xpected timeout ");
+           gotException = true;
         }
         Assert.assertTrue("Did not get exception!", gotException);
 

@@ -158,13 +158,16 @@ public class F {
                         try {
                             result.invoke(result.get());
                         } catch (Exception e) {
-                            throw new UnexpectedException(e);
+                            result.invokeWithException(e);
                         }
                     }
                 }
             };
             for (Promise<T> f : promises) {
                 f.onRedeem(action);
+            }
+            if(promises.isEmpty()) {
+              result.invoke(Collections.<T>emptyList());
             }
             return result;
         }
@@ -176,7 +179,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.Tuple((A) values.get(0), (B) values.get(1)));
+                    if(values != null) {
+                        result.invoke(new F.Tuple((A) values.get(0), (B) values.get(1)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -189,7 +197,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                    if(values != null) {
+                        result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -202,7 +215,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                    if(values != null) {
+                        result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -215,7 +233,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
+                    if(values != null) {
+                        result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -357,7 +380,13 @@ public class F {
                             return;
                         }
                     }
-                    result.invoke(completed.getOrNull());
+                    T resultOrNull = completed.getOrNull();
+                    if(resultOrNull != null) {
+                      result.invoke(resultOrNull);
+                    }
+                    else {
+                      result.invokeWithException(completed.exception);
+                    }
                 }
             };
 

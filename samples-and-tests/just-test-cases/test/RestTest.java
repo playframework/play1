@@ -153,6 +153,13 @@ public class RestTest extends UnitTest {
         assertEquals("ok", res);
     }
 
+    @Test
+    public void testWSAsyncAwaitAllWithException() {
+        String url = "http://localhost:9003/SlowResponseTestController/testWSAsyncAwaitAllWithException";
+        String res = WS.url(url).get().getString();
+        assertEquals("ok", res);
+    }
+
     // Test our "Denial of Service through hash table multi-collisions"-protection
     @Test
     public void testPostHashCollisionProtection() {
