@@ -11,6 +11,7 @@ import play.Logger;
 import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.F.Promise;
 import play.libs.Time;
 
@@ -63,11 +64,16 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         final Promise<V> smartFuture = new Promise<V>();
         JobsPlugin.executor.submit(new Callable<V>() {
             public V call() throws Exception {
-                V result =  Job.this.call();
-                smartFuture.invoke(result);
-                return result;
+                try {
+                    V result =  Job.this.call();
+                    smartFuture.invoke(result);
+                    return result;
+                }
+                catch(Exception e) {
+                    smartFuture.invokeWithException(e);
+                    return null;
+                }
             }
-            
         });
 
         return smartFuture;
@@ -91,11 +97,16 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         JobsPlugin.executor.schedule(new Callable<V>() {
 
             public V call() throws Exception {
-                V result =  Job.this.call();
-                smartFuture.invoke(result);
-                return result;
+                try {
+                    V result =  Job.this.call();
+                    smartFuture.invoke(result);
+                    return result;
+                }
+                catch(Exception e) {
+                    smartFuture.invokeWithException(e);
+                    return null;
+                }
             }
-
         }, seconds, TimeUnit.SECONDS);
 
         return smartFuture;
@@ -124,7 +135,15 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             super.onException(e);
         } catch(Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
+            throw new UnexpectedException(unwrap(e));
         }
+    }
+
+    private Throwable unwrap(Throwable e) {
+      while((e instanceof UnexpectedException || e instanceof PlayException) && e.getCause() != null) {
+        e = e.getCause();
+      }
+      return e;
     }
 
     @Override
