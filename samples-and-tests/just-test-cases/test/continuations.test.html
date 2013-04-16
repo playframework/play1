@@ -97,6 +97,18 @@
 
     openAndWait('@{WithContinuations.useAwaitInWebSocketControllerWithoutContinuations()}')
     assertTextPresent('failCount: 1')
+    
+    openAndWait('@{WithContinuations.useAwaitOnFailingJobsPromise("now")}')
+    assertTextPresent('caught exception')
+
+    openAndWait('@{WithContinuations.useAwaitOnFailingJobsPromise("in")}')
+    assertTextPresent('caught exception')
+    
+    openAndWait('@{WithContinuations.useAwaitOnNormalJobsPromise("now")}')
+    assertTextPresent('ok')
+    
+    openAndWait('@{WithContinuations.useAwaitOnNormalJobsPromise("in")}')
+    assertTextPresent('ok')
 
     openAndWait('@{WithContinuations.usingRenderArgsAndAwait()}')
     assertBodyText('true')
