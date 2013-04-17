@@ -25,7 +25,7 @@ require:    &allDependencies
     - dom4j 1.6.1
     - com.h2database -> h2 1.3.168
     - javax.activation -> activation 1.1.1
-    - javax.mail -> mail 1.4.3
+    - javax.mail -> mail 1.4.5
     - javax.inject 1.0
     - jaxen 1.1
     - joda-time 2.1 
@@ -35,7 +35,7 @@ require:    &allDependencies
     - net.sf.ehcache -> ehcache-core 2.4.3
     - net.sf.ezmorph -> ezmorph 1.0.3
     - net.sf.jsr107cache -> jsr107cache 1.0
-    - net.sf.oval -> oval 1.50
+    - net.sf.oval -> oval 1.81
     - mysql -> mysql-connector-java 5.1.21
     - oauth.signpost -> signpost-core 1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
@@ -54,7 +54,7 @@ require:    &allDependencies
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.2
     - org.slf4j -> slf4j-log4j12 1.7.2
-    - org.yaml -> snakeyaml 1.7
+    - org.yaml -> snakeyaml 1.11
     - spy -> memcached 2.6
     - com.thoughtworks.xstream -> xstream 1.4.3
     - xmlpull 1.1.3.1
