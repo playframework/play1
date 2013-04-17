@@ -1,0 +1,8 @@
+# You can specialize this file for each language.
+# For exemple, for french create a messages.fr file
+#
+optimisticLocking.modelHasChanged=L'objet a été modifié. Votre version est %2$s la version de base de données %3$s. Recharger et refaites vos modifications.
+
+@include.login=./_messages/fr/login.fr
+
+@include.other=./_messages/fr/other

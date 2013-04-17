@@ -33,6 +33,23 @@ For example, the message file containing the corresponding French translations i
 bc. hello=Bonjour!
 back=Retour
 
+You can add additional messages files to the Play Messages by specifying a file name in @messages@ as the value of a configuration option with <code>@include.</code> at the start of the key.
+
+For example, if you define additional messages in a @conf/_messages/default/login@
+
+bc. # Login
+login.username=Username:
+login.password=Password:
+login.remember=Remember me
+login.signin=Sign in
+login.error=Oops, unknown username or password.
+login.logout=You have been logged out.
+
+you can include them by adding the following line to @messages@ file:
+
+bc. @include.login = ./_messages/default/login
+
+
 h2. <a name="languages">Define languages supported by the application</a>
 
 Define a list of supported languages in the "application.langs configuration":configuration#application.langs.
