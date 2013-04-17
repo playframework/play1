@@ -2,6 +2,10 @@ package play.i18n;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import play.Logger;
@@ -16,9 +20,12 @@ import play.vfs.VirtualFile;
 public class MessagesPlugin extends PlayPlugin {
 
     static Long lastLoading = 0L;
+    
+    private static List<String> includeMessageFilenames = new ArrayList<String>();
 
     @Override
     public void onApplicationStart() {
+	includeMessageFilenames.clear();
         Messages.defaults = new Properties();
         try {
             FileInputStream is = new FileInputStream(new File(Play.frameworkPath, "resources/messages"));
@@ -28,24 +35,24 @@ public class MessagesPlugin extends PlayPlugin {
         }
         for(VirtualFile module : Play.modules.values()) {
             VirtualFile messages = module.child("conf/messages");
-            if(messages != null && messages.exists()) {
+            if(messages != null && messages.exists() && !messages.isDirectory()) {
                 Messages.defaults.putAll(read(messages)); 
             }
         }
         VirtualFile appDM = Play.getVirtualFile("conf/messages");
-        if(appDM != null && appDM.exists()) {
+        if(appDM != null && appDM.exists() && !appDM.isDirectory()) {
             Messages.defaults.putAll(read(appDM));
         }
         for (String locale : Play.langs) {
             Properties properties = new Properties();
             for(VirtualFile module : Play.modules.values()) {
                 VirtualFile messages = module.child("conf/messages." + locale);
-                if(messages != null && messages.exists()) {
+                if(messages != null && messages.exists()  && !messages.isDirectory()) {
                     properties.putAll(read(messages)); 
                 }
             }
             VirtualFile appM = Play.getVirtualFile("conf/messages." + locale);
-            if(appM != null && appM.exists()) {
+            if(appM != null && appM.exists()  && !appM.isDirectory()) {
                 properties.putAll(read(appM));
             } else {
                 Logger.warn("Messages file missing for locale %s", locale);
@@ -56,36 +63,69 @@ public class MessagesPlugin extends PlayPlugin {
     }
 
     static Properties read(VirtualFile vf) {
-        if (vf != null) {
-            return IO.readUtf8Properties(vf.inputstream());
+	Properties propsFromFile=null;
+        if (vf != null && !vf.isDirectory()) {
+            propsFromFile = IO.readUtf8Properties(vf.inputstream());
+            
+            // Include
+            Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
+            for (Object key : propsFromFile.keySet()) {
+                if (key.toString().startsWith("@include.")) {
+                    try {
+                        String filenameToInclude = propsFromFile.getProperty(key.toString());
+                        VirtualFile fileToInclude = Play.getVirtualFile("conf/" + filenameToInclude);
+
+                        if(fileToInclude != null && fileToInclude.exists() && !fileToInclude.isDirectory()) {
+                            toInclude.putAll( read(fileToInclude) );
+                            if(!includeMessageFilenames.contains(filenameToInclude)){
+                        	includeMessageFilenames.add(filenameToInclude);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.warn("Missing include: %s", key);
+                    }
+                }
+            }
+            propsFromFile.putAll(toInclude);
         }
-        return null;
+        return propsFromFile;
     }
 
     @Override
     public void detectChange() {
-        if (Play.getVirtualFile("conf/messages")!=null && Play.getVirtualFile("conf/messages").lastModified() > lastLoading) {
+	VirtualFile vf = Play.getVirtualFile("conf/messages");
+        if (vf != null && vf.exists() && !vf.isDirectory() && vf.lastModified() > lastLoading) {
             onApplicationStart();
             return;
         }
         for(VirtualFile module : Play.modules.values()) {
-            if(module.child("conf/messages") != null && module.child("conf/messages").exists() && module.child("conf/messages").lastModified() > lastLoading) {
+            vf = module.child("conf/messages");
+            if(vf != null && vf.exists() && !vf.isDirectory() && vf.lastModified() > lastLoading) {
                 onApplicationStart();
                 return;
             }
         }
         for (String locale : Play.langs) {
-            if (Play.getVirtualFile("conf/messages." + locale)!=null && Play.getVirtualFile("conf/messages." + locale).lastModified() > lastLoading) {
+            vf = Play.getVirtualFile("conf/messages." + locale);
+            if (vf != null && vf.exists() && !vf.isDirectory() && vf.lastModified() > lastLoading) {
                 onApplicationStart();
                 return;
             }
             for(VirtualFile module : Play.modules.values()) {
-                if(module.child("conf/messages."+locale) != null && module.child("conf/messages."+locale).exists() && module.child("conf/messages."+locale).lastModified() > lastLoading) {
+                vf = module.child("conf/messages."+locale);
+                if( vf != null && vf.exists() && !vf.isDirectory() && vf.lastModified() > lastLoading) {
                     onApplicationStart();
                     return;
                 }
             }
         }
-
+        
+        for (String includeFilename : includeMessageFilenames) {
+            vf = Play.getVirtualFile("conf/" + includeFilename);
+            if (vf != null && vf.exists() && !vf.isDirectory() && vf.lastModified() > lastLoading) {
+                onApplicationStart();
+                return;
+            }
+        }
     }
 }
