@@ -107,6 +107,16 @@ h3. The lib directory
 
 This directory contains all standard Java libraries needed by your application. They are automatically added to the Java classpath.
 
+h3. The documentation directory
+
+This directory can include any project documentation you want to share with fellow developers.
+You can add documentation sections using "textile":http://en.wikipedia.org/wiki/Textile_%28markup_language%29 markup.
+
+Every textile file in documentation folder will automatically be added to your documentation index. Just make sure you start it with some @h1.@ header, as it's being used as chapter name.
+
+You can customize the way documentation looks by editing @template.html@ file, but it's not mandatory and you can remove it if plain black on white page is ok for you.
+
+When you want to share it with non technical staff, or need to check it out without Play app running there's a export functionality. Just execute play @doc:export@ command in project root. This will generate zip file in @documentation@ folder with all your textile files rendered to html and files from @images@ and @files@ directories included.
 
 h2. <a name="lifecycle">Development life cycle</a>
 

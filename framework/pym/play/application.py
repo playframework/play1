@@ -62,6 +62,10 @@ class PlayApplication(object):
 
     def modules(self):
         modules = []
+        if self.readConf('application.mode').lower() == 'dev':
+            #Load docviewer module
+			modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/docviewer')))
+			
         for m in self.readConfs('module.'):
             if '${play.path}' in m:
                 m = m.replace('${play.path}', self.play_env["basedir"])
