@@ -54,6 +54,10 @@ public class DocViewerPlugin extends PlayPlugin {
         Router.prependRoute("GET", "/@documentation/modules/{module}/files/{name}", "PlayDocumentation.file");
         Router.prependRoute("GET", "/@documentation/cheatsheet/{category}", "PlayDocumentation.cheatSheet");
         Router.prependRoute("GET", "/@documentation/{docLang}/cheatsheet/{category}", "PlayDocumentation.cheatSheet");
+        Router.prependRoute("GET", "/@projectdocs/?", "ProjectDocumentation.index");
+        Router.prependRoute("GET", "/@projectdocs/{id}", "ProjectDocumentation.page");
+        Router.prependRoute("GET", "/@projectdocs/images/{name}", "ProjectDocumentation.image");
+        Router.prependRoute("GET", "/@projectdocs/files/{name}", "ProjectDocumentation.file");
     }
 
 }

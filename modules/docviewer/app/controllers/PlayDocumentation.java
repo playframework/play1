@@ -1,12 +1,11 @@
 package controllers;
 
 import helpers.CheatSheetHelper;
-
 import helpers.LangMenuHelper;
-import helpers.LangMenuHelper.*;
-import play.Logger;
+import helpers.LangMenuHelper.LangMenu;
 import play.Play;
 import play.libs.IO;
+import play.modules.docviewer.DocumentationGenerator;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.vfs.VirtualFile;
@@ -16,20 +15,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 public class PlayDocumentation extends Controller {
+
+    public static DocumentationGenerator generator = new DocumentationGenerator();
 
     public static void index() throws Exception {
         Http.Header header = request.headers.get("accept-language");
-        String docLang = header!=null? header.value().split(",")[0] : "";
-        docLang = docLang.length()>2? docLang.substring(0,2) : docLang;
+        String docLang = header != null ? header.value().split(",")[0] : "";
+        docLang = docLang.length() > 2 ? docLang.substring(0, 2) : docLang;
         page("home", null, docLang);
     }
 
     public static void page(String id, String module, String docLang) throws Exception {
-        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches("en-.*") ) ) ? "_" + docLang + "/" : "/";
+        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches(
+                "en-.*"))) ? "_" + docLang + "/" : "/";
 
         File page = new File(Play.frameworkPath, "documentation/manual" + docLangDir + id + ".textile");
-        if(!page.exists()){
+        if (!page.exists()) {
             page = new File(Play.frameworkPath, "documentation/manual/" + id + ".textile");
         }
 
@@ -41,8 +44,9 @@ public class PlayDocumentation extends Controller {
             notFound("Manual page for " + id + " not found");
         }
         String textile = IO.readContentAsString(page);
-        String html = toHTML(textile);
-        String title = getTitle(textile);
+        String html = generator.toHTML(textile);
+        html = generator.stripBody(html);
+        String title = generator.getTitle(textile);
 
         List<String> modules = new ArrayList();
         List<String> apis = new ArrayList();
@@ -62,17 +66,15 @@ public class PlayDocumentation extends Controller {
         render(id, html, title, modules, apis, module, docLang, langMenuList);
     }
 
-
-
-
-
     public static void cheatSheet(String category, String docLang) {
         File[] sheetFiles = CheatSheetHelper.getSheets(category, docLang);
         if (sheetFiles != null) {
             List<String> sheets = new ArrayList<String>();
 
             for (File file : sheetFiles) {
-                sheets.add(toHTML(IO.readContentAsString(file)));
+                String html = generator.toHTML(IO.readContentAsString(file));
+                html = generator.stripBody(html);
+                sheets.add(html);
             }
 
             String title = CheatSheetHelper.getCategoryTitle(category);
@@ -104,18 +106,4 @@ public class PlayDocumentation extends Controller {
         }
         renderBinary(file);
     }
-
-    static String toHTML(String textile) {
-        String html = new jj.play.org.eclipse.mylyn.wikitext.core.parser.MarkupParser(new jj.play.org.eclipse.mylyn.wikitext.textile.core.TextileLanguage()).parseToHtml(textile);
-        html = html.substring(html.indexOf("<body>") + 6, html.lastIndexOf("</body>"));
-        return html;
-    }
-
-    static String getTitle(String textile) {
-        if (textile.length() == 0) {
-            return "";
-        }
-        return textile.split("\n")[0].substring(3).trim();
-    }
-
 }
