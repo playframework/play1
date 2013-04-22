@@ -122,7 +122,7 @@ public class WSUrlFetch implements WSImpl {
             }
         }
 
-       /** Execute a DELETE request.*/
+        /** Execute a DELETE request.*/
         public HttpResponse delete() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(getPreparedUrl("DELETE")), "DELETE"));
@@ -173,45 +173,46 @@ public class WSUrlFetch implements WSImpl {
                 connection.setDoInput(true);
                 connection.setInstanceFollowRedirects(this.followRedirects);
                 connection.setReadTimeout(this.timeout * 1000);
-                for (String key: this.headers.keySet()) {
+                for (String key : this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
-                checkFileBody(connection);
+
                 if (this.oauthToken != null && this.oauthSecret != null) {
                     OAuthConsumer consumer = new DefaultOAuthConsumer(oauthInfo.consumerKey, oauthInfo.consumerSecret);
                     consumer.setTokenWithSecret(oauthToken, oauthSecret);
                     consumer.sign(connection);
                 }
+                checkFileBody(connection);
                 return connection;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
 
         private void checkFileBody(HttpURLConnection connection) throws IOException {
-/*            if (this.fileParams != null) {
-                connection.setDoOutput(true);
-                //could be optimized, we know the size of this array.
-                for (int i = 0; i < this.fileParams.length; i++) {
-                    builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
-                            this.fileParams[i].file,
-                            MimeTypes.getMimeType(this.fileParams[i].file.getName()),
-                            null));
-                }
-                if (this.parameters != null) {
-                    for (String key : this.parameters.keySet()) {
-                        Object value = this.parameters.get(key);
-                        if (value instanceof Collection<?> || value.getClass().isArray()) {
-                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
-                            for (Object v : values) {
-                                builder.addBodyPart(new StringPart(key, v.toString()));
-                            }
-                        } else {
-                            builder.addBodyPart(new StringPart(key, value.toString()));
-                        }
-                    }
-                }
-                return;
+            /*            if (this.fileParams != null) {
+            connection.setDoOutput(true);
+            //could be optimized, we know the size of this array.
+            for (int i = 0; i < this.fileParams.length; i++) {
+            builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
+            this.fileParams[i].file,
+            MimeTypes.getMimeType(this.fileParams[i].file.getName()),
+            null));
+            }
+            if (this.parameters != null) {
+            for (String key : this.parameters.keySet()) {
+            Object value = this.parameters.get(key);
+            if (value instanceof Collection<?> || value.getClass().isArray()) {
+            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+            for (Object v : values) {
+            builder.addBodyPart(new StringPart(key, v.toString()));
+            }
+            } else {
+            builder.addBodyPart(new StringPart(key, value.toString()));
+            }
+            }
+            }
+            return;
             }*/
             if (this.parameters != null && !this.parameters.isEmpty()) {
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset="+encoding);
@@ -225,7 +226,10 @@ public class WSUrlFetch implements WSImpl {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
                 connection.setDoOutput(true);
-
+                
+                if(this.mimeType != null) {
+                    connection.setRequestProperty("Content-Type", this.mimeType+"; charset="+encoding);
+                }
                 OutputStream out = connection.getOutputStream();
                 if(this.body instanceof InputStream) {
                     InputStream bodyStream = (InputStream)this.body;
@@ -242,12 +246,9 @@ public class WSUrlFetch implements WSImpl {
                         throw new RuntimeException(e);
                     }
                 }
-                if(this.mimeType != null) {
-                    connection.setRequestProperty("Content-Type", this.mimeType+"; charset="+encoding);
-                }
+
             }
         }
-
     }
 
     /**
@@ -259,7 +260,6 @@ public class WSUrlFetch implements WSImpl {
         private Integer status;
         private String statusText;
         private Map<String, List<String>> headersMap;
-        private String encoding;
 
         /**
          * you shouldnt have to create an HttpResponse yourself
@@ -311,7 +311,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public List<Header> getHeaders() {
             List<Header> result = new ArrayList<Header>();
-            for (String key: headersMap.keySet()) {
+            for (String key : headersMap.keySet()) {
                 result.add(new Header(key, headersMap.get(key)));
             }
             return result;
