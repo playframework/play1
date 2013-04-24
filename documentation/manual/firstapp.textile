@@ -37,6 +37,8 @@ The @play new@ command creates a new directory @helloworld/@ and populates it wi
 
 @conf/@ contains all the application’s configuration files, especially the main @application.conf@ file, the @routes@ definition files and the @messages@ files used for internationalization.
 
+@documentation/@ contains application documentation. You can add your project specific documentation there and access it by "@projectdocs":http://localhost:9000/@projectdocs url.
+
 @lib/@ contains all optional Java libraries packaged as standard .jar files.
 
 @public/@ contains all the publicly available resources, which includes JavaScript, stylesheets and images directories.
