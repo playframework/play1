@@ -720,7 +720,7 @@ public class Play {
 		List<String> modules = new ArrayList<String>();
 		if (localModules.exists() && localModules.isDirectory()) {
 			try {
-				modules = dm.retrieveModules();
+				modules = dm.retrieveModules(true);
 			} catch (Exception e) {
 				throw new UnexpectedException("There was a problem parsing dependencies.yml");
 				
@@ -737,6 +737,7 @@ public class Play {
 				if (module.isDirectory()) {
 					addModule(moduleName, module);
 				} else {
+
 					File modulePath = new File(IO.readContentAsString(module).trim());
 					if (!modulePath.exists() || !modulePath.isDirectory()) {
 						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());

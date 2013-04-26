@@ -20,6 +20,8 @@ import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.FilterHelper;
 
+import play.Logger;
+import play.Play;
 import play.libs.Files;
 import play.libs.IO;
 
@@ -156,11 +158,35 @@ public class DependenciesManager {
         return false;
     }
 
-	public List<String> retrieveModules() throws Exception {
-		ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
+	public List<String> retrieveModules(boolean playModuleOnly) throws Exception {
+		List<String> modules = new ArrayList<String>();
+		
+		// Backward compatibility
+	    	for (Object key : Play.configuration.keySet()) {
+	            String pName = key.toString();
+	            if (pName.startsWith("module.")) {
+	                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
+	                String moduleName = pName.substring(7);
+	                File modulePath = new File(Play.configuration.getProperty(pName));
+	                if (!modulePath.isAbsolute()) {
+	                    modulePath = new File(Play.applicationPath, Play.configuration.getProperty(pName));
+	                }
+	                if (!modulePath.exists() || !modulePath.isDirectory()) {
+	                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+	                } else {
+				String mName = moduleName;
+				if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+				    mName = mName.substring(0, mName.length() - 4);
+				}                          
+				modules.add(mName);	
+	                }
+	            }
+	        } 
+	    
+	    	// Read dependencies.yml
+	    	ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
 		File ivyModule = new File(application, "conf/dependencies.yml");
 		ResolveReport report;
-		List<String> modules = new ArrayList<String>();
 
 		System.setProperty("play.path", framework.getAbsolutePath());
 		Ivy ivy = configure();
@@ -178,7 +204,7 @@ public class DependenciesManager {
 				ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
 				for (ArtifactDownloadReport artifact : adr) {
 					if (artifact.getLocalFile() != null) {
-						if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
+						if (isPlayModule(artifact) || (playModuleOnly == false && !isFrameworkLocal(artifact)) ) {
 						    String mName = artifact.getLocalFile().getName();
 						    if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
 							mName = mName.substring(0, mName.length() - 4);
