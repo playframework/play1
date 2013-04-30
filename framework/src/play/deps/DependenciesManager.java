@@ -2,10 +2,15 @@ package play.deps;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
@@ -20,12 +25,11 @@ import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.FilterHelper;
 
-import play.Logger;
-import play.Play;
 import play.libs.Files;
 import play.libs.IO;
 
 public class DependenciesManager {
+    public static final String MODULE_ORDER_CONF = ".modulesOrder.conf";
 
     public static void main(String[] args) throws Exception {
 
@@ -111,7 +115,7 @@ public class DependenciesManager {
         for (File path : paths) {
             if (path.exists()) {
                 for (File f : path.listFiles()) {
-                    if (!installed.contains(f)) {
+                    if (!installed.contains(f) && !f.getName().equals(MODULE_ORDER_CONF)) {
                         notSync.add(f);
                     }
                 }
@@ -158,68 +162,30 @@ public class DependenciesManager {
         return false;
     }
 
-	public List<String> retrieveModules(boolean playModuleOnly) throws Exception {
-		List<String> modules = new ArrayList<String>();
-		
-		// Backward compatibility
-	    	for (Object key : Play.configuration.keySet()) {
-	            String pName = key.toString();
-	            if (pName.startsWith("module.")) {
-	                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
-	                String moduleName = pName.substring(7);
-	                File modulePath = new File(Play.configuration.getProperty(pName));
-	                if (!modulePath.isAbsolute()) {
-	                    modulePath = new File(Play.applicationPath, Play.configuration.getProperty(pName));
-	                }
-	                if (!modulePath.exists() || !modulePath.isDirectory()) {
-	                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-	                } else {
-				String mName = moduleName;
-				if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
-				    mName = mName.substring(0, mName.length() - 4);
-				}                          
-				modules.add(mName);	
-	                }
-	            }
-	        } 
-	    
-	    	// Read dependencies.yml
-	    	ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
-		File ivyModule = new File(application, "conf/dependencies.yml");
-		ResolveReport report;
+    public List<String> retrieveModules()
+	    throws Exception {
+	List<String> modules = new ArrayList<String>();
+	
+	File file = new File(application + "/modules", MODULE_ORDER_CONF);
+	FileInputStream in = new FileInputStream(file);
+	Properties modulesOrderConfiguration = new Properties();
+	modulesOrderConfiguration.load(in);
+	
+	    String value = null;
+	 Long key = 1L;
 
-		System.setProperty("play.path", framework.getAbsolutePath());
-		Ivy ivy = configure();
-
-		ResolveEngine resolveEngine = ivy.getResolveEngine();
-		ResolveOptions resolveOptions = new ResolveOptions();
-		resolveOptions.setConfs(new String[]{"default"});
-		resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
-
-		report = resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
-
-		for (Iterator iter = report.getDependencies().iterator(); iter.hasNext(); ) {
-			IvyNode node = (IvyNode) iter.next();
-			if (node.isLoaded()) {
-				ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
-				for (ArtifactDownloadReport artifact : adr) {
-					if (artifact.getLocalFile() != null) {
-						if (isPlayModule(artifact) || (playModuleOnly == false && !isFrameworkLocal(artifact)) ) {
-						    String mName = artifact.getLocalFile().getName();
-						    if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
-							mName = mName.substring(0, mName.length() - 4);
-						    }                          
-						    modules.add(mName);
-						}
-					}
-				}
-			}
-		}
-		return modules;
-	}
-
+	 while ((value = modulesOrderConfiguration.getProperty(key.toString())) != null) {
+	     modules.add(value);
+	     key++;
+	 }
+	
+	in.close();
+	return modules;
+    }
+	
     public List<File> retrieve(ResolveReport report) throws Exception {
-
+	Properties modulesOrderConfiguration = new Properties();
+        	
         // Track missing artifacts
         List<ArtifactDownloadReport> missing = new ArrayList<ArtifactDownloadReport>();
 
@@ -234,11 +200,29 @@ public class DependenciesManager {
                     } else {
                         if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
                             artifacts.add(artifact);
+                            
+                            // Save the order of module
+                            if(isPlayModule(artifact)){
+                                String mName = artifact.getLocalFile().getName();
+                                if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+                            	mName = mName.substring(0, mName.length() - 4); 
+                                }
+                                modulesOrderConfiguration.setProperty(String.valueOf(modulesOrderConfiguration.size() + 1), mName);
+                            }
                         }
                     }
                 }
             }
         }
+        
+        // Load modules from modules/ directory, but get the order from the dependencies.yml file
+	// .listFiles() returns items in an OS dependant sequence, which is bad
+	// See #781
+        // Save order in file to be able to retrieve it
+        File file =   new File(application + "/modules", ".modulesOrder.conf");
+        FileOutputStream fOut = new FileOutputStream(file);
+        modulesOrderConfiguration.store(fOut, "Modules orders");
+        fOut.close();  
 
         if (!missing.isEmpty()) {
             System.out.println("~");
