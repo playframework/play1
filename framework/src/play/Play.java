@@ -720,9 +720,9 @@ public class Play {
 		List<String> modules = new ArrayList<String>();
 		if (localModules.exists() && localModules.isDirectory()) {
 			try {
-				modules = dm.retrieveModules(true);
+				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				throw new UnexpectedException("There was a problem parsing dependencies.yml");
+				throw new UnexpectedException("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF);
 				
 			}
 			for (Iterator iter = modules.iterator(); iter.hasNext();) {
