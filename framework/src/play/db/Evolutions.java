@@ -1,6 +1,7 @@
 package play.db;
 
 import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -8,6 +9,7 @@ import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.db.evolutions.Evolution;
 import play.db.evolutions.EvolutionQuery;
+import play.db.evolutions.EvolutionState;
 import play.db.evolutions.exceptions.InconsistentDatabase;
 import play.db.evolutions.exceptions.InvalidDatabaseRevision;
 import play.exceptions.PlayException;
@@ -412,12 +414,12 @@ public class Evolutions extends PlayPlugin {
                         String state = rs.getString("state");
                         String hash = rs.getString("hash").substring(0, 7);
                         String script = "";
-                        if (state.equals("applying_up")) {
+                        if (EvolutionState.APPLYING_UP.getStateWord().equals(state)) {
                             script = rs.getString("apply_script");
                         } else {
                             script = rs.getString("revert_script");
                         }
-                        script = "# --- Rev:" + revision + "," + (state.equals("applying_up") ? "Ups" : "Downs") + " - " + hash + "\n\n" + script;
+                        script = "# --- Rev:" + revision + "," + (EvolutionState.APPLYING_UP.getStateWord().equals(state) ? "Ups" : "Downs") + " - " + hash + "\n\n" + script;
                         String error = rs.getString("last_problem");
                         throw new InconsistentDatabase(script, error, revision, moduleRoot.getKey());
                     }
@@ -537,16 +539,6 @@ public class Evolutions extends PlayPlugin {
                 }
             
             } else {
-                // If you are having problems with the default datatype text (clob for Oracle), you can
-                // specify your own datatype using the 'evolution.PLAY_EVOLUTIONS.textType'-property
-                String textDataType = Play.configuration.getProperty("evolution.PLAY_EVOLUTIONS.textType");
-                if (textDataType == null) {
-                    if (isOracleDialectInUse()) {
-                        textDataType = "clob";
-                    } else {
-                        textDataType = "text";
-                    }
-                }
                 EvolutionQuery.createTable();
             }
         } catch (SQLException e) {
@@ -556,24 +548,6 @@ public class Evolutions extends PlayPlugin {
         }
         Collections.sort(evolutions);
         return evolutions;
-    }
-
-    private synchronized static boolean isOracleDialectInUse() {
-        boolean isOracle = false;
-
-        String jpaDialect = Play.configuration.getProperty("jpa.dialect");
-        if (jpaDialect != null) {
-            try {
-                Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
-			
-                // Oracle 8i dialect is the base class for oracle dialects (at least for now)
-                isOracle = org.hibernate.dialect.Oracle8iDialect.class.isAssignableFrom(dialectClass);
-            } catch (ClassNotFoundException e) {
-                // swallow
-                Logger.warn("jpa.dialect class %s not found", jpaDialect);
-            }
-        }
-        return isOracle;
     }
     
     private static void checkAndUpdateEvolutionsForMultiModuleSupport(Connection connection) throws SQLException {
