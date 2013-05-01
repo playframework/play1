@@ -728,10 +728,7 @@ public class Play {
 				String moduleName = (String) iter.next();
 
 				File module = new File(localModules, moduleName);
-				if (! module.exists()) { //fix. jar is not a module
-					continue;
-				}
-
+				
 				if (moduleName.contains("-")) {
 					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
 				}
