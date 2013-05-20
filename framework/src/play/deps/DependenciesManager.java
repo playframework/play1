@@ -219,6 +219,13 @@ public class DependenciesManager {
 	// .listFiles() returns items in an OS dependant sequence, which is bad
 	// See #781
         // Save order in file to be able to retrieve it
+        
+        // Create directory if not exist
+        File modulesDir = new File(application, "modules");
+        if(!modulesDir.exists()){
+            modulesDir.mkdir();
+        }
+          
         File file =   new File(application + "/modules", ".modulesOrder.conf");
         FileOutputStream fOut = new FileOutputStream(file);
         modulesOrderConfiguration.store(fOut, "Modules orders");

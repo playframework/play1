@@ -129,6 +129,48 @@ bc. #{selenium 'Get string from cache'}
  
 #{/selenium}
 
+h3. CleanTest Annotation
+
+    Some tests may need to access or  not to MVC objects:
+* Response,
+* Request,
+* RenderArgs,
+
+By default this object will created and you can directly access to it.
+
+bc.  Request request = Request.current();
+// some code to use request
+     
+Response response = Response.current();
+// some code to use response
+      
+RenderArgs renderArgs = RenderArgs.current();
+// some code to use renderArgs
+
+In order to control the access to this parameters, you can use the <code>@CleanTest</code> on the test class.
+
+bc. @CleanTest(removeCurrent= true, createDefault=false)
+public class FunctionalTestCleanTest extends FunctionalTest {
+    @Test
+    public void testParam(){
+        Request request = Request.current();
+        assertNull(request);
+     
+        Response response = Response.current();
+        assertNull(response);
+      
+        RenderArgs renderArgs = RenderArgs.current();
+        assertNull(renderArgs);
+     }  
+}
+
+This annotation has the following properties:
+
+* **removeCurrent**: Indicate if current MVC objects will be removed or not
+* **createDefault**: Indicate if current MVC objects will be created or not
+
+
+
 h2. <a name="fixtures">Fixtures</a>
 
 When you run tests, you need to have stable data for your application. The simplest way is to reset your database before each test.
