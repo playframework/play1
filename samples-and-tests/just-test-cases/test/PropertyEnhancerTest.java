@@ -4,17 +4,18 @@ import models.PropertyEnhancerModel;
 
 import org.junit.Test;
 
+import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.test.UnitTest;
 
 public class PropertyEnhancerTest extends UnitTest {
 
     @Test
-    public void checkForSyntheticMethods() throws Exception {
+    public void checkForPlayFrameworkEnhancerMethods() throws Exception {
         PropertyEnhancerModel model = new PropertyEnhancerModel();
         Method getter = model.getClass().getMethod("getText");
-        assertFalse(getter.isSynthetic());
+        assertFalse(getter.isAnnotationPresent(PlayPropertyAccessor.class));
         Method setter = model.getClass().getMethod("setText", String.class);
-        assertTrue(setter.isSynthetic());
+        assertTrue(setter.isAnnotationPresent(PlayPropertyAccessor.class));
     }
 
     @Test
