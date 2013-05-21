@@ -81,11 +81,11 @@ public class PropertiesEnhancer extends Enhancer {
                         }
                     } catch (NotFoundException noGetter) {
 
-                        // Créé le getter
+                        // Getter creation
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
-                        getMethod.setModifiers(getMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(getMethod);
+                        createAnnotation(getAnnotations(getMethod), PlayPropertyAccessor.class);
                     }
 
                     if (!isFinal(ctField)) {
@@ -95,9 +95,8 @@ public class PropertiesEnhancer extends Enhancer {
                                 throw new NotFoundException("it's not a setter !");
                             }
                         } catch (NotFoundException noSetter) {
-                            // Créé le setter
+                            // Setter creation
                             CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
-                            setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
                             ctClass.addMethod(setMethod);
                             createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                         }
@@ -138,12 +137,12 @@ public class PropertiesEnhancer extends Enhancer {
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     try {
 
-                        // Acces à une property ?
+                        // Check access to porperty ?
                         if (isProperty(fieldAccess.getField())) {
 
-                            // TODO : vérifier que c'est bien un champ d'une classe de l'application (fieldAccess.getClassName())
+                            // TODO : Check if it is a application class field (fieldAccess.getClassName())
 
-                            // Si c'est un getter ou un setter
+                            // Getter or setter ?
                             String propertyName = null;
                             if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
                                 || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
@@ -153,19 +152,19 @@ public class PropertiesEnhancer extends Enhancer {
                                 }
                             }
 
-                            // On n'intercepte pas le getter de sa propre property
+                            // To intercept getter of its own property
                             if (propertyName == null || !propertyName.equals(fieldAccess.getFieldName())) {
 
                                 String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", line " + fieldAccess.getLineNumber();
 
                                 if (fieldAccess.isReader()) {
 
-                                    // Réécris l'accés en lecture à la property
+                                    // Rewrite read access to the property
                                     fieldAccess.replace("$_ = ($r)play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeReadProperty($0, \"" + fieldAccess.getFieldName() + "\", \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
 
                                 } else if (!isFinal(fieldAccess.getField()) && fieldAccess.isWriter()) {
 
-                                    // Réécris l'accés en ecriture à la property
+                                    // Rewrite write access to the property
                                     fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", " + fieldAccess.getField().getType().getName() + ".class, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
 
 
