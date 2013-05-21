@@ -226,7 +226,7 @@ public class DependenciesManager {
             modulesDir.mkdir();
         }
           
-       File file =   new File(application + "/modules", ".modulesOrder.conf");
+        File file =   new File(application + "/modules", ".modulesOrder.conf");
         FileOutputStream fOut = new FileOutputStream(file);
         modulesOrderConfiguration.store(fOut, "Modules orders");
         fOut.close();  
