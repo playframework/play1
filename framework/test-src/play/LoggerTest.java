@@ -60,7 +60,7 @@ public class LoggerTest {
         Play.applicationPath = applicationPath;
         Play.id = id ;
         Logger.log4j = log4j;
-        if (Play.configuration != null) {
+        if (Play.id != null && Play.configuration != null) {
                 Logger.init();
         }
     }

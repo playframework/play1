@@ -86,6 +86,12 @@ repositories:
         artifact:   "${play.path}/modules/secure"
         contains:
             - play -> secure $version
+            
+    - playCoreDocviewer:
+        type:       local
+        artifact:   "${play.path}/modules/docviewer"
+        contains:
+            - play -> docviewer $version
 
     - playModules:  
         type:       chain

@@ -1,0 +1,10 @@
+language: java
+jdk:
+  - openjdk6 
+script: ant -buildfile ./framework/build.xml test
+after_failure: 
+    cat ./samples-and-tests/just-test-cases/test-result/*.failed.html
+notifications:
+  email:
+    on_success: change
+    on_failure: always
