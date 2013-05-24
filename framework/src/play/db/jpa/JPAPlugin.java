@@ -276,23 +276,23 @@ public class JPAPlugin extends PlayPlugin {
         String dialect = Play.configuration.getProperty("jpa.dialect");
         if (dialect != null) {
             return dialect;
-        } else if (driver.equals("org.h2.Driver")) {
+        } else if ("org.h2.Driver".equals(driver)) {
             return "org.hibernate.dialect.H2Dialect";
-        } else if (driver.equals("org.hsqldb.jdbcDriver")) {
+        } else if ("org.hsqldb.jdbcDriver".equals(driver)) {
             return "org.hibernate.dialect.HSQLDialect";
-        } else if (driver.equals("com.mysql.jdbc.Driver")) {
+        } else if ("com.mysql.jdbc.Driver".equals(driver)) {
             return "play.db.jpa.MySQLDialect";
-        } else if (driver.equals("org.postgresql.Driver")) {
+        } else if ("org.postgresql.Driver".equals(driver)) {
             return "org.hibernate.dialect.PostgreSQLDialect";
-        } else if (driver.toLowerCase().equals("com.ibm.db2.jdbc.app.DB2Driver")) {
+        } else if ("com.ibm.db2.jdbc.app.DB2Driver".equals(driver)) {
             return "org.hibernate.dialect.DB2Dialect";
-        } else if (driver.equals("com.ibm.as400.access.AS400JDBCDriver")) {
+        } else if ("com.ibm.as400.access.AS400JDBCDriver".equals(driver)) {
             return "org.hibernate.dialect.DB2400Dialect";
-        } else if (driver.equals("com.ibm.as400.access.AS390JDBCDriver")) {
+        } else if ("com.ibm.as400.access.AS390JDBCDriver".equals(driver)) {
             return "org.hibernate.dialect.DB2390Dialect";
-        } else if (driver.equals("oracle.jdbc.OracleDriver")) {
+        } else if ("oracle.jdbc.OracleDriver".equals(driver)) {
             return "org.hibernate.dialect.Oracle10gDialect";
-        } else if (driver.equals("com.sybase.jdbc2.jdbc.SybDriver")) {
+        } else if ("com.sybase.jdbc2.jdbc.SybDriver".equals(driver)) {
             return "org.hibernate.dialect.SybaseAnywhereDialect";
         } else if ("com.microsoft.jdbc.sqlserver.SQLServerDriver".equals(driver)) {
             return "org.hibernate.dialect.SQLServerDialect";
