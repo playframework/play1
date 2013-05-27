@@ -1,0 +1,42 @@
+#{fixture delete:'all'/}
+#{fixture load:'/templates/fasttags/jsAction.yml' /}
+
+#{selenium 'JsAction'}
+
+	open('@{Users.showAll()}')
+    waitForText('css=#1 > td:nth-child(5)', 'A')
+    waitForText('css=#2 > td:nth-child(5)', 'B')
+    waitForText('css=#3 > td:nth-child(5)', 'name with space')
+    waitForText('css=#4 > td:nth-child(5)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    waitForText('css=#javascript_add > td:nth-child(5)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+            
+    assertText('css=#1 > td:nth-child(1)', 'A')
+    assertText('css=#1 > td:nth-child(2)', 'A')
+    assertText('css=#1 > td:nth-child(3)', 'A')
+    assertText('css=#1 > td:nth-child(4)', 'A')
+    assertText('css=#1 > td:nth-child(5)', 'A')
+    
+    assertText('css=#2 > td:nth-child(1)', 'B')
+    assertText('css=#2 > td:nth-child(2)', 'B')
+    assertText('css=#2 > td:nth-child(3)', 'B')
+    assertText('css=#2 > td:nth-child(4)', 'B')
+    assertText('css=#2 > td:nth-child(5)', 'B')
+    
+    assertText('css=#3 > td:nth-child(1)', 'name with space')
+    assertText('css=#3 > td:nth-child(2)', 'name with space')
+    assertText('css=#3 > td:nth-child(3)', 'name with space')
+    assertText('css=#3 > td:nth-child(4)', 'name with space')
+    assertText('css=#3 > td:nth-child(5)', 'name with space')
+    
+    assertText('css=#4 > td:nth-child(1)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#4 > td:nth-child(2)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#4 > td:nth-child(3)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#4 > td:nth-child(4)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#4 > td:nth-child(5)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    
+    assertText('css=#javascript_add > td:nth-child(1)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#javascript_add > td:nth-child(2)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#javascript_add > td:nth-child(3)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#javascript_add > td:nth-child(4)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('css=#javascript_add > td:nth-child(5)', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+#{/selenium}
