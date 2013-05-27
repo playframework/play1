@@ -1,0 +1,45 @@
+#{fixture delete:'all'/}
+#{fixture load:'/templates/fasttags/jsAction.yml' /}
+
+#{selenium 'JsAction'}
+
+	open('@{Users.showAll()}')
+   
+// TODO in autotest : work if headlessBrowser in FirePhone is FIREFOX_3_6 but not working with INTERNET_EXPLORER_8
+// to reactivate later
+    waitForText('//html/body/table/tbody/tr[1]/td[1]', 'A')
+    waitForText('//html/body/table/tbody/tr[2]/td[5]', 'B')
+    waitForText('//html/body/table/tbody/tr[3]/td[5]', 'name with space')
+    waitForText('//html/body/table/tbody/tr[4]/td[5]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    waitForText('//html/body/table/tbody/tr[5]/td[5]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+           
+    assertText('//html/body/table/tbody/tr[1]/td[1]', 'A')
+    assertText('//html/body/table/tbody/tr[1]/td[2]', 'A')
+    assertText('//html/body/table/tbody/tr[1]/td[3]', 'A')
+    assertText('//html/body/table/tbody/tr[1]/td[4]', 'A')
+    assertText('//html/body/table/tbody/tr[1]/td[5]', 'A')
+    
+    assertText('//html/body/table/tbody/tr[2]/td[1]', 'B')
+    assertText('//html/body/table/tbody/tr[2]/td[2]', 'B')
+    assertText('//html/body/table/tbody/tr[2]/td[3]', 'B')
+    assertText('//html/body/table/tbody/tr[2]/td[4]', 'B')
+    assertText('//html/body/table/tbody/tr[2]/td[5]', 'B')
+    
+    assertText('//html/body/table/tbody/tr[3]/td[1]', 'name with space')
+    assertText('//html/body/table/tbody/tr[3]/td[2]', 'name with space')
+    assertText('//html/body/table/tbody/tr[3]/td[3]', 'name with space')
+    assertText('//html/body/table/tbody/tr[3]/td[4]', 'name with space')
+    assertText('//html/body/table/tbody/tr[3]/td[5]', 'name with space')
+    
+    assertText('//html/body/table/tbody/tr[4]/td[1]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[4]/td[2]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[4]/td[3]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[4]/td[4]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[4]/td[5]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    
+    assertText('//html/body/table/tbody/tr[5]/td[1]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[5]/td[2]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[5]/td[3]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[5]/td[4]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+    assertText('//html/body/table/tbody/tr[5]/td[5]', 'name with special characters [c c ; %20 , / ? : @ & = + $ #]')
+#{/selenium}
