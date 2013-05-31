@@ -9,7 +9,8 @@
 
     assertValue('name', 'Play 1.1')
     storeValue('id', 'objectId')
-    echo('Project id is $[objectId]')
+    echo('Project id is ${objectId}')
+    echo(   ${'objectId'})
     assertTextPresent('No company')
 
     type('name', 'Hop')
