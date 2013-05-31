@@ -6,24 +6,24 @@
 	storeText('kiki', 'secondDate')
 	
 	open('@{UseCache.index()}')
-	assertText('yop', '$[firstDate]')
-	assertText('kiki', '$[secondDate]')
+	assertText('yop', '${'${firstDate}'.escape()}')
+	assertText('kiki', '${'${secondDate}'.escape()}')
 	
 	pause(3000)
 	
 	open('@{UseCache.index()}')
-	assertNotText('yop', '$[firstDate]')
-	assertText('kiki', '$[secondDate]')
+	assertNotText('yop', '${'${firstDate}'.escape()}')
+	assertText('kiki', '${'${secondDate}'.escape()}')
 	
 	open('@{UseCache.getDate()}')
 	storeText('a', 'aDate')
 	
 	open('@{UseCache.getDate()}')
-	assertText('a', '$[aDate]')
+	assertText('a', '${'${aDate}'.escape()}')
 	
 	pause(3000)
 	
 	open('@{UseCache.getDate()}')
-	assertNotText('a', '$[aDate]')
+	assertNotText('a', '${'${aDate}'.escape()}')
 
 #{/selenium}

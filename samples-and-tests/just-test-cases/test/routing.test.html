@@ -27,7 +27,7 @@
     
     // Missing name
     clickAndWait('sayHello')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
 
     // A name
     clickAndWait('back')
@@ -54,18 +54,18 @@
     assertAttribute('form@method', 'regexpi:post')
     
     // The yop form
-    assertElementPresent('css=form[action=/application/yop]')
-    assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
+    assertElementPresent('css=form[action="/application/yop"]')
+    assertAttribute('css=form[action="/application/yop"]@method', 'regexpi:post')
     clickAndWait('yop')
     assertTextPresent('Yop')
     clickAndWait('back')
     assertTextPresent('It works !')
     
     // A GET form
-    assertElementPresent('css=form[action=/aGetForm]')
-    assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
+    assertElementPresent('css=form[action="/aGetForm"]')
+    assertAttribute('css=form[action="/aGetForm"]@method', 'regexpi:get')
     clickAndWait('yopGet')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
     clickAndWait('back')
     
     // ... with a name
@@ -78,7 +78,7 @@
     open('/aGetForm/')
     assertTextPresent('Hello 2null !')
     open('/aGetForm')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
     
     // Optional slash
     open('/optionalSlash/')

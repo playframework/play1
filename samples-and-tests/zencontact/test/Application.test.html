@@ -13,7 +13,7 @@
     storeText('time', 'oldTime')
     pause(1100)
     storeText('time', 'newTime')
-    assertNotEquals('$[oldTime]', '$[newTime]')
+    assertNotEquals('${'${oldTime}'.escape()}', '${'${newTime}'.escape()}')
     
     // Go to List page
     clickAndWait('link=List')
