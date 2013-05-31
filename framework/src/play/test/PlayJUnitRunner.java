@@ -22,6 +22,7 @@ import org.junit.runners.model.TestClass;
 
 import play.Invoker;
 import play.Invoker.DirectInvocation;
+import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope.RenderArgs;
@@ -65,41 +66,8 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     
     private void initTest() {
         TestClass testClass = jUnit4.getTestClass();
-        CleanTest cleanTestAnnot = null;
-        if(testClass != null ){
-            cleanTestAnnot = testClass.getJavaClass().getAnnotation(CleanTest.class) ;
-        }
-        if(cleanTestAnnot != null && cleanTestAnnot.removeCurrent() == true){
-            if(Request.current != null){
-                Request.current.remove();
-            }
-            if(Response.current != null){
-                Response.current.remove();
-            }
-            if(RenderArgs.current != null){
-                RenderArgs.current.remove();
-            }
-        }
-        if (cleanTestAnnot == null || (cleanTestAnnot != null && cleanTestAnnot.createDefault() == true)) {
-            if (Request.current() == null) {
-                Request request = Request.createRequest(null, "GET", "/", "",
-                        null, null, null, null, false, 80, "localhost", false,
-                        null, null);
-                request.body = new ByteArrayInputStream(new byte[0]);
-                Request.current.set(request);
-            }
-
-            if (Response.current() == null) {
-                Response response = new Response();
-                response.out = new ByteArrayOutputStream();
-                response.direct = null;
-                Response.current.set(response);
-            }
-
-            if (RenderArgs.current() == null) {
-                RenderArgs renderArgs = new RenderArgs();
-                RenderArgs.current.set(renderArgs);
-            }
+        if(testClass != null){
+            TestEngine.initTest(testClass.getJavaClass());
         }
     }
 

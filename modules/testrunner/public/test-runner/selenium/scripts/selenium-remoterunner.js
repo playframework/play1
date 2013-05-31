@@ -1,5 +1,5 @@
 /*
-* Copyright 2005 ThoughtWorks, Inc
+* Copyright 2011 Software Freedom Conservancy
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -273,7 +273,7 @@ objectExtend(RemoteRunner.prototype, {
     commandError : function(message) {
         postResult = "ERROR: " + message;
         this.commandNode.style.backgroundColor = errorColor;
-        this.commandNode.titcle = message;
+        this.commandNode.title = message;
     },
 
     testComplete : function() {

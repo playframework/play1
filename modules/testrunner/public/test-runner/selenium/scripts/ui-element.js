@@ -102,39 +102,53 @@ function UIElement(uiElementShorthand)
      * has no default values defined, it will not be included among the
      * permutations.
      *
-     * @param args            a list of UIArguments
-     * @param opt_inDocument  (optional)
-     * @return      a list of associative arrays containing key value pairs
+     * @param args        a list of UIArguments
+     * @param inDocument  the document object to pass to the getDefaultValues()
+     *                    method of each argument.
+     *
+     * @return  a list of associative arrays containing key value pairs
      */
-    this.permuteArgs = function(args, opt_inDocument) {
+    this.permuteArgs = function(args, inDocument) {
+        if (args.length == 0) {
+            return [];
+        }
+        
         var permutations = [];
-        for (var i = 0; i < args.length; ++i) {
-            var arg = args[i];
-            var defaultValues = (arguments.length > 1)
-                ? arg.getDefaultValues(opt_inDocument)
-                : arg.getDefaultValues();
-            
-            // skip arguments for which no default values are defined
-            if (defaultValues.length == 0) {
-                continue;
+        var arg = args[0];
+        var remainingArgs = args.slice(1);
+        var subsequentPermutations = this.permuteArgs(remainingArgs,
+            inDocument);
+        var defaultValues = arg.getDefaultValues(inDocument);
+        
+        // skip arguments for which no default values are defined. If the
+        // argument is a required one, then no permutations are possible.
+        if (defaultValues.length == 0) {
+            if (arg.required) {
+                return [];
             }
-            for (var j = 0; j < defaultValues.length; ++j) {
-                var value = defaultValues[j];
-                var nextPermutations = this.permuteArgs(args.slice(i+1));
-                if (nextPermutations.length == 0) {
-                    var permutation = {};
-                    permutation[arg.name] = value + ''; // make into string
+            else {
+                return subsequentPermutations;
+            }
+        }
+        
+        for (var i = 0; i < defaultValues.length; ++i) {
+            var value = defaultValues[i];
+            var permutation;
+            
+            if (subsequentPermutations.length == 0) {
+                permutation = {};
+                permutation[arg.name] = value + "";
+                permutations.push(permutation);
+            }
+            else {
+                for (var j = 0; j < subsequentPermutations.length; ++j) {
+                    permutation = clone(subsequentPermutations[j]);
+                    permutation[arg.name] = value + "";
                     permutations.push(permutation);
                 }
-                else {
-                    for (var k = 0; k < nextPermutations.length; ++k) {
-                        nextPermutations[k][arg.name] = value + '';
-                        permutations.push(nextPermutations[k]);
-                    }
-                }
             }
-            break;
         }
+        
         return permutations;
     }
     
@@ -177,6 +191,7 @@ function UIElement(uiElementShorthand)
             // args is now required
             var locator = parse_locator(this.getLocator(testcase.args));
             var results;
+            
             if (locator.type == 'xpath' || (locator.type == 'implicit' &&
                 locator.string.substring(0, 2) == '//')) {
                 // try using the javascript xpath engine to avoid namespace
@@ -192,6 +207,7 @@ function UIElement(uiElementShorthand)
                     : locator.type + '=' + locator.string;
                 results = eval_locator(locator, doc);
             }
+            
             if (results.length && results[0].hasAttribute('expected-result')) {
                 continue testcaseLoop;
             }
@@ -201,7 +217,7 @@ function UIElement(uiElementShorthand)
                 var msg = 'Testcase "' + testcase.name
                     + '" failed for UI element "' + this.name + '":';
                 if (!results.length) {
-                    msg += '\n"' + locator + '" did not match any elements!';
+                    msg += '\n"' + (locator.string || locator) + '" did not match any elements!';
                 }
                 else {
                     msg += '\n' + results[0] + ' was not the expected result!';
@@ -249,9 +265,11 @@ function UIElement(uiElementShorthand)
                 }
             }
             else {
-                // try using no arguments. If it doesn't work, fine.
+                // try using no arguments. Parse the locator to make sure it's
+                // really good. If it doesn't work, fine.
                 try {
                     var locator = this.getLocator();
+                    parse_locator(locator);
                     defaultLocators[locator] = {};
                 }
                 catch (e) {
@@ -546,6 +564,7 @@ function UIArgument(uiArgumentShorthand, localVars)
         
         this.name = uiArgumentShorthand.name;
         this.description = uiArgumentShorthand.description;
+        this.required = uiArgumentShorthand.required || false;
         
         if (uiArgumentShorthand.defaultValues) {
             var defaultValues = uiArgumentShorthand.defaultValues;

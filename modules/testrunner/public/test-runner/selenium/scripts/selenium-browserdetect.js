@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 ThoughtWorks, Inc
+ * Copyright 2011 Software Freedom Conservancy
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ var BrowserVersion = function() {
         }
         
         
-    }
+    };
     
     
 
@@ -105,6 +105,16 @@ var BrowserVersion = function() {
         return;
     }
 
+    // google chrome has both 'safari' and 'gecko' in the user agent so
+    // it has to go before them - see http://www.google.com/chrome/intl/en/webmasters-faq.html#useragent
+    if (navigator.userAgent.indexOf('Chrome/') != -1) {
+        this.browser = BrowserVersion.GOOGLECHROME;
+        this.isGoogleChrome = true;
+        this.isGecko = true;
+        this.khtml = true;
+        return;
+    }
+
     if (navigator.userAgent.indexOf('Safari') != -1) {
         this.browser = BrowserVersion.SAFARI;
         this.isSafari = true;
@@ -119,11 +129,13 @@ var BrowserVersion = function() {
         return;
     }
 
-    if (navigator.userAgent.indexOf('Firefox') != -1) {
+    if (navigator.userAgent.indexOf('Firefox') != -1 ||
+	navigator.userAgent.indexOf('Namoroka') != -1 ||
+	navigator.userAgent.indexOf('Shiretoko') != -1) {
         this.browser = BrowserVersion.FIREFOX;
         this.isFirefox = true;
         this.isGecko = true;
-        var result = /.*Firefox\/([\d\.]+).*/.exec(navigator.userAgent);
+        var result = /.*[Firefox|Namoroka|Shiretoko]\/([\d\.]+).*/.exec(navigator.userAgent);
         if (result) {
             this.firefoxVersion = result[1];
         }
@@ -140,7 +152,7 @@ var BrowserVersion = function() {
     }
 
     this.browser = BrowserVersion.UNKNOWN;
-}
+};
 
 BrowserVersion.OPERA = "Opera";
 BrowserVersion.IE = "IE";
@@ -148,6 +160,7 @@ BrowserVersion.KONQUEROR = "Konqueror";
 BrowserVersion.SAFARI = "Safari";
 BrowserVersion.FIREFOX = "Firefox";
 BrowserVersion.MOZILLA = "Mozilla";
+BrowserVersion.GOOGLECHROME = "Google Chrome";
 BrowserVersion.UNKNOWN = "Unknown";
 
 var browserVersion = new BrowserVersion();
