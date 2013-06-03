@@ -530,7 +530,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param permanent true -> 301, false -> 302
      */
     protected static void redirect(String url, boolean permanent) {
-        if (url.matches("^([^./]+[.]?)+$")) { // fix Java !
+        if (url.indexOf("/") == -1) { // fix Java !
             redirect(url, permanent, new Object[0]);
         }
         throw new Redirect(url, permanent);
