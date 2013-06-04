@@ -57,7 +57,7 @@ public class FirePhoque {
         // Let's tweak WebClient
 
 	String headlessBrowser = System.getProperty("headlessBrowser",
-		"INTERNET_EXPLORER_9");
+		"FIREFOX_17");
 	BrowserVersion browserVersion;
 	if ("CHROME".equals(headlessBrowser)) {
 	    browserVersion = BrowserVersion.CHROME;
@@ -75,8 +75,10 @@ public class FirePhoque {
 	    browserVersion = BrowserVersion.INTERNET_EXPLORER_7;
 	} else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
 	    browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
-	} else {
+	} else if ("INTERNET_EXPLORER_9".equals(headlessBrowser)) {
 	    browserVersion = BrowserVersion.INTERNET_EXPLORER_9;
+	} else {
+	    browserVersion = BrowserVersion.FIREFOX_17;
 	}
 
         WebClient firephoque = new WebClient(browserVersion);
