@@ -80,7 +80,7 @@
              To test the same stuff´, we therefor request a page from the server (which has the correct lang, en)
              which generates the link we need, then we click it.
              We end up testing the exact same stuff, only under known locale conditions. -->
-        open('@{Application.generateBookWithDateLink(2879877856556)}')
+        open('@{Application.generateBookWithDateLink(2879964256556)}')                                      
         clickAndWait('timeLink')
         assertTextPresent('Booked at 05/04/61 !!')
 		

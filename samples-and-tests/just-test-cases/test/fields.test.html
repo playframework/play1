@@ -11,12 +11,10 @@
 	type('project_name', 'Colcoz')
 	clickAndWait('go')
 	assertTextNotPresent('Required')
-	assertValue('project_name', 'Colcoz')
-
+    assertValue('project_name', 'Colcoz')
 #{/selenium}
 
 #{selenium 'Test private null and path #field'}
-
     open('@{Fields.testField()}')
     assertValue('subProject_subProjectObservation', 'sub project observation value')
     assertValue('subProject_subProjectName', 'sub project name value')
