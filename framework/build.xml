@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project name="play! framework" default="jar" basedir=".">
 
     <property name="baseversion" value="1.2.x" />
