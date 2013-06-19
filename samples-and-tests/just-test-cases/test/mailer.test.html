@@ -47,12 +47,9 @@
 	store('javascript{/.*(email with url to app:http:\/\/localhost:9003\/application\/showit).*/.exec(storedVars["mailWithUrls"])[1]}', 'body')
 
 	open('@{Application.mailWithUrlsInJob()}')
-	assertTextPresent('OK_mailWithUrlsInJob')
-	storeLastReceivedEmailBy('mailWithUrlsJob@localhost', 'mailWithUrls')
+	assertTextPresent('OK_mailWithUrlsInJob')  
+	storeLastReceivedEmailBy('mailWithUrlsJob@localhost', 'mailWithUrlsInJob')
 	//this regexp fails if text not present
-	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrls"])[1]}', 'body')
-
-	
-	
+	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrlsInJob"])[1]}', 'body')
 
 #{/selenium}

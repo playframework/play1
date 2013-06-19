@@ -27,6 +27,7 @@ import play.Logger;
 import play.Play;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 import play.mvc.Scope.RenderArgs;
 import play.vfs.VirtualFile;
 
@@ -109,7 +110,7 @@ public class TestEngine {
         }
     }
     
-    private static void initTest(Class<?> testClass) { 
+    public static void initTest(Class<?> testClass) { 
         CleanTest cleanTestAnnot = null;
         if(testClass != null ){
             cleanTestAnnot = testClass.getAnnotation(CleanTest.class) ;
@@ -127,12 +128,19 @@ public class TestEngine {
         }
         if (cleanTestAnnot == null || (cleanTestAnnot != null && cleanTestAnnot.createDefault() == true)) {
             if (Request.current() == null) {
+                // Use base URL to create a request for this host
+                String host = Router.getBaseUrl();
+                if(host == null || host.equals("application.baseUrl")){
+                    host = "localhost";
+                }else if(host.contains("http://")){
+                    host = host.replaceAll("http://", ""); 
+                }else if(host.contains("https://")){
+                    host = host.replaceAll("https://", ""); 
+                 }
                 Request request = Request.createRequest(null, "GET", "/", "",
-                        null, null, null, null, false, 80, "localhost", false,
+                        null, null, null, null, false, 80, host, false,
                         null, null);
                 request.body = new ByteArrayInputStream(new byte[0]);
-                
-                Logger.trace("##### set Request");
                 Request.current.set(request);
             }
 
@@ -140,13 +148,11 @@ public class TestEngine {
                 Response response = new Response();
                 response.out = new ByteArrayOutputStream();
                 response.direct = null;
-                Logger.trace("##### set Response");
                 Response.current.set(response);
             }
 
             if (RenderArgs.current() == null) {
                 RenderArgs renderArgs = new RenderArgs();
-                Logger.trace("##### set RenderArgs");
                 RenderArgs.current.set(renderArgs);
             }
         }
