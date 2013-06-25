@@ -26,7 +26,7 @@ public class DBPlugin extends PlayPlugin {
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (Play.mode.isDev() && request.path.equals("/@db")) {
-            response.status = Http.StatusCode.MOVED;
+            response.status = Http.StatusCode.FOUND;
             String serverOptions[] = new String[] { };
 
             // For H2 embeded database, we'll also start the Web console
