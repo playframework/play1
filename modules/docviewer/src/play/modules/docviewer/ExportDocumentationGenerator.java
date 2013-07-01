@@ -88,9 +88,12 @@ public class ExportDocumentationGenerator extends DocumentationGenerator {
         if (files.exists()) {
             IO.copyDirectory(files, new File(targetFolder, "files"));
         }
-        
-        File zipFile = new File(generator.projectDocsPath,
-                Play.configuration.getProperty("application.name") + "-docs.zip");
+
+        String fileName = Play.configuration.getProperty("application.name") + "-docs.zip";
+        //Make sure zip can be written
+        fileName = Files.sanitizeFileName(fileName);
+
+        File zipFile = new File(generator.projectDocsPath, fileName);
         Files.zip(targetFolder, zipFile);
         Logger.info("Project documentation exported to: %s", VirtualFile.open(zipFile).relativePath());
     }
