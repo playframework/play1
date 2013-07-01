@@ -1,26 +1,19 @@
 package play.modules.docviewer;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.util.FileUtils;
 import play.Play;
-import play.libs.Files;
 import play.libs.IO;
 import play.templates.Template;
 import play.templates.TemplateLoader;
-import play.test.PlayJUnitRunner;
-import play.vfs.VirtualFile;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * @author Marek Piechut
