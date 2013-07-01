@@ -2,9 +2,11 @@ package play.modules.docviewer;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import play.Logger;
 import play.Play;
 import play.libs.Files;
 import play.libs.IO;
+import play.vfs.VirtualFile;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -53,6 +55,11 @@ public class ExportDocumentationGenerator extends DocumentationGenerator {
         }
 
         DocumentationGenerator generator = new ExportDocumentationGenerator();
+        if(!generator.projectDocsPath.isDirectory()) {
+            Logger.error("Project documentation folder does not exist. Nothing to generate.");
+            return;
+        }
+
         File targetFolder = new File(Play.tmpDir, "documentation");
         Files.deleteDirectory(targetFolder);
 
@@ -81,10 +88,13 @@ public class ExportDocumentationGenerator extends DocumentationGenerator {
         if (files.exists()) {
             IO.copyDirectory(files, new File(targetFolder, "files"));
         }
-        
-        File zipFile = new File(generator.projectDocsPath,
-                Play.configuration.getProperty("application.name") + "-docs.zip");
+
+        String fileName = Play.configuration.getProperty("application.name") + "-docs.zip";
+        //Make sure zip can be written
+        fileName = Files.sanitizeFileName(fileName);
+
+        File zipFile = new File(generator.projectDocsPath, fileName);
         Files.zip(targetFolder, zipFile);
-        System.out.println("Project documentation exported to: " + zipFile.getAbsolutePath());
+        Logger.info("Project documentation exported to: %s", VirtualFile.open(zipFile).relativePath());
     }
 }
