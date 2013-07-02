@@ -2,15 +2,12 @@ package play.templates;
 
 import groovy.lang.Closure;
 
-import java.beans.PropertyDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -410,34 +407,24 @@ public class FastTags {
         }
     }
     
-	public static void _embeddedImage(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        Map<String, String> renderArgs = new HashMap<String, String>();
-        // Copy all arguments to render arguments, except for 'src' & 'name' arguments.
-        for (final Object attribute : args.keySet()) {
-            if (!"src".equalsIgnoreCase(attribute.toString()) && !"name".equalsIgnoreCase(attribute.toString()) && (args.get(attribute) != null)) {
-            	renderArgs.put(attribute.toString(), args.get(attribute).toString());
+    public static void _embeddedImage(Map<?, ?> args, Closure body,
+            PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if ((args.containsKey("arg") && args.get("arg") != null)
+                || (args.containsKey("src") && args.get("src") != null)) {
+            String src = (args.containsKey("arg") && args.get("arg") != null) ? args
+                    .get("arg").toString() : args.get("src").toString();
+            if (src != null) {
+                String name = (args.containsKey("name")) ? args.get("name")
+                        .toString() : null;
+                out.print("<img src=\"" + Mailer.getEmbedddedSrc(src, name)
+                        + "\" " + serialize(args, "src", "name") + "/>");
             }
+        } else {
+            throw new TemplateExecutionException(template.template, fromLine,
+                    "Specify a file name", new TagInternalException(
+                            "Specify a file name"));
         }
-        
-        out.print("<img");
-        
-        Object src = args.get("src");
-        if (src != null) {
-        	Object name = args.get("name");
-        	renderArgs.put("src", Mailer.getEmbedddedSrc(src.toString(), (name != null) ? name.toString() : null));
-        }
-        
-        for (final Object attrKey : renderArgs.keySet()) {
-            if (renderArgs.get(attrKey) != null) {
-            	String value = renderArgs.get(attrKey);
-            	if (value != null) {
-            		out.print(" " + attrKey.toString() + "=\"" + value + "\"");
-            	}
-            }
-        }
-        
-        out.println("/>");
-	}
+    }
 
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuilder attrs = new StringBuilder();
