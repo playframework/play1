@@ -9,15 +9,15 @@
 
     assertValue('name', 'Play 1.1')
     storeValue('id', 'objectId')
-    echo('Project id is $[objectId]')
+    echo('Project id is ${'${objectId}'.escape()}')
     assertTextPresent('No company')
 
     type('name', 'Hop')
     clickAndWait('go')
 
     assertValue('name', 'Hop')
-    echo('Project id is $[objectId]')
-    assertValue('id', '$[objectId]')
+    echo('Project id is ${'${objectId}'.escape()}')
+    assertValue('id', '${'${objectId}'.escape()}')
     assertTextPresent('No company')
 
     type('id', '89776')
@@ -28,52 +28,52 @@
     open('@{JPABinding.createCompany()}?company.name=zenexity')
     assertValue('name', 'zenexity')
     storeValue('id', 'companyId')
-    echo('Company id is $[companyId]')
+    echo('Company id is ${'${companyId}'.escape()}')
 
-    open('@{JPABinding.show()}?id=$[objectId]')
-    type('company', '$[companyId]')
+    open('@{JPABinding.show()}?id=${'${objectId}'.escape()}')
+    type('company', '${'${companyId}'.escape()}')
     clickAndWait('go')
 
     assertValue('name', 'Hop')
-    echo('Project id is $[objectId]')
-    assertValue('id', '$[objectId]')
+    echo('Project id is ${'${objectId}'.escape()}')
+    assertValue('id', '${'${objectId}'.escape()}')
     assertTextNotPresent('No company')
     assertTextPresent('zenexity')
 
-	open('@{JPABinding.show()}?id=$[objectId]')
+	open('@{JPABinding.show()}?id=${'${objectId}'.escape()}')
     type('company', 'xxx')
     clickAndWait('go')
 
 	assertValue('name', 'Hop')
-    echo('Project id is $[objectId]')
+    echo('Project id is ${'${objectId}'.escape()}')
 	assertTextNotPresent('No company')
-	assertValue('company', '$[companyId]')
+	assertValue('company', '${'${companyId}'.escape()}')
 	assertTextPresent('Object not found for id')
 
     open('@{JPABinding.index()}')
 
     type('name', 'Zapps')
-    type('company', '$[companyId]')
+    type('company', '${'${companyId}'.escape()}')
     clickAndWait('go')
 
     assertValue('name', 'Zapps')
-    assertNotValue('id', '$[objectId]')
+    assertNotValue('id', '${'${objectId}'.escape()}')
     assertTextNotPresent('No company')
     assertTextPresent('zenexity')
 
-    open('@{JPABinding.withMap()}?companyId=$[companyId]')
+    open('@{JPABinding.withMap()}?companyId=${'${companyId}'.escape()}')
     storeValue('id', 'objectId')
-    echo('Project id is $[objectId]')
+    echo('Project id is ${'${objectId}'.escape()}')
     assertTextPresent('1 in map')
 
-    open('@{JPABinding.show()}?id=$[objectId]')
+    open('@{JPABinding.show()}?id=${'${objectId}'.escape()}')
     assertTextPresent('1 in map')
 
-    open('@{JPABinding.editMap()}?id=$[objectId]')
+    open('@{JPABinding.editMap()}?id=${'${objectId}'.escape()}')
     assertTextPresent('1 in map')
     assertTextPresent('{zenexity=zenexity}')
 
-    open('@{JPABinding.editMapAndSave()}?id=$[objectId]')
+    open('@{JPABinding.editMapAndSave()}?id=${'${objectId}'.escape()}')
     assertTextPresent('1 in map')
     assertTextPresent('{Coucou=Coucou}')
 

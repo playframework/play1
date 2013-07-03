@@ -116,7 +116,7 @@ th, td {
 
 <p>UI-Element is now fully integrated with Selenium. The only additional file that needs to be specified is your map definitions file. In the IDE, add it to the comma-delimited <em>Selenium Core extensions</em> field of the IDE options. A sample definition file created for the website <a href="http://alistapart.com">alistapart.com</a> is included in the distribution and is available here:</p>
 
-<pre><a href="chrome://selenium-ide/content/selenium/scripts/ui-map-sample.js">chrome://selenium-ide/content/selenium/scripts/ui-map-sample.js</a></pre>
+<pre><a href="chrome://selenium-ide/content/selenium-core/scripts/ui-map-sample.js">chrome://selenium-ide/content/selenium-core/scripts/ui-map-sample.js</a></pre>
 
 <p>You might want to experiment with the sample map to get a feel for UI-Element. For the Selenium RC, you have two options. The map file may be included in the <code>user-extensions.js</code> file specified at startup with the <code>-userExtensions</code> switch. Or, you may load it dynamically with the variant of the <code>setUserExtensionJs</code> command in your driver language, before the browser is started.</p>
 
@@ -357,6 +357,11 @@ map.addElement('searchPages', {
     <td>Yes</td>
     <td>(String) a description for the argument.</td>
     <td><pre>description: 'the index of the article'</pre></td>
+</tr>
+<tr><td>required</td>
+    <td>No</td>
+    <td>(Boolean) whether the argument is necessary for a valid locator to be produced. If <code>true</code>, locators will not be constructed at recording time when no default values are available for this argument. Defaults to <code>false</code>.</td>
+    <td><pre>required: true</pre></td>
 </tr>
 <tr><td>defaultValues<br/>getDefaultValues()</td>
     <td>Yes</td>
