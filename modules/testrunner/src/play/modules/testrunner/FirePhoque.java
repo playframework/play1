@@ -3,6 +3,7 @@ package play.modules.testrunner;
 import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ConfirmHandler;
+import com.gargoylesoftware.htmlunit.DefaultCssErrorHandler;
 import com.gargoylesoftware.htmlunit.DefaultPageCreator;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.PromptHandler;
@@ -10,6 +11,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.javascript.host.Window;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +29,8 @@ public class FirePhoque {
 
     public static void main(String[] args) throws Exception {
 
-        Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
+        Logger logger = Logger.getLogger(DefaultCssErrorHandler.class.getName());
+        logger.setLevel(Level.OFF);
 
         String app = System.getProperty("application.url", "http://localhost:9000");
 
