@@ -4,3 +4,5 @@
 optimisticLocking.modelHasChanged=The object was changed. Your version is %2$s the database version is %3$s. Reload and do your changes again.
 
 @include.login=./_messages/default/login
+
+@include.other=./_messages/default/other
