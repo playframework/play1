@@ -26,9 +26,13 @@ public class MessagesTest extends UnitTest {
     
     @Test
     public void testIncludeMessagesFrench() {
-        Lang.set("fr");
-        assertEquals("Nom d'utilisateur&nbsp;:", Messages.get("login.username"));  
-        assertEquals("Bonjour MessagesTest vous êtes connecté.", Messages.get("login.success", "MessagesTest"));    
-        assertEquals("Un autre message", Messages.get("another.message"));  
+        try{
+            Lang.set("fr");
+            assertEquals("Nom d'utilisateur&nbsp;:", Messages.get("login.username"));  
+            assertEquals("Bonjour MessagesTest vous êtes connecté.", Messages.get("login.success", "MessagesTest"));    
+            assertEquals("Un autre message", Messages.get("another.message"));  
+	}finally{
+	    Lang.set("");
+        }	  
     }
 }
