@@ -117,7 +117,14 @@ bc. public static void encodeVideo(Long videoId) {
     renderText("Encoding started");
 }
 
-Calling @now()@ on a Job returns a @Promise@ value that you can use to retrieve the task result once finished.
+Calling @now()@ on a Job returns a @Promise@ value that you can use to retrieve the task result once finished, or an exception if something went wrong with task execution.
+
+If you want to schedule a Job to run after some delay, @in(int seconds)@ method is there to help you. Calling @in(0)@ has the same effect as @now()@.
+
+Sometimes when dealing with http requests you want to schedule a Job to run after request is responded. A natural use case would be if you create and save new JPA entities and the Job has to retrieve them from database by some identifier and process them. Triggering a Job with @now()@ won't work, because transaction is not yet committed, so a thread executing the task won't be able to retrieve entities; @in(delay)@ will work, but it is not flexible enough. For those cases @Job@ offers @afterRequest()@ method that will schedule a job to run when request is served.
+If @afterRequest()@ is called not from http invocation context, it behaves like @now()@.
+
+All @now()@, @in()@, @afterRequest()@ return a @Promise@ so you have access to this Job execution result.
 
 h2. <a name="concepts">Stopping the application</a>
 
