@@ -21,6 +21,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Expression;
 import play.libs.Time;
 import play.libs.Time.CronExpression;
+import play.mvc.Http.Request;
 import play.utils.Java;
 import play.utils.PThreadFactory;
 
@@ -28,6 +29,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor = null;
     public static List<Job> scheduledJobs = null;
+    private static ThreadLocal<List<Callable<? extends Object>>> afterInvocationActions = new ThreadLocal<List<Callable<? extends Object>>>();
 
     @Override
     public String getStatus() {
@@ -87,7 +89,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Object o : executor.getQueue()) {
                 ScheduledFuture task = (ScheduledFuture)o;
-                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");        
+                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");
             }
         }
         return sw.toString();
@@ -225,9 +227,9 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        
+
         List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
-        
+
         for (final Class clazz : jobs) {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
@@ -253,8 +255,30 @@ public class JobsPlugin extends PlayPlugin {
                 }
             }
         }
-        
+
         executor.shutdownNow();
         executor.getQueue().clear();
+    }
+
+    @Override
+    public void beforeInvocation() {
+      afterInvocationActions.set(new ArrayList<Callable<? extends Object>>());
+    }
+
+    @Override
+    public void afterInvocation() {
+      List<Callable<? extends Object>> currentActions = afterInvocationActions.get();
+      afterInvocationActions.set(null);
+      for (Callable<? extends Object> callable : currentActions) {
+        JobsPlugin.executor.submit(callable);
+      }
+    }
+
+    // default visibility, because we want to use this only from Job.java
+    static void addAfterRequestAction(Callable<? extends Object> c) {
+      if (Request.current() == null) {
+        throw new IllegalStateException("After request actions can be added only from threads that serve requests!");
+      }
+      afterInvocationActions.get().add(c);
     }
 }
