@@ -68,7 +68,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     }
 
   /**
-   * If is called in a 'HttpRequest' invocation context, waits util request
+   * If is called in a 'HttpRequest' invocation context, waits until request
    * is served and schedules job then.
    *
    * Otherwise is the same as now();
