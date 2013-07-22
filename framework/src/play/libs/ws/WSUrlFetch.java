@@ -183,12 +183,13 @@ public class WSUrlFetch implements WSImpl {
                 for (String key : this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
-                checkFileBody(connection);
+
                 if (this.oauthToken != null && this.oauthSecret != null) {
                     OAuthConsumer consumer = new DefaultOAuthConsumer(oauthInfo.consumerKey, oauthInfo.consumerSecret);
                     consumer.setTokenWithSecret(oauthToken, oauthSecret);
                     consumer.sign(connection);
                 }
+                checkFileBody(connection);
                 return connection;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -235,7 +236,10 @@ public class WSUrlFetch implements WSImpl {
                     connection.setRequestProperty("Content-Type", this.mimeType);
                 }
                 connection.setDoOutput(true);
-
+                
+                if(this.mimeType != null) {
+                    connection.setRequestProperty("Content-Type", this.mimeType+"; charset="+encoding);
+                }
                 OutputStream out = connection.getOutputStream();
                 if(this.body instanceof InputStream) {
                     InputStream bodyStream = (InputStream)this.body;
@@ -252,9 +256,7 @@ public class WSUrlFetch implements WSImpl {
                         throw new RuntimeException(e);
                     }
                 }
-                if(this.mimeType != null) {
-                    connection.setRequestProperty("Content-Type", this.mimeType+"; charset="+encoding);
-                }
+
             }
         }
     }

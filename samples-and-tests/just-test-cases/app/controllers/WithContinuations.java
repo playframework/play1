@@ -475,6 +475,54 @@ public class WithContinuations extends Controller {
         render(a,aa);
         
     }
+    public static void useAwaitOnFailingJobsPromise(String a) {
+        Job job = new Job() {
+            @Override
+            public void doJob() throws Exception {
+                throw new RuntimeException("Hello world!");
+            }
+        };
+        
+        Promise promise;
+        if("now".equals(a)) {
+            promise = job.now();
+        }
+        else {
+            promise = job.in(1);
+        }
+        
+        try {
+            await(promise);
+            renderText("ok");
+        }
+        catch(Exception e) {
+            renderText("caught exception: " + e);
+        }
+    }
+    public static void useAwaitOnNormalJobsPromise(String a) {
+        Job job = new Job() {
+          @Override
+          public void doJob() throws Exception {
+            Logger.trace("Everything is fine, I'm just doing my job!");
+          }
+        };
+        
+        Promise promise;
+        if("now".equals(a)) {
+            promise = job.now();
+        }
+        else {
+            promise = job.in(1);
+        }
+        
+        try {
+            await(promise);
+            renderText("ok");
+        }
+        catch(Exception e) {
+            renderText("caught exception");
+        }
+    }
     
     
 }

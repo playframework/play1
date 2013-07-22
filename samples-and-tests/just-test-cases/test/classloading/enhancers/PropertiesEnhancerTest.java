@@ -32,7 +32,8 @@ public class PropertiesEnhancerTest extends FunctionalTest {
 	PropertyDescriptor[] descriptors = PropertyUtils
 		.getPropertyDescriptors(obj);
       
-	assertEquals(10, descriptors.length);
+        //master version also reports JPAContext, probably due to other multidb impl
+	assertEquals(11, descriptors.length);
 
 	assertTrue(validAccessorFor(obj, descriptors, "class", true, false));
 	assertTrue(validAccessorFor(obj, descriptors, "companies", true, true));

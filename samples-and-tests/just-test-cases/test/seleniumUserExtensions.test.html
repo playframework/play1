@@ -4,16 +4,16 @@
 	open('@{SeleniumExtensions.cacheAccess()}')
 	assertTextPresent('OK')
 	storeCacheEntry('magicKey', 'stringCacheValue')
-	assertEquals('magicValue', '$[stringCacheValue]')
+	assertEquals('magicValue', '${'${stringCacheValue}'.escape()}')
 
 	storeCacheEntry('complex', 'complexCacheValue')
-	assertNotEquals('true,false', '$[complexCacheValue]')
+	assertNotEquals('true,false', '${'${complexCacheValue}'.escape()}')
 
 // Test we can access past emails
 	open('@{SeleniumExtensions.emailAccess()}')
 	assertTextPresent('OK')
 	storeLastReceivedEmailBy('boron@localhost', 'email')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
-	assertEquals('Berillium Subject', '$[subject]')
+	assertEquals('Berillium Subject', '${'${subject}'.escape()}')
 
 #{/selenium}

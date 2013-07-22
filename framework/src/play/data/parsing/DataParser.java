@@ -17,6 +17,7 @@ public abstract class DataParser {
     static {
         parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());
         parsers.put("multipart/form-data", new ApacheMultipartParser());
+        parsers.put("multipart/mixed", new ApacheMultipartParser());
         parsers.put("application/xml", new TextParser());
         parsers.put("application/json", new TextParser());
     }

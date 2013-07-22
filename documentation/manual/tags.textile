@@ -343,20 +343,47 @@ h2. <a name="jsaction">jsAction</a>
 
 The @#{jsAction /}@ tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
+* Optional @minimize@ attribute sets if script if minimize or not (default : not)
+* Optional @encodeURI@ attribute sets if variables must be encoded (default : not)
+* Optional @customScript@ attribute sets a default script to apply to the variables (default : empty)
+
+
 Let’s see an example:
 
 bc. GET     /users/{id}        Users.show
 
 Now you can import this route client side:
 
+h3. Ex1:
+
 bc. <script type="text/javascript">
+    // Ex 1
     var showUserAction = #{jsAction @Users.show(':id') /}
     
     var displayUserDetail = function(userId) {
         $('userDetail').load( showUserAction({id: userId}) )
     }
+    
+    // Ex 2
+    var showUserNameAction = #{jsAction @Users.showName(':name'), encodeURI:false, minimize:true /}
+    
+    $(document).ready(function() {
+        $('userDetail').load( showUserNameAction({name: "${user?.name?.urlEncode()}"}) )
+    });
+    
+    // Ex 3
+    var showUserNameActionEncodeURI = #{jsAction @Users.showName(':name'), encodeURI:true, minimize:false /}
+    
+    var displayUserDetailName = function(userName) {
+        $('userDetail').load( showUserNameActionEncodeURI({name: userName}) )
+    }
+    
+    // Ex 4
+    var showUserNameActionCustomScript = #{jsAction @Users.showName(':name'), customScript:"encodeURIComponent(val.replace('&amp;', '&'))", minimize:false /}
+    var displayUserDetail = function(userName) {
+        $('userDetail').load( showUserNameActionCustomScript({name:  userName}) )
+    }
 </script>
-
 
 h2. <a name="jsroute">jsRoute</a>
 
