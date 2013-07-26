@@ -38,12 +38,15 @@ public class Router {
      */
     public static long lastLoading = -1;
 
+    private static boolean argumentContraintMatchingDisabled = false;
+
     /**
      * Parse the routes file. This is called at startup.
      *
      * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not end with a '/' character.
      */
     public static void load(String prefix) {
+        argumentContraintMatchingDisabled = Boolean.parseBoolean(Play.configuration.getProperty("argumentContraintMatchingDisabled", "false"));
         routes.clear();
         parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
@@ -278,6 +281,7 @@ public class Router {
                 if (request.action.equals("404")) {
                     throw new NotFound(route.path);
                 }
+                Logger.trace("Route path: " + route.path + " - with args: " + request.routeArgs);
                 return route;
             }
         }
@@ -449,7 +453,7 @@ public class Router {
                                 List<Object> l = (List<Object>) value;
                                 value = l.get(0);
                             }
-                            if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
+                            if (!value.toString().startsWith(":") && !argumentContraintMatchingDisabled && !arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -487,14 +491,14 @@ public class Router {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString()).replace("$", "\\$");
                                 } else {
 									try {
-                                    	path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding).replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+                                    	path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding).replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20").replace("/", "%2F"));
                                     } catch(UnsupportedEncodingException e) {
-										path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+										path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20").replace("/", "%2F"));
 									}
 									try {
-										host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding).replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+										host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding).replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20").replace("/", "%2F"));
    								 	} catch(UnsupportedEncodingException e) {
-										host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+										host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20").replace("/", "%2F"));
 									}
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
