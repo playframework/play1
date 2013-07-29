@@ -146,8 +146,11 @@ public class F {
 
                 @Override
                 public List<T> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                    waitAllLock.await(timeout, unit);
-                    return get();
+                    if (waitAllLock.await(timeout, unit)){
+                        return get();
+                    } else {
+                        throw new TimeoutException();
+                    }
                 }
             };
             final F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
