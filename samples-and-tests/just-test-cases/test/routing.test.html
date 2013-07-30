@@ -18,6 +18,11 @@
     open('/re/TITITOTO')
     assertTextPresent('Not found')
 
+   // [#1685] - show (reverse routing of param with '/' in it)
+    open('/re/1%2F2/rev')
+    assertTextPresent('OK: 1/2')   
+
+
     open('/')
     
     // Packages

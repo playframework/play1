@@ -76,6 +76,14 @@ public class Application extends Controller {
         renderText("OK: " + re);
     }
 
+    public static void revRoute(String re) {
+    	Map<String,Object> par = new HashMap<String, Object>();
+    	par.put("re", re);
+    	String url = Router.reverse("Application.revRoute", par ).url;
+    	renderText("OK: " + re);
+    }
+
+    
     public static void index() {
         routeArgs.put("lucky", "strike");
         render();
