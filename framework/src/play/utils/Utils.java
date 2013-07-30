@@ -3,6 +3,7 @@ package play.utils;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -230,10 +231,17 @@ public class Utils {
 
     public static String urlDecodePath(String enc) {
         try {
-          return URLDecoder.decode(enc.replaceAll("\\+", "%2B"), "UTF-8");
+          return URLDecoder.decode(enc.replaceAll("\\+", "%2B"),Play.defaultWebEncoding);
         } catch(Exception e) {
             return enc;
         }
     }
-
+    
+    public static String urlEncodePath(String plain) {
+        try {
+          return URLEncoder.encode(plain,Play.defaultWebEncoding);
+        } catch(Exception e) {
+            return plain;
+        }
+    }
 }
