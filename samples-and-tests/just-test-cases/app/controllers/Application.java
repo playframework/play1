@@ -80,9 +80,24 @@ public class Application extends Controller {
     	Map<String,Object> par = new HashMap<String, Object>();
     	par.put("re", re);
     	String url = Router.reverse("Application.revRoute", par ).url;
-    	renderText("OK: " + re);
+	renderText("OK[revRoute]: " + re + " URL: " + url); 
     }
 
+    public static void ressourceWithoutSpecialCharacters(String appId, String verId) {
+        Map<String,Object> args = new HashMap<String, Object>();
+        args.put("appId", appId);
+        args.put("verId", verId);
+        String url = Router.reverse("Application.ressourceWithoutSpecialCharacters", args ).url;
+        renderText("OK[ressourceWithoutSpecialCharacters]: appId=" + appId + " verId=" + verId + " URL: " + url);
+    }
+    
+    public static void ressourceWithSpecialCharacters(String appId, String verId) {
+       Map<String,Object> args = new HashMap<String, Object>();
+       args.put("appId", appId);
+       args.put("verId", verId);
+       String url = Router.reverse("Application.ressourceWithSpecialCharacters", args ).url;
+       renderText("OK[ressourceWithSpecialCharacters]: appId=" + appId + " verId=" + verId + " URL: " + url);
+    }
     
     public static void index() {
         routeArgs.put("lucky", "strike");

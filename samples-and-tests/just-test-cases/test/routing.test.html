@@ -18,10 +18,35 @@
     open('/re/TITITOTO')
     assertTextPresent('Not found')
 
-   // [#1685] - show (reverse routing of param with '/' in it)
+    open('re/version%2F01%2F25/rev')
+    assertTextPresent('OK[revRoute]: version/01/25')   
+    
+    open('re/version%2F01%2F25/rev2')
+    assertTextNotPresent('OK[revRoute]')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=version/01/25 verId=rev2')  
+    
+    open('re/version/01/25/rev')
+    assertTextPresent('OK[revRoute]: version/01/25') 
+    
+    open('re/version/01/25/rev2')
+    assertTextNotPresent('OK[revRoute]')
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=version/01 verId=25/rev2')  
+    
+    open('/re/api01/01')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01 verId=01')  
+    assertTextPresent('URL: /re/api01/01') 
+        
+    open('/re/api01/02/01/01')   
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=api01/02 verId=01/01')  
+    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
+     
+    open('/re/api01%2F02/01%2F01')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01/02 verId=01/01')  
+    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
+ 
+    // [#1685] - show (reverse routing of param with '/' in it)
     open('/re/1%2F2/rev')
-    assertTextPresent('OK: 1/2')   
-
+    assertTextPresent('OK[revRoute]: 1/2')   
 
     open('/')
     
