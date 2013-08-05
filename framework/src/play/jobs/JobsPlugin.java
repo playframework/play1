@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledFuture;
@@ -262,7 +263,7 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-      afterInvocationActions.set(new ArrayList<Callable<? extends Object>>());
+      afterInvocationActions.set(new LinkedList<Callable<? extends Object>>());
     }
 
     @Override
