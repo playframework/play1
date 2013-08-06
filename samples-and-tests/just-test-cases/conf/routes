@@ -12,6 +12,12 @@ GET         /index                          Application.index
 GET         /re/{<[a-z]+>re}                Application.ok
 GET         /re/{<[0-9]{5}>re}              Application.ok
 GET         /re/{<[A-Z]{2,4}>re}            Application.ok
+GET         /re/{<[0-9]%2F[0-9]>re}/rev     Application.revRoute
+GET         /re/{<[a-z0-9]+%2F[a-z,0-9]+>re}/rev     Application.revRoute
+GET         /re/{<[A-Za-z0-9\/%]+>re}/rev            Application.revRoute
+GET         /re/{appId}/{verId}                      Application.ressourceWithoutSpecialCharacters
+GET         /re/{<[a-z0-9]+[\/]??(%2F)??[a-z,0-9]+>appId}/{<[a-z0-9\/%F]+>verId}             Application.ressourceWithSpecialCharacters
+
 
 GET         /{lucky}/doIt                   Application.showIt
 GET         /withQueryParam                 Application.withQueryParam

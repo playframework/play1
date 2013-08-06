@@ -449,7 +449,7 @@ public class Router {
                                 List<Object> l = (List<Object>) value;
                                 value = l.get(0);
                             }
-                            if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
+                            if (!value.toString().startsWith(":") && !arg.constraint.matches(Utils.urlEncodePath(value.toString()))) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
