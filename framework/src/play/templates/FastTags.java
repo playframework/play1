@@ -79,7 +79,7 @@ public class FastTags {
         html += "pattern = pattern.replace(':'+key, val || '');"+ minimize;
         html += "}" + minimize;;
         html += "return pattern;" + minimize;;
-        html += "};" + minimize;
+        html += "}" + minimize;
 	out.println(html);
     }
 
