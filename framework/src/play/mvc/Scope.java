@@ -33,46 +33,6 @@ public class Scope {
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
     public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
-    private static void parseCookieData(Map<String, String> map, String data) throws UnsupportedEncodingException {
-        String[] keyValues = data.split("&");
-        for (String keyValue: keyValues) {
-            String[] splitted = keyValue.split("=", 2);
-            if (splitted.length == 2) {
-                map.put(URLDecoder.decode(splitted[0], "utf-8"), URLDecoder.decode(splitted[1], "utf-8"));
-            }
-        }
-    }
-
-    private static String formatCookieData(Map<String, String> map) throws UnsupportedEncodingException {
-        StringBuilder data = new StringBuilder();
-        String separator = "";
-        for (Map.Entry<String, String> entry: map.entrySet()) {
-            if (entry.getValue() != null) {
-                data.append(separator)
-                        .append(URLEncoder.encode(entry.getKey(), "utf-8"))
-                        .append("=")
-                        .append(URLEncoder.encode(entry.getValue(), "utf-8"));
-                separator = "&";
-            }
-        }
-        return data.toString();
-    }
-
-    /**
-     * Constant time for same length String comparison, to prevent timing attacks
-     */
-    private static boolean safeEquals(String a, String b) {
-        if (a.length() != b.length()) {
-            return false;
-        } else {
-            char equal = 0;
-            for (int i = 0; i < a.length(); i++) {
-                equal |= a.charAt(i) ^ b.charAt(i);
-            }
-            return equal == 0;
-        }
-    }
-
     /**
      * Flash scope
      */
@@ -86,7 +46,7 @@ public class Scope {
                 Flash flash = new Flash();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
                 if (cookie != null) {
-                    parseCookieData(flash.data, cookie.value);
+                    CookieDataCodec.decode(flash.data, cookie.value);
                 }
                 return flash;
             } catch (Exception e) {
@@ -106,7 +66,7 @@ public class Scope {
                 return;
             }
             try {
-                String flashData = formatCookieData(data);
+                String flashData = CookieDataCodec.encode(data);
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
@@ -210,8 +170,8 @@ public class Scope {
 				    if(firstDashIndex > -1) {
                     	String sign = value.substring(0, firstDashIndex);
                     	String data = value.substring(firstDashIndex + 1);
-                    	if (safeEquals(sign, Crypto.sign(data, Play.secretKey.getBytes()))) {
-                            parseCookieData(session.data, data);
+                    	if (CookieDataCodec.safeEquals(sign, Crypto.sign(data, Play.secretKey.getBytes()))) {
+                            CookieDataCodec.decode(session.data, data);
                     	}
 					} 
                     if (COOKIE_EXPIRE != null) {
@@ -289,7 +249,7 @@ public class Scope {
                 return;
             }
             try {
-                String sessionData = formatCookieData(data);
+                String sessionData = CookieDataCodec.encode(data);
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 if (COOKIE_EXPIRE == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
