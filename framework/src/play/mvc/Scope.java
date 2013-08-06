@@ -1,14 +1,12 @@
 package play.mvc;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import play.Logger;
 import play.Play;
@@ -35,6 +33,46 @@ public class Scope {
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
     public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
+    private static void parseCookieData(Map<String, String> map, String data) throws UnsupportedEncodingException {
+        String[] keyValues = data.split("&");
+        for (String keyValue: keyValues) {
+            String[] splitted = keyValue.split("=", 2);
+            if (splitted.length == 2) {
+                map.put(URLDecoder.decode(splitted[0], "utf-8"), URLDecoder.decode(splitted[1], "utf-8"));
+            }
+        }
+    }
+
+    private static String formatCookieData(Map<String, String> map) throws UnsupportedEncodingException {
+        StringBuilder data = new StringBuilder();
+        String separator = "";
+        for (Map.Entry<String, String> entry: map.entrySet()) {
+            if (entry.getValue() != null) {
+                data.append(separator)
+                        .append(URLEncoder.encode(entry.getKey(), "utf-8"))
+                        .append("=")
+                        .append(URLEncoder.encode(entry.getValue(), "utf-8"));
+                separator = "&";
+            }
+        }
+        return data.toString();
+    }
+
+    /**
+     * Constant time for same length String comparison, to prevent timing attacks
+     */
+    private static boolean safeEquals(String a, String b) {
+        if (a.length() != b.length()) {
+            return false;
+        } else {
+            char equal = 0;
+            for (int i = 0; i < a.length(); i++) {
+                equal |= a.charAt(i) ^ b.charAt(i);
+            }
+            return equal == 0;
+        }
+    }
+
     /**
      * Flash scope
      */
@@ -42,18 +80,13 @@ public class Scope {
 
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> out = new HashMap<String, String>();
-        static Pattern flashParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
         static Flash restore() {
             try {
                 Flash flash = new Flash();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
                 if (cookie != null) {
-                    String flashData = URLDecoder.decode(cookie.value, "utf-8");
-                    Matcher matcher = flashParser.matcher(flashData);
-                    while (matcher.find()) {
-                        flash.data.put(matcher.group(1), matcher.group(2));
-                    }
+                    parseCookieData(flash.data, cookie.value);
                 }
                 return flash;
             } catch (Exception e) {
@@ -73,15 +106,7 @@ public class Scope {
                 return;
             }
             try {
-                StringBuilder flash = new StringBuilder();
-                for (String key : out.keySet()) {
-                    flash.append("\u0000");
-                    flash.append(key);
-                    flash.append(":");
-                    flash.append(out.get(key));
-                    flash.append("\u0000");
-                }
-                String flashData = URLEncoder.encode(flash.toString(), "utf-8");
+                String flashData = formatCookieData(data);
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
@@ -168,7 +193,6 @@ public class Scope {
      */
     public static class Session {
 
-        static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
         static final String AT_KEY = "___AT";
         static final String ID_KEY = "___ID";
         static final String TS_KEY = "___TS";
@@ -186,12 +210,8 @@ public class Scope {
 				    if(firstDashIndex > -1) {
                     	String sign = value.substring(0, firstDashIndex);
                     	String data = value.substring(firstDashIndex + 1);
-                    	if (sign.equals(Crypto.sign(data, Play.secretKey.getBytes()))) {
-                        	String sessionData = URLDecoder.decode(data, "utf-8");
-                        	Matcher matcher = sessionParser.matcher(sessionData);
-                        	while (matcher.find()) {
-                            	session.put(matcher.group(1), matcher.group(2));
-                        	}
+                    	if (safeEquals(sign, Crypto.sign(data, Play.secretKey.getBytes()))) {
+                            parseCookieData(session.data, data);
                     	}
 					} 
                     if (COOKIE_EXPIRE != null) {
@@ -269,15 +289,7 @@ public class Scope {
                 return;
             }
             try {
-                StringBuilder session = new StringBuilder();
-                for (String key : data.keySet()) {
-                    session.append("\u0000");
-                    session.append(key);
-                    session.append(":");
-                    session.append(data.get(key));
-                    session.append("\u0000");
-                }
-                String sessionData = URLEncoder.encode(session.toString(), "utf-8");
+                String sessionData = formatCookieData(data);
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 if (COOKIE_EXPIRE == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
