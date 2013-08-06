@@ -11,6 +11,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -313,6 +314,10 @@ public class DBPlugin extends PlayPlugin {
 
         ProxyDriver(Driver d) {
             this.driver = d;
+        }
+             
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return this.driver.getParentLogger();
         }
 
         public boolean acceptsURL(String u) throws SQLException {
