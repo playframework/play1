@@ -50,7 +50,7 @@ public class BytecodeCache {
                 int read = -1;
                 StringBuilder hash = new StringBuilder();
                 // look for null byte, or end-of file
-                while ((read = fis.read()) > -1) {
+                while ((read = fis.read()) > 0) {
                     hash.append((char) read);
                     offset++;
                 }
