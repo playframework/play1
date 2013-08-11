@@ -27,7 +27,7 @@ h3. Launchers
 
 The @eclipsify@ command generates several launchers for the application. For example, running @eclipsify@ on an application called **Nice app** (see screen shot above) will create the following launchers in the @eclipse/@ folder:
 
-* @Nice app.launch@ - the main launcher, equivalent to the @play test@ command, which you can use to run your application by right-clicking it and selecting **Run As > Nice app**
+* @Nice app.launch@ - the main launcher, equivalent to the @play run@ command, which you can use to run your application by right-clicking it and selecting **Run As > Nice app**
 * @Test Nice app.launch@ - the test launcher, equivalent to the @play test@ command, which you also run by right-clicking it and selecting **Run As > Test Nice app**
 * @Connect JPDA Nice app.launch@ - the JPDA debugging session connector, which you can use to connect the Eclipse debugger to an already-running Play instance and start a debugging session, by right-clicking the launch file and selecting **Debug As > Connect JPDA Nice app**. Stopping the debugging session will not stop the server.
 
