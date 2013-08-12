@@ -1,0 +1,15 @@
+#{selenium 'Test the @Before when using an extended class'}
+
+open('@{UsingBeforeBase.a()}')
+assertTextPresent('CHECKED')
+
+open('@{beforetest.UsingBeforeExtended.b()}')
+assertTextPresent('This is B')
+
+open('@{beforetest.UsingBeforeExtended.c()}')
+assertTextPresent('CHECKED')
+
+open('@{beforetest.NotUsingBefore.c()}')
+assertTextPresent('This is onother C')
+
+#{/selenium}
