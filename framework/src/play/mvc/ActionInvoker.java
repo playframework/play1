@@ -681,10 +681,10 @@ public class ActionInvoker {
 
         if (ignoreClassNames) {
             if (act.contains(".")) {
-                act = act.substring(act.indexOf(".") + 1);
+                act = act.substring(act.lastIndexOf(".") + 1);
             }
             if (ann.contains(".")) {
-                ann = ann.substring(ann.indexOf(".") + 1);
+                ann = ann.substring(ann.lastIndexOf(".") + 1);
             }
         }
 
