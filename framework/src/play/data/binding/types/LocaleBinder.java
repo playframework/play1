@@ -17,10 +17,11 @@ public class LocaleBinder implements TypeBinder<Locale> {
             return new Locale(value);
         }
         if (value.length() == 5) {
-            return new Locale(value.substring(0, 1), value.substring(3, 4));
+            return new Locale(value.substring(0, 2), value.substring(3, 5));
         }
-        return Locale.getDefault();
+        if (value.length() == 8) {
+            return new Locale(value.substring(0, 2), value.substring(3, 5), value.substring(6, 8));
+        }
+        return null;
     }
-    
 }
-
