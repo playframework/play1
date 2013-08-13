@@ -162,7 +162,7 @@ public class JavaExtensions {
 
     public static String format(Date date) {
         // Get the pattern from the configuration
-        return new SimpleDateFormat(I18N.getDateFormat()).format(date);
+        return format(date, I18N.getDateFormat());
     }
 
     public static String format(Date date, String pattern) {
