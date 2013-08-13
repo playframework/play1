@@ -93,6 +93,9 @@ public class Messages {
         if (locales.containsKey(locale)) {
             value = locales.get(locale).getProperty(key.toString());
         }
+        if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+            value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
+        }
         if (value == null) {
             value = defaults.getProperty(key.toString());
         }
@@ -173,6 +176,9 @@ public class Messages {
             return defaults;
         Properties mergedMessages = new Properties();
         mergedMessages.putAll(defaults);
+        if (locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+        	mergedMessages.putAll(locales.get(locale.substring(0, 2)));
+        }
         mergedMessages.putAll(locales.get(locale));
         return mergedMessages;
     }
