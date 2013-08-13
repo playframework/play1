@@ -20,6 +20,9 @@ import play.templates.Template;
 import play.templates.TemplateLoader;
 
 import javax.mail.internet.InternetAddress;
+import play.libs.F;
+import play.libs.F.T4;
+import javax.activation.DataSource;
 
 /**
  * Application mailer support
@@ -104,6 +107,27 @@ public class Mailer {
         attachmentsList.addAll(Arrays.asList(attachments));
         infos.set(map);
     }
+
+   @SuppressWarnings("unchecked")
+   public static void attachDataSource(DataSource dataSource, String name, String description, String disposition) {
+        HashMap<String, Object> map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        List<T4<DataSource, String, String, String>> datasourceList = (List<T4<DataSource, String, String, String>>) map.get("datasources");
+        if (datasourceList == null) {
+            datasourceList = new ArrayList<T4<DataSource, String, String, String>>();
+            map.put("datasources", datasourceList);
+        }
+        datasourceList.add(F.T4(dataSource, name, description, disposition));
+        infos.set(map);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static void attachDataSource(DataSource dataSource, String name, String description){
+       attachDataSource(dataSource, name, description, EmailAttachment.ATTACHMENT);
+    }
+    
 
     public static void setContentType(String contentType) {
         HashMap<String, Object> map = infos.get();
@@ -251,7 +275,7 @@ public class Mailer {
             final Object replyTo = infos.get().get("replyTo");
 
             Email email = null;
-            if (infos.get().get("attachments") == null) {
+            if (infos.get().get("attachments") == null && infos.get().get("datasources") == null ) {
                 if (StringUtils.isEmpty(bodyHtml)) {
                     email = new SimpleEmail();
                     email.setMsg(bodyText);
@@ -278,9 +302,20 @@ public class Mailer {
                 }
                 MultiPartEmail multiPartEmail = (MultiPartEmail) email;
                 List<EmailAttachment> objectList = (List<EmailAttachment>) infos.get().get("attachments");
-                for (EmailAttachment object : objectList) {
-                    multiPartEmail.attach(object);
-                }
+                
+	       		if(objectList != null) {
+	                  for (EmailAttachment object : objectList) {
+	                      multiPartEmail.attach(object);
+	                  }
+				}
+		
+			    //Handle DataSource
+			    List<T4<DataSource, String, String, String>> datasourceList = (List<T4<DataSource, String, String, String>>) infos.get().get("datasources");
+				if(datasourceList != null) {
+			          for(T4<DataSource, String, String, String> ds : datasourceList) {
+			             multiPartEmail.attach(ds._1, ds._2, ds._3, ds._4);
+			          }
+				}
             }
             email.setCharset("utf-8");
 
