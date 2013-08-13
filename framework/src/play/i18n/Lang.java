@@ -181,7 +181,10 @@ public class Lang {
      * associated to the current Lang.
      */
     public static Locale getLocale() {
-        String localeStr = get();
+        return getLocaleOrDefault(get());
+    }
+
+    public static Locale getLocaleOrDefault(String localeStr) {
         Locale locale = getLocale(localeStr);
         if (locale != null) {
             return locale;

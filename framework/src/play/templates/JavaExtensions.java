@@ -156,7 +156,7 @@ public class JavaExtensions {
     }
 
     public static String format(Number number, String pattern) {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Lang.getLocale());
         return new DecimalFormat(pattern, symbols).format(number);
     }
 
@@ -170,11 +170,11 @@ public class JavaExtensions {
     }
 
     public static String format(Date date, String pattern, String lang) {
-        return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
+        return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(date);
     }
 
     public static String format(Date date, String pattern, String lang, String timezone) {
-        DateFormat df = new SimpleDateFormat(pattern, new Locale(lang));
+        DateFormat df = new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang));
         df.setTimeZone(TimeZone.getTimeZone(timezone));
         return df.format(date);
     }
@@ -224,7 +224,7 @@ public class JavaExtensions {
     }
 
     public static String asdate(Long timestamp, String pattern, String lang) {
-        return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
+        return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(new Date(timestamp));
     }
 
     public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
@@ -267,7 +267,7 @@ public class JavaExtensions {
 
     public static String formatCurrency(Number number, String currencyCode) {
         Currency currency = Currency.getInstance(currencyCode);
-        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale(Lang.get()));
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(Lang.getLocale());
         numberFormat.setCurrency(currency);
         numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
         String s = numberFormat.format(number);
