@@ -1,0 +1,5 @@
+# You can specialize this file for each language.
+# For exemple, for french create a messages.fr file
+#
+
+@include.login=./_messages/fr/login.fr_CA

@@ -6,3 +6,4 @@ login.signin=Sign in
 login.error=Oops, unknown username or password.
 login.logout=You have been logged out.
 login.success=Hello %s you are log in.
+login.accountExpired=Your account has expired.
