@@ -2,3 +2,13 @@
 # For exemple, for french create a messages.fr file
 #
 optimisticLocking.modelHasChanged=The object was changed. Your version is %2$s the database version is %3$s. Reload and do your changes again.
+
+# Login
+login.username=Username:
+login.password=Password:
+login.remember=Remember me
+login.signin=Sign in
+login.error=Oops, unknown username or password.
+login.logout=You have been logged out.
+login.success=Hello %s you are log in.
+login.accountExpired=Your account has expired.
