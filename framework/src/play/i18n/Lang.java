@@ -181,7 +181,10 @@ public class Lang {
      * associated to the current Lang.
      */
     public static Locale getLocale() {
-        String localeStr = get();
+        return getLocaleOrDefault(get());
+    }
+
+    public static Locale getLocaleOrDefault(String localeStr) {
         Locale locale = getLocale(localeStr);
         if (locale != null) {
             return locale;
@@ -191,12 +194,12 @@ public class Lang {
 
      public static Locale getLocale(String localeStr) {
         Locale langMatch = null;
+        String lang = localeStr;
+        int splitPos = lang.indexOf("_");
+        if (splitPos > 0) {
+        	lang = lang.substring(0, splitPos);
+        }
         for (Locale locale : Locale.getAvailableLocales()) {
-            String lang = localeStr;
-            int splitPos = lang.indexOf("_");
-            if (splitPos > 0) {
-                lang = lang.substring(0, splitPos);
-            }
             if (locale.toString().equalsIgnoreCase(localeStr)) {
                 return locale;
             } else if (locale.getLanguage().equalsIgnoreCase(lang)) {
