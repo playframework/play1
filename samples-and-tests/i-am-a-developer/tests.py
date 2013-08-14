@@ -659,9 +659,10 @@ def waitFor(process, pattern):
 
 #returns true when pattern is seen, but false if failPattern is not seen or if timeout
 def waitForWithFail(process, pattern, failPattern):
-    timer = threading.Timer(5, timeout, [process])
+    timer = threading.Timer(90, timeout, [process])
     timer.start()
     while True:
+	sys.stdout.flush()
         line = process.stdout.readline().strip()
 	sys.stdout.flush()
         #print timeoutOccured
