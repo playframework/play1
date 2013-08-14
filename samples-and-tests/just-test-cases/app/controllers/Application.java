@@ -316,7 +316,7 @@ public class Application extends Controller {
     }
 
     public static void selectTag(){
-        List<User> users = new ArrayList<User>(10);
+        List<User> users = new ArrayList<User>(12);
         User user;
         for(long i = 0; i < 10; i++) {
         	user = new User("User-" + i);
@@ -324,6 +324,14 @@ public class Application extends Controller {
         	user.i = (int) i;
         	users.add(user);
         }
+        user = new User("User-%-10");
+        user.k = 10L;
+        user.i = (int) 10;
+        users.add(user);
+        user = new User("User-%%-11");
+        user.k = 11L;
+        user.i = (int) 11;
+        users.add(user);
         render(users);
     }
     
