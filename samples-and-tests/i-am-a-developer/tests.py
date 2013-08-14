@@ -662,6 +662,7 @@ def waitForWithFail(process, pattern, failPattern):
     timer = threading.Timer(30, timeout, [process])
     timer.start()
     while True:
+	sys.stdout.flush()
         line = process.stdout.readline().strip()
         #print timeoutOccured
         if timeoutOccured:
