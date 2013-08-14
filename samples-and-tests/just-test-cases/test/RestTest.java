@@ -62,7 +62,7 @@ public class RestTest extends UnitTest {
         assertTrue(getResponse.getStatus() == 200);
         List<Header> getResponseHeaders = getResponse.getHeaders();
         for (int i = 0; i < getResponseHeaders.size(); i++) {
-            if (!"Set-Cookie".equals(getResponseHeaders.get(i).name)) {
+            if (!"Date".equals(getResponseHeaders.get(i).name) && !"Set-Cookie".equals(getResponseHeaders.get(i).name)) {
                 assertEquals(getResponseHeaders.get(i).value(), headResponseHeaders.get(i).value());
             }
         }
