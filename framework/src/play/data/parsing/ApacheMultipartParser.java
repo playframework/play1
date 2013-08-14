@@ -686,7 +686,8 @@ public class ApacheMultipartParser extends DataParser {
     private String getFieldName(Map /* String, String */ headers) {
         String fieldName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
-        if (cd != null && cd.toLowerCase().startsWith(FORM_DATA)) {
+        if (cd != null && (cd.toLowerCase().startsWith(FORM_DATA) ||
+                           cd.toLowerCase().startsWith(ATTACHMENT))) {
 
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
