@@ -675,6 +675,7 @@ def waitForWithFail(process, pattern, failPattern):
         if line.count(pattern):
             timer.cancel()
             return True
+    process.communicate()
 
 timeoutOccured = False
 
