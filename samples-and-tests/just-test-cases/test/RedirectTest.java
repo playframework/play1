@@ -50,10 +50,11 @@ public class RedirectTest extends FunctionalTest {
 
 		long shortUrlmSecs = timeRedirectRequest("result-a/");
 		long longUrlmSecs =  timeRedirectRequest("result-abcdefghijklmnopq/");
-		// on core2 duo timing used to be 30ms vs 2000ms - so afactor 2 seems reasonable
+		// on core2 duo timing used to be 30ms vs 2000ms 
 		// should be constant now
 		String msg = String.format("long redirect takes exponentially longer %s vs %s", shortUrlmSecs, longUrlmSecs);
-		assertFalse(msg, longUrlmSecs/shortUrlmSecs > 2 );
+		assertTrue(msg, longUrlmSecs < 100 );
+		assertTrue(msg, shortUrlmSecs < 100 );
 		
 	}
 	//[#1675] make sure Action redirects still work
