@@ -52,37 +52,36 @@ public class BeanWrapper {
     }
 
     public void set(String name, Object instance, Object value) {
+        Object result = value;
         for (Property prop : wrappers.values()) {
             if (name.equals(prop.name)) {
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("Prepareing %s(%s) with %s = '%s'", instance.getClass().getName(), instance.hashCode(), name, value);
+                AttributeStripping stripping = prop.field.getAnnotation(AttributeStripping.class);
+                if (stripping == null) {
+                    stripping = instance.getClass().getAnnotation(AttributeStripping.class);
                 }
 
-                AttributeStripping trimming = prop.field.getAnnotation(AttributeStripping.class);
-                if (trimming == null) {
-                    trimming = instance.getClass().getAnnotation(AttributeStripping.class);
-                }
-
-                if (trimming != null && value instanceof String) {
-                    String str = (String) value;
-                    if (trimming.squish()) {
-                        value = str.replaceAll("\\s+", " ");
+                if (stripping != null && value instanceof String) {
+                    String mod = (String) value;
+                    if (stripping.strip() || stripping.squish()) {
+                        mod = StringUtils.strip(mod);
                     }
 
-                    if (trimming.strip()) {
-                        value = StringUtils.strip(str);
+                    if (stripping.squish()) {
+                        mod = mod.replaceAll("\\s+", " ");
                     }
 
-                    if (trimming.nullify()) {
-                        value = StringUtils.stripToNull(str);
+                    if (stripping.nullify()) {
+                        mod = StringUtils.stripToNull(mod);
                     }
+
+                    result = mod;
 
                     if (Logger.isTraceEnabled()) {
-                        Logger.trace("Stripped to %s(%s) with %s = '%s'", instance.getClass().getName(), instance.hashCode(), name, value);
+                        Logger.trace("Value of attribute '%s' stripped from '%s' to '%s'", name, value, result);
                     }
                 }
 
-                prop.setValue(instance, value);
+                prop.setValue(instance, result);
                 return;
             }
         }

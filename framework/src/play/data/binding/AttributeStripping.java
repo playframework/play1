@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE, ElementType.FIELD })
 public @interface AttributeStripping {
 
-	boolean strip() default true;
+    boolean strip() default true;
 
-	boolean nullify() default true;
+    boolean nullify() default true;
 
-	boolean squish() default false;
+    boolean squish() default false;
 }
