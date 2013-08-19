@@ -4,10 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
+import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
-import play.utils.Utils;
 
 /**
  * Parameters map to POJO binder.
@@ -53,6 +54,34 @@ public class BeanWrapper {
     public void set(String name, Object instance, Object value) {
         for (Property prop : wrappers.values()) {
             if (name.equals(prop.name)) {
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("Prepareing %s(%s) with %s = '%s'", instance.getClass().getName(), instance.hashCode(), name, value);
+                }
+
+                AttributeStripping trimming = prop.field.getAnnotation(AttributeStripping.class);
+                if (trimming == null) {
+                    trimming = instance.getClass().getAnnotation(AttributeStripping.class);
+                }
+
+                if (trimming != null && value instanceof String) {
+                    String str = (String) value;
+                    if (trimming.squish()) {
+                        value = str.replaceAll("\\s+", " ");
+                    }
+
+                    if (trimming.strip()) {
+                        value = StringUtils.strip(str);
+                    }
+
+                    if (trimming.nullify()) {
+                        value = StringUtils.stripToNull(str);
+                    }
+
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Stripped to %s(%s) with %s = '%s'", instance.getClass().getName(), instance.hashCode(), name, value);
+                    }
+                }
+
                 prop.setValue(instance, value);
                 return;
             }
