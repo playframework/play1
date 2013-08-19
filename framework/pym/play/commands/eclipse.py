@@ -27,6 +27,8 @@ def execute(**kargs):
     # if this is a module, we infer the name from the path
     application_name = app.readConf('application.name')
     vm_arguments = app.readConf('jvm.memory')
+    # JDK 7 compat
+    vm_arguments = vm_arguments +' -XX:-UseSplitVerifier'
     if application_name:
         application_name = application_name.replace("/", " ")
     else:
