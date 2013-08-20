@@ -1,12 +1,14 @@
 package play.data.binding;
 
-import org.junit.Test;
-import play.PlayBuilder;
-import play.data.validation.ValidationBuilder;
+import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-import static org.fest.assertions.Assertions.assertThat;
+
+import org.junit.Test;
+
+import play.PlayBuilder;
+import play.data.validation.ValidationBuilder;
 
 public class BeanWrapperTest {
 
@@ -40,6 +42,23 @@ public class BeanWrapperTest {
         }
     }
 
+    @AttributeStripping
+    public static class StrippingClassBean {
+        public String value;
+
+        @AttributeStripping(nullify = true)
+        private String toNull;
+
+        public String getToNull() {
+            return toNull;
+        }
+
+        public void setToNull(String toNull) {
+            this.toNull = toNull;
+        }
+
+    }
+
     @Test
     public void testBind() throws Exception {
 
@@ -66,7 +85,20 @@ public class BeanWrapperTest {
         assertThat(b.a).isEqualTo("a1");
         assertThat(b.b).isEqualTo("b1");
         assertThat(b.i).isEqualTo(2);
+    }
 
+    @Test
+    public void testStripping() throws Exception {
+        new PlayBuilder().build();
+        ValidationBuilder.build();
 
+        StrippingClassBean b = new StrippingClassBean();
+        Map<String, String[]> m = new HashMap<String, String[]>();
+        m.put("b.value", new String[]{" abc "});
+        m.put("b.toNull", new String[]{"   "});
+
+        new BeanWrapper(StrippingClassBean.class).bind("b", null, m, "", b, null);
+        assertThat(b.value).isEqualTo("abc");
+        assertThat(b.getToNull()).isEqualTo(null);
     }
 }
