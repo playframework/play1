@@ -192,7 +192,9 @@ public class PropertiesEnhancer extends Enhancer {
             return false;
         }
         return Modifier.isPublic(ctField.getModifiers())
-                && !Modifier.isStatic(ctField.getModifiers());
+                && !Modifier.isStatic(ctField.getModifiers())
+                // protected classes will be considered public by this call
+                && Modifier.isPublic(ctField.getDeclaringClass().getModifiers());
     }
 
     /**

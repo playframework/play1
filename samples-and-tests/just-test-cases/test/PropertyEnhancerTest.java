@@ -1,4 +1,5 @@
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import models.PropertyEnhancerModel;
 
@@ -65,4 +66,33 @@ public class PropertyEnhancerTest extends UnitTest {
         }
     }
 
+    @Test
+    public void checkOnlyPublicProtectedDeclaredClassesEnhanced() throws Exception {
+        PropertyEnhancerModel model = new PropertyEnhancerModel();
+        for (Class clazz : model.getClass().getDeclaredClasses()) {
+            int modifiers = clazz.getModifiers();
+            boolean shouldEnhance = Modifier.isPublic(modifiers) ||
+                Modifier.isProtected(modifiers);
+            try {
+                Method getter = clazz.getMethod("getPublicField");
+                if (!shouldEnhance) {
+                    fail("Expected no getter method in class " + clazz.getSimpleName());
+                }
+            } catch (NoSuchMethodException e) {
+                if (shouldEnhance) {
+                    fail("Expected getter method in class " + clazz.getSimpleName());
+                }
+            }
+            try {
+                Method setter = clazz.getMethod("setPublicField", String.class);
+                if (!shouldEnhance) {
+                    fail("Expected no setter method in class " + clazz.getSimpleName());
+                }
+            } catch (NoSuchMethodException e) {
+                if (shouldEnhance) {
+                    fail("Expected setter method in class " + clazz.getSimpleName());
+                }
+            }
+        }
+    }
 }
