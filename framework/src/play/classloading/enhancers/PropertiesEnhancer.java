@@ -220,7 +220,7 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
-                throw e;
+                return o.getClass().getField(property).get(o);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
