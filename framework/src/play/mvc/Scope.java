@@ -66,7 +66,7 @@ public class Scope {
                 return;
             }
             try {
-                String flashData = CookieDataCodec.encode(data);
+                String flashData = CookieDataCodec.encode(out);
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
