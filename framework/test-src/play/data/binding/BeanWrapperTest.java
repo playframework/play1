@@ -43,11 +43,14 @@ public class BeanWrapperTest {
     }
 
     @AttributeStripping
-    public static class StrippingClassBean {
+    public static class StrippingBean {
         public String value;
 
         @AttributeStripping(nullify = true)
         private String toNull;
+
+        @AttributeStripping(strip = false, nullify = false)
+        private String intact;
 
         public String getToNull() {
             return toNull;
@@ -92,13 +95,15 @@ public class BeanWrapperTest {
         new PlayBuilder().build();
         ValidationBuilder.build();
 
-        StrippingClassBean b = new StrippingClassBean();
+        StrippingBean b = new StrippingBean();
         Map<String, String[]> m = new HashMap<String, String[]>();
         m.put("b.value", new String[]{" abc "});
         m.put("b.toNull", new String[]{"   "});
+        m.put("b.intact", new String[]{"   "});
 
-        new BeanWrapper(StrippingClassBean.class).bind("b", null, m, "", b, null);
+        new BeanWrapper(StrippingBean.class).bind("b", null, m, "", b, null);
         assertThat(b.value).isEqualTo("abc");
         assertThat(b.getToNull()).isEqualTo(null);
+        assertThat(b.intact).isEqualTo("   ");
     }
 }
