@@ -46,11 +46,13 @@ public class BeanWrapperTest {
     public static class StrippingBean {
         public String value;
 
-        @AttributeStripping(nullify = true)
-        private String toNull;
+        public String toNull;
 
         @AttributeStripping(strip = false, nullify = false)
-        private String intact;
+        public String intact;
+
+        @AttributeStripping(squish = true)
+        public String squish;
 
         public String getToNull() {
             return toNull;
@@ -97,13 +99,15 @@ public class BeanWrapperTest {
 
         StrippingBean b = new StrippingBean();
         Map<String, String[]> m = new HashMap<String, String[]>();
-        m.put("b.value", new String[]{" abc "});
+        m.put("b.value", new String[]{" a  bc "});
         m.put("b.toNull", new String[]{"   "});
         m.put("b.intact", new String[]{"   "});
+        m.put("b.squish", new String[]{"  a_ b   c "});
 
         new BeanWrapper(StrippingBean.class).bind("b", null, m, "", b, null);
-        assertThat(b.value).isEqualTo("abc");
+        assertThat(b.value).isEqualTo("a  bc");
         assertThat(b.getToNull()).isEqualTo(null);
         assertThat(b.intact).isEqualTo("   ");
+        assertThat(b.squish).isEqualTo("a_ b c");
     }
 }
