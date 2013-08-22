@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SSE Test</title>
+    <meta charset="utf-8" />
+    <script type="text/javascript" charset="utf-8">
+      function init() {
+        if(typeof(EventSource)!=="undefined") {
+          var log = document.getElementById('log');
+          if (log) {
+            log.innerHTML = new Date() + "EventSource() testing begins..<br>";
+          }
+
+          var svrEvents = new EventSource('@{EventSources.events()}');
+          if(svrEvents){
+        	  log.innerHTML += new Date() + "EventSource() creating...<br>";
+          }
+
+          svrEvents.addEventListener('open', function(e) {
+              connectionOpen(true);
+        	}, false);
+  
+            svrEvents.addEventListener('error', function(e) {
+        	  if (e.readyState == EventSource.CLOSED) {
+        		  connectionOpen(false);
+        	  }
+        	  
+        	  connectionOpen(false);
+        	}, false);
+  
+          svrEvents.addEventListener('poll', displayPoll, false);             // display multi choice and send back answer
+
+          
+          svrEvents.addEventListener("message", function(event) {
+        	  var log = document.getElementById('log');
+              if (log) {
+                log.innerHTML += new Date() + 'message: ' + event.data + "<br>";
+              }
+        	}, false);
+          
+          svrEvents.addEventListener("ping", function(event) {
+        	  var log = document.getElementById('log');
+              if (log) {
+                log.innerHTML += new Date() + 'ping at: ' + event.data  + "<br>";
+              }
+        	}, false);
+          
+        } else {
+          var log = document.getElementById('log');
+          if (log) {
+            log.innerHTML = "EventSource() not supported<br>";
+          }
+        }
+      }
+
+      function connectionOpen(status) {
+          var log = document.getElementById('log');
+          if (log) {
+            log.innerHTML += new Date() + 'connected: ' + status + "<br>";
+          }
+      }
+      
+      function displayPoll(event) {
+          var html = event.data;
+            var log = document.getElementById('log');
+            if (log) {
+              log.innerHTML += new Date() + 'poll: ' + html + "<br>";
+            }
+        }
+
+      
+    </script>
+  </head>
+  <body onLoad="init()">
+    <div id="log">testing...</div>
+  </body>
+</html>
