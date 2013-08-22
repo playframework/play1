@@ -183,8 +183,8 @@ public class BeanWrapper {
             }
         }
 
-        private Object strip(Object instance, Object value) {
-            Object result = value;
+        public String strip(Object instance, String value) {
+            String result = value;
 
             AttributeStripping stripping = null;
             if (field == null) {
@@ -226,7 +226,7 @@ public class BeanWrapper {
         }
 
         public void setValue(Object instance, Object value) {
-            Object stripped = strip(instance, value);
+            Object stripped = value; // strip(instance, value);
 
             try {
                 if (setter != null) {

@@ -54,6 +54,8 @@ public class BeanWrapperTest {
         @AttributeStripping(squish = true)
         public String squish;
 
+        public int num;
+
         public String getToNull() {
             return toNull;
         }
@@ -103,11 +105,12 @@ public class BeanWrapperTest {
         m.put("b.toNull", new String[]{"   "});
         m.put("b.intact", new String[]{"   "});
         m.put("b.squish", new String[]{"  a_ b   c "});
+        m.put("b.num", new String[]{"  123 "});
 
         new BeanWrapper(StrippingBean.class).bind("b", null, m, "", b, null);
         assertThat(b.value).isEqualTo("a  bc");
         assertThat(b.getToNull()).isEqualTo(null);
         assertThat(b.intact).isEqualTo("   ");
-        assertThat(b.squish).isEqualTo("a_ b c");
+        assertThat(b.num).isEqualTo(123);
     }
 }

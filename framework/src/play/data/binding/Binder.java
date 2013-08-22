@@ -318,6 +318,13 @@ public abstract class Binder {
                 // first we try with annotations resolved from property
                 annotations = prop.getAnnotations();
                 BindingAnnotations propBindingAnnotations = new BindingAnnotations(annotations, bindingAnnotations.getProfiles());
+
+                String[] values = propParamNode.getValues();
+                for (int i = 0; i < values.length; i++) {
+                    String value = values[i];
+                    values[i] = (String) prop.strip(bean, value);
+                }
+
                 Object value = internalBind(propParamNode, prop.getType(), prop.getGenericType(), propBindingAnnotations);
                 if (value != MISSING) {
                     if (value != NO_BINDING) {
