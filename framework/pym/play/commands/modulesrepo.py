@@ -366,11 +366,16 @@ def install(app, args, env):
         sys.exit(0)
 
     name = cmd = sys.argv[2]
-    groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
+    groups = re.match(r'^([a-zA-Z0-9_]+)([-](.*))?$', name)
     module = groups.group(1)
     version = groups.group(3)
 
-    modules_list = load_module_list()
+    server = None
+    if args is not None:
+        for param in args:
+            if param.startswith("--server="):
+                server = param[9:]
+    modules_list = load_module_list(server)
     fetch = None
 
     for mod in modules_list:
@@ -472,7 +477,7 @@ def add(app, args, env):
     print "~ Module %s add to application %s." % (mn, app.name())
     print "~ "
 
-def load_module_list():
+def load_module_list(custom_server):
 
     def addServer(module, server):
         module['server'] = server
@@ -484,8 +489,12 @@ def load_module_list():
         return False
 
     modules = None
-    rev = repositories[:] # clone
-    rev.reverse()
+    if custom_server is not None:
+        rev = [custom_server]
+    else:
+        rev = repositories[:] # clone
+        rev.reverse()
+
     for repo in rev:
         result = load_modules_from(repo)
         if modules is None:
