@@ -721,7 +721,7 @@ public class Play {
 			try {
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				throw new UnexpectedException("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF);
+				throw new UnexpectedException("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF, e);
 				
 			}
 			for (Iterator iter = modules.iterator(); iter.hasNext();) {
