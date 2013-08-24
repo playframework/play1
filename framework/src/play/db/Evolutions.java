@@ -310,6 +310,10 @@ public class Evolutions extends PlayPlugin {
         return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
     }
     
+    public static boolean autoCommit() {
+        return ! "false".equals(Play.configuration.getProperty("evolutions.autocommit", "true"));
+    }
+    
     public static synchronized void resolve(int revision) {
         try {
             execute("update play_evolutions set state = 'applied' where state = 'applying_up' and id = " + revision);
@@ -321,7 +325,7 @@ public class Evolutions extends PlayPlugin {
 
     public static synchronized boolean applyScript(boolean runScript, String moduleKey, VirtualFile evolutionsDirectory) {
         try {
-            Connection connection = getNewConnection();
+            Connection connection = getNewConnection(Evolutions.autoCommit());
             int applying = -1;
             try {
                 for (Evolution evolution : getEvolutionScript(moduleKey, evolutionsDirectory)) {
@@ -340,7 +344,7 @@ public class Evolutions extends PlayPlugin {
                         ps.setString(8, moduleKey);
                         ps.execute();
                     } else {
-                        execute("update play_evolutions set state = 'applying_down' where id = " + evolution.revision);
+                        connection.createStatement().execute("update play_evolutions set state = 'applying_down' where id = " + evolution.revision);
                     }
                     // Execute script
                     if (runScript) {
@@ -354,25 +358,35 @@ public class Evolutions extends PlayPlugin {
                     }
                     // Insert into logs
                     if (evolution.applyUp) {
-                        execute("update play_evolutions set state = 'applied' where id = " + evolution.revision);
+                        connection.createStatement().execute("update play_evolutions set state = 'applied' where id = " + evolution.revision);
                     } else {
-                        execute("delete from play_evolutions where id = " + evolution.revision);
+                        connection.createStatement().execute("delete from play_evolutions where id = " + evolution.revision);
                     }
                 }
+                
+                if(!Evolutions.autoCommit()) {
+                    connection.commit();
+                }
+                
                 return true;
             } catch (Exception e) {
-                String message = e.getMessage();
-                if (e instanceof SQLException) {
-                    SQLException ex = (SQLException) e;
-                    message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
-                }
-                PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ? where id = ?");
-                ps.setString(1, message);
-                ps.setInt(2, applying);
-                ps.execute();
-                closeConnection(connection);
-                Logger.error(e, "Can't apply evolution");
+            	Logger.error(e, "Can't apply evolution");
+            	if(Evolutions.autoCommit()) {
+	                String message = e.getMessage();
+	                if (e instanceof SQLException) {
+	                    SQLException ex = (SQLException) e;
+	                    message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
+	                }
+	                PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ? where id = ?");
+	                ps.setString(1, message);
+	                ps.setInt(2, applying);
+	                ps.execute();
+            	} else {
+            		connection.rollback();
+            	}
                 return false;
+            } finally {
+                closeConnection(connection);                
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
@@ -646,10 +660,14 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    static Connection getNewConnection() throws SQLException {
+    static Connection getNewConnection(boolean autoCommit) throws SQLException {
         Connection connection = DB.datasource.getConnection();
-        connection.setAutoCommit(true); // Yes we want auto-commit
+        connection.setAutoCommit(autoCommit);
         return connection;
+    }
+    
+    static Connection getNewConnection() throws SQLException {
+        return getNewConnection(true);
     }
 
     static void closeConnection(Connection connection) {
