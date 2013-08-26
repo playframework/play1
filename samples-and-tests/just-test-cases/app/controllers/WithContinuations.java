@@ -61,8 +61,7 @@ public class WithContinuations extends Controller {
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
             String r = await(new jobs.DoSomething(100).now());
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -94,10 +93,8 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             List<String> r = await(Promise.waitAll(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
-            boolean delay = System.currentTimeMillis() - s > 200 && System.currentTimeMillis() - s < 400;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -107,8 +104,7 @@ public class WithContinuations extends Controller {
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
             String r = await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -279,7 +275,7 @@ public class WithContinuations extends Controller {
     public static void renderTemplateWithVariablesAssignedBeforeAwait() {
         int n = 1;
         String a = "A";
-        Job<String> job = new Job<String>(){
+        play.jobs.Job<String> job = new play.jobs.Job<String>(){
             public String doJobWithResult() {
                 return "B";
             }
@@ -299,7 +295,7 @@ public class WithContinuations extends Controller {
         
         render(n,a,b,c,d,e);
     }
-    
+
     // This class does not use await() directly and therefor is not enhanched for Continuations
     public static class ControllerWithoutContinuations extends Controller{
         
@@ -376,7 +372,7 @@ public class WithContinuations extends Controller {
         renderArgs.put("b", "2");
         size++;
         
-        Job<String> job = new Job<String>(){
+        play.jobs.Job<String> job = new play.jobs.Job<String>(){
             public String doJobWithResult() {
                 return "B";
             }
@@ -412,7 +408,7 @@ public class WithContinuations extends Controller {
     public static void usingRenderArgsAndAwaitWithFutureAndCallback(final String arg) {
         renderArgs.put("arg", arg);
 
-        Promise<String> promise = new Job() {
+        Promise<String> promise = new play.jobs.Job() {
             @Override
             public String doJobWithResult() throws Exception {
                 return "result";
@@ -472,7 +468,7 @@ public class WithContinuations extends Controller {
         
     }
     public static void useAwaitOnFailingJobsPromise(String a) {
-        Job job = new Job() {
+        play.jobs.Job job = new play.jobs.Job() {
             @Override
             public void doJob() throws Exception {
                 throw new RuntimeException("Hello world!");
@@ -496,7 +492,7 @@ public class WithContinuations extends Controller {
         }
     }
     public static void useAwaitOnNormalJobsPromise(String a) {
-        Job job = new Job() {
+        play.jobs.Job job = new play.jobs.Job() {
           @Override
           public void doJob() throws Exception {
             Logger.trace("Everything is fine, I'm just doing my job!");
