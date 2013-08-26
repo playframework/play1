@@ -3,19 +3,19 @@
 #{selenium 'Test continuations'}
 
     openAndWait('@{WithContinuations.loopWithWait()}')
-    assertTextPresent('0:true;1:true;2:true;3:true;4:true')
+    assertTextPresent('0;1;2;3;4')
     
     openAndWait('@{WithContinuations.waitAndThenRedirect()}')
-    assertTextPresent('Hello -> DONE:100')
+    assertTextPresent('Hello -> DONE')
 
     openAndWait('@{WithContinuations.waitFuture()}')
-    assertTextPresent('0:[DONE:100];1:[DONE:100];2:[DONE:100];3:[DONE:100];4:[DONE:100]')
+    assertTextPresent('0:[DONE];1:[DONE];2:[DONE];3:[DONE];4:[DONE]')
 
     openAndWait('@{WithContinuations.waitAll()}')
-    assertTextPresent('0:[[DONE:100, DONE:200]];1:[[DONE:100, DONE:200]]')
+    assertTextPresent('0:[[DONE, DONE]];1:[[DONE, DONE]]')
 
     openAndWait('@{WithContinuations.waitAny()}')
-    assertTextPresent('0:[DONE:100];1:[DONE:100]')
+    assertTextPresent('0:[DONE];1:[DONE]')
     
     openAndWait('@{WithContinuations.withNaiveJPA()}')
     assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
@@ -75,13 +75,13 @@
     assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
     
     openAndWait('@{WithContinuations.callbackWithResult()}')
-    assertTextPresent('yep -> DONE:100')
+    assertTextPresent('yep -> DONE')
     
     openAndWait('@{WithContinuations.callbackWithResults()}')
-    assertTextPresent('yep -> [DONE:100, DONE:200]')
+    assertTextPresent('yep -> [DONE, DONE]')
     
     openAndWait('@{WithContinuations.waitWithTimeout()}')
-    assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
+    assertTextPresent('Timeout! Partial result is  + Task1 -> DONE')
 
     openAndWait('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
     assertBodyText('1-A-B-C-D-E')

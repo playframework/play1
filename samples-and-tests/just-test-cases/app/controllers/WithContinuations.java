@@ -39,10 +39,8 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             await(100);
-            boolean delay = System.currentTimeMillis() - s > 100;
-            sb.append(i + ":" + delay);
+            sb.append(i);
         }
         renderText(sb);
     }
@@ -62,7 +60,6 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             String r = await(new jobs.DoSomething(100).now());
             sb.append(i + ":[" + r + "]");
         }
@@ -107,7 +104,6 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             String r = await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
 		    sb.append(i + ":[" + r + "]");
         }
