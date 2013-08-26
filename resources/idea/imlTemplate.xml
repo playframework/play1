@@ -13,11 +13,12 @@
         <orderEntry type="module-library">
             <library name="Project Libraries">
                 <CLASSES>
-                    %MODULE_LIB_CLASSES%
                     %MODULE_LINKS%
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    %MODULE_SOURCES%
+                </SOURCES>
                 <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
                 %MODULE_LIBRARIES%
             </library>
