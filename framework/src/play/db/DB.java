@@ -4,9 +4,15 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.sql.DataSource;
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
 
 import org.hibernate.impl.SessionImpl;
+import com.sun.rowset.CachedRowSetImpl;
+
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
 import play.Logger;
@@ -74,23 +80,63 @@ public class DB {
      * @return true if the next result is a ResultSet object; false if it is an update count or there are no more results 
      */
     public static boolean execute(String SQL) {
+        Statement statement = null;
         try {
-            return getConnection().createStatement().execute(SQL);
+            statement = getConnection().createStatement();
+            if(statement != null){
+                return statement.execute(SQL);
+            }
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        }finally {
+            safeCloseStatement(statement);
         }
+        return false; 
     }
 
     /**
      * Execute an SQL query
      * @param SQL
-     * @return The query resultSet
+     * @return The rowSet of the query
      */
-    public static ResultSet executeQuery(String SQL) {
+    public static RowSet executeQuery(String SQL) {
+        Statement statement = null;
+        ResultSet rs = null;
         try {
-            return getConnection().createStatement().executeQuery(SQL);
+            statement = getConnection().createStatement();
+            if(statement != null){
+                rs = statement.executeQuery(SQL);
+            }
+            
+            // Need to use a CachedRowSet that caches its rows in memory, which makes it possible to operate without always being connected to its data source
+            CachedRowSet rowset = new CachedRowSetImpl();
+            rowset.populate(rs);
+            return rowset;     
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        }finally {
+            safeCloseResultSet(rs);
+            safeCloseStatement(statement);
+        }
+    }
+    
+    public static void safeCloseResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
+        }
+    }
+    
+    public static void safeCloseStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
         }
     }
 
