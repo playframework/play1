@@ -2,9 +2,13 @@ package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.ConnectionCustomizer;
+import com.sun.rowset.CachedRowSetImpl;
+
 import jregex.Matcher;
+
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.internal.SessionImpl;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -15,6 +19,9 @@ import play.exceptions.DatabaseException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -25,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -115,27 +123,71 @@ public class DBConfig {
 
     /**
      * Execute an SQL update
+     * 
      * @param SQL
      * @return false if update failed
      */
     public boolean execute(String SQL) {
+        Statement statement = null;
         try {
-            return getConnection().createStatement().execute(SQL);
+            statement = getConnection().createStatement();
+            if (statement != null) {
+                return statement.execute(SQL);
+            }
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseStatement(statement);
         }
+        return false;
     }
 
     /**
      * Execute an SQL query
+     * 
      * @param SQL
-     * @return The query resultSet
+     * @return The rowSet of the query
      */
-    public ResultSet executeQuery(String SQL) {
+    public RowSet executeQuery(String SQL) {
+        Statement statement = null;
+        ResultSet rs = null;
         try {
-            return getConnection().createStatement().executeQuery(SQL);
+            statement = getConnection().createStatement();
+            if (statement != null) {
+                rs = statement.executeQuery(SQL);
+            }
+
+            // Need to use a CachedRowSet that caches its rows in memory, which
+            // makes it possible to operate without always being connected to
+            // its data source
+            CachedRowSet rowset = new CachedRowSetImpl();
+            rowset.populate(rs);
+            return rowset;
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseResultSet(rs);
+            safeCloseStatement(statement);
+        }
+    }
+
+    public static void safeCloseResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    public static void safeCloseStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
         }
     }
 
