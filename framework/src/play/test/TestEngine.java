@@ -1,5 +1,7 @@
 package play.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -17,6 +19,9 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import play.Logger;
 import play.Play;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.Scope.RenderArgs;
 import play.vfs.VirtualFile;
 
 /**
@@ -94,6 +99,29 @@ public class TestEngine {
         }
     }
 
+    private static void initTest() {
+        if (Request.current() == null) {
+            Request request = Request
+                    .createRequest(null, "GET", "/", "", null, null, null,
+                            null, false, 80, "localhost", false, null, null);
+            request.body = new ByteArrayInputStream(new byte[0]);
+            Request.current.set(request);
+        }
+
+        if (Response.current() == null) {
+            Response response = new Response();
+            response.out = new ByteArrayOutputStream();
+            response.direct = null;
+            Response.current.set(response);
+        }
+
+        if (RenderArgs.current() == null) {
+            RenderArgs renderArgs = new RenderArgs();
+            RenderArgs.current.set(renderArgs);
+        }
+    }
+
+    
     @SuppressWarnings("unchecked")
     public static TestResults run(final String name) {
         final TestResults testResults = new TestResults();
@@ -102,6 +130,8 @@ public class TestEngine {
             // Load test class
             final Class testClass = Play.classloader.loadClass(name);
 
+            initTest();
+            
             TestResults pluginTestResults = Play.pluginCollection.runTest(testClass);
             if (pluginTestResults != null) {
                 return pluginTestResults;
