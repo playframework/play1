@@ -1,8 +1,7 @@
 package play.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
@@ -15,12 +14,10 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+
 import play.Invoker;
 import play.Invoker.DirectInvocation;
 import play.Play;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.mvc.Scope.RenderArgs;
 
 public class PlayJUnitRunner extends Runner implements Filterable {
 
@@ -61,7 +58,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
    
     @Override
     public void run(final RunNotifier notifier) {
-    	TestEngine.initTest();
+        TestEngine.initTest();
         jUnit4.run(notifier);
     }
     
