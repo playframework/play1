@@ -363,7 +363,7 @@ public class Scope {
                     String contentType = request.contentType;
                     if (contentType != null) {
                         DataParser dataParser = DataParser.parsers
-			    .get(contentType);
+                                .get(contentType);
                         if (dataParser != null) {
                             _mergeWith(dataParser.parse(request.body));
                         } else {
