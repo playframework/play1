@@ -103,17 +103,16 @@ public class TestEngine {
     public static void initTest() {
         if (Request.current() == null) {
             // Use base URL to create a request for this host
-	    String host = Router.getBaseUrl();
-	    if(host == null || host.equals("application.baseUrl")){
-		host = "localhost";
-	    }else if(host.contains("http://")){
-		host = host.replaceAll("http://", "");
-	    }else if(host.contains("https://")){
-		host = host.replaceAll("https://", "");
-	    }
-	    Request request = Request.createRequest(null, "GET", "/", "",
-						    null, null, null, null, false, 80, host, false,
-						    null, null); 
+            String host = Router.getBaseUrl();
+            if (host == null || host.equals("application.baseUrl")) {
+                host = "localhost";
+            } else if (host.contains("http://")) {
+                host = host.replaceAll("http://", "");
+            } else if (host.contains("https://")) {
+                host = host.replaceAll("https://", "");
+            }
+            Request request = Request.createRequest(null, "GET", "/", "", null,
+                    null, null, null, false, 80, host, false, null, null);
             request.body = new ByteArrayInputStream(new byte[0]);
             Request.current.set(request);
         }
@@ -130,7 +129,6 @@ public class TestEngine {
             RenderArgs.current.set(renderArgs);
         }
     }
-
     
     @SuppressWarnings("unchecked")
     public static TestResults run(final String name) {
