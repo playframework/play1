@@ -159,5 +159,9 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("fr-CA", Locale.class).equals(new Locale("fr", "CA")));
         assertTrue(directBind("xy", Locale.class).equals(new Locale("xy")));	// it even works with unreal locales
         assertTrue(directBind("XY_VW", Locale.class).equals(new Locale("xy", "vw")));
+        assertNull(directBind("", Locale.class));
+        assertNull(directBind(null, Locale.class));
+        assertNull(directBind("x", Locale.class));
+        assertNull(directBind("xyz", Locale.class));
     }
 }
