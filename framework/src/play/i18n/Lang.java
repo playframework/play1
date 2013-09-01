@@ -193,6 +193,9 @@ public class Lang {
     }
 
      public static Locale getLocale(String localeStr) {
+        if(localeStr == null) {
+            return null;            
+        }
         Locale langMatch = null;
         String lang = localeStr;
         int splitPos = lang.indexOf("_");

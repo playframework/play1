@@ -103,11 +103,11 @@ public class Messages {
             value = key.toString();
         }
 
-        return formatString(value, args);
+        return formatString(locale, value, args);
     }
 
-    public static String formatString(String value, Object... args) {
-        String message = String.format(Lang.getLocale(), value, coolStuff(value, args));
+    public static String formatString(String locale, String value, Object... args) {
+        String message = String.format(Lang.getLocaleOrDefault(locale), value, coolStuff(value, args));
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
         while(matcher.find()) {
