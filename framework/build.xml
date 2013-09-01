@@ -244,11 +244,13 @@
 
         <echo message="Testing unittests" />
 
-       
+        <antcall target="unittest" />
         
         <echo message="Testing development lifecycle (wait ...)" />
 
-
+        <exec executable="python" failonerror="true">
+            <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
+        </exec>
 
         <echo message="Using ${basedir}/../play${playExtension}" />
 
@@ -256,7 +258,21 @@
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
         </antcall>
 
-       
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/forum"/>
+        </antcall>
+
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/zencontact"/>
+        </antcall>
+
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/jobboard"/>
+        </antcall>
+
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/yabe"/>
+        </antcall>
 
         <antcall target="test-success" />
 

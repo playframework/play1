@@ -119,6 +119,30 @@ For example, to send an e-mail from a Job running on the playframework.org web s
 
 bc. application.baseUrl=http://www.playframework.org/
 
+h3. Links to embedded images
+
+The tag use the following parameters:
+
+* @src@ url/path to the image
+* Optional @name@ name of the attach image file (so must be unique for a given image)
+* Optional arguments can be added (alt, class,...)
+
+You can add links to embedded images by using the embeddedImage tag like this:
+
+Distant image:
+
+bc. #{embeddedImage src:'http://www.playframework.com/assets/images/logo.png', name:'distantImage' /}
+
+Locale image:
+
+bc. #{embeddedImage src:'file:///public/images/favicon.png', name:'LocaleImage', alt:'LocaleImage' /} 
+
+or:
+
+bc. #{embeddedImage src:'public/images/favicon.png', name:'LocaleImage', alt:'LocaleImage' /}
+
+This will attach the image to the email and create an internal reference inside the the html/text content.
+
 h2. <a name="smtp">SMTP configuration</a>
 
 E-mail functionality is configured by several "mail configuration":configuration#mail properties:

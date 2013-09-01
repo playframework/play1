@@ -146,7 +146,10 @@ public class F {
 
                 @Override
                 public List<T> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                    waitAllLock.await(timeout, unit);
+                    if(!waitAllLock.await(timeout, unit)) {
+                      throw new TimeoutException(String.format("Promises didn't redeem in %s %s", timeout, unit));
+                    }
+                    
                     return get();
                 }
             };

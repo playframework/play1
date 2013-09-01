@@ -110,7 +110,7 @@ public class Images {
             writer.write(null, image, params);
             toFs.flush();
             toFs.close();
-
+            writer.dispose();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -152,7 +152,7 @@ public class Images {
             writer.setOutput(new FileImageOutputStream(to));
             IIOImage image = new IIOImage(dest, null, null);
             writer.write(null, image, params);
-
+            writer.dispose();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

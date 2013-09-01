@@ -361,11 +361,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content);
         nettyResponse.setContent(buf);
 
-        if (Logger.isTraceEnabled()) {
-            Logger.trace("writeResponse: content length [" + response.out.size() + "]");
+        if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("writeResponse: content length [" + response.out.size() + "]");
+            }
+            setContentLength(nettyResponse, response.out.size());
         }
-
-        setContentLength(nettyResponse, response.out.size());
 
         ChannelFuture f = ctx.getChannel().write(nettyResponse);
 

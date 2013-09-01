@@ -3,9 +3,11 @@ package play.libs;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
+
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
+import play.utils.Utils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -123,15 +125,16 @@ public class Mail {
                 // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
-            if (Play.configuration.containsKey("mail.smtp.localhost")) {
-                props.put("mail.smtp.localhost", Play.configuration.get("mail.smtp.localhost"));            //override defaults
+            // Inject additional  mail.* settings declared in Play! configuration
+            Map<Object, Object> additionalSettings = new HashMap<Object, Object>();
+            additionalSettings = Utils.Maps.filterMap(Play.configuration, "^mail\\..*");
+            if(additionalSettings.size() > 0){
+                // Remove "password" fields
+                additionalSettings.remove("mail.smtp.pass");
+                additionalSettings.remove("mail.smtp.password"); 
+                props.putAll(additionalSettings);
             }
-            if (Play.configuration.containsKey("mail.smtp.socketFactory.class")) {
-                props.put("mail.smtp.socketFactory.class", Play.configuration.get("mail.smtp.socketFactory.class"));
-            }
-            if (Play.configuration.containsKey("mail.smtp.port")) {
-                props.put("mail.smtp.port", Play.configuration.get("mail.smtp.port"));
-            }
+                 
             String user = Play.configuration.getProperty("mail.smtp.user");
             String password = Play.configuration.getProperty("mail.smtp.pass");
             if (password == null) {

@@ -13,7 +13,7 @@ public class DoSomething extends Job<String> {
 
     public String doJobWithResult() throws Exception {
         Thread.sleep(d);
-        return "DONE:" + d;
+        return "DONE";
     }
     
 }
