@@ -728,7 +728,7 @@ public class Play {
 				String moduleName = (String) iter.next();
 
 				File module = new File(localModules, moduleName);
-
+				
 				if (moduleName.contains("-")) {
 					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
 				}
