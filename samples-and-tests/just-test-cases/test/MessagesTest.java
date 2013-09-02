@@ -28,13 +28,17 @@ public class MessagesTest extends UnitTest {
 
     @Test
     public void testMessageInAnotherLanguage() {
-        Lang.set("fr");	// a page is displayed in french
-        assertEquals("Dernière connexion février 2013", Messages.getMessage("fr", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
-        // On a french page, we want to display a german message with a date including a month-name
-        assertEquals("Letzte Anmeldung Februar 2013", Messages.getMessage("de", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
-        // non-existing locale strings and null fallback to default messages
-        assertEquals("Last login February 2013", Messages.getMessage("xy", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
-        assertEquals("Last login February 2013", Messages.getMessage(null, "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+        try{
+            Lang.set("fr");	// a page is displayed in french
+            assertEquals("Dernière connexion février 2013", Messages.getMessage("fr", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            // On a french page, we want to display a german message with a date including a month-name
+            assertEquals("Letzte Anmeldung Februar 2013", Messages.getMessage("de", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            // non-existing locale strings and null fallback to default messages
+            assertEquals("Last login February 2013", Messages.getMessage("xy", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            assertEquals("Last login February 2013", Messages.getMessage(null, "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+        } finally {
+            Lang.set("");
+        }
     }
     
     @Test
