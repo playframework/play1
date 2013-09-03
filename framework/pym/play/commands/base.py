@@ -165,7 +165,7 @@ def run(app, args):
 def clean(app):
     app.check()
     tmp = app.readConf('play.tmp')
-    if (tmp is None):
+    if tmp is None or not tmp.strip():
         tmp = 'tmp'
     print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, tmp))
     if os.path.exists(os.path.join(app.path, tmp)):
