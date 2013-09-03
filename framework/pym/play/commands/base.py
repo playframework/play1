@@ -164,9 +164,12 @@ def run(app, args):
 
 def clean(app):
     app.check()
-    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
-    if os.path.exists(os.path.join(app.path, 'tmp')):
-        shutil.rmtree(os.path.join(app.path, 'tmp'))
+    tmp = app.readConf('play.tmp')
+    if tmp is None or not tmp.strip():
+        tmp = 'tmp'
+    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, tmp))
+    if os.path.exists(os.path.join(app.path, tmp)):
+        shutil.rmtree(os.path.join(app.path, tmp))
     print "~"
 
 def show_modules(app, args):
