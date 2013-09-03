@@ -1,5 +1,7 @@
 package play.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -17,6 +19,10 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import play.Logger;
 import play.Play;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.Router;
+import play.mvc.Scope.RenderArgs;
 import play.vfs.VirtualFile;
 
 /**
@@ -94,6 +100,36 @@ public class TestEngine {
         }
     }
 
+    public static void initTest() {
+        if (Request.current() == null) {
+            // Use base URL to create a request for this host
+            String host = Router.getBaseUrl();
+            if (host == null || host.equals("application.baseUrl")) {
+                host = "localhost";
+            } else if (host.contains("http://")) {
+                host = host.replaceAll("http://", "");
+            } else if (host.contains("https://")) {
+                host = host.replaceAll("https://", "");
+            }
+            Request request = Request.createRequest(null, "GET", "/", "", null,
+                    null, null, null, false, 80, host, false, null, null);
+            request.body = new ByteArrayInputStream(new byte[0]);
+            Request.current.set(request);
+        }
+
+        if (Response.current() == null) {
+            Response response = new Response();
+            response.out = new ByteArrayOutputStream();
+            response.direct = null;
+            Response.current.set(response);
+        }
+
+        if (RenderArgs.current() == null) {
+            RenderArgs renderArgs = new RenderArgs();
+            RenderArgs.current.set(renderArgs);
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     public static TestResults run(final String name) {
         final TestResults testResults = new TestResults();
@@ -102,6 +138,8 @@ public class TestEngine {
             // Load test class
             final Class testClass = Play.classloader.loadClass(name);
 
+            initTest();
+            
             TestResults pluginTestResults = Play.pluginCollection.runTest(testClass);
             if (pluginTestResults != null) {
                 return pluginTestResults;
