@@ -108,6 +108,7 @@ public class TestEngine {
             String host = Router.getBaseUrl();
             String domain = null;
             Integer port = 80;
+            boolean isSecure = false;
             if (host == null || host.equals("application.baseUrl")) {
                 host = "localhost" + port;
                 domain = "localhost";
@@ -115,7 +116,8 @@ public class TestEngine {
                 host = host.replaceAll("http://", "");
             } else if (host.contains("https://")) {
                 host = host.replaceAll("https://", "");
-                port = 443;          
+                port = 443;
+                isSecure = true;         
             }
             int colonPos =  host.indexOf(':');
             if(colonPos > -1){
@@ -127,7 +129,7 @@ public class TestEngine {
             
             
             Request request = Request.createRequest(null, "GET", "/", "", null,
-                    null, null, host, false, port, domain, false, null, null);
+                    null, null, host, false, port, domain, isSecure, null, null);
             request.body = new ByteArrayInputStream(new byte[0]);
             Request.current.set(request);
         }
