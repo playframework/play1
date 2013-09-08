@@ -199,6 +199,22 @@ public class BinderTest {
         assertThat(Validation.error("b")).isNotNull();
     }
 
+    @Test
+    public void verify_binding_collections_of_generic_types() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("data.genericTypeList", new String[]{"1", "2", "3"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data3 result = (Data3) Binder.bind(rootParamNode, "data", Data3.class,
+                Data3.class, noAnnotations);
+
+        assertThat(result.genericTypeList).hasSize(3);
+
+        for (int i = 1; i < 3; i++) {
+            assertThat(result.genericTypeList.get(i - 1).value).isEqualTo(Long.valueOf(i));
+        }
+    }
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
