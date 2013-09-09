@@ -195,11 +195,14 @@ public class Fixtures {
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                // Check that the vf exist and isn't a directory
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
-            if (yamlFile == null || !yamlFile.exists()) {
+            
+            // Check again the vf exist and isn't a directory
+            if (yamlFile == null || !yamlFile.exists() || yamlFile.isDirectory()) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
@@ -364,7 +367,7 @@ public class Fixtures {
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
@@ -436,7 +439,7 @@ public class Fixtures {
                 m.find();
                 String file = m.group(1);
                 VirtualFile f = Play.getVirtualFile(file);
-                if (f != null && f.exists()) {
+                if (f != null && f.exists() && !f.isDirectory()) {
                     serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
                 }
             } else {
