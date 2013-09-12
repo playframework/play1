@@ -95,4 +95,10 @@ public class MessagesTest extends UnitTest {
             Lang.set("");
         }
     }
+
+    // test regression for #1716 (ticket #1723)
+    @Test
+    public void testMessagesFormatString() {
+        assertEquals("This is a 'test'", Messages.formatString("This is a '%s'", "test"));
+    }
 }
