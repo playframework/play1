@@ -43,13 +43,13 @@ def execute(**kargs):
     subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
     print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
     # Remove configuration file
-    os.remove(outdir + '/javadocOptions')
-    os.remove(outdir + '/javadocFiles')
+    os.remove(os.path.join(outdir , 'javadocOptions'))
+    os.remove(os.path.join(outdir , 'javadocFiles'))
     
     
     
 def defineJavadocOptions(app, outdir, args):
-    f = open(outdir + '/javadocOptions', 'w')
+    f = open(os.path.join(outdir , 'javadocOptions'), 'w')
     f.write(' '.join(['-classpath', app.cp_args(), '-d', outdir, '-encoding', 'UTF-8', '-charset', 'UTF-8']))
    
     # Add some default options
@@ -116,7 +116,7 @@ def defineJavadocFiles(app, outdir):
 	    add_java_files(os.path.normpath(os.path.join(module, "src")))
         
     #Write files list in files    
-    f = open(outdir + '/javadocFiles', 'w')
+    f = open(os.path.join(outdir, 'javadocFiles'), 'w')
     f.write(' '.join(fileList)) 
     f.close()
   
