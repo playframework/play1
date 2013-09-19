@@ -40,13 +40,15 @@ public class Unbinder {
             Class<?> clazz = src.getClass().getComponentType();
             int size = Array.getLength(src);
             for (int i = 0; i < size; i++) {
-                unBind(result, Array.get(src, i), clazz, name + "[" + (i++) + "]", annotations);
+                unBind(result, Array.get(src, i), clazz, name + "[" + i + "]", annotations);
             }
         } else if (Collection.class.isAssignableFrom(src.getClass())) {
-            Collection<?> c = (Collection<?>) src;
-            int i = 0;
-            for (Object object : c) {
-                unBind(result, object, object.getClass(), name + "[" + (i++) + "]", annotations);
+            if (Map.class.isAssignableFrom(src.getClass())) {
+                throw new UnsupportedOperationException("Unbind won't work with maps yet");
+            } else {
+                Collection<?> c = (Collection<?>) src;
+                Object[] srcArray = c.toArray();
+                unBind(result, srcArray, srcArray.getClass(), name, annotations);
             }
         } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
             // We should use the @As annotation if there is one
