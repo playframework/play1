@@ -215,6 +215,38 @@ public class BinderTest {
         }
     }
 
+    @Test
+    public void test_unbinding_of_collection_of_complex_types() {
+        Data1 d1 = new Data1();
+        d1.a = "a";
+        d1.b = 1;
+
+        Data1 d2 = new Data1();
+        d2.a = "b";
+        d2.b = 2;
+
+        Data1 d3 = new Data1();
+        d3.a = "c";
+        d3.b = 3;
+
+        Data1[] datasArray = {d1, d2};
+        List<Data1> datas = Arrays.asList(new Data1[]{d2, d1, d3});
+
+        Data4 original = new Data4();
+        original.s = "some";
+        original.datas = datas;
+        original.datasArray = datasArray;
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        Unbinder.unBind(result, original, "data", noAnnotations);
+
+        Map<String, String[]> r2 = fromUnbindMap2BindMap(result);
+        RootParamNode root = ParamNode.convert(r2);
+
+        Object binded = Binder.bind(root, "data", Data4.class, Data4.class, noAnnotations);
+        assertThat(binded).isEqualTo(original);
+    }
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
@@ -229,6 +261,9 @@ public class BinderTest {
                 r2.put(key, new String[]{(String)v});
             } else if (v instanceof String[]) {
                 r2.put(key, (String[])v);
+            } else if (v instanceof Collection) {
+                Object[] array = ((Collection) v).toArray();
+                r2.put(key, Arrays.copyOf(array, array.length, String[].class));
             } else {
                 throw new RuntimeException("error");
             }
