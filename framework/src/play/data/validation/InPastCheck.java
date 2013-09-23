@@ -44,6 +44,13 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
                 return false;
             }
         }
+        if (value instanceof Long) {
+            try {
+                return reference.after(new Date((Long) value));
+            } catch (Exception e) {
+                return false;
+            }
+        }
         return false;
     }
 
