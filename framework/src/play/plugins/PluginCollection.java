@@ -534,7 +534,17 @@ public class PluginCollection {
 
     public void onApplicationStop(){
         for( PlayPlugin plugin : getReversedEnabledPlugins() ){
-            plugin.onApplicationStop();
+            try {
+              plugin.onApplicationStop();
+            }
+            catch (Throwable t) {
+              if (t.getMessage() == null)
+                Logger.error(t, "Error while stopping %s", plugin);
+              else if (Logger.isDebugEnabled())
+                Logger.debug(t, "Error while stopping %s", plugin);
+              else
+                Logger.info("Error while stopping %s: %s", plugin, t.toString());
+            }
         }
     }
 
