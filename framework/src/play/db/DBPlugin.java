@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.db.jpa.JPAPlugin;
 import play.exceptions.DatabaseException;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -129,7 +130,21 @@ public class DBPlugin extends PlayPlugin {
                     ds.setMaxIdleTimeExcessConnections(Integer.parseInt(p.getProperty("db.pool.maxIdleTimeExcessConnections", "0")));
                     ds.setIdleConnectionTestPeriod(10);
                     ds.setTestConnectionOnCheckin(true);
-                    
+
+                    if (p.getProperty("db.testquery") != null) {
+                        ds.setPreferredTestQuery(p.getProperty("db.testquery"));
+                    } else {
+                        String driverClass = JPAPlugin.getDefaultDialect(ds.getDriverClass());
+
+                        /*
+                         * Pulled from http://dev.mysql.com/doc/refman/5.5/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html
+                         * Yes, the select 1 also needs to be in there.
+                         */
+                        if (driverClass.equals("play.db.jpa.MySQLDialect")) {
+                            ds.setPreferredTestQuery("/* ping */ SELECT 1");
+                        }
+                    }
+
                     // This check is not required, but here to make it clear that nothing changes for people
                     // that don't set this configuration property. It may be safely removed.
                     if(p.getProperty("db.isolation") != null) {
@@ -193,6 +208,7 @@ public class DBPlugin extends PlayPlugin {
         out.println("Max pool size: " + datasource.getMaxPoolSize());
         out.println("Initial pool size: " + datasource.getInitialPoolSize());
         out.println("Checkout timeout: " + datasource.getCheckoutTimeout());
+        out.println("Test query : " + datasource.getPreferredTestQuery());
         return sw.toString();
     }
 
