@@ -272,7 +272,7 @@ public class JPAPlugin extends PlayPlugin {
         }
     }
 
-    static String getDefaultDialect(String driver) {
+    public static String getDefaultDialect(String driver) {
         String dialect = Play.configuration.getProperty("jpa.dialect");
         if (dialect != null) {
             return dialect;
