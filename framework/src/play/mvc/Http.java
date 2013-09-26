@@ -181,7 +181,11 @@ public class Http {
          */
         public String querystring;
         /**
-         * Full url
+         * URL path (excluding scheme, host and port), starting with '/'<br/>
+         * 
+         * <b>Example:</b><br/>
+         * With this full URL <code>http://localhost:9000/path0/path1</code> <br/>
+         * => <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
         /**
