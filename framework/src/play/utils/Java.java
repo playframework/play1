@@ -70,12 +70,9 @@ public class Java {
      */
     public static Object extractUnderlyingCallable(FutureTask<?> futureTask) {
         try {
-            Field syncField = FutureTask.class.getDeclaredField("sync");
-            syncField.setAccessible(true);
-            Object sync = syncField.get(futureTask);
-            Field callableField = sync.getClass().getDeclaredField("callable");
+            Field callableField = futureTask.getClass().getSuperclass().getDeclaredField("callable");
             callableField.setAccessible(true);
-            Object callable = callableField.get(sync);
+            Object callable = callableField.get(futureTask);
             if (callable.getClass().getSimpleName().equals("RunnableAdapter")) {
                 Field taskField = callable.getClass().getDeclaredField("task");
                 taskField.setAccessible(true);
