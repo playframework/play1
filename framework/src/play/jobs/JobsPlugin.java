@@ -7,12 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import play.Logger;
 import play.Play;
@@ -88,9 +83,11 @@ public class JobsPlugin extends PlayPlugin {
             out.println();
             out.println("Waiting jobs:");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            for (Object o : executor.getQueue()) {
-                ScheduledFuture task = (ScheduledFuture)o;
-                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");
+            ScheduledFuture[] q = executor.getQueue().toArray(new ScheduledFuture[0]);
+
+            for (int i = 0; i < q.length; i++) {
+                ScheduledFuture task = q[i];
+                out.println(Java.extractUnderlyingCallable((FutureTask<?>) task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");
             }
         }
         return sw.toString();
