@@ -142,8 +142,6 @@ public class DBPlugin extends PlayPlugin {
                          */
                         if (driverClass.equals("play.db.jpa.MySQLDialect")) {
                             ds.setPreferredTestQuery("/* ping */ SELECT 1");
-                        } else {
-                            ds.setPreferredTestQuery("SELECT 1");
                         }
                     }
 
