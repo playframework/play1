@@ -77,6 +77,9 @@ public class JobsPlugin extends PlayPlugin {
             }
         }
         if (!executor.getQueue().isEmpty()) {
+            out.println();
+            out.println("Waiting jobs:");
+            out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             ScheduledFuture[] q = executor.getQueue().toArray(new ScheduledFuture[0]);
 
             for (int i = 0; i < q.length; i++) {
