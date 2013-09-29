@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="views/**" kind="src" path="app"/>
+	<classpathentry excluding="japidviews/**|rythm/**|views/**" kind="src" path="app"/>
 	%TESTCLASSPATH%
 	%MODULES%
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
