@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -18,6 +18,15 @@
 ~ By default the command will not delete unrecognized artifacts.
 ~ Use the --sync option to keep both lib/ and modules/ directory synchronized
 ~ with the dependencies management system.
+~
+~ Some options specified after the application path are passed to the JVM : java memory( example. -Xms64m -Xmx256m).  
+~ If JVM memory options (starting with -Xm') are not specified in command line arguments, then any
+~ arguments in the conf/application.conf file's jvm.memory property are passed to the JVM.
+~ All the shell environment variables are passed to the JVM.
+~
+~ If the option [--jpda] is present, a JPDA session is automatically opened on the port specified by the 
+~ conf/application.conf file's jpda.port property (defaulting to 8000). If the JPDA port is already in use, 
+~ another available port is automatically chosen.
 ~
 ~ Options:
 ~ ~~~~~~~~
@@ -33,7 +42,7 @@
 ~
 ~ --sync:
 ~ Keep lib/ and modules/ directory synced.
-~ Delete unknow dependencies.
+~ Delete unknown dependencies.
 ~
 ~ --forceCopy:
 ~ Never create files pointing to the original folder, always copy the folder

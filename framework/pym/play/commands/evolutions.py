@@ -16,15 +16,10 @@ HELP = {
 }
 
 def execute(**kargs):
-    
-    args = kargs.get("args")
-    play_env = kargs.get("env")
-
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
     play_env = kargs.get("env")
-
 
     if command.find(':resolve') > 0:
         args.append('-Dmode=resolve')
@@ -36,16 +31,26 @@ def execute(**kargs):
         args.append('-Dmode=markApplied')
 
     classpath = app.getClasspath()
+    args_memory = app.java_args_memory(args) 
+    app.jpda_port = app.readConf('jpda.port')
 
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
     if args.count('--jpda'):
         print "~ Waiting for JPDA client to continue"
-        add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])
         args.remove('--jpda')
+        add_options.append('-Xdebug')
+        add_options.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=y' % app.jpda_port)
     add_options.extend(args)
+    # Remove duplicate memory arg
+    for arg in args_memory: 
+        if arg in add_options:
+            add_options.remove(arg)
 
-    java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.db.Evolutions']
-
-    return_code = subprocess.call(java_cmd, env=os.environ)
-    if 0 != return_code:
-        sys.exit(return_code);
+    java_cmd = [app.java_path()] + add_options + args_memory + ['-classpath', app.cp_args(), 'play.db.Evolutions']
+    try:
+        return_code = subprocess.call(java_cmd, env=os.environ)
+        if 0 != return_code:
+            sys.exit(return_code);
+    except OSError:
+        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        sys.exit(-1)
