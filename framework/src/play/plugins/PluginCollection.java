@@ -538,7 +538,9 @@ public class PluginCollection {
               plugin.onApplicationStop();
             }
             catch (Throwable t) {
-              if (Logger.isDebugEnabled())
+              if (t.getMessage() == null)
+                Logger.error(t, "Error while stopping %s", plugin);
+              else if (Logger.isDebugEnabled())
                 Logger.debug(t, "Error while stopping %s", plugin);
               else
                 Logger.info("Error while stopping %s: %s", plugin, t.toString());
