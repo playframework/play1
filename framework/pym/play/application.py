@@ -222,6 +222,23 @@ class PlayApplication(object):
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
             self.jpda_port = 0
 
+    def java_args_memory(self, java_args):
+        args_memory = []
+        memory_in_args=False    
+        for arg in java_args:
+            if arg.startswith('-Xm'):
+                memory_in_args=True
+                args_memory.append(arg)
+            
+        if not memory_in_args:
+            memory = self.readConf('jvm.memory')
+            if memory:
+                args_memory = args_memory + memory.split(' ')
+            elif 'JAVA_OPTS' in os.environ:
+                args_memory = args_memory + os.environ['JAVA_OPTS'].split(' ')
+                
+        return args_memory        
+    
     def java_cmd(self, java_args, cp_args=None, className='play.server.Server', args = None):
         if args is None:
             args = ['']
@@ -244,8 +261,8 @@ class PlayApplication(object):
 
         if application_mode == 'prod':
             java_args.append('-server')
-	# JDK 7 compat
-	java_args.append('-XX:-UseSplitVerifier')
+        # JDK 7 compat
+        java_args.append('-XX:-UseSplitVerifier')
         java_policy = self.readConf('java.policy')
         if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)
