@@ -184,10 +184,10 @@ The ""Cobertura module":http://www.playframework.org/modules/cobertura generates
 
 bc. play install cobertura-{version}
 
-We need to enable this module only for test mode. So add this line to the @application.conf@ file, and restart the application in test mode.
+We need to enable this module only for test mode. So add this line to the @dependencies.yml@ file, and restart the application in test mode.
 
-bc. # Import the cobertura module in test mode
-%test.module.cobertura=${play.path}/modules/cobertura
+bc. # Import the cobertura module in application
+    - play -> cobertura {version}
 
 Now reopen the browser at the "http://localhost:9000/@tests":http://localhost:9000/@tests URL, select all tests and run them. All should be green.
 

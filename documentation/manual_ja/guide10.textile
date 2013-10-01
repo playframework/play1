@@ -184,10 +184,10 @@ h2. <a name="cobertura">コードカバレッジ計測</a>
 
 bc. play install cobertura-{version}
 
-このモジュールはテストモードのときだけ有効にする必要があります。そこで、以下の行を @application.conf@ に追加し、アプリケーションをテストモードで再起動します。
+このモジュールはテストモードのときだけ有効にする必要があります。そこで、以下の行を @conf/dependencies.yml@ に追加し、アプリケーションをテストモードで再起動します。
 
-bc. # Import the cobertura module in test mode
-%test.module.cobertura=${play.path}/modules/cobertura
+bc. # Import the cobertura module in appplication
+    - play -> cobertura {version}
 
 ここで、ブラウザから "http://localhost:9000/@tests":http://localhost:9000/@tests URL を再度開き、すべてのテストを選択して実行してください。すべてグリーンになるはずです。
 
