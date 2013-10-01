@@ -4,10 +4,10 @@ h1. 認証機能の追加
 
 h2. <a>secure モジュールの有効化</a>
 
-@yabe/conf/application.conf@ ファイルにおいて **Secure** モジュールを有効化し、アプリケーションを再起動してください。
+@yabe/conf/dependencies.yml@ ファイルにおいて **Secure** モジュールを有効化し、アプリケーションを再起動してください。
 
 bc. # Import the secure module
-module.secure=${play.path}/modules/secure
+    - secure
 
 再起動後、Play はこのモジュールがロードされたことを告げるはずです。
 
