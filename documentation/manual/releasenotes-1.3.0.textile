@@ -6,16 +6,16 @@ The changes in this release are listed in the "Play 1.3.0 milestone":https://pla
 * fixed multiple test bugs (auto-test/async/htmlunit)
 * upgraded to hibernate 4.1.3
 * upgraded to netty-3.6.0.Final
-* numerous libraries upgraded.
+* numerous libraries upgraded
 * numerous i18n fixes
 * improved intellij support
 
 Next to these, there are also some new features in this release:
 
-* multiple database support
+* multiple database support (TODO)
 * customisable netty pipeline	 
-* customisable template name resolving
-* project documentation viewer
+* customisable template name resolving (TO BE DOCUMENTED)
+* project documentation viewer in dev mode
 * improved Job support - added afterRequest() support
 * embedded images support for mailer
 * mailer can return a future
