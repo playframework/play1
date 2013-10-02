@@ -242,13 +242,17 @@ public class Play {
         }
 
         // Mode
-		try {
-        	mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-		} catch (IllegalArgumentException e) {
-			Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
-			fatalServerErrorOccurred();
-		}
-		if (usePrecompiled || forceProd) {
+        try {
+            mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
+            fatalServerErrorOccurred();
+        }
+	
+        // Force the Production mode if forceProd or precompile is activate
+        // Set to the Prod mode must be done before loadModules call
+        // as some modules (e.g. DocViewver) is only available in DEV
+        if (usePrecompiled || forceProd || System.getProperty("precompile") != null) {
             mode = Mode.PROD;
         }
 
@@ -300,8 +304,7 @@ public class Play {
         pluginCollection.loadPlugins();
 
         // Done !
-        if (mode == Mode.PROD || System.getProperty("precompile") != null) {
-            mode = Mode.PROD;
+        if (mode == Mode.PROD) {
             if (preCompile() && System.getProperty("precompile") == null) {
                 start();
             } else {
@@ -725,7 +728,7 @@ public class Play {
 				throw new UnexpectedException("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF, e);
 				
 			}
-			for (Iterator iter = modules.iterator(); iter.hasNext();) {
+			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
 				String moduleName = (String) iter.next();
 
 				File module = new File(localModules, moduleName);
@@ -752,6 +755,7 @@ public class Play {
         if (Play.runingInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
+        
         if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }
