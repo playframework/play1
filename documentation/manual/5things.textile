@@ -49,7 +49,7 @@ bc. public static void show(Long id) {
     render(article);
 }
  
-public static void edit(Long id, String title) {
+bc. public static void edit(Long id, String title) {
     Article article = Article.findById(id);
     article.title = title;
     article.save();
