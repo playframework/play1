@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -24,7 +24,7 @@
 ~ arguments in the conf/application.conf file's jvm.memory property are passed to the JVM.
 ~ All the shell environment variables are passed to the JVM.
 ~
-~ If the application is in DEV mode, a JPDA session is automatically opened on the port specified by the 
+~ If the option [--jpda] is present, a JPDA session is automatically opened on the port specified by the 
 ~ conf/application.conf file's jpda.port property (defaulting to 8000). If the JPDA port is already in use, 
 ~ another available port is automatically chosen.
 ~
