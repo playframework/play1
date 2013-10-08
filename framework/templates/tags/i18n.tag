@@ -6,8 +6,9 @@ if (_keys) {
 }
 js_messages=new com.google.gson.Gson().toJson(ymessages);
 }%
+#{if !_noScriptTag}
 <script type="text/javascript">
-
+#{/if}
 var i18nMessages = ${js_messages};
 
 /**
@@ -40,5 +41,6 @@ var i18n = function(code) {
     }
     return message;
 };
-
+#{if !_noScriptTag}
 </script>
+#{/if}

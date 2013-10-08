@@ -287,6 +287,14 @@ Optionally, you can restrict the tag to only some messages. The wildcard charact
 
 bc. #{i18n keys:['title', 'menu.*'] /}
 
+By default, the #{i18n /} tag renders a
+
+bc. <script type="text/javascript">...</script>
+
+tag around the generated JavaScript. You can hide this tag by setting @noScriptTag@ to @true@:
+
+bc. #{i18n keys:['title', 'menu.*'], noScriptTag:true /}
+
 h2. <a name="if">if</a>
 
 Evaluates the given test, and if true, evaluates the tag body.
