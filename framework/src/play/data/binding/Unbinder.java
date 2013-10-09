@@ -91,8 +91,21 @@ public class Unbinder {
                 String newName = name + "." + field.getName();
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
+                
+                // first we try with annotations resolved from property
+                List<Annotation> allAnnotations = new ArrayList<Annotation>();
+                if(annotations != null && annotations.length > 0){
+                    allAnnotations.addAll(Arrays.asList(annotations));
+                }
+                
+                // Add entity field annotation
+                Annotation[] propBindingAnnotations = field.getAnnotations();
+                if(propBindingAnnotations != null && propBindingAnnotations.length > 0){
+                    allAnnotations.addAll(Arrays.asList(propBindingAnnotations));
+                }
+                
                 try {
-                    unBind(result, field.get(src), field.getType(), newName, annotations);
+                    unBind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Object" + src.getClass() + " won't unbind field " + field.getName(), e);
                 } catch (IllegalArgumentException e) {
