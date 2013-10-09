@@ -4,13 +4,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+import models.AnEntity;
 import models.MyBook;
 import models.Person;
+
 import org.apache.commons.io.IOUtils;
+
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Valid;
 import play.i18n.Lang;
 import play.mvc.Controller;
 import play.utils.Utils;
@@ -123,6 +128,14 @@ public class DataBinding extends Controller {
         }
         
         renderText("b.ba.length=" + b.ba.length);
+    }
+    
+    public static void editAnEntity(@Valid AnEntity entity) {        
+        render(entity);
+    }
+    
+    public static void dispatchAnEntity(@Valid AnEntity entity) {
+        editAnEntity(entity);
     }
 
 }
