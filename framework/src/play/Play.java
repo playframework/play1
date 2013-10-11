@@ -724,8 +724,9 @@ public class Play {
 			try {
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				throw new UnexpectedException("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF, e);
-				
+				Logger.error("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF +" (module will not be loaded in order of the dependencies.yml)", e);
+				// Load module without considering the dependencies.yml order
+				modules = Arrays.asList(localModules.list());		
 			}
 			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
 				String moduleName = (String) iter.next();
