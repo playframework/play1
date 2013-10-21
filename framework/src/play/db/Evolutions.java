@@ -204,10 +204,10 @@ public class Evolutions extends PlayPlugin {
             if (Play.modules.containsKey(specificModule)) {
                 VirtualFile moduleRoot = Play.modules.get(specificModule);
                 
-                if(moduleRoot.child("db/evolutions").exists()) {
+                if(!isModuleEvolutionDisabled(specificModule) && moduleRoot.child("db/evolutions").exists()) {
                     modulesWithEvolutions.put(specificModule, moduleRoot.child("db/evolutions"));
                 } else {
-                    System.out.println("~ '" + specificModule + "' module doesn't have any evolutions scripts in it.");
+                    System.out.println("~ '" + specificModule + "' module doesn't have any evolutions scripts in it or evolutions are disabled.");
 	            System.out.println("~");
                     System.exit(-1);
                 }
@@ -225,11 +225,18 @@ public class Evolutions extends PlayPlugin {
 
     private static void populateModulesWithEvolutions() {
         /** Check that evolutions are enabled **/
-
-        for(Entry<String, VirtualFile> moduleRoot : Play.modules.entrySet()) {            
-            if(moduleRoot.getValue().child("db/evolutions").exists()) {
-                modulesWithEvolutions.put(moduleRoot.getKey(), moduleRoot.getValue().child("db/evolutions"));
+        if(!isModuleEvolutionDisabled()){
+            for(Entry<String, VirtualFile> moduleRoot : Play.modules.entrySet()) {
+                if(moduleRoot.getValue().child("db/evolutions").exists()) {
+                    if(!isModuleEvolutionDisabled(moduleRoot.getKey())){
+                        modulesWithEvolutions.put(moduleRoot.getKey(), moduleRoot.getValue().child("db/evolutions"));
+                    } else {
+                        System.out.println("~ '" + moduleRoot.getKey() + "' module evolutions are disabled.");
+                    }
+                }
             }
+        }else{
+            System.out.println("~ Module evolutions are disabled.");
         }
 
         addMainProjectToModuleList();
@@ -308,6 +315,14 @@ public class Evolutions extends PlayPlugin {
      */
     private boolean isDisabled() {
         return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
+    }
+    
+    private static boolean isModuleEvolutionDisabled(){
+        return "false".equals(Play.configuration.getProperty("modules.evolutions.enabled", "true")); 
+    }
+    
+    private static boolean isModuleEvolutionDisabled(String name){
+        return "false".equals(Play.configuration.getProperty(name + ".evolutions.enabled", "true")); 
     }
     
     public static synchronized void resolve(int revision) {

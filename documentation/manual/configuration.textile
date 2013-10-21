@@ -361,6 +361,23 @@ bc. evolutions.enabled=false
 Default: @true@
 
 
+h3(#modules.evolutions.enabled). modules.evolutions.enabled
+
+Used to disable "database evolutions":evolutions from all modules
+
+bc. modules.evolutions.enabled=false
+
+Default: @true@
+
+h3(#[module name].evolutions.enabled). [module name].evolutions.enabled
+
+Used to disable "database evolutions":evolutions from a given module
+
+bc. [module name].evolutions.enabled=false
+
+Default: @true@
+
+
 h2(#test). Test runner
 
 h3(#headlessBrowser). headlessBrowser
