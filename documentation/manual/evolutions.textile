@@ -314,6 +314,19 @@ bc. $play evolutions:apply -Dmodules=module3
 
 p(note).  If you use the command-line switch, your application will **NOT** be included by default, unless you specify it in the list of modules.
 
+If you wish to only work with the application's evolutions, you can use the @modules.evolutions.enabled@ parameters to configure the evolutions from all modules
+
+bc. modules.evolutions.enabled=false
+
+Default: @true@
+
+If you wish to disable evolutions from a specific module, you can use the @[module name].evolutions.enabled@ parameters to configure the evolutions from the given module
+
+bc. [module name].evolutions.enabled=false
+
+Default: @true@
+
+
 p(note). **Continuing the discussion**
 
 Learn how to configure %(next)"Logging":logs%.
