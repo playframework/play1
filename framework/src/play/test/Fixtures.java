@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.scanner.ScannerException;
+
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
@@ -37,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.persistence.Entity;
 
 public class Fixtures {
@@ -153,12 +155,24 @@ public class Fixtures {
         loadModels(name);
     }
 
+
     /**
      * Load Model instances from a YAML file and persist them using the underlying persistence mechanism.
      * The format of the YAML file is constrained, see the Fixtures manual page
      * @param name Name of a YAML file somewhere in the classpath (or conf/)
      */
     public static void loadModels(String name) {
+        loadModels(true, name);
+    }
+
+   
+    /**
+     * Load Model instances from a YAML file and persist them using the underlying persistence mechanism.
+     * The format of the YAML file is constrained, see the Fixtures manual page
+     * @param name Name of a YAML file somewhere in the classpath (or conf/)
+     * @param loadAsTemplate : indicate if the file must interpreted as a Template
+     */
+    public static void loadModels(boolean loadAsTemplate, String name) {
         VirtualFile yamlFile = null;
         try {
             for (VirtualFile vf : Play.javaPath) {
@@ -174,7 +188,12 @@ public class Fixtures {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
-            String renderedYaml = TemplateLoader.load(yamlFile).render();
+            String renderedYaml = null;
+            if(loadAsTemplate){
+                renderedYaml = TemplateLoader.load(yamlFile).render();
+            }else{
+                renderedYaml = yamlFile.contentAsString();
+            }
 
             Yaml yaml = new Yaml();
             Object o = yaml.load(renderedYaml);
@@ -260,8 +279,15 @@ public class Fixtures {
      * @see loadModels(String name)
      */
     public static void loadModels(String... names) {
+        loadModels(true, names);
+    }
+    
+    /**
+     * @see loadModels(String name)
+     */
+    public static void loadModels(boolean loadAsTemplate, String... names) {
         for (String name : names) {
-            loadModels(name);
+            loadModels(loadAsTemplate, name);
         }
     }
 
@@ -276,11 +302,18 @@ public class Fixtures {
      * @see loadModels(String name)
      */
     public static void loadModels(List<String> names) {
+        loadModels(true, names);
+    }
+    
+    /**
+     * @see loadModels(String name)
+     */
+    public static void loadModels(boolean loadAsTemplate, List<String> names) {
         String[] tNames = new String[names.size()];
         for (int i = 0; i < tNames.length; i++) {
             tNames[i] = names.get(i);
         }
-        load(tNames);
+        loadModels(loadAsTemplate, tNames);
     }
 
     /**
