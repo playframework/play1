@@ -7,10 +7,10 @@
 }%
 
 %{
-    if(_loadModels) {
-        play.test.Fixtures.loadModels(_loadModels)
-    } else if(_load) {
-        play.test.Fixtures.loadModels(_load)
+    if( (_load || _loadModels) && _loadAsTemplate != null) {
+        play.test.Fixtures.loadModels(_loadAsTemplate, (_loadModels?_loadModels:_load) )
+    }else if(_load || _loadModels){
+        play.test.Fixtures.loadModels( (_loadModels?_loadModels:_load) )
     }
 }%
 
