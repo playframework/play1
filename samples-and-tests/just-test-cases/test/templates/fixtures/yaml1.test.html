@@ -1,0 +1,7 @@
+#{fixture delete:'all'/}
+#{fixture load:'yamlTestData.yml' /}
+
+#{selenium 'Test load file as a template'}
+ open('@{Yamls.viewYamlModel(2)}')
+ assertTextPresent('message.name.yamlModel2[]-Test')
+#{/selenium}

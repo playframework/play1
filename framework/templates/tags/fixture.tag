@@ -7,8 +7,10 @@
 }%
 
 %{
-    if(_load) {
-        play.test.Fixtures.load(_load)
+    if(_load && _loadAsTemplate != null) {
+        play.test.Fixtures.loadModels(_loadAsTemplate, _load)
+    }else if(_load){
+        play.test.Fixtures.loadModels(_load)
     }
 }%
 

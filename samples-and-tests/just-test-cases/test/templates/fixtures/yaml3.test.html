@@ -1,0 +1,9 @@
+#{fixture delete:'all'/}
+#{fixture loadAsTemplate:true, load:['yamlTestData.yml', 'yamlTestData2.yml'] /}
+
+#{selenium 'Test load multiple file not as template'}
+ open('@{Yamls.viewYamlModel(2)}')
+ assertTextPresent('message.name.yamlModel2[]-Test')
+ open('@{Yamls.viewYamlModel(4)}')
+ assertTextPresent('message.name.yamlModel4[]-Test')
+#{/selenium}
