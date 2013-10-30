@@ -1,6 +1,0 @@
-----
-Download Hibernate 3.6.1.Final source code, apply the patch, and build with maven (good luck)
-----
-
-DRY RUN -> patch --dry-run -p0 -i ../hibernate-3.6.x.Final.patch
-APPLY -> patch -p0 -i ../hibernate-3.6.x.Final.patch

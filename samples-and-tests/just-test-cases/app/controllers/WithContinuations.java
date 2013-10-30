@@ -16,6 +16,8 @@ import models.*;
 import play.jobs.*;
 
 import play.exceptions.*;
+import play.utils.*;
+import play.data.validation.*;
 
 public class WithContinuations extends Controller {
     
@@ -29,18 +31,16 @@ public class WithContinuations extends Controller {
         await(100);
     }
     
-    protected static void doAwait2() {
-        String s = await(new jobs.DoSomething(100).now());
+    protected static String doAwait2() {
+        return await(new jobs.DoSomething(100).now());
     }
 
     public static void loopWithWait() {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             await(100);
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 1000;
-            sb.append(i + ":" + delay);
+            sb.append(i);
         }
         renderText(sb);
     }
@@ -60,10 +60,8 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             String r = await(new jobs.DoSomething(100).now());
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -95,10 +93,8 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             List<String> r = await(Promise.waitAll(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
-            boolean delay = System.currentTimeMillis() - s > 200 && System.currentTimeMillis() - s < 400;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -107,10 +103,8 @@ public class WithContinuations extends Controller {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
-            long s = System.currentTimeMillis();
             String r = await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
-            sb.append(i + ":" + delay + "[" + r + "]");
+            sb.append(i + ":[" + r + "]");
         }
         renderText(sb);
     }
@@ -189,7 +183,7 @@ public class WithContinuations extends Controller {
                 if(i.get() > 5) {
                     renderText(sb);
                 } else {
-                    boolean delay = System.currentTimeMillis() - s.get() > 100 && System.currentTimeMillis() - s.get() < 150;
+                    boolean delay = System.currentTimeMillis() - s.get() > 100;
                     sb.append(i + ":" + delay);
                     s.set(System.currentTimeMillis());
                     await(100, this);
@@ -281,7 +275,7 @@ public class WithContinuations extends Controller {
     public static void renderTemplateWithVariablesAssignedBeforeAwait() {
         int n = 1;
         String a = "A";
-        Job<String> job = new Job<String>(){
+        play.jobs.Job<String> job = new play.jobs.Job<String>(){
             public String doJobWithResult() {
                 return "B";
             }
@@ -301,7 +295,7 @@ public class WithContinuations extends Controller {
         
         render(n,a,b,c,d,e);
     }
-    
+
     // This class does not use await() directly and therefor is not enhanched for Continuations
     public static class ControllerWithoutContinuations extends Controller{
         
@@ -323,6 +317,14 @@ public class WithContinuations extends Controller {
         }
     }
     
+    public static class ControllerWhichUsesAwaitViaInheritance extends WithContinuations {
+
+        public static void useAwaitViaInheritance() {
+            String res = WithContinuations.doAwait2();
+            renderText(res != null);
+        }
+    }
+
     
     // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
     // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
@@ -370,7 +372,7 @@ public class WithContinuations extends Controller {
         renderArgs.put("b", "2");
         size++;
         
-        Job<String> job = new Job<String>(){
+        play.jobs.Job<String> job = new play.jobs.Job<String>(){
             public String doJobWithResult() {
                 return "B";
             }
@@ -390,6 +392,130 @@ public class WithContinuations extends Controller {
         
         renderText( res );
     }
+    
+    public static void usingRenderArgsAndAwaitWithCallBack(String arg) {
+         renderArgs.put("arg", arg);
+
+         await("1s", new F.Action0() {
+
+             @Override
+             public void invoke() {
+                 renderText(renderArgs.get("arg"));
+             }
+         });
+    }
+
+    public static void usingRenderArgsAndAwaitWithFutureAndCallback(final String arg) {
+        renderArgs.put("arg", arg);
+
+        Promise<String> promise = new play.jobs.Job() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return "result";
+        }
+
+        }.now();
+        await(promise, new F.Action<String>() {
+
+            @Override
+            public void invoke(String result) {
+                renderText(result + "/" + renderArgs.get("arg"));
+            }
+        });
+    }
+
+    public static void echoParamsAfterAwait(String a, Integer b) {
+        String beforeString = "before await: " + getEchoString(a,b);
+        await(1);
+        String afterString = "after await: " + getEchoString(a,b);
+        
+        System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n" + beforeString + "\n" + afterString);
+        renderText(beforeString + "\n" + afterString);
+    }
+
+    private static String getEchoString(String a, Integer b) {
+        return "a: " + a + " b: " + b + " params[a]: " + Utils.join(params.getAll("a"),",") + " params[b]: " + Utils.join(params.getAll("b"), ",");
+    }
+    
+    
+    private static List<String> getErrorStringList(List<play.data.validation.Error> errorList) {
+        List<String> list = new ArrayList<String>();
+        for ( play.data.validation.Error e : errorList ) {
+            list.add(e.getKey()+"="+e.message());
+        }
+        return list;
+    }
+    
+    public static class SomeBean {
+        @Required
+        public String prop;
+    }
+    
+    public static void validationAndAwait(@Required String a, Integer b) {
+        validation.addError("b", "someError");
+        String beforeErrors = Utils.join(getErrorStringList(validation.errors()), ",");
+        await(1);
+        SomeBean sb = new SomeBean();
+        validation.valid(sb);
+        String afterErrors = Utils.join(getErrorStringList(validation.errors()), ",");
+        renderText("beforeErrors: " + beforeErrors + " afterErrors: " + afterErrors);
+    }
+    
+    public static void paramsLocalVariableTracerAndAwait(int a) {
+        int aa = a;
+        await("1s");
+        render(a,aa);
+        
+    }
+    public static void useAwaitOnFailingJobsPromise(String a) {
+        play.jobs.Job job = new play.jobs.Job() {
+            @Override
+            public void doJob() throws Exception {
+                throw new RuntimeException("Hello world!");
+            }
+        };
+        
+        Promise promise;
+        if("now".equals(a)) {
+            promise = job.now();
+        }
+        else {
+            promise = job.in(1);
+        }
+        
+        try {
+            await(promise);
+            renderText("ok");
+        }
+        catch(Exception e) {
+            renderText("caught exception: " + e);
+        }
+    }
+    public static void useAwaitOnNormalJobsPromise(String a) {
+        play.jobs.Job job = new play.jobs.Job() {
+          @Override
+          public void doJob() throws Exception {
+            Logger.trace("Everything is fine, I'm just doing my job!");
+          }
+        };
+        
+        Promise promise;
+        if("now".equals(a)) {
+            promise = job.now();
+        }
+        else {
+            promise = job.in(1);
+        }
+        
+        try {
+            await(promise);
+            renderText("ok");
+        }
+        catch(Exception e) {
+            renderText("caught exception");
+        }
+    }
+    
     
 }
 

@@ -2,7 +2,8 @@ import org.junit.*;
 import play.test.*;
 import play.mvc.Http.*;
 import models.*;
-import controllers.*;
+
+import java.util.HashMap;
 
 public class FunctionalTestTest extends FunctionalTest {
     
@@ -60,6 +61,28 @@ public class FunctionalTestTest extends FunctionalTest {
         User kiki = User.find("byName", "Kiki").first();
         assertNotNull(kiki);
     }
+
+    @Test
+    public void makeSureCookieSaved(){
+        Request request = newRequest();
+        request.contentType = "application/x-www-form-urlencoded";
+        final Cookie cookie = new Cookie();
+        cookie.name = "PLAY_TEST";
+        cookie.value = "Is it keeping saved?";
+        request.cookies = new HashMap<String, Cookie>(){{
+            put("PLAY_TEST", cookie);
+        }};
+
+        Response response = POST(request, "/application/makeSureCookieSaved", "application/x-www-form-urlencoded", "body=dummy");
+        assertIsOk(response);
+        assertEquals("Is it keeping saved?", response.cookies.get("PLAY_TEST").value);
+        response = PUT("/application/makeSureCookieSaved", "application/x-www-form-urlencoded", "body=dummy");
+        assertIsOk(response);
+        assertEquals("Is it keeping saved?", response.cookies.get("PLAY_TEST").value);
+        response = DELETE("/application/makeSureCookieSaved");
+        assertIsOk(response);
+        assertEquals("Is it keeping saved?", response.cookies.get("PLAY_TEST").value);
+    }
     
     public static class AnotherInnerTest extends UnitTest {
         
@@ -87,5 +110,13 @@ public class FunctionalTestTest extends FunctionalTest {
         assertIsOk(response);
     }
     
+    @Test
+    public void canGetRenderArgs() {
+		Response response = GET("/users/edit");
+        assertIsOk(response);
+        assertNotNull(renderArgs("u"));
+        User u = (User) renderArgs("u");
+        assertEquals("Guillaume", u.name);
+    }
 }
 

@@ -5,6 +5,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
@@ -23,11 +24,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,6 +146,9 @@ public class PluginCollection {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (line.trim().length() == 0) {
+                        continue;
+                    }
                     String[] lineParts = line.split(":");
                     LoadingPluginInfo info = new LoadingPluginInfo(lineParts[1].trim(), Integer.parseInt(lineParts[0]), url);
                     pluginsToLoad.add(info);
@@ -382,6 +390,41 @@ public class PluginCollection {
     public List<PlayPlugin> getEnabledPlugins(){
         return enabledPlugins_readOnlyCopy;
     }
+    
+    /**
+     * Returns readonly view of all enabled plugins in reversed order
+     * @return
+     */
+    public Collection<PlayPlugin> getReversedEnabledPlugins() {
+        return new AbstractCollection<PlayPlugin>() {
+			
+		    @Override public Iterator<PlayPlugin> iterator() {
+		    	final ListIterator<PlayPlugin> enabledPluginsListIt = enabledPlugins.listIterator(size() - 1);
+		        return new Iterator<PlayPlugin>() {
+
+					@Override
+					public boolean hasNext() {
+						return enabledPluginsListIt.hasPrevious();
+					}
+
+					@Override
+					public PlayPlugin next() {
+						return enabledPluginsListIt.previous();
+					}
+
+					@Override
+					public void remove() {
+						enabledPluginsListIt.remove();
+					}};
+		      }
+
+		      @Override public int size() {
+		        return enabledPlugins.size();
+		      }			
+			
+			
+		};
+    }
 
     /**
      * Returns new readonly list of all plugins
@@ -490,8 +533,18 @@ public class PluginCollection {
     }
 
     public void onApplicationStop(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
-            plugin.onApplicationStop();
+        for( PlayPlugin plugin : getReversedEnabledPlugins() ){
+            try {
+              plugin.onApplicationStop();
+            }
+            catch (Throwable t) {
+              if (t.getMessage() == null)
+                Logger.error(t, "Error while stopping %s", plugin);
+              else if (Logger.isDebugEnabled())
+                Logger.debug(t, "Error while stopping %s", plugin);
+              else
+                Logger.info("Error while stopping %s: %s", plugin, t.toString());
+            }
         }
     }
 
@@ -531,9 +584,9 @@ public class PluginCollection {
         }
     }
 
-    public Object bind(String name, Object o, Map<String, String[]> params){
+    public Object bind(RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, o, params);
+            Object result = plugin.bind(rootParamNode, name, clazz, type, annotations);
             if (result != null) {
                 return result;
             }
@@ -541,9 +594,9 @@ public class PluginCollection {
         return null;
     }
 
-    public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params){
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, clazz, type, annotations, params);
+            Object result = plugin.bindBean(rootParamNode, name, bean);
             if (result != null) {
                 return result;
             }
@@ -692,18 +745,27 @@ public class PluginCollection {
         return null;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public Collection<Class> getUnitTests() {
+        Set<Class> allPluginTests = new HashSet<Class>();
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            Collection<Class> unitTests = plugin.getUnitTests();
+            if(unitTests != null) {
+                allPluginTests.addAll(unitTests);
+            }
+        }
+        
+        return allPluginTests;
+    }
+    
+    public Collection<Class> getFunctionalTests() {
+        Set<Class> allPluginTests = new HashSet<Class>();
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            Collection<Class> funcTests = plugin.getFunctionalTests();
+            if(funcTests != null) {
+                allPluginTests.addAll(funcTests);
+            }
+        }
+        
+        return allPluginTests;
+    }
 }

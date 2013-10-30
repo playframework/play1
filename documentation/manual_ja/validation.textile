@@ -1,0 +1,458 @@
+h1. Play による HTTP データのバリデーション
+
+バリデーションは、そのデータが妥当な値を持っている、または指定された要件を満たしていることを保証します。バリデーションを使ってデータベースに保存する前にデータが正しいことを確認したり、あるいは HTTP パラメータに直接バリデーションを使用することで簡易なフォームの妥当性を検証することができます。
+
+h2. <a name="how">Play のバリデーションはどのように動作するのでしょうか?</a>
+
+各リクエストは、エラーを集める @Validation@ オブジェクトを持ちます。 バリデーションを定義する方法は三つあります。
+
+# <span>コントローラのメソッドの中から、コントローラの @validation@ フィールドにあるメソッドを直接呼び出します。 @play.data.validation.Validation@ のクラスの static なメソッドを使用することで、この API のサブセットにアクセスすることも可能です。</span>
+# <span>コントローラのメソッド引数の宣言部分にバリデーション用のアノテーションを追加します。</span>
+# <span>アクションメソッドの POJO 引数に <code>@Valid</code> アノテーションを追加し、この POJO のプロパティにバリデーション用のアノテーションを追加します。</span>
+
+validation オブジェクトは、 @play.data.validation.Error@ オブジェクトのコレクションを保持します。各エラーには、2 つのプロパティがあります:
+
+* @key@ 。key は、どのデータ要素がエラーを引き起こしたか判断する手助けになります。キーの値は任意に設定できますが、Play がエラーを生成するときは、Java の変数名に従ったデフォルトの規約を使用します。
+
+* @message@ 。message は、エラーのテキスト記述を含みます。message は、平文のメッセージか、または (通常は国際化対応のために) メッセージバンドルの key を参照します。
+
+最初の方法を使って、単純な HTTP パラメータの妥当性を検証するやり方を見てみましょう:
+
+bc. public static void hello(String name) {
+     validation.required(name);
+     …
+}
+
+このコードは、name 変数が正しく設定されていることをチェックします。正しく設定されていない場合、対応するエラーが現在のエラーコレクションに追加されます。
+
+妥当性の検証が必要なだけ、この操作をくり返すことができます:
+
+bc. public static void hello(String name, Integer age) {
+     validation.required(name);
+     validation.required(age);
+     validation.min(age, 0);
+     …
+}
+
+h2. <a name="messages">バリデーションエラーメッセージ</a>
+
+バリデーションの終了時に、何かエラーが作成されているか、そしてそれらを表示するかどうかをチェックすることができます:
+
+bc. public static void hello(String name, Integer age) {
+     validation.required(name);
+     validation.required(age);
+     validation.min(age, 0);
+     
+     if(validation.hasErrors()) {
+         for(Error error : validation.errors()) {
+             System.out.println(error.message());
+         }
+     }
+}
+
+name と age が @null@ の場合、以下のように表示されます:
+
+bc. Required
+Required
+
+これは、 @$PLAY_HOME/resources/messages@ に定義されたデフォルトのメッセージが以下の通りであるためです:
+
+bc. validation.required=Required
+
+このバリデーションメッセージをカスタマイズする方法が三つあります。
+
+# <span>アプリケーションの @messages@ ファイルでメッセージを再定義することにより、デフォルトメッセージを上書きする。</span> 
+# <span>追加のバリデーション引数として、カスタマイズしたメッセージを提供する。</span>
+# <span>追加のバリデーション引数として、国際化したメッセージへのキーを提供する。</span> 
+
+h3. バリデーションメッセージの国際化
+
+これらのメッセージを上書きするもっとも単純な方法は、アプリケーションの @conf/messages@ ファイルにおいて同じメッセージキーを使用することです。例えば、以下のようにします:
+
+bc. validation.required = Please enter a value 
+
+"国際化":i18n で述べられているように、他の言語による地域化されたメッセージを提供することもできます。
+
+h3. バリデーションメッセージの引数
+
+メッセージの中で、エラーのキー文字列のためのプレースホルダを使うことができます。
+
+bc. validation.required=%s is required
+
+この出力結果は以下のように変わります:
+
+bc. name is required
+age is required
+
+p(note). *制限事項*: この @validation.required(age)@ 構文を使った必須フィールドのバリデーションがひとつ以上失敗した場合、Play は正しいパラメータ名を判断することができません。この場合、フィールド名を直接、すなわち @validation.required("age", age)@ のように指定しなければなりません。
+
+このエラーキーはデフォルトではパラメータ名であり、パラメータそのものをメッセージ検索に使用します。例えば、 @hello@ アクションメソッド 上の @name@ 引数は以下のようにして地域化することができます:
+
+bc. name = Customer name
+
+この結果、出力は以下のようになります:
+
+bc. Customer name is required
+age is required
+
+@error.message(String key)@ メソッドを使ってエラーキーを上書きすることもできます。例えば:
+
+bc. Error error = validation.required(name).error;
+if(error != null) {
+    System.out.println(error.message("Customer name"));
+}
+
+いくつかの組み込みのバリデータにはバリデーション引数に対応した追加のメッセージ引数が定義されています。例えば、'match' バリデーションは正規表現を指定するために、前述の @%s@ プレースホルダとはパラメータインデックスに‘2’を指定する点で異なる @String@ 型の第二引数を定義します: 
+
+bc. validation.match=Must match %2$s 
+
+同様に、'range' バリデーションは 2 および 3 でインデックス付けされた二つの数値型の追加パラメータを定義します: 
+
+bc. validation.range=Not in the range %2$d through %3$d 
+
+その他のバリデーションがどのようなパラメータを持つか確認するには @$PLAY_HOME/resources/messages@ を見てみてください。
+
+h3. 地域化されたバリデーションメッセージのカスタマイズ 
+
+@$PLAY_HOME/resources/messages@ のバリデーションメッセージは、Play の "組み込みバリデーション":validation-builtin それぞれに用意されたデフォルトのメッセージキーを使用します。例えば、以下のようにして異なるメッセージキーを指定することができます:
+
+bc. validation.required.em = You must enter the %s! 
+
+
+アクションメソッド中の手動バリデーションで、このメッセージキーを使用します:
+
+bc. validation.required(manualKey).message("validation.required.em"); 
+
+
+あるいは、このキーをアノテーションの @message@ パラメータで使用します:
+
+bc. public static void hello(@Required(message="validation.required.em") String name) { 
+   …
+} 
+
+
+このバリデーション用アノテーションと同じテクニックを JavaBean プロパティに使用することができます:
+
+bc. public static void hello(@Valid Person person) { 
+   …
+} 
+ 
+public class Person extends Model { 
+   @Required(message = "validation.required.emphasis")
+   public String name; 
+   …
+} 
+
+h3. (地域化されない) 文字列バリデーションメッセージのカスタマイズ
+
+Play のメッセージ検索は、キーに対応するメッセージが定義されていない場合、単にそのメッセージキーを返すので、必要があればメッセージキーの替わりに文字列のメッセージそのものを使用することもできます。手動バリデーションにおいて、上の例と同様にこれを使用します:
+
+bc. validation.required(manualKey).message("Give us a name!"); 
+
+以下のようにして、アクションメソッドパラメータに使用します:
+
+bc. public static void save(@Required(message = "Give us a name!") String name) { 
+   …
+} 
+
+以下のようにして、JavaBean プロパティのアノテーションに使用します:
+
+bc. public static void save(@Valid Person person) { 
+   …
+}
+ 
+public class Person extends Model {
+   @Required(message = "Give us a name!")
+   public String name; 
+   … 
+} 
+
+
+
+
+h2. <a name="display">テンプレートへのエラーの表示</a>
+
+ほとんどの場合、ビューテンプレートにエラーメッセージを表示したくなると思います。 @errors@ オブジェクトを使用することで、テンプレート中でエラーメッセージにアクセスすることができます。いくつかのタグは、エラーを表示する手助けをします:
+
+サンプルを見てみましょう:
+
+bc. public static void hello(String name, Integer age) {
+   validation.required(name);
+   validation.required(age);
+   validation.min(age, 0);
+   render(name, age);
+}
+
+そして、現在のテンプレートは以下のようになります:
+
+bc. #{ifErrors}
+ 
+   <h1>Oops…</h1>
+ 
+   #{errors}
+       <li>${error}</li>
+   #{/errors}
+ 
+#{/ifErrors}
+#{else}
+ 
+   Hello ${name}, you are ${age}.
+ 
+#{/else}
+
+しかし、実際のアプリケーションでは、もとのフォームを再表示したくなると思います。これを行うためには、2 つのアクションが存在します: 1 つのアクションではフォームを表示し、もう 1 つのアクションでは POST を扱います。
+
+もちろん、バリデーションは 2 番目のアクションで実行され、ここで何らかのエラーが発生した場合には 1 番目のアクションにリダイレクトしなければなりません。この場合、リダイレクトの間にエラーを保持する特別なトリックが必要になります。 @validation.keep()@ メソッドを使用してください。このメソッドは、次のアクションのためにエラーコレクションを保持します。
+
+実際のサンプルを見てみましょう:
+
+bc. public class Application extends Controller {
+ 
+   public static void index() {
+      render();
+   }
+ 
+   public static void hello(String name, Integer age) {
+      validation.required(name);
+      validation.required(age);
+      validation.min(age, 0);
+      if(validation.hasErrors()) {
+          params.flash(); // add http parameters to the flash scope
+          validation.keep(); // keep the errors for the next request
+          index();
+      }
+      render(name, age);
+   }
+ 
+}
+
+そして @view/Application/index.html@ テンプレートは以下のようになります:
+
+bc. #{ifErrors}
+   <h1>Oops…</h1>
+ 
+   #{errors}
+       <li>${error}</li>
+   #{/errors}
+#{/ifErrors}
+ 
+#{form @Application.hello()}
+   <div>
+      Name: <input type="text" name="name" value="${flash.name}" />
+   </div>
+   <div>
+      Age: <input type="text" name="age" value="${flash.age}" /> 
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}
+
+エラーを生成したフィールドの隣にそれぞれのエラーメッセージを表示することによって、より良いユーザー体験を作成することができます:
+
+bc. #{ifErrors}
+   <h1>Oops…</h1>
+#{/ifErrors}
+ 
+#{form @Application.hello()}
+   <div>
+      Name: <input type="text" name="name" value="${flash.name}" />
+      <span class="error">#{error 'name' /}</span>
+   </div>
+   <div>
+      Age: <input type="text" name="age" value="${flash.age}" /> 
+      <span class="error">#{error 'age' /}</span>
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}
+
+
+h2. <a name="annotations">アノテーションによるバリデーション</a>
+
+@play.data.validation@ パッケージ内のアノテーションは、 @Validation@ オブジェクトのそれぞれのメソッドに対応したアノテーションによって入力チェック制約を指定する、もっと簡単な代替手段を提供します。この入力チェック用アノテーションは、コントローラのメソッド引数を注釈するだけで使用することができます:
+
+bc. public static void hello(@Required String name, @Required @Min(0) Integer age) {
+   if(validation.hasErrors()) {
+       params.flash(); // add http parameters to the flash scope
+       validation.keep(); // keep the errors for the next request
+       index();
+   }
+   render(name, age);
+}
+
+h2. <a name="objects">複雑なオブジェクトのバリデーション</a>
+
+アノテーションを使用して、モデルオブジェクトに容易に制約を追加することができ、コントローラではすべてのプロパティが妥当でなければならないことを指定します。User クラスを使用して前述の例を書き直してみましょう。
+
+はじめは、プロパティにバリデーション用のアノテーションを設定した @User@ クラスです:
+
+bc. package models;
+ 
+public class User {
+    
+    @Required
+    public String name;
+ 
+    @Required
+    @Min(0)
+    public Integer age;
+}
+
+次は、 @User@ オブジェクトのプロパティが妥当でなければならないことを指定する <code>@Valid</code> アノテーションを設定した @hello@ アクションを以下のように変更します:
+
+bc. public static void hello(@Valid User user) {
+   if(validation.hasErrors()) {
+       params.flash(); // add http parameters to the flash scope
+       validation.keep(); // keep the errors for the next request
+       index();
+   }
+   render(name, age);
+}
+
+最後に、フォームを以下のように変更します:
+
+bc. #{ifErrors}
+   <h1>Oops…</h1>
+#{/ifErrors}
+ 
+#{form @Application.hello()}
+   <div>
+      Name: <input type="text" name="user.name" value="${flash['user.name']}" />
+      <span class="error">#{error 'user.name' /}</span>
+   </div>
+   <div>
+      Age: <input type="text" name="user.age" value="${flash['user.age']}" /> 
+      <span class="error">#{error 'user.age' /}</span>
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}
+
+h2. <a name="builtin">組み込みのバリデーション</a>
+
+@play.data.validation@ パッケージには、 @Validation@ オブジェクトにおいて、またはアノテーションとして使用できる、いくつかの "組み込みのバリデーション":validation-builtin が含まれています。
+
+h2. <a name="custom">@CheckWith を使ったカスタムバリデーション</a>
+
+@play.data.validation@ パッケージに必要なバリデータを見つけることができませんか? 自分で書いてしまいましょう。総称的な <code>@CheckWith</code> アノテーションを使って、独自の @Check@ 実装を紐付けることができます。
+
+例えば、以下のようにします:
+
+bc. public class User {
+    
+    @Required
+    @CheckWith(MyPasswordCheck.class)
+    public String password;
+    
+    static class MyPasswordCheck extends Check {
+        
+        public boolean isSatisfied(Object user, Object password) {
+            return notMatchPreviousPasswords(password);
+        }
+    }
+}
+
+デフォルトのバリデーションエラーメッセージキーは @validation.invalid@ です。デフォルトのキーを使用するためには、メッセージのキーとパラメータを使って @Check.setMessage@ をコールします。
+
+bc. static class MyPasswordCheck extends Check {
+ 
+    public boolean isSatisfied(Object user, Object password) {
+        final Date lastUsed = dateLastUsed(password);
+        setMessage("validation.used", JavaExtensions.format(lastUsed));
+        return lastUsed == null;
+    }
+}
+
+メッセージ検索は、常に第一引数としてフィールド名を持ち、後続のパラメータとしてメッセージパラメータを持ちます。このため、上記の例では以下のようにメッセージを定義することができます:
+
+bc. validation.used = &{%1$s} already used on date %2$s
+user.password = Password
+
+@&{%1$s}@ では、1 というインデックス (フィールド名) でメッセージ引数を別のメッセージ検索のためのメッセージキーとして使用しており、また @%2$s@ はメッセージの第二引数 (フォーマットされた日付) です。
+
+p(note). このメッセージ構文 - @%s@, @%s2$s@ と @&{…}@ - は "ローカライズされたメッセージの検索":i18n#retrieve 方法の章に説明があります。
+
+
+h2. <a name="customannotations">カスタムアノテーション</a>
+
+より複雑ですが、モデルのコードをクリーンにし、バリデータのパラメータを案内することのできる、独自のアノテーションによるバリデーションを書くこともできます。
+
+例えば、 "@URL":validation-builtin#url バリデーションの限定的なバージョンが必要だとすると、 @file://@ URL などのようなスキーマの URL でも認めますし、どのスキーマを認めるかパラメータにて正確に指定します。
+
+まず始めに、デフォルトのメッセージをオーバーライドするためのパラメータと共に、独自のバリデーションアノテーションを書きます:
+
+bc. import net.sf.oval.configuration.annotation.Constraint;
+import java.lang.annotation.*;
+ 
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Constraint(checkWith = URICheck.class)
+public @interface URI {
+    String message() default URICheck.message;
+}
+
+このアノテーションは @net.sf.oval.configuration.annotation.AbstractAnnotationCheck@ の実装を参照します。
+
+bc. public class URICheck extends AbstractAnnotationCheck<URI> {
+ 
+    /** Error message key. */
+    public final static String message = "validation.uri";
+ 
+    /** URI schemes allowed by validation. */
+    private List<String> schemes;
+ 
+    @Override
+    public void configure(URI uri) {
+        setMessage(uri.message());
+        this.schemes = Arrays.asList(uri.schemes());
+    }
+ 
+    /**
+     * Add the URI schemes to the message variables so they can be included
+     * in the error message.
+     */
+    @Override
+    public Map<String, String> createMessageVariables() {
+        final Map<String, String> variables = new TreeMap<String, String>();
+        variables.put("2", JavaExtensions.join(schemes, ", "));
+        return variables;
+    }
+ 
+    @Override
+    public boolean isSatisfied(Object validatedObject, Object value,
+        OValContext context, Validator validator) throws OValException {
+ 
+        requireMessageVariablesRecreation();
+        try {
+            final java.net.URI uri = new java.net.URI(value.toString());
+            final boolean schemeValid = schemes.contains(uri.getScheme());
+            return schemes.size() == 0 || schemeValid;
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+}
+
+この @isSatisfied@ メソッドは、メッセージをレンダリングする前に @createMessageVariables()@ をコールするよう Oval に指示するために、 @requireMessageVariablesRecreation()@ をコールします。これは、メッセージフォーマッタに引き渡された変数の順序付けられたマップを返します。このマップのキーは使用されません; この例にある @"2"@ はメッセージパラメータのインデックスを示しています。先ほどと同様、最初の引数はフィールド名です。
+
+これを使うためには、モデルのプロパティにこのアノテーションを使用します。
+
+bc. public class User {
+    
+    @URI(message = "validation.uri.schemes", schemes = {"http", "https"})
+    public String profile;
+}
+
+以下のようにメッセージを定義することができます:
+
+bc. validation.uri = Not a valid URI
+validation.uri.schemes = &{%1$s} is not a valid URI - allowed schemes are %2$s
+
+
+
+p(note). **考察を続けます**
+ 
+Play アプリケーションの最後の層は %(next)"ドメインオブジェクトモデル":model% です:

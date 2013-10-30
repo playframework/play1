@@ -1,0 +1,45 @@
+h1. サンプルアプリケーション
+
+Play は、フレームワークをインストールしたパスの @samples-and-test/@ ディレクトリ内にある以下のサンプルアプリケーション一式と共に提供されています。私たちは自動化されたテストスイートを動かすためにそれらを使用しますし、あなたは Play の典型的な使い方を見つけるためにそれらを覗いてみることができます。
+
+h2. <a>Yet Another Blog Engine</a>
+
+"Play ガイド":guide1 チュートリアルで作成するアプリケーションの完成形です。
+
+!images/yabe!
+
+h2. <a>Zencontact</a>
+
+簡単な連絡先管理アプリケーションです。
+
+!images/zencontact!
+
+h2. <a>Booking</a>
+
+よく知られている JBoss seam フレームワークの 'booking' アプリケーションのポーティングです。
+
+!images/booking!
+
+h2. <a>Forum</a>
+
+JPA を使用する簡単なフォーラムアプリケーションです。
+
+!images/forum!
+
+h2. <a>Jobboard</a>
+
+CRUD モジュールを使用して管理画面を自動生成するフル機能のジョブボードアプリケーションです。
+
+!images/jobboard!
+
+h2. <a>Chat</a>
+
+HTTP ベースのチャットアプリケーションです。リソースを浪費せずに多くの同時接続ユーザを扱うことができるよう、非同期リクエストモデルを使用します。
+
+!images/chat!
+
+h2. <a>Validation</a>
+
+バリデーションがサポートされたフォームを作成する様々な方法を実演します。
+
+!images/validation!

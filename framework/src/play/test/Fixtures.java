@@ -1,5 +1,31 @@
 package play.test;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
+import org.yaml.snakeyaml.introspector.BeanAccess;
+import org.yaml.snakeyaml.scanner.ScannerException;
+import play.Logger;
+import play.Play;
+import play.classloading.ApplicationClasses;
+import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
+import play.data.binding.types.DateBinder;
+import play.db.DB;
+import play.db.DBConfig;
+import play.db.DBPlugin;
+import play.db.SQLSplitter;
+import play.db.Model;
+import play.db.jpa.JPAPlugin;
+import play.exceptions.DatabaseException;
+import play.exceptions.UnexpectedException;
+import play.exceptions.YAMLException;
+import play.libs.IO;
+import play.templates.TemplateLoader;
+import play.vfs.VirtualFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,51 +35,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.FileUtils;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
-import org.yaml.snakeyaml.introspector.BeanAccess;
-import org.yaml.snakeyaml.scanner.ScannerException;
-
-import play.Logger;
-import play.Play;
-import play.classloading.ApplicationClasses;
-import play.data.binding.Binder;
-import play.data.binding.types.DateBinder;
-import play.db.DB;
-import play.db.DBConfig;
-import play.db.DBPlugin;
-import play.db.Model;
-import play.exceptions.DatabaseException;
-import play.exceptions.UnexpectedException;
-import play.exceptions.YAMLException;
-import play.libs.IO;
-import play.templates.TemplateLoader;
-import play.vfs.VirtualFile;
+import javax.persistence.Entity;
 
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
-    static Map<String, Object> idCache = new HashMap<String, Object>();
 
     public static void executeSQL(String sqlScript) {
-        for(String sql: sqlScript.split(";")) {
-            if(sql.trim().length() > 0) {
-                DB.execute(sql);
+        for(CharSequence sql : new SQLSplitter(sqlScript)) {
+            final String s = sql.toString().trim();
+            if(s.length() > 0) {
+                DB.execute(s);
             }
         }
     }
@@ -67,7 +62,6 @@ public class Fixtures {
      * @param types Types to delete
      */
     public static void delete(Class<? extends Model>... types) {
-        idCache.clear();
         // since we don't know which db(s) we're deleting from,
         // we just disableForeignKeyConstraints() on all configs
         for (DBConfig dbConfig : DB.getDBConfigs()) {
@@ -112,7 +106,12 @@ public class Fixtures {
     public static void deleteAllModels() {
         List<Class<? extends Model>> classes = new ArrayList<Class<? extends Model>>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
-            classes.add((Class<? extends Model>)c.javaClass);
+		   if( c.javaClass.isAnnotationPresent(Entity.class) ) {
+		       classes.add((Class<? extends Model>)c.javaClass);
+		    }
+        }
+        for (DBConfig dbConfig : DB.getDBConfigs()) {
+            disableForeignKeyConstraints(dbConfig);
         }
         Fixtures.delete(classes);
     }
@@ -148,7 +147,6 @@ public class Fixtures {
         }
         
         try {
-            idCache.clear();
             List<String> names = new ArrayList<String>();
             DBConfig dbConfig = DB.getDBConfig(dbConfigName);
             ResultSet rs = dbConfig.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
@@ -178,7 +176,13 @@ public class Fixtures {
      */
     @Deprecated
     public static void load(String name) {
-        loadModels(name);
+        Map<String, Object> idCache = new HashMap<String, Object>();
+        loadModels(name, idCache);
+    }
+
+    public static void loadModels(String name) {
+        Map<String, Object> idCache = new HashMap<String, Object>();
+        loadModels(name, idCache);
     }
 
     /**
@@ -186,16 +190,19 @@ public class Fixtures {
      * The format of the YAML file is constrained, see the Fixtures manual page
      * @param name Name of a YAML file somewhere in the classpath (or conf/)
      */
-    public static void loadModels(String name) {
+    protected static void loadModels(String name, Map<String, Object> idCache) {
         VirtualFile yamlFile = null;
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                // Check that the vf exist and isn't a directory
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
-            if (yamlFile == null) {
+            
+            // Check again the vf exist and isn't a directory
+            if (yamlFile == null || !yamlFile.exists() || yamlFile.isDirectory()) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
@@ -208,36 +215,54 @@ public class Fixtures {
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
                     if (matcher.matches()) {
+                        // Type of the object. i.e. models.employee
                         String type = matcher.group(1);
+                        // Id of the entity i.e. nicolas
                         String id = matcher.group(2);
                         if (!type.startsWith("models.")) {
                             type = "models." + type;
                         }
+
+                        // Was the entity already defined?
                         if (idCache.containsKey(type + "-" + id)) {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
-                        Map<String, String[]> params = new HashMap<String, String[]>();
-                        if (objects.get(key) == null) {
-                            objects.put(key, new HashMap<Object, Object>());
-                        }
-                        serialize(objects.get(key), "object", params);
+
+
+                        // Those are the properties that were parsed from the YML file
+                        final Map<?, ?> entityValues =  objects.get(key);
+
+                        // Prefix is object, why is that?
+                        final Map<String, String[]> fields = serialize(entityValues, "object");
+
+
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
-                        resolveDependencies(cType, params);
-                        Model model = (Model)Binder.bind("object", cType, cType, null, params);
-                        for(Field f : model.getClass().getFields()) {
-                            if (f.getType().isAssignableFrom(Map.class)) {	 	
-                                f.set(model, objects.get(key).get(f.getName()));
+                        final Map<String, String[]> resolvedFields = resolveDependencies(cType, fields, idCache);
+
+                        RootParamNode rootParamNode = ParamNode.convert(resolvedFields);
+                        // This is kind of hacky. This basically says that if we have an embedded class we should ignore it.
+                        if (Model.class.isAssignableFrom(cType)) {
+
+                            Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, null);
+                            for(Field f : model.getClass().getFields()) {
+                                if (f.getType().isAssignableFrom(Map.class)) {
+                                    f.set(model, objects.get(key).get(f.getName()));
+                                }
+                                if (f.getType().equals(byte[].class)) {
+                                    f.set(model, objects.get(key).get(f.getName()));
+                                }
                             }
-                            if (f.getType().equals(byte[].class)) {
-                                f.set(model, objects.get(key).get(f.getName()));
+                            model._save();
+
+                            Class<?> tType = cType;
+                            while (!tType.equals(Object.class)) {
+                                idCache.put(tType.getName() + "-" + id, Model.Manager.factoryFor(cType).keyValue((Model)model));
+                                tType = tType.getSuperclass();
                             }
                         }
-                        model._save();
-                        Class<?> tType = cType;
-                        while (!tType.equals(Object.class)) {
-                            idCache.put(tType.getName() + "-" + id, Model.Manager.factoryFor(cType).keyValue(model));
-                            tType = tType.getSuperclass();
+                        else {
+                            idCache.put(cType.getName() + "-" + id, Binder.bind(rootParamNode, "object", cType, cType, null));
                         }
                     }
                 }
@@ -258,8 +283,9 @@ public class Fixtures {
      */
     @Deprecated
     public static void load(String... names) {
+        Map<String, Object> idCache = new HashMap<String, Object>();
         for (String name : names) {
-            loadModels(name);
+            loadModels(name, idCache);
         }
     }
 
@@ -267,8 +293,9 @@ public class Fixtures {
      * @see loadModels(String name)
      */
     public static void loadModels(String... names) {
+        Map<String, Object> idCache = new HashMap<String, Object>();
         for (String name : names) {
-            loadModels(name);
+            loadModels(name, idCache);
         }
     }
 
@@ -340,7 +367,7 @@ public class Fixtures {
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
@@ -372,18 +399,35 @@ public class Fixtures {
 
     // Private
 
-    static void serialize(Map<?, ?> values, String prefix, Map<String, String[]> serialized) {
-        for (Object key : values.keySet()) {
-            Object value = values.get(key);
+
+    /**
+     *
+     * TODO: reuse beanutils or MapUtils?
+     *
+     * @param entityProperties
+     * @param prefix
+     * @return an hash with the resolved entity name and the corresponding value
+     */
+    static Map<String, String[]> serialize(Map<?, ?> entityProperties, String prefix) {
+
+        if (entityProperties == null) {
+            return MapUtils.EMPTY_MAP;
+        }
+
+        final Map<String, String[]> serialized = new HashMap<String, String[]>();
+
+        for (Object key : entityProperties.keySet()) {
+
+            Object value = entityProperties.get(key);
             if (value == null) {
                 continue;
             }
             if (value instanceof Map<?, ?>) {
-                serialize((Map<?, ?>) value, prefix + "." + key, serialized);
+                serialized.putAll(serialize((Map<?, ?>) value, prefix + "[" + key.toString() +"]"));
             } else if (value instanceof Date) {
                 serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat(DateBinder.ISO8601).format(((Date) value))});
-            } else if (value instanceof List<?>) {
-                List<?> l = (List<?>) value;
+            } else if (Collection.class.isAssignableFrom(value.getClass())) {
+                Collection<?> l = (Collection<?>) value;
                 String[] r = new String[l.size()];
                 int i = 0;
                 for (Object el : l) {
@@ -395,40 +439,93 @@ public class Fixtures {
                 m.find();
                 String file = m.group(1);
                 VirtualFile f = Play.getVirtualFile(file);
-                if (f != null && f.exists()) {
+                if (f != null && f.exists() && !f.isDirectory()) {
                     serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
                 }
             } else {
                 serialized.put(prefix + "." + key.toString(), new String[]{value.toString()});
             }
         }
+
+        return serialized;
     }
 
     @SuppressWarnings("unchecked")
-    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized) {
-        Set<Field> fields = new HashSet<Field>();
+    /**
+     *  Resolve dependencies between objects using their keys. For each referenced objects, it sets the foreign key
+     */
+    static Map<String, String[]> resolveDependencies(Class<Model> type, Map<String, String[]> yml, Map<String, Object> idCache) {
+
+        // Contains all the fields (object properties) we should look up
+        final Set<Field> fields = new HashSet<Field>();
+        final Map<String, String[]> resolvedYml = new HashMap<String, String[]>();
+        resolvedYml.putAll(yml);
+
+        // Look up the super classes
         Class<?> clazz = type;
         while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
-        for (Model.Property field : Model.Manager.factoryFor(type).listProperties()) {
+
+
+        // Iterate through the Entity property list
+        // @Embedded are not managed by the JPA plugin
+        // This is not the nicest way of doing things.
+         //modelFields =  Model.Manager.factoryFor(type).listProperties();
+        final List<Model.Property> modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
+
+        for (Model.Property field : modelFields) {
+            // If we have a relation, get the matching object
             if (field.isRelation) {
-                String[] ids = serialized.get("object." + field.name);
+                // These are the Ids that were set in the yml file (i.e person(nicolas)-> nicolas is the id)
+                final String[] ids = resolvedYml.get("object." + field.name);
                 if (ids != null) {
+                    final String[] resolvedIds = new String[ids.length];
                     for (int i = 0; i < ids.length; i++) {
-                        String id = ids[i];
-                        id = field.relationType.getName() + "-" + id;
+                        final String id = field.relationType.getName() + "-" + ids[i];
                         if (!idCache.containsKey(id)) {
                             throw new RuntimeException("No previous reference found for object of type " + field.name + " with key " + ids[i]);
                         }
-                        ids[i] = idCache.get(id).toString();
+                        // We now get the primary key
+                        resolvedIds[i] = idCache.get(id).toString();
+                    }
+                    // Set the primary keys instead of the object itself.
+                    // Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName() returns the primary key label.
+                    if (Model.class.isAssignableFrom(field.relationType )) {
+                        resolvedYml.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), resolvedIds);
+                    } else {
+                        // Might be an embedded object
+                        final String id = field.relationType.getName() + "-" + ids[0];
+                        Object o = idCache.get(id);
+                        // This can be a composite key
+                        if (o.getClass().isArray()) {
+                            for (Object a : (Object[])o) {
+                                for (Field f : field.relationType.getDeclaredFields()) {
+                                    try {
+                                        resolvedYml.put("object." + field.name + "." + f.getName(), new String[] {f.get(a).toString()});
+                                    } catch(Exception e) {
+                                        // Ignores
+                                    }
+                                }
+                            }
+                        } else {
+                            for (Field f : field.relationType.getDeclaredFields()) {
+                                try {
+                                    resolvedYml.put("object." + field.name + "." + f.getName(), new String[] {f.get(o).toString()});
+                                } catch(Exception e) {
+                                    // Ignores
+                                }
+                            }
+                        }
                     }
                 }
-                serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
+
+                resolvedYml.remove("object." + field.name);
             }
         }
+        // Returns the map containing the ids to load for this object's relation.
+        return resolvedYml;
     }
 
     private static void disableForeignKeyConstraints(DBConfig dbConfig) {
@@ -482,7 +579,7 @@ public class Fixtures {
                     exec.addBatch("ALTER TABLE " + tableName+" NOCHECK CONSTRAINT ALL");
                 exec.executeBatch();
                 exec.close();
-                
+
                 return;
             } catch (SQLException ex) {
                 throw new DatabaseException("Error while disabling foreign keys", ex);

@@ -1,0 +1,229 @@
+h1. ドメインオブジェクトモデル
+
+モデルは Play アプリケーションの中心的な存在です。モデルは、アプリケーションが操作する情報のドメインに特化した表現です。
+
+マーチンファウラーはこれを次のように定義しています:
+
+bq. ビジネスのコンセプト、ビジネスの状況に関する情報、およびビジネスルールを表現する責務を負います。これを保存する技術的な詳細はインフラストラクチャに委譲されるものの、ビジネスの状況を反映する状態はここで制御され、使用されます。この層は業務ソフトウェアの心臓部です。
+
+一般的な Java のアンチパターンは、モデルをシンプルな Java Beans のセットに保ち、モデルオブジェクトを操作する "service" 層にアプリケーションロジックを戻すことです。
+
+マーチンファウラーはこのアンチパターンを "ドメインモデル貧血症":http://www.martinfowler.com/bliki/AnemicDomainModel.html と名付けました: 
+
+bq. ドメインモデル貧血症の基本的な症状は、一見、それが本物のドメインモデルに見えるという点です。オブジェクトがいくつかあり、それらはドメイン空間にある名詞から名前をつけられています。それから、オブジェクト同士がしっかりとしたリレーションで結びついており、本物のドメインモデルと同じような構造を持っているのです。ただし、オブジェクトの振る舞いを見れば違いが分かります。それらのオブジェクトにはわずかな振る舞いしかない、ということに気づくと思います。ドメインのロジックをドメインオブジェクトの中に入れないという設計ルールに従っているのでしょう。その代わり、すべてのドメインロジックを含むサービスオブジェクト群が存在しているのです。こういったサービスはドメインモデルの上位に居座り、データのためだけにドメインモデルを使うのです。
+ 
+このアンチパターンが根本的に怖いのは、オブジェクト指向設計の基本概念 (データと処理を一緒にする) の真逆だということです。ドメインモデル貧血症とは、単なる手続き型設計のことなのです。まさに、私 (そして Eric) のようなオブジェクト信望者が、Smalltalk の初期からずーーーーーっと戦ってきたもの、そのものなのです。さらに困ったことに、貧血オブジェクト (Anemic Object) が本物のオブジェクトだと思っているひとがたくさんいます。つまり、オブジェクト指向設計が何たるかをまったく分かっていないということなんです。
+
+h2. <a>プロパティのシミュレーション</a>
+
+Play のサンプルアプリケーションを見てみると、クラスが public 変数を宣言しているのをしばしば目にするでしょう。どのような経験があろうと、Java 開発者であれば public 変数を目にした途端に警告サイレンがじゃんじゃん鳴り出すかもしれません。Java においては (他のオブジェクト指向言語と同様に) すべてのフィールドを private にして、アクセサとミューテータを提供するのを最も良い習慣としています。これは、オブジェクト指向デザインにおいて重要な概念であるカプセル化を促進するためのものです。
+
+Java には、本当の意味でプロパティを定義する組み込みのシステムはありません。Java Beans と名付けられた規約を使用します: Java オブジェクトのプロパティは getXxx/setXxx メソッドのペアと共に定義するという規約です。プロパティが読み取り専用の場合、getter しかありません。
+
+システムはうまく動きますが、書くのは非常に退屈です。いずれのプロパティについても、private で宣言して 2 つのメソッドを書かなければなりません。ほとんどの場合、getter と setter の実装はいつも同じです:
+
+bc. private String name;
+ 
+public String getName() {
+    return name;
+}
+ 
+public void setName(String value) {
+    name = value;
+}
+
+Play フレームワークの Model 部分は、自動的にこのパターンを生成し、コードを簡潔に保ちます。事実上、すべての public 変数はインスタンスのプロパティになります。規約では、クラスの **public** で **static ではなく** 、 **final でない** フィールドはすべてプロパティと見なされます。
+
+例えば、このようにクラスを定義する場合:
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+}
+
+ロードされたクラスは以下のようになります:
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+    public String getName() {
+        return name;
+    }
+ 
+    public void setName(String name) {
+        this.name = name;
+    }
+ 
+    public Integer getPrice() {
+        return price;
+    }
+ 
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+}
+
+プロパティにアクセスしたい場合は、以下のように書くだけです:
+
+bc. product.name = "My product";
+product.price = 58;
+
+ロード時には以下のように変換されます:
+
+bc. product.setName("My product");
+product.setPrice(58);
+
+p(note). **警告！**
+ 
+自動生成に頼る場合、プロパティにアクセスするために getter および setter メソッドを直接使用することはできません。これらのメソッドは実行時に生成されます。このため、それらを参照するコードを書くと、コンパイラはメソッドを見つられず、エラーを発生させます。
+
+もちろん、自分で getter および setter メソッドを定義することができます。メソッドが存在している場合、Play は既存のアクセサを使用します。
+
+これらから、Product クラスの price プロパティを保護するには、以下のように書くことができます:
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+    public void setPrice(Integer price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("Price can’t be negative!");
+        }
+        this.price = price;
+    }
+}
+
+このプロパティに負の値を設定しようとすると、例外が投げられます:
+
+bc. product.price = -10: // Oops! IllegalArgumentException
+
+Play は getter または setter が存在すれば、常にそれを使用します。次のコードを見てください:
+
+bc. @Entity
+public class Data extends Model {
+ 
+   @Required
+   public String value;
+   public Integer anotherValue;
+ 
+   public Integer getAnotherValue() {
+       if(anotherValue == null) {
+           return 0;
+       }
+       return anotherValue;
+   }
+ 
+   public void setAnotherValue(Integer value) {
+       if(value == null) {
+           this.anotherValue = null;
+       } else {
+           this.anotherValue = value * 2;
+       }
+   }
+ 
+   public String toString() {
+       return value + " - " + anotherValue;
+   }
+ 
+}
+
+別のクラスから、以下のようなアサーションを試すことができます:
+
+bc. Data data = new Data();
+data.anotherValue = null;
+assert data.anotherValue == 0;
+data.anotherValue = 4
+assert data.anotherValue == 8;
+
+これはちゃんと動きます。拡張されたクラスは Java Beans の規約に従うので、JavaBean を期待するようなライブラリからオブジェクトを使用するような場合でも、それは完璧に動作します!
+
+
+h2. <a name="database">モデルを永続化するデータベースの設定</a>
+
+ほとんどの場合、モデルオブジェクトのデータを永続化して保存する必要があるでしょう。データをデータベースに保存するのは、もっとも自然なやり方です。
+
+開発中、インメモリ、または "db 設定":configuration#db を使ってアプリケーション中のサブディレクトリにデータを保存する組み込みデータベースを素早くセットアップすることができます。
+
+Play は @$PLAY_HOME/framework/lib/@ 内にH2とMySQLのJDBCドライバーを含みます。PostgreSQL か Oracleデータベースを使いたければ、例えば、JDBCドライバーをそこに、または、アプリケーションの @lib/@ ディレクトリに追加します。
+
+任意のJDBCに従ったデータベースに接続するには、ドライバーライブラリを加え、またJDBCプロパティ "db.url":configuration#db.url , "db.driver":configuration#db.driver , "db.user":configuration#db.user , "db.pass":configuration#db.pass を定義する。:
+
+bc. db.url=jdbc:mysql://localhost/test
+db.driver=com.mysql.jdbc.Driver
+db.user=root
+db.pass=
+
+"jpa.dialect":configuration#jpa.dialect で JPA の方言を設定することもできます:
+
+ソースコードにおいて、 @play.db.DB@ から @java.sql.Connection@ を取得して、通常の方法で使用することができます。
+
+bc. Connection conn = DB.getConnection();
+conn.createStatement().execute("select * from products");
+
+h2. <a name="hibernate">Hibernate によるモデルの永続化</a>
+
+Java オブジェクトを自動的にデータベースに永続化するために (JPA を通して) Hibernate を使用することができます。
+
+どんな Java オブジェクトでも、 <code>@javax.persistence.Entity</code> アノテーションを追加して JPA エンティティとして定義した場合、Play は自動的に JPA  EntityManager を起動します。
+
+bc. @Entity
+public class Product {
+ 
+    public String name;
+    public Integer price;
+}
+
+p(note). **警告！**
+  
+JPA のものではなく、Hibernate の <code>@Entity</code> アノテーションを使用するのはよくある誤りです。Play は JPA API を通して Hibernate を使用することを思い出してください。
+
+@play.db.jpa.JPA@ オブジェクトから EntityManager を取得することができます:
+
+bc. EntityManager em = JPA.em();
+em.persist(product);
+em.createQuery("from Product where price > 50").getResultList();
+
+Play は、JPA の扱いを手助けする気の利いたサポートクラスを提供します。 @play.db.jpa.Model@ を継承するだけです。
+
+bc. @Entity
+public class Product extends Model {
+ 
+    public String name;
+    public Integer price;
+}
+
+その後、Product インスタンスのシンプルなメソッドを使用して Product オブジェクトを操作してください:
+
+bc. Product.find("price > ?", 50).fetch();
+Product product = Product.findById(2L);
+product.save();
+product.delete();
+
+h2. <a name="stateless">ステートレスモデル</a>
+
+Play は、‘何も共有しない’ アーキテクチャで機能するように設計されています。この考えは、アプリケーションを完全にステートレスに保ちます。これをすることによって、アプリケーションは同時に必要とされる複数のサーバノード上で動作するようになります。
+
+モデルをステートレスに保つために避けるべき一般的な落とし穴はどのようなものでしょうか? **いかなるオブジェクトも、複数リクエストのために Java ヒープに保存してはならないということです。**
+
+h4. 複数リクエストをまたいでデータを保持するには、いくつかの選択肢があります:
+
+# データが小さくて、十分に簡単である場合は、フラッシュかセッションスコープに保存してください。ただし、これらのスコープに保存できるデータはそれぞれ 4KB に制限され、かつ String 型のデータしか認められません。
+# (データベースのような) 永続的なストレージに、データを恒久的に保存してください。例えば "ウィザード" を使ってオブジェクトを作成するような場合、データは複数のリクエストに渡ります:
+#* 最初のリクエストでオブジェクトを初期化し、データベースに保存します。
+#* 新規に作成したオブジェクトの ID をフラッシュスコープに保存します。
+#* 連続するリクエストの間、オブジェクトの id を使ってデータベースからオブジェクトを取り出し、更新し、再度保存します。
+# (キャッシュのような) 一時的なストレージに、データを一時的に保存してください。例えば "ウィザード" を使ってオブジェクトを作成するような場合、データは複数のリクエストに渡ります:
+#* 最初のリクエストでオブジェクトを初期化し、キャッシュに保存します。
+#* 新規に作成したオブジェクトのキーをフラッシュスコープに保存します。
+#* 連続するリクエストの間、キャッシュから (正しいキーを持った) オブジェクトを取り出し、更新し、再度保存します。
+#* 一連の処理の最後のリクエストの終わりに、(例えばデータベースに) オブジェクトを恒久的に保存します。
+
+キャッシュは信頼できるストレージではありませんが、キャッシュにオブジェクトを入れられるなら、それは検索できて然るべきです。要件によって、キャッシュは Java Servlet セッションを置き換えるとても良い選択肢となり得ます。
+
+p(note). **考察を続けます**
+ 
+今度は、 %(next)"JPA 永続化":jpa% を使ってモデルを永続化する方法について確認しましょう。

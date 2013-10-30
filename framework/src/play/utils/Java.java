@@ -21,6 +21,8 @@ import play.Play;
 import play.classloading.ApplicationClassloaderState;
 import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;
@@ -165,6 +167,22 @@ public class Java {
         throw new NoSuchMethodException(method);
     }
 
+    public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
+
+        Class invokedClass = null;
+        List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
+        if(assignableClasses.size() == 0)
+        {
+            invokedClass = clazz;
+        }
+        else
+        {
+            invokedClass = assignableClasses.get(0);
+        }
+        
+        return Java.invokeStaticOrParent(invokedClass, method, args);
+    }
+
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         return method.invoke(null, prepareArgs(method, args));
     }
@@ -178,9 +196,12 @@ public class Java {
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
+
+        RootParamNode rootParamNode = ParamNode.convert(args);
+
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], args);
+            rArgs[i] = Binder.bind(rootParamNode, paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i]);
         }
         return rArgs;
     }
@@ -190,9 +211,16 @@ public class Java {
      */
     public static String[] parameterNames(Method method) throws Exception {
         try {
+            /*System.out.println("searching for " + "$" + method.getName() + LVEnhancer.computeMethodHash(method.getParameterTypes()));
+            for(Field f : method.getDeclaringClass().getDeclaredFields()) {
+                System.out.println(f.getName() + " : " + Modifier.toString(f.getModifiers()));
+            }
+            for(Field f : method.getDeclaringClass().getFields()) {
+                System.out.println(f.getName() + " : " + Modifier.toString(f.getModifiers()));
+            }*/
             return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LVEnhancer.computeMethodHash(method.getParameterTypes())).get(null);
         } catch (Exception e) {
-            throw new UnexpectedException("Cannot read parameter names for " + method);
+            throw new UnexpectedException("Cannot read parameter names for " + method, e);
         }
     }
 

@@ -36,7 +36,7 @@ bc. …
 </h2>
 …
 
-You can new refresh the home page, and click a post title to display the post.
+You can now refresh the home page, and click a post title to display the post.
 
 !images/guide4-0!
 
@@ -179,12 +179,14 @@ bc. <h3>Post a comment</h3>
 
 Note that we reuse the posted parameters to fill the HTML input values.
 
-To make the UI feedback more pleasant for the poster, we will add a little JavaScript to automatically set focus on the comment form in case of an error. As this script uses "JQuery":files/jquery-1.4.2.min.js and "JQuery Tools Expose":files/jquery.tools-1.2.5.toolbox.expose.min.js as support libraries, you have to include them. Download these two libraries to the @yabe/public/javascripts/@ directory and modify the @main.html@ template to include them:
+To make the UI feedback more pleasant for the poster, we will add a little JavaScript to automatically set focus on the comment form in case of an error. As this script uses "JQuery":files/jquery-1.4.2.min.js and "JQuery Tools Expose":http://cdn.jquerytools.org/1.2.5/full/jquery.tools.min.js as support libraries, you have to include them. Download these two libraries to the @yabe/public/javascripts/@ directory and modify the @main.html@ template to include them:
 
 bc. …
     <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}"></script>
     <script src="@{'/public/javascripts/jquery.tools-1.2.5.toolbox.expose.min.js'}"></script>
 </head>
+
+p(note). Note that the current version of Play bundles a newer version of jQuery than the one used in this tutorial.
 
 Now you can add this script to the @show.html@ template (add it at the end of the page):
 
@@ -221,7 +223,7 @@ bc. public static void postComment(Long postId, @Required String author, @Requir
     show(postId);
 }
 
-and display the success message in @show.html@ if present (add it at the top the page):
+and display the success message in @show.html@ if present (add it at the top of the page):
 
 bc. …
 #{if flash.success}

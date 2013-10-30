@@ -7,6 +7,9 @@ import static play.data.binding.Binder.directBind;
 
 import models.*;
 
+import play.exceptions.BinderException;
+import utils.ExceptionThrowingSubject;
+
 public class DirectBindingTest extends UnitTest {
     
     @Test
@@ -148,5 +151,22 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("on", Boolean.class).equals(true));
         assertTrue(directBind("yes", Boolean.class).equals(true));
     }
+
+    @Test(expected = BinderException.class)
+    public void testExceptionThrowingBinder() throws Exception  {
+        directBind("invalid data", ExceptionThrowingSubject.class);
+    }
+
     
+    @Test
+    public void testLocale() throws Exception  {
+        assertTrue(directBind("fr", Locale.class).equals(new Locale("fr")));
+        assertTrue(directBind("FR", Locale.class).equals(new Locale("fr")));
+        assertTrue(directBind("fr_CA", Locale.class).equals(new Locale("fr", "CA")));
+        assertTrue(directBind("fr_ca", Locale.class).equals(new Locale("fr", "CA")));
+        assertTrue(directBind("FR_CA", Locale.class).equals(new Locale("fr", "CA")));
+        assertTrue(directBind("fr-CA", Locale.class).equals(new Locale("fr", "CA")));
+        assertTrue(directBind("xy", Locale.class).equals(new Locale("xy")));	// it even works with unreal locales
+        assertTrue(directBind("XY_VW", Locale.class).equals(new Locale("xy", "vw")));
+    }
 }

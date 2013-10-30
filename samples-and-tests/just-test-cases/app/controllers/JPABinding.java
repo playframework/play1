@@ -14,7 +14,8 @@ public class JPABinding extends Controller {
         render();
     }
     
-    public static void create(Project project) {
+    // #1195 Use @Valid to trigger the validation before the action-invoking 
+    public static void create(@Valid Project project) {
         System.out.println(project);
         project.create();
         show(project.id);
@@ -73,6 +74,11 @@ public class JPABinding extends Controller {
         System.out.println(a.b.name);
         aSaveForm();
     }
+    
+    public static void echoEntityBinding(@Valid A a) {
+        renderText(String.format("a.id=%d, a.b.id=%d, a.b.name=%s", a.id, a.b.id, a.b.name));
+    }
+    
     
 }
 

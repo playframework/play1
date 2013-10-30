@@ -1,0 +1,9 @@
+h2. Test - Data loader
+
+*==@Before public void setUp() { Fixtures.deleteAll();==*
+*==Fixtures.load("data.yml");}==*
+Fixtures はユニットテストを実行する前にデータストアを初期化するために使用します。
+
+*==#{fixture delete:'all', load:'data.yml' /}==*
+*==#{selenium} ... #{/selenium}==*
+Selenium テストを使うときも同様に出来ます。

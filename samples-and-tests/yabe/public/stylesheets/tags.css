@@ -1,0 +1,8 @@
+.tags-list .tag {
+    cursor: pointer;
+    padding: 1px 4px;
+}
+.crudField .tags-list .selected {
+    background: #222;
+    color: #fff;
+}

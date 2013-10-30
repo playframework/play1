@@ -1,0 +1,5 @@
+# Application dependencies
+
+require:
+    - play
+    - crud

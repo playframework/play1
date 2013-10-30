@@ -135,7 +135,7 @@ class IamADeveloper(unittest.TestCase):
         insert(app, 'app/jobs/Job1.java', 5, "public class Job1 extends Job {")
         insert(app, 'app/jobs/Job1.java', 6, "  public void doJob() throws Exception{")
         insert(app, 'app/jobs/Job1.java', 7, '      Logger.info("Job starting");')
-        insert(app, 'app/jobs/Job1.java', 8, '      Thread.sleep(2000);')
+        insert(app, 'app/jobs/Job1.java', 8, '      Thread.sleep(5000);')
         insert(app, 'app/jobs/Job1.java', 9, '      Logger.info("Job done");')
         insert(app, 'app/jobs/Job1.java', 10, '  }')
         insert(app, 'app/jobs/Job1.java', 11, '}')
@@ -252,7 +252,8 @@ class IamADeveloper(unittest.TestCase):
         
         # Open the documentation
         step('Open the documentation')
-        
+    
+        browser.addheaders = [("Accept-Language", "en")]
         response = browser.open('http://localhost:9000/@documentation')
         self.assert_(browser.viewing_html())
         self.assert_(browser.title() == 'Play manual - Documentation')
@@ -656,12 +657,14 @@ def waitFor(process, pattern):
     return waitForWithFail(process, pattern, "")
     
 
-#returns true when pattern is seen, but false if failPattern is seen
+#returns true when pattern is seen, but false if failPattern is not seen or if timeout
 def waitForWithFail(process, pattern, failPattern):
-    timer = threading.Timer(5, timeout, [process])
+    timer = threading.Timer(90, timeout, [process])
     timer.start()
     while True:
+        sys.stdout.flush()
         line = process.stdout.readline().strip()
+	sys.stdout.flush()
         #print timeoutOccured
         if timeoutOccured:
             return False

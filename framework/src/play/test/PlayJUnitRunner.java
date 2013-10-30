@@ -1,20 +1,34 @@
 package play.test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.Filterable;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
+
 import play.Invoker;
 import play.Invoker.DirectInvocation;
+import play.mvc.Router;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.Scope.RenderArgs;
 import play.Play;
 
-public class PlayJUnitRunner extends Runner {
+public class PlayJUnitRunner extends Runner implements Filterable {
 
     public static final String invocationType = "JUnitTest";
 
@@ -49,10 +63,24 @@ public class PlayJUnitRunner extends Runner {
     public Description getDescription() {
         return jUnit4.getDescription();
     }
+    
+    private void initTest() {
+        TestClass testClass = jUnit4.getTestClass();
+        if(testClass != null){
+            TestEngine.initTest(testClass.getJavaClass());
+        }
+    }
 
     @Override
     public void run(final RunNotifier notifier) {
-        jUnit4.run(notifier);
+	initTest();
+	jUnit4.run(notifier);
+    }
+    
+    @Override
+    public void filter(Filter toFilter) throws NoTestsRemainException {
+    	jUnit4.filter(toFilter);
+    	
     }
 
     // *********************

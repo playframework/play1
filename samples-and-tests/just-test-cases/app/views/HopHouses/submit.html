@@ -2,29 +2,19 @@
 
 <div id="id">${h.id}</div>
 <div id="numbers">
-	#{list items:h.numbers, as:'n'}
-		${n},
-	#{/list}
+	#{list items:h.numbers, as:'n'} ${n}, #{/list}
 </div>
 <div id="moreNumbers">
-	#{list items:h.moreNumbers, as:'n'}
-		${n},
-	#{/list}
+	#{list items:h.moreNumbers, as:'n'} ${n}, #{/list}
 </div>
 <div id="moreMoreNumbers">
-	#{list items:h.moreMoreNumbers, as:'n'}
-		${n},
-	#{/list}
+	#{list items:h.moreMoreNumbers, as:'n'} ${n}, #{/list}
 </div>
 <div id="tags">
-	#{list items:h.tags, as:'n'}
-		${n},
-	#{/list}
+	#{list items:h.tags, as:'n'} ${n}, #{/list}
 </div>
 <div id="moreTags">
-	#{list items:h.moreTags, as:'n'}
-		${n},
-	#{/list}
+	#{list items:h.moreTags, as:'n'} ${n}, #{/list}
 </div>
 
 <div id="noSet">${h.notSet?.length}</div>
@@ -39,9 +29,7 @@
 	<div id="a.bikes">${h.address.bikes?.length} bikes</div>
 	<div id="a.dogs">
 		${h.address.dogs?.size()} dogs
-		#{list items:h.address.dogs, as:'dog'}
-			${dog},
-		#{/list}
+		#{list items:h.address.dogs, as:'dog'} ${dog}, #{/list}
 	</div>
 #{/if}
 
@@ -53,6 +41,4 @@
 	<div id="${t.key}">${t}</div>
 #{/list}
 
-#{list items:h.dogs, as:'dog'}
-	${dog},
-#{/list}
+#{list items:h.dogs, as:'dog'} ${dog}, #{/list}

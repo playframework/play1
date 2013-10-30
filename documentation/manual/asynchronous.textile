@@ -50,6 +50,48 @@ bc. public static void loopWithoutBlocking() {
 
 While using only one thread to process requests, the default in development mode, Play is able to run concurrently these loops for several requests at the same time.
 
+A more realistic example is asynchronously fetching content from remote URLs. The following example, performs three remote HTTP requests in parallel: each call to the @play.libs.WS.WSRequest.getAsync()@ method executes a GET request asynchronously and returns a @play.libs.F.Promise@. The action method suspends the incoming HTTP request by calling @await(…)@ on the combination of the three @Promise@ instances. When all three remote calls have a response, a thread will resume processing and render a response.
+
+bc. public class AsyncTest extends Controller {
+ 
+  public static void remoteData() {
+    F.Promise<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
+    F.Promise<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
+    F.Promise<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
+  
+    F.Promise<List<WS.HttpResponse>> promises = F.Promise.waitAll(r1, r2, r3);
+ 
+    // Suspend processing here, until all three remote calls are complete.
+    List<WS.HttpResponse> httpResponses = await(promises);
+ 
+    render(httpResponses);
+  }
+}
+
+
+h3. Callbacks
+
+A different way to implement the previous example of three asynchronous remote requests is to use a callback. This time, the call to @await(…)@ includes a @play.libs.F.Action@ implementation, which is a callback that is executed when the @promises@ are done.
+
+bc. public class AsyncTest extends Controller {
+ 
+  public static void remoteData() {
+    F.Promise<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
+    F.Promise<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
+    F.Promise<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
+ 
+    F.Promise<List<WS.HttpResponse>> promises = F.Promise.waitAll(r1, r2, r3);
+ 
+    // Suspend processing here, until all three remote calls are complete.
+    await(promises, new F.Action<List<WS.HttpResponse>>() {
+      public void invoke(List<WS.HttpResponse> httpResponses) {
+        render(httpResponses);
+      }
+    });
+  }
+}
+
+
 h2. HTTP response streaming
 
 Now that you can loop without blocking the request, you may want to send data to the browser as soon you have part of the result available. That is the point of the @Content-Type:Chunked@ HTTP response type. It allows to send your HTTP response several times using multiples chunks. The browser will receive these chunks as soon as they are published.
@@ -66,6 +108,7 @@ bc. public static void generateLargeCSV() {
 }
 
 Even if the CSV generation takes one hour, Play is able to simultaneously process several requests using a single thread, sending back the generated data to the client as soon as they are available.
+
 
 h2. Using WebSockets
 

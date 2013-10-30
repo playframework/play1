@@ -66,7 +66,7 @@ public class Job extends Model {
     }
 
     public static List search(String by) {
-        return find("from Job job where job.index like ? and job.online = true", JavaExtensions.noAccents("%" + by.toLowerCase() + "%")).fetch();
+        return find("from Job job where job.index like ?1 and job.online = true", JavaExtensions.noAccents("%" + by.toLowerCase() + "%")).fetch();
     }
 
     public String toString() {

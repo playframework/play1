@@ -1,0 +1,230 @@
+h1. 組み込みバリデーション
+
+Play にはいくつか組み込みバリデーションが用意されており、使用方法は "バリデーション":validation の章で説明されています。
+
+バリデーションにはそれぞれエラーメッセージが関連づけられています。エラーメッセージは @PLAY_HOME/resources/messages@ に定義され、キーは @validation.@ の後にバリデーションの名前が付いたものです。この定義は同一のキーでアプリケーションの @conf/messages@ ファイルにメッセージを定義することで上書きすることが出来ます。また他言語用のメッセージファイルを使うことでローカライズすることも出来ます。
+
+<h2><a name="email">email</a></h2>
+
+メールアドレス形式かどうかをチェックします。
+
+bc. validation.email(address);
+
+アノテーション構文:
+
+bc. @Email String address
+
+メッセージキー: @validation.email@
+
+<h2><a name="equals">equals</a></h2>
+
+他のパラメータの値と等しいかどうかをチェックします。チェックには検証値の @equals@ メソッドが使用されます。例えばパスワードの確認フィールドのチェックに使用します。
+
+bc. validation.equals(password, passwordConfirmation);
+
+アノテーション構文:
+
+bc. @Equals("passwordConfirmation") String password
+
+メッセージキー: @validation.equals@
+
+<h2><a name="future">future</a></h2>
+
+未来の日付かどうかをチェックします。2番目の日付が基準日として指定された場合、基準日に対して未来、言い換えると基準日よりも後でなければいけません。
+
+bc. validation.future(dueDate);
+validation.future(dueDate, shipmentDate);
+
+アノテーション構文:
+
+bc. @InFuture String dueDate
+@InFuture("1979-12-31") String birthDate
+
+メッセージキー: @validation.future@
+
+<h2><a name="ipv4Address">ipv4Address</a></h2>
+
+バージョン 4 のプロトコルに沿った IP アドレスかどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。
+
+bc. validation.ipv4Address(value);
+
+アノテーション構文:
+
+bc. @IPv4Address String ip
+
+メッセージキー: @validation.ipv4@
+
+<h2><a name="ipv6Address">ipv6Address</a></h2>
+
+バージョン 6 のプロトコルに沿った IP アドレスかどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。
+
+bc. validation.ipv6Address(value);
+
+アノテーション構文:
+
+bc. @IPv6Address String ip
+
+メッセージキー: @validation.ipv6@
+
+<h2><a name="isTrue">isTrue</a></h2>
+
+@true@ と評価される @String@ または @Boolean@ かどうかをチェックします。例えばチェック必須の '規約に同意します' のチェックボックスがチェックされているかどうかや、非ゼロの @Number@ かどうかをチェックするときに使用します。ヌル値は false または不正な値だとみなされます。
+
+bc. validation.isTrue(agree);
+
+アノテーション構文:
+
+bc. @IsTrue String agree
+
+メッセージキー: @validation.isTrue@
+
+<h2><a name="match">match</a></h2>
+
+指定された正規表現にマッチするかどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。
+
+bc. validation.match(abbreviation, "[A-Z]{3}"); // TLA
+
+アノテーション構文:
+
+bc. @Match("[A-Z]{3}") String abbreviation
+
+メッセージキー: @validation.match@
+
+<h2><a name="max">max</a></h2>
+
+指定された数値以下の @String@ または @Number@ であるかどうかをチェックします。ヌル値は有効な値 (valid) だと見なされます。
+
+bc. validation.max(wordCount, 7500); // Short story
+
+アノテーション構文:
+
+bc. @Max(7500) String wordCount
+
+メッセージキー: @validation.max@
+
+<h2><a name="maxSize">maxSize</a></h2>
+
+指定された長さ以下の @String@ かどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。
+
+bc. validation.maxSize(url, 2083); // IE 4.0 - 8
+
+アノテーション構文:
+
+bc. @MaxSize(2083) String value
+
+メッセージキー: @validation.maxSize@
+
+<h2><a name="min">min</a></h2>
+
+指定された数値以上の @String@ または @Number@ かどうかをチェックします。ヌル値は有効な値 (valid) だと見なされます。
+
+bc. validation.min(age, 18); // Adult
+
+アノテーション構文:
+
+bc. @Min(18) Long age
+
+メッセージキー: @validation.min@
+
+<h2><a name="minSize">minSize</a></h2>
+
+指定された長さ以上の @String@ かどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。
+
+bc. validation.minSize(value, 42);
+
+アノテーション構文:
+
+bc. @MinSize(42) String value
+
+メッセージキー: @validation.minSize@
+
+<h2><a name="past">past</a></h2>
+
+過去の日付かどうかをチェックします。2番目の日付が基準日として指定された場合、基準日に対して過去、言い換えると基準日よりも前でなければいけません。
+
+bc. validation.past(actualDepartureDate);
+validation.past(expectedDepartureDate, expectedArrivalDate);
+
+アノテーション構文:
+
+bc. @InPast String actualDepartureDate
+@InPast("1980-01-01") String birthDate
+
+メッセージキー: @validation.past@
+
+<h2><a name="phone">phone</a></h2>
+
+正当な電話番号かどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。バリデーションは厳密ではなく、基本的な電話番号のパターンに沿っているかどうかをチェックするだけです。国固有のバリデーションは独自の @Match を実装してください。
+
+bc. validation.phone(value);
+
+アノテーション構文:
+
+bc. @Phone String phone
+
+メッセージキー: @validation.phone@
+
+フォーマット: @+CCC (SSSSSS)9999999999xEEEE@
+ 
+* @+@          任意の国コードマーク。
+* @CCC@        任意の国コード。3 桁以下で、直後に区切り文字が必要です。
+* @(SSSSSS)@   任意のサブゾーン。6 桁以下。
+* @9999999999@ 必須の番号。20 桁以下 (現在と未来の既知のケースが全て網羅されているべきです)。
+* @x@          任意の拡張。"ext" や "extension" と書くことも出来ます。
+* @EEEE@       任意の拡張番号。最大 4 桁。
+* 区切り文字には _半角スペース_、@-@, @.@ や @/@ を使用可能で、番号のどこにでも使うことが出来ます。
+  
+例:
+
+* @アメリカ:(305) 613 09 58 ext 101@
+* @フランス:+33 1 47 37 62 24 x3@
+* @ドイツ:+49-4312 / 777 777@
+* @中国:+86 (10)69445464@
+* @イギリス:(020) 1234 1234@
+
+<h2><a name="range">range</a></h2>
+
+指定された 2 つの数値の範囲に含まれる数値かどうかをチェックします。
+
+bc. validation.range(wordCount, 17500, 40000); // 短編小説
+
+アノテーション構文:
+
+bc. @Range(min = 17500, max = 40000) String wordCount
+
+メッセージキー: @validation.range@
+
+<h2><a name="required">required</a></h2>
+
+@String@, @Collection@, @File@ または配列が空でないかどうかをチェックします。
+
+bc. validation.required(value);
+
+アノテーション構文:
+
+bc. @Required String value
+
+メッセージキー: @validation.required@
+
+<h2><a name="unique">unique</a></h2>
+
+データベースに問い合わせることで、このアノテーションを持つカラムの値がユニークであることをチェックします。(JPA によってのみ動作します) 追加のカラムをカンマ区切りのリストとしてアノテーションの値に定義することができます。このため、 @c@ と呼ばれるプロパティを <code>@Unique("a, b")</code> で注釈すると、プロパティ @a@, @b@ そして @c@ の値の組み合わせがユニークであることをチェックします。
+
+アノテーション構文:
+
+bc. @Unique(additionalColumns) String productCode
+@Unique("postCode") String houseNumber
+
+メッセージキー: @validation.unique@
+
+<h2><a name="url">url</a></h2>
+
+正当な URL かどうかをチェックします。空文字列は有効な値 (valid) だと見なされます。(RFC 1738 に定義されている) 正当な URL が全て受け入れられるわけではないことに注意してください。@http@, @https@ と @ftp@ スキーマの URL だけが有効な値 (valid) だと見なされます。
+
+bc. validation.url(value);
+
+アノテーション構文:
+
+bc. @URL String address
+
+メッセージキー: @validation.url@

@@ -62,7 +62,7 @@ public class RestTest extends UnitTest {
         assertTrue(getResponse.getStatus() == 200);
         List<Header> getResponseHeaders = getResponse.getHeaders();
         for (int i = 0; i < getResponseHeaders.size(); i++) {
-            if (!"Set-Cookie".equals(getResponseHeaders.get(i).name)) {
+            if (!"Date".equals(getResponseHeaders.get(i).name) && !"Set-Cookie".equals(getResponseHeaders.get(i).name)) {
                 assertEquals(getResponseHeaders.get(i).value(), headResponseHeaders.get(i).value());
             }
         }
@@ -142,6 +142,38 @@ public class RestTest extends UnitTest {
         // verify url ending with only ? or none
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc?").get().getString());
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc").get().getString());
+    }
+
+    @Test
+    public void testWSAsyncWithException() {
+        String url = "http://localhost:9003/SlowResponseTestController/testWSAsyncWithException";
+        String res = WS.url(url).get().getString();
+        assertEquals("ok", res);
+    }
+
+    @Test
+    public void testWSAsyncAwaitAllWithException() {
+        String url = "http://localhost:9003/SlowResponseTestController/testWSAsyncAwaitAllWithException";
+        String res = WS.url(url).get().getString();
+        assertEquals("ok", res);
+    }
+
+    // Test our "Denial of Service through hash table multi-collisions"-protection
+    @Test
+    public void testPostHashCollisionProtection() {
+        // generate some post data with 1000 params
+        // PS: these keys does not have hash-colition, but our protection is only looking at the count
+        Map<String, Object> manyParams = new HashMap<String, Object>();
+        for ( int i=0; i < 1000; i++) {
+            manyParams.put("a"+i, ""+i);
+        }
+
+        assertEquals("POST", WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getString());
+
+        // now add one more to push the limit
+        manyParams.put("anotherone", "x");
+        // 413 Request Entity Too Large
+        assertEquals(413, (int)WS.url("http://localhost:9003/Rest/echoHttpMethod").params(manyParams).post().getStatus());
     }
 
 }

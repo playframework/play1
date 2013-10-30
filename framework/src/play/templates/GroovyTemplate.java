@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -50,12 +51,27 @@ import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Router;
+import play.templates.types.SafeCSVFormatter;
+import play.templates.types.SafeHTMLFormatter;
+import play.templates.types.SafeXMLFormatter;
 import play.utils.HTML;
 
 /**
  * A template
  */
 public class GroovyTemplate extends BaseTemplate {
+
+    static final Map<String, SafeFormatter> safeFormatters = new HashMap<String, SafeFormatter>();
+
+    static {
+        safeFormatters.put("csv", new SafeCSVFormatter());
+        safeFormatters.put("html", new SafeHTMLFormatter());
+        safeFormatters.put("xml", new SafeXMLFormatter());
+    }
+
+    public static <T> void registerFormatter(String format, SafeFormatter formatter) {
+        safeFormatters.put(format, formatter);
+    }
 
     static {
         new GroovyShell().evaluate("java.lang.String.metaClass.if = { condition -> if(condition) delegate; else '' }");
@@ -223,7 +239,7 @@ public class GroovyTemplate extends BaseTemplate {
             TagContext.init();
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);
-        t.template = this;
+        t.init(this);
         Monitor monitor = null;
         try {
             monitor = MonitorFactory.start(name);
@@ -323,7 +339,16 @@ public class GroovyTemplate extends BaseTemplate {
 
         // Leave this field public to allow custom creation of TemplateExecutionException from different pkg
         public GroovyTemplate template;
+        private String extension;
 
+        public void init(GroovyTemplate t) {
+            template = t;
+            int index = template.name.lastIndexOf(".");
+            if (index > 0) {
+                extension = template.name.substring(index + 1);
+            }
+        }
+        
         @Override
         public Object getProperty(String property) {
             try {
@@ -338,10 +363,8 @@ public class GroovyTemplate extends BaseTemplate {
 
         public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure body) {
             String templateName = tag.replace(".", "/");
-            String callerExtension = "tag";
-            if (template.name.indexOf(".") > 0) {
-                callerExtension = template.name.substring(template.name.lastIndexOf(".") + 1);
-            }
+            String callerExtension = (extension != null) ? extension : "tag";
+
             BaseTemplate tagTemplate = null;
             try {
                 tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + "." + callerExtension);
@@ -397,17 +420,15 @@ public class GroovyTemplate extends BaseTemplate {
          * if we need to
          */
         public String __safeFaster(Object val) {
-            if (val != null) {
-                if (val instanceof RawData) {
-                    return ((RawData) val).data;
-                } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
-                    return val.toString();
-                } else {
-                    return HTML.htmlEscape(val.toString());
+            if (val instanceof RawData) {
+                return ((RawData)val).data;
+            } else if (extension != null) {
+                SafeFormatter formatter = safeFormatters.get(extension);
+                if (formatter != null) {
+                    return formatter.format(template, val);
                 }
-            } else {
-                return "";
             }
+            return (val != null) ? val.toString() : "";
         }
 
         public String __getMessage(Object[] val) {

@@ -32,7 +32,7 @@ public class Hotels extends Application {
             hotels = Hotel.all().fetch(page, size);
         } else {
             search = search.toLowerCase();
-            hotels = Hotel.find("lower(name) like ? OR lower(city) like ?", "%"+search+"%", "%"+search+"%").fetch(page, size);
+            hotels = Hotel.find("lower(name) like ?1 OR lower(city) like ?2", "%"+search+"%", "%"+search+"%").fetch(page, size);
         }
         render(hotels, search, size, page);
     }

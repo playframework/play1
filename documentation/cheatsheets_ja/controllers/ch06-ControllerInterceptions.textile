@@ -1,0 +1,18 @@
+h2. Controller - Interceptions
+
+*==@Before ➟ action ➟ @After ➟ template ➟ @Finally==*
+Interceptions evaluation order
+インターセプト評価の順
+
+*==@Before static void checkAuthentification()==*
+*==@After static void log()==*
+*==@Finally static void audit()==*
+You get the idea
+
+*==@With(Secure.class)==*
+*==public class Admin extends Application==*
+コントローラスコープでのカスタムインターセプタ
+
+*==@Catch(value={RuntimeException.class})==*
+*public static void onException(RuntimeException e) {…}*
+コントローラ層での例外ハンドリング

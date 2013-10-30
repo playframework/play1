@@ -1,5 +1,5 @@
-Selenium.version = "1.0.1";
-Selenium.revision = "final";
+Selenium.version = "2.33";
+Selenium.revision = ".0";
 
-window.top.document.title += " - Selenium v" + Selenium.version + " [" + Selenium.revision + "]";
+window.top.document.title += " v" + Selenium.version + Selenium.revision;
 

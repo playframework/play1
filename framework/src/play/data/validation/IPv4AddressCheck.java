@@ -10,11 +10,10 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
     final static String mes = "validation.ipv4";
 
     @Override
-    public void configure(IPv4Address phone) {
-        setMessage(phone.message());
+    public void configure(IPv4Address ipv4Address) {
+        setMessage(ipv4Address.message());
     }
 
-    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator)
     throws OValException {
         if (value == null || value.toString().length() == 0) {
@@ -22,6 +21,10 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
         }
         try {
             String[] parts = value.toString().split("[.]");
+            if (parts.length != 4) {
+                return false;
+            }
+            
             for(int i=0; i<parts.length; i++) {
                 int p = Integer.valueOf(parts[i]);
                 if(p < 0 || p > 255) {

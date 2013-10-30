@@ -47,31 +47,13 @@ public class ContinuationEnhancer extends Enhancer {
         CtClass ctClass = makeClass(applicationClass);
 
         if (!ctClass.subtypeOf(classPool.get(ControllersEnhancer.ControllerSupport.class.getName()))) {
-            return;
+            return ;
         }
 
-        final boolean[] needsContinuations = new boolean[]{false};
 
-        for (CtMethod m : ctClass.getDeclaredMethods()) {
-            m.instrument(new ExprEditor() {
+        boolean needsContinuations = shouldEnhance( ctClass );
 
-                @Override
-                public void edit(MethodCall m) throws CannotCompileException {
-                    try {
-                        if (continuationMethods.contains(m.getMethod().getLongName())) {
-                            needsContinuations[0] = true;
-                        }
-                    } catch (Exception e) {
-                    }
-                }
-            });
-
-            if (needsContinuations[0]) {
-                break;
-            }
-        }
-
-        if (!needsContinuations[0]) {
+        if (!needsContinuations) {
             return;
         }
 
@@ -94,4 +76,44 @@ public class ContinuationEnhancer extends Enhancer {
         ctClass.defrost();
         enhancedForContinuationsInterface.defrost();
     }
+
+    private boolean shouldEnhance(CtClass ctClass) throws Exception {
+
+        if (ctClass == null || ctClass.getPackageName().startsWith("play.")) {
+            // If we have not found any await-usage yet, we return false..
+            return false;
+        }
+
+        boolean needsContinuations = false;
+        final boolean[] _needsContinuations = new boolean[]{false};
+
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
+            m.instrument(new ExprEditor() {
+
+                @Override
+                public void edit(MethodCall m) throws CannotCompileException {
+                    try {
+                        if (continuationMethods.contains(m.getMethod().getLongName())) {
+                            _needsContinuations[0] = true;
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+            });
+
+            if (_needsContinuations[0]) {
+                break;
+            }
+        }
+
+        if (!_needsContinuations[0]) {
+            // Check parent class
+            _needsContinuations[0] = shouldEnhance( ctClass.getSuperclass());
+        }
+
+        return _needsContinuations[0];
+
+    }
+
+
 }

@@ -79,7 +79,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
             if (names.size() <= 1 || source.indexOf("new ")>=0) {
                 for (String cName : names) { // dynamic class binding
-                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
+                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
                 }
             }
 
@@ -92,7 +92,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
             if (names.size() <= 1 || source.indexOf(".class")>=0) {
                 for (String cName : names) { // dynamic class binding
-                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
+                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')");
 
                 }
             }
@@ -243,7 +243,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void startTag() {
         tagIndex++;
-        String tagText = parser.getToken().trim().replaceAll("\n", " ");
+        String tagText = parser.getToken().trim().replaceAll("\r", "").replaceAll("\n", " ");
         String tagName = "";
         String tagArgs = "";
         boolean hasBody = !parser.checkNext().endsWith("/");

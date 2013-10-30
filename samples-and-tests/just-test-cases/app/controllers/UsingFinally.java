@@ -7,7 +7,7 @@ import java.util.*;
 
 public class UsingFinally extends Controller {
 
-    @Finally(unless="a")
+    @Finally(unless={"a", "onlytest"})
     static void yop(String willBeNull) {
         assert willBeNull == null;
         response.reset();

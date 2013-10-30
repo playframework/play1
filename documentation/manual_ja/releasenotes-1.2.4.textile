@@ -1,0 +1,44 @@
+h1. Play 1.2.4 -- リリースノート
+
+Play! 1.2.4 で直されたバグは "ロードマップ・ページ":http://www.playframework.org/roadmap/1.2.4 で読むことができます。ここでは重要な変更をハイライトします。
+
+h2. Java7 サポート
+
+Java7 は Play! で難しい設定などは一切なしでサポートされました。次のコードは問題なく書くことができます。
+
+bc. Map<String, List<String>> map = new HashMap<>();
+String version = "1.2.4";
+switch(version) {
+	 case "1.2.4":
+	    //code
+	    break;
+	  case "1.2.3":
+	    //code
+	    break;
+	  case "1.2.2":
+	    //code
+	  default:
+	    //code
+	    break;
+}
+	
+
+h2. 新しいバインダーの実装
+
+新しいバインダーの実装はより柔軟になり、jQuery から Play へのマッピングを簡単にします。さらに、この新しい実装を使って、より多くの複合オブジェクトをマッピングすることができます。
+
+h2. 最新の Websocket のサポート
+
+最新ドラフト (hybi-00 から hybi-10) をサポートしています。 詳しくは "websocket specification":http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10 を参照して下さい。
+
+h2. 複合 ID のサポート
+
+複合 ID は Fixtures でサポートされました。モデルと Fixture で次のアノテーションもサポートされました。 <code>@IdClass</code>, <code>@EmbeddedId</code> . より詳しくは  "hibernate documentation":http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html#d0e2177 を参照してください。
+
+h2. IntelliJ サポートの改善
+
+<code>play idealize</code> コマンドで完全な IntelliJ プロジェクトが作成できるようになりました。IntelliJ から Play! のプロジェクトを直接開くことができます。
+
+h2. その他の小さな変更
+
+"86件のバグ修正":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/121681-124 といくつかの小さな改良を行いました。

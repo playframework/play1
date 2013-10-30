@@ -1,6 +1,10 @@
 package play.i18n;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
+
 import play.Logger;
 import play.Play;
 import play.mvc.Http;
@@ -64,12 +68,68 @@ public class Lang {
 
     /**
      * Change language for next requests 
-     * @param locale (fr, ja, it ...)
+     * @param locale (e.g. "fr", "ja", "it", "en_ca", "fr_be", ...)
      */
     public static void change(String locale) {
-        if (set(locale)) {
-            Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+        String closestLocale = findClosestMatch(Collections.singleton(locale));
+        if ( closestLocale == null ) {
+            // Give up
+            return ;
         }
+        if ( set(closestLocale) ) {
+            Response response = Response.current();
+            if ( response != null ) {
+                // We have a current response in scope - set the language-cookie to store the selected language for the next requests
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+            }
+        }
+
+    }
+
+    /**
+     * Given a set of desired locales, searches the set of locales supported by this Play! application and returns the closest match.
+     *
+     * @param desiredLocales a collection of desired locales. If the collection is ordered, earlier locales are preferred over later ones.
+     *                       Locales should be of the form "[language]_[country" or "[language]", e.g. "en_CA" or "en".
+     *                       The locale strings are case insensitive (e.g. "EN_CA" is considered the same as "en_ca").
+     *                       Locales can also be of the form "[language]-[country", e.g. "en-CA" or "en".
+     *                       They are still case insensitive, though (e.g. "EN-CA" is considered the same as "en-ca").
+     * @return the closest matching locale. If no closest match for a language/country is found, null is returned
+     */
+    private static String findClosestMatch(Collection<String> desiredLocales) {
+        ArrayList<String> cleanLocales = new ArrayList<String>(desiredLocales.size());
+        //look for an exact match
+        for (String a: desiredLocales) {
+            a = a.replace("-", "_");
+            cleanLocales.add(a);
+            for (String locale: Play.langs) {
+                if (locale.equalsIgnoreCase(a)) {
+                    return locale;
+                }
+            }
+        }
+        // Exact match not found, try language-only match.
+        for (String a: cleanLocales) {
+            int splitPos = a.indexOf("_");
+            if (splitPos > 0) {
+                a = a.substring(0, splitPos);
+            }
+            for (String locale: Play.langs) {
+                String langOnlyLocale;
+                int localeSplitPos = locale.indexOf("_");
+                if (localeSplitPos > 0) {
+                    langOnlyLocale = locale.substring(0, localeSplitPos);
+                } else {
+                    langOnlyLocale = locale;
+                }
+                if (langOnlyLocale.equalsIgnoreCase(a)) {
+                    return locale;
+                }
+            }
+        }
+
+        // We did not find a anything
+        return null;
     }
 
     /**
@@ -97,30 +157,14 @@ public class Lang {
             }
 
         }
-        // Try from accept-language - look for an exact match
-        for (String a: request.acceptLanguage()) {
-            a = a.replace("-", "_").toLowerCase();
-            for (String locale: Play.langs) {
-                if (locale.toLowerCase().equals(a)) {
-                    set(locale);
-                    return;
-                }
-            }
+        String closestLocaleMatch = findClosestMatch(request.acceptLanguage());
+        if ( closestLocaleMatch != null ) {
+            set(closestLocaleMatch);
+        } else {
+            // Did not find anything - use default
+            setDefaultLocale();
         }
-        // now see if we have a country-only match
-        for (String a: request.acceptLanguage()) {
-            if (a.indexOf("-") > 0) {
-                a = a.substring(0, a.indexOf("-"));
-            }
-            for (String locale: Play.langs) {
-                if (locale.equals(a)) {
-                    set(locale);
-                    return;
-                }
-            }
-        }
-        // Use default
-        setDefaultLocale();
+
     }
 
     public static void setDefaultLocale() {
@@ -137,21 +181,35 @@ public class Lang {
      * associated to the current Lang.
      */
     public static Locale getLocale() {
-        String lang = get();
-        Locale locale = getLocale(lang);
+        return getLocaleOrDefault(get());
+    }
+
+    public static Locale getLocaleOrDefault(String localeStr) {
+        Locale locale = getLocale(localeStr);
         if (locale != null) {
             return locale;
         }
         return Locale.getDefault();
     }
 
-     public static Locale getLocale(String lang) {
+     public static Locale getLocale(String localeStr) {
+        if(localeStr == null) {
+            return null;            
+        }
+        Locale langMatch = null;
+        String lang = localeStr;
+        int splitPos = lang.indexOf("_");
+        if (splitPos > 0) {
+        	lang = lang.substring(0, splitPos);
+        }
         for (Locale locale : Locale.getAvailableLocales()) {
-            if (locale.getLanguage().equals(lang)) {
+            if (locale.toString().equalsIgnoreCase(localeStr)) {
                 return locale;
+            } else if (locale.getLanguage().equalsIgnoreCase(lang)) {
+                langMatch = locale;
             }
         }
-        return null;
+        return langMatch;
     }
 
 }

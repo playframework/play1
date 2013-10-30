@@ -1,0 +1,31 @@
+h2. Model - Relational mapping
+
+*==@Table(name="sql_tbl", catalog="", schema="")==*
+このクラスが保存されるテーブルを定義します。
+
+*==@Id==*
+ID となるフィールドを定義します。
+
+*==@Version==*
+バージョンを保持しているフィールドを定義します。
+
+*==@Basic==*
+永続的なフィールドを定義します。省略可能です。
+
+*==@Transient==*
+(永続的でない) 一時的なフィールドを定義します。
+
+*==@Lob(fetch=[LAZY, EAGER], type=[BLOB,CLOB])==*
+ラージオブジェクトとして保存されるフィールドを定義します。
+
+*==@UniqueConstraint(primary=false, String columns[])==*
+セカンダリインデックスを定義します。
+
+*==@Temporal(DATE,TIME,TIMESTAMP)==*
+java.util.Date や Calendar 型のフィールドにだけ使われるべきです。
+
+*==@Enumerated(ORDINAL, STRING)==*
+列挙型のクラスを保持するフィールドを定義します。
+
+*==@Column(name="sql_column_name")==*
+フィールド名と異なるテーブルのカラム名を定義します。

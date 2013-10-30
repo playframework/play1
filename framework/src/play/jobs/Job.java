@@ -11,8 +11,10 @@ import play.Logger;
 import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.F.Promise;
 import play.libs.Time;
+import play.mvc.Http;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
@@ -24,7 +26,7 @@ import com.jamonapi.MonitorFactory;
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     public static final String invocationType = "Job";
-    
+
     protected ExecutorService executor;
     protected long lastRun = 0;
     protected boolean wasError = false;
@@ -36,7 +38,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public InvocationContext getInvocationContext() {
         return new InvocationContext(invocationType, this.getClass().getAnnotations());
     }
-    
+
     /**
      * Here you do the job
      */
@@ -61,17 +63,32 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      */
     public Promise<V> now() {
         final Promise<V> smartFuture = new Promise<V>();
-        JobsPlugin.executor.submit(new Callable<V>() {
-            public V call() throws Exception {
-                V result =  Job.this.call();
-                smartFuture.invoke(result);
-                return result;
-            }
-            
-        });
-
+    JobsPlugin.executor.submit(getJobCallingCallable(smartFuture));
         return smartFuture;
     }
+
+  /**
+   * If is called in a 'HttpRequest' invocation context, waits until request
+   * is served and schedules job then.
+   *
+   * Otherwise is the same as now();
+   *
+   * If you want to schedule a job to run after some other job completes, wait till a promise redeems
+   * of just override first Job's call() to schedule the second one.
+   *
+   * @return the job completion
+   */
+  public Promise<V> afterRequest() {
+    InvocationContext current = Invoker.InvocationContext.current();
+    if(current == null || !Http.invocationType.equals(current.getInvocationType())) {
+      return now();
+    }
+
+    final Promise<V> smartFuture = new Promise<V>();
+    Callable<V> callable = getJobCallingCallable(smartFuture);
+    JobsPlugin.addAfterRequestAction(callable);
+    return smartFuture;
+  }
 
     /**
      * Start this job in several seconds
@@ -87,18 +104,28 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      */
     public Promise<V> in(int seconds) {
         final Promise<V> smartFuture = new Promise<V>();
-
-        JobsPlugin.executor.schedule(new Callable<V>() {
-
-            public V call() throws Exception {
-                V result =  Job.this.call();
-                smartFuture.invoke(result);
-                return result;
-            }
-
-        }, seconds, TimeUnit.SECONDS);
-
+        JobsPlugin.executor.schedule(getJobCallingCallable(smartFuture), seconds, TimeUnit.SECONDS);
         return smartFuture;
+    }
+
+    private Callable<V> getJobCallingCallable(final Promise<V> smartFuture) {
+      return new Callable<V>() {
+        public V call() throws Exception {
+          try {
+            V result = Job.this.call();
+            if (smartFuture != null) {
+              smartFuture.invoke(result);
+            }
+            return result;
+          }
+          catch (Exception e) {
+            if (smartFuture != null) {
+              smartFuture.invokeWithException(e);
+              }
+            return null;
+          }
+        }
+      };
     }
 
     /**
@@ -124,7 +151,15 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             super.onException(e);
         } catch(Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
+            throw new UnexpectedException(unwrap(e));
         }
+    }
+
+    private Throwable unwrap(Throwable e) {
+      while((e instanceof UnexpectedException || e instanceof PlayException) && e.getCause() != null) {
+        e = e.getCause();
+      }
+      return e;
     }
 
     @Override

@@ -29,3 +29,4 @@ validation.url=Not a valid URL
 validation.phone=Not a valid phone
 validation.ipv4=Not a valid IP address
 validation.ipv6=Not a valid IP v6 address
+validation.unique=Must be unique

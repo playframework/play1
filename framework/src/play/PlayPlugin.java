@@ -5,10 +5,13 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -48,17 +51,41 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called when play need to bind a Java object from HTTP params
+     * Use method using RootParamNode instead
+     * @return
      */
+    @Deprecated
     public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
         return null;
     }
 
     /**
-     * Called when play need to bind an existing Java object from HTTP params
+     * Called when play need to bind a Java object from HTTP params.
+     *
+     * When overriding this method, do not call super impl.. super impl is calling old bind method
+     * to be backward compatible.
      */
+    public Object bind( RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations) {
+        // call old method to be backward compatible
+        return bind(name, clazz, type, annotations, rootParamNode.originalParams);
+    }
+
+    /**
+     * Use bindBean instead
+     */
+    @Deprecated
     public Object bind(String name, Object o, Map<String, String[]> params) {
         return null;
+    }
+
+    /**
+     * Called when play need to bind an existing Java object from HTTP params.
+     * When overriding this method, DO NOT call the super method, since its default impl is to
+     * call the old bind method to be backward compatible.
+     */
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean) {
+        // call old method to be backward compatible.
+        return bind(name, bean, rootParamNode.originalParams);
     }
 
     public Map<String, Object> unBind(Object src, String name) {
@@ -327,5 +354,36 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Object willBeValidated(Object value) {
         return null;
     }
-    
+
+    /**
+     * Implement to add some classes that should be considered unit tests but do not extend
+     * {@link org.junit.Assert} to tests that can be executed by test runner (will be visible in test UI).
+     * <p/>
+     * <strong>Note:</strong>You probably will also need to override {@link PlayPlugin#runTest(java.lang.Class)} method
+     * to handle unsupported tests execution properly.
+     * <p/>
+     * Keep in mind that this method can only add tests to currently loaded ones.
+     * You cannot disable tests this way. You should also make sure you do not duplicate already loaded tests.
+     * 
+     * @return list of plugin supported unit test classes (empty list in default implementation)
+     */
+    public Collection<Class> getUnitTests() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Implement to add some classes that should be considered functional tests but do not extend
+     * {@link play.test.FunctionalTest} to tests that can be executed by test runner (will be visible in test UI).
+     * <p/>
+     * <strong>Note:</strong>You probably will also need to override {@link PlayPlugin#runTest(java.lang.Class)} method
+     * to handle unsupported tests execution properly.
+     * <p/>
+     * Keep in mind that this method can only add tests to currently loaded ones.
+     * You cannot disable tests this way. You should also make sure you do not duplicate already loaded tests.
+     *
+     * @return list of plugin supported functional test classes (empty list in default implementation)
+     */
+    public Collection<Class> getFunctionalTests() {
+        return Collections.emptyList();
+    }
 }

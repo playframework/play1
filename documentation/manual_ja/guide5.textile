@@ -1,0 +1,138 @@
+h1. キャプチャの設定
+
+我々のブログエンジンは誰でもコメントを投稿することができるので、自動化されたスパムを避けるためにちょっと保護してあげるべきです。スパムからフォームを守るシンプルな方法は、"captcha":http://en.wikipedia.org/wiki/Captcha 画像を追加することです。
+
+h2. <a>キャプチャ画像の生成</a>
+
+Play を使うと、どれだけ簡単にキャプチャ画像を生成できるかを見るところから始めましょう。これまでのように HTML レスポンスを返す代わりに、バイナリストリームを返すことを除けば、新たに別のアクションを使用するだけです。
+
+Play は **フルスタック** な web フレームワークなので、web アプリケーションで一般的に必要なものは組込みで含めています; キャプチャの生成はそのうちの 1 つです。 @play.libs.Images@ ユーティリティを使って容易にキャプチャ画像を生成することが可能であり、その後、HTTP レスポンスにそれを書き出します。
+
+いつも通り、シンプルな実装から始めましょう。 @Application@ コントローラに @captcha@ アクションを追加してください:
+
+bc. public static void captcha() {
+    Images.Captcha captcha = Images.captcha();
+    renderBinary(captcha);
+}
+
+Images.Captcha クラスは java.io.InputStream を実装するため、キャプチャオブジェクトを直接 renderBinary() メソッドに渡せることに注意してください。
+
+p(note). @play.libs.*@ をインポートすることを **忘れないでください** 。
+
+ここで、 @/yabe/conf/routes@ ファイルに新しいルートを追加します:
+
+bc. GET     /captcha                                Application.captcha
+
+そして、"http://localhost:9000/captcha":http://localhost:9000/captcha を開いて @captcha@ アクションを試してください。
+
+!images/guide5-1!
+
+画面をリフレッシュする度に、ランダムな文字列を生成するはずです。
+
+h2. <a>状態を管理する方法</a>
+
+これまでは簡単でしたが、もっとも複雑な部分がやって来ます。キャプチャの妥当性を検証するためには、キャプチャ画像に書き込まれたランダム文字列をどこかに保存して、フォームが投稿されたタイミングでこの文字列を確認する必要があります。
+
+もちろん、単純に画像を生成するときに文字列をユーザセッションに設定し、あとから検索することも可能です。しかし、この方法には 2 つの欠点があります:
+
+**はじめに** 、Play のセッションは cookie として保存されます。これはアーキテクチャ上の多くの問題を解決しますが、様々な影響も及ぼします。cookie に書き込まれたデータは、署名はされています (そのため、ユーザはこれを変更できません) が、暗号化はされていません。キャプチャのコードをセッションに書き込んでしまうと、セッション cookie を読むことで誰でも簡単にこれを解読することができてしまいます。
+
+**続いて** 、Play が **ステートレス** なフレームワークであることを思い出してください。Play は、物事を純粋にステートレスな方法で管理します。典型的な例としては、もしユーザが同時に 2 つの異なるキャプチャを持つ 2 つの異なるブログページを開いた場合、何が起こるでしょうか? フォームごとにキャプチャコードを追跡しなければならなくなります。
+
+このため、この問題を解決するために 2 つのことをしなければなりません。キャプチャの秘密鍵をサーバ側に保存します。これは一時的なデータなので、Play **キャッシュ** を容易に使用することができます。さらに、キャッシュされたデータの生存期間は限られているので、セキュリティ機能が 1 つ追加されることになります (キャプチャコードは 10 分間のみ有効になるようにしましょう) 。そして、このコードを後から解決するために、 **ユニーク ID** を生成する必要があります。このユニーク ID は、それぞれのフォームに hidden フィールドとして追加され、生成されたキャプチャコードを暗黙的に参照します。
+
+この方法で、状態に関する問題をエレガントに解決することができます。
+
+@captcha@ アクションを以下のように変更してください:
+
+bc. public static void captcha(String id) {
+    Images.Captcha captcha = Images.captcha();
+    String code = captcha.getText("#E4EAFD");
+    Cache.set(id, code, "10mn");
+    renderBinary(captcha);
+}
+
+@getText()@ メソッドがどのような色でも引数として受け取ることに注意してください。この色は文字列を描画するのに使用されます。
+
+p(note). @play.cache.*@ をインポートするのを **忘れないでください** 。
+
+h2. <a>コメントフォームへのキャプチャ画像の追加</a>
+
+それでは、コメントフォームを表示する前にユニーク ID を生成しましょう。その後、この ID を使ってキャプチャ画像を統合するよう HTML フォームを変更し、ID は別の hidden フィールドに追加します。
+
+@Application.show@ アクションを書き換えましょう:
+
+bc. public static void show(Long id) {
+    Post post = Post.findById(id);
+    String randomID = Codec.UUID();
+    render(post, randomID);
+}
+
+@/yable/app/views/Application/show.html@ テンプレートに含まれるフォームは、以下のようになります:
+
+bc. ...
+<p>
+    <label for="content">Your message: </label>
+    <textarea name="content" id="content">${params.content}</textarea>
+</p>
+<p>
+    <label for="code">Please type the code below: </label>
+    <img src="@{Application.captcha(randomID)}" />
+    <br />
+    <input type="text" name="code" id="code" size="18" value="" />
+    <input type="hidden" name="randomID" value="${randomID}" />
+</p>
+<p>
+    <input type="submit" value="Submit your comment" />
+</p>
+...
+
+よいスタートです。これでコメントフォームにキャプチャ画像が付きました。
+
+!images/guide5-2!
+
+h2. <a>キャプチャのバリデーション</a>
+
+あとはキャプチャの妥当性を検証するだけです。 @randomID@ を hidden フィールドとして追加しましたよね? このため、 @postComment@ アクションからこれを検索して、その後 Cache から実際のコードを検索して、これを投稿されたコードと最終的に比較することができます。
+
+そんなに難しくありません。 @postComment@ アクションを変更しましょう。
+
+bc. public static void postComment(
+        Long postId, 
+        @Required(message="Author is required") String author, 
+        @Required(message="A message is required") String content, 
+        @Required(message="Please type the code") String code, 
+        String randomID) 
+{
+    Post post = Post.findById(postId);
+    validation.equals(
+        code, Cache.get(randomID)
+    ).message("Invalid code. Please type it again");
+    if(validation.hasErrors()) {
+        render("Application/show.html", post, randomID);
+    }
+    post.addComment(author, content);
+    flash.success("Thanks for posting %s", author);
+    Cache.delete(randomID);
+    show(postId);
+}
+
+エラーメッセージが増えたので、 @show.html@ テンプレートへのエラー表示方法を変更してください (ええ、今のところ最初のエラーだけを表示します。これで充分です):
+
+bc. .. 
+#{ifErrors}
+    <p class="error">
+        ${errors[0]}
+    </p>
+#{/ifErrors}
+...
+
+p(note). 一般的に、もっと複雑なフォームの場合、エラーメッセージはこのようなやり方では管理されず、 @messages@ ファイルに外出しにされ、それぞれのエラーは関連するフィールドの隣に出力されます。
+
+今や完全に機能するキャプチャを確認してください。
+
+!images/guide5-3!
+
+いいですね!
+
+p(note). 次: %(next)"タグ機能のサポート":guide6%

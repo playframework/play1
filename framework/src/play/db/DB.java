@@ -12,6 +12,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+
+import org.hibernate.internal.SessionImpl;
+import play.db.jpa.JPA;
+import play.exceptions.DatabaseException;
+import play.Logger;
 
 /**
  * Database connection utilities.
@@ -161,7 +168,7 @@ public class DB {
     /**
      * Execute an SQL update
      * @param SQL
-     * @return false if update failed
+     * @return true if the next result is a ResultSet object; false if it is an update count or there are no more results 
      */
     public static boolean execute(String SQL) {
         return defaultDBConfig.execute(SQL);

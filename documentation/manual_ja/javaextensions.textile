@@ -1,0 +1,400 @@
+h1. Java エクステンション
+
+Java エクステンションは、ビューテンプレートで使う便利なメソッドをオブジェクトに追加し、式をより表現力豊かにします。
+
+コードサンプルは、テンプレートにおける式の例と、その結果を次の行に示しています。
+
+
+
+h2. <a name="collection">コレクションの拡張</a>
+
+
+h3. <a name="join">join(separator)</a>
+
+コレクションの要素それぞれの間を与えられたセパレータで連結します。返却型: @String@
+
+bc. ${['red', 'green', 'blue'].join('/')}
+red/green/blue
+
+
+h3. <a name="last">last()</a>
+
+リストの最後のアイテムを返します。返却型: @Object@
+
+bc. ${['red', 'green', 'blue'].last()}
+blue
+
+
+h3. <a name="pluralize">pluralize()</a>
+
+コレクションのサイズが 1 でない場合に ‘s’ を返します。返却型: @String@
+
+bc. colour${['red', 'green', 'blue'].pluralize()} 
+colours
+
+
+h3. <a name="pluralize-plural">pluralize(plural)</a>
+
+コレクションのサイズが 1 でない場合に、与えられた複数形を返します。返却型: @String@
+
+bc. box${['red', 'green', 'blue'].pluralize('es')}
+boxes
+
+
+h3. <a name="pluralize-singular-plural">pluralize(singular, plural)</a>
+
+コレクションのサイズが 1 でない場合に与えられた複数形を返します; コレクションのサイズが 1 の場合は与えられた単数形を返します。返却型: @String@
+
+bc. journ${['red'].pluralize('al', 'aux')}
+journal
+ 
+journ${['red', 'green', 'blue'].pluralize('al', 'aux')}
+journaux
+
+
+
+h2. <a name="date">日付の拡張</a>
+
+
+h3. <a name="format">format(format)</a>
+
+与えられたフォーマットパターンで日付をフォーマットします。返却型: @String@
+
+bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss')}
+07 June 2010 01:42:50
+
+
+h3. <a name="format-language">format(format, language)</a>
+
+与えられたフォーマットパターンと言語で日付をフォーマットします。返却型: @String@
+
+bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
+07 juin 2010 01:42:50
+
+
+h3. <a name="since">since()</a>
+
+日付を現在と比較した相対値、例えば **3 minutes ago** としてフォーマットします。返却型: @String@
+
+bc. ${new Date(new Date().getTime() - 1000000).since()}
+16 minutes ago
+
+次のメッセージを使って出力をカスタマイズすることができます: @since.seconds@, @since.minutes@, @since.hours@, @since.days@, @since.months@ and @since.years@.  
+
+
+h3. <a name="since-condition">since(condition)</a>
+
+日付を現在と比較した相対値としてフォーマットします。条件が true の場合、一ヶ月より前の日付は日付としてフォーマットされます。返却型: @String@
+
+@since()@ と同じメッセージを使って出力をカスタマイズすることができるのと同様に、一ヶ月より前の日付について @since.format@ を使うことができます。
+
+bc. ${new Date(1262350000000).since(false)}
+5 months ago
+ 
+${new Date(1262350000000).since(true)}
+Jan 1, 2010
+
+
+
+h2. <a name="long">Long の拡張</a>
+
+
+h3. <a name="asdate">asdate(format)</a>
+
+タイムスタンプを日付としてフォーマットします。返却型: @String@ - フォーマットされた日付
+
+bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss')}
+07 June 2010 01:42:50
+
+
+h3. <a name="asdate-language">asdate(format, language)</a
+
+タイムスタンプを与えられた言語における日付としてフォーマットします。返却型: @String@ - フォーマットされた日付
+
+bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss', 'fr')}
+07 juin 2010 01:42:50
+
+
+h3. <a name="formatSize">formatSize()</a>
+
+バイト数を単位の付いたファイルサイズとしてフォーマットします。
+
+bc. ${726016L.formatSize()}
+709KB
+
+
+
+
+h2. <a name="map">Map の拡張</a>
+
+
+h3. <a name="asAttr">asAttr()</a>
+
+マップのキーと値を HTML の属性としてフォーマットします。返却型: @play.templates.Template.ExecutableTemplate.RawData@.
+
+bc. ${[id:'42', color:'red'].asAttr()}
+id="42" color="red" 
+
+
+h3. <a name="asAttr-condition">asAttr(condition)</a>
+
+条件が ture の場合、マップのキーと値を HTML の属性としてフォーマットします。返却型: @play.templates.Template.ExecutableTemplate.RawData@.
+
+bc. ${[id:'42', color:'red'].asAttr(true)}
+id="42" color="red" 
+
+
+
+h2. <a name="number">Number の拡張</a>
+
+
+h3. <a name="number-divisibleBy">divisibleBy(divisor)</a>
+
+与えられた数字で割り切れる場合に true を返します。返却型: @boolean@
+
+bc. ${42.divisibleBy(7)}
+true
+
+
+h3. <a name="number-format">format(format)</a>
+
+与えられたフォーマットパターンで数字をフォーマットします。返却型: @String@
+
+bc. ${42.format('000.00')}
+042.00
+
+
+h3. <a name="number-formatCurrency">formatCurrency(currencyCode)</a
+
+与えられた通貨コード、例えば **EUR** で数字を通貨としてフォーマットします。返却型: @String@
+
+bc. ${42.formatCurrency('EUR').raw()}
+&euro; 42.00
+
+
+h3. <a name="number-page">page(pageSize)</a>
+
+インデックスとして解釈した数字の、与えられたページ数に対するページ数を返します。返却型: @String@
+
+bc. ${42.page(10)}
+5
+
+
+h3. <a name="number-pluralize">pluralize()</a>
+
+数字が 1 でない場合に ‘s’ を返します。返却型: @String@
+
+bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()} 
+colours - colours
+
+
+h3. <a name="number-pluralize-plural">pluralize(plural)</a>
+
+数字が 1 でない場合に与えられた複数形を返します。返却型: @String@
+
+bc. box${3.pluralize('es')}
+boxes
+
+
+h3. <a name="number-pluralize-singular-plural">pluralize(singular, plural)</a>
+
+数字が 1 でない場合に与えられた複数形を返します; 数字が 1 の場合は与えられた単数形を返します。返却型: @String@
+
+bc. journ${1.pluralize('al', 'aux')}
+journal
+ 
+journ${3.pluralize('al', 'aux')}
+journaux
+
+
+
+h2. <a name="object">オブジェクトの拡張</a>
+
+
+h3. <a name="addSlashes">addSlashes()</a>
+
+Java においてエスケープされたオブジェクトの @文字列@ 表現に含まれるシングルクォーテーションとダブルクォーテーションを、バックスラッシュでエスケープします。返却型: @String@
+
+bc. ${"single quote (')".addSlashes().raw()} ${'double quote (")'.addSlashes().raw()}
+single quote (\') double quote (\")
+
+
+h3. <a name="capAll">capAll()</a>
+
+オブジェクトの @文字列@ 表現に含まれるすべての単語の先頭を大文字にします。返却型: @String@
+
+bc. ${"lorum ipsum dolor".capAll()}
+Lorum Ipsum Dolor
+
+
+h3. <a name="capFirst">capFirst()</a>
+
+オブジェクトの @文字列@ 表現に含まれる最初の単語の先頭を大文字にします。返却型: @String@
+
+bc. ${"lorum ipsum dolor".capFirst()}
+Lorum ipsum dolor
+
+
+h3. <a name="cut">cut(substring)</a>
+
+与えられた部分文字列を取り除きます。返却型: @String@
+
+bc. ${"lorum ipsum dolor".cut('um')}
+lor ips dolor
+
+
+h3. <a name="escape">escape()</a>
+
+オブジェクトの @文字列@ 表現に含まれる HTML 文字をエスケープします。返却型: @String@
+
+bc. ${"The <blink>tag</blink> is evil".escape().raw()}
+The &lt;blink&gt;tag&lt;/blink&gt; is evil
+
+
+h3. <a name="nl2br">nl2br()</a>
+
+改行文字を HTML の @br@ タグで置き換えます。返却型: @String@
+
+bc. ${"one\ntwo".nl2br()}
+one<br/>two
+
+この出力は HTML-エスケープされないので、 出力中の @br@ タグ がエスケープされていないことに注意してください。これは、おそらくユーザの入力に対して "escape()":#escape を使用したくなることを意味します:
+
+bc. ${userInput.escape().nl2br()}
+
+
+h3. <a name="raw">raw()</a>
+
+オブジェクトをテンプレートエスケープせずに返します。返却型: @play.templates.Template.ExecutableTemplate.RawData@
+
+bc. ${'<'}
+&lt;
+ 
+${'<'.raw()}
+<
+
+
+h3. <a name="raw-condition">raw(condition)</a>
+
+条件が true の場合、オブジェクトをテンプレートエスケープせずに返します。返却型: @play.templates.Template.ExecutableTemplate.RawData@
+
+bc. ${'<'.raw(true)}
+<
+
+
+h3. <a name="yesNo">yesNo('yes', 'no')</a>
+
+オブジェクトが true と評価される場合は最初のパラメータ (‘yes’) を、そうでない場合は二番目のパラメータ (‘no’) を返します。返却型: @String@
+
+bc. ${"".yesno('yes', 'no')}
+no
+ 
+${"not empty".yesno('yes', 'no')}
+yes
+
+
+h2. <a name="string">String の拡張</a>
+
+
+h3. <a name="asXml">asXml()</a>
+
+与えられた XML 文字列を解析します。返却型: @groovy.util.slurpersupport.GPathResult@
+
+h3. <a name="camelCase">camelCase()</a>
+
+文字列を Java クラス名のようにキャメルケースとしてフォーマットします。返却型: @String@
+
+bc. ${"lorum ipsum dolor".camelCase()}
+LorumIpsumDolor
+
+
+h3. <a name="capitalizeWords">capitalizeWords()</a>
+
+文字列に含まれるすべての単語の先頭を大文字にします。返却型: @String@
+
+bc. ${"lorum ipsum dolor".capitalizeWords()}
+Lorum Ipsum Dolor
+
+
+h3. <a name="escapeHtml">escapeHtml()</a>
+
+与えられた HTML 文字をエスケープします。返却型: @String@
+
+bc. ${"The <blink>tag</blink> is evil".escapeHtml().raw()}
+The &lt;blink&gt;tag&lt;/blink&gt; is evil
+
+
+h3. <a name="escapeJavaScript">escapeJavaScript()</a>
+
+与えられた JavaScript 文字をエスケープします。返却型: @String@
+
+bc. ${"single quote (') double quote (\")".escapeJavaScript().raw()}
+single quote (\') double quote (\")
+
+
+h3. <a name="escapeXml">escapeXml()</a>
+
+与えられた XML 文字をエスケープします。返却型: @String@
+
+bc. ${"<>\"&".escapeXml().raw()}
+&lt;&gt;&quot;&amp;
+
+
+h3. <a name="noAccents">noAccents()</a>
+
+文字列に含まれる文字からアクセントを取り除きます。返却型: @String@
+
+bc. ${"Stéphane Épardaud".noAccents()}
+Stephane Epardaud
+
+
+h3. <a name="pad">pad(length)</a>
+
+与えられた長さだけ文字列に @nbsp;@ を付け足します。返却型: @String@
+
+bc. ${"x".pad(4).raw()}
+x&nbsp;&nbsp;&nbsp;
+
+
+h3. <a name="slugify">slugify()</a>
+
+URL パスとして予約されている文字に沿うように、文字列を URL に使用できる ‘俗語’ としてフォーマットします。返却型: @String@
+
+bc. ${"The Play! framework’s manual".slugify()}
+the-play-framework-s-manual
+
+
+h3. <a name="urlEncode">urlEncode()</a>
+
+与えられた URL クエリ文字列をエスケープします。返却型: @String@
+
+bc. ${"!@#\$%^&()".urlEncode()}
+%21%40%23%24%25%5E%26%28%29
+
+
+h2. <a name="string-array">String 配列の拡張</a>
+
+
+h3. <a name="add">add(value)</a>
+
+配列の終端に値を追加します。返却型: @String[]@
+
+bc. ${(["red", "green", "blue"] as String[]).add('pink').join(' ')}
+red green blue pink
+
+
+h3. <a name="contains">contains(string)</a>
+
+配列が与えられた文字列を含む場合は true を返します。返却型: @boolean@
+
+bc. ${(['red', 'green', 'blue'] as String[]).contains('green')}
+true
+
+
+h3. <a name="remove">remove(string)</a>
+
+与えられた文字列を取り除いた配列を返します。返却型: @String[]@
+
+bc. ${(['red', 'green', 'blue'] as String[]).remove('green').join(' ')}
+red blue
+

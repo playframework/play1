@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import play.Play;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.db.DBConfig;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Scope.Params;
@@ -107,7 +109,10 @@ public class JPQL {
 
     public JPABase create(String entity, String name, Params params) throws Exception {
         Object o = Play.classloader.loadClass(entity).newInstance();
-        return ((GenericModel) o).edit(name, params.all());
+
+        RootParamNode rootParamNode = ParamNode.convert(params.all());
+
+        return ((GenericModel) o).edit(rootParamNode, name);
     }
 
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
@@ -126,10 +131,10 @@ public class JPQL {
         if (query.trim().toLowerCase().startsWith("order by ")) {
             return "from " + entityName + " " + query;
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params == null) {
             query += " = null";
         }
         return "from " + entityName + " where " + query;
@@ -145,10 +150,10 @@ public class JPQL {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "delete " + query;
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params == null) {
             query += " = null";
         }
         return "delete from " + entityName + " where " + query;
@@ -167,10 +172,10 @@ public class JPQL {
         if (query.trim().toLowerCase().startsWith("order by ")) {
             return "select count(*) from " + entityName;
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
+        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params == null) {
             query += " = null";
         }
         if (query.trim().length() == 0) {
@@ -205,55 +210,90 @@ public class JPQL {
 
     public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
-        StringBuffer jpql = new StringBuffer();
-        String[] parts = findBy.split("And");
+        StringBuilder jpql = new StringBuilder();
+        String subRequest;
+        if (findBy.contains("OrderBy"))
+        	subRequest = findBy.split("OrderBy")[0];
+        else subRequest = findBy;
+        String[] parts = subRequest.split("And");
+		int index = 1;
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             if (part.endsWith("NotEqual")) {
                 String prop = extractProp(part, "NotEqual");
-                jpql.append(prop + " <> ?");
+                jpql.append(prop).append(" <> ?").append(index++);
             } else if (part.endsWith("Equal")) {
                 String prop = extractProp(part, "Equal");
-                jpql.append(prop + " = ?");
+                jpql.append(prop).append(" = ?").append(index++);
             } else if (part.endsWith("IsNotNull")) {
                 String prop = extractProp(part, "IsNotNull");
-                jpql.append(prop + " is not null");
+                jpql.append(prop).append(" is not null");
             } else if (part.endsWith("IsNull")) {
                 String prop = extractProp(part, "IsNull");
-                jpql.append(prop + " is null");
+                jpql.append(prop).append(" is null");
             } else if (part.endsWith("LessThan")) {
                 String prop = extractProp(part, "LessThan");
-                jpql.append(prop + " < ?");
+                jpql.append(prop).append(" < ?").append(index++);
             } else if (part.endsWith("LessThanEquals")) {
                 String prop = extractProp(part, "LessThanEquals");
-                jpql.append(prop + " <= ?");
+                jpql.append(prop).append(" <= ?").append(index++);
             } else if (part.endsWith("GreaterThan")) {
                 String prop = extractProp(part, "GreaterThan");
-                jpql.append(prop + " > ?");
+                jpql.append(prop).append(" > ?").append(index++);
             } else if (part.endsWith("GreaterThanEquals")) {
                 String prop = extractProp(part, "GreaterThanEquals");
-                jpql.append(prop + " >= ?");
+                jpql.append(prop).append(" >= ?").append(index++);
             } else if (part.endsWith("Between")) {
                 String prop = extractProp(part, "Between");
-                jpql.append(prop + " < ? AND " + prop + " > ?");
+                jpql.append(prop).append(" < ?").append(index++).append(" AND ").append(prop).append(" > ?").append(index++);
             } else if (part.endsWith("Like")) {
                 String prop = extractProp(part, "Like");
-                jpql.append("LOWER(" + prop + ") like ?");
+                // HSQL -> LCASE, all other dbs lower
+                if (isHSQL()) {
+                    jpql.append("LCASE(").append(prop).append(") like ?").append(index++);
+                } else {
+                    jpql.append("LOWER(").append(prop).append(") like ?").append(index++);
+                }
             } else if (part.endsWith("Ilike")) {
                 String prop = extractProp(part, "Ilike");
-                jpql.append("LOWER(" + prop + ") like LOWER(?)");
+                 if (isHSQL()) {
+                    jpql.append("LCASE(").append(prop).append(") like LCASE(?").append(index++).append(")");
+                 } else {
+                    jpql.append("LOWER(").append(prop).append(") like LOWER(?").append(index++).append(")");
+                 }
             } else if (part.endsWith("Elike")) {
                 String prop = extractProp(part, "Elike");
-                jpql.append(prop + " like ?");
+                jpql.append(prop).append(" like ?").append(index++);
             } else {
                 String prop = extractProp(part, "");
-                jpql.append(prop + " = ?");
+                jpql.append(prop).append(" = ?").append(index++);
             }
             if (i < parts.length - 1) {
-                jpql.append(" AND ");
+                jpql.append(" AND ");	
             }
         }
+		// ORDER BY clause
+		if (findBy.contains("OrderBy")) {
+			jpql.append(" ORDER BY ");
+			String orderQuery = findBy.split("OrderBy")[1];
+			parts = orderQuery.split("And");
+			for (int i = 0; i < parts.length; i++) {
+				String part = parts[i];
+				String orderProp;
+				if (part.endsWith("Desc"))
+					orderProp = extractProp(part, "Desc") + " DESC";
+				else orderProp = part.toLowerCase();
+				if (i > 0)
+					jpql.append(", ");
+				jpql.append(orderProp);
+			}
+		}
         return jpql.toString();
+    }
+
+    private boolean isHSQL() {
+        String db = Play.configuration.getProperty("db");
+        return ("mem".equals(db) || "fs".equals(db) || "org.hsqldb.jdbcDriver".equals(Play.configuration.getProperty("db.driver")));
     }
 
     protected static String extractProp(String part, String end) {

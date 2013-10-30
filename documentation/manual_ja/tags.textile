@@ -1,0 +1,557 @@
+h1. 組込みテンプレートタグ
+
+以下は、中心となる "テンプレートエンジン構文":templates#syntax に従うことで利用できる、組み込みのタグです。
+
+p(note). こことは別に %(next)"Java エクステンション":javaextensions% マニュアルページがあります。
+
+
+h2. <a name="a">a</a>
+
+@a@ タグはコントローラのアクションへの HTML リンクを挿入します。
+
+bc. #{a @Application.logout()}Disconnect#{/a}
+
+以下のようにレンダリングされます:
+
+bc. <a href="/application/logout">Disconnect</a>
+
+もし呼び出そうとしているアクションが GET メソッドを使用して起動するどんなルートも持たない場合、Play は自動的に、リンクをクリックしたときに JavaScript を使ってサブミットする隠しフォームを生成します。
+
+
+h2. <a name="authenticityToken">authenticityToken</a>
+
+"クロスサイトリクエストフォージェリ":security#csrf を防ぐため、どのフォームでも使用できる、生成されたトークンを含む hidden input フィールドをレンダリングします。
+
+bc. #{authenticityToken /}
+
+以下のようにレンダリングされます:
+
+bc. <input type="hidden" name="authenticityToken"
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
+
+
+h2. <a name="cache">cache</a>
+
+タグパラメータにキャッシュのキーを指定し、 @play.cache.Cache@ API を使ってタグの内容をキャッシュします。
+
+bc. #{cache 'startTime'}
+   ${new java.util.Date()}
+#{/cache}
+
+デフォルトでは、タグの内容は永久にキャッシュされますが、 @for@ パラメータで有効期間を指定することができます。
+
+bc. #{cache 'currentTime', for:'3s'}
+   ${new java.util.Date()}
+#{/cache}
+
+
+h2. <a name="dolayout">doLayout</a>
+
+このタグは、テンプレート継承と共に使用し、評価された子テンプレートの内容を挿入します。
+
+bc. <!-- common header here -->
+<div id="content">
+    #{doLayout /}
+</div>
+<!-- common footer here -->
+
+
+h2. <a name="else">else</a>
+
+当然、 @if@ タグと共に使用されます。
+
+bc. #{if user}
+    Connected user is ${user}
+#{/if}
+#{else}
+    Please log in
+#{/else}
+
+一方で、 @list@ タグと共に使用することも可能であり、list が空の場合に実行されます。
+
+bc. #{list items:task, as:'task'}
+    <li>${task}</li>
+#{/li}
+ 
+#{else}
+    Nothing to do...
+#{/else}
+
+
+h2. <a name="elseif">elseif</a>
+
+bc. #{if tasks.size() > 1}
+    Busy tasklist
+#{/if}
+ 
+#{elseif tasks}
+    One task on the list
+#{/elseif}
+ 
+#{else}
+    Nothing to do
+#{/else}
+
+@else@ と同様に、 @list@ タグと共に使用することも可能です。
+
+
+h2. <a name="error">error</a>
+
+入力エラーが存在する場合に、タグパラメータでフィールドを指定して、エラーメッセージを出力します。
+
+bc. #{error 'user.name'/}
+
+オプションの @field@ パラメータを使って、違うフィールドのエラーメッセージを使用することができます。これは、複数のフィールドで共通のエラーメッセージを共有する場合に便利です。
+
+bc. #{error 'contact.street',  field:'contact.address'/}
+#{error 'contact.city',    field:'contact.address'/}
+#{error 'contact.country', field:'contact.address'/}
+
+
+h2. <a name="errorClass">errorClass</a>
+
+タグパラメータで指定したフィールドに入力エラーがある場合に @hasError@ という文字列を出力します。これは、エラーがある入力フィールドに対する CSS クラスを設定する場合に便利です。
+
+bc. <input name="name" class="#{errorClass 'name'/}">
+
+これは、以下と等価です:
+
+bc. <input name="name" class="${errors.forKey('name') ? 'hasError' : ''}">
+
+
+h2. <a name="errors">errors</a>
+
+現在のバリデーションエラーをくり返します。
+
+bc. <ul>
+#{errors}
+    <li>${error}</li>
+#{/errors}
+</ul>
+
+このタグはボディに暗黙的な変数を定義します。
+
+* @error@, エラーです
+* @error_index@, エラーの index で、1 から始まります
+* @error_isLast@, 最後の要素の場合に true になります
+* @error_isFirst@, 最初の要素の場合に true になります
+* @error_parity@, @odd@ と @even@ が交互に値になります
+
+bc. <table>
+<tr><th>#</th><th>Error</th></tr>
+#{errors}
+    <tr class="${error_parity}"><td>${error_index}</td><td>${error}</td></tr>
+#{/errors}
+</table>
+
+あるフィールドに関連するエラーのみをフィルタリングするためにオプションのフィールドパラメータを使用することも、あるいはデフォルトのパラメータを使用することもできます。
+
+bc. <ul>
+#{errors 'myField'}
+    There where errors with the field myField<br />
+    <li>${error}</li>
+#{/errors}
+</ul>
+
+
+h2. <a name="extends">extends</a>
+
+そのテンプレートに、他のテンプレートを継承させます。
+
+bc. #{extends 'main.html' /}
+
+
+h2. <a name="field">field</a>
+
+field タグは Don't Repeat Yourself の精神に基づいたヘルパです。このタグは次のようにして動作します:
+
+以下のように書く代わりに:
+
+bc. <p>
+  <label>&{'user.name'}</label>
+  <input type="text" id="user_name" name="user.name" value="${user?.name}" class="${errors.forKey('user.name') ? 'has_error' : ''}">
+  <span class="error">${errors.forKey('user.name')}</span>
+</p>
+
+以下のように書くことができます:
+
+bc. #{field 'user.name'}
+<p>
+  <label>&{field.name}</label>
+  <input type="text" id="${field.id}" name="${field.name}" value="${field.value}" class="${field.errorClass}">
+  <span class="error">${field.error}</span>
+</p>
+#{/field}
+
+何度も何度も @user.name@ をくり返してはいけません。
+
+
+h2. <a name="form">form</a>
+
+@form@ タグを挿入します。Play はデフォルトを POST として route ファイルから HTTP メソッドを推測します。URL に対して GET と POST の両方のルートが設定されている場合、このタグは、デフォルトでは定義されたルートのうち最初のルートを使用します。
+
+* オプションの @method@ は POST または GET です。
+* オプションの @id@ 属性は form 要素に ID を設定します。
+* オプションの @enctype@ 属性は form のデータエンコーディングを設定します。デフォルトは‘application/x-www-form-urlencoded’です。
+
+文字コードは常に **utf-8** です。
+
+bc. #{form @Client.details(), method:'GET', id:'detailsForm'}
+   ...
+#{/form}
+
+は以下のようにレンダリングされます:
+
+bc. <form action="/client/details" id="detailsForm" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+アクションメソッドの一部として対象のエンティティを指定することもできます:
+
+bc. #{form @Client.details(client.id)}
+   ...
+#{/form}
+
+HTTP パラメータの名前はアクションメソッドに定義した名前から検出されます。
+
+bc. public static void details(String clientId){
+       // ...
+}
+
+Play は clientId を含むアクション URL を生成します:
+
+bc. <form action="/client/details?clientId=3442" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+@form@ タグは GET 以外のメソッドでは "真性性トークン":#authenticityToken を自動的に含める。
+
+bc. #{form @Client.create(), method:'POST', id:'creationForm',
+       enctype:'multipart/form-data' }
+   ...
+#{/form}
+
+以下のようにレンダリングされます:
+
+bc. <form action="/client/create" id="creationForm" method="POST"
+      accept-charset="utf-8" enctype="multipart/form-data">
+<input type="hidden" name="authenticityToken" 
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
+ ...
+</form>
+
+もしフォームがサーバサイドのリソースを更新するのであれば、 **POST** メソッドを使用する _べき_ です。もしフォームがデータをフィルタするために使用され、ドメインを更新しないのであれば GET を使用することができます。 "等べき":http://en.wikipedia.org/wiki/Idempotence を参照してください。GET, PUT そして DELETE が等べきである一方、POST は等べきではありません。
+
+
+h2. <a name="get">get</a>
+
+"set":#set タグで定義された値を検索します。get/set メカニズムを使うことで、テンプレート間、すなわちレイアウトと子テンプレート間で値をやり取りすることができます。
+
+bc. <head>
+    <title>#{get 'title' /}</title>
+</head>
+
+以下のように、title が指定されていない場合には "Homepage" を表示するような方法で、このタグを使用することもできます。
+
+bc. <head>
+    <title>#{get 'title'}Homepage #{/get}</title>
+</head>
+
+@if@ タグを使って値が設定されているかテストすることができます:
+
+bc. #{if get('title')}
+    <h1>#{get 'title' /}</h1>
+#{/if}
+
+h2. <a name="i18n">i18n</a>
+
+ローカライズされた Javascript メッセージを外部化します。ローカライズされたメッセージは @i18n()@ 関数を使うことで JavaScript から利用することができます。
+
+@conf/messages@ ファイルに訳語を定義してください。
+
+bc. hello_world=Hello, World !
+hello_someone=Hello %s !
+
+テンプレート (またはレイアウト) ページにメッセージを取り込んでください:
+
+bc. #{i18n /}
+
+そして JavaScript からキーを使って検索してください:
+
+bc. alert(i18n('hello_world'));
+alert(i18n('hello_someone', 'John'));
+
+オプションとして、このタグをいくつかのメッセージのみに制限することができます。ワイルドカードは末尾に指定することができます:
+
+bc. #{i18n keys:['title', 'menu.*'] /}
+
+h2. <a name="if">if</a>
+
+指定された条件を評価し、true の場合はタグボディを評価します。
+
+bc. #{if user.countryCode == 'en' }
+    Connected user is ${user}
+#{/if}
+
+条件を組み合わせて使用する場合は、以下のようにします:
+
+bc. #{if ( request.actionMethod == 'administer'  && user.isAdmin() ) }
+    You are admin, allowed to administer.
+#{/if}
+
+
+h2. <a name="iferror">ifError</a>
+
+対応する入力項目がエラーである場合、タグの内容がレンダリングされます。
+
+bc. #{ifError 'user.name'}
+  <p>
+    User name is invalid: 
+    #{error 'user.name' /}
+  <p>
+#{/ifError}
+
+h2. <a name="iferrors">ifErrors</a>
+
+バリデーションエラーが発生している場合、タグの内容がレンダリングされます。
+
+bc. #{ifErrors}
+  <p>Error(s) found!</p>
+#{/ifErrors}
+
+h2. <a name="ifnot">ifnot</a>
+
+きれいに #{if !condition} を書き換えます。
+
+bc. #{ifnot tasks}
+    No tasks today
+#{/ifnot}
+
+
+h2. <a name="include">include</a>
+
+別のテンプレートを取り込みます。取り込み側のテンプレート上の全ての変数は、取り込んだ側のテンプレートにて直接利用することができます。
+
+bc. <div id="tree">
+    #{include 'tree.html' /}
+</div>
+
+
+h2. <a name="jsaction">jsAction</a>
+
+この @#{jsAction /}@ タグは、サーバアクションに基づいた URL と自由な変数から成る JavaScript 関数を返却します。この関数では AJAX リクエストを行わないので、返却された URL を使って手作業で Ajax リクエストを実行する必要があります。
+
+例を見てみましょう:
+
+bc. GET     /users/{id}        Users.show
+
+クライアント側でこのルートをインポートすることができます:
+
+bc. <script type="text/javascript">
+    var showUserAction = #{jsAction @Users.show(':id') /}
+    
+    var displayUserDetail = function(userId) {
+        $('userDetail').load( showUserAction({id: userId}) )
+    }
+</script>
+
+
+h2. <a name="jsroute">jsRoute</a>
+
+@#{jsRoute /}@ タグは @#{jsAction /}@ タグに似ていて,サーバーアクションおよび対応するHTTPメソッド(GET, POST など)に基づくURLを構築する両方の関数を含むオブジェクトを返します。
+
+Example:
+
+bc. PUT     /users/{id}        Users.update
+
+Then, in a template:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
+</script>
+
+
+h2. <a name="list">list</a>
+
+オブジェクトのコレクションをくり返します。
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <li>${product}</li>
+#{/list}
+</ul>
+
+このタグは、ボディに暗黙的な変数を定義します。変数名には、接頭辞としてループ変数名が付きます。
+
+* @name_index@, アイテムの index で、1 から始まります
+* @name_isLast@, 最後の要素の場合に true になります
+* @name_isFirst@, 最初の要素の場合に true になります
+* @name_parity@, @odd@ と @even@ が交互に値になります
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <span class="${product_parity}">${product_index}. ${product}</span>
+    ${product_isLast ? '' : '-'}
+#{/list}
+</ul>
+
+@items@ パラメータはオプションであり、デフォルトの @arg@ 引数で置き換えることが可能です。
+
+このため:
+
+bc. #{list items:users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+を、以下のように書き換えることができます:
+
+bc. #{list users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+Groovy の **range** オブジェクトを使うことで、容易に **for** ループを作ることができます:
+
+bc. #{list items:0..10, as:'i'}
+    ${i}
+#{/list}
+
+bc. #{list items:'a'..'z', as:'letter'}
+    ${letter} ${letter_isLast ? '' : '|' }
+#{/list}
+
+@as@ パラメータもまたオプションです。デフォルト変数名として @_@ を使用します:
+
+bc. #{list users}
+    <li>${_}</li>
+#{/list}
+
+
+h2. <a name="option">option</a>
+
+テンプレートに @option@ タグを挿入します。
+
+* @value@ - option の値
+
+bc. #{option user.id} ${user.name} #{/option}
+
+これは、以下のように出力されるでしょう:
+
+bc. <option value="42">jto</option>
+
+h2. <a name="script">script</a>
+
+テンプレートに @script@ タグを挿入します。利便性のため、このタグは @/public/javascripts@ 内のスクリプトを参照します。
+
+* @src@ (必須) - @/public/javascripts@ パスを含まないスクリプトファイル名
+* @id@ (オプション) - 生成された @script@ タグの @id@ 属性の値
+* @charset@ (オプション) - ソースのエンコーディングを設定します - デフォルトは UTF-8 です
+
+@src@ パラメータはデフォルトの @arg@ 引数に置き換えることもできます。
+
+bc. #{script 'jquery-1.4.2.min.js' /}
+#{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
+
+
+h2. <a name="render">render</a>
+
+タグパラメータでパスを指定してテンプレートをレンダリングします。パスは絶対パスか、または @/app/views@ に対する相対パスです。
+
+bc. #{render 'Application/other.html'/}
+
+
+h2. <a name="select">select</a>
+
+テンプレートに @select@ タグを挿入します。
+
+* @name@ (必須) - select 要素に name 属性を設定する
+
+不明な属性はすべて HTML 要素として取り扱われ、"そのまま" レンダリングされます。
+
+bc. #{select 'booking.beds', value:2, id:'select1'}
+	#{option 1}One king-size bed#{/option}
+	#{option 2}Two double beds#{/option}
+	#{option 3}Three beds#{/option}
+#{/select}
+
+これは、以下のように出力されるでしょう:
+
+bc. <select name="booking.beds" size="1" id="select1" >
+  <option value="1">One king-size bed</option>
+  <option value="2" selected="selected">Two double beds</option>
+  <option value="3">Three beds</option>
+</select>
+
+
+このタグは @items@ 属性を使って options を生成することもできます。
+
+* @items@ (オプション) - @options@ を作成するために使われるオブジェクトのリスト
+* @value@ (オプション) - @items@ の中の選択された要素(注意: 複数選択はサポートしません)
+* @labelProperty@ (オプション) - それぞれのアイテムについて option のラベルとして使用される属性 
+* @valueProperty@ (オプション) - それぞれのアイテムについて option の値として使用される属性。デフォルトでは @id@ が使用される
+
+p(note). @labelProperty@ と @valueProperty@ はプリミティブ値であってはなりません。そのため、例えば @int@ や @long@ を使わずに、 @Integer@ や @Long@ 変数を使ってください。
+
+例えば、それぞれが name 属性を持つ User のリストを与えられた場合:
+
+bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:5, class:'test', id:'select2' /}
+
+これは、以下のように出力されるでしょう:
+
+bc. <select name="users" size="1" class="test" id="select2" >
+  <option value="0" >User-0</option>
+  <option value="1" >User-1</option>            
+  <option value="2" >User-2</option>            
+  <option value="3" >User-3</option>
+  <option value="4" >User-4</option>
+  <option value="5" selected="selected">User-5</option>
+</select>
+
+h2. <a name="set">set</a>
+
+同じテンプレートかレイアウトにおいて @get@ タグを使って検索できる値を定義します。
+
+bc. #{set title:'Admin' /}
+#{set style:'2columns' /}
+
+変数を使用することも可能です:
+
+bc. #{set title:'Profile of ' + user.login /}
+
+変数の値をボディ内で定義することも可能です:
+
+bc. #{set 'title'}
+    Profile of ${user.login}
+#{/set}
+
+
+h2. <a name="stylesheet">stylesheet</a>
+
+テンプレートに @link@ タグを挿入します。利便性のため、このタグは @/public/stylesheets@ 内の CSS ファイルを参照します。
+
+* @src@ (必須) - @/public/stylesheets@ パスを含まないファイル名
+* @id@ (オプション) - 生成された @link@ タグの @id@ 属性の値
+* @media@ (オプション) - @media@ 属性の値: screen, print, aural, projection…
+* @title@ (オプション) - @title@ 属性の値 (または説明)
+
+@src@ パラメータはデフォルトの @arg@ 引数に置き換えることもできます。
+
+bc. #{stylesheet 'default.css' /}
+#{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
+
+
+h2. <a name="verbatim">verbatim</a>
+
+Java 拡張の "raw()":javaextensions#arawa のように、しかしタグボティ全体のテンプレート出力における HTML エスケープを無効にします。
+
+bc. ${'&amp;'}
+#{verbatim}${'&amp;'}#{/verbatim}
+
+この例の場合、最初の行は @&amp;@ を出力しますが、二番目の行はアンパサンドを出力します。
+

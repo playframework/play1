@@ -1,0 +1,20 @@
+#{extends 'main.html' /}
+
+#{set 'title'}Data Binding anEntity test#{/set}
+
+<form action="@{DataBinding.dispatchAnEntity()}" method="post">
+    <table>
+        <tbody>
+        <tr>
+            <th>Date:</th>
+            <td ><input style="width:250px;" id="entity_date" type="text" name="entity.date" value="${entity?.getFormattedDate()}"/></td>
+        </tr>
+        <tr>
+            <th>yop:</th>
+            <td><input style="width:250px;" id="entity_yop" type="text" name="entity.yop" value="${entity?.yop}"/></td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="hidden" name="entity.id" value="${entity?.id}"/>
+    <input id="submit" type="submit" value="Dispatch"/>
+</form>

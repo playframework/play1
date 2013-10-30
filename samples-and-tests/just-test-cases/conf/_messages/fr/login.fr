@@ -1,0 +1,9 @@
+# Login
+login.username=Nom d'utilisateur&nbsp;:
+login.password=Mot de passe&nbsp;:
+login.remember=Se souvenir de moi
+login.signin=Connexion
+login.error=Oops, utilisateur ou mot de passe incorrect.
+login.logout=Vous avez été déconnecté(e).
+login.success=Bonjour %s vous êtes connecté.
+login.lastLogin=Dernière connexion %1$tB %1$tY

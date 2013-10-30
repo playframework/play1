@@ -17,7 +17,7 @@ bc. application.baseUrl=http://localhost:9000/
 
 For @prod@ mode:
 
-bc. %production%.application.baseUrl=http://www.yourdomain.com/
+bc. %production.application.baseUrl=http://www.yourdomain.com/
 
 
 h3(#application.defaultCookieDomain). application.defaultCookieDomain
@@ -40,7 +40,7 @@ Default: @PLAY_LANG@
 
 h3(#application.langs). application.langs
 
-Defines locales used by your application. You can then place localized messages in @conf/messages.{locale}@ files. The value is a comma-separated list of language codes, for example:
+Defines locales used by your application. You can then place localised messages in @conf/messages.{locale}@ files. The value is a comma-separated list of language codes, for example:
 
 bc. application.langs=fr,en,ja
 
@@ -99,7 +99,7 @@ Default: no value.
 
 h3(#application.secret). application.secret
 
-The secret key is used to secure cryptographics functions, usually set by the @play new@ or @play secret@ command. If you deploy your application to several instances be sure to use the same key. For example:
+The secret key is used to secure cryptographic functions, usually set by the @play new@ or @play secret@ command. If you deploy your application to several instances be sure to use the same key. For example:
 
 bc. application.secret=mNuAvlsFVjeuynN4IWZxZzFOHYVagafzjruHmWTL26VISKr46rUtyGcJuX7aYx4q
 
@@ -175,7 +175,7 @@ h2(#attachments). Attachments
 
 h3(#attachments.path). attachments.path
 
-Storage path for @play.db.jpa.Blob@ content. For example:
+Storage path for @play.db.jpa.Blob@ content. This can be an absolute path, or a relative path to a folder inside the Play application folder. For example:
 
 bc. attachments.path=data/attachments
 
@@ -214,7 +214,7 @@ Default: @secret@
 
 h2(#cron). Scheduled jobs
 
-You can configure cron expressions for scheduled jobs as configuration keys that start with @cron.@ and use the key as the value of a <code>@play.jobs.On</code> or <code>@Every</code> annotation. For example, <code>@On(cron.noon)</code> refers to:
+You can configure cron expressions for scheduled jobs as configuration keys that start with @cron.@ and use the key as the value of a <code>@play.jobs.On</code> or <code>@Every</code> annotation. For example, <code>@On("cron.noon")</code> refers to:
 
 bc. cron.noon=0 0 12 * * ?
 
@@ -227,6 +227,8 @@ h3(#date.format). date.format
 Sets the default date format, using a @java.text.SimpleDateFormat@ pattern. For example:
 
 bc. date.format=dd-MM-yyyy
+
+This property also affects how @${date.format()}@ renders dates in templates. It also set the default date format when binding a date parameter.
 
 Default: @yyyy-MM-dd@
 
@@ -282,6 +284,15 @@ Default:
 * @org.h2.Driver@ when "db":#db is set to @mem@ or @fs@, or if "db.url":#db.url  starts with @jdbc:h2:mem:@
 * @com.mysql.jdbc.Driver@ if "db":#db is a @mysql:…@ configuration.
 
+h3(#db.isolation). db.isolation
+
+Database transaction isolation level. For example:
+
+bc. db.isolation=SERIALIZABLE
+
+Valid values are @NONE@, @READ_UNCOMMITTED@, @READ_COMMITTED@, @REPEATABLE_READ@, @SERIALIZABLE@, or an integer value to be passed to @java.sql.Connection.setTransactionIsolation()@. Note that not all databases support all transaction isolation levels.
+
+Default: database dependent, usually @READ_COMMITTED@
 
 h3(#db.pass). db.pass
 
@@ -317,7 +328,7 @@ Default: @1@
 
 h3(#db.pool.timeout). db.pool.timeout
 
-Connection pool time-out in milliseoncds. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout. For example:
+Connection pool time-out in milliseconds. See the "c3p0 documentation":http://www.mchange.com/projects/c3p0/#checkoutTimeout. For example:
 
 bc. db.pool.timeout=10000
 
@@ -340,7 +351,7 @@ Database connection user name, used with "db.url":#db.url.
 Default: none, or @sa@ when "db":#db is set to @mem@ or @fs@. 
 
 
-h2(#evolutions). Database evoluations
+h2(#evolutions). Database evolutions
 
 
 h3(#evolutions.enabled). evolutions.enabled
@@ -352,9 +363,45 @@ bc. evolutions.enabled=false
 Default: @true@
 
 
+h3(#modules.evolutions.enabled). modules.evolutions.enabled
+
+Used to disable "database evolutions":evolutions from all modules
+
+bc. modules.evolutions.enabled=false
+
+Default: @true@
+
+h3(#[module name].evolutions.enabled). [module name].evolutions.enabled
+
+Used to disable "database evolutions":evolutions from a given module
+
+bc. [module name].evolutions.enabled=false
+
+Default: @true@
+
+
+h2(#test). Test runner
+
+h3(#headlessBrowser). headlessBrowser
+
+Specifies the web browser compatibility mode for the HtmlUnit headless web browser used when running @play auto-test@.
+
+bc. headlessBrowser=INTERNET_EXPLORER_7
+
+Values:
+
+* @FIREFOX_3@
+* @FIREFOX_3_6@
+* @INTERNET_EXPLORER_6@
+* @INTERNET_EXPLORER_7@
+* @INTERNET_EXPLORER_8@
+
+Default: @INTERNET_EXPLORER_8@
+
+
 h2(#hibernate). Hibernate
 
-You can specify additional hibernate properties. For example, to enable SQL comments:
+You can specify additional Hibernate properties. For example, to enable SQL comments:
 
 bc. hibernate.use_sql_comments=true
 
@@ -375,7 +422,7 @@ HTTP listener address, to restrict addresses the server listens on. For example:
 
 bc. http.address=127.0.0.1
 
-Default: the server listens for HTTP on the wilcard address.
+Default: the server listens for HTTP on the wildcard address.
 
 
 h3(#http.cacheControl). http.cacheControl
@@ -444,6 +491,18 @@ Proxy user for web services requests.
 Default: @http.proxyUser@ system property.
 
 
+h3(#http.nonProxyHosts). http.nonProxyHosts
+
+Indicates the hosts which should be connected to directly and not through the proxy server.
+The value can be a list of hosts, each seperated by a @|@, and in addition a wildcard character @*@ can be used for matching.
+
+For example:
+
+bc. http.nonProxyHosts=localhost|*.example.com
+
+Default: @http.nonProxyHosts@ system property.
+
+
 
 h3(#http.useETag). http.useETag
 
@@ -460,7 +519,7 @@ Custom @USER_AGENT@ header value for web services requests. For example:
 
 bc. http.userAgent=myApp 1.0
 
-Defualt: none.
+Default: none.
 
 
 h3(#https.port). https.port
@@ -604,7 +663,7 @@ bc. memcached.1.host=127.0.0.1:11211
 memcached.2.host=127.0.0.1:11212
 
 
-h2(#mimetype). Custom mime types
+h2(#mimetype). Custom MIME types
 
 You can declare additional MIME types. For example:
 
@@ -633,7 +692,7 @@ h2(#mail). Mail
 
 h3(#mail.debug). mail.debug
 
-Enables SMTP transaction logging.
+Enables SMTP transaction logging; under the hood, Play uses JavaMail to perform the actual SMTP transactions.
 
 bc. mail.debug=true
 
@@ -658,7 +717,7 @@ Default: none.
 
 h3(#mail.smtp.channel). mail.smtp.channel
 
-SMTP encrypted channel configuration, used with "mail.smtp.host":#mail.smtp.host. Values:
+There are two ways to send the e-mail over an encrypted channel, which you can choose with this configuration property. Values:
 
 * @clear@ - no encryption
 * @ssl@ - SMTP-over-SSL (SMTPS) connector; an SSL socket listening on port 465
@@ -719,7 +778,7 @@ Default: @smtp@
 
 h3(#mail.smtp.socketFactory.class). mail.smtp.socketFactory.class
 
-When using SSL connections with JavaMail, the default SSL behavior is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behavior is to skip that check. You can control this using this property.
+When using SSL connections with JavaMail, the default SSL behaviour is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behaviour is to skip that check. You can control this using this property.
 
 
 h3(#mail.smtp.user). mail.smtp.user
@@ -779,9 +838,18 @@ HTTP server maximum content length for response streaming, in bytes.
 Default: none - no maximum.
 
 
+h3(#play.ssl.enabledCiphers). play.ssl.enabledCiphers
+
+This setting allows to specify certain SSL ciphers to be used. This might be needed in case you have to be PCI compliant, as some ciphers in the default settings are vulnerable to the so-called BEAST attack.
+
+bc. play.ssl.enabledCiphers=SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA
+
+Default: none - the default ciphers are chosen.
+
+
 h3(#play.pool). play.pool
 
-Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialize all requests (very useful for debugging purpose). For example:
+Execution pool size. Try to keep this as low as possible. Setting this to 1 thread will serialise all requests (very useful for debugging purpose). For example:
 
 bc. play.pool=10
 
@@ -864,7 +932,7 @@ bc. XForwardedProto=https
 
 h3(#XForwardedSupport). XForwardedSupport
 
-A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server.
+A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server. Alternatively you can use 'ALL' if you do not want to restrict local addresses. **Note**: only use 'ALL' if you are very sure that if it safe to do so (e.g. you have a proper firewall in place that blocks public requests). A valid use-case would be when using Play! behind a Amazon ELB loadbalancer, which internal IP's tend to change over time.      
 
 Default: @127.0.0.1@
 

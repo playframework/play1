@@ -1,0 +1,10 @@
+# Login
+login.username=Username:
+login.password=Password:
+login.remember=Remember me
+login.signin=Sign in
+login.error=Oops, unknown username or password.
+login.logout=You have been logged out.
+login.success=Hello %s you are log in.
+login.accountExpired=Your account has expired.
+login.lastLogin=Last login %1$tB %1$tY

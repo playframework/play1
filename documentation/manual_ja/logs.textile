@@ -1,0 +1,49 @@
+h1. ログの設定
+
+Play のロガーは組み込みの "Log4j":http://logging.apache.org/log4j/1.2/index.html です。ほとんどの Java ライブラリが Log4j か、または Log4j をバックエンドとして使えるラッパを使用するので、アプリケーションに適合するよう、容易にロギングを設定することができます。
+
+h2. <a name="logging">アプリケーションからのロギング</a>
+
+Play はデフォルトのロガーとして @play.Logger@ クラスを提供します。このクラスは @play@ という名前のロガーにメッセージや例外を書き込むために Log4j を使用します。
+
+アプリケーションからのロギングは簡単です:
+
+bc. Logger.info("A log message");
+Logger.error(ex, "Oops");
+
+@play.Logger@ クラスのメソッドは、標準の Java フォーマット構文に通じる容易なフォーマット化をサポートします:
+
+bc. Logger.debug("The param was %s", param);
+Logger.info("I want to log %s and %s and %s", a, b, c);
+
+特別な要件のために Log4j を直接使って別のロガーを作成することもできます:
+
+bc. org.apache.log4j.Logger.getLogger("another.logger");
+
+h2. <a name="levels">ログレベルの設定</a>
+
+"application.log":configuration#application.log を設定することでPlay loggerのログレベルを設定できます。このレベルはアプリケーションによって生成されたメッセージにのみ適用されることに注意してください。
+
+完全に Log4j を制御する必要のある場合は、 @conf/@ ディレクトリに @log4j.properties@ ファイルを作成します。このディレクトリはクラスパスの最初の要素なので、このファイルは全てのライブラリからデフォルトとして使用されます。
+
+log4j のデフォルト設定は以下のとおりです:
+
+bc. log4j.rootLogger=ERROR, Console
+ 
+log4j.logger.play=INFO
+ 
+# Console
+log4j.appender.Console=org.apache.log4j.ConsoleAppender
+log4j.appender.Console.layout=org.apache.log4j.PatternLayout
+log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
+
+このファイルをコピーして、特別な要件に向けて更新してください!
+
+
+h3. <a name="production">Production 設定</a>
+
+参考: "configure logging for production":production#logging にも例があります。
+
+p(note). **考察を続けます**
+ 
+次は、 %(next)"複数環境における設定":ids% に続きます。

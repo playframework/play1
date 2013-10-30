@@ -1,8 +1,8 @@
-h1. A first iteration for the data model
+h1. A first iteration of the data model
 
 Here we will start to write the model for our blog engine.
 
-h2. <a>Introduction to JPA</a>
+h2. <a class="jpa">Introduction to JPA</a>
 
 The model layer has a central position in a Play application (and in fact in all well-designed applications). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contain classes like User, Post and Comment.
 
@@ -14,7 +14,7 @@ If you have used Hibernate or JPA before you will be surprised by the simplicity
 
 If you don’t know JPA, you can read "some of these simple presentations":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before continuing.
 
-h2. <a>The User class</a>
+h2. <a class="user">The User class</a>
 
 We will start to code the blog engine by creating the User class. Create a new file @/yabe/app/models/User.java@, and declare a first implementation of the User class:
 
@@ -55,7 +55,7 @@ Now if you’re a Java developer with any experience at all, warning bells are p
 
 You can now refresh the application home page, to see the result. In fact, unless you made a mistake, you should not see any change: Play has automatically compiled and loaded the User class, but this does not add any new features to the application.
 
-h2. <a>Writing the first test</a>
+h2. <a class="test">Writing the first test</a>
 
 A good way to test the newly created User class is to write a JUnit test case. It will allow you to incrementally complete the application model and ensure that all is fine.
 
@@ -132,7 +132,7 @@ public void tryConnectAsUser() {
 
 Each time you make a modification you can run all the tests from the Play test runner to make sure you didn’t break anything. 
 
-h2. <a>The Post class</a>
+h2. <a class="post">The Post class</a>
 
 The @Post@ class will represent blog posts. Let’s write a first implementation:
 
@@ -166,6 +166,8 @@ public class Post extends Model {
 
 Here we use the <code>@Lob</code> annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the @User@ class using <code>@ManyToOne</code>. That means that each @Post@ is authored by a single @User@, and that each @User@ can author several @Post@ instances.
 
+p(note). Recent versions of PostgreSQL do not store @String@ fields annotated with <code>@Lob</code> as text unless you also annotate the field with <code>@Type(type = "org.hibernate.type.TextType")</code>.
+
 We will write a new test case to check that the @Post@ class works as expected. But before writing more tests, we need to do something in the JUnit test class. In the current test, the database content is never deleted, so each new run creates more and more objects. This will soon become problematic, when more advanced tests count objects to check that all is fine.
 
 So let’s write a JUnit @setup()@ method to delete the database before each test:
@@ -174,11 +176,10 @@ bc. public class BasicTest extends UnitTest {
  
     @Before
     public void setup() {
-        Fixtures.deleteAll();
+        Fixtures.deleteDatabase();
     }
-    
-    ...
  
+    …
 }
 
 p(note). The <code>@Before</code> concept is a core concept of the JUnit testing tool.
@@ -209,9 +210,9 @@ public void createPost() {
     assertNotNull(firstPost.postedAt);
 }
 
-p(note). **Don’t forget** to import the @java.util.List@ or will get a compilation error.
+p(note). **Don’t forget** to import the @java.util.List@ or you will get a compilation error.
 
-h2. <a>Adding Comments</a>
+h2. <a class="comments">Adding Comments</a>
 
 The last thing that we need to add to this first model draft is the ability to attach comments to posts.
 
@@ -295,7 +296,7 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the @mappedBy@ attribute to tell JPA that the @Comment@ class’s post field maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the @Comments@ belong to the @Post@, it’s better that the @Comment@ class maintains the relationship.
+Note how we have used the @mappedBy@ attribute to tell JPA that the @Comment@ class’ post field is the owning side that maintains the relationship. When you define a bi-directional relation with JPA it is important to specify which side will maintain the relationship. In this case, since @Comment@ instances belong to a @Post@, we define the relationship on the @Comment.post@ inverse relation.
 
 We have set the @cascade@ property to tell JPA that we want @Post@ deletion be cascaded to @comments@. This way, if you delete a post, all related comments will be deleted as well.
 
@@ -348,7 +349,7 @@ Is it green?
 
 !images/guide2-2!
 
-h2. <a>Using Fixtures to write more complicated tests</a>
+h2. <a class="fixtures">Using Fixtures to write more complicated tests</a>
 
 When you start to write more complex tests, you often need a set of data to test on. Fixtures let you describe your model in a "YAML":http://en.wikipedia.org/wiki/Yaml file and load it at any time before a test.
 
@@ -406,7 +407,7 @@ public void fullTest() {
 
 p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
 
-h2. <a>Save your work</a>
+h2. <a class="save">Save your work</a>
 
 We have now finished a huge part of the blog engine. Now that we have created and tested all these things, we can start to develop the web application itself.
 

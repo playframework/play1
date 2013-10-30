@@ -4,11 +4,15 @@
 	open('@{HasErrors.willBeNotFound()}')
 	assertTextPresent('Not found')
 	assertTextPresent('Hop')
+	// Make sure end of content survives with 2-byte utf-8-chars in error-template
+	assertTextPresent('ÆØÅ')
 	
 	// 500
 	open('@{HasErrors.willThrowError()}')
 	assertTextPresent('Execution exception')
 	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
+	// Make sure end of content survives with 2-byte utf-8-chars in error-template
+	assertTextPresent('ÆØÅ')
 	
 	// 500
 	open('@{HasErrors.willThrowErrorToo()}')

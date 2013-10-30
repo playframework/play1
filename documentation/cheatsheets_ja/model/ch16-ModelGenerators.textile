@@ -1,0 +1,11 @@
+h2. Model - Generators
+
+*==@GeneratedValue(strategy = [NONE, TABLE, SEQUENCE,==*
+*==IDENTITY, AUTO])==*
+インデックスの自動生成に使用します。
+
+*==@SequenceGenerator==*
+永続的なエンティティに使用するデータストア内のシーケンスを使った値のジェネレータを定義します。
+
+*==@TableGenerator==*
+永続的なエンティティに使用するデータストア内のテーブルを使ったシーケンスのジェネレータを定義します。

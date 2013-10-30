@@ -1,21 +1,18 @@
 package play.utils;
 
-import java.lang.annotation.Annotation;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-
 import play.Play;
 import play.mvc.Scope;
+
+import java.lang.annotation.Annotation;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Generic utils
@@ -215,6 +212,22 @@ public class Utils {
                 "ddMMyyyy"));
             }
             return dateformat.get();
+        }
+    }
+
+    public static String urlDecodePath(String enc) {
+        try {
+          return URLDecoder.decode(enc.replaceAll("\\+", "%2B"),Play.defaultWebEncoding);
+        } catch(Exception e) {
+            return enc;
+        }
+    }
+    
+    public static String urlEncodePath(String plain) {
+        try {
+          return URLEncoder.encode(plain,Play.defaultWebEncoding);
+        } catch(Exception e) {
+            return plain;
         }
     }
 }

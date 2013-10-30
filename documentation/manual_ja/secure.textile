@@ -1,0 +1,148 @@
+h1. Secure モジュール
+
+このシンプルな **Secure** モジュールは、アプリケーションの基本的な認証および認可管理をセットアップする手助けとなります。このモジュールは、 <code>@With</code> アノテーションを使うことで容易にコントローラに追加することのできるインターセプタ一式を定義する、シンプルな @controllers.Secure@ コントローラを提供します。
+
+
+h2. <a name="setup">モジュールのセットアップ</a>
+
+h3. <a name="enable">アプリケーションで Secure モジュールを利用可能にする</a>
+
+@/conf/dependencies.yml@ ファイルの @require:@ の後に次の行を追加することで、Secure モジュールを有効にします:
+
+bc. require:
+    - play -> secure
+
+その後、 @play dependencies@ コマンドを実行してモジュールをアプリケーションに追加します。
+
+
+h3. <a name="routes">デフォルトの Secure ルートの取り込み</a>
+
+@conf/routes@ ファイルに次の行を追加することで、モジュールのデフォルトのルートを取り込みます:
+
+bc. # Import Secure routes
+*      /                module:secure
+
+p(note). デフォルトのルートファイルの使用は必須ではないことに **注意** してください。独自のルートを定義することも、これら 2 つを混ぜ合わせることも可能です。
+
+h2. <a name="controller">コントローラの保護</a>
+
+コントローラを保護するために必要なのは、 <code>@With</code> で注釈することだけです。例えば、以下のようにします:
+
+bc. @With(Secure.class)
+public class Application extends Controller {
+    
+    public static void index() {
+        render();
+    }
+}
+
+このコントローラは自動的にデフォルトの認証ページで保護されます。
+
+h2. <a name="custom">認証メカニズムのカスタマイズ</a>
+
+デフォルトでは、このログインページはどのような login/password も受け付けます。これをカスタマイズするには、アプリケーションが **Security** プロパイダを提供する必要があります。まずは @controllers.Secure.Security@ クラスを継承するクラスを、 @controllers@ パッケージに作成してください。その後、 @authenticate(String username, String password)@ メソッドをオーバーライドします。
+
+bc. package controllers;
+ 
+public class Security extends Secure.Security {
+    
+    static boolean authenticate(String username, String password) {
+        User user = User.find("byEmail", username).first();
+        return user != null && user.password.equals(password);
+    }
+}
+
+p(note). アプリケーションが認証イベント (onAuthenticated, onDisconnected) にどのように反応すべきかカスタマイズするために、他のメソッドも同様にオーバーライドできることを **確認** してください。
+
+h2. <a name="user">接続したユーザの検索</a>
+
+たった今、作成した Security ヘルパを、接続したユーザを検索するためにアプリケーションコードから再利用することができます。
+
+bc. @With(Secure.class)
+public class Application extends Controller {
+    
+    public static void index() {
+        String user = Security.connected();
+        render(user);
+    }
+}
+
+h2. <a name="auth">認証チェックの追加</a>
+
+h3. <a name="authcontroller">コントローラアノテーション</a>
+
+Secure モジュールに、接続したユーザがこのアクションをコールするために必要な権限を持っているかチェックすることを伝えるために、 <code>@Check</code> アノテーションをコントローラクラスまたはアクションメソッドのどちらにでも使用することができます。
+
+例えば、あるアクションメソッド権限のあるユーザに制限するためには、次のようにします:
+
+bc. @With(Secure.class)
+public class Application extends Controller {
+   …
+   
+   @Check("isAdmin")
+   public static void delete(Long id) {
+       …
+   }
+}
+
+ひとつのコントローラにあるすべてのアクションメソッドを制限するためには、コントローラクラスに <code>@Check</code> アノテーションを使用します:
+
+bc. @With(Secure.class)
+@Check("administrator")
+public class Application extends Controller { 
+   …
+   
+   public static void delete(Long id) {
+       …
+   }
+   
+   public static void edit(Long id) {
+       …
+   }
+}
+
+デフォルトでは、secure モジュールは常に全てのチェックを承認します。作成した @Security@ クラスでひとつ以上のメソッドをオーバーライドして、カスタマイズしなければなりません。
+
+bc. package controllers;
+ 
+public class Security extends Secure.Security {
+    …
+    
+    static boolean check(String profile) {
+        User user = User.find("byEmail", connected()).first();
+        if ("administrator".equals(profile)) {
+            return user.admin;
+        }
+        else {
+            return false;
+        }
+    }    
+}
+
+h3. <a name="authtag">テンプレートタグ</a>
+
+テンプレート中で権限をチェックするために @secure.check@ を使うこともできます。これは、コントローラのアノテーションによって保護された操作に対するユーザインタフェースコントロールを、条件付きで表示する場合に便利です。例えば、次のようにします:
+
+bc. #{secure.check "administrator"}
+    <a href="@{delete(item.id)}">Delete</a>
+#{/secure.check}
+
+このタグは認証されたユーザにのみ、そのボディをレンダリングするので、‘Delete’ リンクはユーザが @delete@ コントローラアクションの実行を許可された場合にのみ表示されます。
+
+h2. <a name="commands">コマンド</a>
+
+Secure モジュールはログインページをオーバーライドするために使用する @play secure:override@ を提供しているので、アプリケーションをカスタマイズすることができます。これは、モジュールからアプリケーションにコピーされた関連するファイルが替わりに使用されることで動作します。
+
+@play secure:override@ は @play secure:ov@ と省略することができます。
+
+h3. <a name="css">CSS のオーバーライド</a>
+
+ログインページのルックアンドフィールを編集してカスタマイズできるように、CSS ファイルをアプリケーションにコピーするには、 @play secure:override --css@ コマンドを使用します。
+
+h3. <a name="login">ログインテンプレートのオーバーライド</a>
+
+デフォルトのログインページテンプレートをオーバーライドするように、ログインページのビューテンプレートをアプリケーションにコピーするには、 @play secure:override --login@ コマンドを使用します。
+
+h3. <a name="layout">メインレイアウトのオーバーライド</a>
+
+ログインページが使用するレイアウトをオーバーライドするように、メインレイアウトをコピーするには、 @play secure:override --layout@ コマンドを使用します。

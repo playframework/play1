@@ -1,0 +1,301 @@
+h1. データベースエボリューションの管理
+
+リレーショナルデータベースを使用する場合、データベーススキーマの進展を追跡し、管理する方法が必要になります。データベーススキーマの変更を追跡する、より洗練された方法が必要になるいくつかのシチュエーションがあります。
+
+* 開発チームの中で作業をしていて、すべての人があらゆるスキーマの変更を知る必要があるとき。
+* 本番サーバにデプロイをしていて、データベーススキーマを更新する強固な方法が必要なとき。
+* 複数のマシンで作業をしていて、すべてのデータベーススキーマを同期する必要があるとき。
+
+p(note). もし JPA を使って作業しているのであれば、Hibernate が自動的にデータベースの変更を取り扱います。JPA を使わない場合、またはより良いチューニングのために手動でデータベーススキーマの面倒を見ることを好む場合、エボリューションが便利です。
+
+h2. <a name="script">エボリューションスクリプト</a>
+
+Play はいくつかの **エボリューションスクリプト** を使ってデータベースの進展を追跡します。これらのスクリプトは古くて平易な SQL で書かれており、アプリケーションの @db/evolutions@ ディレクトリに配置されることになっています。
+
+最初のスクリプトは @1.sql@, 二番目のスクリプトは @2.sql@, そしてその次は… と命名されます。
+
+いずれのスクリプトもふたつの部分を含みます:
+
+* 変更の要件を定義する *Ups* パート。
+* 変更を取り消す方法を定義する *Downs* パート。
+
+例えば、基本的なアプリケーションを立ち上げる最初のエボリューションスクリプトを見てみましょう:
+
+bc. # Users schema
+ 
+# --- !Ups
+ 
+CREATE TABLE User (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    email varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    fullname varchar(255) NOT NULL,
+    isAdmin boolean NOT NULL,
+    PRIMARY KEY (id)
+);
+ 
+# --- !Downs
+ 
+DROP TABLE User; 
+
+見てのとおり、SQL スクリプトはコメントを使って *UPs* 節と *Downs* 節に分けなければいけません。
+
+@application.conf@ にデータベースが設定されていて、エボリューションスクリプトが存在すれば、エボリューションは自動的に活性化します。 application.conf で "evolutions.enabled":configuration#evolutions.enabled を @false@ に設定することでエボリューションを非活性化することができます。
+例えば、テストが自分自身のデータベースをセットアップする場合、テスト環境においてエボリューションを非活性化することができます。
+
+**エボリューション** が活性化すると、DEV モードの場合はあらゆるリクエストの前に、あるいは PROD モードの場合はアプリケーションを起動する前に Play はデータベーススキーマの状態を確認します。DEV モードにおいてデータベーススキーマが更新されていない場合、適切な SQL スクリプトを実行してデータベーススキーマを同期することをエラーページが提示します。
+
+!images/evolutions!
+
+この SQL に同意する場合、'Apply evolutions' ボタンをクリックして直接これを適用することができます。
+
+p(note). インメモリデータベース (*db=mem*) を使っていてデータベースが空の場合、Play はすべてのエボリューションスクリプトを自動的に実行します。
+
+h2. 同時変更の同期
+
+さて、ここで二人の開発者が作業するプロジェクトを想像してみましょう。開発者 A は新しいデータベーステーブルが必要な機能に取り掛かっています。そのため、以下のような @2.sql@ エボリューションスクリプトを作成するでしょう:
+
+bc. # Add Post
+ 
+# --- !Ups
+CREATE TABLE Post (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    title varchar(255) NOT NULL,
+    content text NOT NULL,
+    postedAt date NOT NULL,
+    author_id bigint(20) NOT NULL,
+    FOREIGN KEY (author_id) REFERENCES User(id),
+    PRIMARY KEY (id)
+);
+ 
+# --- !Downs
+DROP TABLE Post;
+
+Play は開発者 A のデータベースにこのエボリューションスクリプトを適用します。
+
+一方で、開発者 B は @User@ テーブルの変更が必要な機能に取り掛かっています。そのため、やはり以下のような @2.sql@ エボリューションスクリプトを作成するでしょう:
+
+bc. # Update User
+ 
+# --- !Ups
+ALTER TABLE User ADD age INT;
+ 
+# --- !Downs
+ALTER TABLE User DROP age;
+
+開発者 B は機能を終えてコミットします (Git を使っていることにしましょう) 。 ここで開発者 A は作業を続ける前に同僚の成果をマージしなければならないので @git pull@ を実行しますが、このマージでは以下のようなコンフリクトが発生します:
+
+bc. Auto-merging db/evolutions/2.sql
+CONFLICT (add/add): Merge conflict in db/evolutions/2.sql
+Automatic merge failed; fix conflicts and then commit the result.
+
+いずれの開発者も @2.sql@ エボリューションスクリプトを作成しました。そのため開発者 A はこのファイルの内容をマージする必要があります:
+
+bc. <<<<<<< HEAD
+# Add Post
+ 
+# --- !Ups
+CREATE TABLE Post (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    title varchar(255) NOT NULL,
+    content text NOT NULL,
+    postedAt date NOT NULL,
+    author_id bigint(20) NOT NULL,
+    FOREIGN KEY (author_id) REFERENCES User(id),
+    PRIMARY KEY (id)
+);
+ 
+# --- !Downs
+DROP TABLE Post;
+=======
+# Update User
+ 
+# --- !Ups
+ALTER TABLE User ADD age INT;
+ 
+# --- !Downs
+ALTER TABLE User DROP age;
+>>>>>>> devB
+
+このマージは実に簡単に行えます:
+
+bc. # Add Post and update User
+ 
+# --- !Ups
+ALTER TABLE User ADD age INT;
+ 
+CREATE TABLE Post (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    title varchar(255) NOT NULL,
+    content text NOT NULL,
+    postedAt date NOT NULL,
+    author_id bigint(20) NOT NULL,
+    FOREIGN KEY (author_id) REFERENCES User(id),
+    PRIMARY KEY (id)
+);
+ 
+# --- !Downs
+ALTER TABLE User DROP age;
+ 
+DROP TABLE Post;
+
+このエボリューションスクリプトは、開発者 A が既に適用した以前のリビジョン 2 とは違う、このデータベースの新しい **リビジョン 2** を表現しています。
+
+このため Play はこれを検知し、まず古いリビジョン 2 を取り消し、新しいリビジョン 2 スクリプトを適用してデータベースを同期するよう開発者 A に依頼します:
+
+!images/evolutions-conflict!
+
+h2. 矛盾した状態
+
+エボリューションスクリプトを間違えて、エボリューションが失敗することもあるでしょう。この場合、Play はデータベーススキーマを矛盾した状態にあると印付け、作業を続ける前にこの問題を手動で解決するよう依頼します。
+
+例えば、このエボリューションの **Ups** スクリプトにはエラーがあります:
+
+bc. # Add another column to User
+  
+# --- !Ups
+ALTER TABLE Userxxx ADD company varchar(255);
+ 
+# --- !Downs
+ALTER TABLE User DROP company;
+
+このため、このエボリューションを適用すると失敗し、Play はデータベーススキーマを矛盾していると印付けます:
+
+!images/evolutions-inconsistent!
+
+さて、作業を続ける前にこの矛盾を解決しなければなりません。そこで、修正した SQL コマンドを実行します:
+
+bc. ALTER TABLE User ADD company varchar(255);
+
+その後、ボタンをクリックすることで、この問題は手動で解決したと印付けます。
+
+しかし、エボリューションスクリプトにはエラーがあるので、これを直したいはずです。そこで @3.sql@ スクリプトを修正します:
+
+bc. # Add another column to User
+  
+# --- !Ups
+ALTER TABLE User ADD company varchar(255);
+ 
+# --- !Downs
+ALTER TABLE User DROP company;
+
+Play は以前の *3* を置き換えるこの新しいエボリューションを検知し、以下のスクリプトを実行します:
+
+!images/evolutions-resolve!
+
+これですべてが解決し、作業を続けることができます。
+
+p(note). とは言え、開発モードにおいては、単に開発データベースを捨てて最初からすべてのエボリューションを再度適用するほうが簡単な場合がしばしばあります。
+
+h2. エボリューションコマンド
+
+DEV モードでは対話的にエボリューションを実行します。しかし PROD モードではアプリケーションを実行する前に @evolutions@ コマンドを使ってデータベーススキーマを確定しなければいけません。
+
+本番モードのアプリケーションを更新されていないデータベースで実行しようとした場合、アプリケーションは起動しません。
+
+bc. ~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! master-localbuild, http://www.playframework.org
+~ framework ID is prod
+~
+~ Ctrl+C to stop
+~ 
+13:33:22 INFO  ~ Starting ~/test
+13:33:22 INFO  ~ Precompiling ...
+13:33:24 INFO  ~ Connected to jdbc:mysql://localhost
+13:33:24 WARN  ~ 
+13:33:24 WARN  ~ Your database is not up to date.
+13:33:24 WARN  ~ Use `play evolutions` command to manage database evolutions.
+13:33:24 ERROR ~ 
+ 
+@662c6n234
+Can't start in PROD mode with errors
+ 
+Your database needs evolution!
+An SQL script will be run on your database.
+ 
+play.db.Evolutions$InvalidDatabaseRevision
+	at play.db.Evolutions.checkEvolutionsState(Evolutions.java:323)
+	at play.db.Evolutions.onApplicationStart(Evolutions.java:197)
+	at play.Play.start(Play.java:452)
+	at play.Play.init(Play.java:298)
+	at play.server.Server.main(Server.java:141)
+Exception in thread "main" play.db.Evolutions$InvalidDatabaseRevision
+	at play.db.Evolutions.checkEvolutionsState(Evolutions.java:323)
+	at play.db.Evolutions.onApplicationStart(Evolutions.java:197)
+	at play.Play.start(Play.java:452)
+	at play.Play.init(Play.java:298)
+	at play.server.Server.main(Server.java:141)
+
+エラーメッセージは @play evolutions@ コマンドを実行するよう依頼しています:
+
+bc. $ play evolutions
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! master-localbuild, http://www.playframework.org
+~ framework ID is gbo
+~
+~ Connected to jdbc:mysql://localhost
+~ Application revision is 3 [15ed3f5] and Database revision is 0 [da39a3e]
+~
+~ Your database needs evolutions!
+ 
+# ----------------------------------------------------------------------------
+ 
+# --- Rev:1,Ups - 6b21167
+ 
+CREATE TABLE User (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    email varchar(255) NOT NULL,
+    password varchar(255) NOT NULL,
+    fullname varchar(255) NOT NULL,
+    isAdmin boolean NOT NULL,
+    PRIMARY KEY (id)
+);
+ 
+# --- Rev:2,Ups - 9cf7e12
+  
+ALTER TABLE User ADD age INT;
+CREATE TABLE Post (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    title varchar(255) NOT NULL,
+    content text NOT NULL,
+    postedAt date NOT NULL,
+    author_id bigint(20) NOT NULL,
+    FOREIGN KEY (author_id) REFERENCES User(id),
+    PRIMARY KEY (id)
+);
+ 
+# --- Rev:3,Ups - 15ed3f5
+ 
+ALTER TABLE User ADD company varchar(255);
+ 
+# ----------------------------------------------------------------------------
+ 
+~ Run `play evolutions:apply` to automatically apply this script to the db
+~ or apply it yourself and mark it done using `play evolutions:markApplied`
+~
+
+このエボリューションを Play が自動的に実行するようにしたい場合は、以下を実行します:
+
+bc. $ play evolutions:apply
+
+本番データベースにおいて、このスクリプトを手動で実行したい場合は、次のコマンドを実行してデータベースが更新されたことを Play に伝える必要があります:
+
+bc. $ play evolutions:markApplied
+
+エボリューションスクリプトの自動実行中になんらかのエラーが発生した場合、DEV モードにおいては、それらを手動で解決し、次のコマンドを実行することでデータベーススキーマが修正されたと印付ける必要があります:
+
+bc. $ play evolutions:resolve
+
+p(note). **考察を続けます**
+
+%(next)"ロギング":logs% の設定方法を学びましょう。

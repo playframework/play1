@@ -26,7 +26,18 @@ import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
 
-    static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
+    public static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
+
+    private boolean isAwakingFromAwait() {
+        Http.Request request = Http.Request.current();
+        if (request == null) {
+            return false;
+        }
+
+        // if CONTINUATIONS_STORE_VALIDATIONS is present we know that
+        // we are awaking from await()
+        return request.args.containsKey(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
+    }
 
     @Override
     public void beforeInvocation() {
@@ -36,6 +47,16 @@ public class ValidationPlugin extends PlayPlugin {
 
     @Override
     public void beforeActionInvocation(Method actionMethod) {
+
+        // when using await, this code get called multiple times.
+        // When  recovering from await() we're going to restore (overwrite) validation.current
+        // with the object-instance from the previous part of the execution.
+        // If this is happening it is no point in doing anything here, since
+        // we overwrite it later on.
+        if (isAwakingFromAwait()) {
+            return ;
+        }
+
         try {
             Validation.current.set(restore());
             boolean verify = false;
@@ -128,7 +149,10 @@ public class ValidationPlugin extends PlayPlugin {
             return;
         }
         if (Validation.errors().isEmpty()) {
-            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            // Only send "delete cookie" header when the cookie was present in the request
+            if(Http.Request.current().cookies.containsKey(Scope.COOKIE_PREFIX + "_ERRORS") || !Scope.SESSION_SEND_ONLY_IF_CHANGED) {
+                Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            }
             return;
         }
         try {

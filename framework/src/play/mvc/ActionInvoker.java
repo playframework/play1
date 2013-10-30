@@ -7,11 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -20,6 +16,9 @@ import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
+import play.data.binding.CachedBoundActionMethodArgs;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
 import play.exceptions.ActionNotFoundException;
@@ -27,6 +26,7 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
+import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
 import play.mvc.results.Result;
@@ -35,7 +35,7 @@ import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-import java.util.Stack;
+
 import java.util.concurrent.Future;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
@@ -63,6 +63,7 @@ public class ActionInvoker {
         Scope.RouteArgs.current.set(new Scope.RouteArgs());
         Scope.Session.current.set(Scope.Session.restore());
         Scope.Flash.current.set(Scope.Flash.restore());
+        CachedBoundActionMethodArgs.init();
 
         ControllersEnhancer.currentAction.set(new Stack<String>());
 
@@ -158,6 +159,12 @@ public class ActionInvoker {
                     ControllerInstrumentation.initActionCall();
                     try {
                         inferResult(invokeControllerMethod(actionMethod));
+                    } catch(Result result) {
+                        actionResult = result;
+                        // Cache it if needed
+                        if (cacheKey != null) {
+                            play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
+                        }
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {
@@ -508,6 +515,9 @@ public class ActionInvoker {
     static final String F = "__future";
     static final String CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES = "__CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES";
     static final String CONTINUATIONS_STORE_RENDER_ARGS = "__CONTINUATIONS_STORE_RENDER_ARGS";
+    static final String CONTINUATIONS_STORE_PARAMS = "__CONTINUATIONS_STORE_PARAMS";
+    public static final String CONTINUATIONS_STORE_VALIDATIONS = "__CONTINUATIONS_STORE_VALIDATIONS";
+    static final String CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS = "__CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case
@@ -516,6 +526,8 @@ public class ActionInvoker {
             // Action0
             instance = Http.Request.current().args.get(A);
             Future f = (Future) Http.Request.current().args.get(F);
+            Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+            Scope.RenderArgs.current.set(renderArgs);
             if (f == null) {
                 method = instance.getClass().getDeclaredMethod("invoke");
                 method.setAccessible(true);
@@ -605,28 +617,48 @@ public class ActionInvoker {
         return new Object[]{controllerClass, actionMethod};
     }
 
+
     public static Object[] getActionMethodArgs(Method method, Object o) throws Exception {
         String[] paramsNames = Java.parameterNames(method);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
-        Object[] rArgs = new Object[method.getParameterTypes().length];
+
+
+        // Check if we have already performed the bind operation
+        Object[] rArgs = CachedBoundActionMethodArgs.current().retrieveActionMethodArgs(method);
+        if ( rArgs != null) {
+            // We have already performed the binding-operation for this method
+            // in this request.
+            return rArgs;
+        }
+
+        rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
             Class<?> type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap<String, String[]>();
+            Map<String, String[]> params = new HashMap<String, String[]> ();
+
+            // In case of simple params, we don't want to parse the body.
             if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {
                 params.putAll(Scope.Params.current().all());
             }
+            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
 
-            if (Logger.isTraceEnabled()) {
-                Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
-            }
-
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
+            RootParamNode root = ParamNode.convert(params);
+            rArgs[i] = Binder.bind(
+                        root,
+                        paramsNames[i],
+                        method.getParameterTypes()[i],
+                        method.getGenericParameterTypes()[i],
+                        method.getParameterAnnotations()[i],
+                        new Binder.MethodAndParamInfo(o, method, i + 1));
         }
+
+        CachedBoundActionMethodArgs.current().storeActionMethodArgs(method, rArgs);
         return rArgs;
     }
+
 }

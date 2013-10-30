@@ -16,8 +16,8 @@ def execute(**kargs):
     play_env = kargs.get("env")
 
     is_application = os.path.exists(os.path.join(app.path, 'conf', 'application.conf'))
-    app.check()
     if is_application:
+        app.check()
         app.check_jpda()
     modules = app.modules()
     classpath = app.getClasspath()
@@ -26,6 +26,9 @@ def execute(**kargs):
     # if this is an application, the name of the project is in the application.conf file
     # if this is a module, we infer the name from the path
     application_name = app.readConf('application.name')
+    vm_arguments = app.readConf('jvm.memory')
+    # JDK 7 compat
+    vm_arguments = vm_arguments +' -XX:-UseSplitVerifier'
     if application_name:
         application_name = application_name.replace("/", " ")
     else:
@@ -58,9 +61,18 @@ def execute(**kargs):
         playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
     cpJarToSource = {}
+    lib_src = os.path.join(app.path, 'tmp/lib-src')
     for el in classpath:
+        # library sources jars in the lib directory
         if os.path.basename(el) != "conf" and el.endswith('-sources.jar'):
             cpJarToSource[el.replace('-sources', '')] = el
+
+        # pointers to source jars produced by 'play deps'
+        src_file = os.path.join(lib_src, os.path.basename(el) + '.src')
+        if os.path.exists(src_file):
+            f = file(src_file)
+            cpJarToSource[el] = f.readline().rstrip()
+            f.close()
 
     javadocLocation = {}
     for el in classpath:
@@ -120,12 +132,14 @@ def execute(**kargs):
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_VERSION%', play_env["version"])
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%VM_ARGUMENTS%', vm_arguments)
 
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_VERSION%', play_env["version"])
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%VM_ARGUMENTS%', vm_arguments)
 
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))
@@ -133,8 +147,11 @@ def execute(**kargs):
         os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
-
-    print "~ OK, the application is ready for eclipse"
+   
+    if is_application:
+        print "~ OK, the application \"%s\" is ready for eclipse" % application_name
+    else:
+        print "~ OK, the module \"%s\" is ready for eclipse" % application_name
     print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path)
     print "~"
     print "~ Use eclipsify again when you want to update eclipse configuration files."

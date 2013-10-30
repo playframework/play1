@@ -1,0 +1,52 @@
+h2. Template - Standard Tags
+
+*==#{extends ʻpage.htmlʼ/}==*
+*==#{doLayout /}==*
+マスタテンプレートのデコレータ
+
+*==#{get 'title'}Used if title not set#{/get}==*
+*==#{set title:ʻHome Pageʼ}==*
+ページとマスタテンプレート間で共有される変数
+
+*==#{include 'tree.html'/}==*
+ページの断片をインクルードします。 - page コンテキストは共有されます。
+
+*==#{script id:'myscript' , src:ʻscript.js', charset:'utf-8' /}==*
+*==#{stylesheet id:'main', media:'print', src:'print.css' /}==*
+スクリプトとスタイルシートをインポートします。
+
+*==#{a @Application.logout() }Disconnect#{/a}==*
+*==#{form @Client.create() , id:'form' enctype:'multipart/form-==*
+*==data' } ... #{/form}==*
+アンカーやフォームを作るのに便利なタグ
+
+*==#{verbatim}${'&amp;'}#{/verbatim}==*
+HTML エスケープを無効化します。
+
+*==#{i18n /}==*
+ローカライズされたメッセージを Javascript にエクスポートします。
+
+*==#{ifErrors} &lt;p&gt;Error(s) found!&lt;/p&gt; #{/ifErrors}==*
+検証エラーをチェックします。
+
+*==#{ifError 'user.name'} #{error 'user.name' /} #{/ifError}==*
+指定されたエラーをチェックします。
+
+*==#{errors} &lt;li&gt;${error}&lt;/li&gt; #{/errors}==*
+検証エラーを繰り返し処理します。
+
+*==#{if cond}...#{/if}#{elseif cond}...#{/elseif}#{else}...#{/else}==*
+*==#{ifnot cond}...#{/ifnot}==*
+条件構文
+
+*==#{list items:0..10, as:'i'}${i}#{/list}==*
+*==#{list items:'a'..'z', as:'l'}${l} ${l_isLast ?'':'|' }#{/list}==*
+*==#{list users}${_}#{/list}==*
+ループ構文
+
+*==#{list items:task, as:'task'}${task}#{/list}==*
+*==#{else}No tasks on the list#{/else}==*
+Tip: else は list と一緒に使えます。
+
+*==#{cache ʻkeyʼ, for:ʼ15minʼ}...#{/cache}==*
+15 分間コンテンツをキャッシュします。

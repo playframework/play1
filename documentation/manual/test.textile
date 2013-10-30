@@ -32,7 +32,7 @@ public class MyTest extends UnitTest {
 
 h3. Functional test
 
-A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects. 
+A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects.
 
 Here is an example of a Functional test:
 
@@ -49,6 +49,16 @@ public class ApplicationTest extends FunctionalTest {
         assertStatus(200, response);
     }
      
+}
+
+Using the @renderArgs()@ method, you can also get direct access to the arguments passed to the view, instead of having to make assertions about the response itself.  For example:
+
+bc. @Test
+public void testUserIsFoundAndPassedToView() {
+    Response response = POST("/user/find?name=mark&dob=18011977");
+    assertThat(renderArgs("user"), is(notNullValue()));
+    User user = (User) renderArgs("user");
+    assertThat(user.name, is("mark"));
 }
 
 h3. Selenium test
@@ -119,6 +129,51 @@ bc. #{selenium 'Get string from cache'}
  
 #{/selenium}
 
+h3. CleanTest Annotation
+
+Some Unit/Functional tests may need to (or should not) access these ThreadLocal MVC objects:
+* Response,
+* Request,
+* RenderArgs,
+
+By default these objects will be created and you can directly access them.
+The CleanTest annotation enables you to change this default behaviour (a use 
+case would be to test some code that will be used in a Job context and thus 
+doesn't have access to these objects).   
+
+
+bc.  Request request = Request.current();
+// some code to use request
+     
+Response response = Response.current();
+// some code to use response
+      
+RenderArgs renderArgs = RenderArgs.current();
+// some code to use renderArgs
+
+In order to control the access to these parameters, you can use the <code>@CleanTest</code> on the test class.
+
+bc. @CleanTest(removeCurrent= true, createDefault=false)
+public class FunctionalTestCleanTest extends FunctionalTest {
+    @Test
+    public void testParam(){
+        Request request = Request.current();
+        assertNull(request);
+     
+        Response response = Response.current();
+        assertNull(response);
+      
+        RenderArgs renderArgs = RenderArgs.current();
+        assertNull(renderArgs);
+     }  
+}
+
+This annotation has the following properties:
+
+* **removeCurrent**: Indicate if current MVC objects will be removed or not
+* **createDefault**: Indicate if current MVC objects will be created or not
+
+
 h2. <a name="fixtures">Fixtures</a>
 
 When you run tests, you need to have stable data for your application. The simplest way is to reset your database before each test.
@@ -156,7 +211,7 @@ p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
 
 For Selenium tests, you can use the @#{fixture /}@ tag:
 
-bc. #{fixture delete:'all', load:'data.yml' /}
+bc. #{fixture delete:'all', loadModels:'data.yml' /}
  
 #{selenium}
     
@@ -170,7 +225,7 @@ bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
 
 and for Selenium tests:
 
-bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
+bc. #{fixture delete:'all', loadModels:['users.yml', 'roles.yml', 'permissions.yml'] /}
 
 h2. <a name="running">Running the tests</a>
 
@@ -188,9 +243,9 @@ On the test runner page, each test is a link. You can ‘right click’ and ‘O
 
 When you run tests this way, Play will start with a special @test@ framework ID. So you can define special configurations in the @application.conf@ file.
 
-If you want several different test-configuration, you can use framework IDs matching the pattern @test-?.*@ (e.g: @test-special@).
-If you use a framework ID other then the default @test@, you must make sure ALL test configuration in @application.conf@ is available
-with that framework ID. When launching test with special test framework ID you do it like this: @play test --%test-your-special-id@
+If you want several different test configurations, you can use framework IDs matching the pattern @test-?.*@ (e.g: @test-special@).
+
+If you use a framework ID other then the default @test@, you must make sure ALL test configuration in @application.conf@ is available with that framework ID. When launching test with special test framework ID you do it like this: @play test --%test-your-special-id@
 
 For example:
 
@@ -213,6 +268,8 @@ So setting up a continuous integration system to test your application, could be
 * Check for the marker file @result.passed@ or @result.failed@ in the @/test-result@ directory
 
 Run these steps in a CRON tab, and you’re done!
+
+You can change the web browser compatibility mode used by the headless browser by configuring "headlessBrowser":configuration#headlessBrowser.
 
 p(note). **Continuing the discussion**
  

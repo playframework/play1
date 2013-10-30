@@ -2,6 +2,7 @@ package controllers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Date;
 import play.Play;
 import play.mvc.*;
 import play.data.validation.*;
@@ -14,7 +15,7 @@ public class Secure extends Controller {
     static void checkAccess() throws Throwable {
         // Authent
         if(!session.contains("username")) {
-            flash.put("url", "GET".equals(request.method) ? request.url : "/"); // seems a good default
+            flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
             login();
         }
         // Checks
@@ -41,12 +42,23 @@ public class Secure extends Controller {
 
     public static void login() throws Throwable {
         Http.Cookie remember = request.cookies.get("rememberme");
-        if(remember != null && remember.value.indexOf("-") > 0) {
-            String sign = remember.value.substring(0, remember.value.indexOf("-"));
-            String username = remember.value.substring(remember.value.indexOf("-") + 1);
-            if(Crypto.sign(username).equals(sign)) {
-                session.put("username", username);
-                redirectToOriginalURL();
+        if(remember != null) {
+            int firstIndex = remember.value.indexOf("-");
+            int lastIndex = remember.value.lastIndexOf("-");
+            if (lastIndex > firstIndex) {
+                String sign = remember.value.substring(0, firstIndex);
+                String restOfCookie = remember.value.substring(firstIndex + 1);
+                String username = remember.value.substring(firstIndex + 1, lastIndex);
+                String time = remember.value.substring(lastIndex + 1);
+                Date expirationDate = new Date(Long.parseLong(time)); // surround with try/catch?
+                Date now = new Date();
+                if (expirationDate == null || expirationDate.before(now)) {
+                    logout();
+                }
+                if(Crypto.sign(restOfCookie).equals(sign)) {
+                    session.put("username", username);
+                    redirectToOriginalURL();
+                }
             }
         }
         flash.keep("url");
@@ -73,7 +85,11 @@ public class Secure extends Controller {
         session.put("username", username);
         // Remember if needed
         if(remember) {
-            response.setCookie("rememberme", Crypto.sign(username) + "-" + username, "30d");
+            Date expiration = new Date();
+            String duration = Play.configuration.getProperty("secure.rememberme.duration","30d"); 
+            expiration.setTime(expiration.getTime() + Time.parseDuration(duration) * 1000 );
+            response.setCookie("rememberme", Crypto.sign(username + "-" + expiration.getTime()) + "-" + username + "-" + expiration.getTime(), duration);
+
         }
         // Redirect to the original URL (or /)
         redirectToOriginalURL();
@@ -94,7 +110,7 @@ public class Secure extends Controller {
         Security.invoke("onAuthenticated");
         String url = flash.get("url");
         if(url == null) {
-            url = "/";
+            url = Play.ctxPath + "/";
         }
         redirect(url);
     }
@@ -182,15 +198,9 @@ public class Secure extends Controller {
         }
 
         private static Object invoke(String m, Object... args) throws Throwable {
-            Class security = null;
-            List<Class> classes = Play.classloader.getAssignableClasses(Security.class);
-            if(classes.size() == 0) {
-                security = Security.class;
-            } else {
-                security = classes.get(0);
-            }
+
             try {
-                return Java.invokeStaticOrParent(security, m, args);
+                return Java.invokeChildOrStatic(Security.class, m, args);       
             } catch(InvocationTargetException e) {
                 throw e.getTargetException();
             }

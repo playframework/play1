@@ -1,0 +1,12 @@
+~ Name:
+~ ~~~~~
+~ version -- Print the framework version
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play version
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Prints the version of the Play framework currently being used.
+~

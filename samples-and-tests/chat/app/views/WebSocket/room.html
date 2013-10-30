@@ -48,7 +48,8 @@
 <script type="text/javascript">
 
     // Create a socket
-    var socket = new WebSocket('@@{WebSocket.ChatRoomSocket.join(user)}')
+    var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+    var socket = new WS('@@{WebSocket.ChatRoomSocket.join(user)}')
     
     // Display a message
     var display = function(event) {

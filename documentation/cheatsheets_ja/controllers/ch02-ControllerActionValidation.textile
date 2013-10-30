@@ -1,0 +1,27 @@
+h2. Controller.action - Validation
+
+*==@Required String lastname==*
+*==@IsTrue String agree==*
+*==@Max(7500) Integer wordCount==*
+*==@Min(18) Long age==*
+*==@MaxSize(2083) String value==*
+*==@MinSize(42) String value==*
+*==@Email String address==*
+*==@Equals("passwordConfirmation") String password==*
+*==@InFuture String dueDate==*
+*==@InFuture("1979-12-31") String birthDate==*
+*==@Match("[A-Z]{3}") String abbreviation==*
+*==@Match("(directDebit|creditCard|onReceipt)")==*
+*==@Past String actualDepartureDate==*
+*==@Past("1980-01-01") String birthDate==*
+*==@Range(min = 17500, max = 40000) String wordCount==*
+*==@URL String address==*
+*==@IPv4Address String ip==*
+*==@IPv6Address String ip==*
+
+*==@Phone String phone==*
+Relaxed phone validation
+電話番号の緩やかな検証
+
+*==@Valid Person person==*
+JavaBean (POJO) 検証 - Person クラスは検証のアノテーションが必要です。

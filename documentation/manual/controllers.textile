@@ -170,17 +170,7 @@ bc.  public static void articlesSince(@As(lang={"fr,de","*"},
 
 In this example, we specified that for the French and German languages the date format is @dd-MM-yyyy@ and for all the other languages it's @MM-dd-yyyy@. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
 
-If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale.
-To set the default date format to use, edit your application.conf and set the following property:
-
-bc. date.format=yyy-MM-dd
-date.format.fr=dd/MM/yyyy
-
-Please note that the language fr in the application.conf must be enabled as well:
-
-bc. application.langs=fr
-
-This property also affects how the dates are rendered in the templates using @${date.format()}@.
+If no <code>@As</code> annotation is specified, then Play! uses the default date format according to your locale. The "date.format configuration":configuration#date.format specifies the default date format to use.
 
 
 h3. <a name="calendar">Calendar</a>
@@ -206,9 +196,7 @@ bc. String mimeType = MimeTypes.getContentType(attachment.getName());
 
 The @play.libs.MimeTypes@ class looks up the MIME type for the given file name’s extension in the file @$PLAY_HOME/framework/src/play/libs/mime-types.properties@ 
 
-You can also add your own types to your application’s @conf/application.conf@ file. For example, to add a MIME type for GIMP images with the @.xcf@ extension, add the line: 
-
-bc. mimetype.xcf=application/x-gimp-image 
+You can also add your own types using the "Custom MIME types configuration":configuration#mimetype.
 
 
 h3. <a name="array">Arrays or collections of supported types</a>
@@ -376,6 +364,9 @@ public class PointBinder implements TypeBinder<Point> {
 
 As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
 
+h4. Exception throwing in TypeBinders
+
+If a typebinder throws an exception, by default the exception is trapped and the object that was bound is null.  If a TypeBinder author wants an Exception to propagate instead, a BinderException should be thrown which will not be trapped by the Binder.
 
 h2. <a name="result">Result types</a>
 
@@ -407,6 +398,48 @@ You can format the text message using the Java standard formatting syntax:
 bc. public static void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderText("There are %s unread messages", unreadMessages);
+}
+
+h3. <a name="renderjson">Return a JSON String</a>
+
+Play comes equiped with a method to simply return a JSON string, by making use of the @renderJSON(…)@ methods. These methods return a JSON string and set the response content type to @application/json@. 
+
+You can specify your own JSON string, or you can pass in an @Object@, which will be serialised by the @GsonBuilder@.
+
+Example:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderJSON("{\"messages\": " + unreadMessages +"}");
+}
+
+Alternatively, if you had a more complex object structure, you may wish to build the JSON using the @GsonBuilder@.
+
+bc. public static void getUnreadMessages() {
+    List<Message> unreadMessages = MessagesBox.unreadMessages();
+    renderJSON(unreadMessages);
+}
+
+If you need more control over the JSON builder when passing an @Object@ to the @renderJSON(…)@ method, you can also pass in GSON serialisers and @Type@ objects to customise the output. 
+
+h3. <a name="renderxml">Return an XML String</a>
+
+As with the JSON methods, there are several methods for rendering XML directly from the controller. The @renderXml(…)@ methods return XML strings with the content type set to @text/xml@.
+
+Here you can specify your own XML string, pass a @org.w3c.dom.Document@ object, or pass a POJO which will be serialised by the XStream serialiser.
+
+Example:
+
+bc. public static void countUnreadMessages() {
+    Integer unreadMessages = MessagesBox.countUnreadMessages();
+    renderXml("<unreadmessages>"+unreadMessages+"</unreadmessages>");
+}
+
+Alternatively, you can use a @org.w3c.dom.Document@ object.
+
+bc. public static void getUnreadMessages() {
+    Document unreadMessages = MessagesBox.unreadMessagesXML();
+    renderXml(unreadMessages);
 }
 
 h3. <a name="binary">Return binary content</a>
@@ -559,11 +592,8 @@ bc. <form action="@{application.index}" method="POST" accept-charset="ISO-8859-1
 
 h4. Custom encoding for the entire application
 
-Set the @application.web_encoding@ in @application.conf@ to specify which encoding Play uses when communicating with the browser. This also changes the default encoding for Play’s powerful "Web Service client":libs#WebServiceclient.
+Configure "application.web_encoding":configuration#application.web_encoding to specify which encoding Play uses when communicating with the browser.
 
-bc. application.web_encoding=ISO-8859-1
-
-Changing @application.web_encoding@ affects the @charset@ part of the @Content-type@ HTTP header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play serves static content: So, if you have modified the default response encoding and you have static text-files (in the @public/@ folder) that contain special characters, you must make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
 
 h2. <a name="interceptions">Interceptions</a>
 
@@ -577,7 +607,7 @@ Methods annotated with the <code>@Before</code> annotation are executed before e
 
 So, to create a security check:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before
     static void checkAuthentification() {
@@ -593,7 +623,7 @@ bc. public class Admin extends Application {
 
 If you don’t want the @Before method to intercept all action calls, you can specify a list of actions to exclude:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before(unless="login")
     static void checkAuthentification() {
@@ -610,7 +640,7 @@ bc. public class Admin extends Application {
 
 Or if you want the @Before method to intercept a list of action calls, you can specify a only param :
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Before(only={"login","logout"})
     static void doSomething() {  
@@ -625,7 +655,7 @@ h3. <a name="after">@After</a>
 
 Methods annotated with the <code>@After</code> annotation are executed after each action call for this Controller.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @After
     static void log() {
@@ -644,7 +674,7 @@ h3. <a name="catch">@Catch</a>
 
 Methods annotated with <code>@Catch</code> are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
 	
     @Catch(IllegalStateException.class)
     public static void logIllegalState(Throwable throwable) {
@@ -662,7 +692,7 @@ bc. public class Admin extends Application {
 
 As with normal Java exception handling, you can catch a super-class to catch more exception types. If you have more than one catch method, you can specify their **priority** so that they are executed in order of priority (priority 1 is executed first).
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Catch(value = Throwable.class, priority = 1)
     public static void logThrowable(Throwable throwable) {
@@ -690,7 +720,7 @@ h3. <a name="finally">@Finally</a>
 Methods annotated with the <code>@Finally</code> annotation are always executed after each action call to this Controller.
 @Finally-methods are called both after successful action calls and if an error occurred.
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Finally
     static void log() {
@@ -706,7 +736,7 @@ bc. public class Admin extends Application {
 
 If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
 
-bc. public class Admin extends Application {
+bc. public class Admin extends Controller {
  
     @Finally
     static void log(Throwable e) {
@@ -748,7 +778,7 @@ bc. public class Secure extends Controller {
 And on another Controller:
 
 bc. @With(Secure.class)
-public class Admin extends Application {
+public class Admin extends Controller {
     
     …
 }
@@ -773,11 +803,9 @@ bc. public static void index() {
     render(messages);
 }
 
-The session expires when you close your web browser, unless the @application.session.maxAge@ configuration property is set. For example:
+The session expires when you close your web browser, unless you configure "application.session.maxAge":configuration#application.session.maxAge.
 
-bc. application.session.maxAge=7d  # Remember for one week.
-
-The cache has different semantics than the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
+The cache has different semantics to the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 
 p(note). **Continuing the discussion**
  

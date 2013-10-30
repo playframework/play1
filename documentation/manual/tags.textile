@@ -181,7 +181,7 @@ bc. #{field 'user.name'}
   <input type="text" id="${field.id}" name="${field.name}" value="${field.value}" class="${field.errorClass}">
   <span class="error">${field.error}</span>
 </p>
-#{/}
+#{/field}
 
 So you don’t repeat @user.name@ again and again.
 
@@ -250,14 +250,20 @@ h2. <a name="get">get</a>
 Retrieves a value defined with a "set":#set tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
 
 bc. <head>
-    <title>#{get 'title' /}
+    <title>#{get 'title' /}</title>
 </head>
 
 You can also use the get tag in the following way, which will display "Homepage" if title has not been specified.
 
 bc. <head>
-    <title>#{get 'title'}Homepage #{/} 
+    <title>#{get 'title'}Homepage #{/get}</title>
 </head>
+
+You can test whether a variable is set using the @if@ tag:
+
+bc. #{if get('title')}
+    <h1>#{get 'title' /}</h1>
+#{/if}
 
 h2. <a name="i18n">i18n</a>
 
@@ -281,11 +287,19 @@ Optionally, you can restrict the tag to only some messages. The wildcard charact
 
 bc. #{i18n keys:['title', 'menu.*'] /}
 
+By default, the #{i18n /} tag renders a
+
+bc. <script type="text/javascript">...</script>
+
+tag around the generated JavaScript. You can hide this tag by setting @noScriptTag@ to @true@:
+
+bc. #{i18n keys:['title', 'menu.*'], noScriptTag:true /}
+
 h2. <a name="if">if</a>
 
 Evaluates the given test, and if true, evaluates the tag body.
 
-bc. #{if user.countryCode == 'en"' }
+bc. #{if user.countryCode == 'en' }
     Connected user is ${user}
 #{/if}
 
@@ -337,18 +351,65 @@ h2. <a name="jsaction">jsAction</a>
 
 The @#{jsAction /}@ tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
+* Optional @minimize@ attribute sets if script if minimize or not (default : not)
+* Optional @encodeURI@ attribute sets if variables must be encoded (default : not)
+* Optional @customScript@ attribute sets a default script to apply to the variables (default : empty)
+
+
 Let’s see an example:
 
 bc. GET     /users/{id}        Users.show
 
 Now you can import this route client side:
 
+h3. Ex1:
+
 bc. <script type="text/javascript">
+    // Ex 1
     var showUserAction = #{jsAction @Users.show(':id') /}
     
     var displayUserDetail = function(userId) {
         $('userDetail').load( showUserAction({id: userId}) )
     }
+    
+    // Ex 2
+    var showUserNameAction = #{jsAction @Users.showName(':name'), encodeURI:false, minimize:true /}
+    
+    $(document).ready(function() {
+        $('userDetail').load( showUserNameAction({name: "${user?.name?.urlEncode()}"}) )
+    });
+    
+    // Ex 3
+    var showUserNameActionEncodeURI = #{jsAction @Users.showName(':name'), encodeURI:true, minimize:false /}
+    
+    var displayUserDetailName = function(userName) {
+        $('userDetail').load( showUserNameActionEncodeURI({name: userName}) )
+    }
+    
+    // Ex 4
+    var showUserNameActionCustomScript = #{jsAction @Users.showName(':name'), customScript:"encodeURIComponent(val.replace('&amp;', '&'))", minimize:false /}
+    var displayUserDetail = function(userName) {
+        $('userDetail').load( showUserNameActionCustomScript({name:  userName}) )
+    }
+</script>
+
+h2. <a name="jsroute">jsRoute</a>
+
+The @#{jsRoute /}@ tag is similar to the @#{jsAction /}@ tag, it returns an object containing both the function which consctructs the URL based on the server action, and the corresponding HTTP method (GET, POST, etc.).
+
+Example:
+
+bc. PUT     /users/{id}        Users.update
+
+Then, in a template:
+
+bc. <script type="text/javascript">
+    var updateUserRoute = #{jsRoute @Users.update(':id') /}
+    $.ajax({
+      url: updateUserRoute.url({id: userId}),
+      type: updateUserRoute.method,
+      data: 'user.name=Guillaume'
+    });
 </script>
 
 
@@ -446,7 +507,7 @@ Insert a @select@ tag in the template.
 
 * @name@ (required) - attribute sets a name to the select element.
 
-Any unknow attribute will be considered as an HTML attribute, and rendered "as is"
+Any unknown attribute will be considered as an HTML attribute, and rendered "as is"
 
 bc. #{select 'booking.beds', value:2, id:'select1'}
 	#{option 1}One king-size bed#{/option}
@@ -466,11 +527,11 @@ bc. <select name="booking.beds" size="1" id="select1" >
 This tag can generate options using @items@ attribute.
 
 * @items@ (optional) - list of objects, used to create @options@
-* @value@ (optional) - selected element in @items@
+* @value@ (optional) - selected element in @items@ (note that multiple selections are not supported)
 * @labelProperty@ (optional) - for each item, attribute used as option's label 
 * @valueProperty@ (optional) - for each item, attribute used as option's value. @id@ is used by default
 
-p(note). The @labelProperty@ and @valueProperty@ shouldn't be primitives value. So, for example, instead of using @int@ or @long@ use an @Integer@ or @Long@ variable.
+p(note). The @labelProperty@ and @valueProperty@ shouldn't be primitive values. So, for example, use an @Integer@ or @Long@ variable instead of an @int@ or @long@.
 
 For example, giving a list of User, each having a name attribute:
 

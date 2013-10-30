@@ -60,6 +60,7 @@ public abstract class Enhancer {
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
+
             if(Play.usePrecompiled) {
                 try {
                     File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
@@ -68,7 +69,13 @@ public abstract class Enhancer {
                     Logger.error("Missing class %s", className);
                 }
             }
-            return new ByteArrayInputStream(Play.classes.getApplicationClass(className).enhancedByteCode);
+            ApplicationClass appClass = Play.classes.getApplicationClass(className);
+
+            if ( appClass.enhancedByteCode == null) {
+                throw new RuntimeException("Trying to visit uncompiled class while enhancing. Uncompiled class: " + className);
+            }
+
+            return new ByteArrayInputStream(appClass.enhancedByteCode);
         }
 
         public URL find(String className) {
@@ -113,6 +120,23 @@ public abstract class Enhancer {
      */    
     protected boolean hasAnnotation(CtField ctField, String annotation) throws ClassNotFoundException {
         for (Object object : ctField.getAvailableAnnotations()) {
+            Annotation ann = (Annotation) object;
+            if (ann.annotationType().getName().equals(annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Test if a method has the provided annotation
+	 * @param ctMethod the javassist method representation
+	 * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
+	 * @return true if field has the annotation
+	 * @throws java.lang.ClassNotFoundException
+	 */
+    protected boolean hasAnnotation(CtMethod ctMethod, String annotation) throws ClassNotFoundException {
+        for (Object object : ctMethod.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;
             if (ann.annotationType().getName().equals(annotation)) {
                 return true;

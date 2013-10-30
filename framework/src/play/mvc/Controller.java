@@ -17,6 +17,7 @@ import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -25,6 +26,7 @@ import play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime;
 import play.classloading.enhancers.LVEnhancer.MethodExecution;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
+import play.data.validation.ValidationPlugin;
 import play.exceptions.*;
 import play.libs.Time;
 import play.mvc.Http.Request;
@@ -527,7 +529,7 @@ public class Controller implements ControllerSupport {
      * @param permanent true -> 301, false -> 302
      */
     protected static void redirect(String url, boolean permanent) {
-        if (url.matches("^([^./]+[.]?)+$")) { // fix Java !
+        if (url.indexOf("/") == -1) { // fix Java !
             redirect(url, permanent, new Object[0]);
         }
         throw new Redirect(url, permanent);
@@ -663,10 +665,12 @@ public class Controller implements ControllerSupport {
             }
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
             if (element != null) {
-                throw new TemplateNotFoundException(templateName, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
-            } else {
-                throw ex;
+                ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
+                if (applicationClass != null) {
+                    throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
+                }
             }
+            throw ex;
         }
     }
 
@@ -939,6 +943,18 @@ public class Controller implements ControllerSupport {
             Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
             Scope.RenderArgs.current.set( renderArgs);
 
+            // Params
+            // We know that the params are partially reprocessed during awake(Before now), but here we restore the correct values as
+            // they where when we performed the await();
+            Map params = (Map) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
+            Scope.Params.current().all().clear();
+            Scope.Params.current().all().putAll(params);
+
+            // Validations
+            Validation validation = (Validation) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
+            Validation.current.set(validation);
+            ValidationPlugin.keys.set( (Map<Object, String>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS) );
+
         } else {
             // we are storing before suspend
 
@@ -949,12 +965,23 @@ public class Controller implements ControllerSupport {
 
             // renderArgs
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+
+             // Params
+             // Store the actual params values so we can restore the exact same state when awaking.
+             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
+
+            // Validations
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS, Validation.current());
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS, ValidationPlugin.keys.get());
+
+
         }
     }
 
     protected static void await(int millis, F.Action0 callback) {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.A, callback);
+        Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
         throw new Suspend(millis);
     }
 
@@ -1036,6 +1063,7 @@ public class Controller implements ControllerSupport {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.F, future);
         Request.current().args.put(ActionInvoker.A, callback);
+        Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
         throw new Suspend(future);
     }
 

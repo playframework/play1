@@ -1,15 +1,12 @@
 package play.data.binding;
 
-import org.fest.assertions.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import play.PlayBuilder;
 import play.data.validation.Validation;
-import play.data.validation.ValidationBuilder;
+import play.data.validation.ValidationPlugin;
 
-import javax.lang.model.type.TypeVariable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -19,6 +16,10 @@ public class BinderTest {
 
     final Annotation[] noAnnotations = new Annotation[]{};
 
+    // provider of generic typed collection
+    private class GenericListProvider {
+        private List<Data2> listOfData2 = new ArrayList<Data2>();
+    }
 
     @Before
     public void setup() {
@@ -33,7 +34,8 @@ public class BinderTest {
         Integer myInt = 12;
         Unbinder.unBind(r, myInt, "myInt", noAnnotations);
         Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
-        assertThat(Binder.bind("myInt", Integer.class, null, noAnnotations, r2)).isEqualTo(myInt);
+        RootParamNode root = ParamNode.convert(r2);
+        assertThat(Binder.bind(root, "myInt", Integer.class, null, null)).isEqualTo(myInt);
         int a = 0;
     }
 
@@ -56,7 +58,8 @@ public class BinderTest {
         Map<String, String[]> r2 = fromUnbindMap2BindMap( r);
 
         Data1.myStatic = 2;
-        Object bindResult = Binder.bind("data1", Data1.class, null, noAnnotations, r2);
+        RootParamNode root = ParamNode.convert(r2);
+        Object bindResult = Binder.bind(root, "data1", Data1.class, null, null);
         assertThat(bindResult).isEqualTo(data1);
         assertThat(Data1.myStatic).isEqualTo(2);
     }
@@ -69,18 +72,188 @@ public class BinderTest {
         data2.a = "aaa";
         data2.b = false;
         data2.c = 12;
+        
+        Data1 data1_1 = new Data1();
+        data1_1.a = "aAaA";
+        data1_1.b = 13;
 
-        data2.data1 = new Data1();
-        data2.data1.a = "aAaA";
-        data2.data1.b = 13;
+        Data1 data1_2 = new Data1();
+        data1_2.a = "bBbB";
+        data1_2.b = 14;
+        
+        data2.data1 = data1_1;
+        data2.datas = new ArrayList<Data1>(2);
+        data2.datas.add(data1_1);
+        data2.datas.add(data1_2);
 
 
 
         Map<String, Object> r = new HashMap<String, Object>();
         Unbinder.unBind(r, data2, "data2", noAnnotations);
         Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
-        assertThat(Binder.bind("data2", Data2.class, null, noAnnotations, r2)).isEqualTo(data2);
+        RootParamNode root = ParamNode.convert(r2);
+        assertThat(Binder.bind(root, "data2", Data2.class, null, null)).isEqualTo(data2);
 
+    }
+
+
+     @Test
+    public void verifyBindingOfStringMaps() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+
+        Map<String, String> specialCaseMap = new HashMap<String,String>();
+        params.put("specialCaseMap.a", new String[] {"AA"});
+        params.put("specialCaseMap.b", new String[] {"BB"});
+
+        Data3 data3;
+
+        params.put("data3.a", new String[] {"aAaA"});
+        params.put("data3.map[abc]", new String[] {"ABC"});
+        params.put("data3.map[def]", new String[] {"DEF"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        specialCaseMap = (Map<String, String>)Binder.bind(rootParamNode, "specialCaseMap", specialCaseMap.getClass(), specialCaseMap.getClass(), noAnnotations);
+
+        assertThat(specialCaseMap.size()).isEqualTo(2);
+        assertThat(specialCaseMap.get("a")).isEqualTo("AA");
+        assertThat(specialCaseMap.get("b")).isEqualTo("BB");
+
+        data3 = (Data3) Binder.bind(rootParamNode, "data3", Data3.class, Data3.class, noAnnotations);
+
+        assertThat(data3.a).isEqualTo("aAaA");
+        assertThat(data3.map.size()).isEqualTo(2);
+        assertThat(data3.map.get("abc")).isEqualTo("ABC");
+        assertThat(data3.map.get("def")).isEqualTo("DEF");
+    }
+
+     @Test
+	    public void verify_binding_of_simple_bean_collections() throws Exception {
+
+	        Map<String, String[]> params = new HashMap<String, String[]>();
+
+	        Data2 data2;
+	        List<Data2> lst = new ArrayList<Data2>();
+			// build the parameters
+	        params.put("data2[0].a", new String[] { "a0" });
+	        params.put("data2[1].a", new String[] { "a1" });
+	        params.put("data2[2].a", new String[] { "a2" });
+	        params.put("data2[3].a", new String[] { "a3" });
+	        params.put("data2[4].a", new String[] { "a4" });
+	        params.put("data2[5].a", new String[] { "a5" });
+	        params.put("data2[6].a", new String[] { "a6" });
+	        params.put("data2[7].a", new String[] { "a7" });
+	        params.put("data2[8].a", new String[] { "a8" });
+	        params.put("data2[9].a", new String[] { "a9" });
+	        params.put("data2[10].a", new String[] { "a10" });
+	        params.put("data2[12].a", new String[] { "a12" });
+
+	        RootParamNode rootParamNode = ParamNode.convert(params);
+
+	        lst = (List<Data2>) Binder.bind(rootParamNode, "data2", lst.getClass(), GenericListProvider.class.getDeclaredFields()[0].getGenericType(),
+	                noAnnotations);
+			//check the size and the order
+	        assertThat(lst.size()).isEqualTo(13);
+	        assertThat(lst.get(0).a).isEqualTo("a0");
+	        assertThat(lst.get(1).a).isEqualTo("a1");
+	        assertThat(lst.get(9).a).isEqualTo("a9");
+	        assertThat(lst.get(10).a).isEqualTo("a10");
+	        assertThat(lst.get(10).a).isEqualTo("a10");
+	        assertThat(lst.get(11)).isNull(); //check for null item
+	        assertThat(lst.get(12).a).isEqualTo("a12");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void verify_binding_of_root_parameters() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("a", new String[] {"foo"});
+        params.put("b", new String[] {"2"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data1 data1 = new Data1();
+        Binder.bindBean(rootParamNode, "", data1);
+
+        assertThat(data1.a).isEqualTo("foo");
+        assertThat(data1.b).isEqualTo(2);
+
+        // Also test with the old deprecated but shorter form
+        data1 = new Data1();
+        Binder.bind(data1, null, params);
+        assertThat(data1.a).isEqualTo("foo");
+        assertThat(data1.b).isEqualTo(2);
+
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void verify_validation_error_of_root_parameters() throws Exception {
+        // Initialize Validation.current()
+        new ValidationPlugin().beforeInvocation();
+
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("a", new String[] {"foo"});
+        params.put("b", new String[] {"bar"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data1 data1 = new Data1();
+        Binder.bindBean(rootParamNode, null, data1);
+
+        assertThat(Validation.error("a")).isNull();
+        assertThat(Validation.error("b")).isNotNull();
+
+        // Also test with the old deprecated but shorter form
+        data1 = new Data1();
+        Binder.bind(data1, null, params);
+        assertThat(Validation.error("a")).isNull();
+        assertThat(Validation.error("b")).isNotNull();
+    }
+
+    @Test
+    public void verify_binding_collections_of_generic_types() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("data.genericTypeList", new String[]{"1", "2", "3"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        Data3 result = (Data3) Binder.bind(rootParamNode, "data", Data3.class,
+                Data3.class, noAnnotations);
+
+        assertThat(result.genericTypeList).hasSize(3);
+
+        for (int i = 1; i < 3; i++) {
+            assertThat(result.genericTypeList.get(i - 1).value).isEqualTo(Long.valueOf(i));
+        }
+    }
+
+    @Test
+    public void test_unbinding_of_collection_of_complex_types() {
+        Data1 d1 = new Data1();
+        d1.a = "a";
+        d1.b = 1;
+
+        Data1 d2 = new Data1();
+        d2.a = "b";
+        d2.b = 2;
+
+        Data1 d3 = new Data1();
+        d3.a = "c";
+        d3.b = 3;
+
+        Data1[] datasArray = {d1, d2};
+        List<Data1> datas = Arrays.asList(new Data1[]{d2, d1, d3});
+
+        Data4 original = new Data4();
+        original.s = "some";
+        original.datas = datas;
+        original.datasArray = datasArray;
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        Unbinder.unBind(result, original, "data", noAnnotations);
+
+        Map<String, String[]> r2 = fromUnbindMap2BindMap(result);
+        RootParamNode root = ParamNode.convert(r2);
+
+        Object binded = Binder.bind(root, "data", Data4.class, Data4.class, noAnnotations);
+        assertThat(binded).isEqualTo(original);
     }
 
     /**
@@ -93,10 +266,14 @@ public class BinderTest {
         for (Map.Entry<String, Object> e : r.entrySet()) {
             String key = e.getKey();
             Object v = e.getValue();
+            System.out.println(key + " " + v + " " ) ;
             if (v instanceof String) {
                 r2.put(key, new String[]{(String)v});
             } else if (v instanceof String[]) {
                 r2.put(key, (String[])v);
+            } else if (v instanceof Collection) {
+                Object[] array = ((Collection) v).toArray();
+                r2.put(key, Arrays.copyOf(array, array.length, String[].class));
             } else {
                 throw new RuntimeException("error");
             }
@@ -107,74 +284,3 @@ public class BinderTest {
 }
 
 
-class Data1 {
-
-    public static int myStatic;
-
-    private final String f = "final"; 
-
-    public String a;
-
-    public int b;
-
-    public void abc(Integer a) {
-
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Data1 data1 = (Data1) o;
-
-        if (b != data1.b) return false;
-        if (a != null ? !a.equals(data1.a) : data1.a != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = a != null ? a.hashCode() : 0;
-        result = 31 * result + b;
-        return result;
-    }
-}
-
-
-class Data2 {
-    public String a;
-    public Boolean b;
-    public int c;
-
-    /**
-     * Tried first with arrays and lists but the Unbinder fails in such situations.
-     */
-
-    public Data1 data1;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Data2 data2 = (Data2) o;
-
-        if (c != data2.c) return false;
-        if (a != null ? !a.equals(data2.a) : data2.a != null) return false;
-        if (b != null ? !b.equals(data2.b) : data2.b != null) return false;
-        if (data1 != null ? !data1.equals(data2.data1) : data2.data1 != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = a != null ? a.hashCode() : 0;
-        result = 31 * result + (b != null ? b.hashCode() : 0);
-        result = 31 * result + c;
-        result = 31 * result + (data1 != null ? data1.hashCode() : 0);
-        return result;
-    }
-}

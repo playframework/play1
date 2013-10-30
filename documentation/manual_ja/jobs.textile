@@ -1,0 +1,138 @@
+h1. 非同期ジョブ
+
+Play はウェブアプリケーションフレームワークなので、アプリケーションロジックの大部分は HTTP リクエストに応じるコントローラによって行われます。
+
+しかし、どのような HTTP リクエストとも関係のないところで何らかのアプリケーションロジックを実行しなければならないことも時々あります。初期化タスク、保守タスク、あるいは HTTP リクエストの実行プールをブロックせずに実行する長いタスクなどには、役に立つ場合があります。
+
+ジョブはフレームワークによって完全に管理されます。これは、Play が JPA エンティティマネージャの同期と、トランザクション管理といったすべてのデータベース接続関連のものを管理することを意味します。ジョブを作成するのに必要なのは、 @play.jobs.Job@ スーパークラスを継承することだけです。
+
+bc. package jobs;
+ 
+import play.jobs.*;
+ 
+public class MyJob extends Job {
+    
+    public void doJob() {
+        // execute some application logic here ...
+    }
+    
+}
+
+結果を返すジョブを作成しなければならない場合があります。そのときは @doJobWithResult()@ メソッドをオーバーライドします。
+
+bc. package jobs;
+ 
+import play.jobs.*;
+  
+public class MyJob extends Job<String> {
+    
+    public String doJobWithResult() {
+        // execute some application logic here ...
+        return result;
+    }
+    
+}
+
+この例では @String@ を使用しましたが、もちろん、ジョブはどんなオブジェクト型でも返すことができます。
+
+h2. <a name="concepts">起動時に実行するジョブ</a>
+
+ブートストラップジョブはアプリケーション始動時に Play によって実行されます。ブートストラップジョブとしてマークするために必要なのは、 <code>@OnApplicationStart</code> アノテーションを追加することだけです。
+
+bc. import play.jobs.*;
+ 
+@OnApplicationStart
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        if(Page.count() == 0) {
+            new Page("root").save();
+            Logger.info("A root page has been created.");
+        }
+    }
+    
+}
+
+結果を返す必要はありません。結果を返しても、それは失われます。
+
+デフォルトでは、 *@OnApplicationStart* でアノテーションされたすべてのジョブは順番に実行されます。すべてのジョブが完了したところで、アプリケーションはリクエストを受け取り、処理する準備を整えます。
+
+アプリケーションの起動時にジョブを開始したいけれど、直ちにリクエストを受け取って処理したい場合、ジョブを <code>@OnApplicationStart(async=true)</code> と註釈することができます。これでジョブはアプリケーション起動時にバックグラウンドで開始するようになります。すべての非同期ジョブは同時に開始します。
+
+p(note). **警告**
+ 
+DEV モードでアプリケーションを実行する場合、アプリケーションは最初の HTTP リクエストがあるまで始動を控えます。さらには、DEV モードの場合、アプリケーションは必要に応じて自動的に再起動することがあります。
+ 
+PROD モードで実行するとき、アプリケーションはサーバの起動と同時に開始します。
+
+h2. <a name="scheduling">スケジューリングされたジョブ</a>
+
+スケジューリングされたジョブは、フレームワークによって定期的に実行されます。 <code>@Every</code> アノテーションを使用することで、特定の間隔でジョブを実行するよう Play に指示することができます。
+
+bc. import play.jobs.*;
+ 
+@Every("1h")
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        List<User> newUsers = User.find("newAccount = true").fetch();
+        for(User user : newUsers) {
+            Notifier.sayWelcome(user);
+        }
+    }
+    
+}
+
+上記は時間用アノテーションであり、分または秒で感覚を指定したい場合は、以下の方法で指定することができます:-
+i) 分 - @Every("3mn"),@Every("30mn")
+ii) 秒 - @Every("35s"),@Every("56s")
+
+<code>@Every</code> アノテーションで事足りない場合は、CRON 式を使用してジョブを実行する <code>@On</code> アノテーションを使用することができます。
+
+bc. import play.jobs.*;
+ 
+/** Fire at 12pm (noon) every day **/ 
+@On("0 0 12 * * ?")
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        Logger.info("Maintenance job ...");
+        ...
+    }
+    
+}
+
+p(note). **Tip**
+ 
+Play は "Quartz ライブラリ":http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html の CRON 式パーサを使用します。
+
+結果を返す必要はありません。結果を返しても、それは失われます。
+
+h2. <a name="tasks">Triggering task jobs</a>
+
+Job インスタンスにおいて単に @now()@ をコールすることで、特別なタスクを執り行うジョブをトリガーすることもできます。こうすると、ジョブは何もブロックせずに、速やかに実行されます。
+
+bc. public static void encodeVideo(Long videoId) {
+    new VideoEncoder(videoId).now();
+    renderText("Encoding started");
+}
+
+Job において @now()@ をコールすると、そのタスクの終了後に結果を読み出すために使用できる @Promise@ を返します。
+
+h2. <a name="concepts">アプリケーションの停止</a>
+
+アプリケーションがシャットダウンする前にアクションを実行する必要がある場合があるので、Playは <code>@OnApplicationStop</code> アノテーションを提供します。
+
+bc. import play.jobs.*;
+ 
+@OnApplicationStop
+public class Bootstrap extends Job {
+ 
+    public void doJob() {
+        Fixture.deleteAll();
+    }
+}
+
+p(note). **考察を続けます**
+
+より強力な %(next)"HTTP による非同期プログラミング":asynchronous% とジョブを組み合わせる方法について学びましょう。

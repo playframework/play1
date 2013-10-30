@@ -1,24 +1,41 @@
 package models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FieldResult;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
-import play.db.jpa.Model;
+import play.data.validation.Unique;
+import play.db.jpa.GenericModel;
 
 @Entity
-public class Book extends Model {
-    
-    public Book(String title, String author, String content, int shelfNumber) {
-        this.title = title;
-        this.author = author;
-        this.content = content;
-        this.shelfNumber = shelfNumber;
+public class Book extends GenericModel {
+
+    @Id
+    @GeneratedValue
+    @Column(name="pk_id")
+    public Long id;
+
+    public Long getId() {
+        return id;
     }
-    
-    public Book() {}
-    
+
+    @Override
+    public Object _key() {
+        return getId();
+    }
+
+    @Unique("author")
+    @Column(name="col_title")
     public String title;
-    public String author;
-    public String content;
-    public int shelfNumber;
+
+    @Unique
+    @Column(name="col_isbn")
+    public String isbn;
+
+    @ManyToOne()
+    public Author author;
+
+
 }

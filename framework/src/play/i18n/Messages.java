@@ -1,13 +1,10 @@
 package play.i18n;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 
@@ -96,18 +93,26 @@ public class Messages {
         if (locales.containsKey(locale)) {
             value = locales.get(locale).getProperty(key.toString());
         }
+        if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+            value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
+        }
         if (value == null) {
             value = defaults.getProperty(key.toString());
         }
         if (value == null) {
             value = key.toString();
         }
-
-        return formatString(value, args);
+        Locale l = Lang.getLocaleOrDefault(locale);
+        return formatString(l, value, args);
     }
 
     public static String formatString(String value, Object... args) {
-        String message = String.format(value, coolStuff(value, args));
+        return formatString(Lang.getLocale(), value, args);
+    }
+
+    public static String formatString(Locale locale, String value, Object... args) {
+        String message = String.format(locale, value, coolStuff(value, args));
+
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
         while(matcher.find()) {
@@ -122,8 +127,10 @@ public class Messages {
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
     	// when invoked with a null argument we get a null args instead of an array with a null value.
+
     	if(args == null)
     		return NO_ARGS;
+
         Class<? extends Number>[] conversions = new Class[args.length];
 
         Matcher matcher = formatterPattern.matcher(pattern);
@@ -145,7 +152,7 @@ public class Messages {
         }
 
         Object[] result = new Object[args.length];
-        for(int i=0; i<args.length; i++) {
+        for(int i=0; i < args.length; i++) {
             if(args[i] == null) {
                 continue;
             }
@@ -154,8 +161,9 @@ public class Messages {
             } else {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive and object binder
-                    result[i] = Binder.directBind(args[i] + "", conversions[i]);
+                    result[i] = Binder.directBind(null, args[i] + "", conversions[i], null);
                 } catch(Exception e) {
+                    // Ignore
                     result[i] = null;
                 }
             }
@@ -171,7 +179,13 @@ public class Messages {
     public static Properties all(String locale) {
         if(locale == null || "".equals(locale))
             return defaults;
-        return locales.get(locale);
+        Properties mergedMessages = new Properties();
+        mergedMessages.putAll(defaults);
+        if (locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+        	mergedMessages.putAll(locales.get(locale.substring(0, 2)));
+        }
+        mergedMessages.putAll(locales.get(locale));
+        return mergedMessages;
     }
 
 }

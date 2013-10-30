@@ -1,0 +1,103 @@
+h1. キャッシュの使用
+
+パフォーマンスの高いシステムを作成するため、データのキャッシュが必要になる場合があります。Play にはキャッシュライブラリがあり、分散環境下では "Memcahed":http://www.danga.com/memcached/ を使用します。
+
+Memcached を設定しない場合、Play は JVM ヒープにデータを保存するスタンドアロンキャッシュを使用します。JVM へのデータのキャッシュは、Play の ‘何も共有しない’ という前提を覆します: 複数のサーバで実行したアプリケーションの振る舞いが一貫していると期待することはできません。それぞれのアプリケーションインスタンスは異なるデータのコピーを持ちます。
+
+キャッシュの規約がはっきりしていることを理解することは重要です: キャッシュにデータを置いた場合、このデータが永久に残り続けると期待することはできません。実際のところ、期待すべきではありません。キャッシュは高速ですが、その値は失効しますし、(永続的にバックアップしない限り) 基本的にキャッシュはメモリ上にのみ存在します。
+
+このため、期待するデータが無い場合、再度データを置くことが、キャッシュを使う最善の方法です:
+
+bc. public static void allProducts() {
+    List<Product> products = Cache.get("products", List.class);
+    if(products == null) {
+        products = Product.findAll();
+        Cache.set("products", products, "30mn");
+    }
+    render(products);
+}
+
+h2. <a name="api">キャッシュ API</a>
+
+キャッシュ API は @play.cache.Cache@ クラスによって提供されます。このクラスには、キャッシュのデータを設定する、置き換える、取得する、と言ったひと揃えのメソッドがあります。それぞれのメソッドの振る舞いを正確に理解するには、Memcached のドキュメントを参照してください。
+
+いくつか例を示します:
+
+bc. public static void showProduct(String id) {
+    Product product = Cache.get("product_" + id, Product.class);
+    if(product == null) {
+        product = Product.findById(id);
+        Cache.set("product_" + id, product, "30mn");
+    }
+    render(product);
+}
+ 
+public static void addProduct(String name, int price) {
+    Product product = new Product(name, price);
+    product.save();
+    showProduct(product.id);
+}
+ 
+public static void editProduct(String id, String name, int price) {
+    Product product = Product.findById(id);
+    product.name = name;
+    product.price = price;
+    Cache.set("product_" + id, product, "30mn");
+    showProduct(id);
+}
+ 
+public static void deleteProduct(String id) {
+    Product product = Product.findById(id);
+    product.delete();
+    Cache.delete("product_" + id);
+    allProducts();
+}
+
+いくつかのメソッドは @safe@ という接頭辞で始まります - 例えば、 @safeDelete@ や @safeSet@ という具合です。標準のメソッドは処理をブロックしません。これは、以下のメソッド呼び出しを発行した際:
+
+bc. Cache.delete("product_" + id);
+
+@delete@ メソッドが、キャッシュオブジェクトが実際に削除されるまで待たずに、直ちにリターンすることを意味します。このため、このオブジェクトはまだ存在するかもしれない場合には、エラー - 例えば IO エラー - が発生します。
+
+処理を続行する前に、このオブジェクトを確実に削除したい場合には、 @safeDelete@ メソッドを使うことができます:
+
+bc. Cache.safeDelete("product_" + id);
+
+このメソッドは処理をブロックし、オブジェクトが削除されたかどうかを示す boolean 型の値を返します。以上より、キャッシュからあるアイテムが削除されたことを保証する完全なパターンは、以下のようになります:
+
+bc. if(!Cache.safeDelete("product_" + id)) {
+    throw new Exception("Oops, the product has not been removed from the cache");
+}
+...
+
+これらの処理をブロックする @safe@ メソッドの呼び出しは、アプリケーションを遅くすることに注意してください。このため、これらのメソッドは必要な場合にのみ使用してください。
+
+@expiration == "0s"@ (ゼロ秒) を指定した場合の実際の有効期限はキャッシュ実装によって異なることにも注意してください。
+
+h2. <a name="session">セッションをキャッシュとして使ってはいけません!</a>
+
+インメモリのセッション実装を使用するフレームワークを使ってきたならば、Play が小さな String 型のデータのみを HTTP セッションに保存することを許可することを不満に感じるかもしれません。しかし、セッションはアプリケーションデータをキャッシュする場所ではないので、このほうが良いのです!
+
+このため、以下のようなやり方に慣れているならば:
+
+bc. httpServletRequest.getSession().put("userProducts", products);
+...
+// and then in subsequent requests
+products = (List<Product>)httpServletRequest.getSession().get("userProducts");
+
+Play ではちょっと違ったやり方で同じ効果を得られます。以下のほうがより良いアプローチだと考えます:
+
+bc. Cache.set(session.getId(), products);
+...
+// and then in subsequent requests
+List<Product> products = Cache.get(session.getId(), List.class)
+
+ここでは、Cache の中のそれぞれの情報が一意性を保てるように、一意な UUID を使用しました。セッションオブジェクトとは違い、キャッシュはどのユーザにも紐付かないことを忘れないでください!
+
+h2. <a name="memcached">memcached の設定</a>
+
+Memcached の実際の実装を利用する場合は、 "memcached configuration":configuration#memcached において Memcached を利用可能にし、"memcached.host configuration":configuration#memcached.host でデーモンのアドレスを定義します:
+
+p(note). **考察を続けます**
+ 
+%(next)"メール送信":emails% について学びましょう。

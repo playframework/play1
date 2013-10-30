@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -67,6 +68,10 @@ public class Blob implements BinaryField, UserType {
         }
         return file;
     }
+    
+    public String getUUID()  {
+        return UUID;
+    }
 
     //
 
@@ -78,24 +83,32 @@ public class Blob implements BinaryField, UserType {
         return Blob.class;
     }
 
+    private static boolean equal(Object a, Object b) {
+      return a == b || (a != null && a.equals(b));
+    }
+
     public boolean equals(Object o, Object o1) throws HibernateException {
-        return o == null ? false : o.equals(o1);
+        if(o instanceof Blob && o1 instanceof Blob) {
+            return equal(((Blob)o).UUID, ((Blob)o1).UUID) &&
+                    equal(((Blob)o).type, ((Blob)o1).type);
+        }
+        return equal(o, o1);
     }
 
     public int hashCode(Object o) throws HibernateException {
         return o.hashCode();
     }
 
-    public Object nullSafeGet(ResultSet rs, String[] names, Object o) throws HibernateException, SQLException {
-        String val = (String) StringType.INSTANCE.nullSafeGet(rs, names[0]);
+    public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor sessionImplementor, Object o) throws HibernateException, SQLException {
+       String val = (String) StringType.INSTANCE.nullSafeGet(resultSet, names[0], sessionImplementor, o);
         if(val == null || val.length() == 0 || !val.contains("|")) {
             return new Blob();
         }
         return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
     }
 
-    public void nullSafeSet(PreparedStatement ps, Object o, int i) throws HibernateException, SQLException {
-        if(o != null) {
+    public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor sessionImplementor) throws HibernateException, SQLException {
+         if(o != null) {
             ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
         } else {
             ps.setNull(i, Types.VARCHAR);
@@ -106,7 +119,7 @@ public class Blob implements BinaryField, UserType {
         if(o == null) {
             return null;
         }
-        return new Blob(this.UUID, this.type);
+        return new Blob(((Blob)o).UUID, ((Blob)o).type);
     }
 
     public boolean isMutable() {

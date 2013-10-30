@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
 /**
- * This field size must be lower than.
+ * This field size must be equal or greater than.
  * Message key: validation.minSize
  * $1: field name
  * $2: reference value

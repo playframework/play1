@@ -1,0 +1,156 @@
+h1. お好みの IDE を設定しよう
+
+Play と共に作業することは簡単です。Play が自動的にソースファイルに加えられた変更をコンパイルしてリフレッシュするので、高性能な IDE は必要ありません。シンプルなテキストエディタを使って簡単に作業することができます。
+
+とは言え、近頃の Java IDE は自動補完、逐次コンパイル、リファクタリングやデバッグのアシストと言ったクールで生産的な機能を提供します。Play は "Netbeans":http://www.netbeans.org, "IntelliJ IDEA":http://www.jetbrains.com/idea/index.html と "Eclipse":http://www.eclipse.org プラットフォームをサポートします。
+
+
+h2(#eclipse). <a>Eclipse</a>
+
+h3. 設定ファイルの生成
+
+Play は Eclipse の設定を簡易化するコマンドを提供しています。Play アプリケーションを動作する Eclipse プロジェクトに変換するには、 @eclipsify@ コマンドを使用してください:
+
+bc. # play eclipsify myApp
+
+その後、 **File/Import/General/Existing project...** メニューから Workspace にアプリケーションをインポートする必要があります。
+
+!images/eclipse!
+
+classpath の変更のような重要な変更をアプリケーションへ加えるときは、設定ファイルを再生成するために @eclipsify@ を再度実行します。
+
+p(note). **チームで作業しているときは Eclipse 設定ファイルをコミットしないこと!**
+
+生成した設定ファイルにはフレームワークをインストールした場所への絶対参照が含まれています。これはあなた自身のインストール作業に特化したものです。チームで作業するときは、それぞれの開発者は自分の Eclipse 設定ファイルを個人で管理しなければなりません。
+
+h3. ランチャ
+
+@eclipsify@ コマンドはアプリケーション用にいくつかのランチャを生成します。例えば、 **Nice app** と呼ばれるアプリケーション (上記スクリーンショット参照) 上で @eclipsify@ を実行すると、@eclipse/@ folder 内に以下のランチャを作成します:
+
+* @Nice app.launch@ - 右クリックから **Run As > Nice app** を選択することでアプリケーションを実行するために使用できる、 @play test@ コマンドと等価なメインのランチャ
+* @Test Nice app.launch@ - やはり右クリックから **Run As > Test Nice app** を選択して実行する、 @play test@ と等価なテストランチャ
+* @Connect JPDA Nice app.launch@ - ランチャファイルを右クリックして **Debug As > Connect JPDA Nice app** を選択することで、実行済みの Play インスタンスに対するEclipse デバッガに接続し、デバッグセッションを開始する JPDA デバッグセッションコネクタです。デバッグセッションを停止してもサーバは停止されません。
+
+h3. Play Eclipse プラグイン
+
+更に、Play には HTML ビューテンプレート、 @application.conf@ そして @routes@ ファイル用のエディタを提供する Eclipse プラグインが含まれています。
+
+プラグインをインストールするには、 @$PLAY_HOME/support/eclipse@ から @$ECLIPSE_HOME/dropins@ に JAR ファイルをコピーします。
+
+
+h2(#netbeans). <a>NetBeans</a>
+
+Play は Netbeans の設定を簡易化するコマンドを提供しています。既存のアプリケーションを妥当な Netbeans プロジェクトに変換するには、 @netbeansify@ コマンドを使用してください:
+
+bc. # play netbeansify myApp
+
+その後は、そのアプリケーションをそのまま Netbeans プロジェクトとして開くことができます。
+
+!images/netbeans!
+
+アプリケーションを開始するには、標準の *Run* ボタンを使用してください。アプリケーションが起動されていれば、いつでも *Debug* ボタンを使ってデバッグセッションをアタッチすることができます。デバッグセッションを終了してもサーバは止まりません。
+
+classpath の変更のような重要な変更をアプリケーションへ加えるときは、設定ファイルを再生成するために @netbeansify@ を再度実行します。
+
+p(note). **チームで作業しているときは @nbproject/@ ディレクトリをコミットしないこと!**
+ 
+生成した設定ファイルにはフレームワークをインストールした場所への絶対参照が含まれています。これはあなた自身のインストール作業に特化したものです。チームで作業するときは、それぞれの開発者は自分の Netbeans 設定ファイルを個人で管理しなければなりません。
+
+h2(#intellij). <a>IntelliJ IDEA</a>
+
+Play は IntelliJ IDEA の設定を簡易化するコマンドを提供しています。既存のアプリケーションを妥当な IntelliJ IDEA モジュールに変換するには、 @idealize@ コマンドを使用してください:
+
+bc. # play idealize myApp
+
+単一モジュールプロジェクトを作成する場合は、IntelliJ IDEA にて以下を実行してください。
+
+# コマンドラインから @play new@ コマンドを使って Play プロジェクトを作成する。
+# コマンドラインから @play idealize@ コマンドを使って IntelliJ IDEA モジュールを作成する。
+# IntelliJ IDEA の *File* メニューから *Open Project…* を選択して、生成された @.ipr@ ファイルを選択する。
+
+!images/intellij!
+
+実行設定を追加するには:
+
+# IntelliJ IDEA の *Run* メニューから *Edit Configurations* を選択する。
+# *Defaults* 内の *Application* で右クリックし、 *Add New Configuration* を選択する。
+# *Main class* 内に @play.server.Server@ を入力する。
+# *VM parameters* 内に @-Dapplication.path="."@ を入力する。
+# *Working directory* 内にアプリケーションパスを入力する。
+
+IntelliJ において Play をテストモードで実行するには:
+
+# 実行設定を編集し、 *VM parameters* に *-Dplay.id=test* を追加する。
+# モジュールを右クリックして *Open Module Settings* を選択する。
+# *Dependencies* タブを選択する。
+# *Add…* をクリックして *Single-Entry Module Library* を選択する。
+# @$PLAY_HOME/modules/testrunner/lib/play-testrunner.jar@ を選択して *OK* をクリックする。
+
+p(note). **チームで作業しているときは .iml ファイルをコミットしないこと!**
+ 
+生成した設定ファイルにはフレームワークをインストールした場所への絶対参照が含まれています。これはあなた自身のインストール作業に特化したものです。チームで作業するときは、それぞれの開発者は自分の IntelliJ IDEA 設定ファイルを個人で管理しなければなりません。
+
+
+h2(#textmate). <a>Textmate</a>
+
+シンタックスハイライトと自動補完を有効にするために @$PLAY_HOME/support/textmate.zip@ にある "Textmate":http://macromates.com/ バンドルをインストールします。このバンドルはコントローラとビューの行き来も容易にします。
+
+!images/editor!
+
+
+h2(#vim). <a>Vim</a>
+
+Textmate に影響された "snipMate":http://www.vim.org/scripts/script.php?script_id=2540 プラグインは、 "Vim":http://www.vim.org/ にキーワード自動補完を提供します。Play は HTML と Java のスニペットファイルを提供しています: これらを使用するためには、snipMate をインストールして @$PLAY_HOME/support/vim/*.snippets@ を @~/.vim/snippets/@ にコピーします。
+
+
+h2(#custom). <a>カスタム設定</a>
+
+Play アプリケーションは標準的な Java アプリケーションであり、お好みのエディタを使って作業をするために特定のプラグインも必要としません。ただし、その場合は Play がどのように動作しているかについて、ほんのちょっとの知識を必要とします:
+
+h3. Classpath 設定
+
+Play アプリケーションのクラスパスは以下の通り (この順で) 構築されます:
+
+* アプリケーションの @conf/@ ディレクトリ
+* The @$PLAY_PATH/framework/play-$version.jar@
+* @lib/@ ディレクトリ内のすべての JAR ファイル
+* @$PLAY_PATH/framework/lib/@ ディレクトリ内のすべての JAR ファイル
+
+p(note). *Tip*
+ 
+モジュールを利用する場合は、すべてのモジュールライブラリも同様に ( @$module/lib/@ ディレクトリから) クラスパスに追加する必要があります。  からモジュールライブラリをクラスパスに追加する必要があります。
+
+
+h3. 実行する Main クラス
+
+Play アプリケーションを開始するには、 @play.server.Server@ クラスを実行するだけです。Play は実行するアプリケーションの場所を見つけるために @"application.path"@ システムプロパティを使用します。通常、以下のようにしてこの値を渡します:
+
+bc. java -Dapplication.path="/app/path"…
+
+
+h3. Java エージェント
+
+HotSwap リロードを有効にするためには、Java agent を @play.jar@ ライブラリに組み込む必要があります。通常は以下のようにします:
+
+bc. java -javaagent:"$PLAY_PATH/framework/play.jar" …
+
+これは必須ではありませんが、これが利用可能であるとき、クラスのリロードが高速になるでしょう。
+
+
+h2. <a>デバッグ問題</a>
+
+Java ソースが変更されたとき、Play は自動的に Java クラスをリロードします。しかし、Java はクラスのリロードを完全にサポートしていないので、JDPA デバッグは簡単に混乱します: コードをステップインしたときに、ブレークポイントの設定に失敗したり、デバッガが間違った行で止まるかもしれません。
+
+これを避けるよりよい方法は、コードを変更した後にデバッグセッションを新規に開始することです。幸運なことに、JPDA は JVM を再起動することなく、いつでもデバッガを接続したり、切断することができます。
+
+以上より、デバッグにおける正しいワークフローは次のようになります:
+
+* <span>ソースコードを変更します。</span>
+* <span>結果を見るためにブラウザをリフレッシュします。 (このとき Play は変更内容をリロードして JVM 上のクラスを再定義します)</span>
+* <span>何かがおかしくデバッグする必要がある場合は、新しいデバッグセッションを開始します。</span>
+* <span>コードをデバッグして、修正します。</span>
+* <span>デバッガを切断します。</span>
+
+このワークフローを使用することによって、JVM にロードされたコードとデバッガを常に同期させることができます。
+
+p(note). 次は: %(next)" 'Hello World' チュートリアル":firstapp% です。

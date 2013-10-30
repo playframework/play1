@@ -8,12 +8,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.deps.DependenciesManager;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
@@ -117,9 +119,9 @@ public class Play {
      */
     public static Map<String, VirtualFile> modulesRoutes;
     /**
-     * The main application.conf
+     * The loaded configuration files
      */
-    public static VirtualFile conf;
+    public static Set<VirtualFile> confs = new HashSet<VirtualFile>(1);
     /**
      * The app configuration (already resolved from the framework id)
      */
@@ -239,8 +241,17 @@ public class Play {
         }
 
         // Mode
-        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        if (usePrecompiled || forceProd) {
+        try {
+            mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
+            fatalServerErrorOccurred();
+        }
+	
+        // Force the Production mode if forceProd or precompile is activate
+        // Set to the Prod mode must be done before loadModules call
+        // as some modules (e.g. DocViewver) is only available in DEV
+        if (usePrecompiled || forceProd || System.getProperty("precompile") != null) {
             mode = Mode.PROD;
         }
 
@@ -250,7 +261,7 @@ public class Play {
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
-        javaPath = new ArrayList<VirtualFile>(2);
+        javaPath = new CopyOnWriteArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
@@ -292,8 +303,7 @@ public class Play {
         pluginCollection.loadPlugins();
 
         // Done !
-        if (mode == Mode.PROD || System.getProperty("precompile") != null) {
-            mode = Mode.PROD;
+        if (mode == Mode.PROD) {
             if (preCompile() && System.getProperty("precompile") == null) {
                 start();
             } else {
@@ -337,23 +347,32 @@ public class Play {
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
     public static void readConfiguration() {
-        configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
+        confs = new HashSet<VirtualFile>();
+        configuration = readOneConfigurationFile("application.conf");
+        extractHttpPort();
         // Plugins
         pluginCollection.onConfigurationRead();
+     }
+
+    private static void extractHttpPort() {
+        final String javaCommand = System.getProperty("sun.java.command", "");
+        jregex.Matcher m = new jregex.Pattern(".* --http.port=({port}\\d+)").matcher(javaCommand);
+        if (m.matches()) {
+            configuration.setProperty("http.port", m.group("port"));
+        }
     }
 
 
-    private static Properties readOneConfigurationFile(String filename, Set<String> seenFileNames) {
-
-        if (seenFileNames.contains(filename)) {
-            throw new RuntimeException("Detected recursive @include usage. Have seen the file " + filename + " before");
-        }
-        seenFileNames.add(filename);
-
+    private static Properties readOneConfigurationFile(String filename) {
         Properties propsFromFile=null;
 
         VirtualFile appRoot = VirtualFile.open(applicationPath);
-        conf = appRoot.child("conf/" + filename);
+        
+        VirtualFile conf = appRoot.child("conf/" + filename);
+        if (confs.contains(conf)) {
+            throw new RuntimeException("Detected recursive @include usage. Have seen the file " + filename + " before");
+        }
+        
         try {
             propsFromFile = IO.readUtf8Properties(conf.inputstream());
         } catch (RuntimeException e) {
@@ -362,7 +381,9 @@ public class Play {
                 fatalServerErrorOccurred();
             }
         }
-        // Ok, check for instance specifics configuration
+        confs.add(conf);
+        
+        // OK, check for instance specifics configuration
         Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
         for (Object key : propsFromFile.keySet()) {
@@ -397,6 +418,9 @@ public class Play {
                 } else {
                     r = System.getProperty(jp);
                     if (r == null) {
+                        r = System.getenv(jp);
+                    }
+                    if (r == null) {
                         Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
                         continue;
                     }
@@ -412,7 +436,7 @@ public class Play {
             if (key.toString().startsWith("@include.")) {
                 try {
                     String filenameToInclude = propsFromFile.getProperty(key.toString());
-                    toInclude.putAll( readOneConfigurationFile(filenameToInclude, seenFileNames) );
+                    toInclude.putAll( readOneConfigurationFile(filenameToInclude) );
                 } catch (Exception ex) {
                     Logger.warn("Missing include: %s", key);
                 }
@@ -451,6 +475,8 @@ public class Play {
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
+                // Put it in the current context for any code that relies on having it there
+                Thread.currentThread().setContextClassLoader(classloader);
                 // Reload plugins
                 pluginCollection.reloadApplicationPlugins();
 
@@ -547,8 +573,8 @@ public class Play {
     public static synchronized void stop() {
         if (started) {
             Logger.trace("Stopping the play application");
-            started = false;
             pluginCollection.onApplicationStop();
+            started = false;
             Cache.stop();
             Router.lastLoading = 0L;
         }
@@ -609,9 +635,11 @@ public class Play {
                 classloader.detectChanges();
             }
             Router.detectChanges(ctxPath);
-            if (conf.lastModified() > startedAt) {
-                start();
-                return;
+            for(VirtualFile conf : confs) {
+                if (conf.lastModified() > startedAt) {
+                    start();
+                    return;
+                }
             }
             pluginCollection.detectChange();
             if (!Play.started) {
@@ -682,48 +710,52 @@ public class Play {
                 }
             }
         }
-        for (Object key : configuration.keySet()) {
-            String pName = key.toString();
-            if (pName.startsWith("module.")) {
-                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
-                String moduleName = pName.substring(7);
-                File modulePath = new File(configuration.getProperty(pName));
-                if (!modulePath.isAbsolute()) {
-                    modulePath = new File(applicationPath, configuration.getProperty(pName));
-                }
-                if (!modulePath.exists() || !modulePath.isDirectory()) {
-                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                } else {
-                    addModule(moduleName, modulePath);
-                }
-            }
-        }
 
-        // Load modules from modules/ directory
-        File localModules = Play.getFile("modules");
-        if (localModules.exists() && localModules.isDirectory()) {
-            for (File module : localModules.listFiles()) {
-                String moduleName = module.getName();
-                if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
-                }
-                if (module.isDirectory()) {
-                    addModule(moduleName, module);
-                } else {
-                    File modulePath = new File(IO.readContentAsString(module).trim());
-                    if (!modulePath.exists() || !modulePath.isDirectory()) {
-                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                    } else {
-                        addModule(moduleName, modulePath);
-                    }
+        // Load modules from modules/ directory, but get the order from the dependencies.yml file
+		// .listFiles() returns items in an OS dependant sequence, which is bad
+		// See #781
+		// the yaml parser wants play.version as an environment variable
+		System.setProperty("play.version", Play.version);
+		DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, null);
 
-                }
-            }
-        }
+		File localModules = Play.getFile("modules");
+		List<String> modules = new ArrayList<String>();
+		if (localModules.exists() && localModules.isDirectory()) {
+			try {
+				modules = dm.retrieveModules();
+			} catch (Exception e) {
+				Logger.error("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF +" (module will not be loaded in order of the dependencies.yml)", e);
+				// Load module without considering the dependencies.yml order
+				modules = Arrays.asList(localModules.list());		
+			}
+			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
+				String moduleName = (String) iter.next();
+
+				File module = new File(localModules, moduleName);
+
+				if (moduleName.contains("-")) {
+					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+				}
+
+				if (module.isDirectory()) {
+					addModule(moduleName, module);
+				} else {
+
+					File modulePath = new File(IO.readContentAsString(module).trim());
+					if (!modulePath.exists() || !modulePath.isDirectory()) {
+						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+					} else {
+						addModule(moduleName, modulePath);
+					}
+				}
+			}
+		}
+
         // Auto add special modules
         if (Play.runningInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
+        
         if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }

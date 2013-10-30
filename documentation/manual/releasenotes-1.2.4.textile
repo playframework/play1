@@ -1,0 +1,44 @@
+h1. Play 1.2.4 -- Release notes
+
+You can read about the bugs fixed in Play 1.2.4 on the "road map page":http://www.playframework.org/roadmap/1.2.4. This page highlights the most important changes.
+
+h2. Support for Java 7
+
+Play now supports Java 7 out-of-the-box, so you can write the following code without any problems.
+
+bc. Map<String, List<String>> map = new HashMap<>();
+String version = "1.2.4";
+switch(version) {
+	 case "1.2.4":
+	    //code
+	    break;
+	  case "1.2.3":
+	    //code
+	    break;
+	  case "1.2.2":
+	    //code
+	  default:
+	    //code
+	    break;
+}
+	
+
+h2. New binder implementation
+
+The new binder implementation is more flexible and allows easy mapping from jQuery to Play. It is also possible to map more complex objects using this new implementation.
+
+h2. Latest WebSocket support
+
+Play now supports the latest draft WebSocket specification, namely hybi-00 to hybi-10. Please refer to the "WebSocket specification":http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-10 for more information.
+
+h2. Support for composite IDs
+
+Fixtures now supports Composite IDs. The following annotations are also supported on your model and directly from the fixtures: <code>@IdClass</code>, <code>@EmbeddedId</code>. Please refer to the "Hibernate documentation":http://docs.jboss.org/hibernate/annotations/3.5/reference/en/html/entity.html#d0e2177 for more information.
+
+h2. Better IntelliJ support
+
+The <code>play idealize</code> command now creates a complete IntelliJ project. You can directly open your Play project from IntelliJ.
+
+h2. Other improvements
+
+There are also a number of small improvements, as well as "86 fixed bugs":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/121681-124.

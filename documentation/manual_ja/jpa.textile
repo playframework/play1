@@ -1,0 +1,285 @@
+h1. JPA 永続化
+
+Play は、JPA エンティティの管理を容易にするとても便利な一連のヘルパを提供します。
+
+p(note). いつでも素の JPA API に立ち返ることができることに **注意** してください。
+
+h2. <a name="starting">JPA エンティティマネージャの開始</a>
+
+Playは、 <code>@javax.persistence.Entity</code> アノテーションで注釈されたクラスをひとつ以上見つけた場合、自動的に Hibernate エンティティマネージャを開始します。とは言え、JDBC データソースを正しく設定していない場合、エンティティマネージャの開始は失敗してしまうので、確実に設定してください。
+
+h2. <a name="obtaining">JPA エンティティマネージャの取得</a>
+
+JPA エンティティマネージャが開始されている場合、JPA ヘルパを使用してアプリケーションコードからそれを取得することができます。例えば、以下のようにします:
+
+bc. public static index() {
+    Query query = JPA.em().createQuery("select * from Article");
+    List<Article> articles = query.getResultList();
+    render(articles);
+}
+
+h2. <a name="transactions">トランザクション管理</a>
+
+Play は自動的にトランザクションを管理します。Play は、HTTPリクエスト毎にトランザクションを開始し、HTTP レスポンスを送信するときにコミットします。アプリケーションコードが例外を創出した場合、トランザクションは自動的にロールバックされます。
+
+アプリケーションコードから強制的にトランザクションをロールバックする必要が場合、 @JPA.setRollbackOnly()@ メソッドを使用することができ、JPAは現在のトランザクションにコミットしません。
+
+アノテーションを使って、トランザクションをどのように扱うべきか指定することもできます。
+
+コントローラ内のメソッドを <code>@play.db.jpa.Transactional(readOnly=true)</code> でアノテーションした場合、トランザクションは読み出し専用になります。
+
+Play にトランザクションを一切起動させないようにしたい場合は、メソッドを <code>@play.db.jpa.NoTransaction</code> でアノテーションします。
+
+すべてのメソッドでトランザクションを利用しない場合は、コントローラクラスを <code>@play.db.jpa.NoTransaction</code> でアノテーションすることができます。
+
+<code>@play.db.jpa.NoTransaction</code> を使うと、Play はコネクションプールから一切のコネクションを取得しません - これは速度を向上させます。
+
+
+h2. <a name="support">**play.db.jpa.Model** サポートクラス</a>
+
+このクラスは JPA の中心的なヘルパクラスです。JPA エンティティのうちの 1 つに @play.db.jpa.Model@ クラスを継承させると、ヘルパクラスは JPA アクセスを容易にする多くのヘルパトメソッドを提供します。
+
+例えば、次の Post モデルオブジェクトを見てください:
+
+bc.. @Entity
+public class Post extends Model {
+
+    public String title;
+    public String content;
+    public Date postDate;
+
+    @ManyToOne
+    public Author author;
+
+    @OneToMany
+    public List<Comment> comments;
+}
+
+@play.db.jpa.Model@ クラスは自動的に 自動生成された @Long 型の id@ フィールドを提供します。自動生成された @Long 型の id@ を JPA モデルのための主キー (技術的な主キー) として保持し、別のフィールドを機能的な主キーとして管理することは一般的に良い案だと考えます。
+
+Play が、Post クラスの **public** メンバを自動的に **プロパティ** と見なすという事実に注意してください。このため、このオブジェクトのためにすべての setter/getter メソッドを書く必要はありません。
+
+h2. <a name="genericmodel">GenericModel によるカスタム id のマッピング</a>
+
+エンティティは @play.db.jpa.Model@ に基づかなければならないわけではありません。エンティティは @play.db.jpa.GenericModel@ クラスを継承することもできます。これは、エンティティのプライマリキーに @Long 型の id@ を使いたくない場合に必要になります。
+
+例えば、以下はとてもシンプルな **User** エンティティのマッピングです。 **id** は UUID であり、属性 **name** と **mail** は必須、そして Play のバリデーションを使ってシンプルなビジネスルールを強制することができます。
+
+bc.. @Entity
+public class User extends GenericModel {
+    @Id
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid")
+    public String id;
+
+    @Required
+    public String name;
+
+    @Required
+    @MaxSize(value=255, message = "email.maxsize")
+    @play.data.validation.Email
+    public String mail;
+}
+
+h2. <a name="finding">オブジェクトの検索</a>
+
+@play.db.jpa.Model@ はデータを検索するいくつかの方法を提供します。例えば、以下のようにします:
+
+h3. ID による検索
+
+オブジェクトを検索する最も簡単な方法です。
+
+bc. Post aPost = Post.findById(5L);
+
+h3. 全件検索
+
+bc. List<Post> posts = Post.findAll();
+
+これは、 **すべての** ポストを検索する最も簡単な方法ですが、同じことは次のようにしても可能です:
+
+bc. List<Post> posts = Post.all().fetch();
+
+次のようにして、ページングした結果を得ることができます:
+
+bc. // 100 max posts
+List<Post> posts = Post.all().fetch(100);
+
+または、次のようにすることも可能です,
+
+bc. 
+// 100 max posts start at 50
+List<Post> posts = Post.all().from(50).fetch(100); 
+
+h3. 簡易なクエリによる検索
+
+クエリは、とても表現豊かなファインダを作成することを可能にしますが、シンプルなクエリについてのみ動作します。
+
+bc. Post.find("byTitle", "My first post").fetch();
+Post.find("byTitleLike", "%hello%").fetch();
+Post.find("byAuthorIsNull").fetch();
+Post.find("byTitleLikeAndAuthor", "%hello%", connectedUser).fetch();
+
+簡易なクエリは、Comparator が以下に従う箇所において、 <code>==[Property][Comparator]And?==</code> という文法に従います。
+
+* @LessThan@ - 与えられた値より小さい
+* @LessThanEquals@ - 与えられた値と等しいか小さい
+* @GreaterThan@ - 与えられた値より大きい
+* @GreaterThanEquals@ - 与えられた値と等しいか大きい
+* @Like@ - 属性値が常に小文字に変換されることを除いて、SQL の like 式と等価
+* @Ilike@ - 大文字小文字を無視することを除いて Like と同じであり、属性値はやはり小文字に変換される
+* @Elike@ - SQL の like 式と等価であり、変換は行われない
+* @NotEqual@ - 等しくない
+* @Between@ - ふたつの値の間 (ふたつの引数が必要)
+* @IsNotNull@ - null でない (引数は必要なし)
+* @IsNull@ - null (引数は必要なし)
+
+h3. JPQL クエリによる検索
+
+JPQL クエリを使用することができます:
+
+bc. Post.find(
+    "select p from Post p, Comment c " +
+    "where c.post = p and c.subject like ?", "%hop%"
+);
+
+一部だけ使用することも可能です:
+
+bc. Post.find("title", "My first post").fetch();
+Post.find("title like ?", "%hello%").fetch();
+Post.find("author is null").fetch();
+Post.find("title like ? and author is null", "%hello%").fetch();
+Post.find("title like ? and author is null order by postDate", "%hello%").fetch();
+
+@order by@ 構文を指定することも可能です:
+
+bc. Post.find("order by postDate desc").fetch();
+
+h2. <a name="counting">オブジェクトのカウント</a>
+
+簡単にオブジェクトをカウントすることができます。
+
+bc. long postCount = Post.count();
+
+クエリを使ってカウントすることも可能です:
+
+bc. long userPostCount = Post.count("author = ?", connectedUser);
+
+
+h2. <a name="files">play.db.jpa.Blob によるアップロードされたファイルの保存</a>
+
+@play.db.jpa.Blob@ 型を使ってアップロードされたファイルを (データベースではなく) ファイルシステムに保存することができます。サーバ側では、Play はアップロードされた画像をアプリケーションフォルダの中にある @attachments/@ フォルダのファイルに保存します。このファイル名 ( "UUID":http://en.wikipedia.org/wiki/Uuid) と MIME タイプは、データベースの属性に @VARCHAR@ SQL 型として保存されます。
+
+Play におけるファイルのアップロードと保存、そして提供の基本的な使い方はとても簡単です。これは、バインディングフレームワークが HTML フォームからアップロードされたファイルを自動的に JPA モデルにバインドするためであり、また Play がプレーンなテキストデータと同じくらい簡単にバイナリデータを配信できる便利なメソッドを提供しているためです。モデルにアップロードされたファイルを保存するには、 @play.db.jpa.Blob@ 型のプロパティを追加します。
+
+bc. import play.db.jpa.Blob;
+ 
+@Entity
+public class User extends Model {
+ 
+   public String name;
+   public Blob photo;
+}
+
+ファイルをアップロードするためには、ビューにフォームを追加し、モデルの @Blob@ プロパティ用にファイルをアップロードするフォームコントロールを使用します:
+
+bc. #{form @addUser(), enctype:'multipart/form-data'}
+   <input type="file" name="user.photo">
+   <input type="submit" name="submit" value="Upload">
+#{/form}
+
+それから、アップロードされたファイルを新規モデルオブジェクトに保存するアクションをコントローラに追加します:
+
+bc. public static void addUser(User user) {
+   user.save();
+   index();
+}
+
+Play が自動的にファイルアップロードをハンドリングするので、このコードは JPA エンティティを保存すること以外は何もしないように見えます。まず最初に、アクションメソッドを開始する前にアップロードされたファイルは @tmp/uploads/@ のサブフォルダに保存されます。次に、エンティティが保存されると、このファイルは UUID をファイル名として @attachments/@ フォルダにコピーされます。最後に、アクションが完了するとこの一時ファイルは削除されます。
+
+同じ user に対して別のファイルをアップロードした場合、新しい UUID の名前を持つ新規ファイルとしてサーバに保存されます。これは、元のファイルが孤立することを意味しています。無限のディスクスペースを持っていないのであれば、おそらく "非同期ジョブ":jobs による独自のクリーンアップスキーマを実装しなければならないことでしょう。
+
+もし HTTP リクエストがファイルの正確な MIME タイプを指定していない場合は、 "コントローラファイルアップロード":controllers#file の章で述べたとおり、ファイル名の拡張子マッピングを使用することができます。
+
+添付ファイルを別のフォルダに保存するためには、 "attachments.path":configuration#attachments.path を設定してください。
+
+保存されたファイルを提供するためには、 "コントローラバイナリレスポンス":controllers#binary の章で述べたとおり、コントローラの @renderBinary@ メソッドに @Blob.get()@ を渡します。
+
+
+
+h2. <a name="save">明示的な保存</a>
+
+Hibernate は、データベースから問い合わせたオブジェクトのキャッシュを保持します。これらオブジェクトは、これを取得するために使用された EntityManager がアクティブである限り、永続的なオブジェクトとして参照されます。これは、トランザクション境界内で行われる、これらのオブジェクトに対するいかなる変更についても、トランザクションがコミットされるときに自動的に永続化されることを意味します。JPA の標準では、これらの更新はトランザクション境界内において暗黙的です; これらの値を永続化するためにメソッドをコールする必要はありません。
+
+主に不都合な点は、すべてのオブジェクトを手動で管理しなければならないということです。EntityManager に (もっと直感的であるべき) オブジェクトの更新を指示する代わりに、どのオブジェクトを更新しないのかを EntityManager に指示しなければなりません。これを行うために、本質的にはひとつのエンティティをロールバックする @refresh()@ メソッドをコールします。トランザクションのコミットを呼び出す前、またはオブジェクトを更新すべきでないことを認識している場合に、これを行います。
+
+以下は、フォームがサブミットされた後に永続オブジェクトを編集する一般的なユースケースです:
+
+bc. public static void save(Long id) {
+    User user = User.findById(id);
+    user.edit("user", params.all());
+    validation.valid(user);
+    if(validation.hasErrors()) {
+        // Here we have to explicitly discard the user modifications...
+        user.refresh();
+        edit(id);
+    }
+    show(id);
+}
+
+これまで見てきたところ、ほとんどの開発者がこのことに気付いておらず、save() を明示的にコールしなければオブジェクトは保存されないと仮定し、エラーが発生した場合にオブジェクトの状態を破棄し忘れます。
+
+このため、Play ではまさにこれを変えました。JPASupport/JPAModel を継承するすべての永続オブジェクトは save() メソッドを明示的にコールしなければ保存されません。このため、実際のところ前述のコードを次のように書き直すことができます:
+
+bc. public static void save(Long id) {
+    User user = User.findById(id);
+    user.edit("user", params.all());
+    validation.valid(user);
+    if(validation.hasErrors()) {
+        edit(id);
+    } else{
+       user.save(); // explicit save here
+       show(id);
+    }
+}
+
+これははるかに直感的です。さらには、大きなオブジェクトグラフについて明示的に save() をコールすることは退屈でなので、 **cascade=CascadeType.ALL** 属性で注釈された関連について、 @save()@ は連鎖的にコールされます。
+
+h2. <a name="typing">ジェネリック型の問題についてもっと詳しく</a>
+
+@play.db.jpa.Model@ はひと揃えのジェネリックメソッドを定義します。これらのジェネリックメソッドは、メソッドの戻り値の型を指定するために型パラメータを使用します。これらのメソッドを使用する場合、戻り値として使用される具体的な型は実行コンテキストから型推論を使用することで決定されます。
+
+例えば、 @findAll@ メソッドは次のように定義されています:
+
+bc. <T> List<T> findAll();
+
+これは次のように使用します:
+
+bc. List<Post> posts = Post.findAll();
+
+この場合、Javaコンパイラは、メソッドの結果に ==List&lt;Post&gt;== が割り当てられているという事実を使用することで、実際の型 @T@ を解決します。このため、T は Post 型として解決されます。
+
+残念ながら、ジェネリックメソッドの戻り値を、別のメソッドの実行引数に直接使用する場合や、ループ処理で使用する場合は、型推論による型の決定は行われません。このため、以下のコードは "型の不一致: 要素タイプ Object から Post には変換できません" というコンパイルエラーが発生します:
+
+bc. for(Post p : Post.findAll()) {
+    p.delete();
+}
+
+もちろん、次のように一時的なローカル変数を使用することで、この問題を解決することができます:
+
+bc. List<Post> posts = Post.findAll(); // type inference works here!
+for(Post p : posts) {
+    p.delete();
+}
+
+でも、ちょっと待ってください。もっといいやり方があります。Java 言語には、一度にコードを短く、しかしながら読み易くする、実用的だけれど、あまり知られていない機能があります:
+
+bc. for(Post p : Post.<Post>findAll()) {
+    p.delete();
+}
+
+
+p(note). Play は XA (two-phase commits) をサポートしていません。 同じリクエストでそれぞれの違ったJPA設定を使う場合、 **Play はできる限り多くのトランザクションでコミットしようとします** 。 最初のデータベースでコミットに成功し、次に別データベースでコミットに失敗しても、最初のコミットはロールバックされません。同一リクエストの中で複数のJPA設定を使用する場合には、このことを覚えておいてください。
+
+p(note). **考察を続けます**
+ 
+今度はいくつかの %(next)"Play ライブラリ":libs% を確認しましょう。

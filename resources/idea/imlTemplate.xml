@@ -13,17 +13,18 @@
         <orderEntry type="module-library">
             <library name="Project Libraries">
                 <CLASSES>
-                    %MODULE_LIB_CLASSES%
                     %MODULE_LINKS%
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    %MODULE_SOURCES%
+                </SOURCES>
                 <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
                 %MODULE_LIBRARIES%
             </library>
         </orderEntry>
         <orderEntry type="module-library">
-            <library name="PlayFramework Dependecies">
+            <library name="PlayFramework Dependencies">
                 <CLASSES>
                     <root url="file://%PLAYHOME%/framework/lib" />
                 </CLASSES>
@@ -38,7 +39,9 @@
                     <root url="jar://%PLAYHOME%/framework/play-%PLAYVERSION%.jar!/" />
                 </CLASSES>
                 <JAVADOC />
-                <SOURCES />
+                <SOURCES>
+                    <root url="file://%PLAYHOME%/framework/src" />
+                </SOURCES>
             </library>
         </orderEntry>
     </component>

@@ -2,3 +2,11 @@ YamlModel(ym1):
   id: 1
   name: Morten
   binaryData: !!binary VGhpcyBTdHJpbmcgaXMgc3RvcmVkIGluIHlhbWwgZmlsZSB1c2luZyBiYXNlNjQ=
+
+DataWithCompositeKey(1):
+   key1: a
+   key2: b
+
+DataWithCompositeKey(2):
+   key1: a
+   key2: c

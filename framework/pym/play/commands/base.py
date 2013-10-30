@@ -8,6 +8,7 @@ import getopt
 import urllib2
 import webbrowser
 import time
+import signal
 
 from play.utils import *
 
@@ -119,14 +120,43 @@ def new(app, args, env, cmdloader=None):
     print "~ Have fun!"
     print "~"
 
+process = None
+
+def handle_sigterm(signum, frame):
+    global process
+    if 'process' in globals():
+        process.terminate()
+        sys.exit(0)
+
+first_sigint = True
+
+def handle_sigint(signum, frame):
+    global process
+    global first_sigint
+    if 'process' in globals():
+        if first_sigint:
+            # Prefix with new line because ^C usually appears on the terminal
+            print "\nTerminating Java process"
+            process.terminate()
+            first_sigint = False
+        else:
+            print "\nKilling Java process"
+            process.kill()
+        
 def run(app, args):
+    global process
     app.check()
     
     print "~ Ctrl+C to stop"
     print "~ "
     java_cmd = app.java_cmd(args)
     try:
-        subprocess.call(java_cmd, env=os.environ)
+        process = subprocess.Popen (java_cmd, env=os.environ)
+        signal.signal(signal.SIGTERM, handle_sigterm)
+        return_code = process.wait()
+	signal.signal(signal.SIGINT, handle_sigint)
+        if 0 != return_code:
+            sys.exit(return_code)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
@@ -134,9 +164,12 @@ def run(app, args):
 
 def clean(app):
     app.check()
-    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
-    if os.path.exists(os.path.join(app.path, 'tmp')):
-        shutil.rmtree(os.path.join(app.path, 'tmp'))
+    tmp = app.readConf('play.tmp')
+    if tmp is None or not tmp.strip():
+        tmp = 'tmp'
+    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, tmp))
+    if os.path.exists(os.path.join(app.path, tmp)):
+        shutil.rmtree(os.path.join(app.path, tmp))
     print "~"
 
 def show_modules(app, args):
@@ -160,7 +193,9 @@ def test(app, args):
     print "~ "
 
     try:
-        subprocess.call(java_cmd, env=os.environ)
+        return_code = subprocess.call(java_cmd, env=os.environ)
+        if 0 != return_code:
+            sys.exit(return_code)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
@@ -192,6 +227,11 @@ def autotest(app, args):
     except Exception, e:
         pass
 
+    # Do not run the app if SSL is configured and no cert store is configured
+    keystore = app.readConf('keystore.file')
+    if protocol == 'https' and not keystore:
+      print "https without keystore configured. play auto-test will fail. Exiting now."
+      sys.exit(-1)
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
@@ -213,12 +253,16 @@ def autotest(app, args):
         line = soutint.readline().strip()
         if line:
             print line
-            if line.find('/@tests to run the tests') > -1:
+            if line.find('Server is up and running') > -1: # This line is written out by Server.java to system.out and is not log file dependent
                 soutint.close()
                 break
 
     # Run FirePhoque
     print "~"
+
+    headless_browser = ''
+    if app.readConf('headlessBrowser'):
+        headless_browser = app.readConf('headlessBrowser')
 
     fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
     fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
@@ -228,7 +272,9 @@ def autotest(app, args):
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
         cp_args = ';'.join(fpcp)    
-    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), 'play.modules.testrunner.FirePhoque']
+    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
+    if protocol == 'https':
+        java_cmd.insert(-1, '-Djavax.net.ssl.trustStore=' + app.readConf('keystore.file'))
     try:
         subprocess.call(java_cmd, env=os.environ)
     except OSError:
@@ -237,21 +283,23 @@ def autotest(app, args):
 
     print "~"
     time.sleep(1)
-    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
-        print "~ All tests passed"
-        print "~"
-    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
-        print "~ Some tests have failed. See file://%s for results" % test_result
-        print "~"
     
     # Kill if exists
-    http_port = app.readConf('http.port')
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
         opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception, e:
         pass
+ 
+    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
+        print "~ All tests passed"
+        print "~"
+        testspassed = True
+    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
+        print "~ Some tests have failed. See file://%s for results" % test_result
+        print "~"
+        sys.exit(1)
 
 def id(play_env):
     if not play_env["id"]:

@@ -1,0 +1,135 @@
+h1. Internationalization
+
+Internationalisation (I18N) is a means of adapting your application to different languages to allow for regional differences. Follow these steps to enable internationalisation in your application.
+
+h2. <a name="utf8">Only use UTF-8!</a>
+
+Play supports only one encoding: UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
+
+Be sure to be consistent with UTF-8 usage throughout your application:
+
+* Edit all your source files as UTF-8
+* Define proper encoding headers in HTTP
+* Set your HTML meta tags to UTF-8
+* If you use a database, configure it to use UTF-8, and always connect to it using UTF-8
+
+p(note). **Note**
+ 
+The UTF-8 encoding issue is the reason why most of the Play configuration files, even though they are Java properties files, are not named @*.properties@. Java imposes the requirement that properties files must be encoded with the **ISO-8859-1** encoding. Play configuration files must be UTF-8 encoded. Need we say more?
+
+h2. <a name="messages">Externalize your messages</a>
+
+To support I18N you have to externalize all messages in your application. 
+
+Create a file named @messages@ in the application’s @conf/@ directory. This file is really just a Java properties file.
+
+bc. hello=Hello!
+back=Back
+
+Then you can define a specific @message@ file for each language used in your application. Just add the ISO language code as a file extension. 
+
+For example, the message file containing the corresponding French translations is @conf/messages.fr@:
+
+bc. hello=Bonjour!
+back=Retour
+
+h2. <a name="languages">Define languages supported by the application</a>
+
+Define a list of supported languages in the "application.langs configuration":configuration#application.langs.
+
+On the first request from a new user, Play will guess the default language to use. It does so by parsing the HTTP @Accept-language@ header. It will then save the chosen language in a @PLAY_LANG@ cookie. So the next request will use the same language.
+
+You can use language/country pair if you want to distinguish between variant, such as en_US and en_GB, or zh_CN and zh_TW. However, be aware that some users may only expose a language and not a country in their Accept-language. For that reason, you should always provide the "naked" language (e.g. en).
+
+For example, if most of your users are from US but you also want to support British English, it is recommended to use simply "en" of US English and "en_GB" for British English.
+
+From your application code your can retrieve the current language for the user by accessing the @play.i18n.Lang@ object:
+
+bc. String lang = Lang.get();
+
+If you want to permanently change the user language, use the change() method:
+
+bc. Lang.change("ja");
+
+The new value will be saved back to the user’s language cookie.
+
+
+h2. <a name="dates">Define date format according to your locale</a>
+
+Configure "date.format":configuration#date.format to specify the default date format to use.
+
+
+h2(#retrieve). <a>Retrieve localized messages</a>
+
+
+h3(#argument). Message arguments
+
+From the application code, you can retrieve messages defined in message files. From Java, use the @play.i18n.Messages@ object.
+
+bc. public static void hello() {
+    renderText(Messages.get("hello"));
+}
+
+We support message formatting through the standard @java.util.Formatter@ ‘Format string syntax’. You can also define dynamic content in your messages:
+
+bc. hello=Hello %s!
+
+where @%s@ represents a message argument that will be output as a @String@. Message arguments are provided by additional (varargs) arguments to @Messages.get@:
+
+bc. public static void hello(String user) {
+    renderText(Messages.get("hello", user));
+}
+
+h3(#template). Template output
+
+From a template you can use the special @&{…}@ syntax to display localized messages:
+
+bc. <h1>&{'hello'}</h1>
+
+or using dynamic content in message arguments:
+
+bc. <h1>&{'hello', params.user}</h1>
+
+
+h3(#arguments). Multiple arguments
+
+You can define multiple message arguments, such as this message which refers to two ‘decimal integer’ arguments:
+
+bc. guess=Please pick a number between %d and %d
+
+which you display by specifying the message arguments in the right order:
+
+bc. <p>&{'guess', low, high}</p>
+
+
+h3(#indices). Argument indices
+
+You can also specify the message argument explicitly, to use a different order. For example, suppose a message in English has two parameters:
+
+bc. guess.characteristic=Guess %s’s %s.
+
+with message output like:
+
+bc. <p>&{'guess.characteristic', person.name, 'age'}</p>
+
+The French localisation has the two message in the opposite order, so in the French localisation we specify the argument indices:
+
+bc. guess.characteristic=Devinez %2$s de %1$s.
+
+where @%2$s@ outputs the **second** argument as a decimal integer.
+
+Finally, we want to localise the characteristic name ‘age’ as well, so we would change the output to use the message key @person.age@, and change the message definitions to:
+
+bc. guess.characteristic=Guess %s’s &{%s}.
+person.age = age
+
+and
+
+bc. guess.characteristic=Devinez &{%2$s} de %1$s.
+person.age = l’age
+
+where @&{%s}@ is itself a message look-up, with the argument value as the message key.
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Cache":cache%.

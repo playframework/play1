@@ -2,9 +2,11 @@ package controllers;
 
 import java.util.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -74,6 +76,29 @@ public class Application extends Controller {
         renderText("OK: " + re);
     }
 
+    public static void revRoute(String re) {
+    	Map<String,Object> par = new HashMap<String, Object>();
+    	par.put("re", re);
+    	String url = Router.reverse("Application.revRoute", par ).url;
+	renderText("OK[revRoute]: " + re + " URL: " + url); 
+    }
+
+    public static void ressourceWithoutSpecialCharacters(String appId, String verId) {
+        Map<String,Object> args = new HashMap<String, Object>();
+        args.put("appId", appId);
+        args.put("verId", verId);
+        String url = Router.reverse("Application.ressourceWithoutSpecialCharacters", args ).url;
+        renderText("OK[ressourceWithoutSpecialCharacters]: appId=" + appId + " verId=" + verId + " URL: " + url);
+    }
+    
+    public static void ressourceWithSpecialCharacters(String appId, String verId) {
+       Map<String,Object> args = new HashMap<String, Object>();
+       args.put("appId", appId);
+       args.put("verId", verId);
+       String url = Router.reverse("Application.ressourceWithSpecialCharacters", args ).url;
+       renderText("OK[ressourceWithSpecialCharacters]: appId=" + appId + " verId=" + verId + " URL: " + url);
+    }
+    
     public static void index() {
         routeArgs.put("lucky", "strike");
         render();
@@ -96,11 +121,19 @@ public class Application extends Controller {
     }
     
     public static void dashboard(String client) {
-        
+        renderText(client);
     }
 
     public static void hello(String name) {
         render(name);
+    }
+
+    public static void helloWorld(String name) {
+        render("/Application/hello.html", name);
+    }
+
+    public static void helloSteph(String name) {
+        render("/Application/hello.html", name);
     }
 
     public static void yop() {
@@ -119,9 +152,14 @@ public class Application extends Controller {
         render();
     }
     
+
+    public static void generateBookWithDateLink(long timeLong) {
+        render(timeLong);
+    }
+    
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        df.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
         renderText("Booked at %s !!", df.format(at));
     }
 
@@ -143,6 +181,10 @@ public class Application extends Controller {
         renderText("OK");
     }
 
+    public static void withQueryParam(String lucky) {
+         renderText("OK");
+    }
+
     public static void reverserouting() {
         render("Application/reverse.html");
     }
@@ -156,6 +198,14 @@ public class Application extends Controller {
             JPABinding.save(new Project("COLCOZ"));
         }
         renderText(def);
+    }
+
+    public static void jsRoute() {
+        render();
+    }
+
+    public static void jsRouteError() {
+        render();
     }
 
     public static void mail() {
@@ -198,6 +248,12 @@ public class Application extends Controller {
         renderText("OK5");
     }
     
+
+    public static void mailwithpercentinsubject() {
+        notifiers.Welcome.subjectwithpercent();
+        renderText("OKPCT");
+    }
+
     public static void mailWithUrls() {
         notifiers.Welcome.welcome_mailWithUrls(false);
         renderText("OK_mailWithUrls");
@@ -214,6 +270,12 @@ public class Application extends Controller {
         new MailJob().now().get();
         renderText("OK_mailWithUrlsInJob");
     }
+
+    public static void mailWithEmbeddedImage() {
+        notifiers.Welcome.mailWithEmbeddedImage();
+        renderText("OK_mailWithEmbeddedImage");
+    }
+    
 
     public static void ifthenelse() {
         boolean a = true;
@@ -261,7 +323,7 @@ public class Application extends Controller {
     }
 
     public static void selectTag(){
-        List<User> users = new ArrayList<User>(10);
+        List<User> users = new ArrayList<User>(12);
         User user;
         for(long i = 0; i < 10; i++) {
         	user = new User("User-" + i);
@@ -269,10 +331,62 @@ public class Application extends Controller {
         	user.i = (int) i;
         	users.add(user);
         }
+        user = new User("User-%-10");
+        user.k = 10L;
+        user.i = (int) 10;
+        users.add(user);
+        user = new User("User-%%-11");
+        user.k = 11L;
+        user.i = (int) 11;
+        users.add(user);
         render(users);
     }
     
     public static void fastTag_render_test() {
         render();
+    }
+    
+    public static void writeChunks() throws UnsupportedEncodingException {
+        response.contentType = "text/plain";
+        response.setHeader("Transfer-Encoding", "chunked");
+        response.writeChunk("a");
+        response.writeChunk("b");
+        response.writeChunk("c");
+        response.writeChunk("æøå");
+        response.writeChunk("æøå".getBytes("UTF-8"));
+    }
+
+    private static final Object CHUNK_LOCK = new Object();
+
+    public static void writeChunks2() {
+        // Some applications may want to keep sending data to the client until
+        // the client closes the HTTP connection. To simulate this case, we have
+        // an infinite loop that terminates only when an exception occurs, and
+        // we need to ensure that an exception will occur when the client closes
+        // the HTTP connection.
+        // The purpose of the synchronization lock is to test the ability for
+        // this method to terminate. If this method does not terminate, a second
+        // call to this method will hang with no output.
+        synchronized(CHUNK_LOCK) {
+            response.contentType = "text/plain";
+            response.setHeader("Transfer-Encoding", "chunked");
+            Logger.info("Write chunks started.");
+            try {
+                while (true) {
+                    response.writeChunk("Go, Go, Igo!\n");
+                }
+            }
+            catch (Exception e) {
+                Logger.info("Write chunks exception.", e);
+            }
+            Logger.info("Write chunks stopped.");
+        }
+    }
+
+    public static void makeSureCookieSaved(){
+        if(request.cookies!=null && request.cookies.get("PLAY_TEST")!=null){
+            response.setCookie("PLAY_TEST", request.cookies.get("PLAY_TEST").value);
+        }
+        renderText("OK");
     }
 }

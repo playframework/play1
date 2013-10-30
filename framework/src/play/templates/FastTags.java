@@ -1,19 +1,19 @@
 package play.templates;
 
 import groovy.lang.Closure;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Error;
@@ -23,6 +23,7 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Http;
+import play.mvc.Mailer;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.Flash;
 import play.mvc.Scope.Session;
@@ -56,18 +57,55 @@ public class FastTags {
     }
 
     public static void _jsAction(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "'; for(key in options) { pattern = pattern.replace(':'+key, options[key]); } return pattern }");
+        String html = "";
+        String minimize = "";
+        if(args.containsKey("minimize") && Boolean.FALSE.equals(Boolean.valueOf(args.get("minimize").toString()))){
+            minimize = "\n";
+        }
+        html += "function(options) {" + minimize;
+        html += "var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "';" + minimize;;
+        html += "for(key in options) {" + minimize;;
+        html += "var val = options[key];" + minimize;
+        // Encode URI script
+        if(args.containsKey("encodeURI") && Boolean.TRUE.equals(Boolean.valueOf(args.get("encodeURI").toString()))){ 
+            html += "val = encodeURIComponent(val.replace('&amp;', '&'));" + minimize;
+        }
+        //Custom script
+        if(args.containsKey("customScript")){
+            html += "val = " + args.get("customScript") + minimize;
+        }
+        html += "pattern = pattern.replace(':'+key, val || '');"+ minimize;
+        html += "}" + minimize;;
+        html += "return pattern;" + minimize;;
+        html += "}" + minimize;
+	out.println(html);
+    }
+
+    public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        final Object arg = args.get("arg");
+        if (!(arg instanceof ActionDefinition)) {
+            throw new TemplateExecutionException(template.template, fromLine, "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
+        }
+        final ActionDefinition action = (ActionDefinition)arg;
+        out.print("{");
+        if (action.args.isEmpty()) {
+            out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");
+        } else {
+            out.print("url: function(args) { var pattern = '" + action.url.replace("&amp;", "&") + "'; for (var key in args) { pattern = pattern.replace(':'+key, args[key] || ''); } return pattern; },");
+        }
+        out.print("method: '" + action.method + "'");
+        out.print("}");
     }
 
     public static void _authenticityToken(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken() + "\">");
+        out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken() + "\"/>");
     }
 
     public static void _option(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && (selectedValue.toString()).equals(value.toString());
-        out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + "" + serialize(args, "selected", "value") + ">");
+        out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + " " + serialize(args, "selected", "value") + ">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
@@ -95,13 +133,17 @@ public class FastTags {
         if (args.containsKey("method")) {
             actionDef.method = args.get("method").toString();
         }
+	    String name = null;
+	    if (args.containsKey("name")) {
+            name = args.get("name").toString();
+        }
         if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + (name != null?"name=\"" + name + "\"":"") +  ">");
         if (!("GET".equals(actionDef.method))) {
             _authenticityToken(args, body, out, template, fromLine);
         }
@@ -130,22 +172,12 @@ public class FastTags {
         Object obj = body.getProperty(pieces[0]);
         if(obj != null){
             if(pieces.length > 1){
-                for(int i = 1; i < pieces.length; i++){
-                    try{
-                        Field f = obj.getClass().getField(pieces[i]);
-                        if(i == (pieces.length-1)){
-                            try{
-                                Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
-                                field.put("value", getter.invoke(obj, new Object[0]));
-                            }catch(NoSuchMethodException e){
-                                field.put("value",f.get(obj).toString());
-                            }
-                        }else{
-                            obj = f.get(obj);
-                        }
-                    }catch(Exception e){
-                        // if there is a problem reading the field we dont set any value
-                    }
+                try{
+                	String path = _arg.substring(_arg.indexOf(".") + 1);
+                	Object value = PropertyUtils.getProperty(obj, path);
+              		field.put("value", value);
+                }catch(Exception e){
+                	// if there is a problem reading the field we dont set any value
                 }
             }else{
                 field.put("value", obj);
@@ -369,6 +401,25 @@ public class FastTags {
             t.internalRender(newArgs);
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
+        }
+    }
+    
+    public static void _embeddedImage(Map<?, ?> args, Closure body,
+            PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if ((args.containsKey("arg") && args.get("arg") != null)
+                || (args.containsKey("src") && args.get("src") != null)) {
+            String src = (args.containsKey("arg") && args.get("arg") != null) ? args
+                    .get("arg").toString() : args.get("src").toString();
+            if (src != null) {
+                String name = (args.containsKey("name")) ? args.get("name")
+                        .toString() : null;
+                out.print("<img src=\"" + Mailer.getEmbedddedSrc(src, name)
+                        + "\" " + serialize(args, "src", "name") + "/>");
+            }
+        } else {
+            throw new TemplateExecutionException(template.template, fromLine,
+                    "Specify a file name", new TagInternalException(
+                            "Specify a file name"));
         }
     }
 

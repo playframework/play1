@@ -1,0 +1,111 @@
+
+<div class="wrapper">
+
+    <div id="docSidebar">
+
+        <div id="logo">
+            <img src="@{'/public/playmanual/logo.png'}">
+            <h2 id="version">Play ${play.version}</h2>
+        </div>
+
+        <h2>閲覧</h2>
+        <ul>
+            <li id="gotoc"><a href="/@documentation/home">ローカルドキュメント</a></li>
+            <li id="gotoc"><a href="/@api/index.html">Java API</a></li>
+        </ul>
+
+        <h2>コンテンツ</h2>
+        <div id="toc"></div>
+
+        #{if modules}
+            <h2>Installed modules</h2>
+            <ul>
+                #{list modules, as:'module'}
+                    <li>
+                        <a href="modules/${module}/home">${module}</a>
+                        #{if apis.contains(module)}
+                            — <a href="/@api/-${module}/index.html">Browse API</a>
+                        #{/if}
+                    </li>
+                #{/list}
+            </ul>
+        #{/if}
+
+        <h2>検索</h2>
+        <p>google でヘルプを検索する</p>
+        <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="28" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
+
+    </div>
+
+    <div id="pageContent">
+
+        <div class="wikistyle">
+            <h1>新しいアプリケーションの準備が整いました!</h1>
+            <p>
+                おめでとうございます。新しい play アプリケーションが作成されました。このページは次のいくつかの手順であなたのお手伝いをします。
+            </p>
+            <h2><a name="why">なぜこのページが表示されるのですか?</a></h2>
+            <p>
+                <strong>conf/routes</strong> ファイルには、ブラウザが <strong>GET</strong> メソッドを使って <strong>/</strong> URI をリクエストしたとき、play に <strong>Application.index</strong> を起動するよう指示するルートが定義されています。
+            </p>
+            <pre><code># Application home page
+GET     /         Application.index</code></pre>
+            <p>
+                そのため、play は <strong>controllers&#46;Application&#46;index()</strong> メソッドを起動しました:
+            </p>
+            <pre><code>public static void index() {
+    render();
+}</code></pre>
+            <p>
+                このアクションは <strong>render()</strong> の呼び出しを使って play にテンプレートを表示するよう依頼します。play は規約によって <strong>app/views/Application/index.html</strong> テンプレートを表示しました:
+            </p>
+            <pre><code>&#35;{extends 'main.html' /}
+&#35;{set title:'Home' /}
+
+&#35;{welcome /}</code></pre>
+            <p>
+                このテンプレートは <strong>app/views/main.html</strong> を拡張し、そして <strong>&#35;{welcome /}</strong> タグを使ってこの welcome ページを表示します。
+            </p>
+            <h2><a name="ide">Java IDE をセットアップする必要がありますか?</a></h2>
+            <p>
+                あなたは任意のテキストエディタを使って、今すぐにアプリケーションのハックを始めることができます。Java ソースファイルに加えられた更新を含むすべての変更は、次回のページ更新時に自動的に再度読み込まれます。
+            </p>
+            <p>
+                <strong>Eclipse</strong>, <strong>Netbeans</strong> またはその他の Java IDE にてアプリケーションをセットアップしたい場合は、<a href="/@documentation/ide">お好みの IDE を設定しよう</a> ページを確認してください。
+            </p>
+            <h2><a name="db">データベースに接続する必要がありますか?</a></h2>
+            <p>
+                <strong>conf/application.conf</strong> ファイルにこれらのいずれかの行を追加することで、すぐに (インメモリまたはファイルシステムに書き込まれる) 開発データベースをセットアップすることができます:
+            </p>
+<pre><code># 一時的なインメモリデータベース用 (H2 in memory)
+db=mem
+
+# シンプルなファイル書き込みデータベース用 (H2 file stored)
+db=fs</code></pre>
+            <p>
+                既存の <strong>MySQL5 サーバ</strong> に接続したい場合は、以下を使用します:
+            </p>
+            <pre><code>db=mysql:user:pwd@database_name</code></pre>
+            <p>
+                その他の JDBC 準拠のデータベースに接続する必要がある場合は、まず対応するドライバのライブラリを <strong>lib/</strong> ディレクトリに追加し、そして <strong>conf/application.conf</strong> ファイルに以下の行を追加してください:
+            </p>
+            <pre><code>db.url=jdbc:postgresql:database_name
+db.driver=org.postgresql.Driver
+db.user=root
+db.pass=secret</code></pre>
+            <h2><a name="doc">もっとヘルプが必要ですか?</a></h2>
+            <p>
+                アプリケーションを <strong>DEV</strong> モードで実行している場合は <a href="/@documentation">/@documentation</a> という URL で最新のドキュメントに直接アクセスすることができます。あるいは <a href="http://www.playframework.org">http://www.playframework.org</a> を訪問してください。
+            </p>
+            <p>
+                Play ユーザは <a href="http://groups.google.com/group/play-framework">Play Google Group</a> でヘルプを検索し、プロジェクトを発表し、議論します。もし google アカウントを持っていない場合でも、<strong>play-framework+subscribe@googlegroups.com</strong> にメールを送ってメーリングリストに参加することができます。
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</div>
+
+</div>
+

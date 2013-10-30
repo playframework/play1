@@ -169,5 +169,14 @@ public class JPAController extends Controller {
         acc.save();
         with3Levels();
     }
+
+	public static void testFoundTwoRepresentationOfTheSameObject() {
+	    AnEntity e1 = new AnEntity().save();
+	    e1.children = new ArrayList<AnotherEntity>();
+
+	    new AnotherEntity().save();
+	    e1.save();
+	    render();
+	}
 }
 

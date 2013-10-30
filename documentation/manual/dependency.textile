@@ -12,9 +12,9 @@ Once you have expressed these dependencies in your application’s @conf/depende
 
 h2. <a name="format">Dependency format</a>
 
-A dependency is described by an organisation a name and a revision number. In the @dependencies.yml@ file you will write it like this:
+A dependency is described by an organisation a name a revision number and optionally a classifier. In the @dependencies.yml@ file you will write it like this:
 
-bc. organisation -> name revision
+bc. organisation -> name revision [classifier]
 
 So, for instance version 1.0 of the "Play PDF module":http://www.playframework.org/modules/pdf is expressed like this:
 
@@ -27,6 +27,11 @@ bc. commons-lang -> commons-lang 2.5
 In this case, you can omit the organisation from the dependency declaration:
 
 bc. commons-lang 2.5
+
+When your dependency has a classifier, you can use this:
+
+bc. net.sf.json-lib -> json-lib 2.4 jdk15
+
 
 h3. Dynamic revisions
 
@@ -169,6 +174,13 @@ bc. play dependencies --sync
 
 If you run this command again the unwanted **JAR** will be deleted. 
 
+When you deploy an application in production, you can reduce the size of its modules by removing module source code and documentation. You can do this by adding the @--forProd@ option to the command:
+
+bc. play dependencies --forProd
+
+This removes the @documentation/@, @src/@, @tmp/@, @*sample*/@ and @*test*/@ directories from each module.
+
+
 h2. <a name="conflicts">Conflict resolution</a>
 
 Whenever two components need different revisions of the same dependency, the conflicts manager will choose one. The default is to keep the latest revision and to evict the others. 
@@ -246,7 +258,7 @@ repositories:
     
     - zenexity:
         type:       http
-        artifact:   "http://www.zenexity.com/repo/[module]-[revision].[ext]"
+        artifact:   "http://www.zenexity.com/repo/[module]-[revision].zip"
         contains:
             - com.zenexity -> *
 
@@ -302,6 +314,73 @@ repositories:
             - mysecondmodule
 
 Note: don't forget to run @play dependencies myplayapp@.
+
+
+h3. Custom ivy settings
+
+Play is using Ivy under the hood. If you require a special configuration such as setting a proxy, basic authentication for an internal maven nexus repository, you can edit the ivysettings.xml file. It is located in the @.ivy2@ folder in your home directory.
+
+Example 1, you want Ivy to ignore checksums:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivysettings>
+  <property name="ivy.checksums" value=""/>
+</ivysettings>
+
+Example 2, you want to use basic authentication:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivysettings>
+  <credentials host="maven-repo.xxx" realm="Sonatype Nexus Repository Manager"
+    username="user" passwd="reallygreatpassword"/>
+</ivysettings>
+
+Example 3, reuse local maven repository and repository manager:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivy-settings>
+  <!-- path to local maven repo and default maven layout -->
+  <property name="local-maven2-pattern" 
+    value="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision]" 
+    override="false" />
+ 
+  <!-- set resolver chain as default -->
+  <settings defaultResolver="main" />
+ 
+  <!-- configure caches -->
+  <caches repositoryCacheDir="${user.home}/.ivy2/cache">
+    <!-- do not cache from local .m2-->
+    <cache name="nocache" useOrigin="true" />
+    <cache name="default" />
+  </caches>
+ 
+  <resolvers>
+    <chain name="main">
+      <!-- as this is not cached, even changing SNAPSHOT dependencies 
+        are resolved correctly -->
+      <filesystem name="local-maven-2" m2compatible="true" local="true" 
+        cache="nocache">
+        <ivy pattern="${local-maven2-pattern}.pom" />
+        <artifact pattern="${local-maven2-pattern}(-[classifier]).[ext]" />
+      </filesystem>
+      <!-- use repository manager as proxy to maven-central
+        (and all other repositories)--> 
+      <ibiblio name="repomanager" m2compatible="true"
+        root="http://your.repomanager.intra/path/to/repo" cache="default"/>
+    </chain>
+  </resolvers>
+</ivy-settings>
+
+There are many things you can configure: see the "Ivy settings documentation":http://ant.apache.org/ivy/history/2.1.0/settings.html.
+
+
+h3. Clearing the Ivy cache
+
+The Ivy cache can become corrupted, especially when using the @http@ type in the repositories section of @conf/dependencies.yml@. If this happens, and dependency resolution does not work, you can clear the cache with the @--clearcache@ option.
+
+bc. $ play dependencies --clearcache
+
+This is equivalent to @rm -r ~/.ivy2/cache@.
 
 
 p(note). **Continuing the discussion**

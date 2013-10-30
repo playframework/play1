@@ -23,12 +23,14 @@ import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Scope.RenderArgs;
 
 import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
-import java.util.concurrent.Future;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 import play.Invoker;
 import play.mvc.Controller;
@@ -44,6 +46,8 @@ public abstract class FunctionalTest extends BaseTest {
 
     private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
 
+    private static Map<String, Object> renderArgs = new HashMap<String, Object>();
+    
     @Before
     public void clearCookies(){
         savedCookies = null;
@@ -64,13 +68,19 @@ public abstract class FunctionalTest extends BaseTest {
         Response response = GET(url);
         if (Http.StatusCode.FOUND == response.status && followRedirect) {
             Http.Header redirectedTo = response.headers.get("Location");
-            java.net.URL redirectedUrl = null;
-            try {
-                redirectedUrl = new java.net.URL(redirectedTo.value());
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+            String location = redirectedTo.value();
+            if(location.contains("http")){
+            	java.net.URL redirectedUrl = null;
+            	try {
+            		redirectedUrl = new java.net.URL(redirectedTo.value());
+            	} catch (MalformedURLException e) {
+            		throw new RuntimeException(e);
+            	}
+            	response = GET(redirectedUrl.getPath());
             }
-            response = GET(redirectedUrl.getPath());
+            else{
+            	response = GET(location);
+            }
         }
         return response;
     }
@@ -168,7 +178,8 @@ public abstract class FunctionalTest extends BaseTest {
         List<Part> parts = new ArrayList<Part>();
 
         for (String key : parameters.keySet()) {
-            parts.add(new StringPart(key, parameters.get(key)));
+            final StringPart stringPart = new StringPart(key, parameters.get(key), request.encoding);
+            parts.add(stringPart);
         }
 
         for (String key : files.keySet()) {
@@ -225,6 +236,7 @@ public abstract class FunctionalTest extends BaseTest {
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(body.getBytes());
+        if (savedCookies != null) request.cookies = savedCookies;
         return makeRequest(request);
     }
 
@@ -258,11 +270,39 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static void makeRequest(final Request request, final Response response) {
-        final Future invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        final CountDownLatch actionCompleted = new CountDownLatch(1);
+        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
-            public void execute() throws Exception {                
+            public void execute() throws Exception {
+            	renderArgs.clear();
                 ActionInvoker.invoke(request, response);
+                
+                if(RenderArgs.current().data != null) {
+                	renderArgs.putAll(RenderArgs.current().data);
+                }
+            }
+
+            @Override
+            public void onSuccess() throws Exception {
+                try {
+                    super.onSuccess();
+                } finally {
+                    onActionCompleted();
+                }
+            }
+
+            @Override
+            public void onException(final Throwable e) {
+                try {
+                    super.onException(e);
+                } finally {
+                    onActionCompleted();
+                }
+            }
+
+            private void onActionCompleted() {
+                actionCompleted.countDown();
             }
 
             @Override
@@ -275,7 +315,9 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
-            invocationResult.get(30, TimeUnit.SECONDS);
+            if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
+                throw new TimeoutException("Request did not complete in time");
+            }
             if (savedCookies == null) {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
@@ -284,6 +326,10 @@ public abstract class FunctionalTest extends BaseTest {
                 // 0, they discard immediately.
                 if(e.getValue().maxAge == null || e.getValue().maxAge > 0) {
                     savedCookies.put(e.getKey(), e.getValue());
+                } else {
+                    // cookies with maxAge zero still remove a previously existing cookie,
+                    // like PLAY_FLASH.
+                    savedCookies.remove(e.getKey());
                 }
             }
             response.out.flush();
@@ -400,8 +446,10 @@ public abstract class FunctionalTest extends BaseTest {
      * @param response server response
      */
     public static void assertContentType(String contentType, Response response) {
-        assertTrue("Response contentType unmatched : '" + contentType + "' !~ '" + response.contentType + "'",
-                response.contentType.startsWith(contentType));
+        String responseContentType = response.contentType;
+        assertNotNull("Response contentType missing", responseContentType);
+        assertTrue("Response contentType unmatched : '" + contentType + "' !~ '" + responseContentType + "'",
+                responseContentType.startsWith(contentType));
     }
 
     /**
@@ -427,6 +475,10 @@ public abstract class FunctionalTest extends BaseTest {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    public static Object renderArgs(String name) {
+    	return renderArgs.get(name);
     }
 
     // Utils

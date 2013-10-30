@@ -1,0 +1,9 @@
+#{fixture delete:'all' /}
+
+#{selenium 'Test Job Later'}
+
+    openAndWait('@{CallingJobLater.saveEntityTriggerJob()}')
+    openAndWait('@{CallingJobLater.renderSaveEntityTriggerJobResult()}')
+    assertTextPresent('cityNameJobLater')
+
+#{/selenium}

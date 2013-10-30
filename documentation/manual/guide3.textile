@@ -91,7 +91,7 @@ bc. #{extends 'main.html' /}
                 ${frontPost.comments.size() ?: 'no'} 
                 comment${frontPost.comments.size().pluralize()}
                 #{if frontPost.comments}
-                    , latest by ${frontPost.comments[0].author}
+                    , latest by ${frontPost.comments[-1].author}
                 #{/if}
             </span>
         </div>
@@ -100,7 +100,7 @@ bc. #{extends 'main.html' /}
         </div>
     </div>
     
-    #{if olderPosts.size() > 1}
+    #{if olderPosts}
         <div class="older-posts">    
             <h3>Older posts <span class="from">from this blog</span></h3>
         
@@ -120,7 +120,7 @@ bc. #{extends 'main.html' /}
                             ${oldPost.comments.size() ?: 'no'} 
                             comment${oldPost.comments.size().pluralize()}
                             #{if oldPost.comments}
-                                - latest by ${oldPost.comments[0].author}
+                                - latest by ${oldPost.comments[-1].author}
                             #{/if}
                         </div>
                     </div>
@@ -138,7 +138,7 @@ bc. #{extends 'main.html' /}
     </div>
 #{/else}
 
-You can read about this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the @?:@ operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
+You can read about how this template works in the "Templates chapter":templates. Basically, it allows you to access your Java objects dynamically. Under the hood we use Groovy. Most of the pretty constructs you see (like the @?:@ operator) come from Groovy. But you don’t really need to learn Groovy to write Play templates. If you’re already familiar with another template language like JSP with JSTL you won’t be lost.
 
 OK, now refresh the blog home page.
 
@@ -164,7 +164,7 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
                 &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
                 comment${_post.comments.size().pluralize()}
                 #{if _post.comments}
-                    , latest by ${_post.comments[0].author}
+                    , latest by ${_post.comments[-1].author}
                 #{/if}
             </span>
         #{/if}
@@ -323,7 +323,7 @@ The blog home page is now finished. As usual we can commit this blog version to 
 
 bc. $ bzr st
 $ bzr add
-$ bzr commit -m 'Home page'
+$ bzr commit -m "Home page"
 
 p(note). Next: %(next)"The comments page":guide4%. 
 

@@ -4,6 +4,7 @@ $(document).ready(function(){
 	var navigation = '<ol class="navigation">';
 	var h2index = 0;
 	var h3index = 0;
+	
 	$('#pageContent h2, #pageContent h3, #pageContent > div > ol > li > a').each(function(index) {
 	  
 		// In each heading, construct an in-page link from its id, or the nested a[name]
@@ -36,7 +37,8 @@ $(document).ready(function(){
 		}
 		
 		// Output a nested LI for this H3.
-		if (this.tagName == 'H3' || (this.tagName == 'A' && $(this).parent('li').find('li').size() > 0) ) {
+		var linkHasNestedList = (this.tagName == 'A' && $(this).parent('li').find('li').size() > 0);
+		if (this.tagName == 'H3' || linkHasNestedList || $(this).hasClass('navigation') ) {
 			h3index++;
 			
 			// Start a new nested OL for the first H3.

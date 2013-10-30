@@ -54,7 +54,7 @@ public class User extends Model {
     }
 
     public Long getTopicsCount() {
-        return Post.count("select count(distinct t) from Topic t, Post p, User u where p.postedBy = ? and p.topic = t", this);
+        return Post.count("select count(distinct t) from Topic t, Post p, User u where p.postedBy = ?1 and p.topic = t", this);
     }
     
     // ~~~~~~~~~~~~ 

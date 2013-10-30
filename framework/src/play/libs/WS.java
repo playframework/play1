@@ -358,7 +358,7 @@ public class WS extends PlayPlugin {
          * @return the WSRequest for chaining.
          */
         public WSRequest setHeader(String name, String value) {
-            this.headers.put(name, value);
+            this.headers.put( HTTP.fixCaseForHttpHeader(name), value);
             return this;
         }
 
@@ -539,6 +539,12 @@ public class WS extends PlayPlugin {
         public abstract Integer getStatus();
 
         /**
+         * The HTTP status text
+         * @return the status text of the http response
+         */
+        public abstract String getStatusText();
+
+        /**
          * @return true if the status code is 20x, false otherwise
          */
         public boolean success() {
@@ -550,7 +556,7 @@ public class WS extends PlayPlugin {
          * @return the content type of the http response
          */
         public String getContentType() {
-            return getHeader("Content-Type");
+            return getHeader("content-type");
         }
 
         public String getEncoding() {

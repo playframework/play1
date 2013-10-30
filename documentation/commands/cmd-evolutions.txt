@@ -1,0 +1,40 @@
+~ Name:
+~ ~~~~~
+~ evolutions -- Run the evolution check
+~ evolutions:apply -- Automatically apply pending evolutions
+~ evolutions:markApplied -- Mark pending evolutions as manually applied
+~ evolutions:resolve -- Resolve partially applied evolution
+~
+~ Alias:
+~ ~~~~~
+~ ev
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play evolutions [app_path] [--jpda]
+~ play evolutions:apply [app_path] [--jpda]
+~ play evolutions:markApplied [app_path] [--jpda]
+~ play evolutions:resolve [app_path] [--jpda]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Track and organize your database schema evolutions evolutions
+~ Play tracks your database evolutions using several "evolutions script". 
+~ These scripts are written in plain old SQL and should be located in the db/evolutions directory of your application.
+~
+~ All options specified after the application path are passed to the JVM (example. -Xms64m -Xmx256m).  
+~ If JVM memory options (starting with -Xm') are not specified in command line arguments, then any
+~ arguments in the conf/application.conf file's jvm.memory property are passed to the JVM.
+~ All the shell environment variables are passed to the JVM.
+~
+~ If the option [--jpda] is present, a JPDA session is automatically opened on the port specified by the 
+~ conf/application.conf file's jpda.port property (defaulting to 8000). If the JPDA port is already in use, 
+~ another available port is automatically chosen.
+~
+~ Options:
+~ ~~~~~~~~
+~
+~ --jpda:
+~ Listen for JPDA connection. The process will be suspended until
+~ a client is plugged to the JPDA port.
+~

@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+
+<script type="text/javascript">
+  function set(eltId, content) {
+    var elt = document.getElementById(eltId);
+    if (elt !== null) {
+      elt.textContent = content;
+    }
+  }
+</script>
+
+<div id="a-url"></div>
+<div id="a-method"></div>
+
+<div id="b-url"></div>
+<div id="b-method"></div>
+
+<div id="c"></div>
+
+<script type="text/javascript">
+  var a = #{jsRoute @Application.index() /};
+  set('a-url', a.url());
+  set('a-method', a.method);
+
+  var b = #{jsRoute @Application.hello() /};
+  set('b-url', b.url());
+  set('b-method', b.method);
+
+  var c = #{jsRoute @Rest.postOrPut(':id') /};
+  set('c', c.url({id: 'foo'}));
+</script>

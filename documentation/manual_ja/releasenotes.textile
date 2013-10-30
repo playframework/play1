@@ -1,0 +1,227 @@
+h1. Play 1.0.1 — リリースノート
+
+**play 1.0.1** は play 1.0 ブランチのメンテナンスリリースです。このリリースは大量の小さなバグを修正し、JPA オブジェクトのより良いバインディング、XSS セキュリティ問題を回避する HTML および Javascript コードの自動エスケープを提供します。
+
+p(note). **play 1.0.1** はメンテナンスリリースであり、バージョン 1.0 との完全な互換性があります。何か問題にぶつかったら Google Group にて質問してください。
+
+"1.0.1 ロードマップページ":http://www.playframework.org/roadmap/1.0.1 にて、修正されたバグについて読むことができます。もっとも重要な変更は、このページにてハイライトされています:
+
+h2. <a>テンプレートにおける HTML コードの自動エスケープ</a>
+
+全ての動的な式は、アプリケーションにおける XSS セキュリティ問題を回避するために、テンプレートエンジンによってエスケープされます。このため、 **==&lt;h1>Title&lt;/h1>==** を含む title 変数は、以下のようにエスケープされます:
+
+bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
+
+これらを本当にエスケープせずに表示したい場合は、 **raw()** メソッドを明示的に呼び出す必要があります:
+
+bc. ${title.raw()} --> <h1>Title</h1>
+
+素の HTML の大部分を表示したい場合は、 **#{verbatim /}** タグを使うこともできます:
+
+bc. #{verbatim}
+    ${title} --> <h1>Title</h1>
+#{/verbatim}
+
+もちろん、この機能は既存のアプリケーションを壊してしまうかもしれないので、デフォルトでは有効ではありません。これは以下の行を **application.conf** ファイルに追加することで有効にすることができます:
+
+bc. future.escapeInTemplates=true
+
+この行は、リリース 1.0.1 で作られた新規アプリケーションには追加されます。
+
+h2. <a>@javax.inject.Inject サポート</a>
+
+"Spring module":spring モジュールで提供されるような DI コンテナを使っている場合、 **@Inject** アノテーションを使うことができます。この **@Inject** アノテーションは、定義された Java Beans をコントローラ、ジョブ、またはメーラに自動的にインジェクションします。このアノテーションは static フィールドに作用します。
+
+例えば、Spring に定義された **PriceWatcher** サービスをコントローラにインジェクションするには、以下のようにするだけです:
+
+bc. public class Application extends Controller {
+    
+    @Inject
+    static PriceWatcher prices;
+    
+    public static void index() {
+        prices.getAll(); // prices is defined here
+    }
+    
+}
+
+自動リロードは期待通り動作するはずです。
+
+h2. <a>JPA オブジェクトのより良いバインディング</a>
+
+以前は、HTTP を使って JPA オブジェクトを自動的に紐付ける方法はありませんでした。例えば:
+
+bc. public static void save(User user) {
+    user.save(); // fail in 1.0
+}
+
+**User** は JPA エンティティクラスであり、user は Binder によって作成された一時的なオブジェクトで、まだ Hibernate によって管理されていないので、このコードは失敗します。
+
+古いやり方は、以下のように **edit()** メソッドを使うものでした:
+
+bc. public static void save(Long id) {
+    User user = User.findById(id);
+    user.edit(params);
+    user.save(); // ok
+}
+
+今では、HTTP パラメータに **user.id** フィールドを渡すことができます。Play は **id** フィールドを見つけると、HTTP パラメータを編集する前に、データベースからマッチするインスタンスをロードします。その後、HTTP リクエストの他のパラメータが適用されます。こうして、HTTP パラメータを直接保存することができます。
+
+bc. public static void save(User user) {
+    user.save(); // ok with 1.0.1
+}
+
+もちろん、この機能は既存のアプリケーションを壊してしまうかもしれないので、デフォルトでは有効ではありません。これは以下の行を **application.conf** ファイルに追加することで有効にすることができます:
+
+bc. future.bindJPAObjects=true
+
+この行は、リリース 1.0.1 で作られた新規アプリケーションには追加されます。
+
+h2. <a>コマンドラインからのフレームワーク id の設定</a>
+
+フレームワーク id によって、同じ play! アプリケーションを異なる設定 (例えば dev, test, staging, production, などなど...) で実行することができます。
+
+コマンドラインを使うことで、アプリケーションが使用する "フレームワーク id":ids を指定することができます。例えば、アプリケーションを production モードで実行するには、以下のコマンドを:
+
+bc. play run --%production
+
+以下の行を **application.conf** ファイルに定義して実行します:
+
+bc. application.mode=dev
+%production.application.mode=prod
+
+これは、フレームワーク id 情報を使用する全ての既存のコマンドと互換性があります。今でも、デフォルト id は **play id** コマンドを使って定義します。
+
+ちなみに **play test** は以下と等価です:
+
+bc. play run --%test
+
+h2. <a>カスタムバリデーション</a>
+
+必要なバリデータを **play.data.validation** パッケージから探すことができませんか？自分で書きましょう。一般的な **@CheckWith** アノテーションを使って、独自の **Check** 実装を紐付けることができます。
+
+例:
+
+bc. public class User {
+    
+    @Required
+    @CheckWith(MyPasswordCheck.class)
+    public String password;
+    
+    static class MyPasswordCheck extends Check {
+        
+        public abstract boolean isSatisfied(Object user, Object password) {
+            return notMatchPreviousPasswords(password);
+        }
+        
+    }
+}
+
+h2. <a>テストランナーの更新</a>
+
+selenium をバージョン 1.0.1 final に更新し、UI を改良しました。Selenium テストは全画面で実行されます。さらに "Run all tests" のような新機能がいくつか追加されています。
+
+!images/selenium-fullscreen!
+
+アプリケーションを test モードで実行した場合、ローカルのドキュメントを利用することもできます。
+
+h2. <a>HTML5 をデフォルトの doctype へ、そして JQuery を新規アプリケーションへ</a>
+
+新規アプリケーションにはデフォルトの HTML スケルトンが含まれます。以前、このスケルトンは **XHTML 1.0 Transitional** でフォーマットされた HTML でした。今では、デフォルトで **HTML5** doctype となります:
+
+bc. <!DOCTYPE html>
+ 
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}">
+        #{get 'moreStyles' /}
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+        #{get 'moreScripts' /}
+    </head>
+    <body>
+        #{doLayout /}
+    </body>
+</html>
+
+これは単なるデフォルト設定であり、当然、お望みであればどのような doctype にも変更可能です。しかしながら、"HTML5":http://html5.org は間違いなく次世代的であり、簡単です。
+
+デフォルトテンプレートには **JQuery** Javascript ライブラリが含まれます。これは、モダンな web アプリケーションには優れた Javascript フレームワークが必要であり、かつ我々が "JQuery":http://www.jquery.com を愛しているからです。こちらも単なるデフォルト設定であり、お望みのどんな Javascript ライブラリで置き換えることもできます。
+
+ああ、そして、デフォルトテンプレートには追加のスクリプトと/またはスタイルを挿し込む 2 つのデフォルトのプレースホルダが含まれます。例えば、以下のようにしてビューに追加します:
+
+bc. #{set 'moreScripts'}
+<script src="@{'/public/javascripts/gears_init.js'}" type="text/javascript" ></script>
+#{/set}
+
+これで、このビューにて gear Javascript ライブラリにアクセスすることができるようになります。
+
+h2. <a>#{list} タグの改善</a>
+
+items パラメータはオプションとなり、デフォルトの arg 引数で置き換えることが可能です。
+
+このため:
+
+bc. #{list items:users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+を、以下のように書き換えることができます:
+
+bc. #{list users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+as パラメータもまたオプションです。デフォルト変数名として _ を使用します:
+
+bc. #{list users}
+    <li>${_}</li>
+#{/list}
+
+h2. <a>新しい #{jsAction /} タグ</a>
+
+この **#{jsAction /}** タグは、サーバ側で定義されたルートを Javascript 関数として取り込めるようにします。これは、自由な引数を使う AJAX によって URL を呼び出す必要がある場合に、とても便利です。
+
+例を見てみましょう:
+
+bc. GET     /users/{id}        Users.show
+
+このルートをクライアント側に取り込むことができます:
+
+bc. <script type="text/javascript">
+    var showUserAction = #{jsAction @Users.show(':id')}
+    
+    var displayUserDetail = function(userId) {
+        $('#userDetail').load( showUserAction({id: userId}) )
+    }
+</script>
+
+見ての通り、自由な引数を定義するために **:ame** 構文を使用します。可変引数と固定引数を一緒に使用することも可能です。この **#{jsAction /}** タグは Javascript 関数を出力します。この関数は全ての可変引数を定義する Javascript オブジェクトを引数として受け取ります。
+
+h2. <a>新しいサンプルアプリケーション: 'booking'</a>
+
+この予約アプリケーションは、有名な "JBoss seam フレームワークの予約アプリケーション":http://docs.jboss.com/seam/latest/reference/en-US/html/tutorial.html#booking を移植したものです。
+
+この予約アプリケーションは、ステートレスなフレームワークを使って、クライアント側で RestFul な方法で複雑な状態をどのように管理するかを示します。
+
+!images/booking!
+
+h2. <a>Eclipse プラグインは順調です</a>
+
+eclipse 専用プラグインを提供するためにがんばって作業しています。現状はアルファ版ですが、すでに利用可能です。このプラグインは play インストールパスの **support/eclipse** ディレクトリにあります。
+
+!images/eclipse-plugin!
+
+h2. <a>IntelliJ IDEA のサポート</a>
+
+今やPlay! フレームワークは、そのままで "IntelliJ IDEA":http://www.jetbrains.com/idea/ をサポートします！
+
+Play! アプリケーションを IntelliJ IDEA プロジェクトに変換するには、 **idealize** コマンドを使います:
+
+bc. # play idealize myApp
+
+!images/intellij!
+
+コンテキストメニューから実行やデバッグを行うことができます。

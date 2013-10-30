@@ -1,0 +1,22 @@
+h2. Controller.action - Redirection
+
+*render(params...);*
+与えられたパラメータでテンプレートを text/html としてレンダリングします。
+
+*renderXML(params...);*
+パラメータを application/xml としてレンダリングします。
+
+*renderJson(params...);*
+パラメータを application/json としてレンダリングします。
+
+*renderText(params...);*
+パラメータを text/plain としてレンダリングします。
+
+*renderTemplate("Clients/showClient.html", id, client);*
+デフォルトのテンプレートをバイパスします。
+
+*redirect("http://www.crionics.com");*
+指定された URL に HTTP リダイレクトします。
+
+*From an action, calling another Controller.action()*
+透過的にリダイレクトを生成します。

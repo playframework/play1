@@ -4,17 +4,25 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+import models.AnEntity;
+import models.MyBook;
 import models.Person;
+
+import org.apache.commons.io.IOUtils;
+
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Valid;
 import play.i18n.Lang;
 import play.mvc.Controller;
+import play.utils.Utils;
 
 public class DataBinding extends Controller {
     
-    @play.mvc.Before static void lang(String lang) {
+    @play.mvc.Before(unless = "myInputStream") static void lang(String lang) {
         System.out.println(lang);
     }
 
@@ -96,5 +104,39 @@ public class DataBinding extends Controller {
         }
         renderText(out);
     }
+
+
+    public static void myInputStream(String productCode) throws Exception {
+        renderText(productCode + " - " + IOUtils.toString(request.body));
+    }
+
+    public static void myList(List<MyBook> items) {
+        renderText(Utils.join(items, ","));
+    }
+
+    public static class BeanWithByteArray {
+        public byte[] ba;
+    }
+    
+    public static void bindBeanWithByteArray(BeanWithByteArray b) {
+        if ( b == null) {
+            renderText("b==null");
+        }
+        
+        if ( b.ba == null) {
+            renderText("b.ba==null");
+        }
+        
+        renderText("b.ba.length=" + b.ba.length);
+    }
+    
+    public static void editAnEntity(@Valid AnEntity entity) {        
+        render(entity);
+    }
+    
+    public static void dispatchAnEntity(@Valid AnEntity entity) {
+        editAnEntity(entity);
+    }
+
 }
 

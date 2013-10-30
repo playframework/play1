@@ -4,35 +4,41 @@
 	assertTextPresent('OK')
 	storeLastReceivedEmailBy('toto@localhost', 'email')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
-	assertEquals('Yop', '$[subject]')
+	assertEquals('Yop', '${'${subject}'.escape()}')
 	
 	open('@{Application.mail2()}')
 	assertTextPresent('OK2')
 	storeLastReceivedEmailBy('toto@localhost', 'email2')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email2"])[1]}', 'subject2')
-	assertEquals('Yop2', '$[subject2]')
+	assertEquals('Yop2', '${'${subject2}'.escape()}')
 
 	open('@{Application.mail3()}')
 	assertTextPresent('OK3')
 	storeLastReceivedEmailBy('toto@localhost', 'email3')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email3"])[1]}', 'subject3')
-	assertEquals('Yop3', '$[subject3]')
+	assertEquals('Yop3', '${'${subject3}'.escape()}')
 
 
 	open('@{Application.mail4()}')
 	assertTextPresent('OK4')
 	storeLastReceivedEmailBy('toto@localhost', 'email4')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email4"])[1]}', 'subject4')
-	assertEquals('Yop4', '$[subject4]')
+	assertEquals('Yop4', '${'${subject4}'.escape()}')
 
 
     open('@{Application.mail5()}')
 	assertTextPresent('OK5')
 	storeLastReceivedEmailBy('test@localhost', 'email5')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email5"])[1]}', 'subject5')
-	assertEquals('test attachments', '$[subject5]')
+	assertEquals('test attachments', '${'${subject5}'.escape()}')
     store('javascript{/name:\s+(.*)\s*/.exec(storedVars["email5"])[1]}', 'body')
-	assertEquals('fond2.png', '$[body]')
+	assertEquals('fond2.png', '${'${body}'.escape()}')
+
+    // show that
+    // https://play.lighthouseapp.com/projects/57987/tickets/1572-playmvcmailer-setsubject-fails-on-messagesget-with 
+    // is fixed
+    open('@{Application.mailwithpercentinsubject()}')
+	assertTextPresent('OKPCT')
 
 	open('@{Application.mailWithUrls()}')
 	assertTextPresent('OK_mailWithUrls')
@@ -41,12 +47,16 @@
 	store('javascript{/.*(email with url to app:http:\/\/localhost:9003\/application\/showit).*/.exec(storedVars["mailWithUrls"])[1]}', 'body')
 
 	open('@{Application.mailWithUrlsInJob()}')
-	assertTextPresent('OK_mailWithUrlsInJob')
-	storeLastReceivedEmailBy('mailWithUrlsJob@localhost', 'mailWithUrls')
+	assertTextPresent('OK_mailWithUrlsInJob')  
+	storeLastReceivedEmailBy('mailWithUrlsJob@localhost', 'mailWithUrlsInJob')
 	//this regexp fails if text not present
-	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrls"])[1]}', 'body')
+	store('javascript{/.*(email with url to app:http:\/\/my.externalhostname.com\/application\/showit).*/.exec(storedVars["mailWithUrlsInJob"])[1]}', 'body')
 
-	
-	
-
+    open('@{Application.mailWithEmbeddedImage()}')
+    assertTextPresent('OK_mailWithEmbeddedImage')
+    storeLastReceivedEmailBy('mailWithEmbeddedImage@localhost', 'mailWithEmbeddedImage')
+    //this regexp fails if text not present  
+    store('javascript{/.*(img src="cid:[a-z]*" alt="distantImage").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
+    store('javascript{/.*(img src="cid:[a-z]*" alt="LocaleImage").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
+    store('javascript{/.*(img src="cid:[a-z]*" alt="LocaleImage2" class="testClass").*/.exec(storedVars["mailWithEmbeddedImage"])[1]}', 'body')
 #{/selenium}

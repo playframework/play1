@@ -156,13 +156,13 @@ public class JavaExtensions {
     }
 
     public static String format(Number number, String pattern) {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Lang.getLocale());
         return new DecimalFormat(pattern, symbols).format(number);
     }
 
     public static String format(Date date) {
         // Get the pattern from the configuration
-        return new SimpleDateFormat(I18N.getDateFormat()).format(date);
+        return format(date, I18N.getDateFormat());
     }
 
     public static String format(Date date, String pattern) {
@@ -170,11 +170,11 @@ public class JavaExtensions {
     }
 
     public static String format(Date date, String pattern, String lang) {
-        return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
+        return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(date);
     }
 
     public static String format(Date date, String pattern, String lang, String timezone) {
-        DateFormat df = new SimpleDateFormat(pattern, new Locale(lang));
+        DateFormat df = new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang));
         df.setTimeZone(TimeZone.getTimeZone(timezone));
         return df.format(date);
     }
@@ -219,25 +219,37 @@ public class JavaExtensions {
         return Messages.get("since.years", years, pluralize(years));
     }
 
+    public static String asdate(Long timestamp) {
+        return asdate(timestamp, I18N.getDateFormat());
+    }
+    
     public static String asdate(Long timestamp, String pattern) {
         return asdate(timestamp, pattern, Lang.get());
     }
 
     public static String asdate(Long timestamp, String pattern, String lang) {
-        return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
+        return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(new Date(timestamp));
     }
 
     public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
         return format(new Date(timestamp), pattern, lang, timezone);
     }
 
-    public static RawData nl2br(Object data) {
+    public static RawData nl2br(RawData data) {
         return new RawData(data.toString().replace("\n", "<br/>"));
+    }
+
+    public static RawData nl2br(Object data) {
+        return new RawData(HTML.htmlEscape(data.toString()).replace("\n", "<br/>"));
     }
 
     public static String urlEncode(String entity) {
         try {
-            return URLEncoder.encode(entity, Http.Response.current().encoding);
+            String encoding = play.Play.defaultWebEncoding;
+            if (Http.Response.current() != null) {
+                encoding = Http.Response.current().encoding;
+            }
+            return URLEncoder.encode(entity, encoding);
         } catch (UnsupportedEncodingException e) {
             Logger.error(e, entity);
         }
@@ -259,7 +271,7 @@ public class JavaExtensions {
 
     public static String formatCurrency(Number number, String currencyCode) {
         Currency currency = Currency.getInstance(currencyCode);
-        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale(Lang.get()));
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(Lang.getLocale());
         numberFormat.setCurrency(currency);
         numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
         String s = numberFormat.format(number);
@@ -323,7 +335,7 @@ public class JavaExtensions {
 
     public static String pluralize(Number n, String plural) {
         long l = n.longValue();
-        if (l < 2) {
+        if (l != 1) {
             return plural;
         }
         return "";
@@ -359,7 +371,7 @@ public class JavaExtensions {
         string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
         string = string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-");
         // Get rid of any - at the start and end.
-        string.replaceAll("-+$", "").replaceAll("^-+", "");
+        string = string.replaceAll("-+$", "").replaceAll("^-+", "");
 
         return (lowercase ? string.toLowerCase() : string);
     }

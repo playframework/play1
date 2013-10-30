@@ -1,0 +1,231 @@
+h1. アプリケーションのテスト
+
+自動実行できるテストスイートを作成するのは、アプリケーションを堅牢にする良い方法です。自動テストスイートを作成することで、アジャイルなやり方で作業することができます。
+
+Play のテストは、何をテストするかによって "Junit 4":http://www.junit.org/ または "Selenium":http://seleniumhq.org/ を使って作成されます。
+
+h2. <a name="writing">テストの記述</a>
+
+テストは @test/@ ディレクトリに作成されなければなりません。アプリケーションが @test@ モードで実行するときにだけ、このフォルダはソースパスに加えられます。テストは、異なる 3 種類の方法で書くことができます。
+
+h3. 単体テスト
+
+単体テストは JUnit を使用して書かれます。このテストでは、(いくつかのユーティリティを含む) アプリケーションのモデルをテストすることができます。
+
+単体テストの例を以下に示します:
+
+bc. import play.test.*;
+import org.junit.*;
+ 
+public class MyTest extends UnitTest {
+     
+    @Test
+    public void aTest() {
+        assertEquals(2, 1 + 1); // A really important thing to test
+    }
+ 
+    @Test
+    public void testUsers() {
+        assertEquals(3, Users.count()); 
+    }
+}
+
+h3. 機能テスト
+
+機能テストは JUnit を使用して書かれます。このテストでは、直接コントローラオブジェクトにアクセスすることでアプリケーションをテストします。
+
+機能テストの例を以下に示します:
+
+bc. import play.test.*;
+import play.mvc.*;
+import play.mvc.Http.*;
+import org.junit.*;
+ 
+public class ApplicationTest extends FunctionalTest {
+     
+    @Test
+    public void testTheHomePage() {
+        Response response = GET("/");
+        assertStatus(200, response);
+    }
+     
+}
+
+レスポンスそのものに関するアサーションを作成する代わりに、 @renderArgs()@ メソッドを使うことでビューに渡された引数に直接アクセスすることができます。例えば:
+
+bc. @Test
+public void testUserIsFoundAndPassedToView() {
+    Response response = POST("/user/find?name=mark&dob=18011977")
+    assertThat(renderArgs("user"), is(notNullValue());
+    User user = (User) renderArgs("user");
+    assertThat(user.name, is("mark"));
+}
+
+h3. Selenium テスト
+
+受入テストは Selenium を使用して書かれます。このテストでは、自動化されたブラウザでこれを実行することでアプリケーションをテストします。
+
+Selenium テストは HTML テーブルを使用して書かれます。従来のこの構文を使用するか、または @#{selenium /}@ タグを使用することができます。
+
+Selenium テストの例を以下に示します:
+
+bc. #{selenium 'Test security'}
+ 
+    // Try to log in the administration area
+    clearSession()
+    open('/admin')
+    assertTextPresent('Login')
+    type('login', 'admin')
+    type('password', 'secret')
+    clickAndWait('signin')
+ 
+    // Verify that the user in correctly logged in
+    assertText('success', 'Welcom admin!')
+ 
+#{/selenium}
+
+Slenium テストはブラウザを通して実行されるので、モックで送信された e メールや、Play Cache に格納された文字列にアクセスするためには、Selenium エクステンションを使用しなければなりません。
+
+あるアカウントに送信された最近の e メールにアクセスする例を以下に示します:
+
+bc. #{selenium 'Test email sending'}
+ 
+    // Open email form and send an email to boron@localhost
+    open('/sendEmail')
+    assertTextPresent('Email form')
+    type('To', 'boron@localhost')
+    type('Subject', 'Berillium Subject')
+    clickAndWait('send')
+    
+    // Extract the last email sent to boron@localhost into a JavaScript
+    // variable called email
+    storeLastReceivedEmailBy('boron@localhost', 'email')
+    // Extract the subject line from the email variable into a variable 
+    // called subject
+    store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
+    // Test the contents of the subject variable
+    assertEquals('Berillium Subject', '$[subject]')
+ 
+#{/selenium}
+
+Play Cache に格納された文字列 (例えば、キャプチャに対する正しい答え) にアクセスする例を以下に示します:
+
+bc. #{selenium 'Get string from cache'}
+ 
+    open('/register')
+    assertTextPresent('Registration form')
+    type('Email', 'my@email.com')
+    type('Password', 'secretpass')
+    type('Password2', 'secretpass')
+    // .. Fill in the registration form ..
+ 
+    // Get the value of the magicKey variable from the cache
+    // (set to the CAPTCHA answer in the application)
+    storeCacheEntry('magicKey', 'captchaAnswer')
+    // Type it into the form
+    type('Answer', '$[captchaAnswer]')
+ 
+    clickAndWait('register')
+ 
+#{/selenium}
+
+h2. <a name="fixtures">フィクスチャ</a>
+
+テストを実行するとき、アプリケーションのための安定したデータを必要とします。最も簡単な方法は、各テストの前にデータベースをリセットすることです。
+
+@play.test.Fixtures@ クラスは、データベースを操作して、テストデータを注入する手助けをします。通常、これは JUnit テストの <code>@Before</code> メソッドで使用します。
+
+bc. @Before
+public void setUp() {
+    Fixtures.deleteDatabase();
+}
+
+データをインポートするには、Fixtures が自動的にインポートすることができる YAML ファイルに定義するのが簡単です。
+
+bc. # Test data
+ 
+Company(google):
+   name:    Google
+ 
+Company(zen):
+   name:    Zenexity
+ 
+User(guillaume):
+   name:    guillaume
+   company: zen
+
+その後、以下のようにします:
+
+bc. @Before
+public void setUp() {
+    Fixtures.deleteDatabase();
+    Fixtures.loadModels("data.yml");
+}
+
+p(note). "YAML マニュアルページ":yaml で Play と YAML について詳しく読むことができます。
+
+Selenium テストのために @#{fixture /}@ タグを使用することができます:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    
+    // Write your test here
+ 
+#{/selenium}
+
+データをいくつかの YAML ファイルに分割すると便利な場合があります。複数のファイルかた一度にフィクスチャをロードすることができます:
+
+bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
+
+Selenium テストは以下のようになります:
+
+bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
+
+h2. <a name="running">テストの実行</a>
+
+テストを実行するには、 @play test@ コマンドを使ってアプリケーションを @test@ モードで実行しなければなりません。
+
+bc. # play test myApp
+
+このモードでは、Play は自動的に @test-runner@ モジュールをロードします。このモジュールは "http://localhost:9000/@tests ":http://localhost:9000/@tests という URL で利用可能な Web ベースのテストランナーを提供します。
+
+!images/test-runner!
+
+テストを実行すると、その結果はアプリケーションの @/test-result@ ディレクトリに保存されます。
+
+テストランナーページでは、各テストはリンクになっています。‘右クリック’ して ‘新しいタブで開き’ 、テストランナーの外で直接実行することができます。
+
+この方法でテストを実行する場合、Play は特別なフレームワーク ID @test@ で始動します。このため、 @application.conf@ ファイルで特別な設定を定義することができます。
+
+いくつかの異なるテスト設定が必要な場合、パターン @test-?.*@ にマッチするフレームワーク ID (例: 'test-special') を使用することができます。
+
+デフォルトの @test@ とは違うフレームワーク ID を使用する場合は、@application.conf@ にあるすべてのテスト用設定が、そのフレームワーク ID で利用可能であることをしっかりと確認しなければなりません。特別なテストフレームワーク ID でテストを起動するときは、このようにします: 'play test --%test-your-special-id'
+
+例えば
+
+bc. %test.db=mem
+%test.jpa.ddl=create-drop
+
+h2. <a name="continuous">継続的統合と自動的なテストの実行</a>
+
+@auto-test@ コマンドは @test@ コマンドと同じことをしますが、こちらは自動的にブラウザを起動し、すべてのテストを実行し、そして停止します。
+
+継続的統合システムを構築する場合、これは便利なコマンドです;
+
+実行後、すべての結果は @/test-result@ ディレクトリに保存されます。さらに、このディレクトリにはテストスイートの最終的な結果を示すマーカーファイル ( @result.failed@ または @result.passed@ のどちらか) を含んでいます。最終的に、このディレクトリは @application.log@ ファイルにすべてのログを含みます。
+
+このためアプリケーションをテストするための継続的統合システムシステムの構築手順は、以下のようになるかもしれません:
+
+* 最新版のアプリケーションをチェックアウトする
+* @play auto-test@ を実行する
+* プロセスの完了を待つ
+* @/test-result@ ディレクトリ内のマーカファイル @result.passed@ または @result.failed@ を確認する
+
+これらの手順が CRON タブで実行されれば完了です!
+
+"headlessBrowser":configuration#headlessBrowser を設定することで、ヘッドレスブラウザによって利用される web ブラウザ互換性を変更することができます。
+
+p(note). **考察を続けます**
+ 
+Next: %(next)"セキュリティガイド":security%.

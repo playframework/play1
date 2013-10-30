@@ -1,0 +1,91 @@
+h1. インストールガイド
+
+
+h2. <a name="prerequisites">前提条件</a>
+
+Play framework を実行するには、"Java5 以降":http://java.sun.com が必要です。Play をソースからビルドしたいのであれば、ソースコードを取得するために "Git ソースコントロールクライアント":http://git-scm.com/ が必要であり、ビルドするために "Ant":http://ant.apache.org/ が必要になります。
+
+カレントパスで java コマンドが認識できることを確認してください (@java -version@ を入力して確認してみてください) 。Play はデフォルトの java コマンドか、 @$JAVA_HOME@ が定義されている場合は、このパスで実行可能な java コマンドを使用します。
+
+*play* のコマンドラインユーティリティは Python を使用します。ですから、どのような UNIX システムでもそのまま使うことができます (ただし Python 2.5 以上が必要です) 。 Windows で実行する場合でも、フレームワークに Python ランタイムをバンドルしているので、心配する必要はありません。
+
+
+h2. <a name="install">Installation from the binary packageバイナリパッケージからのインストール</a>
+
+h3. 一般的な手順
+
+通常、インストール手順は次のとおりです。
+
+# Java をインストールします。
+# 最新の "Play binary package":http://download.playframework.org/ ダウンロードし、アーカイブを展開します。
+# ‘play’ コマンドをシステムパスに追加し、実行できることを確認します。
+
+
+h3. Mac OS X
+
+Java は組み込まれているか、自動的にインストールされるので、最初の手順は省略することができます。
+
+# 最新の "Play binary package":http://download.playframework.org/ をダウンロードし、 @/Applications@ に展開します。
+# @/etc/paths@ を編集し、(例えば) @/Applications/play-1.2.5@ 行を追加します。
+
+OS X における代替手順は次のとおりです:
+
+# "HomeBrew":http://mxcl.github.com/homebrew/ をインストールします。
+# @brew install play@ を実行します。
+
+h3. Linux
+
+Javaをインストールするには、（多くの Linux 上でデフォルトの Java コマンドである GCJ ではなく）Sun-JDK または OpenJDK のいずれかを使用してください。
+
+
+h3. Windows
+
+Java をインストールするには、最新の JDK パッケージをダウンロードしてインストールします。 Python ランタイムはフレームワークに同梱されているので、別途 Python をインストールする必要はありません。
+
+
+h2. <a name="build">最新ソースからのビルド</a>
+
+最新の機能やバグ修正の恩恵を得るために、Play をソースからコンパイルしたくなるかもしれません。ソースコードを取得するためには "Git クライアント":http://git-scm.com/ が必要であり、フレームワークをビルドするためには "Ant":http://ant.apache.org/ が必要です。
+
+コマンドラインから下記を実行します:
+
+bc. # git clone git://github.com/playframework/play.git
+# cd play/framework
+# ant
+
+これで Play framework を使用する準備が整いました。
+
+
+h2. <a name="run">play コマンドを使用する</a>
+
+フレームワークを正しくインストールしたら、シェルを開いて *play* コマンドを実行してください。
+
+bc. $ play
+
+play のデフォルトメッセージが見えるはずです:
+
+!images/help!
+
+*play help コマンド名* を実行することで、特定のコマンドのより詳細なヘルプを見ることができます。次の例を試してみてください:
+
+bc. # play help run
+
+h2. <a name="new">新しいアプリケーションの作成</a>
+
+@new@ コマンドを使って新しいアプリケーションを作成してください。アプリケーションの作成先として、存在しないパスを指定する必要があります。
+
+bc. # play new myApp
+
+!images/guide1-1!
+
+新しいアプリケーションが作成されます。以下のコマンドでアプリケーションを開始します:
+
+bc. # play run myApp
+
+ブラウザで "http://localhost:9000":http://localhost:9000 を開いて、アプリケーションのデフォルトページを見ることができます。
+
+!images/guide1-2!
+
+p(note). **Play を利用する環境が整いました**
+ 
+次は %(next)"お好みの IDE を設定しましょう":ide%

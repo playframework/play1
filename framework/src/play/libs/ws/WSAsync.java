@@ -1,25 +1,16 @@
 package play.libs.ws;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
+import com.ning.http.client.*;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.AsyncHttpClientConfig.Builder;
+import com.ning.http.client.Realm.AuthScheme;
+import com.ning.http.client.Realm.RealmBuilder;
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
-
 import org.apache.commons.lang.NotImplementedException;
-
 import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
@@ -30,19 +21,13 @@ import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.AsyncHttpClientConfig.Builder;
-import com.ning.http.client.ByteArrayPart;
-import com.ning.http.client.FilePart;
-import com.ning.http.client.Part;
-import com.ning.http.client.PerRequestConfig;
-import com.ning.http.client.ProxyServer;
-import com.ning.http.client.Realm.AuthScheme;
-import com.ning.http.client.Realm.RealmBuilder;
-import com.ning.http.client.Response;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -73,6 +58,7 @@ public class WSAsync implements WSImpl {
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
+        String nonProxyHosts = Play.configuration.getProperty("http.nonProxyHosts", System.getProperty("http.nonProxyHosts"));
         String userAgent = Play.configuration.getProperty("http.userAgent");
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
@@ -85,6 +71,12 @@ public class WSAsync implements WSImpl {
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
+            if (nonProxyHosts != null) {
+                final String[] strings = nonProxyHosts.split("\\|");
+                for (String uril : strings) {
+                    proxy.addNonProxyHost(uril);
+                }
+            }
             confBuilder.setProxyServer(proxy);
         }
         if (userAgent != null) {
@@ -220,7 +212,6 @@ public class WSAsync implements WSImpl {
             try {
                 return new HttpAsyncResponse(prepare(prepareGet()).execute().get());
             } catch (Exception e) {
-                Logger.error(e.toString());
                 throw new RuntimeException(e);
             }
         }
@@ -394,7 +385,8 @@ public class WSAsync implements WSImpl {
                     }
                     @Override
                     public void onThrowable(Throwable t) {
-                        throw new RuntimeException(t);
+                        // An error happened - must "forward" the exception to the one waiting for the result
+                        smartFuture.invokeWithException(t);
                     }
                 });
 
@@ -555,7 +547,7 @@ public class WSAsync implements WSImpl {
 
         /**
          * you shouldnt have to create an HttpResponse yourself
-         * @param method
+         * @param response
          */
         public HttpAsyncResponse(Response response) {
             this.response = response;
@@ -568,6 +560,15 @@ public class WSAsync implements WSImpl {
         @Override
         public Integer getStatus() {
             return this.response.getStatusCode();
+        }
+
+        /**
+         * the HTTP status text
+         * @return the status text of the http response
+         */
+        @Override
+        public String getStatusText() {
+            return this.response.getStatusText();
         }
 
         @Override

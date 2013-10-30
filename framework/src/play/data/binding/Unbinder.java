@@ -35,29 +35,20 @@ public class Unbinder {
         if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
-            } else {
-                @SuppressWarnings("unchecked")
-                List<Object> objects = (List<Object>) result.get(name);
-                objects.add(src != null ? src.toString() : null);
-            }
+            } 
         } else if (src.getClass().isArray()) {
-            List<Object> objects = new ArrayList<Object>();
-            result.put(name, objects);
             Class<?> clazz = src.getClass().getComponentType();
             int size = Array.getLength(src);
             for (int i = 0; i < size; i++) {
-                unBind(result, Array.get(src, i), clazz, name, annotations);
+                unBind(result, Array.get(src, i), clazz, name + "[" + i + "]", annotations);
             }
         } else if (Collection.class.isAssignableFrom(src.getClass())) {
             if (Map.class.isAssignableFrom(src.getClass())) {
                 throw new UnsupportedOperationException("Unbind won't work with maps yet");
             } else {
                 Collection<?> c = (Collection<?>) src;
-                List<Object> objects = new ArrayList<Object>();
-                result.put(name, objects);
-                for (Object object : c) {
-                    unBind(result, object, object.getClass(), name, annotations);
-                }
+                Object[] srcArray = c.toArray();
+                unBind(result, srcArray, srcArray.getClass(), name, annotations);
             }
         } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
             // We should use the @As annotation if there is one
@@ -102,8 +93,21 @@ public class Unbinder {
                 String newName = name + "." + field.getName();
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
+                
+                // first we try with annotations resolved from property
+                List<Annotation> allAnnotations = new ArrayList<Annotation>();
+                if(annotations != null && annotations.length > 0){
+                    allAnnotations.addAll(Arrays.asList(annotations));
+                }
+                
+                // Add entity field annotation
+                Annotation[] propBindingAnnotations = field.getAnnotations();
+                if(propBindingAnnotations != null && propBindingAnnotations.length > 0){
+                    allAnnotations.addAll(Arrays.asList(propBindingAnnotations));
+                }
+                
                 try {
-                    unBind(result, field.get(src), field.getType(), newName, annotations);
+                    unBind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Object" + src.getClass() + " won't unbind field " + field.getName(), e);
                 } catch (IllegalArgumentException e) {

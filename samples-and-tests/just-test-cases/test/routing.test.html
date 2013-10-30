@@ -18,6 +18,36 @@
     open('/re/TITITOTO')
     assertTextPresent('Not found')
 
+    open('re/version%2F01%2F25/rev')
+    assertTextPresent('OK[revRoute]: version/01/25')   
+    
+    open('re/version%2F01%2F25/rev2')
+    assertTextNotPresent('OK[revRoute]')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=version/01/25 verId=rev2')  
+    
+    open('re/version/01/25/rev')
+    assertTextPresent('OK[revRoute]: version/01/25') 
+    
+    open('re/version/01/25/rev2')
+    assertTextNotPresent('OK[revRoute]')
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=version/01 verId=25/rev2')  
+    
+    open('/re/api01/01')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01 verId=01')  
+    assertTextPresent('URL: /re/api01/01') 
+        
+    open('/re/api01/02/01/01')   
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=api01/02 verId=01/01')  
+    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
+     
+    open('/re/api01%2F02/01%2F01')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01/02 verId=01/01')  
+    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
+ 
+    // [#1685] - show (reverse routing of param with '/' in it)
+    open('/re/1%2F2/rev')
+    assertTextPresent('OK[revRoute]: 1/2')   
+
     open('/')
     
     // Packages
@@ -27,7 +57,7 @@
     
     // Missing name
     clickAndWait('sayHello')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
 
     // A name
     clickAndWait('back')
@@ -54,18 +84,18 @@
     assertAttribute('form@method', 'regexpi:post')
     
     // The yop form
-    assertElementPresent('css=form[action=/application/yop]')
-    assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
+    assertElementPresent('css=form[action="/application/yop"]')
+    assertAttribute('css=form[action="/application/yop"]@method', 'regexpi:post')
     clickAndWait('yop')
     assertTextPresent('Yop')
     clickAndWait('back')
     assertTextPresent('It works !')
     
     // A GET form
-    assertElementPresent('css=form[action=/aGetForm]')
-    assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
+    assertElementPresent('css=form[action="/aGetForm"]')
+    assertAttribute('css=form[action="/aGetForm"]@method', 'regexpi:get')
     clickAndWait('yopGet')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
     clickAndWait('back')
     
     // ... with a name
@@ -78,7 +108,7 @@
     open('/aGetForm/')
     assertTextPresent('Hello 2null !')
     open('/aGetForm')
-    assertTextPresent('Hello !')
+    assertTextPresent('Hello  !')
     
     // Optional slash
     open('/optionalSlash/')
@@ -111,6 +141,8 @@
     assertText('g', '/aGetForm?name=Yop')
     assertText('h', '/aGetForm/?name=Yop')
     assertText('i', '/optionalSlash')
+    assertText('j', '/withQueryParam')
+    assertText('k', '/withQueryParam?lucky=duck')
     
     // Reverse
     open('@{Application.reverserouting2()}')
@@ -122,9 +154,9 @@
 
     // Host
     open('/')
-    assertTextPresent('1: http://static.foo.com/assets/hello.html')
+    assertTextPresent('1: http://static.foo.com:9003/assets/hello.html')
     assertTextPresent('2: /assets/hello.html')
-    assertTextPresent('3: http://static2.foo.com/x/hello.html')
+    assertTextPresent('3: http://static2.foo.com:9003/x/hello.html')
     assertTextPresent('4: /x/hello.html')
     assertTextPresent('5: http://localhost:9003/public/image.gif')
     assertTextPresent('6: /public/image.gif')
@@ -141,4 +173,20 @@
     assertTextPresent('17: http://localhost:9003/application/ok?re=A')
     assertTextPresent('18: http://localhost:9003/re/TITI')
     assertTextPresent('19: http://assets.localhost:9003/images')
+
+
+    open('/client')
+    assertTextPresent('localhost')
+
+
+    // jsRoute tag
+    open('@{Application.jsRoute()}')
+    assertText('a-url', '/')
+    assertText('a-method', 'GET')
+    assertText('b-url', '/sayHello')
+    assertText('b-method', 'PUT')
+    assertText('c', '/ressource/foo')
+
+    open('@{Application.jsRouteError()}')
+    assertTextPresent('Wrong parameter type')
 #{/selenium}    

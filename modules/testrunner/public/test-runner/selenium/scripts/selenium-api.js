@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 ThoughtWorks, Inc
+ * Copyright 2011 Software Freedom Conservancy
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -180,26 +180,51 @@ function Selenium(browserbot) {
     };
     this.defaultTimeout = Selenium.DEFAULT_TIMEOUT;
     this.mouseSpeed = Selenium.DEFAULT_MOUSE_SPEED;
+
+
+    // TODO(simon): This guard should not be necessary. Remove it,
+    if (bot && bot.locators && bot.locators.add) {
+      bot.locators.add('xpath', {
+        single: function(target, opt_root) {
+          return browserbot.locateElementByXPath(target, opt_root);
+        },
+        many: function(target, opt_root) {
+          return browserbot.locateElementsByXPath(target, opt_root);
+        }
+      });
+
+      bot.locators.add('css', {
+        single: function(target, opt_root) {
+          return browserbot.locateElementByCss(target, opt_root);
+        },
+        many: function(target, opt_root) {
+          return eval_css(target, opt_root);
+        }
+      });
+    }
 }
 
 Selenium.DEFAULT_TIMEOUT = 30 * 1000;
 Selenium.DEFAULT_MOUSE_SPEED = 10;
 Selenium.RIGHT_MOUSE_CLICK = 2;
 
-Selenium.decorateFunctionWithTimeout = function(f, timeout) {
+Selenium.decorateFunctionWithTimeout = function(f, timeout, callback) {
     if (f == null) {
         return null;
     }
     
     var timeoutTime = getTimeoutTime(timeout);
-    
+   
     return function() {
         if (new Date().getTime() > timeoutTime) {
+            if (callback != null) {
+                 callback();
+            }
             throw new SeleniumError("Timed out after " + timeout + "ms");
         }
         return f();
     };
-}
+};
 
 Selenium.createForWindow = function(window, proxyInjectionMode) {
     if (!window.location) {
@@ -238,22 +263,58 @@ Selenium.prototype.doClick = function(locator) {
         // command will wait for the flag to be lowered.
         
         var win = elementWithHref.ownerDocument.defaultView;
-        var originalLocation = win.location.href;
+        var originalLocation = win.location.href.replace(/#.*/,"");
         var originalHref = elementWithHref.href;
         
-        elementWithHref.href = 'javascript:try { '
+        var newHref = 'javascript:try { '
             + originalHref.replace(/^\s*javascript:/i, "")
             + ' } finally { window._executingJavascriptHref = undefined; }' ;
+        elementWithHref.href = newHref; 
         
         win._executingJavascriptHref = true;
-        
+
+        var savedEvent = null;
+        var evtListener =  function(evt) {
+          savedEvent = evt;
+        };
+
+        element.addEventListener("click", evtListener, false);
+
         this.browserbot.clickElement(element);
+
+        element.removeEventListener("click", evtListener, false);
+
+        // We're relying on javascript that's owned by
+        // elementWithHref getting executed.  It might not
+        // get executed if:
+        // 1) the click event was cancelled
+        // 2) the page changed the href value on us
+        // 3) the elementWithHref was removed from the document
+
+        if (savedEvent && savedEvent.getPreventDefault()) {
+          // click was canceled by event listener
+          win._executingJavascriptHref = undefined;
+        } else if (elementWithHref.href != newHref) {
+          // the page changed the href value on us
+          win._executingJavascriptHref = undefined;
+        } else {
+          // check that elementWithHref is still in the document
+          var d = elementWithHref.ownerDocument;
+          var html = d ? d.documentElement : null;
+          var curElem = elementWithHref;
+          while (curElem && html && (curElem.isSameNode ? !curElem.isSameNode(html) : curElem != html)) {
+            curElem = curElem.parentNode;
+          }
+          if (!html || !curElem) {
+            win._executingJavascriptHref = undefined;
+          }
+        }
         
         return Selenium.decorateFunctionWithTimeout(function() {
             if (win.closed) {
                 return true;
             }
-            if (win.location.href != originalLocation) {
+            if (win.location.href.replace(/#.*/,"") != originalLocation) {
                 // navigated to some other page ... javascript from previous
                 // page can't still be executing!
                 return true;
@@ -400,6 +461,7 @@ Selenium.prototype.doShiftKeyDown = function() {
    *
    */
    this.browserbot.shiftKeyDown = true;
+   core.events.shiftKeyDown_ = true;
 };
 
 Selenium.prototype.doShiftKeyUp = function() {
@@ -408,6 +470,7 @@ Selenium.prototype.doShiftKeyUp = function() {
    *
    */
    this.browserbot.shiftKeyDown = false;
+   core.events.shiftKeyDown_ = false;
 };
 
 Selenium.prototype.doMetaKeyDown = function() {
@@ -416,6 +479,7 @@ Selenium.prototype.doMetaKeyDown = function() {
    *
    */
    this.browserbot.metaKeyDown = true;
+   core.events.metaKeyDown_ = true;
 };
 
 Selenium.prototype.doMetaKeyUp = function() {
@@ -424,6 +488,7 @@ Selenium.prototype.doMetaKeyUp = function() {
    *
    */
    this.browserbot.metaKeyDown = false;
+   core.events.metaKeyDown_ = false;
 };
 
 Selenium.prototype.doAltKeyDown = function() {
@@ -432,6 +497,7 @@ Selenium.prototype.doAltKeyDown = function() {
    *
    */
    this.browserbot.altKeyDown = true;
+   core.events.altKeyDown_ = true;
 };
 
 Selenium.prototype.doAltKeyUp = function() {
@@ -440,6 +506,7 @@ Selenium.prototype.doAltKeyUp = function() {
    *
    */
    this.browserbot.altKeyDown = false;
+   core.events.altKeyDown_ = false;
 };
 
 Selenium.prototype.doControlKeyDown = function() {
@@ -448,6 +515,7 @@ Selenium.prototype.doControlKeyDown = function() {
    *
    */
    this.browserbot.controlKeyDown = true;
+   core.events.controlKeyDown_ = true;
 };
 
 Selenium.prototype.doControlKeyUp = function() {
@@ -456,6 +524,7 @@ Selenium.prototype.doControlKeyUp = function() {
    *
    */
    this.browserbot.controlKeyDown = false;
+   core.events.controlKeyDown_ = false;
 };
 
 Selenium.prototype.doKeyDown = function(locator, keySequence) {
@@ -663,7 +732,6 @@ Selenium.prototype.doMouseMoveAt = function(locator, coordString) {
 };
 
 Selenium.prototype.doType = function(locator, value) {
-
     /**
    * Sets the value of an input field, as though you typed it in.
    *
@@ -676,12 +744,10 @@ Selenium.prototype.doType = function(locator, value) {
    if (this.browserbot.controlKeyDown || this.browserbot.altKeyDown || this.browserbot.metaKeyDown) {
         throw new SeleniumError("type not supported immediately after call to controlKeyDown() or altKeyDown() or metaKeyDown()");
     }
-        // TODO fail if it can't be typed into.
+	
     var element = this.browserbot.findElement(locator);
-    if (this.browserbot.shiftKeyDown) {
-        value = new String(value).toUpperCase();
-    }
-    this.browserbot.replaceText(element, value);
+
+	core.events.setValue(element, value);
 };
 
 Selenium.prototype.doTypeKeys = function(locator, value) {
@@ -738,7 +804,7 @@ Selenium.prototype.findToggleButton = function(locator) {
         Assert.fail("Element " + locator + " is not a toggle-button.");
     }
     return element;
-}
+};
 
 Selenium.prototype.doCheck = function(locator) {
     /**
@@ -888,12 +954,14 @@ Selenium.prototype.makePageLoadCondition = function(timeout) {
     }
     // if the timeout is zero, we won't wait for the page to load before returning
     if (timeout == 0) {
+	  // abort XHR request  
+          this._abortXhrRequest(); 	   
     	  return;
     }
-    return Selenium.decorateFunctionWithTimeout(fnBind(this._isNewPageLoaded, this), timeout);
+    return Selenium.decorateFunctionWithTimeout(fnBind(this._isNewPageLoaded, this), timeout, fnBind(this._abortXhrRequest, this));
 };
 
-Selenium.prototype.doOpen = function(url) {
+Selenium.prototype.doOpen = function(url, ignoreResponseCode) {
     /**
    * Opens an URL in the test frame. This accepts both relative and absolute
    * URLs.
@@ -907,7 +975,16 @@ Selenium.prototype.doOpen = function(url) {
    * new browser session on that domain.
    *
    * @param url the URL to open; may be relative or absolute
+   * @param ignoreResponseCode (optional) turn off ajax head request functionality
+   *
    */
+    if (ignoreResponseCode == null || ignoreResponseCode.length == 0) {
+        this.browserbot.ignoreResponseCode = true;
+    } else if (ignoreResponseCode.toLowerCase() == "true") {
+        this.browserbot.ignoreResponseCode = true;
+    } else {
+        this.browserbot.ignoreResponseCode = false;
+    }
     this.browserbot.openLocation(url);
     if (window["proxyInjectionMode"] == null || !window["proxyInjectionMode"]) {
         return this.makePageLoadCondition();
@@ -1082,7 +1159,7 @@ Selenium.prototype.doWaitForPopUp = function(windowID, timeout) {
     *                timeout will be used. See the setTimeout() command.
     */
     if (! timeout) {
-        var timeout = this.defaultTimeout;
+        timeout = this.defaultTimeout;
     }
     var timeoutTime = getTimeoutTime(timeout);
     
@@ -1375,7 +1452,7 @@ Selenium.prototype.getValue = function(locator) {
    */
     var element = this.browserbot.findElement(locator)
     return getInputValue(element).trim();
-}
+};
 
 Selenium.prototype.getText = function(locator) {
     /**
@@ -1388,7 +1465,7 @@ Selenium.prototype.getText = function(locator) {
    * @return string the text of the element
    */
     var element = this.browserbot.findElement(locator);
-    return getText(element).trim();
+    return core.text.getElementText(element);
 };
 
 Selenium.prototype.doHighlight = function(locator) {
@@ -1417,6 +1494,7 @@ Selenium.prototype.getEval = function(script) {
    * @return string the results of evaluating the snippet
    */
     try {
+        LOG.info('script is: ' + script);
         var window = this.browserbot.getCurrentWindow();
         var result = eval(script);
         // Selenium RC doesn't allow returning null
@@ -1483,7 +1561,7 @@ Selenium.prototype.getSelectedLabels = function(selectLocator) {
    * @return string[] an array of all selected option labels in the specified select drop-down
    */
     return this.findSelectedOptionProperties(selectLocator, "text");
-}
+};
 
 Selenium.prototype.getSelectedLabel = function(selectLocator) {
     /** Gets option label (visible text) for selected option in the specified select element.
@@ -1492,7 +1570,7 @@ Selenium.prototype.getSelectedLabel = function(selectLocator) {
    * @return string the selected option label in the specified select drop-down
    */
     return this.findSelectedOptionProperty(selectLocator, "text");
-}
+};
 
 Selenium.prototype.getSelectedValues = function(selectLocator) {
     /** Gets all option values (value attributes) for selected options in the specified select or multi-select element.
@@ -1501,7 +1579,7 @@ Selenium.prototype.getSelectedValues = function(selectLocator) {
    * @return string[] an array of all selected option values in the specified select drop-down
    */
     return this.findSelectedOptionProperties(selectLocator, "value");
-}
+};
 
 Selenium.prototype.getSelectedValue = function(selectLocator) {
     /** Gets option value (value attribute) for selected option in the specified select element.
@@ -1519,7 +1597,7 @@ Selenium.prototype.getSelectedIndexes = function(selectLocator) {
    * @return string[] an array of all selected option indexes in the specified select drop-down
    */
     return this.findSelectedOptionProperties(selectLocator, "index");
-}
+};
 
 Selenium.prototype.getSelectedIndex = function(selectLocator) {
     /** Gets option index (option number, starting at 0) for selected option in the specified select element.
@@ -1528,7 +1606,7 @@ Selenium.prototype.getSelectedIndex = function(selectLocator) {
    * @return string the selected option index in the specified select drop-down
    */
     return this.findSelectedOptionProperty(selectLocator, "index");
-}
+};
 
 Selenium.prototype.getSelectedIds = function(selectLocator) {
     /** Gets all option element IDs for selected options in the specified select or multi-select element.
@@ -1537,7 +1615,7 @@ Selenium.prototype.getSelectedIds = function(selectLocator) {
    * @return string[] an array of all selected option IDs in the specified select drop-down
    */
     return this.findSelectedOptionProperties(selectLocator, "id");
-}
+};
 
 Selenium.prototype.getSelectedId = function(selectLocator) {
     /** Gets option element ID for selected option in the specified select element.
@@ -1546,7 +1624,7 @@ Selenium.prototype.getSelectedId = function(selectLocator) {
    * @return string the selected option ID in the specified select drop-down
    */
     return this.findSelectedOptionProperty(selectLocator, "id");
-}
+};
 
 Selenium.prototype.isSomethingSelected = function(selectLocator) {
     /** Determines whether some option in a drop-down menu is selected.
@@ -1568,7 +1646,7 @@ Selenium.prototype.isSomethingSelected = function(selectLocator) {
         }
     }
     return false;
-}
+};
 
 Selenium.prototype.findSelectedOptionProperties = function(locator, property) {
    var element = this.browserbot.findElement(locator);
@@ -1587,7 +1665,7 @@ Selenium.prototype.findSelectedOptionProperties = function(locator, property) {
     }
     if (selectedOptions.length == 0) Assert.fail("No option selected");
     return selectedOptions;
-}
+};
 
 Selenium.prototype.findSelectedOptionProperty = function(locator, property) {
     var selectedOptions = this.findSelectedOptionProperties(locator, property);
@@ -1595,7 +1673,7 @@ Selenium.prototype.findSelectedOptionProperty = function(locator, property) {
         Assert.fail("More than one selected option!");
     }
     return selectedOptions[0];
-}
+};
 
 Selenium.prototype.getSelectOptions = function(selectLocator) {
     /** Gets all option labels in the specified select drop-down.
@@ -1639,7 +1717,6 @@ Selenium.prototype.isTextPresent = function(pattern) {
    * @return boolean true if the pattern matches the text, false otherwise
    */
     var allText = this.browserbot.bodyText();
-    allText = allText.replace(/\s+/g, ' ') // Optimization
 
     var patternMatcher = new PatternMatcher(pattern);
     if (patternMatcher.strategy == PatternMatcher.strategies.glob) {
@@ -1816,7 +1893,11 @@ Selenium.prototype.getAttributeFromAllWindows = function(attributeName) {
     // DGF normally you should use []s instead of eval "win."+attributeName
     // but in this case, attributeName may contain dots (e.g. document.title)
     // in that case, we have no choice but to use eval...
-    attributes.push(eval("win."+attributeName));
+    try {
+        attributes.push(eval("win."+attributeName));
+    } catch (ignored) {
+        // Dead object
+    }
     for (var windowName in this.browserbot.openedWindows)
     {
         try {
@@ -1975,6 +2056,14 @@ Selenium.prototype.doWindowMaximize = function() {
    var window = this.browserbot.getCurrentWindow();
    if (window!=null && window.screen) {
        window.moveTo(0,0);
+
+       // It appears Firefox on Mac won't move a window to (0,0).  But, you can move it to (0,1), which
+       // seems to do basically the same thing.  In my (KJM - 6/20/10) tests, anything less than (0, 22)
+       // pushed the browser to (0,0), so it seems it's improperly accounting for something in the browser chrome.
+       if (window.screenX != 0) {
+           window.moveTo(0, 1);
+       }
+
        window.resizeTo(screen.availWidth, screen.availHeight);
    }
 };
@@ -2277,7 +2366,7 @@ Selenium.prototype.getExpression = function(expression) {
      * @return string the value passed in
      */
     return expression;
-}
+};
 
 Selenium.prototype.getXpathCount = function(xpath) {
     /**
@@ -2289,7 +2378,19 @@ Selenium.prototype.getXpathCount = function(xpath) {
     */
     var result = this.browserbot.evaluateXPathCount(xpath, this.browserbot.getDocument());
     return result;
-}
+};
+
+Selenium.prototype.getCssCount = function(css) {
+    /**
+    * Returns the number of nodes that match the specified css selector, eg. "css=table" would give
+    * the number of tables.
+    * 
+    * @param css the css selector to evaluate. do NOT wrap this expression in a 'count()' function; we will do that for you.
+    * @return the number of nodes that match the specified selector
+    */
+    var result = this.browserbot.evaluateCssCount(css, this.browserbot.getDocument());
+    return result;
+};
 
 Selenium.prototype.doAssignId = function(locator, identifier) {
     /**
@@ -2301,7 +2402,7 @@ Selenium.prototype.doAssignId = function(locator, identifier) {
     */
     var element = this.browserbot.findElement(locator);
     element.id = identifier;
-}
+};
 
 Selenium.prototype.doAllowNativeXpath = function(allow) {
     /**
@@ -2316,7 +2417,7 @@ Selenium.prototype.doAllowNativeXpath = function(allow) {
     if ("false" == allow || "0" == allow) { // The strings "false" and "0" are true values in JS
         allow = false;
     }
-    this.browserbot.allowNativeXpath = allow;
+    this.browserbot.setAllowNativeXPath(allow);
 }
 
 Selenium.prototype.doIgnoreAttributesWithoutValue = function(ignore) {
@@ -2338,7 +2439,7 @@ Selenium.prototype.doIgnoreAttributesWithoutValue = function(ignore) {
     if ('false' == ignore || '0' == ignore) {
         ignore = false;
     }
-    this.browserbot.ignoreAttributesWithoutValue = ignore;
+    this.browserbot.setIgnoreAttributesWithoutValue(ignore);
 }
 
 Selenium.prototype.doWaitForCondition = function(script, timeout) {
@@ -2418,6 +2519,10 @@ Selenium.prototype._isNewPageLoaded = function() {
     return this.browserbot.isNewPageLoaded();
 };
 
+Selenium.prototype._abortXhrRequest = function() {
+    return this.browserbot.abortXhrRequest();
+};
+
 Selenium.prototype.doWaitForPageToLoad.dontCheckAlertsAndConfirms = true;
 
 /**
@@ -2427,7 +2532,8 @@ Selenium.prototype.doWaitForPageToLoad.dontCheckAlertsAndConfirms = true;
 Selenium.prototype.preprocessParameter = function(value) {
     var match = value.match(/^javascript\{((.|\r?\n)+)\}$/);
     if (match && match[1]) {
-        return eval(match[1]).toString();
+        var result = eval(match[1]);
+        return result == null ? null : result.toString();
     }
     return this.replaceVariables(value);
 };
@@ -2440,7 +2546,7 @@ Selenium.prototype.replaceVariables = function(str) {
     var stringResult = str;
 
     // Find all of the matching variable references
-    var match = stringResult.match(/\$\[\w+\]/g);
+    var match = stringResult.match(/\$\{\w+\}/g);
     if (!match) {
         return stringResult;
     }
@@ -2450,6 +2556,9 @@ Selenium.prototype.replaceVariables = function(str) {
         var variable = match[i]; // The replacement variable, with ${}
         var name = variable.substring(2, variable.length - 1); // The replacement variable without ${}
         var replacement = storedVars[name];
+        if (replacement && typeof(replacement) === 'string' && replacement.indexOf('$') != -1) {
+            replacement = replacement.replace(/\$/g, '$$$$'); //double up on $'s because of the special meaning these have in 'replace'
+        }
         if (replacement != undefined) {
             stringResult = stringResult.replace(variable, replacement);
         }
@@ -2530,7 +2639,7 @@ Selenium.prototype.doCreateCookie = function(nameValuePair, optionsString) {
     }
     LOG.debug("Setting cookie to: " + cookie);
     this.browserbot.getDocument().cookie = cookie;
-}
+};
 
 Selenium.prototype.doDeleteCookie = function(name,optionsString) {
     /**
@@ -2860,8 +2969,11 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
             var fileOutputStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
                 .createInstance(Components.interfaces.nsIFileOutputStream);
                 
+            // Apparently octal permissions are deprecated, but the suggested alternative is broken in Firefox (and not backwards-compatible from FF 4.0): https://bugzilla.mozilla.org/show_bug.cgi?id=433295
             fileOutputStream.init(nsFile,
-                writeFlag | createFlag | truncateFlag, 0664, null);
+                                  writeFlag | createFlag | truncateFlag,
+                                  0664,
+                                  null);
             return fileOutputStream;
         },
         
@@ -3080,30 +3192,27 @@ Selenium.prototype.doRemoveScript = function(scriptTagId) {
 
 Selenium.prototype.doUseXpathLibrary = function(libraryName) {
     /**
-	* Allows choice of one of the available libraries.
+    * Allows choice of one of the available libraries.
     * @param libraryName name of the desired library
-    * Only the following three can be chosen:
+    * Only the following can be chosen:
     * <ul>
     *   <li>"ajaxslt" - Google's library</li>
     *   <li>"javascript-xpath" - Cybozu Labs' faster library</li>
+    *   <li>"rpc-optimizing-ajaxslt" - the RPC optimizing strategy, delegating to ajaxslt</li>
+    *   <li>"rpc-optimizing-jsxpath" - the RPC optimizing strategy, delegating to javascript-xpath</li>
     *   <li>"default" - The default library.  Currently the default library is "ajaxslt" .</li>
     * </ul>
-    * If libraryName isn't one of these three, then 
-    * no change will be made.
-    *   
+    * If libraryName isn't one of these, it may be the name of another engine
+    * registered to the browserbot's XPathEvaluator, for example by overriding
+    * XPathEvaluator.prototype.init() . If it is not a registered engine
+    * either, then no change will be made.
     */
 
-    if (libraryName == "default") {
-        this.browserbot.xpathLibrary = this.browserbot.defaultXpathLibrary;
+    if (! this.browserbot.getXPathEngine(libraryName)) {
         return;
     }
-
-	if ((libraryName != 'ajaxslt') && (libraryName != 'javascript-xpath')) {
-		return;
-	}
-	
-	this.browserbot.xpathLibrary = libraryName;	
-	
+    
+    this.browserbot.setXPathEngine(libraryName);
 };
 
 /**

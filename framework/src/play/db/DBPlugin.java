@@ -1,22 +1,23 @@
 package play.db;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.mchange.v2.c3p0.ConnectionCustomizer;
+
+import java.sql.SQLFeatureNotSupportedException;
 
 import play.Play;
 import play.PlayPlugin;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The DB plugin
@@ -28,16 +29,27 @@ public class DBPlugin extends PlayPlugin {
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (Play.mode.isDev() && request.path.equals("/@db")) {
-            response.status = Http.StatusCode.MOVED;
+            response.status = Http.StatusCode.FOUND;
+            String serverOptions[] = new String[] { };
 
             // For H2 embeded database, we'll also start the Web console
             if (h2Server != null) {
                 h2Server.stop();
             }
-            h2Server = org.h2.tools.Server.createWebServer();
+
+            String domain = request.domain;
+            if (domain.equals("")) {
+                domain = "localhost";
+            }
+
+            if (!domain.equals("localhost")) {
+                serverOptions = new String[] {"-webAllowOthers"};
+            }
+            
+            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
             h2Server.start();
 
-            response.setHeader("Location", "http://localhost:8082/");
+            response.setHeader("Location", "http://" + domain + ":8082/");
             return true;
         }
         return false;
@@ -117,7 +129,7 @@ public class DBPlugin extends PlayPlugin {
     }
 
     /**
-     * Needed because DriverManager will not load a driver ouside of the system classloader
+     * Needed because DriverManager will not load a driver outside of the system classloader
      */
     public static class ProxyDriver implements Driver {
 
@@ -150,5 +162,18 @@ public class DBPlugin extends PlayPlugin {
         public boolean jdbcCompliant() {
             return this.driver.jdbcCompliant();
         }
+      
+        // Method not annotated with @Override since getParentLogger() is a new method
+        // in the CommonDataSource interface starting with JDK7 and this annotation
+        // would cause compilation errors with JDK6.
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            try {
+                return (java.util.logging.Logger) Driver.class.getDeclaredMethod("getParentLogger").invoke(this.driver);
+            } catch (Throwable e) {
+                return null;
+            }
+        }
     }
+
+
 }

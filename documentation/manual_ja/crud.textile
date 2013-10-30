@@ -1,0 +1,314 @@
+h1. CRUD: 管理機能ジェネレータ
+
+CRUD (Create, Read, Update, Delete) モジュールは、JPA モデルオブジェクト用の完全に利用可能な web インタフェースを生成します。
+
+h2. <a name="usage">CRUD モジュールの使い方</a>
+
+CRUD モジュールを使ってデータを管理するシンプルな例を見てみましょう。
+
+h3. <a name="enable">アプリケーションで CRUD モジュールを利用可能にする</a>
+
+@/conf/dependencies.yml@ ファイルの @require:@ の後に次の行を追加することで、CRUD モジュールを有効にします:
+
+bc. require:
+    - play -> crud
+
+新しいモジュールの依存性を取り込むために、ここで @play dependencies@ コマンドを実行します。
+
+
+h3. <a name="routes">デフォルトの CRUD ルートの取り込み</a>
+
+@conf/routes@ ファイルに次の行を追加することで、モジュールのデフォルトのルートを取り込みます:
+
+bc. # Import CRUD routes
+*     /admin           module:crud
+
+この設定は、このあとに追加することになるいくつかのルートを、それぞれの CRUD コントローラに追加します。
+
+p(note). デフォルトのルートファイルの使用は必須ではないことに **注意** してください。独自のルートを定義することも、これら 2 つを混ぜ合わせることも可能です。
+
+h3. <a name="model">User クラスの作成</a>
+
+CRUD モジュールはアプリケーションのモデルクラスにユーザインタフェースを提供します。 "JPA":jpa エンティティである User モデルクラスの作成から始めましょう。
+
+bc. package models;
+ 
+import play.*;
+import play.db.jpa.*;
+ 
+import javax.persistence.*;
+import java.util.*;
+ 
+@Entity
+public class User extends Model {
+ 	
+	public String name;
+	public String email;
+	public String address;
+ 	
+}
+
+h3. <a name="controller">Users コントローラの作成</a>
+
+次に、CRUD コントローラを継承するだけのシンプルなコントローラを作成します。これは CRUD モジュールがルートを生成するために使用するある種の ‘マーカー’ です。
+
+bc. package controllers;
+ 
+public class Users extends CRUD {
+   
+}
+
+ここで "http://localhost:9000/admin":http://localhost:9000/admin を開くと、User 管理画面が見えるはずです。
+
+!images/crud1!
+
+コントローラクラスの名前は、モデルクラス名の最後に ‘s’ を付けたものでなければなりません。違う名前を付けたい場合は、アノテーションを使うことができます。
+
+bc. package controllers;
+ 
+import models.User;
+ 
+@CRUD.For(User.class)
+public class AdminUsers extends CRUD {
+   
+}
+
+h3. <a name="view">User フォーム</a>
+
+**Add** ボタンをクリックすると、User フォームが表示されるはずです。
+
+!images/crud2!
+
+User クラスにいくつかバリデーションルールを追加することができます:
+
+bc. package models;
+ 
+import play.*;
+import play.db.jpa.*;
+ 
+import javax.persistence.*;
+import java.util.*;
+ 
+import play.data.validation.*;
+ 
+@Entity
+public class User extends Model {
+ 	
+   @Required
+   @MinSize(8)
+   public String name;
+	
+   @Required
+   @Email
+   public String email;
+	
+   @Required
+   @MaxSize(1000)
+   public String address;
+ 
+   public String toString() {
+      return email;
+   }
+	
+}
+
+
+User フォームを更新すれば、バリデーションが自動的に適用されていることを確認できるでしょう。
+
+!images/crud3!
+
+h3. <a name="labels">フォームラベルの変更</a>
+
+アプリケーションの @conf/messages@ ファイルに以下の行を追加してください:
+
+bc. name=Name
+email=Email address
+address=Postal address
+
+そして、User フォームを更新してください:
+
+!images/crud4!
+
+h3. <a name="list">User の作成とリストビューのカスタマイズ</a>
+
+デフォルトのリストビューは、オブジェクトの @toString()@ メソッドの結果を含むただひとつの列を使用します。
+
+!images/crud5!
+
+このビューをカスタマイズするには、アプリケーションに @/app/views/Users/list.html@ テンプレートを作成する必要があります。
+
+シェルを開いてアプリケーションディレクトリに移動したら、以下をタイプします:
+
+bc. play crud:ov --template Users/list
+
+このコマンドは、CRUD のデフォルトの @list.html@ テンプレートを、アプリケーションの @Users/list.html@ にコピーしますが、もしこのファイルが存在すれば上書きします。
+
+このテンプレートを以下のように編集してください:
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudList" class="${type.name}">
+	
+	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
+ 
+	<div id="crudListSearch">
+		#{crud.search /}
+	</div>
+ 
+	<div id="crudListTable">
+		#{crud.table fields:['email', 'name'] /}
+	</div>
+	
+	<div id="crudListPagination">
+		#{crud.pagination /}
+	</div>
+	
+	<p id="crudListAdd">
+		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
+	</p>
+</div>
+
+そして、リストを更新してください。
+
+!images/crud6!
+
+
+h3. <a name="custom">フィールドレンダリングのカスタマイズ: crud.custom タグ</a>
+
+それぞれの @User@ エンティティの、リストやフォームビューにおける表示のされ方をカスタマイズすることで、ちょっと前進することができます。
+
+フィールドをカスタマイズするには、 @#{crud.custom}@ タグを使用します:
+
+bc. #{crud.table fields:['name', 'company']}
+ 
+   #{crud.custom 'company'}
+     <a href="@{Companies.show(object.company.id)}">
+      	 ${object.company.name}
+     </a>
+   #{/crud.custom}
+ 
+#{/crud.table}
+
+カスタムハンドラを定義することで、追加の列や入力フォームを表示することもできます:
+
+bc. #{crud.table fields:['name', 'company', 'edit']}
+ 
+   #{crud.custom 'company'}
+      <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
+   #{/crud.custom}
+ 
+   #{crud.custom 'edit'}
+      <a href="@{Users.edit(object.id)}">Edit</a>
+   #{/crud.custom}
+ 
+#{/crud.table}
+
+
+h2. <a name="collections">文字列のリストと列挙型のリスト</a>
+
+CRUD モジュールはフィールドを文字として表示します。この文字フィールドにおいて、リストはカンマで区切られた文字列として表示されます。例えば:
+
+bc. @Entity
+public class Account extends Model {
+ 
+      @CollectionOfElements
+      public Set<ContentType> contentTypes;
+ 
+      @CollectionOfElements
+      public Set<String> usernames;
+ 
+      public Account(Set<String> usernames) {
+            super();
+            this.usernames = usernames;
+      }
+}
+
+これは、次のように表示されます: contentTypes は "myEnumId1","myEnumId2" と表示され、usernames は "string1","string2" と表示されます。それぞれの定義において、これが CRUD モジュールで行うべき最初のカスタマイズです。
+
+h2. <a name="objecttype">_show_ と _blank_ ビューの一般的なカスタマイズ方法</a>
+
+CRUD ビューの振る舞いに主に影響するのは、それぞれの列の @ObjectType@ です。このため、
+例えば <code>@Version</code> アノテーションの付いたフィールドを隠すと言ったように、 CRUD モジュールの振る舞いを一般的な方法で変更したい場合、独自の @ObjectType@ クラスを作成することができます。コントローラまたはコントローラのスーパークラスに static メソッドを宣言しなければなりません。
+
+bc. protected static ObjectType createObjectType(Class<? extends Model> type) {
+   return new VersionObjectType(type);
+} 
+
+以下に完全な例を示します:
+
+bc.   public class CustomAdminCompany extends CRUD {
+   protected static ObjectType createObjectType(Class<? extends Model> type) {
+      return new VersionObjectType(type);
+   }
+   
+   public static class VersionObjectType extends ObjectType {
+      
+      private final String versionColumn;
+      
+      public VersionObjectType(Class<? extends Model> modelClass) {
+         super(modelClass);
+         versionColumn = getVersionColumnName(modelClass);
+      }
+      private String getVersionColumnName(Class modelClass) {
+         Class c = modelClass;
+         try {
+            while (!c.equals(Object.class)) {
+               for (Field field : c.getDeclaredFields()) {
+                  if (field.isAnnotationPresent(Version.class)) {
+                     return field.getName();
+                  }
+               }
+               c = c.getSuperclass();
+            }
+         } catch (Exception e) {
+            throw new UnexpectedException("Error while determining the "
+               + "object @Version for an object of type " + modelClass);
+         }
+         return null;
+      }
+ 
+      @Override
+      public List<ObjectField> getFields() {
+         List<ObjectField> result = super.getFields();
+         for (ObjectField objectField : result) {
+            if (objectField.name.equals(versionColumn)) {
+               objectField.type = "hidden";
+            }
+         }
+         return result;
+      }
+   }   
+}
+
+これで終わりではありません; @findPage@ やその他のメソッドをカスタマイズすることもできます。ソースコードを覗いてみてください。
+
+h2. <a name="l10n">ローカライズ</a>
+
+CRUD モジュールのメッセージをアプリケーションの @conf/messages@ ファイルで上書きすることで、ユーザインタフェースをローカライズすることができます。
+
+bc. crud.add=Create new &{%s}
+
+CRUD モジュール自身のメッセージファイル: @$PLAY_HOME/modules/crud/conf/messages@ を見て、どのメッセージキーが使用されているか確認してください。
+
+
+h2. <a name="commands">コマンド</a>
+
+CRUD モジュールは、コマンドラインから使って、デフォルトのテンプレートを上書きする *crud:override* コマンドを提供します。これが機能するのは、CRUD モジュールはアプリケーションのテンプレートが存在する場合に、自身のテンプレートではなく、アプリケーションのものをロードするためです。 @crud:override@ の代わりに @crud:ov@ を使用することもできます。
+
+h3. play crud:override --template [path]
+
+例えば @Users/list@ のようにパスで指定したテンプレートを、アプリケーションの @app/views/CRUD@ ディレクトリにコピーします。 @--template@ の代わりに @-t@ を使用することもできます。
+
+h3. play crud:override --layout
+
+メインのレイアウトテンプレートである @layout.html@ を上書きします。
+
+h3. play crud:override --css
+
+スタイルシート @crud.css@ を @public/stylesheets/@ ディレクトリにコピーして上書きします。
+
+
+
+h2. <a name="limitation">制限事項</a>
+
+CRUD モジュールは、双方向の関連を持つふたつのエンティティのうち、ひとつのみ: @mappedBy@ 属性を持たないエンティティを表示します。

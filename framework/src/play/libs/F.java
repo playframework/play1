@@ -44,22 +44,40 @@ public class F {
 
         public V get() throws InterruptedException, ExecutionException {
             taskLock.await();
+            if (exception != null) {
+                // The result of the promise is an exception - throw it
+                throw new ExecutionException(exception);
+            }
             return result;
         }
 
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             taskLock.await(timeout, unit);
+            if (exception != null) {
+                // The result of the promise is an exception - throw it
+                throw new ExecutionException(exception);
+            }
             return result;
         }
         List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
         boolean invoked = false;
         V result = null;
+        Throwable exception = null;
 
         public void invoke(V result) {
+            invokeWithResultOrException(result, null);
+        }
+
+        public void invokeWithException(Throwable t) {
+            invokeWithResultOrException(null, t);
+        }
+
+        protected void invokeWithResultOrException(V result, Throwable t) {
             synchronized (this) {
                 if (!invoked) {
                     invoked = true;
                     this.result = result;
+                    this.exception = t;
                     taskLock.countDown();
                 } else {
                     return;
@@ -128,7 +146,10 @@ public class F {
 
                 @Override
                 public List<T> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                    waitAllLock.await(timeout, unit);
+                    if(!waitAllLock.await(timeout, unit)) {
+                      throw new TimeoutException(String.format("Promises didn't redeem in %s %s", timeout, unit));
+                    }
+                    
                     return get();
                 }
             };
@@ -140,13 +161,16 @@ public class F {
                         try {
                             result.invoke(result.get());
                         } catch (Exception e) {
-                            throw new UnexpectedException(e);
+                            result.invokeWithException(e);
                         }
                     }
                 }
             };
             for (Promise<T> f : promises) {
                 f.onRedeem(action);
+            }
+            if(promises.isEmpty()) {
+              result.invoke(Collections.<T>emptyList());
             }
             return result;
         }
@@ -158,7 +182,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.Tuple((A) values.get(0), (B) values.get(1)));
+                    if(values != null) {
+                        result.invoke(new F.Tuple((A) values.get(0), (B) values.get(1)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -171,7 +200,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                    if(values != null) {
+                        result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -184,7 +218,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                    if(values != null) {
+                        result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -197,7 +236,12 @@ public class F {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
+                    if(values != null) {
+                        result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
+                    }
+                    else {
+                        result.invokeWithException(completed.exception);
+                    }
                 }
             });
             return result;
@@ -339,7 +383,13 @@ public class F {
                             return;
                         }
                     }
-                    result.invoke(completed.getOrNull());
+                    T resultOrNull = completed.getOrNull();
+                    if(resultOrNull != null) {
+                      result.invoke(resultOrNull);
+                    }
+                    else {
+                      result.invokeWithException(completed.exception);
+                    }
                 }
             };
 

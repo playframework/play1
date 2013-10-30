@@ -1,8 +1,14 @@
 package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.ConnectionCustomizer;
+import com.sun.rowset.CachedRowSetImpl;
+
 import jregex.Matcher;
+
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.internal.SessionImpl;
+
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
@@ -13,6 +19,9 @@ import play.exceptions.DatabaseException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -23,6 +32,9 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class DBConfig {
@@ -87,7 +99,7 @@ public class DBConfig {
             JPAConfig jpaConfig = JPA.getJPAConfig(dbConfigName, true);
             if (jpaConfig!=null) {
                 JPAContext jpaContext = jpaConfig.getJPAContext();
-                return ((org.hibernate.ejb.EntityManagerImpl) jpaContext.em()).getSession().connection();
+                return ((SessionImpl)((org.hibernate.ejb.EntityManagerImpl) jpaContext.em()).getSession()).connection();
             }
 
             // do we have a current raw connection bound to thread?
@@ -111,27 +123,71 @@ public class DBConfig {
 
     /**
      * Execute an SQL update
+     * 
      * @param SQL
      * @return false if update failed
      */
     public boolean execute(String SQL) {
+        Statement statement = null;
         try {
-            return getConnection().createStatement().execute(SQL);
+            statement = getConnection().createStatement();
+            if (statement != null) {
+                return statement.execute(SQL);
+            }
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseStatement(statement);
         }
+        return false;
     }
 
     /**
      * Execute an SQL query
+     * 
      * @param SQL
-     * @return The query resultSet
+     * @return The rowSet of the query
      */
-    public ResultSet executeQuery(String SQL) {
+    public RowSet executeQuery(String SQL) {
+        Statement statement = null;
+        ResultSet rs = null;
         try {
-            return getConnection().createStatement().executeQuery(SQL);
+            statement = getConnection().createStatement();
+            if (statement != null) {
+                rs = statement.executeQuery(SQL);
+            }
+
+            // Need to use a CachedRowSet that caches its rows in memory, which
+            // makes it possible to operate without always being connected to
+            // its data source
+            CachedRowSet rowset = new CachedRowSetImpl();
+            rowset.populate(rs);
+            return rowset;
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        } finally {
+            safeCloseResultSet(rs);
+            safeCloseStatement(statement);
+        }
+    }
+
+    public static void safeCloseResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    public static void safeCloseStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ex) {
+                throw new DatabaseException(ex.getMessage(), ex);
+            }
         }
     }
 
@@ -190,10 +246,19 @@ public class DBConfig {
                     destroy();
                 }
 
-                if (p.getProperty(propsPrefix, "").startsWith("java:")) {
-
+                boolean isJndiDatasource = false;
+                String datasourceName = p.getProperty(propsPrefix, "");
+                
+                // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
+                if (datasourceName.startsWith("jndi:")) {
+                    datasourceName = datasourceName.substring("jndi:".length());
+                    isJndiDatasource = true;
+                }
+                
+                if (isJndiDatasource || datasourceName.startsWith("java:")) {
+                    
                     Context ctx = new InitialContext();
-                    datasource = (DataSource) ctx.lookup(p.getProperty(propsPrefix));
+                    datasource = (DataSource) ctx.lookup(datasourceName);
 
                 } else {
 
@@ -233,6 +298,13 @@ public class DBConfig {
                     ds.setMaxIdleTimeExcessConnections(Integer.parseInt(p.getProperty(propsPrefix + ".pool.maxIdleTimeExcessConnections", "0")));
                     ds.setIdleConnectionTestPeriod(10);
                     ds.setTestConnectionOnCheckin(true);
+
+                    // This check is not required, but here to make it clear that nothing changes for people
+                    // that don't set this configuration property. It may be safely removed.
+                    if(p.getProperty("db.isolation") != null) {
+                        ds.setConnectionCustomizerClassName(DBConfig.PlayConnectionCustomizer.class.getName());
+                    }
+
                     datasource = ds;
                     url = ds.getJdbcUrl();
                     Connection c = null;
@@ -262,6 +334,7 @@ public class DBConfig {
         return dbConfigured;
     }
 
+
     /**
      * returns empty string if default config.
      * returns descriptive string about config name if not default config
@@ -290,7 +363,9 @@ public class DBConfig {
         out.println("Jdbc url: " + ds.getJdbcUrl());
         out.println("Jdbc driver: " + ds.getDriverClass());
         out.println("Jdbc user: " + ds.getUser());
-        out.println("Jdbc password: " + ds.getPassword());
+        if (Play.mode.isDev()) {
+            out.println("Jdbc password: " + ds.getPassword());
+        }
         out.println("Min pool size: " + ds.getMinPoolSize());
         out.println("Max pool size: " + ds.getMaxPoolSize());
         out.println("Initial pool size: " + ds.getInitialPoolSize());
@@ -399,6 +474,13 @@ public class DBConfig {
             this.driver = d;
         }
 
+        /*
+         * JDK 7 compatibility
+         */
+        public java.util.logging.Logger getParentLogger() {
+            return null;
+        }
+
         public boolean acceptsURL(String u) throws SQLException {
             return this.driver.acceptsURL(u);
         }
@@ -425,4 +507,54 @@ public class DBConfig {
     }
 
 
+    public static class PlayConnectionCustomizer implements ConnectionCustomizer {
+
+        public static Map<String, Integer> isolationLevels;
+
+        static {
+            isolationLevels = new HashMap<String, Integer>();
+            isolationLevels.put("NONE", Connection.TRANSACTION_NONE);
+            isolationLevels.put("READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED);
+            isolationLevels.put("READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED);
+            isolationLevels.put("REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ);
+            isolationLevels.put("SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE);
+        }
+
+        public void onAcquire(Connection c, String parentDataSourceIdentityToken) {
+            Integer isolation = getIsolationLevel();
+            if (isolation != null) {
+                try {
+                    Logger.trace("Setting connection isolation level to %s", isolation);
+                    c.setTransactionIsolation(isolation);
+                } catch (SQLException e) {
+                    throw new DatabaseException("Failed to set isolation level to " + isolation, e);
+                }
+            }
+        }
+
+        public void onDestroy(Connection c, String parentDataSourceIdentityToken) {}
+        public void onCheckOut(Connection c, String parentDataSourceIdentityToken) {}
+        public void onCheckIn(Connection c, String parentDataSourceIdentityToken) {}
+
+        /**
+         * Get the isolation level from either the isolationLevels map, or by
+         * parsing into an int.
+         */
+        private Integer getIsolationLevel() {
+            String isolation = Play.configuration.getProperty("db.isolation");
+            if (isolation == null) {
+                return null;
+            }
+            Integer level = isolationLevels.get(isolation);
+            if (level != null) {
+                return level;
+            }
+
+            try {
+                return Integer.valueOf(isolation);
+            } catch (NumberFormatException e) {
+                throw new DatabaseException("Invalid isolation level configuration" + isolation, e);
+            }
+        }
+    }
 }

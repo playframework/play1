@@ -1,0 +1,383 @@
+h1. 依存性管理
+
+Play の依存性管理システムによって、アプリケーションの外部依存性を単一の @dependencies.yml@ ファイルに記述することができます。
+
+Play アプリケーションには三種類の依存性があります:
+
+* Play フレームワーク自身。Play アプリケーションは常に Play フレームワークに依存します。
+* アプリケーションの @lib/@ ディレクトリにインストールされた **JAR** ファイルとして提供されるあらゆる Java ライブラリ
+* アプリケーションの @modules/@ ディレクトリにインストールされた (実際はアプリケーションの断片である) Play モジュール
+
+これらの依存性をアプリケーションの @conf/dependencies.yml@ ファイルに記述すると、Play はすべての必要な依存性を解決し、ダウンロードしてインストールします。
+
+h2. <a name="format">依存性の書式</a>
+
+依存性は組織名とリビジョン番号によって記述されます。例えば、以下のように @dependencies.yml@ ファイルに依存性を記述します:
+
+bc. organisation -> name revision
+
+このため、例えば "Play PDF モジュール":http://www.playframework.org/modules/pdf のバージョン 1.0 は以下のように表現されます:
+
+bc. play -> pdf 1.0
+
+"commons-lang":http://commons.apache.org/lang/ のように組織の名称と依存性の名称がぴったり一致する場合があります:
+
+bc. commons-lang -> commons-lang 2.5
+
+この場合、依存性定義から組織名を省略することができます:
+
+bc. commons-lang 2.5
+
+h3. 動的なリビジョン
+
+リビジョン番号は (例えば 1.2 などのように) 固定にするか、または動的にすることができます。動的なリビジョン番号は許容するリビジョンの範囲を表します。
+
+例えば:
+
+* @[1.0,2.0]@ は 1.0 以上かつ 2.0 以下のすべてのバージョンにマッチします
+* @[1.0,2.0[@ は 1.0 以上かつ 2.0 より小さいすべてのバージョンにマッチします
+* @]1.0,2.0]@ は 1.0 より大きく 2.0 以下のすべてのバージョンにマッチします
+* @]1.0,2.0[@ は 1.0 より大きく 2.0 より小さいすべてのバージョンにマッチします
+* @[1.0,)@ は 1.0 以上のすべてのバージョンにマッチします
+* @]1.0,)@ は 1.0 より大きいすべてのバージョンにマッチします
+* @(,2.0]@ は 2.0 以下のすべてのバージョンにマッチします
+* @(,2.0[@ は 2.0 より小さいすべてのバージョンにマッチします
+
+h2. <a name="yml">dependencies.yml</a>
+
+新しい Play アプリケーションを作成すると、自動的に @dependencies.yml@ 記述子が @conf/@ ディレクトリに作成されます:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+
+段落 @require@ には、アプリケーションが必要とするすべての依存性が一覧されています。ここでは、この新しいアプリケーションは **Play バージョン 1.2** にのみ依存しています。でも、 "Google Guava":http://code.google.com/p/guava-libraries/" が必要であることにしてみましょう; こんなふうにするでしょう:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07
+
+h3. ‘play dependencies’ コマンド
+
+Play に新しい依存性を解決して、ダウンロードして、インストールするように伝えるには、 @play dependencies@ を実行します:
+
+bc. $ play dependencies
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! 1.2, http://www.playframework.org
+~ framework ID is gbo
+~
+~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
+~
+~ 	com.google.guava->guava r07 (from mavenCentral)
+~ 	com.google.code.findbugs->jsr305 1.3.7 (from mavenCentral)
+~
+~ Downloading required dependencies,
+~
+~ 	downloaded http://repo1.maven.org/maven2/com/google/guava/guava/r07/guava-r07.jar
+~ 	downloaded http://repo1.maven.org/maven2/com/google/code/findbugs/jsr305/1.3.7/jsr305-1.3.7.jar
+~
+~ Installing resolved dependencies,
+~
+~ 	lib/guava-r07.jar
+~ 	lib/jsr305-1.3.7.jar
+~
+~ Done!
+~
+
+これで Play はふたつの JAR (**guava-r07.jar**, **jsr305-1.3.7.jar**) を Maven 中央リポジトリからダウンロードして @lib/@ ディレクトリにインストールしました。
+
+ひとつの依存性しか定義していないのに、なぜふたつの JAR なのでしょうか? それは、Google Buava が透過的な依存性を持つからです。この依存性は実際に必要としているわけではないので外部化したくなるでしょう。
+
+h3. 透過的な依存性
+
+あらゆる推移的な依存性はデフォルトで自動的に解決されます。しかし、必要であればそれらを無効にする方法がいくつかあります。
+
+1. 特定の依存性について、推移的な依存性を無効にすることができます:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07:
+        transitive: false
+
+2. プロジェクト全体で推移的な依存性を無効にすることができます:
+
+bc. # Application dependencies
+    
+transitiveDependencies: false    
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07
+
+3. 特定の依存性を明示的に除外することができます:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07:
+        exclude:
+            - com.google.code.findbugs -> *
+
+h3. lib/ と modules/ ディレクトリの同期
+
+ここでもう一度 @play dependencies@ を実行すると、依存性 findbugs は除外されます:
+
+bc. $ play deps
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! 1.2, http://www.playframework.org
+~ framework ID is gbo
+~
+~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
+~
+~ 	com.google.guava->guava r07 (from mavenCentral)
+~
+~ Installing resolved dependencies,
+~
+~ 	lib/guava-r07.jar
+~
+~ ********************************************************************
+~ WARNING: Your lib/ and modules/ directories and not synced with 
+~ current dependencies (use --sync to automatically delete them)
+~
+~ 	Unknown: ~/Documents/coco/lib/jsr305-1.3.7.jar
+~ ********************************************************************
+~
+~ Done!
+~
+
+しかし、以前にダウンロードした **jsr305-1.3.7.jar** アーティファクトは、まだ @lib/@ ディレクトリに存在しています。
+
+@lib/@ と @modules/@ ディレクトリを依存性管理システムと同期したまま保持するために、 @dependencies@ コマンドに @--sync@ コマンドを指定することができます:
+
+bc. play dependencies --sync
+
+もう一度コマンドを実行すると、不要な **JAR** は削除されます。
+
+アプリケーションを本番環境にデプロイする際、モジュールのソースコードとドキュメントを削除することでモジュールの容量を縮小することができます。これはコマンドに @--forProd@ オプションを追加することで実行できます:
+
+bc. play dependencies --forProd
+
+これは、各モジュールの @documentation/@, @src/@, @tmp/@, @*sample*/@ そして @*test*/@ ディレクトリを削除します。
+
+
+h2. <a name="conflicts">競合の解決</a>
+
+ふたつのコンポーネントが同じ依存性の違うリビジョンを必要とする場合は、コンフリクトマネージャがひとつを選びます。デフォルトではもっとも新しいリビジョンを保持し、他のリビジョンを追い出します。
+
+しかし、例外があります。Play フレームワークのコア自身が競合に巻き込まれた場合は @$PLAY/framework/lib@ で利用可能なバージョンが優先されます。例えば、Play は @commons-lang 2.5@ に依存します。もしアプリケーションが @commons-lang 3.0@ を要求する場合:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07:
+        transitive: false
+    - commons-lang 3.0
+
+@play dependencies@ を実行すると、バージョンが新しいにも関わらず @commons-lang 3.0@ は追い出されるでしょう:
+
+bc. play dependencies
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! 1.2, http://www.playframework.org
+~ framework ID is gbo
+~
+~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
+~
+~ 	com.google.guava->guava r07 (from mavenCentral)
+~
+~ Some dependencies have been evicted,
+~
+~	commons-lang 3.0 is overriden by commons-lang 2.5
+~
+~ Installing resolved dependencies,
+~
+~ 	lib/guava-r07.jar
+~
+~ Done!
+~
+
+@$PLAY/framework/lib@ にて利用可能な依存性はアプリケーションの @lib/@ ディレクトリにインストールされないことにも注意してください。
+
+コアの依存性を上書くか、最新バージョンが利用可能となっている別のリビジョンを選択することで、強制的に依存性のバージョンを指定したくなる場合があるかもしれません。
+
+このため、いずれの依存性にも @force@ オプションを指定することができます:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07:
+        transitive: false
+    - commons-lang 3.0:
+        force: true
+
+h2. <a name="repositories">新しいリポジトリの追加</a>
+
+デフォルトでは、Play は "Maven 中央リポジトリ":http://repo1.maven.org/maven2/ から **JAR** 依存性を探し、 "Play モジュール中央リポジトリ":http://www.playframework.org/modules から **Play モジュール** を探します。
+
+もちろん、 @repositories@ 節で新しいカスタムリポジトリを指定することができます:
+
+bc. # Application dependencies
+    
+require:
+    - play 1.2
+    - com.google.guava -> guava r07:
+        transitive: false
+    - commons-lang 3.0:
+        force: true
+    - com.zenexity -> sso 1.0
+        
+# My custom repositories
+repositories:
+    
+    - zenexity:
+        type:       http
+        artifact:   "http://www.zenexity.com/repo/[module]-[revision].zip"
+        contains:
+            - com.zenexity -> *
+
+この設定を使うと、組織 @com.zenexity@ のすべての依存性はリモート HTTP サーバから検索され、ダウンロードされます。
+
+h3. Maven リポジトリ
+
+以下のように @iBiblio@ タイプを使うことで、maven2 互換のリポジトリを追加することもできます:
+
+bc. # Application dependencies
+    
+require:
+    - play
+    - play -> scala 0.8
+    - org.jbpm -> jbpm-persistence-jpa 5.0.0:
+        exclude:
+            - javassist -> javassist *
+            - org.hibernate -> hibernate-annotations *
+            - javax.persistence -> persistence-api *
+repositories:
+    - jboss:
+        type: iBiblio
+        root: "http://repository.jboss.org/nexus/content/groups/public-jboss/"
+        contains:
+            - org.jbpm -> *
+            - org.drools -> *
+
+h3. ローカルリポジトリ
+
+最後とおそらく最初に、ローカルモジュールを参照するリポジトリを定義したいかもしれません。ここでは、(今は非推奨の) @application.conf@ でのモジュール解決に非常に近い形で依存関係を解決します。
+
+次のようなフォルダ構成だとします。
+
+bc. myplayapp/
+myfirstmodule/
+mysecondmodule/
+
+次の @myplayapp/conf/depencencies.yml@ は意図したとおりに依存関係を解決します。
+
+bc. # Application dependencies
+    
+require:
+    - play
+    - myfirstmodule -> myfirstmodule
+    - mysecondmodule -> mysecondmodule
+    
+repositories:
+    - My modules:
+        type:       local
+        artifact:   ${application.path}/../[module]
+        contains:
+            - myfirstmodule
+            - mysecondmodule
+
+注意: @play dependencies myplayapp@ を実行するのを忘れないでください。
+
+
+h3. カスタム ivy 設定
+
+Play は内部で Ivy を使っています。内部の中央 Maven リポジトリの Basic 認証といったプロキシ設定のように特別な設定が必要なら、ivysettings.xml ファイルを編集することができます。ファイルはホームディレクトリの @.ivy2@ フォルダにあります。
+
+例 1, Ivy にチェックサムを無視させる:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivysettings>
+  <property name="ivy.checksums" value=""/>
+</ivysettings>
+
+例 2, Basic 認証を使う:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivysettings>
+  <credentials host="maven-repo.xxx" realm="Sonatype Nexus Repository Manager"
+    username="user" passwd="reallygreatpassword"/>
+</ivysettings>
+
+例 3, ローカル maven リポジトリとリポジトリマネージャを再利用する:
+
+bc. <!-- .ivy2/ivysettings.xml -->
+<ivy-settings>
+  <!-- path to local maven repo and default maven layout -->
+  <property name="local-maven2-pattern" 
+    value="${user.home}/.m2/repository/[organisation]/[module]/[revision]/[module]-[revision]" 
+    override="false" />
+ 
+  <!-- set resolver chain as default -->
+  <settings defaultResolver="main" />
+ 
+  <!-- configure caches -->
+  <caches repositoryCacheDir="${user.home}/.ivy2/cache">
+    <!-- do not cache from local .m2-->
+    <cache name="nocache" useOrigin="true" />
+    <cache name="default" />
+  </caches>
+ 
+  <resolvers>
+    <chain name="main">
+      <!-- as this is not cached, even changing SNAPSHOT dependencies 
+        are resolved correctly -->
+      <filesystem name="local-maven-2" m2compatible="true" local="true" 
+        cache="nocache">
+        <ivy pattern="${local-maven2-pattern}.pom" />
+        <artifact pattern="${local-maven2-pattern}(-[classifier]).[ext]" />
+      </filesystem>
+      <!-- use repository manager as proxy to maven-central
+        (and all other repositories)--> 
+      <ibiblio name="repomanager" m2compatible="true"
+        root="http://your.repomanager.intra/path/to/repo" cache="default"/>
+    </chain>
+  </resolvers>
+</ivy-settings>
+
+設定項目はたくさんあります: "Ivy の設定ドキュメント":http://ant.apache.org/ivy/history/2.1.0/settings.html を参照してください。
+
+
+h3. Ivy キャッシュをクリアする
+
+Ivy のキャッシュは、特に @conf/dependencies.yml@ のリポジトリセクションにおいて @http@ タイプを使用すると壊れる場合があります。Ivy キャッシュが壊れて依存性が解決されなくなった場合は、 @--clearcache@ オプションを使ってキャッシュをクリアすることができます。
+
+bc. $ play dependencies --clearcache
+
+これは @rm -r ~/.ivy2/cache@ と等価です。
+
+
+p(note). **考察を続けます**
+
+次: %(next)"データベースエボリューション":evolutions%

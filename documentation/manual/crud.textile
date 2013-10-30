@@ -13,6 +13,9 @@ In the @/conf/dependencies.yml@ file, enable the CRUD module by adding a line af
 bc. require:
     - play -> crud
 
+Now run the @play dependencies@ command to resolve the new module dependency.
+
+
 h3. <a name="routes">Import default CRUD routes</a>
 
 In the @conf/routes@ file, import the default module routes by adding this line:
@@ -214,7 +217,7 @@ public class Account extends Model {
       @CollectionOfElements
       public Set<String> usernames;
  
-      public Account(Set<String> usernames {
+      public Account(Set<String> usernames) {
             super();
             this.usernames = usernames;
       }
@@ -278,6 +281,15 @@ bc.   public class CustomAdminCompany extends CRUD {
 }
 
 This is not the end; you can also customize @findPage@ and other methods. Have a look at the source code.
+
+h2. <a name="l10n">Localisation</a>
+
+You can localise the user-interface text by overriding the CRUD module’s messages in your application’s @conf/messages@ file.
+
+bc. crud.add=Create new &{%s}
+
+To see which message keys are used, look in the CRUD module’s own message file: @$PLAY_HOME/modules/crud/conf/messages@.
+
 
 h2. <a name="commands">Commands</a>
 

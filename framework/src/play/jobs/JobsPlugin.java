@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledFuture;
@@ -21,6 +22,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Expression;
 import play.libs.Time;
 import play.libs.Time.CronExpression;
+import play.mvc.Http.Request;
 import play.utils.Java;
 import play.utils.PThreadFactory;
 
@@ -28,6 +30,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor = null;
     public static List<Job> scheduledJobs = null;
+    private static ThreadLocal<List<Callable<? extends Object>>> afterInvocationActions = new ThreadLocal<List<Callable<? extends Object>>>();
 
     @Override
     public String getStatus() {
@@ -52,7 +55,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Job job : scheduledJobs) {
                 out.print(job.getClass().getName());
-                if (job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
+                if (job.getClass().isAnnotationPresent(OnApplicationStart.class) && !(job.getClass().isAnnotationPresent(On.class) || job.getClass().isAnnotationPresent(Every.class))) {
                     OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
                     out.print(" run at application start" + (appStartAnnotation.async()?" (async)" : "") + ".");
                 }
@@ -87,7 +90,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Object o : executor.getQueue()) {
                 ScheduledFuture task = (ScheduledFuture)o;
-                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");        
+                out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");
             }
         }
         return sw.toString();
@@ -225,7 +228,58 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
+
+        List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
+
+        for (final Class clazz : jobs) {
+            // @OnApplicationStop
+            if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
+                try {
+                    Job<?> job = ((Job<?>) clazz.newInstance());
+                    scheduledJobs.add(job);
+                    job.run();
+                    if (job.wasError) {
+                        if (job.lastException != null) {
+                            throw job.lastException;
+                        }
+                        throw new RuntimeException("@OnApplicationStop Job has failed");
+                    }
+                } catch (InstantiationException e) {
+                    throw new UnexpectedException("Job could not be instantiated", e);
+                } catch (IllegalAccessException e) {
+                    throw new UnexpectedException("Job could not be instantiated", e);
+                } catch (Throwable ex) {
+                    if (ex instanceof PlayException) {
+                        throw (PlayException) ex;
+                    }
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+
         executor.shutdownNow();
         executor.getQueue().clear();
+    }
+
+    @Override
+    public void beforeInvocation() {
+      afterInvocationActions.set(new LinkedList<Callable<? extends Object>>());
+    }
+
+    @Override
+    public void afterInvocation() {
+      List<Callable<? extends Object>> currentActions = afterInvocationActions.get();
+      afterInvocationActions.set(null);
+      for (Callable<? extends Object> callable : currentActions) {
+        JobsPlugin.executor.submit(callable);
+      }
+    }
+
+    // default visibility, because we want to use this only from Job.java
+    static void addAfterRequestAction(Callable<? extends Object> c) {
+      if (Request.current() == null) {
+        throw new IllegalStateException("After request actions can be added only from threads that serve requests!");
+      }
+      afterInvocationActions.get().add(c);
     }
 }
