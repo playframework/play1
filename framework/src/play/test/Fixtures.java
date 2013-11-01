@@ -189,6 +189,7 @@ public class Fixtures {
     /**
      * Load Model instances from a YAML file and persist them using the underlying persistence mechanism.
      * The format of the YAML file is constrained, see the Fixtures manual page
+     * @param loadAsTemplate : indicate if the file must interpreted as a Template
      * @param name Name of a YAML file somewhere in the classpath (or conf/)
      */
     public static void loadModels(boolean loadAsTemplate, String name) {
@@ -301,10 +302,7 @@ public class Fixtures {
      */
     @Deprecated
     public static void load(String... names) {
-        Map<String, Object> idCache = new HashMap<String, Object>();
-        for (String name : names) {
-            loadModels(name, idCache);
-        }
+        loadModels(names);
     }
 
     /**
@@ -320,7 +318,7 @@ public class Fixtures {
     public static void loadModels(boolean loadAsTemplate, String... names) {
         Map<String, Object> idCache = new HashMap<String, Object>();
         for (String name : names) {
-            loadModels(idCache, loadAsTemplate, name);
+            loadModels(loadAsTemplate, name, idCache);
         }
     }
 
