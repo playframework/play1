@@ -101,6 +101,7 @@ try:
     # ~~~~~~~~~~~~~~~~~ Override port
     get_opt(remaining_args, "http.port", play_env)
     get_opt(remaining_args, "https.port", play_env)
+    get_opt(remaining_args, "jpda.port", play_env)
 
     # ~~~~~~~~~~~~~~~~~ Override id
     for a in remaining_args:
@@ -119,12 +120,12 @@ try:
             print "~ framework ID is %s" % play_env["id"]
         print "~"
 
-    # ~~~~~~~~~~~~~~~~~ Checking for disable_check_jpda
-    disable_check_jpda = False
+    # ~~~~~~~~~~~~~~~~~ Checking for disable_random_jpda
+    disable_random_jpda = False
     if remaining_args.count('-f') == 1:
-        disable_check_jpda = True
+        disable_random_jpda = True
         remaining_args.remove('-f')
-    play_env["disable_check_jpda"] = disable_check_jpda 
+    play_env["disable_random_jpda"] = disable_random_jpda
 
     play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
