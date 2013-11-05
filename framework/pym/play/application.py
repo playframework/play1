@@ -33,7 +33,12 @@ class PlayApplication(object):
         else:
             self.conf = None
         self.play_env = env
-        self.jpda_port = self.readConf('jpda.port')
+
+        if env.has_key('jpda.port'):
+            self.jpda_port = env['jpda.port']
+        else:
+            self.jpda_port = self.readConf('jpda.port')
+
         self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
@@ -257,10 +262,8 @@ class PlayApplication(object):
         if cp_args is None:
             cp_args = self.cp_args()
 
-        self.jpda_port = self.readConf('jpda.port')
         if self.play_env.has_key('jpda.port'):
             self.jpda_port = ["--jpda.port=%s" % self.play_env['jpda.port']]
-
 
         application_mode = self.readConf('application.mode').lower()
 
@@ -321,6 +324,8 @@ class PlayConfParser:
     def __init__(self, confFolder, env):
         self.id = env["id"]
         self.entries = self.readFile(confFolder, "application.conf")
+        if env.has_key('jpda.port'):
+            self.entries['jpda.port'] = env['jpda.port']
         if env.has_key('http.port'):
             self.entries['http.port'] = env['http.port']
 
