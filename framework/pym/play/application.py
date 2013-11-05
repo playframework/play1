@@ -258,6 +258,9 @@ class PlayApplication(object):
             cp_args = self.cp_args()
 
         self.jpda_port = self.readConf('jpda.port')
+        if self.play_env.has_key('jpda.port'):
+            self.jpda_port = ["--jpda.port=%s" % self.play_env['jpda.port']]
+
 
         application_mode = self.readConf('application.mode').lower()
 

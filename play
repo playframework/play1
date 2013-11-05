@@ -101,6 +101,7 @@ try:
     # ~~~~~~~~~~~~~~~~~ Override port
     get_opt(remaining_args, "http.port", play_env)
     get_opt(remaining_args, "https.port", play_env)
+    get_opt(remaining_args, "jpda.port", play_env)
 
     # ~~~~~~~~~~~~~~~~~ Override id
     for a in remaining_args:
