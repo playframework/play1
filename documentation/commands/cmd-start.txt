@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play start [app_path] [--deps] [--%fwk_id] [--java_options]
+~ play start [app_path] ] [-f] [--deps] [--%fwk_id]  [--http[s].port=<value>] [--jpda.port=<value>] [--pid_file=<file>] [--java_options]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -25,9 +25,23 @@
 ~
 ~ Options:
 ~ ~~~~~~~~~
+~ -f:
+~ Disable the JPDA port checking and force the jpda.port value.
+~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
 ~
 ~ --deps: 
 ~ Resolve and install dependencies before running the command.
 ~
+~ --pid_file=<file>:
+~ Specify where to write the process id (pid) of the background server process.
+~
+~ --http.port=<value>:
+~ Override the http.port and %fwk_id.http.port variables in application.conf, and listen to the specified http port
+~
+~ --https.port=<value>:
+~ Override the https.port and %fwk_id.https.port variables in application.conf, and listen to the specified https port
+~
+~ --jpda.port=<value>:
+~ Override the jpda.port and %fwk_id.jpda.port variables in application.conf. Use the specified port (<value>) as the remote debugging port for the application. Can be combined with the option -f
