@@ -233,7 +233,7 @@ and for Selenium tests:
 bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
 
 p(note). The fixture file will be loaded as a Template by default.
-To avoid this, you can use the @loadModels(String name, boolean loadAsTemplate)@ with loadAsTemplate set to @false@
+To avoid this, you can use the @loadModels(boolean loadAsTemplate, String name)@ with loadAsTemplate set to @false@
 or for Selenium tests @#{fixture delete:'all', loadAsTemplate:false, load:'data.yml' /}@
 
 h2. <a name="running">Running the tests</a>
