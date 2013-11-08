@@ -571,7 +571,7 @@ public class Evolutions extends PlayPlugin {
                     }
                 }
 
-                execute("create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script text, revert_script text, state varchar(255), last_problem text, module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
+                execute("create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ", module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
             }
         } catch (SQLException e) {
             Logger.error(e, "SQL error while checking play evolutions");
