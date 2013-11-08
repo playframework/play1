@@ -361,6 +361,7 @@ bc. evolutions.enabled=false
 Default: @true@
 
 
+
 h3(#modules.evolutions.enabled). modules.evolutions.enabled
 
 Used to disable "database evolutions":evolutions from all modules
@@ -377,6 +378,13 @@ bc. [module name].evolutions.enabled=false
 
 Default: @true@
 
+h3(#evolution.PLAY_EVOLUTIONS.textType). evolution.PLAY_EVOLUTIONS.textType
+
+If you are having problems with the default datatype text (clob for Oracle), you can specify your own datatype 
+
+bc. evolution.PLAY_EVOLUTIONS.textType=clob
+
+Default: @clob@
 
 h2(#test). Test runner
 
