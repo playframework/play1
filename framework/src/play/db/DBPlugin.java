@@ -1,8 +1,5 @@
 package play.db;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mchange.v2.c3p0.ConnectionCustomizer;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -31,6 +28,9 @@ import play.exceptions.DatabaseException;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.ConnectionCustomizer;
 
 /**
  * The DB plugin
@@ -80,7 +80,7 @@ public class DBPlugin extends PlayPlugin {
                     DB.destroy();
                 }
 
-	        boolean isJndiDatasource = false;
+	            boolean isJndiDatasource = false;
                 String datasourceName = p.getProperty("db", "");
                 // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
                 if (datasourceName.startsWith("jndi:")) {
@@ -241,14 +241,22 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.destroyMethod", "close");
         }
 
-        Matcher m = new jregex.Pattern("^mysql:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[^\\s]+)$").matcher(p.getProperty("db", ""));
+        Matcher m = new jregex.Pattern("^mysql:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[a-zA-Z0-9_]+)(\\?)?({parameters}[^\\s]+)?$").matcher(p.getProperty("db", ""));
         if (m.matches()) {
             String user = m.group("user");
             String password = m.group("pwd");
             String name = m.group("name");
             String host = m.group("host");
+            String parameters = m.group("parameters");
+    		
+            Map<String, String> paramMap = new HashMap<String, String>();
+            paramMap.put("useUnicode", "yes");
+            paramMap.put("characterEncoding", "UTF-8");
+            paramMap.put("connectionCollation", "utf8_general_ci");
+            addParameters(paramMap, parameters);
+            
             p.put("db.driver", "com.mysql.jdbc.Driver");
-            p.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            p.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?" + toQueryString(paramMap));
             if (user != null) {
                 p.put("db.user", user);
             }
@@ -306,6 +314,27 @@ public class DBPlugin extends PlayPlugin {
         }
 
         return false;
+    }
+    
+    private static void addParameters(Map<String, String> paramsMap, String urlQuery) {
+    	if (!StringUtils.isBlank(urlQuery)) {
+	    	String[] params = urlQuery.split("[\\&]");
+	    	for (String param : params) {
+				String[] parts = param.split("[=]");
+				if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
+					paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
+				}
+			}
+    	}
+    }
+    
+    private static String toQueryString(Map<String, String> paramMap) {
+    	StringBuilder builder = new StringBuilder();
+    	for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+    		if (builder.length() > 0) builder.append("&");
+			builder.append(entry.getKey()).append("=").append(entry.getValue() != null ? entry.getValue() : "");
+		}
+    	return builder.toString();
     }
 
     /**
