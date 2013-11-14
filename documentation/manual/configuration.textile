@@ -348,6 +348,13 @@ Database connection user name, used with "db.url":#db.url.
 
 Default: none, or @sa@ when "db":#db is set to @mem@ or @fs@. 
 
+h3(#db.testquery). db.testquery
+
+Query to use when keepalive connection polling is being performed.
+
+Default: SELECT 1
+Default on MySQL: /* ping */ SELECT 1
+
 
 h2(#evolutions). Database evolutions
 
