@@ -5,6 +5,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,6 +66,7 @@ import javax.net.ssl.*;
 public class WSAsync implements WSImpl {
 
     private AsyncHttpClient httpClient;
+    private static SSLContext sslCTX = null;
 
     public WSAsync() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
@@ -74,6 +77,7 @@ public class WSAsync implements WSImpl {
         String userAgent = Play.configuration.getProperty("http.userAgent");
         String keyStore = Play.configuration.getProperty("ssl.keyStore", System.getProperty("javax.net.ssl.keyStore"));
         String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword", System.getProperty("javax.net.ssl.keyStorePassword"));
+        Boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -98,34 +102,63 @@ public class WSAsync implements WSImpl {
         }
 
         if (keyStore != null && !keyStore.equals("")) {
-            Logger.debug("Loading keystore '%s' with password '%s'", keyStore, keyStorePass);
-            try {
-                // Keystore
-                InputStream kss = null;
-                char[] storePass = keyStorePass.toCharArray();
-                KeyStore ks = KeyStore.getInstance("PLAYKS");
-                ks.load(kss, storePass);
 
-                // Keymanager
-                char[] certPwd = "".toCharArray();
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                kmf.init(ks, certPwd);
-                KeyManager[] keyManagers = kmf.getKeyManagers();
+            Logger.info("keyStore '%s', keyStorePass '%s', CAValidation '%s', sslCTX %s", keyStore, keyStorePass, CAValidation, sslCTX);
+            if (sslCTX == null) {
+                try {
+                    // Keystore
+                    InputStream kss = new FileInputStream(keyStore);
+                    char[] storePass = keyStorePass.toCharArray();
+                    KeyStore ks = KeyStore.getInstance("JKS");
+                    ks.load(kss, storePass);
 
-                // Trustmanager
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509", "SunJJSE");
-                tmf.init(ks);
-                TrustManager[] trustManagers = tmf.getTrustManagers();
+                    // Keymanager
+                    char[] certPwd = keyStorePass.toCharArray();
+                    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                    kmf.init(ks, certPwd);
+                    KeyManager[] keyManagers = kmf.getKeyManagers();
 
-                SecureRandom secureRandom = new SecureRandom();
+                    // Trustmanager
+                    TrustManager[] trustManagers = null;
+                    if (CAValidation == true) {
+                        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+                        tmf.init(ks);
+                        trustManagers = tmf.getTrustManagers();
+                    } else {
+                        trustManagers = new TrustManager[] {
+                                new X509TrustManager() {
+                                    @Override
+                                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                                    }
 
-                // SSL context
-                SSLContext sslCTX = SSLContext.getInstance("TLS");
-                sslCTX.init(keyManagers, trustManagers, secureRandom);
+                                    @Override
+                                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                                    }
+
+                                    @Override
+                                    public X509Certificate[] getAcceptedIssuers() {
+                                        return null;
+                                    }
+                                }
+                        };
+                    }
+                    // Dump the trustManager store
+                    X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
+
+                    for (X509Certificate cert : trustManager.getAcceptedIssuers()) {
+                        Logger.info("Cert Subject %s, issuer %s", cert.getSubjectDN().getName(), cert.getIssuerDN().getName());
+                    }
+
+                    SecureRandom secureRandom = new SecureRandom();
+
+                    // SSL context
+                    sslCTX = SSLContext.getInstance("TLS");
+                    sslCTX.init(keyManagers, trustManagers, secureRandom);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error setting SSL context " + e.toString());
+                }
 
                 confBuilder.setSSLContext(sslCTX);
-            } catch (Exception e) {
-                throw new RuntimeException("Error setting SSL context",e);
             }
         }
         // when using raw urls, AHC does not encode the params in url.
