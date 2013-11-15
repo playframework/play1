@@ -3,6 +3,8 @@ package play.libs.ws;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +39,8 @@ import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
 
+import javax.net.ssl.*;
+
 /**
  * Simple HTTP client to make webservices requests.
  * 
@@ -68,6 +72,8 @@ public class WSAsync implements WSImpl {
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
         String nonProxyHosts = Play.configuration.getProperty("http.nonProxyHosts", System.getProperty("http.nonProxyHosts"));
         String userAgent = Play.configuration.getProperty("http.userAgent");
+        String keyStore = Play.configuration.getProperty("ssl.keyStore", System.getProperty("javax.net.ssl.keyStore"));
+        String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword", System.getProperty("javax.net.ssl.keyStorePassword"));
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -89,6 +95,38 @@ public class WSAsync implements WSImpl {
         }
         if (userAgent != null) {
             confBuilder.setUserAgent(userAgent);
+        }
+
+        if (keyStore != null && !keyStore.equals("")) {
+            Logger.debug("Loading keystore '%s' with password '%s'", keyStore, keyStorePass);
+            try {
+                // Keystore
+                InputStream kss = null;
+                char[] storePass = keyStorePass.toCharArray();
+                KeyStore ks = KeyStore.getInstance("PLAYKS");
+                ks.load(kss, storePass);
+
+                // Keymanager
+                char[] certPwd = "".toCharArray();
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                kmf.init(ks, certPwd);
+                KeyManager[] keyManagers = kmf.getKeyManagers();
+
+                // Trustmanager
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509", "SunJJSE");
+                tmf.init(ks);
+                TrustManager[] trustManagers = tmf.getTrustManagers();
+
+                SecureRandom secureRandom = new SecureRandom();
+
+                // SSL context
+                SSLContext sslCTX = SSLContext.getInstance("TLS");
+                sslCTX.init(keyManagers, trustManagers, secureRandom);
+
+                confBuilder.setSSLContext(sslCTX);
+            } catch (Exception e) {
+                throw new RuntimeException("Error setting SSL context",e);
+            }
         }
         // when using raw urls, AHC does not encode the params in url.
         // this means we can/must encode it(with correct encoding) before passing it to AHC
