@@ -28,6 +28,135 @@ public class Unbinder {
         }
         unBind(result, src, src.getClass(), name, annotations);
     }
+    
+    private static void directUnbind(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        if (!result.containsKey(name)) {
+            result.put(name,  (src != null ? src.toString() : null));
+        } 
+    }
+    
+    private static void unbindArray(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        if(src == null){
+            directUnbind( result, src,  srcClazz,  name, annotations);
+        }else{
+            Class<?> clazz = src.getClass().getComponentType();
+            int size = Array.getLength(src);
+            for (int i = 0; i < size; i++) {
+                unBind(result, Array.get(src, i), clazz, name + "[" + i + "]", annotations);
+            }
+        }
+    }
+    
+    private static void unbindCollection(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        if(src == null){
+            directUnbind( result, src,  srcClazz,  name, annotations);
+        }else if (Map.class.isAssignableFrom(src.getClass())) {
+            throw new UnsupportedOperationException("Unbind won't work with maps yet");
+        } else {
+            Collection<?> c = (Collection<?>) src;
+            Object[] srcArray = c.toArray();
+            unBind(result, srcArray, srcArray.getClass(), name, annotations);
+        }
+    }
+    
+    private static void unbindDate(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        // Get the date format from the controller
+        boolean isAsAnnotation = false;
+        try {
+            if (annotations != null) {
+                for (Annotation annotation : annotations) {
+                    if (annotation.annotationType().equals(As.class)) {
+                        if (Calendar.class.isAssignableFrom(src.getClass())) {
+                            result.put(name, new SimpleDateFormat(((As) annotation).value()[0]).format(((Calendar) src).getTime()));
+                        } else {
+                            result.put(name, new SimpleDateFormat(((As) annotation).value()[0]).format((Date) src));
+                        }
+                        isAsAnnotation = true;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            // Ignore
+        }
+
+
+        if (!isAsAnnotation) {
+            // We want to use that one so when redirecting it looks ok. We could as well use the DateBinder.ISO8601 but the url looks terrible
+            if (Calendar.class.isAssignableFrom(src.getClass())) {
+                result.put(name, new SimpleDateFormat(I18N.getDateFormat()).format(((Calendar) src).getTime()));
+            } else {
+                result.put(name, new SimpleDateFormat(I18N.getDateFormat()).format((Date) src));
+            }
+        }
+    }
+    
+    private static void internalUnbind(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        Field[] fields = srcClazz.getDeclaredFields();
+        for (Field field : fields) {
+
+            if ((field.getModifiers() & BeanWrapper.notwritableField) != 0) {
+                // skip fields that cannot be bound by BeanWrapper
+                continue;
+            }
+
+            String newName = name + "." + field.getName();
+            boolean oldAcc = field.isAccessible();
+            field.setAccessible(true);
+            
+            // first we try with annotations resolved from property
+            List<Annotation> allAnnotations = new ArrayList<Annotation>();
+            if(annotations != null && annotations.length > 0){
+                allAnnotations.addAll(Arrays.asList(annotations));
+            }
+            
+            // Add entity field annotation
+            Annotation[] propBindingAnnotations = field.getAnnotations();
+            if(propBindingAnnotations != null && propBindingAnnotations.length > 0){
+                allAnnotations.addAll(Arrays.asList(propBindingAnnotations));
+            }
+            
+            // Check for TypeBinder   
+            boolean isExtendedTypeBinder = false;
+            
+            try {
+                if (allAnnotations != null) {
+                    for (Annotation annotation : allAnnotations) {
+                        if (annotation.annotationType().equals(As.class)) {
+                            Class<? extends TypeBinder<?>> toInstanciate = (Class<? extends TypeBinder<?>>) ((As) annotation).binder();
+                            
+                            if (!(toInstanciate.equals(As.DEFAULT.class)) && ExtendedTypeBinder.class.isAssignableFrom(toInstanciate)) {
+                                // Instantiate the binder
+                                ExtendedTypeBinder<?> myInstance = (ExtendedTypeBinder<?>) toInstanciate.newInstance();
+                                myInstance.unBind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0])); 
+                                isExtendedTypeBinder = true;
+                            }
+                        }
+                    }
+                }
+
+                if (!isExtendedTypeBinder) {
+                    if (Date.class.isAssignableFrom(field.getType()) || Calendar.class.isAssignableFrom(field.getType())) {
+                        // We should use the @As annotation if there is one
+                        unbindDate(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
+                    } else if (isDirect(field.getType())) {
+                        directUnbind(result, field.get(src),  field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
+                    } else {
+                        unBind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Object" + srcClazz + " won't unbind field " + field.getName(), e);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Object" + srcClazz + " won't unbind field " + field.getName(), e);
+            }catch (Exception e) {
+                throw new RuntimeException("Object" + srcClazz + " won't unbind field " + field.getName(), e);
+            } finally {
+                field.setAccessible(oldAcc);
+            }
+
+        }
+    }
 
     private static void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         Map<String, Object> r = Play.pluginCollection.unBind(src, name);
@@ -35,90 +164,12 @@ public class Unbinder {
             result.putAll(r);
             return;
         }
-
-        if (isDirect(srcClazz) || src == null) {
-            if (!result.containsKey(name)) {
-                result.put(name, src != null ? src.toString() : null);
-            } 
-        } else if (src.getClass().isArray()) {
-            Class<?> clazz = src.getClass().getComponentType();
-            int size = Array.getLength(src);
-            for (int i = 0; i < size; i++) {
-                unBind(result, Array.get(src, i), clazz, name + "[" + i + "]", annotations);
-            }
-        } else if (Collection.class.isAssignableFrom(src.getClass())) {
-            if (Map.class.isAssignableFrom(src.getClass())) {
-                throw new UnsupportedOperationException("Unbind won't work with maps yet");
-            } else {
-                Collection<?> c = (Collection<?>) src;
-                Object[] srcArray = c.toArray();
-                unBind(result, srcArray, srcArray.getClass(), name, annotations);
-            }
-        } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
-            // We should use the @As annotation if there is one
-            // Get the date format from the controller
-            boolean isAsAnnotation = false;
-            try {
-                if (annotations != null) {
-                    for (Annotation annotation : annotations) {
-                        if (annotation.annotationType().equals(As.class)) {
-                            if (Calendar.class.isAssignableFrom(src.getClass())) {
-                                result.put(name, new SimpleDateFormat(((As) annotation).value()[0]).format(((Calendar) src).getTime()));
-                            } else {
-                                result.put(name, new SimpleDateFormat(((As) annotation).value()[0]).format((Date) src));
-                            }
-                            isAsAnnotation = true;
-                        }
-                    }
-                }
-
-            } catch (Exception e) {
-                // Ignore
-            }
-
-
-            if (!isAsAnnotation) {
-                // We want to use that one so when redirecting it looks ok. We could as well use the DateBinder.ISO8601 but the url looks terrible
-                if (Calendar.class.isAssignableFrom(src.getClass())) {
-                    result.put(name, new SimpleDateFormat(I18N.getDateFormat()).format(((Calendar) src).getTime()));
-                } else {
-                    result.put(name, new SimpleDateFormat(I18N.getDateFormat()).format((Date) src));
-                }
-            }
-        } else {
-            Field[] fields = src.getClass().getDeclaredFields();
-            for (Field field : fields) {
-
-                if ((field.getModifiers() & BeanWrapper.notwritableField) != 0) {
-                    // skip fields that cannot be bound by BeanWrapper
-                    continue;
-                }
-
-                String newName = name + "." + field.getName();
-                boolean oldAcc = field.isAccessible();
-                field.setAccessible(true);
-                
-                // first we try with annotations resolved from property
-                List<Annotation> allAnnotations = new ArrayList<Annotation>();
-                if(annotations != null && annotations.length > 0){
-                    allAnnotations.addAll(Arrays.asList(annotations));
-                }
-                
-                // Add entity field annotation
-                Annotation[] propBindingAnnotations = field.getAnnotations();
-                if(propBindingAnnotations != null && propBindingAnnotations.length > 0){
-                    allAnnotations.addAll(Arrays.asList(propBindingAnnotations));
-                }
-                
-                try {
-                    unBind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Object" + src.getClass() + " won't unbind field " + field.getName(), e);
-                } catch (IllegalArgumentException e) {
-                    throw new RuntimeException("Object" + src.getClass() + " won't unbind field " + field.getName(), e);
-                }
-                field.setAccessible(oldAcc);
-            }
+        if (srcClazz.isArray()) {
+            unbindArray(result, src, srcClazz, name, annotations);           
+        } else if (Collection.class.isAssignableFrom(srcClazz)) {
+            unbindCollection(result, src, srcClazz, name, annotations);
+        } else{
+            internalUnbind(result, src, srcClazz, name, annotations);
         }
     }
 
