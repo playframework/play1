@@ -263,4 +263,9 @@ public class Promises extends UnitTest {
     Promise.waitAll(new DoSomething2(200).now(), new DoSomething2(200).now()).get(400, TimeUnit.MILLISECONDS);
   }
 
+  @Test(expected = TimeoutException.class)
+  public void waitForTimeout() throws InterruptedException, ExecutionException, TimeoutException {
+    new DoSomething2(200).now().get(100, TimeUnit.MILLISECONDS);
+  }
+
 }
