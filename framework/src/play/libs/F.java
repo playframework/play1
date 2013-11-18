@@ -52,7 +52,10 @@ public class F {
         }
 
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            taskLock.await(timeout, unit);
+            if(!taskLock.await(timeout, unit)) {
+              throw new TimeoutException(String.format("Promise didn't redeem in %s %s", timeout, unit));
+            }
+            
             if (exception != null) {
                 // The result of the promise is an exception - throw it
                 throw new ExecutionException(exception);
