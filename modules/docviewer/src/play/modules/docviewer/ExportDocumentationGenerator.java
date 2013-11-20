@@ -95,6 +95,7 @@ public class ExportDocumentationGenerator extends DocumentationGenerator {
 
         File zipFile = new File(generator.projectDocsPath, fileName);
         Files.zip(targetFolder, zipFile);
-        Logger.info("Project documentation exported to: %s", VirtualFile.open(zipFile).relativePath());
+        if(Logger.isInfoEnabled())
+        	Logger.info("Project documentation exported to: %s", VirtualFile.open(zipFile).relativePath());
     }
 }

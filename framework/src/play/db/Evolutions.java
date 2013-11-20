@@ -287,10 +287,12 @@ public class Evolutions extends PlayPlugin {
         try {
             checkEvolutionsState();
         } catch (InvalidDatabaseRevision e) {
-        	Logger.info("Automatically applying evolutions in in-memory database");
+        	if(Logger.isInfoEnabled())
+        		Logger.info("Automatically applying evolutions in in-memory database");
             for(Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {            
                 if ("mem".equals(Play.configuration.getProperty("db")) && listDatabaseEvolutions(moduleRoot.getKey()).peek().revision == 0) {
-                	Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
+                	if(Logger.isInfoEnabled())
+                		Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
                     applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
                 } else {
                     throw e;

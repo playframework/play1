@@ -65,7 +65,8 @@ public class Application extends Controller {
     public static void aaa() {
         try {
             boolean test = TestUtil.invokeTest("a");
-            Logger.info("test:" + test);
+            if(Logger.isInfoEnabled())
+            	Logger.info("test:" + test);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -370,16 +371,19 @@ public class Application extends Controller {
         synchronized(CHUNK_LOCK) {
             response.contentType = "text/plain";
             response.setHeader("Transfer-Encoding", "chunked");
-            Logger.info("Write chunks started.");
+            if(Logger.isInfoEnabled())
+            	Logger.info("Write chunks started.");
             try {
                 while (true) {
                     response.writeChunk("Go, Go, Igo!\n");
                 }
             }
             catch (Exception e) {
-                Logger.info("Write chunks exception.", e);
+                if(Logger.isInfoEnabled())
+                	Logger.info("Write chunks exception.", e);
             }
-            Logger.info("Write chunks stopped.");
+            if(Logger.isInfoEnabled())
+            	Logger.info("Write chunks stopped.");
         }
     }
 

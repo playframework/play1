@@ -24,7 +24,8 @@ public class WithContinuations extends Controller {
     @Before
     static void intercept() {
         // just to check
-        Logger.info("Before continuation");
+        if(Logger.isInfoEnabled())
+        	Logger.info("Before continuation");
     }
     
     protected static void doAwait() {

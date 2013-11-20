@@ -144,6 +144,14 @@ public class Logger {
         return juliLevel;
     }
 
+	public static boolean isInfoEnabled() {
+        if (forceJuli || log4j == null) {
+            return juli.isLoggable(java.util.logging.Level.INFO);
+        } else {
+            return log4j.isInfoEnabled();
+        }
+	}
+	
     /**
      * @return true if log4j.debug / jul.fine logging is enabled
      */

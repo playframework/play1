@@ -11,7 +11,8 @@ import play.mvc.Before;
 public class ParamsRemover extends Controller {
 
     public static void getPostPutDeleteOptions_getThenRemove(){
-        Logger.info("getting, then removing");
+        if(Logger.isInfoEnabled())
+        	Logger.info("getting, then removing");
         
         String result = "";
         
@@ -27,7 +28,8 @@ public class ParamsRemover extends Controller {
     
     
     public static void getPostPutDeleteOptions_removeThenGet(){
-        Logger.info("getting, then removing");
+        if(Logger.isInfoEnabled())
+        	Logger.info("getting, then removing");
         
         String result = "";
 
@@ -45,7 +47,8 @@ public class ParamsRemover extends Controller {
     }
     
     public static void getPostPutDeleteOptions_remove_in_before_ThenGet(){
-        Logger.info("getting, then removing");
+        if(Logger.isInfoEnabled())
+        	Logger.info("getting, then removing");
         
         String result = "";
 

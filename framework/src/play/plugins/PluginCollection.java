@@ -252,7 +252,8 @@ public class PluginCollection {
         //check for missing/removed plugins
         for( PlayPlugin enabledPlugin : getEnabledPlugins()){
             if( !Play.plugins.contains( enabledPlugin)) {
-                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
+                if(Logger.isInfoEnabled())
+                	Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
                 //this enabled plugin was disabled.
                 //must disable it in pluginCollection
                 disablePlugin( enabledPlugin);
@@ -543,7 +544,8 @@ public class PluginCollection {
               else if (Logger.isDebugEnabled())
                 Logger.debug(t, "Error while stopping %s", plugin);
               else
-                Logger.info("Error while stopping %s: %s", plugin, t.toString());
+                if(Logger.isInfoEnabled())
+                	Logger.info("Error while stopping %s: %s", plugin, t.toString());
             }
         }
     }

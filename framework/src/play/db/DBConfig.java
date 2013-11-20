@@ -315,7 +315,8 @@ public class DBConfig {
                             c.close();
                         }
                     }
-                    Logger.info("Connected to %s", ds.getJdbcUrl());
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("Connected to %s", ds.getJdbcUrl());
 
                 }
 

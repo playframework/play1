@@ -19,6 +19,8 @@ framework/docs
 samples-and-tests/*/test-result/
 
 # IDE and editors
+# first one is for eclipse...
+/bin
 *~
 .idea
 nbproject

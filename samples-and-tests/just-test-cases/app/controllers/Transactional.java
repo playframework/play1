@@ -70,7 +70,9 @@ public class Transactional extends Controller {
 	
 	public static void useMultipleJPAConfigs() {
 	    
-	    Logger.info("Other db url: " + DB.getDBConfig("other").getUrl());
+	    if(Logger.isInfoEnabled())
+	    
+	    	Logger.info("Other db url: " + DB.getDBConfig("other").getUrl());
 	    
 	    EntityInOtherDb other = new EntityInOtherDb();
 	    other.name = "test";

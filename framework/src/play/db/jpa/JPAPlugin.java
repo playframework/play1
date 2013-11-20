@@ -235,7 +235,8 @@ public class JPAPlugin extends PlayPlugin {
                         continue;
                     }
                     Package p = applicationClass.javaPackage;
-                    Logger.info("JPA -> Adding package: %s", p.getName());
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("JPA -> Adding package: %s", p.getName());
                     cfg.addPackage(p.getName());
                 }
 
