@@ -47,14 +47,16 @@ public class CompositeIdPk implements Serializable {
 				* result
 				+ ((compositeIdForeignB == null) ? 0 : compositeIdForeignB
 						.hashCode());
-        Logger.info("hashCode " + result);
+        if(Logger.isInfoEnabled())
+        	Logger.info("hashCode " + result);
 
         return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-        Logger.info("CompositeIdPk " + compositeIdForeignA + " " + compositeIdForeignB);
+        if(Logger.isInfoEnabled())
+        	Logger.info("CompositeIdPk " + compositeIdForeignA + " " + compositeIdForeignB);
 		if (this == obj)
 			return true;
 		if (obj == null)
