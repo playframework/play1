@@ -645,7 +645,8 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+            if(Logger.isTraceEnabled())
+            	Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
 
             RootParamNode root = ParamNode.convert(params);
             rArgs[i] = Binder.bind(

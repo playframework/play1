@@ -212,7 +212,8 @@ public class Play {
         }
         Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
-        Logger.info("Starting %s", root.getAbsolutePath());
+        if(Logger.isInfoEnabled())
+        	Logger.info("Starting %s", root.getAbsolutePath());
 
         if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
             tmpDir = null;
@@ -296,7 +297,8 @@ public class Play {
         // Default cookie domain
         Http.Cookie.defaultDomain = configuration.getProperty("application.defaultCookieDomain", null);
         if (Http.Cookie.defaultDomain != null) {
-            Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
+            if(Logger.isInfoEnabled())
+            	Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
         }
 
         // Plugins
@@ -511,7 +513,8 @@ public class Play {
             // Default web encoding
             String _defaultWebEncoding = configuration.getProperty("application.web_encoding");
             if (_defaultWebEncoding != null) {
-                Logger.info("Using custom default web encoding: " + _defaultWebEncoding);
+                if(Logger.isInfoEnabled())
+                	Logger.info("Using custom default web encoding: " + _defaultWebEncoding);
                 defaultWebEncoding = _defaultWebEncoding;
                 // Must update current response also, since the request/response triggering
                 // this configuration-loading in dev-mode have already been
@@ -545,7 +548,8 @@ public class Play {
             }
 
             if (firstStart) {
-                Logger.info("Application '%s' is now started !", configuration.getProperty("application.name", ""));
+                if(Logger.isInfoEnabled())
+                	Logger.info("Application '%s' is now started !", configuration.getProperty("application.name", ""));
                 firstStart = false;
             }
 
@@ -589,7 +593,8 @@ public class Play {
         if (usePrecompiled) {
             if (Play.getFile("precompiled").exists()) {
                 classloader.getAllClasses();
-                Logger.info("Application is precompiled");
+                if(Logger.isInfoEnabled())
+                	Logger.info("Application is precompiled");
                 return true;
             }
             Logger.error("Precompiled classes are missing!!");
@@ -597,7 +602,8 @@ public class Play {
             return false;
         }
         try {
-            Logger.info("Precompiling ...");
+            if(Logger.isInfoEnabled())
+            	Logger.info("Precompiling ...");
             Thread.currentThread().setContextClassLoader(Play.classloader);
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
@@ -780,7 +786,8 @@ public class Play {
         }
         roots.add(root);
         if (!name.startsWith("_")) {
-            Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
+            if(Logger.isInfoEnabled())
+            	Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
         }
     }
 

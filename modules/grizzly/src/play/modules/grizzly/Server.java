@@ -40,15 +40,19 @@ public class Server {
             ws.start();
             if (Play.mode == Mode.DEV) {
                 if(address == null) {
-                    Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
                 } else {
-                    Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
                 }
             } else {
                 if(address == null) {
-                    Logger.info("Listening for HTTP on port %s ...", httpPort);
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("Listening for HTTP on port %s ...", httpPort);
                 } else {
-                    Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
                 }
             }
         } catch (IOException e) {

@@ -18,7 +18,8 @@ public class SlowResponseTestController extends Controller {
 
     public static void slowResponse() throws Exception {
         int seconds = 2;
-        Logger.info("Sleeping " + seconds + " before sending response");
+        if(Logger.isInfoEnabled())
+        	Logger.info("Sleeping " + seconds + " before sending response");
         Thread.sleep(seconds*1000);
         renderText("Response after sleep");
     }
@@ -65,7 +66,8 @@ public class SlowResponseTestController extends Controller {
         try {
           await(promises);
         } catch (Exception e) {
-           Logger.info(e, "got xpected timeout ");
+           if(Logger.isInfoEnabled())
+        	   Logger.info(e, "got xpected timeout ");
            gotException = true;
         }
         Assert.assertTrue("Did not get exception!", gotException);

@@ -53,7 +53,8 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
                         disabledPlugins.add( pluginClassName );
 
                         if( Play.pluginCollection.disablePlugin( clazz)){
-                            Logger.info("Plugin disabled: " + clazz);
+                            if(Logger.isInfoEnabled())
+                            	Logger.info("Plugin disabled: " + clazz);
 
                         }else{
                             Logger.warn("Could not disable Plugin: " + clazz + ". Already disabled?");
@@ -70,12 +71,14 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
 
         for( String pluginClassName : previousDisabledPlugins ){
             if( !disabledPlugins.contains( pluginClassName)){
-                Logger.info("Enabling plugin " + pluginClassName + " since it is now longer listed in plugins.disable section in config");
+                if(Logger.isInfoEnabled())
+                	Logger.info("Enabling plugin " + pluginClassName + " since it is now longer listed in plugins.disable section in config");
                 Class<? extends PlayPlugin> clazz = resolveClass(pluginClassName);
                 if( clazz != null ){
                     //try to disable it
                     if( Play.pluginCollection.enablePlugin( clazz)){
-                        Logger.info("Plugin reenabled: " + clazz);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Plugin reenabled: " + clazz);
                     }else{
                         Logger.warn("Could not reenable Plugin: " + clazz);
                     }

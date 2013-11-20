@@ -78,7 +78,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Play.init(root, playId);
         Play.Mode mode = Play.Mode.valueOf(Play.configuration.getProperty("application.mode", "DEV").toUpperCase());
         if (mode.isDev()) {
-            Logger.info("Forcing PROD mode because deploying as a war file.");
+            if(Logger.isInfoEnabled())
+            	Logger.info("Forcing PROD mode because deploying as a war file.");
         }
 
         // Servlet 2.4 does not allow you to get the context path from the servletcontext...
