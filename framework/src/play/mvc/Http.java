@@ -419,9 +419,18 @@ public class Http {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
-                String[] decodedData = new String(Codec.decodeBASE64(data)).split(":");
-                user = decodedData.length > 0 ? decodedData[0] : null;
-                password = decodedData.length > 1 ? decodedData[1] : null;
+                //In basic auth, the password can contain a colon as well so split(":") may split the string into
+                //3 parts....username, part1 of password and part2 of password so don't use split here
+                String decoded = new String(Codec.decodeBASE64(data));
+                //splitting on ONLY first : allows user's password to contain a :
+                int indexOf = decoded.indexOf(":");
+                if(indexOf < 0)
+                	return;
+                
+                String username = decoded.substring(0, indexOf);
+                String thePasswd = decoded.substring(indexOf+1);
+                user = username.length() > 0 ? username : null;
+                password = thePasswd.length() > 0 ? thePasswd : null;
             }
         }
 
