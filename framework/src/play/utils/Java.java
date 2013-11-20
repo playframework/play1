@@ -399,7 +399,8 @@ public class Java {
                     }
                 }
             } catch (Exception ex) {
-                play.Logger.info("ERROR: when setting value for field %s - %s", field, ex);
+                if(play.Logger.isInfoEnabled())
+                	play.Logger.info("ERROR: when setting value for field %s - %s", field, ex);
             }
         }
 
@@ -411,7 +412,8 @@ public class Java {
                     return field.get(instance);
                 }
             } catch (Exception ex) {
-                play.Logger.info("ERROR: when getting value for field %s - %s", field, ex);
+                if(play.Logger.isInfoEnabled())
+                	play.Logger.info("ERROR: when getting value for field %s - %s", field, ex);
             }
             return null;
         }

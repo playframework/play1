@@ -33,7 +33,8 @@ public class ByteRangeServingTest extends FunctionalTest {
 	@Test
 	public void multipart() {
 		HttpResponse resp = WS.url("http://localhost:9003/public/byterangeserving-testfile.txt").setHeader("range", "bytes=0-3,6-7").get();
-		Logger.info(resp.getHeader("content-type") + "=" + resp.getContentType());
+		if(Logger.isInfoEnabled())
+			Logger.info(resp.getHeader("content-type") + "=" + resp.getContentType());
 		assertEquals("multipart/byteranges; boundary=$$$THIS_STRING_SEPARATES$$$", resp.getContentType());
 		assertEquals("bytes", resp.getHeader("accept-ranges"));
 		String r = resp.getString();
@@ -48,7 +49,8 @@ public class ByteRangeServingTest extends FunctionalTest {
 			CRLF +
 			"67";
 		
-		Logger.info("got response '%s'\nawaited: '%s'", r, awaited);
+		if(Logger.isInfoEnabled())
+			Logger.info("got response '%s'\nawaited: '%s'", r, awaited);
 		assertEquals(awaited, r);
 	}
 }

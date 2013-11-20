@@ -57,7 +57,8 @@ public class UsingFinallyWithThrowable extends Controller {
     
     public static void get_results(){
         String result = "" + finally1Called + " " + finally2Called + " " + finally2Called_withException + " " + finally3Called;
-        //Logger.info("Result: " + result);
+        //if(Logger.isInfoEnabled())
+        //	Logger.info("Result: " + result);
         renderText(result);
     }
     

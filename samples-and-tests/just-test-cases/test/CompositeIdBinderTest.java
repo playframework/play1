@@ -44,8 +44,10 @@ public class CompositeIdBinderTest extends UnitTest {
     	params.put("object.compositeIdForeignB.id", new String[]{b.id.toString()});
 		CompositeIdEntity bound = (CompositeIdEntity)Binder.bind("object", CompositeIdEntity.class, CompositeIdEntity.class, null, params);
 
-        Logger.info("1" + e._key());
-        Logger.info("2" + bound._key());
+        if(Logger.isInfoEnabled())
+        	Logger.info("1" + e._key());
+        if(Logger.isInfoEnabled())
+        	Logger.info("2" + bound._key());
 
 
 

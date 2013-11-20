@@ -333,7 +333,8 @@ public class Mail {
                 content.append("\n\t" + body);
 
                 content.append("\n");
-                Logger.info(content.toString());
+                if(Logger.isInfoEnabled())
+                	Logger.info(content.toString());
 
                 for (Object add : email.getToAddresses()) {
                     content.append(", " + add.toString());

@@ -104,22 +104,26 @@ public class RestTest extends UnitTest {
         params.put( "paramÆØÅ", "%%%æøåÆØÅ");
         
         String res = WS.url("http://localhost:9003/ressource/returnParam").params(params).get().getString();
-        Logger.info("res: " + res);
+        if(Logger.isInfoEnabled())
+        	Logger.info("res: " + res);
         assertEquals("param: %%%æøåÆØÅ", res);
         
         // try it again with different encoding
         HttpResponse r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).get();
-        Logger.info("res.contentType: " + r.getContentType());
+        if(Logger.isInfoEnabled())
+        	Logger.info("res.contentType: " + r.getContentType());
         assertEquals("param: %%%æøåÆØÅ", r.getString());
         
         // do the same with post..
         res = WS.url("http://localhost:9003/ressource/returnParam").params(params).post().getString();
-        Logger.info("res: " + res);
+        if(Logger.isInfoEnabled())
+        	Logger.info("res: " + res);
         assertEquals("param: %%%æøåÆØÅ", res);
         
         // try it again with different encoding
         r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).post();
-        Logger.info("res.contentType: " + r.getContentType());
+        if(Logger.isInfoEnabled())
+        	Logger.info("res.contentType: " + r.getContentType());
         assertEquals("param: %%%æøåÆØÅ", r.getString());
         
         

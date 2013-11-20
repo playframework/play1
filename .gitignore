@@ -41,3 +41,4 @@ modules/*
 !modules/secure
 !modules/testrunner
 
+/bin

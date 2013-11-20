@@ -1146,7 +1146,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 futureClose();
             }
         };
-        Logger.trace("invoking");
+        if(Logger.isTraceEnabled())
+        	Logger.trace("invoking");
 
         Invoker.invoke(new WebSocketInvocation(route, request, inbound, outbound, ctx, messageEvent));
     }
