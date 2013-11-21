@@ -36,7 +36,7 @@ public class LoggerTest {
     
     private static String id;
     
-    private static org.apache.log4j.Logger log4j;
+    private static org.slf4j.Logger log4j;
     
     /**
      * Safes the original configuration and log.
