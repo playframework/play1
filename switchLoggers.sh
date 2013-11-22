@@ -45,6 +45,8 @@ cp framework/lib-logging/log4j-over-slf4j-1.7.5.jar framework/lib
 cp framework/lib-logging/logback-classic-1.0.13.jar framework/lib
 cp framework/lib-logging/logback-core-1.0.13.jar	 framework/lib
 
+cp framework/lib-logging/*logback.xml resources/application-skel/conf
+
 #Now delete commons-logging which conflicts with jcl-over-slf4j classes
 rm framework/lib/commons-logging-1.1.3.jar
 rm framework/lib/slf4j-log4j12-1.7.5.jar
@@ -53,4 +55,6 @@ rm framework/lib/log4j-1.2.17.jar
 #######################
 # End changes needed for logback installation
 ######################
+
+
 
