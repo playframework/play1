@@ -184,9 +184,9 @@ public class JPAPlugin extends PlayPlugin {
                 // This setting is global for all JPAs - only configure if configuring default JPA
                 if (StringUtils.isEmpty(propPrefix)) {
                     if (Play.configuration.getProperty(propPrefix + "jpa.debugSQL", "false").equals("true")) {
-                        org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
+                        //org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
                     } else {
-                        org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+                        //org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
                     }
                 }
                 // inject additional  hibernate.* settings declared in Play! configuration
@@ -235,7 +235,8 @@ public class JPAPlugin extends PlayPlugin {
                         continue;
                     }
                     Package p = applicationClass.javaPackage;
-                    Logger.info("JPA -> Adding package: %s", p.getName());
+                    if(Logger.isInfoEnabled())
+                    	Logger.info("JPA -> Adding package: %s", p.getName());
                     cfg.addPackage(p.getName());
                 }
 

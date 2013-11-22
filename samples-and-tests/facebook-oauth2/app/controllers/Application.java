@@ -47,7 +47,8 @@ public class Application extends Controller {
     static void setuser() {
         User user = null;
         if (session.contains("uid")) {
-            Logger.info("existing user: " + session.get("uid"));
+            if(Logger.isInfoEnabled())
+            	Logger.info("existing user: " + session.get("uid"));
             user = User.get(Long.parseLong(session.get("uid")));
         }
         if (user == null) {

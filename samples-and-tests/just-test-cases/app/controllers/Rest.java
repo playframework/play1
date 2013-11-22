@@ -58,13 +58,15 @@ public class Rest extends Controller {
 	public static void postOrPut(String id, long timestamp, boolean cachable, String[] multipleValues){
 		String error = testParams();
 		if (error.length() > 0) {
-			Logger.info("postOrPut error: " + error);
+			if(Logger.isInfoEnabled())
+				Logger.info("postOrPut error: " + error);
 			error("ERROR : " + error);
 		}
 		renderJSON("{id: 101}");
 	}
 	private static String testParams(){
-		Logger.info("Params: " + params);
+		if(Logger.isInfoEnabled())
+			Logger.info("Params: " + params);
 		String error = "";
 		if (!filterString("名字").equals(params.get("id")))  error += "id : was '"+params.get("id")+"', expected "+filterString("'名字")+"'\n";
 		if (params.get("timestamp", Long.class)!=1200000L) error += "timestamp : was "+params.get("timestamp")+", expected 1200000L\n";
@@ -75,7 +77,9 @@ public class Rest extends Controller {
 		if (multipleValues.length > 1 && !multipleValues[1].equals(filterString("dobrodošli"))) error += "multipleValues[1] : was '"+multipleValues[1]+"', expected '"+filterString("dobrodošli")+"'\n";
 		if (multipleValues.length > 2 && !multipleValues[2].equals(filterString("ยินดีต้อนรับ"))) error += "multipleValues[2] : was '"+multipleValues[2]+"', expected '"+filterString("ยินดีต้อนรับ")+"'\n";
 		
-		Logger.info("error: " + error);
+		if(Logger.isInfoEnabled())
+		
+			Logger.info("error: " + error);
 		return error;
 	}
 	public static void postOrPutFile(File file){
@@ -99,7 +103,8 @@ public class Rest extends Controller {
 	
 	public static void returnParam() {
 	    String param = params.get("paramÆØÅ");
-	    Logger.info("Serverside: params: " + param);
+	    if(Logger.isInfoEnabled())
+	    	Logger.info("Serverside: params: " + param);
 	    renderText("param: " + param);
 	}
 	

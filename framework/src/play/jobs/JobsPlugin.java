@@ -200,7 +200,8 @@ public class JobsPlugin extends PlayPlugin {
         }
         cron = Expression.evaluate(cron, cron).toString();
         if (cron == null || "".equals(cron) || "never".equalsIgnoreCase(cron)) {
-            Logger.info("Skipping job %s, cron expression is not defined", job.getClass().getName());
+            if(Logger.isInfoEnabled())
+            	Logger.info("Skipping job %s, cron expression is not defined", job.getClass().getName());
             return;
         }
         try {

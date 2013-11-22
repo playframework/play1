@@ -11,11 +11,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import org.apache.log4j.Appender;
-import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.slf4j.LoggerFactory;
 
 import play.exceptions.PlayException;
 
@@ -25,6 +25,8 @@ import play.exceptions.PlayException;
  */
 public class Logger {
 
+	protected static org.slf4j.Logger log4j = LoggerFactory.getLogger(Logger.class);
+	
     /**
      * Will force use of java.util.logging (default to try log4j first).
      */
@@ -38,10 +40,6 @@ public class Logger {
      */
     public static boolean recordCaller = false;
     /**
-     * The application logger (play).
-     */
-    public static org.apache.log4j.Logger log4j;
-    /**
      * When using java.util.logging.
      */
     public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
@@ -54,45 +52,6 @@ public class Logger {
      * Try to init stuff.
      */
     public static void init() {
-        String log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.xml");
-        URL log4jConf = Logger.class.getResource(log4jPath);
-        boolean isXMLConfig = log4jPath.endsWith(".xml");
-        if (log4jConf == null) { // try again with the .properties
-            isXMLConfig = false;
-            log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.properties");
-            log4jConf = Logger.class.getResource(log4jPath);
-        }
-        if (log4jConf == null) {
-            Properties shutUp = new Properties();
-            shutUp.setProperty("log4j.rootLogger", "OFF");
-            PropertyConfigurator.configure(shutUp);
-        } else if (Logger.log4j == null) {
-
-            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
-                // The log4j configuration file is located somewhere in the application folder,
-                // so it's probably a custom configuration file
-                configuredManually = true;
-            }
-            if (isXMLConfig) {
-                DOMConfigurator.configure(log4jConf);
-            } else {
-                PropertyConfigurator.configure(log4jConf);
-            }
-            Logger.log4j = org.apache.log4j.Logger.getLogger("play");
-            // In test mode, append logs to test-result/application.log
-            if (Play.runningInTestMode()) {
-                org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-                try {
-                    if (!Play.getFile("test-result").exists()) {
-                        Play.getFile("test-result").mkdir();
-                    }
-                    Appender testLog = new FileAppender(new PatternLayout("%d{DATE} %-5p ~ %m%n"), Play.getFile("test-result/application.log").getAbsolutePath(), false);
-                    rootLogger.addAppender(testLog);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     /**
@@ -102,19 +61,6 @@ public class Logger {
     public static void setUp(String level) {
         if (forceJuli || log4j == null) {
             Logger.juli.setLevel(toJuliLevel(level));
-        } else {
-            Logger.log4j.setLevel(org.apache.log4j.Level.toLevel(level));
-            if (redirectJuli) {
-                java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-                for (Handler handler : rootLogger.getHandlers()) {
-                    rootLogger.removeHandler(handler);
-                }
-                Handler activeHandler = new JuliToLog4jHandler();
-                java.util.logging.Level juliLevel = toJuliLevel(level);
-                activeHandler.setLevel(juliLevel);
-                rootLogger.addHandler(activeHandler);
-                rootLogger.setLevel(juliLevel);
-            }
         }
     }
 
@@ -144,6 +90,14 @@ public class Logger {
         return juliLevel;
     }
 
+	public static boolean isInfoEnabled() {
+        if (forceJuli || log4j == null) {
+            return juli.isLoggable(java.util.logging.Level.INFO);
+        } else {
+            return log4j.isInfoEnabled();
+        }
+	}
+	
     /**
      * @return true if log4j.debug / jul.fine logging is enabled
      */
@@ -182,8 +136,10 @@ public class Logger {
             //check level against jul
             return juli.isLoggable(julLevel);
         } else {
+        	return false;
+        	//figure out
             //check level against log4j
-            return log4j.isEnabledFor(log4jLevel);
+            //return log4j.isEnabledFor(log4jLevel);
         }
 
     }
@@ -452,7 +408,7 @@ public class Logger {
                 if (recordCaller) {
                     org.apache.log4j.Logger.getLogger(getCallerClassName()).fatal(format(message, args));
                 } else {
-                    log4j.fatal(format(message, args));
+                    log4j.error(format(message, args));
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -481,7 +437,7 @@ public class Logger {
                     if (recordCaller) {
                         org.apache.log4j.Logger.getLogger(getCallerClassName()).fatal(format(message, args), e);
                     } else {
-                        log4j.fatal(format(message, args), e);
+                        log4j.error(format(message, args), e);
                     }
                 }
             } catch (Throwable ex) {
@@ -568,7 +524,7 @@ public class Logger {
               } else if (recordCaller) {
                 org.apache.log4j.Logger.getLogger(getCallerClassName(5)).log(level, sw.toString(), null);
               } else {
-                log4j.log(level, sw.toString(), e);
+            	  log4j.warn(sw.toString(), e);
               }
             }
             catch (Exception e1) {

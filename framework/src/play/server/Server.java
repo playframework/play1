@@ -81,15 +81,19 @@ public class Server {
 
                 if (Play.mode == Mode.DEV) {
                     if (address == null) {
-                        Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
                     } else {
-                        Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
                     }
                 } else {
                     if (address == null) {
-                        Logger.info("Listening for HTTP on port %s ...", httpPort);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTP on port %s ...", httpPort);
                     } else {
-                        Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
                     }
                 }
 
@@ -112,15 +116,19 @@ public class Server {
 
                 if (Play.mode == Mode.DEV) {
                     if (secureAddress == null) {
-                        Logger.info("Listening for HTTPS on port %s (Waiting a first request to start) ...", httpsPort);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTPS on port %s (Waiting a first request to start) ...", httpsPort);
                     } else {
-                        Logger.info("Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ...", httpsPort, secureAddress);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ...", httpsPort, secureAddress);
                     }
                 } else {
                     if (secureAddress == null) {
-                        Logger.info("Listening for HTTPS on port %s ...", httpsPort);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTPS on port %s ...", httpsPort);
                     } else {
-                        Logger.info("Listening for HTTPS at %2$s:%1$s  ...", httpsPort, secureAddress);
+                        if(Logger.isInfoEnabled())
+                        	Logger.info("Listening for HTTPS at %2$s:%1$s  ...", httpsPort, secureAddress);
                     }
                 }
 
@@ -167,7 +175,8 @@ public class Server {
         if (System.getProperty("precompile") == null) {
             new Server(args);
         } else {
-            Logger.info("Done.");
+            if(Logger.isInfoEnabled())
+            	Logger.info("Done.");
         }
     }
 
