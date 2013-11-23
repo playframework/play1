@@ -156,7 +156,7 @@ class IamADeveloper(unittest.TestCase):
         browser = mechanize.Browser()
         response = browser.open('http://localhost:9000/')
 
-    
+
         step("check that job completed before processing request")
         self.assert_(waitFor(self.play, 'Job done'))
         self.assert_(waitFor(self.play, 'Processing request'))
@@ -276,11 +276,12 @@ class IamADeveloper(unittest.TestCase):
         self.assert_(browser.title() == 'Your application is ready !')        
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
-        
+
         # Make a mistake in Application.java and refresh
         step('Make a mistake in Application.java')
         
         edit(app, 'app/controllers/Application.java', 13, '        render()')        
+        
         try:
             browser.reload()
             self.fail()
@@ -292,7 +293,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('insert ";" to complete BlockStatements'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -311,7 +312,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('insert ";" to complete BlockStatements'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -369,7 +370,7 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
         
@@ -385,7 +386,7 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
@@ -404,7 +405,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Template execution error '))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
             self.assert_(html.count('Cannot get property \'name\' on null object'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -424,7 +425,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Template execution error '))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
             self.assert_(html.count('Cannot get property \'name\' on null object'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -456,7 +457,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -475,7 +476,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -593,7 +594,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Compilation error'))
             self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
             self.assert_(html.count('The public type Hello2 must be defined in its own file'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
@@ -610,7 +611,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Compilation error'))
             self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
             self.assert_(html.count('The public type Hello2 must be defined in its own file'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
@@ -649,7 +650,7 @@ def bootstrapWorkingDirectory( folder ):
 def callPlay(self, args):
     play_script = os.path.join(self.working_directory, '../../../play')
     process_args = [play_script] + args
-    play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE)
+    play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
     return play_process
 
 #returns true when pattern is seen
@@ -664,7 +665,7 @@ def waitForWithFail(process, pattern, failPattern):
     while True:
         sys.stdout.flush()
         line = process.stdout.readline().strip()
-	sys.stdout.flush()
+        sys.stdout.flush()
         #print timeoutOccured
         if timeoutOccured:
             return False
@@ -674,7 +675,7 @@ def waitForWithFail(process, pattern, failPattern):
         if failPattern != "" and line.count(failPattern):
             timer.cancel()
             return False
-        if line.count(pattern):
+        if pattern in line:
             timer.cancel()
             return True
 
