@@ -156,7 +156,7 @@ class IamADeveloper(unittest.TestCase):
         browser = mechanize.Browser()
         response = browser.open('http://localhost:9000/')
 
-
+    
         step("check that job completed before processing request")
         self.assert_(waitFor(self.play, 'Job done'))
         self.assert_(waitFor(self.play, 'Processing request'))
@@ -276,12 +276,11 @@ class IamADeveloper(unittest.TestCase):
         self.assert_(browser.title() == 'Your application is ready !')        
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
-
+        
         # Make a mistake in Application.java and refresh
         step('Make a mistake in Application.java')
         
         edit(app, 'app/controllers/Application.java', 13, '        render()')        
-        
         try:
             browser.reload()
             self.fail()
