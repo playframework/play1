@@ -1,23 +1,5 @@
 package play.db;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-
-import org.apache.commons.lang.StringUtils;
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.classloading.ApplicationClasses;
-import play.classloading.ApplicationClassloader;
-import play.exceptions.PlayException;
-import play.exceptions.UnexpectedException;
-import play.libs.Codec;
-import play.libs.IO;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.mvc.results.Redirect;
-import play.vfs.VirtualFile;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
@@ -32,7 +14,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
-import javax.sql.DataSource;
+
+import org.apache.commons.lang.StringUtils;
+
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
+import play.libs.Codec;
+import play.libs.IO;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.results.Redirect;
+import play.vfs.VirtualFile;
 
 /**
  * Handles migration of data.
@@ -604,16 +601,16 @@ public class Evolutions extends PlayPlugin {
         ResultSet rs = connection.getMetaData().getColumns(null, null, "play_evolutions", "module_key");
 
         if(!rs.next()) {
-            
             System.out.println("!!! - Updating the play_evolutions table to cope with multiple modules - !!!");
             execute("alter table play_evolutions add module_key varchar(255);");
             execute("alter table play_evolutions drop primary key;");
-            execute("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);");
 
             System.out.println("!!! - Assigning any existing evolutions to the parent project - !!!");
             PreparedStatement statement = connection.prepareStatement("update play_evolutions set module_key = ? where module_key is null");
             statement.setString(1, Play.configuration.getProperty("application.name"));
             statement.execute();
+            
+            execute("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);");
         }
     }
 
