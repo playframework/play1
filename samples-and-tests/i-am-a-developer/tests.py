@@ -23,7 +23,7 @@ class IamADeveloper(unittest.TestCase):
         self.working_directory = bootstrapWorkingDirectory('i-am-testing-log-levels-here')
     
         # play new job-app
-        step('Create a new project')
+        step('Create a new projectAAA')
     
         self.play = callPlay(self, ['new', '%s/loglevelsapp' % self.working_directory, '--name=LOGLEVELSAPP'])
         self.assert_(waitFor(self.play, 'The new application will be created'))
@@ -33,7 +33,12 @@ class IamADeveloper(unittest.TestCase):
         self.play.wait()
     
         app = '%s/loglevelsapp' % self.working_directory
-            
+
+        sourceFile1 = self.working_directory + '/../../../framework/lib-logging/logback.xml'
+        sourceFile2 = self.working_directory + '/../../../framework/lib-logging/logback.xml.test'
+        destFile = self.working_directory + '/loglevelsapp/conf/logback.xml'
+        shutil.copyfile(sourceFile1, destFile)
+                    
         #inserting some log-statements in our controller
         insert(app, "app/controllers/Application.java", 13, '        Logger.debug("I am a debug message");')
         insert(app, "app/controllers/Application.java", 14, '        Logger.info("I am an info message");')            
@@ -81,7 +86,8 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "conf/log4j.xml", 16, ' </root>')
         insert(app, "conf/log4j.xml", 17, '</log4j:configuration>')
         
-            
+        shutil.copyfile(sourceFile2, destFile)
+
         # Run the newly created application
         step('re-run our logger-application')
     
