@@ -1017,7 +1017,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
-        
+        play.Logger.info("Are we done? " + future.isDone());
         if(future.isDone()) {
             try {
                 return future.get();

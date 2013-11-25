@@ -264,6 +264,13 @@ public class Invoker {
             InvocationContext.current.remove();
         }
 
+        private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
+          for( PlayPlugin plugin :  Play.pluginCollection.getEnabledPlugins() ) {
+               if (plugin.getFilter() != null)
+                plugin.getFilter().withinFilter(fct);
+           }
+        }
+
         /**
          * It's time to execute.
          */
@@ -275,7 +282,12 @@ public class Invoker {
                 preInit();
                 if (init()) {
                     before();
-                    execute();
+                    withinFilter(new play.libs.F.Function0<Void>() {
+                        public Void apply() throws Throwable {
+                            execute();
+                            return null;
+                        }
+                    });
                     after();
                     onSuccess();
                 }

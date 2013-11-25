@@ -386,4 +386,32 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Collection<Class> getFunctionalTests() {
         return Collections.emptyList();
     }
+
+    /** 
+     * Class that define a filter. A filter is a class that wrap a certain behavior around an action.
+     * You can access your Request and Response object within the filter. See the JPA plugin for an example.
+     * The JPA plugin wraps a transaction around an action. The filter applies a transaction to the current Action.
+     */
+    public abstract class Filter<T> {
+        String name;
+
+        public Filter(String name) {
+            this.name = name;
+        }
+        
+        public abstract T withinFilter(play.libs.F.Function0<T> fct) throws Throwable;
+
+        public String getName() {
+            return name;
+        }
+    }
+    
+    /**
+     * Return the filter implementation for this plugin. 
+     */ 
+    public Filter getFilter() {
+        return null;
+    }
+
+
 }

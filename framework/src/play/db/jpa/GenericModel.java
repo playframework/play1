@@ -64,8 +64,12 @@ public class GenericModel extends JPABase {
         return (T)edit( rootParamNode, name, o, annotations);
     }
 
-    @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
+        return edit(JPA.DEFAULT, rootParamNode, name, o, annotations);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static <T extends JPABase> T edit(String dbName, ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
         // #1601 - If name is empty, we're dealing with "root" request parameters (without prefixes).
         // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
         ParamNode paramNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
@@ -120,7 +124,7 @@ public class GenericModel extends JPABase {
                                         continue;
                                     }
                                  
-                                    Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?1");
+                                    Query q = JPA.em(dbName).createQuery("from " + relation + " where " + keyName + " = ?1");
                                     q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations,_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                     try {
                                         l.add(q.getSingleResult());
@@ -135,7 +139,7 @@ public class GenericModel extends JPABase {
                             String[] ids = fieldParamNode.getChild(keyName, true).getValues();
                             if (ids != null && ids.length > 0 && !ids[0].equals("")) {
 
-                                Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?1");
+                                Query q = JPA.em(dbName).createQuery("from " + relation + " where " + keyName + " = ?1");
                                 q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations, ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType(), null));
                                 try {
                                     Object to = q.getSingleResult();
@@ -220,7 +224,7 @@ public class GenericModel extends JPABase {
      * store (ie insert) the entity.
      */
     public boolean create() {
-        if (!em().contains(this)) {
+        if (!em(JPA.getDBName(this.getClass())).contains(this)) {
             _save();
             return true;
         }
@@ -231,7 +235,7 @@ public class GenericModel extends JPABase {
      * Refresh the entity state.
      */
     public <T extends JPABase> T refresh() {
-        em().refresh(this);
+        em(JPA.getDBName(this.getClass())).refresh(this);
         return (T) this;
     }
 
@@ -239,7 +243,7 @@ public class GenericModel extends JPABase {
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
     public <T extends JPABase> T merge() {
-        return (T) em().merge(this);
+        return (T) em(JPA.getDBName(this.getClass())).merge(this);
     }
 
     /**

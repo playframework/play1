@@ -21,6 +21,14 @@ import play.exceptions.UnexpectedException;
 
 public class F {
 
+
+    /**
+     * A Function with no arguments.
+     */
+    public static interface Function0<R> {
+        public R apply() throws Throwable;
+    }
+
     public static class Promise<V> implements Future<V>, F.Action<V> {
 
         protected final CountDownLatch taskLock = new CountDownLatch(1);

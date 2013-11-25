@@ -1,0 +1,20 @@
+Student(erik):
+    email:          Erik Bakker
+    birthdate:      08/08/1988
+    
+Student(emilie):
+    email:          Emilie Leroux
+    birthdate:      30/01/2007
+
+Student(isabelle):
+    email:          Isabelle Leroux
+    birthdate:      02/06/2010
+
+Teacher(nicolas):
+    name:          Nicolas Leroux
+    topic:         Computing
+    
+Teacher(robbert):
+    name:          Robbert Bakker
+    topic:         Gaming 
+      

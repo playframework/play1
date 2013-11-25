@@ -109,7 +109,7 @@ public class ActionInvoker {
         try {
 
             resolve(request, response);
-            Method actionMethod = request.invokedMethod;
+            final Method actionMethod = request.invokedMethod;
 
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
