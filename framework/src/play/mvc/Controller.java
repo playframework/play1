@@ -357,6 +357,13 @@ public class Controller implements ControllerSupport {
     /**
      * Send a 400 Bad request
      */
+    protected static void badRequest(String msg) {
+        throw new BadRequest(msg);
+    }
+
+    /**
+     * Send a 400 Bad request
+     */
     protected static void badRequest() {
         throw new BadRequest();
     }
