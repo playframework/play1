@@ -103,61 +103,13 @@ public class WSAsync implements WSImpl {
 
         if (keyStore != null && !keyStore.equals("")) {
 
-            Logger.info("keyStore '%s', keyStorePass '%s', CAValidation '%s', sslCTX %s", keyStore, keyStorePass, CAValidation, sslCTX);
+            Logger.info("Keystore configured, loading from '%s', CA validation enabled : %s", keyStore, CAValidation);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Keystore password : %s, SSLCTX : %s", keyStorePass, sslCTX);
+            }
+
             if (sslCTX == null) {
-                try {
-                    // Keystore
-                    InputStream kss = new FileInputStream(keyStore);
-                    char[] storePass = keyStorePass.toCharArray();
-                    KeyStore ks = KeyStore.getInstance("JKS");
-                    ks.load(kss, storePass);
-
-                    // Keymanager
-                    char[] certPwd = keyStorePass.toCharArray();
-                    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                    kmf.init(ks, certPwd);
-                    KeyManager[] keyManagers = kmf.getKeyManagers();
-
-                    // Trustmanager
-                    TrustManager[] trustManagers = null;
-                    if (CAValidation == true) {
-                        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-                        tmf.init(ks);
-                        trustManagers = tmf.getTrustManagers();
-                    } else {
-                        trustManagers = new TrustManager[] {
-                                new X509TrustManager() {
-                                    @Override
-                                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                                    }
-
-                                    @Override
-                                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                                    }
-
-                                    @Override
-                                    public X509Certificate[] getAcceptedIssuers() {
-                                        return null;
-                                    }
-                                }
-                        };
-                    }
-                    // Dump the trustManager store
-                    X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
-
-                    for (X509Certificate cert : trustManager.getAcceptedIssuers()) {
-                        Logger.info("Cert Subject %s, issuer %s", cert.getSubjectDN().getName(), cert.getIssuerDN().getName());
-                    }
-
-                    SecureRandom secureRandom = new SecureRandom();
-
-                    // SSL context
-                    sslCTX = SSLContext.getInstance("TLS");
-                    sslCTX.init(keyManagers, trustManagers, secureRandom);
-                } catch (Exception e) {
-                    throw new RuntimeException("Error setting SSL context " + e.toString());
-                }
-
+                sslCTX = WSSSLContext.getSslContext(keyStore, keyStorePass, CAValidation);
                 confBuilder.setSSLContext(sslCTX);
             }
         }
@@ -175,6 +127,8 @@ public class WSAsync implements WSImpl {
     public WSRequest newRequest(String url, String encoding) {
         return new WSAsyncRequest(url, encoding);
     }
+
+
 
     public class WSAsyncRequest extends WSRequest {
 
@@ -723,6 +677,11 @@ public class WSAsync implements WSImpl {
 
             public String getContentType() {
                 return request.mimeType;
+            }
+
+            @Override
+            public Object unwrap() {
+                return null;
             }
 
             public String getHeader(String name) {
