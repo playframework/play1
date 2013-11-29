@@ -854,6 +854,22 @@ bc. ssl.KeyManagerFactory.algorithm=SunX509
 
 Default: @SunX509@
 
+h2(#keystores). Custom key stores
+
+Allows for custom SSL certificates to be used with connection initiated through WebServices
+
+h3(#ssl.keyStore). ssl.Keystore
+
+The custom keystore that should be added to Play! WebServices connections
+
+h3(#ssl.keyStorePassword). ssl.keyStorePassword
+
+The password neede to access the keys inside the keystore. This is required.
+
+h3(#ssl.cavalidation). ssl.cavalidation
+
+If set to true, the CA chain is validated upon connection.
+
 
 h2(#trustmanager). trustmanager
 
