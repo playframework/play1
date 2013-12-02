@@ -21,11 +21,10 @@ import org.apache.commons.lang.NotImplementedException;
  * Time utils
  */
 public class Time {
-
-    static Pattern days = Pattern.compile("^([0-9]+)d$");
-    static Pattern hours = Pattern.compile("^([0-9]+)h$");
-    static Pattern minutes = Pattern.compile("^([0-9]+)mi?n$");
-    static Pattern seconds = Pattern.compile("^([0-9]+)s$");
+    private final static Pattern p = Pattern.compile("(([0-9]+?)((d|h|mi?n|s)))+?");
+    private final static Integer DAY = 24 * 60 * 60;
+    private final static Integer HOUR = 60 * 60;
+    private final static Integer MINUTE = 60;
 
     /**
      * Parse a duration
@@ -34,30 +33,29 @@ public class Time {
      */
     public static int parseDuration(String duration) {
         if (duration == null) {
-            return 60 * 60 * 24 * 30;
+            return 30 * DAY;
         }
-        int toAdd = -1;
-	    if (days.matcher(duration).matches()) {
-            Matcher matcher = days.matcher(duration);
-            matcher.matches();
-            toAdd = Integer.parseInt(matcher.group(1)) * (60 * 60) * 24;
-        } else if (hours.matcher(duration).matches()) {
-            Matcher matcher = hours.matcher(duration);
-            matcher.matches();
-            toAdd = Integer.parseInt(matcher.group(1)) * (60 * 60);
-        } else if (minutes.matcher(duration).matches()) {
-            Matcher matcher = minutes.matcher(duration);
-            matcher.matches();
-            toAdd = Integer.parseInt(matcher.group(1)) * (60);
-        } else if (seconds.matcher(duration).matches()) {
-            Matcher matcher = seconds.matcher(duration);
-            matcher.matches();
-            toAdd = Integer.parseInt(matcher.group(1));
-        }
-        if (toAdd == -1) {
+
+        final Matcher matcher = p.matcher(duration);
+        int seconds = 0;
+        if (!matcher.matches()) {
             throw new IllegalArgumentException("Invalid duration pattern : " + duration);
         }
-        return toAdd;
+
+        matcher.reset();
+        while (matcher.find()) {
+            if (matcher.group(3).equals("d")) {
+                seconds += Integer.parseInt(matcher.group(2)) * DAY;
+            } else if (matcher.group(3).equals("h")) {
+                seconds += Integer.parseInt(matcher.group(2)) * HOUR;
+            } else if (matcher.group(3).equals("mi") || matcher.group(2).equals("min")) {
+                seconds += Integer.parseInt(matcher.group(2)) * MINUTE;
+            } else {
+                seconds += Integer.parseInt(matcher.group(2));
+            }
+        }
+
+        return seconds;
     }
 
     /**
