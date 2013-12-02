@@ -129,6 +129,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 }
 
             } catch (Exception ex) {
+            	Logger.warn(ex, "Exception on request. serving 500 back");
                 serve500(ex, ctx, nettyRequest);
             }
         }
