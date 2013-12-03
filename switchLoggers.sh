@@ -35,7 +35,7 @@
 #first copy the adapters for other logging libs to slf4j
 cp framework/lib-logging/jcl-over-slf4j-1.7.5.jar framework/lib
 cp framework/lib-logging/jul-to-slf4j-1.7.5.jar framework/lib
-cp framework/lib-logging/log4j-over-slf4j-1.7.5.jar framework/lib
+cp framework/lib-logging/log4j-over-slf4j-1.7.5b.jar framework/lib
 
 #Now copy the implementation of slf4j
 cp framework/lib-logging/logback-classic-1.0.13.jar framework/lib
