@@ -29,10 +29,6 @@
 #
 
 
-#This one is used to proxy classes that playframework is calling into which prevents switching out
-#libraries
-cp framework/lib-logging/emptylog4j.jar framework/lib
-
 #####################
 #this if for logback
 #####################
