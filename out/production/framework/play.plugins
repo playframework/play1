@@ -1,0 +1,10 @@
+0:play.CorePlugin
+100:play.data.parsing.TempFilePlugin
+200:play.data.validation.ValidationPlugin
+300:play.db.DBPlugin
+400:play.db.jpa.JPAPlugin
+450:play.db.Evolutions
+500:play.i18n.MessagesPlugin
+600:play.libs.WS
+700:play.jobs.JobsPlugin
+100000:play.plugins.ConfigurablePluginDisablingPlugin

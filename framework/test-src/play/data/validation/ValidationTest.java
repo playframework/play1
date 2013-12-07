@@ -1,5 +1,6 @@
 package play.data.validation;
 
+import junit.framework.Assert;
 import org.junit.Test;
 import play.i18n.MessagesBuilder;
 
@@ -34,4 +35,13 @@ public class ValidationTest {
 
     }
 
+    @Test
+    public  void testURLCheck(){
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://localhost",null,null));
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://localhost:80",null,null));
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://127.0.0.1",null,null));
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://127.0.0.1:80",null,null));
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://www.qq.com",null,null));
+        Assert.assertTrue(new URLCheck().isSatisfied(null,"http://www.playframework.com/modules",null,null));
+    }
 }
