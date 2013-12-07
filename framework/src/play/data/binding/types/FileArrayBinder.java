@@ -28,9 +28,11 @@ public class FileArrayBinder implements TypeBinder<File[]> {
             if (uploads != null) {
                 for (Upload upload : uploads) {
                     if (upload.getFieldName().equals(value)) {
-                        File file = upload.asFile();
-                        if (file.length() > 0) {
-                            fileArray.add(file);
+                        if(upload.getSize() != null && upload.getSize() > 0) {
+                            File file = upload.asFile();
+                            if (file.length() > 0) {
+                                fileArray.add(file);
+                            }
                         }
                     }
                 }
