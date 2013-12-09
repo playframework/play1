@@ -33,17 +33,17 @@ public class GenericModel extends JPABase {
      *  public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations)
      */
     @Deprecated
-    public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static Object create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return (T)create(rootParamNode, name, type, annotations);
+        return create(rootParamNode, name, type, annotations);
     }
 
-    public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
+    public static Object create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
             Object model = c.newInstance();
-            return (T) edit(rootParamNode, name, model, annotations);
+            return edit(rootParamNode, name, model, annotations);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -57,13 +57,13 @@ public class GenericModel extends JPABase {
      * @return
      */
     @Deprecated
-    public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static Object edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return (T)edit( rootParamNode, name, o, annotations);
+        return edit( rootParamNode, name, o, annotations);
     }
 
     @SuppressWarnings("deprecation")
-    public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
+    public static Object edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
         // #1601 - If name is empty, we're dealing with "root" request parameters (without prefixes).
         // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
         ParamNode paramNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
@@ -166,7 +166,7 @@ public class GenericModel extends JPABase {
             // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
             ParamNode beanNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
             Binder.bindBean(beanNode, o, annotations);
-            return (T) o;
+            return o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
