@@ -55,7 +55,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public Object bind(RootParamNode rootParamNode, String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations) {
         // TODO need to be more generic in order to work with JPASupport
-        if (JPABase.class.isAssignableFrom(clazz)) {
+    	if(clazz.isAnnotationPresent(Entity.class)) {
 
             ParamNode paramNode = rootParamNode.getChild(name, true);
 
