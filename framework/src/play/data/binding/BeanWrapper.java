@@ -3,6 +3,7 @@ package play.data.binding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -20,7 +21,7 @@ public class BeanWrapper {
 
     private Class<?> beanClass;
 
-    /** 
+    /**
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap<String, Property>();
@@ -145,6 +146,8 @@ public class BeanWrapper {
 
     public static class Property {
 
+        private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+
         private Annotation[] annotations;
         private Method setter;
         private Field field;
@@ -202,14 +205,14 @@ public class BeanWrapper {
                 stripping = instance.getClass().getAnnotation(AttributeStripping.class);
             }
 
-            if (stripping != null && value instanceof String) {
-                String mod = (String) value;
+            if (stripping != null) {
+                String mod = value;
                 if (stripping.strip() || stripping.squish()) {
                     mod = StringUtils.strip(mod);
                 }
 
                 if (stripping.squish()) {
-                    mod = mod.replaceAll("\\s+", " ");
+                    mod = WHITESPACE.matcher(mod).replaceAll(" ");
                 }
 
                 if (stripping.nullify()) {
