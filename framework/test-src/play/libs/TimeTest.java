@@ -29,6 +29,18 @@ public class TimeTest {
         assertEquals(duration, 14410);
     }
 
+    @Test
+    public void parseGood4() {
+	    int duration = Time.parseDuration("2h");
+        assertEquals(duration, 7200);
+    }
+
+    @Test
+    public void parseGood5() {
+        int duration = Time.parseDuration("120m");
+        assertEquals(duration, 7200);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void parseBad1() {
         int duration = Time.parseDuration("1w2d3h10s");

@@ -21,7 +21,7 @@ import org.apache.commons.lang.NotImplementedException;
  * Time utils
  */
 public class Time {
-    private final static Pattern p = Pattern.compile("(([0-9]+?)((d|h|mi?n|s)))+?");
+    private final static Pattern p = Pattern.compile("(([0-9]+?)((d|h|m|mi|min|s)))+?");
     private final static Integer DAY = 24 * 60 * 60;
     private final static Integer HOUR = 60 * 60;
     private final static Integer MINUTE = 60;
@@ -48,7 +48,7 @@ public class Time {
                 seconds += Integer.parseInt(matcher.group(2)) * DAY;
             } else if (matcher.group(3).equals("h")) {
                 seconds += Integer.parseInt(matcher.group(2)) * HOUR;
-            } else if (matcher.group(3).equals("mi") || matcher.group(2).equals("min")) {
+            } else if (matcher.group(3).equals("m") || matcher.group(3).equals("mi") || matcher.group(3).equals("min")) {
                 seconds += Integer.parseInt(matcher.group(2)) * MINUTE;
             } else {
                 seconds += Integer.parseInt(matcher.group(2));
