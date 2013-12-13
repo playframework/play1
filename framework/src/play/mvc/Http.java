@@ -17,11 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jboss.netty.channel.ChannelHandlerContext;
+
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.F;
+import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.F.EventStream;
@@ -825,11 +829,17 @@ public class Http {
     public abstract static class Inbound {
 
         public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+        final BlockingEventStream<WebSocketEvent> stream;
 
+
+        public Inbound(ChannelHandlerContext ctx) {
+        	stream = new BlockingEventStream<WebSocketEvent>(ctx);
+		}
+        
         public static Inbound current() {
             return current.get();
         }
-        final EventStream<WebSocketEvent> stream = new EventStream<WebSocketEvent>();
+
 
         public void _received(WebSocketFrame frame) {
             stream.publish(frame);
