@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -460,16 +461,15 @@ public class F {
 
     public static class EventStream<T> {
 
-        final int bufferSize;
-        final ConcurrentLinkedQueue<T> events = new ConcurrentLinkedQueue<T>();
+        final LinkedBlockingQueue<T> events;
         final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
 
         public EventStream() {
-            this.bufferSize = 100;
+        	this(100);
         }
 
         public EventStream(int maxBufferSize) {
-            this.bufferSize = maxBufferSize;
+        	events = new LinkedBlockingQueue<T>(maxBufferSize);
         }
 
         public synchronized Promise<T> nextEvent() {
@@ -481,15 +481,25 @@ public class F {
             return new LazyTask(events.peek());
         }
 
-        public synchronized void publish(T event) {
-            if (events.size() > bufferSize) {
-                events.poll();
-            }
-            events.offer(event);
+        //NOTE: cannot synchronize since events.put may block when system is overloaded.
+        //Normally, I HATE blocking an NIO thread, but to do this correct, we need a token from netty that we can use to disable
+        //the socket reads completely(ie. stop reading from socket when queue is full) as in normal NIO operations if you stop reading
+        //from the socket, the local nic buffer fills up, then the remote nic buffer fills(the client's nic), and so the client is informed
+        //he can't write anymore just yet (or he blocks if he is synchronous).
+        //Then when someone pulls from the queue, the token would be set to enabled allowing to read from nic buffer again and it all propogates
+        //This is normal flow control with NIO but since it is not done properly, this at least fixes the issue where websocket break down and
+        //skip packets.  They no longer skip packets anymore.
+        public void publish(T event) {
+        	try {
+            	//This method blocks if the queue is full(read publish method documentation just above)
+				events.put(event);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
             notifyNewEvent();
         }
 
-        void notifyNewEvent() {
+        synchronized void notifyNewEvent() {
             T value = events.peek();
             for (Promise<T> task : waiting) {
                 task.invoke(value);
