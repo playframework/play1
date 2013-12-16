@@ -165,7 +165,7 @@ public class FastTags {
         Map<String,Object> field = new HashMap<String,Object>();
         Object objId = args.get("arg");
         if(objId == null)
-        	throw new IllegalArgumentException("'arg' param must be supplied to tag field as a String");
+        	throw new IllegalArgumentException("'arg' param must be supplied to tag field");
         String _arg = objId.toString();
         
         field.put("name", _arg);
