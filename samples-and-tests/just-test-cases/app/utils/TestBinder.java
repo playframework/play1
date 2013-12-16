@@ -13,7 +13,7 @@ public class TestBinder implements TypeBinder<String>, TypeUnbinder<String> {
     }
 
     @Override
-    public void unBind(Map<String, Object> result, Object src,
+    public boolean unBind(Map<String, Object> result, Object src,
 	    Class<?> srcClazz, String name, Annotation[] annotations)
 	    throws Exception {
 	String value = (String) src;
@@ -21,6 +21,7 @@ public class TestBinder implements TypeBinder<String>, TypeUnbinder<String> {
 	    value = value.replaceAll("^--", "").replaceAll("--$", "");
 	}
 	result.put(name, value);
+	return true;
     }
     
 }
