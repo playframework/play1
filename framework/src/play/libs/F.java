@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import play.Logger;
 import play.exceptions.UnexpectedException;
 
 public class F {
@@ -461,14 +462,85 @@ public class F {
 
     public static class EventStream<T> {
 
-        final LinkedBlockingQueue<T> events;
+        final int bufferSize;
+        final ConcurrentLinkedQueue<T> events = new ConcurrentLinkedQueue<T>();
         final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
 
         public EventStream() {
-        	this(100);
+            this.bufferSize = 100;
         }
 
         public EventStream(int maxBufferSize) {
+            this.bufferSize = maxBufferSize;
+        }
+
+        public synchronized Promise<T> nextEvent() {
+            if (events.isEmpty()) {
+                LazyTask task = new LazyTask();
+                waiting.add(task);
+                return task;
+            }
+            return new LazyTask(events.peek());
+        }
+
+        public synchronized void publish(T event) {
+            if (events.size() > bufferSize) {
+            	Logger.warn("Dropping message.  If this is catastrophic to your app, use Websockets instead or request bug fix");
+                events.poll();
+            }
+            events.offer(event);
+            notifyNewEvent();
+        }
+
+        void notifyNewEvent() {
+            T value = events.peek();
+            for (Promise<T> task : waiting) {
+                task.invoke(value);
+            }
+            waiting.clear();
+        }
+
+        class LazyTask extends Promise<T> {
+
+            public LazyTask() {
+            }
+
+            public LazyTask(T value) {
+                invoke(value);
+            }
+
+            @Override
+            public T get() throws InterruptedException, ExecutionException {
+                T value = super.get();
+                markAsRead(value);
+                return value;
+            }
+
+            @Override
+            public T getOrNull() {
+                T value = super.getOrNull();
+                markAsRead(value);
+                return value;
+            }
+
+            private void markAsRead(T value) {
+                if (value != null) {
+                    events.remove(value);
+                }
+            }
+        }
+    }
+
+    public static class BlockingEventStream<T> {
+
+        final LinkedBlockingQueue<T> events;
+        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+
+        public BlockingEventStream() {
+        	this(100);
+        }
+
+        public BlockingEventStream(int maxBufferSize) {
         	events = new LinkedBlockingQueue<T>(maxBufferSize);
         }
 
@@ -606,6 +678,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() >= archiveSize) {
+            	Logger.warn("Dropping evt message.  If this is catastrophic to your app, use Websockets instead or request bug fix");
                 events.poll();
             }
             events.offer(new IndexedEvent(event));
