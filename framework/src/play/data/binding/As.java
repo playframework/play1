@@ -25,7 +25,7 @@ public @interface As {
         }
 
         @Override
-        public void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name,
+        public boolean unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name,
                 Annotation[] annotations) throws Exception {
             throw new UnsupportedOperationException("Not supported.");   
         }
