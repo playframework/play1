@@ -78,6 +78,8 @@ public class Secure extends Controller {
         if(validation.hasErrors() || !allowed) {
             flash.keep("url");
             flash.error("secure.error");
+	    //MUST remove password so it is not in the flash cookie for security
+            params.remove("password");
             params.flash();
             login();
         }
