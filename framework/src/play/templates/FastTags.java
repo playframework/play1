@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
+
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -36,6 +38,14 @@ import play.utils.HTML;
  */
 public class FastTags {
 
+	private static String errorClass = "hasError";
+	
+	static {
+		String errorCls = Play.configuration.getProperty("error.class");
+		if(!StringUtils.isEmpty(errorCls))
+			errorClass = errorCls;
+	}
+			
     public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         String key = args.get("arg").toString();
         String duration = null;
@@ -161,13 +171,18 @@ public class FastTags {
      */
     public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Map<String,Object> field = new HashMap<String,Object>();
-        String _arg = args.get("arg").toString();
+        Object objId = args.get("arg");
+        if(objId == null)
+        	throw new IllegalArgumentException("'arg' param must be supplied to tag field as a String");
+        String _arg = objId.toString();
+        
         field.put("name", _arg);
         field.put("id", _arg.replace('.','_'));
-        field.put("flash", Flash.current().get(_arg));
+        Object flashObj = Flash.current().get(_arg);
+        field.put("flash", flashObj);
         field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash").toString().split(",") : new String[0]);
         field.put("error", Validation.error(_arg));
-        field.put("errorClass", field.get("error") != null ? "hasError" : "");
+        field.put("errorClass", field.get("error") != null ? errorClass : "");
         String[] pieces = _arg.split("\\.");
         Object obj = body.getProperty(pieces[0]);
         if(obj != null){
@@ -182,7 +197,11 @@ public class FastTags {
             }else{
                 field.put("value", obj);
             }
+            //finally, we may have an object in flash that needs to be repeated(luckily passwords don't get put in flash)...
+        } else if(flashObj != null) {
+        	field.put("value", flashObj);
         }
+
         body.setProperty("field", field);
         body.call();
     }
