@@ -138,15 +138,7 @@ public class UrlEncodedParser extends DataParser {
 
             // add the complete body as a parameters
             if(!forQueryString) {
-            	//This is a HUGE security violation for forms with passwords as it hides the password even deeper in
-            	//the cookie.  many developers don't know on loginPOST and register POST, one must call params.remove("password") before
-            	//calling params.flash so the password does not end up in a cookie in clear text.
-            	//This may be breaking something/someone but currently, it's a HUGE security violation
-            	
-            	//Lastly, this effectively doubles the size of the cookie when flashing it as well which is very annoying and takes up a bunch of
-            	//space
-            	
-                //decodedParams.put("body", new String[] {data});
+                decodedParams.put("body", new String[] {data});
             }
 
             return decodedParams;

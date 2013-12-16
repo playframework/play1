@@ -515,9 +515,14 @@ public class Scope {
                             sb.append(d);
                             coma = true;
                         }
-                        Flash.current().put(key, sb.toString());
+                        
+                        //don't flash the body which has the clear text password if the form had password in it
+                        if(!"body".equals(key))
+                        	Flash.current().put(key, sb.toString());
                     } else {
-                        Flash.current().put(key, get(key));
+                    	//don't flash the body which has the clear text password if the form had password in it
+                        if(!"body".equals(key))
+                        	Flash.current().put(key, get(key));
                     }
                 }
             } else {
@@ -532,9 +537,13 @@ public class Scope {
                             sb.append(d);
                             coma = true;
                         }
-                        Flash.current().put(key, sb.toString());
+                        //don't flash the body which has the clear text password if the form had password in it
+                        if(!"body".equals(key))
+                        	Flash.current().put(key, sb.toString());
                     } else {
-                        Flash.current().put(key, get(key));
+                    	//don't flash the body which has the clear text password if the form had password in it
+                        if(!"body".equals(key))
+                        	Flash.current().put(key, get(key));
                     }
                 }
             }
