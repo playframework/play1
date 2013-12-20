@@ -369,6 +369,17 @@ public class Http {
 
             newRequest.parseXForwarded();
 
+            if (Play.configuration.containsKey("XForwardedOverwriteDomainAndPort") && newRequest.host != null && !newRequest.host.equals(_host)) {
+                if (newRequest.host.contains(":")) {
+                    final String[] hosts = newRequest.host.split(":");
+                    newRequest.port = Integer.parseInt(hosts[1]);
+                    newRequest.domain = hosts[0];
+                } else {
+                    newRequest.port = 80;
+                    newRequest.domain = newRequest.host;
+                }
+            }
+
             newRequest.resolveFormat();
 
             newRequest.authorizationInit();
