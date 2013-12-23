@@ -269,6 +269,11 @@ public class Play {
         if (appRoot.child("app/views").exists()) {
             templatesPath = new ArrayList<VirtualFile>(2);
             templatesPath.add(appRoot.child("app/views"));
+        } else if(usePrecompiled) {
+        	if(!appRoot.child("precompiled/templates/app/views").exists())
+        		throw new IllegalArgumentException("There is no precompiled/templates/app/views directory to use precompiled with");
+            templatesPath = new ArrayList<VirtualFile>(2);
+            templatesPath.add(appRoot.child("precompiled/templates/app/views"));
         } else {
             templatesPath = new ArrayList<VirtualFile>(1);
         }
@@ -283,7 +288,7 @@ public class Play {
         loadModules();
 
         // Load the templates from the framework after the one from the modules
-        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates/app/views")));
+        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
 
         // Enable a first classloader
         classloader = new ApplicationClassloader();
