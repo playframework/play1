@@ -350,6 +350,13 @@ Database connection user name, used with "db.url":#db.url.
 
 Default: none, or @sa@ when "db":#db is set to @mem@ or @fs@. 
 
+h3(#db.testquery). db.testquery
+
+Override query to use when keepalive connection polling is being performed. The default value will cause keepalive to fetch metadata. This means it does a getTables() which can be a heavy operation on a busy databse. 
+
+Default: null  
+Default on MySQL: /* ping */ SELECT 1
+
 
 h2(#evolutions). Database evolutions
 

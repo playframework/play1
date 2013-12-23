@@ -230,11 +230,17 @@ public class LVEnhancer extends Enhancer {
         }
 
         public static void exitMethod(String clazz, String method, String signature) {
-            getCurrentMethodParams().pop();
+        	Stack<MethodExecution> stack = getCurrentMethodParams();
+        	if(stack.isEmpty())
+        		return;
+            stack.pop();
         }
 
         public static void initMethodCall(String method, int nbParams, String subject, String[] paramNames) {
-            getCurrentMethodParams().peek().currentNestedMethodCall = new MethodExecution(subject, paramNames, nbParams);
+        	Stack<MethodExecution> stack = getCurrentMethodParams();
+        	if(stack.isEmpty())
+        		return;
+        	stack.peek().currentNestedMethodCall = new MethodExecution(subject, paramNames, nbParams);
         }
         
         /**

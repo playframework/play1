@@ -20,6 +20,12 @@ public class AnEntity extends Model {
     @As(binder=utils.TestBinder.class) 
     public String yop;
     
+    @As(unbinder=utils.TestBinder.class) 
+    public String yap;
+    
+    @As(binder=utils.TestBinder.class, unbinder=utils.TestUnbinder.class) 
+    public String yip;
+    
     @OneToMany
     public List<AnotherEntity> children = new ArrayList<AnotherEntity>();
     

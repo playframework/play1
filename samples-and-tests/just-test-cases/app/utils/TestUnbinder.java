@@ -6,11 +6,7 @@ import java.lang.annotation.*;
 
 import play.data.binding.*;
 
-public class TestBinder implements TypeBinder<String>, TypeUnbinder<String> {
-
-    public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
-        return "--" + value + "--";
-    }
+public class TestUnbinder implements TypeUnbinder<String> {
 
     @Override
     public boolean unBind(Map<String, Object> result, Object src,
@@ -18,11 +14,10 @@ public class TestBinder implements TypeBinder<String>, TypeUnbinder<String> {
 	    throws Exception {
 	String value = (String) src;
 	if(value != null){
-	    value = value.replaceAll("^--", "").replaceAll("--$", "");
+	    value = value.replaceAll("^--", "##").replaceAll("--$", "##");
 	}
 	result.put(name, value);
 	return true;
-    }
-    
+    }    
 }
 

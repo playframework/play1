@@ -23,8 +23,8 @@ public class F {
 
     public static class Promise<V> implements Future<V>, F.Action<V> {
 
-        final CountDownLatch taskLock = new CountDownLatch(1);
-        boolean cancelled = false;
+        protected final CountDownLatch taskLock = new CountDownLatch(1);
+        protected boolean cancelled = false;
 
         public boolean cancel(boolean mayInterruptIfRunning) {
             return false;
@@ -62,10 +62,10 @@ public class F {
             }
             return result;
         }
-        List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
-        boolean invoked = false;
-        V result = null;
-        Throwable exception = null;
+        protected List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
+        protected boolean invoked = false;
+        protected V result = null;
+        protected Throwable exception = null;
 
         public void invoke(V result) {
             invokeWithResultOrException(result, null);

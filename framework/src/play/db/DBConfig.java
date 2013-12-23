@@ -12,6 +12,7 @@ import org.hibernate.internal.SessionImpl;
 import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
 import play.db.jpa.JPAConfig;
 import play.db.jpa.JPAContext;
 import play.exceptions.DatabaseException;
@@ -36,6 +37,28 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+import javax.sql.RowSet;
+import javax.sql.rowset.CachedRowSet;
+
+import jregex.Matcher;
+
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.internal.SessionImpl;
+
+import play.Logger;
+import play.Play;
+import play.db.jpa.JPA;
+import play.db.jpa.JPAConfig;
+import play.db.jpa.JPAContext;
+import play.exceptions.DatabaseException;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.ConnectionCustomizer;
+import com.sun.rowset.CachedRowSetImpl;
 
 public class DBConfig {
 
@@ -299,6 +322,20 @@ public class DBConfig {
                     ds.setIdleConnectionTestPeriod(10);
                     ds.setTestConnectionOnCheckin(true);
 
+                    if (p.getProperty(propsPrefix+".testquery") != null) {
+			    ds.setPreferredTestQuery(p.getProperty(propsPrefix+".testquery"));
+                    } else {
+                        String driverClass = JPAPlugin.getDefaultDialect(propsPrefix, ds.getDriverClass());
+
+                        /*
+                         * Pulled from http://dev.mysql.com/doc/refman/5.5/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html
+                         * Yes, the select 1 also needs to be in there.
+                         */
+                        if (driverClass.equals("play.db.jpa.MySQLDialect")) {
+                            ds.setPreferredTestQuery("/* ping */ SELECT 1");
+                        }
+                    }
+
                     // This check is not required, but here to make it clear that nothing changes for people
                     // that don't set this configuration property. It may be safely removed.
                     if(p.getProperty("db.isolation") != null) {
@@ -370,6 +407,7 @@ public class DBConfig {
         out.println("Max pool size: " + ds.getMaxPoolSize());
         out.println("Initial pool size: " + ds.getInitialPoolSize());
         out.println("Checkout timeout: " + ds.getCheckoutTimeout());
+        out.println("Test query : " + ds.getPreferredTestQuery());
         return sw.toString();
     }
 
@@ -406,13 +444,21 @@ public class DBConfig {
             p.put(propsPrefix + ".destroyMethod", "close");
         }
 
-        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty(propsPrefix, ""));
+        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[a-zA-Z0-9_]+)(\\?)?({parameters}[^\\s]+)?$").matcher(p.getProperty(propsPrefix, ""));
         if (m.matches()) {
             String user = m.group("user");
             String password = m.group("pwd");
             String name = m.group("name");
+            String parameters = m.group("parameters");
+    		
+            Map<String, String> paramMap = new HashMap<String, String>();
+            paramMap.put("useUnicode", "yes");
+            paramMap.put("characterEncoding", "UTF-8");
+            paramMap.put("connectionCollation", "utf8_general_ci");
+            addParameters(paramMap, parameters);
+            
             p.put(propsPrefix+".driver", "com.mysql.jdbc.Driver");
-            p.put(propsPrefix+".url", "jdbc:mysql://localhost/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            p.put(propsPrefix+".url", "jdbc:mysql://localhost/" + name + "?" + toQueryString(paramMap));
             if (user != null) {
                 p.put(propsPrefix+".user", user);
             }
@@ -453,6 +499,27 @@ public class DBConfig {
         }
 
         return false;
+    }
+    
+    private static void addParameters(Map<String, String> paramsMap, String urlQuery) {
+    	if (!StringUtils.isBlank(urlQuery)) {
+	    	String[] params = urlQuery.split("[\\&]");
+	    	for (String param : params) {
+				String[] parts = param.split("[=]");
+				if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
+					paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
+				}
+			}
+    	}
+    }
+    
+    private static String toQueryString(Map<String, String> paramMap) {
+    	StringBuilder builder = new StringBuilder();
+    	for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+    		if (builder.length() > 0) builder.append("&");
+			builder.append(entry.getKey()).append("=").append(entry.getValue() != null ? entry.getValue() : "");
+		}
+    	return builder.toString();
     }
 
     public DataSource getDatasource() {
