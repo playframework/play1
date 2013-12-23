@@ -18,8 +18,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.jboss.netty.channel.ChannelHandlerContext;
+
 import play.Logger;
-import play.exceptions.UnexpectedException;
 
 public class F {
 
@@ -535,22 +536,25 @@ public class F {
 
         final LinkedBlockingQueue<T> events;
         final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+        final ChannelHandlerContext ctx;
+        
 
-        public BlockingEventStream() {
-        	this(100);
+        public BlockingEventStream(ChannelHandlerContext ctx) {
+        	this(100, ctx);
         }
 
-        public BlockingEventStream(int maxBufferSize) {
-        	events = new LinkedBlockingQueue<T>(maxBufferSize);
+        public BlockingEventStream(int maxBufferSize, ChannelHandlerContext ctx) {
+        	this.ctx = ctx;
+        	events = new LinkedBlockingQueue<T>(maxBufferSize+10);
         }
 
         public synchronized Promise<T> nextEvent() {
             if (events.isEmpty()) {
-                LazyTask task = new LazyTask();
+                LazyTask task = new LazyTask(ctx);
                 waiting.add(task);
                 return task;
             }
-            return new LazyTask(events.peek());
+            return new LazyTask(events.peek(), ctx);
         }
 
         //NOTE: cannot synchronize since events.put may block when system is overloaded.
@@ -563,7 +567,11 @@ public class F {
         //skip packets.  They no longer skip packets anymore.
         public void publish(T event) {
         	try {
-            	//This method blocks if the queue is full(read publish method documentation just above)
+            	//This method blocks if the queue is full(read publish method documentation just above)        		 
+        		if (events.remainingCapacity() == 10) {
+        			Logger.trace("events queue is full! Setting readable to false.");
+        			ctx.getChannel().setReadable(false);
+        		}
 				events.put(event);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
@@ -581,10 +589,14 @@ public class F {
 
         class LazyTask extends Promise<T> {
 
-            public LazyTask() {
+        	final ChannelHandlerContext ctx;
+        	
+            public LazyTask(ChannelHandlerContext ctx) {
+            	this.ctx = ctx;
             }
 
-            public LazyTask(T value) {
+            public LazyTask(T value, ChannelHandlerContext ctx) {
+            	this.ctx = ctx;
                 invoke(value);
             }
 
@@ -605,6 +617,9 @@ public class F {
             private void markAsRead(T value) {
                 if (value != null) {
                     events.remove(value);
+                    //Don't start back up until we get down to half the total capacity to prevent jittering:
+                    if (events.remainingCapacity() > events.size()) 
+                    	ctx.getChannel().setReadable(true);
                 }
             }
         }

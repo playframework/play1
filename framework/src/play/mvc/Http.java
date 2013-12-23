@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jboss.netty.channel.ChannelHandlerContext;
+
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -826,12 +829,17 @@ public class Http {
     public abstract static class Inbound {
 
         public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+        final BlockingEventStream<WebSocketEvent> stream;
 
+
+        public Inbound(ChannelHandlerContext ctx) {
+        	stream = new BlockingEventStream<WebSocketEvent>(ctx);
+		}
+        
         public static Inbound current() {
             return current.get();
         }
 
-        final BlockingEventStream<WebSocketEvent> stream = new BlockingEventStream<WebSocketEvent>();
 
         public void _received(WebSocketFrame frame) {
             stream.publish(frame);
