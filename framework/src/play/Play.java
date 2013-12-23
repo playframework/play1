@@ -265,8 +265,11 @@ public class Play {
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
-        // Build basic templates path
-        if (appRoot.child("app/views").exists()) {
+        if(usePrecompiled) {
+        	templatesPath = new ArrayList<VirtualFile>(2);
+        	templatesPath.add(appRoot.child("precompiled/templates/app/views")); 
+        } else if (appRoot.child("app/views").exists()) {
+        	 // Build basic templates path
             templatesPath = new ArrayList<VirtualFile>(2);
             templatesPath.add(appRoot.child("app/views"));
         } else {

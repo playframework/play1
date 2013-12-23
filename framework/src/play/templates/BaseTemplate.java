@@ -40,11 +40,13 @@ public abstract class BaseTemplate extends Template {
 
     public void loadPrecompiled() {
         try {
-            File file = Play.getFile("precompiled/templates/" + name);
+        	//Remove the prefix "precompiled/templates/" because that is in the path now added
+        	//when the program starts up or it never even gets here and just fails
+            File file = Play.getFile(name);
             byte[] code = IO.readContent(file);
             directLoad(code);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot load precompiled template " + name);
+            throw new RuntimeException("Cannot load precompiled template " + name, e);
         }
     }
 

@@ -667,6 +667,9 @@ public class Controller implements ControllerSupport {
             Template template = TemplateLoader.load(template(templateName));
             throw new RenderTemplate(template, templateBinding.data);
         } catch (TemplateNotFoundException ex) {
+        	//This is added here as in one case, the below TemplateNotFoundException is being thrown and
+        	//this exception is not chained with it so we don't know where it actually failed.
+        	Logger.warn(ex, "Template not found");
             if (ex.isSourceAvailable()) {
                 throw ex;
             }
