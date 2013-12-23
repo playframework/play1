@@ -283,7 +283,7 @@ public class Play {
         loadModules();
 
         // Load the templates from the framework after the one from the modules
-        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
+        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates/app/views")));
 
         // Enable a first classloader
         classloader = new ApplicationClassloader();
