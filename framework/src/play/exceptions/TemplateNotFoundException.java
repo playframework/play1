@@ -1,5 +1,6 @@
 package play.exceptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -22,8 +23,16 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
     
     public TemplateNotFoundException(String path, ApplicationClass applicationClass, Integer line) {
         this(path);
-        this.sourceFile = applicationClass.javaFile.relativePath();
-        this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
+        //This occurs with using property -Dprecompiled=true and no file is found
+        if(applicationClass.javaFile != null) {
+        	this.sourceFile = applicationClass.javaFile.relativePath();
+        	this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
+        }
+        else {
+        	this.sourceFile = "{unknown source file.  appclass="+applicationClass+"}";
+        	this.source = new ArrayList<String>();
+        }
+        
         this.line = line;
     }
     

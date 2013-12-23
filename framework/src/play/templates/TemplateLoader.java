@@ -73,7 +73,7 @@ public class TemplateLoader {
                     templates.put(key, template);
                     return template;
                 } catch(Exception e) {
-                    Logger.warn("Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
+                    Logger.warn(e, "Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
                 }
             }
             BaseTemplate template = new GroovyTemplate(file.relativePath(), file.contentAsString());
@@ -164,6 +164,9 @@ public class TemplateLoader {
      */
     public static Template load(String path) {
         Template template = null;
+        //Play.templatesPath for precompiled=true NEEDS to have
+        //the directory /precompiled/templates/app/views as part of it's path or tf.exists below
+        //will be false and it will never load the precompiled template
         for (VirtualFile vf : Play.templatesPath) {
             if (vf == null) {
                 continue;
