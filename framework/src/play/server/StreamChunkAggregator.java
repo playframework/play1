@@ -74,6 +74,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
                     currentMessage.setContent(new FileChannelBuffer(localFile));
                     this.out = null;
                     this.currentMessage = null;
+                    this.file.delete();
                     this.file = null;
                     Channels.fireMessageReceived(ctx, currentMessage, e.getRemoteAddress());
                 }
