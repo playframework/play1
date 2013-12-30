@@ -56,7 +56,7 @@ public class Evolutions extends PlayPlugin {
 
         Play.templatesPath = new ArrayList<VirtualFile>();
         Play.modulesRoutes = new HashMap<String, VirtualFile>();
-        Play.loadModules();
+        Play.loadModules(VirtualFile.open(Play.applicationPath));
 
 
         if (System.getProperty("modules") != null) {
