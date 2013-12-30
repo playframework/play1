@@ -76,7 +76,9 @@ public class VirtualFile {
     String isRoot(File f) {
         for (VirtualFile vf : Play.roots) {
             if (vf.realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
-                return "{module:" + vf.getName() + "}";
+                String modulePathName = vf.getName();
+                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-")) : modulePathName;
+                return "{module:" + moduleName + "}";
             }
         }
         return null;
