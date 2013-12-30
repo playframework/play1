@@ -4,7 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +22,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.Crypto;
 import play.libs.Time;
+import play.mvc.Http.Request;
 import play.utils.Utils;
 
 /**
@@ -472,7 +475,30 @@ public class Scope {
 
         void _mergeWith(Map<String, String[]> map) {
             for (Map.Entry<String, String[]> entry : map.entrySet()) {
-                Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
+            	String key = entry.getKey();
+            	if(key.startsWith("_play_")) {
+            		//parse the name first
+            		String[] pieces = key.split("_");
+            		String name = pieces[2];
+            		String previousHash = pieces[3];
+            		
+            		//special case when using #{input} tag to make fields read_only
+            		String postUrl = Request.current().path;
+            		String realValue = "";
+            		if(entry.getValue() != null) {
+            			//#{input} tag readonly and hidden can only be used with single values
+            			realValue = entry.getValue()[0];
+            		}
+            		
+            		String hash = Crypto.sign(postUrl+name+realValue+Play.secretKey);            		
+            		if(!hash.equals(previousHash))
+            			throw new RuntimeException("most likely a hacker since hash was modified");
+            		
+            		//Now put the ACTUAL name in instead of the modified one with hash
+            		Utils.Maps.mergeValueInMap(data, name, entry.getValue());
+            	} else {
+            		Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
+            	}
             }
         }
 
