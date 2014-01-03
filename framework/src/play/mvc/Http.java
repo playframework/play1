@@ -22,6 +22,7 @@ import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.F;
+import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.F.EventStream;
@@ -829,7 +830,8 @@ public class Http {
         public static Inbound current() {
             return current.get();
         }
-        final EventStream<WebSocketEvent> stream = new EventStream<WebSocketEvent>();
+
+        final BlockingEventStream<WebSocketEvent> stream = new BlockingEventStream<WebSocketEvent>();
 
         public void _received(WebSocketFrame frame) {
             stream.publish(frame);
