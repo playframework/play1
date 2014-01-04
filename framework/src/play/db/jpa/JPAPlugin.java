@@ -172,8 +172,7 @@ public class JPAPlugin extends PlayPlugin {
             } catch (Exception e) {
                 Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
-            org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
-   
+            
             cfg.setInterceptor(new HibernateInterceptor());
         }
         JPQL.instance = new JPQL();

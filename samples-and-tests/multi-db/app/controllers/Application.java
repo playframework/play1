@@ -11,7 +11,9 @@ public class Application extends Controller {
 
     public static void index() {
     	List<Student> students = Student.findAll();
-        render();
+    	List<Teacher> teachers = Teacher.findAll();
+        
+        render(students, teachers);
     }
 
 }
