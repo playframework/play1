@@ -160,6 +160,12 @@ public class JPAPlugin extends PlayPlugin {
             properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
             properties.put("hibernate.dialect", getDefaultDialect(p, dbName, p.getProperty("db."+ dbName + ".driver")));
             
+             if (Play.configuration.getProperty("jpa." + dbName + ".debugSQL", "false").equals("true")) {
+                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
+            } else {
+                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+            }
+
             cfg.configure(Configuration.addHibernateProperties(properties, dbName));
             cfg.setDataSource(DB.getDataSource(dbName));
           

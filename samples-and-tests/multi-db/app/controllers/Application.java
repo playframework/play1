@@ -12,6 +12,8 @@ public class Application extends Controller {
     public static void index() {
     	List<Student> students = Student.findAll();
     	List<Teacher> teachers = Teacher.findAll();
+
+    	// Ok, renders our results from the 2 different db
         
         render(students, teachers);
     }
