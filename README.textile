@@ -1,4 +1,4 @@
-h1. Welcome to Play framework  "!http://www.playframework.com/assets/images/logos/normal.png!":https://playone.ci.cloudbees.com
+h1. Welcome to Play framework  "!http://www.playframework.com/assets/images/logos/normal.png{width: 20%; height: 20%;}!":https://playone.ci.cloudbees.com
 
 Play framework makes it easier to build Web applications with Java. It is a clean alternative to bloated Enterprise Java stacks. It focuses on developer productivity and targets RESTful architectures. Play is a perfect companion to agile software development.
 
