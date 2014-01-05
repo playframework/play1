@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds">
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">      
+	      <evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator"> 
+	        <expression>
+	           e.level.toInt() &lt;= INFO.toInt()
+	        </expression>
+	      </evaluator>
+	      <OnMismatch>DENY</OnMismatch>
+	      <OnMatch>NEUTRAL</OnMatch>
+	    </filter>
+    
+		<encoder>
+			<pattern>%date{ISO8601} [%X{txId}-%X{user}] [%thread] %caller{1} %logger %-4level: %message%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"> 
+    	    <level>warn</level>
+    	</filter>
+    
+		<encoder>
+			<pattern>%date{ISO8601} [%X{txId}-%X{user}] %caller{1} %-4level: %message%n</pattern>
+		</encoder>
+		<target>System.err</target>
+	</appender>
+	
+    <!-- turboFilter class="com.alvazan.play.logging.MDCLevelFilter">
+       <MDCKey>filter</MDCKey>
+       <Value>true</Value>
+       <ThisLevelOrBelow>INFO</ThisLevelOrBelow>
+       <OnMatch>DENY</OnMatch>
+    </turboFilter-->
+  
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="java.sql" level="WARN"/>
+    <logger name="bytecodeparser.analysis" level="INFO"/> 
+    
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="STDOUT"/>
+		<appender-ref ref="STDERR"/>
+	</root>
+</configuration>

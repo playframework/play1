@@ -81,7 +81,13 @@ public class LoggerTest {
      * Test method for {@link play.Logger#init()}.
      */
     @Test
-    public void testInitWithProperties() {        
+    public void testInitWithProperties() {
+    	try {
+    		Class.forName("org.apache.log4j.AsyncAppender");
+    	}catch(ClassNotFoundException e) {
+    		return; //skip test since this is no log4j
+    	}
+    	
         Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, "/play/testlog4j.properties");
         Logger.log4j=null;
         Logger.init();
@@ -93,7 +99,13 @@ public class LoggerTest {
      * Test method for {@link play.Logger#init()}.
      */
     @Test
-    public void testInitWithXML() {        
+    public void testInitWithXML() {       
+    	try {
+    		Class.forName("org.apache.log4j.AsyncAppender");
+    	}catch(ClassNotFoundException e) {
+    		return; //skip test since this is no log4j
+    	}
+
         Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, "/play/testlog4j.xml");
         Logger.log4j=null;
         Logger.init();
