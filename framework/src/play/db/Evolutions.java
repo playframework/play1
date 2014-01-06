@@ -123,6 +123,7 @@ public class Evolutions extends PlayPlugin {
                 System.out.println("");
                 System.out.println("~ Please correct it manually, and mark it resolved by running `play evolutions:resolve`");
                 System.out.println("~");
+                System.exit(-1);
                 return;
             } catch (InvalidDatabaseRevision e) {
                 // see later
@@ -157,6 +158,7 @@ public class Evolutions extends PlayPlugin {
                         System.out.println("~");
                         System.out.println("~ Can't apply evolutions for " + moduleRoot.getKey() + "...");
                         System.out.println("~");
+                        System.exit(-1);
                     }
 
 
@@ -168,6 +170,7 @@ public class Evolutions extends PlayPlugin {
                     } else {
                         System.out.println("~ Can't apply evolutions for " + moduleRoot.getKey() + "...");
                         System.out.println("~");
+                        System.exit(-1);
                     }
 
                 } else {
@@ -208,13 +211,14 @@ public class Evolutions extends PlayPlugin {
                     modulesWithEvolutions.put(specificModule, moduleRoot.child("db/evolutions"));
                 } else {
                     System.out.println("~ '" + specificModule + "' module doesn't have any evolutions scripts in it or evolutions are disabled.");
-	            System.out.println("~");
+	                System.out.println("~");
                     System.exit(-1);
                 }
             } else if (Play.configuration.getProperty("application.name").equals(specificModule))  {
                 weShouldAddTheMainProject = true;
             } else {
                 System.out.println("~ Couldn't find a module with the name '" + specificModule + "'. ");
+                System.exit(-1);
             }
         }
 
