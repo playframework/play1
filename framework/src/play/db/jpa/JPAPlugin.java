@@ -184,6 +184,10 @@ public class JPAPlugin extends PlayPlugin {
         JPQL.instance = new JPQL();
     }
 
+    public static String getDefaultDialect(String driver) {
+        return getDefaultDialect(Play.configuration, "default", driver);
+    }
+
     public static String getDefaultDialect(Properties p, String dbName, String driver) {
         String dialect = p.getProperty("jpa." + dbName + ".dialect");
         if (dialect != null) {
