@@ -3,10 +3,12 @@ package play.deps;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,11 +136,11 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             }
                         }
                         HashMap extraAttributesMap = null;
-			if(m.groupCount() == 4 &&  m.group(4) != null && !m.group(4).trim().isEmpty()){
-			    // dependency has a classifier
-			    extraAttributesMap = new HashMap();
-			    extraAttributesMap.put("classifier", m.group(4).trim());
-			}
+            			if(m.groupCount() == 4 &&  m.group(4) != null && !m.group(4).trim().isEmpty()){
+            			    // dependency has a classifier
+            			    extraAttributesMap = new HashMap();
+            			    extraAttributesMap.put("classifier", m.group(4).trim());
+            			}
 
                         ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3), extraAttributesMap);
 
@@ -236,5 +238,39 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             return defaultValue;
         }
         return o;
+    }
+
+    public static List<String> getOrderedModuleList(File file) throws Oops {
+        Yaml yaml = new Yaml();
+        Object o = null;
+
+        // Try to parse the yaml
+        try {
+            o = yaml.load(new FileInputStream(file));
+        } catch (Exception e) {
+            throw new Oops(e.toString().replace("\n", "\n~ \t"));
+        }
+
+        // We expect a Map here
+        if (!(o instanceof Map)) {
+            throw new Oops("Unexpected format -> " + o);
+        }
+
+        Map data = (Map) o;
+        ModuleRevisionId id = null;
+
+        
+        
+        if (data.containsKey("require")) {
+            if (data.get("require") instanceof List) {
+
+                List dependencies = (List) data.get("require");
+                // filter out play
+                dependencies.remove("play");
+                System.out.println("loading modules " + dependencies);
+                return dependencies;
+            }
+        }
+        return new ArrayList<String>();
     }
 }
