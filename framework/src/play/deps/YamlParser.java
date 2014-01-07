@@ -264,13 +264,30 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         if (data.containsKey("require")) {
             if (data.get("require") instanceof List) {
 
-                List dependencies = (List) data.get("require");
-                // filter out play
-                dependencies.remove("play");
-                System.out.println("loading modules " + dependencies);
+                List<String> dependencies = filterModuleName((List<String>) data.get("require"));
+            
                 return dependencies;
             }
         }
         return new ArrayList<String>();
+    }
+
+    private static List<String> filterModuleName(List<String> dependencies) {
+        List<String> moduleNames = new ArrayList<String>();
+        for (String name : dependencies) {
+            String filteredName = getModuleName(name);
+            if (!"play".equals(filteredName)) {
+                moduleNames.add(filteredName);
+            }
+        }
+        return moduleNames;
+    }
+
+    private static String getModuleName(String name) {
+        int index = name.indexOf(" ");
+        if (index > 0) {
+            return name.substring(0, index);
+        }
+        return name;
     }
 }
