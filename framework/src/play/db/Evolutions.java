@@ -12,19 +12,14 @@ import play.db.evolutions.EvolutionQuery;
 import play.db.evolutions.EvolutionState;
 import play.db.evolutions.exceptions.InconsistentDatabase;
 import play.db.evolutions.exceptions.InvalidDatabaseRevision;
-import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.libs.Codec;
 import play.libs.IO;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.vfs.VirtualFile;
-
 import java.io.File;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -35,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
-import java.util.regex.Pattern;
+
 
 /**
  * Handles migration of data.
@@ -84,7 +79,7 @@ public class Evolutions extends PlayPlugin {
 
         for(Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {       
 
-            /** Sumary **/
+            /** Summary **/
             Evolution database = listDatabaseEvolutions(moduleRoot.getKey()).peek();
             Evolution application = listApplicationEvolutions(moduleRoot.getKey(), moduleRoot.getValue()).peek();
 
@@ -332,6 +327,15 @@ public class Evolutions extends PlayPlugin {
         return ! "false".equals(Play.configuration.getProperty("evolutions.autocommit", "true"));
     }
     
+    public static synchronized void resolve(int revision) {
+        try {
+            EvolutionQuery.resolve(revision, Play.configuration.getProperty("application.name"));
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    
     public static synchronized void resolve(String moduleKey, int revision) {
         try {
             EvolutionQuery.resolve(revision, moduleKey);
@@ -399,8 +403,6 @@ public class Evolutions extends PlayPlugin {
     }
 
     public synchronized static void checkEvolutionsState() {
-
-
         for(Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {            
 
             if (DB.datasource != null) {
@@ -552,13 +554,10 @@ public class Evolutions extends PlayPlugin {
     
     private static void checkAndUpdateEvolutionsForMultiModuleSupport(Connection connection) throws SQLException {
         ResultSet rs = connection.getMetaData().getColumns(null, null, "play_evolutions", "module_key");
-        if(!rs.next()) {       
-            System.out.println("!!! - Updating the play_evolutions table to cope with multiple modules - !!!");      
+        if (!rs.next()) {
+            System.out.println("!!! - Updating the play_evolutions table to cope with multiple modules - !!!");
             EvolutionQuery.alterForModuleSupport(connection);
-    }
-    
-    static Connection getNewConnection() throws SQLException {
-        return getNewConnection(true);
         }
     }
+   
 }

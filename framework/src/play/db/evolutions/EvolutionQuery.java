@@ -195,10 +195,14 @@ public class EvolutionQuery{
             closeConnection(connection);
         }
     }
-
+    
     public static Connection getNewConnection() throws SQLException {
+        return getNewConnection(true); // Yes we want auto-commit
+    }
+
+    public static Connection getNewConnection(boolean autoCommit) throws SQLException {
         Connection connection = DB.datasource.getConnection();
-        connection.setAutoCommit(true); // Yes we want auto-commit
+        connection.setAutoCommit(autoCommit); 
         return connection;
     }
     
