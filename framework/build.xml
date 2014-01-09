@@ -361,6 +361,7 @@
             <fileset dir="test-src">
                 <include name="**/*.properties"/>
                 <include name="**/*.sql"/>
+                <include name="**/*.yml"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.plugins"/>
             </fileset>

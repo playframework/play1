@@ -1,0 +1,12 @@
+# Application dependencies
+
+require:
+    - play
+    - crud
+    - play -> deadbolt 1.5.4
+    - play -> cobertura 2.4:
+        id: test
+    - play -> pdf [0.9,)
+    - commons-lang -> commons-lang 2.5
+    - commons-codec 1.7
+    - net.sf.json-lib -> json-lib 2.4 jdk15
