@@ -725,7 +725,7 @@ public class Play {
 			try {
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				Logger.error("There was a problem parsing depencies.yml (module will not be loaded in order of the dependencies.yml)", e);
+				Logger.error("There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)", e);
 				// Load module without considering the dependencies.yml order
 				modules = Arrays.asList(localModules.list());		
 			}
@@ -737,11 +737,12 @@ public class Play {
 				if (moduleName.contains("-")) {
 					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
 				}
-
-				if (module.isDirectory()) {
+				
+				if(module == null || !module.exists()){
+				        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, module.getAbsolutePath());
+				} else if (module.isDirectory()) {
 					addModule(moduleName, module);
 				} else {
-
 					File modulePath = new File(IO.readContentAsString(module).trim());
 					if (!modulePath.exists() || !modulePath.isDirectory()) {
 						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
