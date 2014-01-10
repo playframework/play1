@@ -3,17 +3,39 @@ package play.i18n;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import play.Play;
 import play.PlayBuilder;
 import play.mvc.Http;
+import play.mvc.Http.Header;
+import play.mvc.Http.Request;
 import play.test.FunctionalTest;
 
 public class LangTest {
 
+	@Test
+	public void testFirefoxExample() {
+		Play.langs = Arrays.asList("zh", "en");
+		Play.configuration = new Properties();
+		
+		Header header = new Header("accept-language", "zh_cn,en;q=0.3,en_us;q=0.7");
+		Map<String, Header> headers = new HashMap<>();
+		headers.put(header.name, header);
+		
+		Request request = Request.createRequest(null, null, null, null, null, null, null, null, false, 0, null, false, headers , null);
+		Http.Request.current.set(request);
+		
+		String language = Lang.get();
+		Assert.assertEquals("zh", language);
+	}
+	
     @Test
     public void testChange() {
         new PlayBuilder().build();

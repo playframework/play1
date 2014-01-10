@@ -97,32 +97,33 @@ public class Lang {
      * @return the closest matching locale. If no closest match for a language/country is found, null is returned
      */
     private static String findClosestMatch(Collection<String> desiredLocales) {
-        ArrayList<String> cleanLocales = new ArrayList<String>(desiredLocales.size());
-        //look for an exact match
-        for (String a: desiredLocales) {
-            a = a.replace("-", "_");
-            cleanLocales.add(a);
-            for (String locale: Play.langs) {
-                if (locale.equalsIgnoreCase(a)) {
-                    return locale;
-                }
-            }
-        }
+        //in general the previous code preferred matching the developers list in order in application.conf first when looking for exact
+        //match instead of matching the users preference of zh_cn such that zh_cn, en, en_us returned en as exact match.  Chinese users
+        //were not happy since they had zh_cn listed first or zh_tw listed first and didn't know why.
+        
+        //Also, the current code completely did not support IE10 since IE sends in zh_Hans
+
         // Exact match not found, try language-only match.
-        for (String a: cleanLocales) {
-            int splitPos = a.indexOf("_");
+    	for(String theLocale : desiredLocales) {
+    		theLocale = theLocale.replace("-", "_");
+        	if(playContainsExact(theLocale)) {
+        		return theLocale;
+        	}
+        	
+            int splitPos = theLocale.indexOf("_");
+            String userLangOnly = theLocale;
             if (splitPos > 0) {
-                a = a.substring(0, splitPos);
+            	userLangOnly = userLangOnly.substring(0, splitPos);
             }
             for (String locale: Play.langs) {
-                String langOnlyLocale;
+                String playLangOnly;
                 int localeSplitPos = locale.indexOf("_");
                 if (localeSplitPos > 0) {
-                    langOnlyLocale = locale.substring(0, localeSplitPos);
+                    playLangOnly = locale.substring(0, localeSplitPos);
                 } else {
-                    langOnlyLocale = locale;
+                    playLangOnly = locale;
                 }
-                if (langOnlyLocale.equalsIgnoreCase(a)) {
+                if (playLangOnly.equalsIgnoreCase(userLangOnly)) {
                     return locale;
                 }
             }
@@ -132,7 +133,17 @@ public class Lang {
         return null;
     }
 
-    /**
+    private static boolean playContainsExact(String userLocale) {
+    	for (String locale: Play.langs) {
+    		if(userLocale.equalsIgnoreCase(locale))
+    			return true;
+    	}
+		return false;
+	}
+
+
+
+	/**
      * Guess the language for current request in the following order:
      * <ol>
      * <li>if a <b>PLAY_LANG</b> cookie is set, use this value</li>
