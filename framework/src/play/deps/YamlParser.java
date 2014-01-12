@@ -276,10 +276,10 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     private static List<String> filterModuleName(List<String> dependencies) {
         List<String> moduleNames = new ArrayList<String>();
         for (String name : dependencies) {
-            String filteredName = getModuleName(name);
+            String filteredName = getModuleWithVersion(name);
             if (!"play".equals(filteredName)) {
                 // Only add modules
-                File moduleDir = new File(Play.applicationPath, "modules/"+ filteredName);
+                File moduleDir = new File(Play.applicationPath, "modules/"+ getModuleWithVersion(name));
                 if (moduleDir.exists()) {
                     moduleNames.add(filteredName);
                 }
@@ -288,11 +288,17 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return moduleNames;
     }
 
-    private static String getModuleName(String name) {
-        int index = name.indexOf(" ");
+    private static String getModuleWithVersion(String name) {
+        int index = name.indexOf("->");
         if (index > 0) {
-            return name.substring(0, index);
+            name = name.substring(index + 2).trim();
         }
-        return name;
+        index = name.indexOf(" ");
+        String version = null;
+        if (index > 0) {
+            version = name.substring(index + 1).trim();
+            name = name.substring(0, index).trim();
+        }
+        return name + ((version != null) ? "-" + version : "");
     }
 }
