@@ -725,7 +725,7 @@ public class Play {
 			try {
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				Logger.error("There was a problem parsing depencies.yml (module will not be loaded in order of the dependencies.yml)", e);
+				Logger.error("There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)", e);
 				// Load module without considering the dependencies.yml order
 				modules = Arrays.asList(localModules.list());		
 			}

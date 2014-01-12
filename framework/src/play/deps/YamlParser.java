@@ -29,6 +29,7 @@ import org.apache.ivy.plugins.parser.ModuleDescriptorParser;
 import org.apache.ivy.plugins.parser.ParserSettings;
 import org.apache.ivy.plugins.repository.Resource;
 import org.yaml.snakeyaml.Yaml;
+import play.Play;
 
 public class YamlParser extends AbstractModuleDescriptorParser {
 
@@ -277,7 +278,11 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         for (String name : dependencies) {
             String filteredName = getModuleName(name);
             if (!"play".equals(filteredName)) {
-                moduleNames.add(filteredName);
+                // Only add modules
+                File moduleDir = new File(Play.applicationPath, "modules/"+ filteredName);
+                if (moduleDir.exists()) {
+                    moduleNames.add(filteredName);
+                }
             }
         }
         return moduleNames;
