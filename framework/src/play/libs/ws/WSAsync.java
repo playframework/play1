@@ -3,6 +3,10 @@ package play.libs.ws;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +41,8 @@ import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
 
+import javax.net.ssl.*;
+
 /**
  * Simple HTTP client to make webservices requests.
  * 
@@ -60,6 +66,7 @@ import com.ning.http.client.Response;
 public class WSAsync implements WSImpl {
 
     private AsyncHttpClient httpClient;
+    private static SSLContext sslCTX = null;
 
     public WSAsync() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
@@ -68,6 +75,9 @@ public class WSAsync implements WSImpl {
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
         String nonProxyHosts = Play.configuration.getProperty("http.nonProxyHosts", System.getProperty("http.nonProxyHosts"));
         String userAgent = Play.configuration.getProperty("http.userAgent");
+        String keyStore = Play.configuration.getProperty("ssl.keyStore", System.getProperty("javax.net.ssl.keyStore"));
+        String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword", System.getProperty("javax.net.ssl.keyStorePassword"));
+        Boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -90,6 +100,19 @@ public class WSAsync implements WSImpl {
         if (userAgent != null) {
             confBuilder.setUserAgent(userAgent);
         }
+
+        if (keyStore != null && !keyStore.equals("")) {
+
+            Logger.info("Keystore configured, loading from '%s', CA validation enabled : %s", keyStore, CAValidation);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Keystore password : %s, SSLCTX : %s", keyStorePass, sslCTX);
+            }
+
+            if (sslCTX == null) {
+                sslCTX = WSSSLContext.getSslContext(keyStore, keyStorePass, CAValidation);
+                confBuilder.setSSLContext(sslCTX);
+            }
+        }
         // when using raw urls, AHC does not encode the params in url.
         // this means we can/must encode it(with correct encoding) before passing it to AHC
         confBuilder.setUseRawUrl(true);
@@ -104,6 +127,8 @@ public class WSAsync implements WSImpl {
     public WSRequest newRequest(String url, String encoding) {
         return new WSAsyncRequest(url, encoding);
     }
+
+
 
     public class WSAsyncRequest extends WSRequest {
 
@@ -652,6 +677,11 @@ public class WSAsync implements WSImpl {
 
             public String getContentType() {
                 return request.mimeType;
+            }
+
+            @Override
+            public Object unwrap() {
+                return null;
             }
 
             public String getHeader(String name) {
