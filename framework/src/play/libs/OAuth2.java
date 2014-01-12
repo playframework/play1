@@ -25,6 +25,10 @@ public class OAuth2 {
     public String accessTokenURL;
     public String clientid;
     public String secret;
+    
+    public static enum RequestType{
+    	POST,GET
+    }
 
     public OAuth2(String authorizationURL,
             String accessTokenURL,
@@ -83,13 +87,25 @@ public class OAuth2 {
     }
 
     public Response retrieveAccessToken(String callbackURL) {
+        return retrieveAccessToken(callbackURL, "", "", RequestType.GET );
+    }
+	
+	public Response retrieveAccessToken(String callbackURL, String parameterName, String parameterValue, RequestType type ) {
         String accessCode = Params.current().get("code");
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("client_id", clientid);
         params.put("client_secret", secret);
         params.put("redirect_uri", callbackURL);
         params.put("code", accessCode);
-        HttpResponse response = WS.url(accessTokenURL).params(params).get();
+		if(!parameterName.isEmpty() && !parameterValue.isEmpty()){
+			params.put(parameterName, parameterValue);
+		}
+		HttpResponse response = null;
+		if(type.equals(RequestType.POST)){
+			response = WS.url(accessTokenURL).params(params).post();
+		}else{
+			response = WS.url(accessTokenURL).params(params).get();
+		}
         return new Response(response);
     }
 
