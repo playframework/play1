@@ -42,6 +42,7 @@ public class TestEngine {
 
     public static List<Class> allUnitTests() {
         List<Class> classes = Play.classloader.getAssignableClasses(Assert.class);
+        classes.addAll(Play.classloader.getAssignableClasses(junit.framework.Assert.class));
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             Class c = it.next();
             if (Modifier.isAbstract(c.getModifiers())) {
