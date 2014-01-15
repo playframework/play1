@@ -2,6 +2,7 @@ package play.deps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -32,6 +33,7 @@ import org.apache.ivy.plugins.parser.ModuleDescriptorParser;
 import org.apache.ivy.plugins.parser.ParserSettings;
 import org.apache.ivy.plugins.repository.Resource;
 import org.yaml.snakeyaml.Yaml;
+
 import play.Play;
 
 public class YamlParser extends AbstractModuleDescriptorParser {
@@ -269,19 +271,40 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return modules;
     }
     
+      
     private static String filterModuleName(ModuleRevisionId rev) {
         if (!"play".equals(rev.getName())) {
             File moduleDir = new File(Play.applicationPath, "modules");
-            File moduleWithVersion = new File(moduleDir, rev.getName()+ "-" + rev.getRevision());
-            File moduleWithoutVersion = new File(moduleDir, rev.getName());
-            if(moduleWithVersion != null && moduleWithVersion.exists()){
-                return rev.getName() + "-" + rev.getRevision();
-            }else if(moduleWithoutVersion != null && moduleWithoutVersion.exists()){
-                return rev.getName();
+            // create new filename filter to check if it is a module (lib will
+            // be skipped)
+            File[] filterFiles = moduleDir.listFiles(new ModuleFilter(rev));
+            if (filterFiles != null && filterFiles.length > 0) {
+                return filterFiles[0].getName();
             }
         }
+
         return null;
+
+    }
+
+    private static class ModuleFilter implements FilenameFilter {
+
+        private ModuleRevisionId moduleRevision;
+
+        public ModuleFilter(ModuleRevisionId moduleRevision) {
+            this.moduleRevision = moduleRevision;
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            // Accept module with the same name or with a version number
+            if (name.equals(moduleRevision.getName())
+                    || name.equals(moduleRevision.getName() + "-" + moduleRevision.getRevision())
+                    || name.startsWith(moduleRevision.getName() + "-")) {
+                return true;
+            }
+            return false;
+        }
     }
     
-   
 }
