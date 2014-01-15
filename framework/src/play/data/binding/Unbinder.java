@@ -3,16 +3,13 @@ package play.data.binding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import play.Logger;
 import play.Play;
-import play.data.binding.types.DateBinder;
 import play.libs.I18N;
-import play.utils.Utils;
 
 /**
  * Try to unbind an object to a Map<String,String>
@@ -47,14 +44,27 @@ public class Unbinder {
         }
     }
     
+    public static <E> E[] toArray(Collection<?> c, Class<?> clazz) {
+        @SuppressWarnings("unchecked")
+        E[] array = (E[]) Array.newInstance(clazz, c.size());
+        return c.toArray(array);
+    }
+    
     private static void unbindCollection(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         if(src == null){
             directUnbind( result, src,  srcClazz,  name, annotations);
         }else if (Map.class.isAssignableFrom(src.getClass())) {
             throw new UnsupportedOperationException("Unbind won't work with maps yet");
         } else {
-            Collection<?> c = (Collection<?>) src;
-            Object[] srcArray = c.toArray();
+            Collection<?> c = (Collection<?>) src;   
+            Object[] srcArray = null;
+            if(c.size() > 0){
+                Object o = c.iterator().next();
+                Class<?> clazz = o.getClass();  
+                srcArray = toArray(c, clazz);                
+            }else{
+               srcArray = c.toArray();
+            }   
             unBind(result, srcArray, srcArray.getClass(), name, annotations);
         }
     }
