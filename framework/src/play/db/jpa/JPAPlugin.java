@@ -1,14 +1,8 @@
 package play.db.jpa;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
-import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.type.Type;
-import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -22,20 +16,14 @@ import play.db.Model;
 import play.db.Configuration;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
-import play.utils.Utils;
-
 import javax.persistence.*;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Collections;
-import org.apache.commons.lang.*;
-import play.db.Configuration;
 
 /**
  * JPA Plugin

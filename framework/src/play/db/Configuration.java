@@ -57,11 +57,9 @@ public class Configuration {
     public static Map<String, String> getProperties(String name) {
         Map<String, String> properties = new HashMap<String, String>();
         Properties props = Play.configuration;
-        boolean found = false;
         for (Object key : Collections.list(props.keys())) {
             if (key.toString().startsWith("db." + name)) {
                 properties.put(key.toString(), props.get(key).toString());
-                found = true;
             }
         } 
         return properties;

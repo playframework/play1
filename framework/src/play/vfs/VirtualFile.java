@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channel;
@@ -155,14 +156,23 @@ public class VirtualFile {
     }
 
     public Channel channel() {
+        FileInputStream fis = null;
         try {
-            FileInputStream fis = new FileInputStream(realFile);
+            fis = new FileInputStream(realFile);
             FileChannel ch = fis.getChannel();
             return ch;
         } catch (FileNotFoundException e) {
             return null;
+        }finally{
+            try {
+                if (fis != null) {
+                    fis.close();
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
-
     }
 
     public static VirtualFile open(String file) {

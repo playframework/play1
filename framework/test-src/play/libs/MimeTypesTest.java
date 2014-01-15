@@ -2,15 +2,11 @@ package play.libs;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
-
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import play.PlayBuilder;
 import play.libs.MimeTypes;
-import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
 

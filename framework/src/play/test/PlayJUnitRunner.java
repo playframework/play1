@@ -1,11 +1,6 @@
 package play.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
@@ -22,10 +17,6 @@ import org.junit.runners.model.TestClass;
 
 import play.Invoker;
 import play.Invoker.DirectInvocation;
-import play.mvc.Router;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.mvc.Scope.RenderArgs;
 import play.Play;
 
 public class PlayJUnitRunner extends Runner implements Filterable {
@@ -44,9 +35,8 @@ public class PlayJUnitRunner extends Runner implements Filterable {
                 Play.javaPath.add(Play.getVirtualFile("test"));
                 Play.start();
                 useCustomRunner = true;
-                Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
             }
-            Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
+            Class<?> classToRun = Play.classloader.loadApplicationClass(testClass.getName());
             jUnit4 = new JUnit4(classToRun);
         }
     }

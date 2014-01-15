@@ -3,13 +3,17 @@ package play.server.ssl;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PasswordFinder;
+
 import play.Logger;
 import play.Play;
 
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.*;
+
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.Socket;
 import java.security.*;
 import java.util.Properties;
@@ -81,10 +85,12 @@ public class SslHttpServerContextFactory {
         X509Certificate[] chain;
 
         public PEMKeyManager() {
+            PEMReader keyReader = null;
+            PEMReader reader = null;
             try {
                 final Properties p = Play.configuration;
 
-                PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file",
+                keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file",
                                                                                                "conf/host.key"))),
                                                     new PasswordFinder() {
                     public char[] getPassword() {
@@ -93,7 +99,7 @@ public class SslHttpServerContextFactory {
                 });
                 key = ((KeyPair) keyReader.readObject()).getPrivate();
 
-                PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
+                reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
 
 		X509Certificate cert;
 		Vector chainVector = new Vector();
@@ -105,6 +111,18 @@ public class SslHttpServerContextFactory {
             } catch (Exception e) {
                 e.printStackTrace();
                 Logger.error(e, "");
+            }finally{
+                try {
+                    if (keyReader != null) {
+                        keyReader.close();
+                    }
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
 

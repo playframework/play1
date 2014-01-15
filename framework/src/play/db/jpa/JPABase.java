@@ -1,6 +1,5 @@
 package play.db.jpa;
 
-import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.engine.spi.*;

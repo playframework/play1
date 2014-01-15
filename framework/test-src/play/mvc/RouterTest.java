@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.ning.http.client.RequestBuilder;
 import org.junit.Test;
 import play.Play;
 

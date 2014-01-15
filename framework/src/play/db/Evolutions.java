@@ -1,8 +1,5 @@
 package play.db;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
@@ -32,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
-import javax.sql.DataSource;
 
 /**
  * Handles migration of data.

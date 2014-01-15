@@ -17,7 +17,6 @@ import org.w3c.dom.Document;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
-import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -60,8 +59,6 @@ import java.lang.reflect.Type;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.libs.F;
-
-import javax.management.RuntimeErrorException;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -1017,7 +1014,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
-        play.Logger.info("Are we done? " + future.isDone());
+
         if(future.isDone()) {
             try {
                 return future.get();

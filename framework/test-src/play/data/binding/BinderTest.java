@@ -36,7 +36,6 @@ public class BinderTest {
         Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
         RootParamNode root = ParamNode.convert(r2);
         assertThat(Binder.bind(root, "myInt", Integer.class, null, null)).isEqualTo(myInt);
-        int a = 0;
     }
 
     @Test
@@ -131,7 +130,6 @@ public class BinderTest {
 
 	        Map<String, String[]> params = new HashMap<String, String[]>();
 
-	        Data2 data2;
 	        List<Data2> lst = new ArrayList<Data2>();
 			// build the parameters
 	        params.put("data2[0].a", new String[] { "a0" });
