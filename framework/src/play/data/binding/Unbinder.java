@@ -42,16 +42,24 @@ public class Unbinder {
             }
         }
     }
-    
+        
     private static void unbindCollection(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         if(src == null){
             directUnbind( result, src,  srcClazz,  name, annotations);
         }else if (Map.class.isAssignableFrom(src.getClass())) {
             throw new UnsupportedOperationException("Unbind won't work with maps yet");
         } else {
-            Collection<?> c = (Collection<?>) src;
-            Object[] srcArray = c.toArray();
-            unBind(result, srcArray, srcArray.getClass(), name, annotations);
+            Collection<?> c = (Collection<?>) src;  
+            if (Map.class.isAssignableFrom(src.getClass())) {
+                throw new UnsupportedOperationException("Unbind won't work with maps yet");
+            } else {
+                 int i = 0;
+                 // We cannot convert it to array, as the class of the array will be object instead of the real object class
+                 // Moreover the list could contains different classes (all elements extends from a parent class)
+                 for (Object object : c) {
+                     unBind(result, object, object.getClass(), name + "[" + (i++) + "]", annotations);
+                 }
+            } 
         }
     }
     
