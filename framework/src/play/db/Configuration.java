@@ -14,9 +14,9 @@ public class Configuration {
         final String OLD_JPA_CONFIG_PATTERN = "^jpa\\.([^\\.]*)$";
         final String OLD_HIBERNATE_CONFIG_PATTERN = "^hibernate\\.([a-zA-Z.-]*)$";
         
-        Properties newProperties = convertPattern(p, OLD_DB_CONFIG_PATTERN, "db.default.");
-        newProperties = convertPattern(newProperties, OLD_JPA_CONFIG_PATTERN, "jpa.default.");  
-        newProperties = convertPattern(newProperties, OLD_HIBERNATE_CONFIG_PATTERN, "default.hibernate."); 
+        Properties newProperties = convertPattern(p, OLD_DB_CONFIG_PATTERN, "db.default");
+        newProperties = convertPattern(newProperties, OLD_JPA_CONFIG_PATTERN, "jpa.default");  
+        newProperties = convertPattern(newProperties, OLD_HIBERNATE_CONFIG_PATTERN, "default.hibernate"); 
         
        return newProperties;
     }
@@ -28,7 +28,7 @@ public class Configuration {
              Matcher m = pattern.matcher(property);
              if (m.matches()) {
                  //String[] name = property.split("\\.");
-                 p.put(newFormat + m.group(1), p.get(property));
+                 p.put(newFormat + "." + m.group(1), p.get(property));
                  //newProperties.remove(property);
              }
               // Special case db=...
