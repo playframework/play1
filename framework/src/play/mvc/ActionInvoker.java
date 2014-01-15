@@ -25,7 +25,6 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.i18n.Lang;
 import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;

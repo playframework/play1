@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -20,18 +19,7 @@ import com.sun.rowset.CachedRowSetImpl;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
 import play.Logger;
-import play.exceptions.PlayException;
-import javax.persistence.*;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Collections;
-import org.apache.commons.lang.*;
 
 /**
  * Database connection utilities.

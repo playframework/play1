@@ -233,9 +233,10 @@ public class IO {
      */
     public static void writeContent(CharSequence content, File file, String encoding) {
         OutputStream os = null;
+        PrintWriter printWriter = null;
         try {
             os = new FileOutputStream(file);
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
+            printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
             printWriter.println(content);
             printWriter.flush();
             os.flush();
@@ -244,6 +245,9 @@ public class IO {
         } finally {
             try {
                 if(os != null) os.close();
+                if(printWriter != null){
+                    printWriter.close();
+                }
             } catch(Exception e) {
                 //
             }

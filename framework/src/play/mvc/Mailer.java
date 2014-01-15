@@ -136,7 +136,6 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
     
-    @SuppressWarnings("unchecked")
     public static void attachDataSource(DataSource dataSource, String name, String description){
        attachDataSource(dataSource, name, description, EmailAttachment.ATTACHMENT);
     }

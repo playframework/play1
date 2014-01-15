@@ -10,7 +10,6 @@ import play.CorePlugin;
 import play.Play;
 import play.PlayBuilder;
 import play.PlayPlugin;
-import play.classloading.ApplicationClasses;
 import play.data.parsing.TempFilePlugin;
 import play.data.validation.ValidationPlugin;
 import play.db.DBPlugin;
@@ -20,7 +19,6 @@ import play.i18n.MessagesPlugin;
 import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
-import play.test.UnitTest;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**

@@ -1,8 +1,6 @@
 package play.mvc;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;

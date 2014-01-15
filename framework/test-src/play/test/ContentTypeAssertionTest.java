@@ -1,6 +1,5 @@
 package play.test;
 
-import static org.junit.Assert.*;
 import static play.test.FunctionalTest.*;
 
 import org.junit.Test;

@@ -15,12 +15,8 @@ import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 
-import javax.persistence.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.*;
 
 /**
  * A super class for JPA entities 
@@ -68,7 +64,6 @@ public class GenericModel extends JPABase {
         return edit(JPA.DEFAULT, rootParamNode, name, o, annotations);
     }
 
-    @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(String dbName, ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
         // #1601 - If name is empty, we're dealing with "root" request parameters (without prefixes).
         // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
