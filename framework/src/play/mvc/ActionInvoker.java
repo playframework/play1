@@ -55,6 +55,13 @@ public class ActionInvoker {
             return;
         }
 
+        //moved up because this method was called twice and on the second call
+        //Scope.Session.current.set(Scope.Session.restore()) was being called a second time erasing
+        //my session changes.
+        if (request.resolved) {
+            return;
+        }
+        
         Http.Request.current.set(request);
         Http.Response.current.set(response);
 
@@ -66,10 +73,6 @@ public class ActionInvoker {
         CachedBoundActionMethodArgs.init();
 
         ControllersEnhancer.currentAction.set(new Stack<String>());
-
-        if (request.resolved) {
-            return;
-        }
 
         // Route and resolve format if not already done
         if (request.action == null) {
