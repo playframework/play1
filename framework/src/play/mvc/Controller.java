@@ -217,7 +217,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Return a 200 OK application/binary response
+     * Return a 200 OK application/binary response.
+     * Content is fully loaded in memory, so it should not be used with large data.
      * @param is The stream to copy
      */
     protected static void renderBinary(InputStream is) {
@@ -236,6 +237,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
      *
      * @param is The stream to copy
      * @param name Name of file user is downloading.
@@ -257,6 +259,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
      *
      * @param is The stream to copy
      * @param name Name of file user is downloading.
@@ -279,7 +282,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
+     * 
      * @param is The stream to copy
      * @param name The attachment name
      * @param contentType The content type of the attachment
