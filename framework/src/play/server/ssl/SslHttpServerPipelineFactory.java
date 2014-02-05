@@ -62,7 +62,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         String handler = handlers[handlers.length - 1];
         ChannelHandler instance = getInstance(handler);
         SslPlayHandler sslPlayHandler = (SslPlayHandler) instance;
-        if (instance == null || !(instance instanceof SslPlayHandler) ||  sslPlayHandler != null) {
+        if (instance == null || !(instance instanceof SslPlayHandler) || sslPlayHandler == null) {
             Logger.error("The last handler must be the SslPlayHandler in \"play.netty.pipeline\"");
             return pipeline;
         }    
@@ -83,8 +83,8 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         }
 
         if (sslPlayHandler != null) {
-            pipeline.addLast("handler", instance);
-            sslPlayHandler.pipelines.put("SslHandler", instance);
+            pipeline.addLast("handler", sslPlayHandler);
+            sslPlayHandler.pipelines.put("SslHandler", sslPlayHandler);
         } 
         
         return pipeline;
