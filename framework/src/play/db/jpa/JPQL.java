@@ -23,7 +23,7 @@ public class JPQL {
     }
 
      public long count(String entity) {
-        return count(JPA.DEFAULT);
+        return count(JPA.DEFAULT, entity);
     }
 
     public long count(String dbName, String entity) {
