@@ -241,10 +241,16 @@ public class BinderTest {
         Data1[] datasArray = {d1, d2};
         List<Data1> datas = Arrays.asList(new Data1[]{d2, d1, d3});
 
+        Map<String, Data1> mapData = new HashMap<String, Data1>();
+        mapData.put(d1.a, d1);
+        mapData.put(d2.a, d2);
+        mapData.put(d3.a, d3);
+
         Data4 original = new Data4();
         original.s = "some";
         original.datas = datas;
         original.datasArray = datasArray;
+        original.mapDatas = mapData;
 
         Map<String, Object> result = new HashMap<String, Object>();
         Unbinder.unBind(result, original, "data", noAnnotations);
