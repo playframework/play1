@@ -54,7 +54,6 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     
     
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
-        Logger.warn("parseDescriptor");
         try {
             InputStream srcStream =  rsrc.openStream();
             long lastModified = (rsrc != null?rsrc.getLastModified():0L);

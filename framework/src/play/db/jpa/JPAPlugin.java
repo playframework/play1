@@ -3,6 +3,7 @@ package play.db.jpa;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Level;
 import org.hibernate.ejb.Ejb3Configuration;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -17,6 +18,7 @@ import play.db.Configuration;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import javax.persistence.*;
+
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -24,6 +26,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.Collections;
+
+
 
 /**
  * JPA Plugin
@@ -118,10 +122,10 @@ public class JPAPlugin extends PlayPlugin {
         
         
         org.hibernate.ejb.HibernatePersistence persistence = new org.hibernate.ejb.HibernatePersistence();
-        Properties p = Configuration.convertToMultiDB(Play.configuration);
-               
-               
-        for (String dbName : Configuration.getDbNames(p)) {
+        // Update the configuration
+        Play.configuration = Configuration.convertToMultiDB(Play.configuration);
+                         
+        for (String dbName : Configuration.getDbNames(Play.configuration)) {
             Ejb3Configuration cfg = new Ejb3Configuration();
             List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
             for (Class<?> clazz : classes) {
@@ -139,14 +143,14 @@ public class JPAPlugin extends PlayPlugin {
             }
 
 
-            if (!p.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
-                cfg.setProperty("hibernate.hbm2ddl.auto", p.getProperty("jpa.ddl", "update"));
+            if (!Play.configuration.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
+                cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             }
           
             Map<String, String> properties = Configuration.getProperties(dbName);
             properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
             properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
-            properties.put("hibernate.dialect", getDefaultDialect(p, dbName, p.getProperty("db."+ dbName + ".driver")));
+            properties.put("hibernate.dialect", getDefaultDialect(Play.configuration, dbName, Play.configuration.getProperty("db."+ dbName + ".driver")));
             
              if (Play.configuration.getProperty("jpa." + dbName + ".debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
