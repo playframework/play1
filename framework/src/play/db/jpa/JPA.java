@@ -22,7 +22,7 @@ import play.Logger;
 public class JPA {
 
     protected static final Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<String,EntityManagerFactory>();
-    static ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>();
+    public static ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>();
     public static String DEFAULT = "default";
 
     public static class JPAContext {
@@ -31,8 +31,11 @@ public class JPA {
         public boolean autoCommit = false;
     }
 
-    static Map<String, JPAContext> get() {
-        if (currentEntityManager.get() == null) {
+    public static boolean isInitialized(){
+        return (currentEntityManager.get() != null);
+    }
+    public static Map<String, JPAContext> get() {
+        if (!isInitialized()) {
             throw new JPAException("The JPA context is not initialized. JPA Entity Manager automatically start when one or more classes annotated with the @javax.persistence.Entity annotation are found in the application.");
         }
         return currentEntityManager.get();
