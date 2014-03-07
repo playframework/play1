@@ -34,6 +34,7 @@ public class PlayBuilder {
     @SuppressWarnings({"deprecation"})
     public void build(){
         
+        Play.version = "localbuild";
         Play.configuration = configuration;
         Play.classes = new ApplicationClasses();
         Play.javaPath = new ArrayList<VirtualFile>();
