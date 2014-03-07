@@ -21,7 +21,7 @@ import play.Logger;
  */
 public class JPA {
 
-    protected static final Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<String,EntityManagerFactory>();
+    protected static Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<String,EntityManagerFactory>();
     public static ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>();
     public static String DEFAULT = "default";
 
@@ -268,7 +268,8 @@ public class JPA {
                 for (String db : ems.keySet()) {
                     EntityManager m = ems.get(db).entityManager;
                     EntityTransaction localTx = m.getTransaction();
-                    if (localTx.getRollbackOnly()) {
+                    // The resource transaction must be in progress in order to determine if it has been marked for rollback
+                    if (localTx.isActive() && localTx.getRollbackOnly()) {
                         rollbackAll = true;
                     }
                 }
@@ -277,10 +278,13 @@ public class JPA {
                     EntityManager m = ems.get(db).entityManager;
                     boolean ro = ems.get(db).readonly;
                     EntityTransaction localTx = m.getTransaction();
-                    if (rollbackAll || ro) {
-                        localTx.rollback();
-                    } else {
-                        localTx.commit();
+                    // transaction must be active to make some rollback or commit
+                    if (localTx.isActive()) {
+                        if (rollbackAll || ro) {
+                            localTx.rollback();
+                        } else {
+                            localTx.commit();
+                        }
                     }
                 }
 
@@ -296,7 +300,14 @@ public class JPA {
                     for (String db : ems.keySet()) {
                         EntityManager m = ems.get(db).entityManager;
                         EntityTransaction localTx = m.getTransaction();
-                        try { localTx.rollback(); } catch(Throwable e) {}
+                        try { 
+                            // transaction must be active to make some rollback or commit
+                            if (localTx.isActive()) {
+                                localTx.rollback(); 
+                            }
+                        } catch(Throwable e) {
+                            
+                        }
                     }
                 }
                 

@@ -158,7 +158,7 @@ public class DependenciesManager {
     // Retrieve the list of modules in the order they were defined in the dependencies.yml.
     public List<String> retrieveModules() throws Exception {
     	File ivyModule = new File(application, "conf/dependencies.yml");
-        if(!ivyModule.exists()) {
+        if(ivyModule == null || !ivyModule.exists()) {
             return new ArrayList<String>();
         }
     	return YamlParser.getOrderedModuleList(ivyModule);
@@ -381,9 +381,11 @@ public class DependenciesManager {
         Ivy ivy = Ivy.newInstance(ivySettings);
 
         // Default ivy config see: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/807
-        File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
-        if(ivyDefaultSettings.exists()) {
-            ivy.configure(ivyDefaultSettings);
+        if(userHome != null){
+            File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
+            if(ivyDefaultSettings != null && ivyDefaultSettings.exists()) {
+                ivy.configure(ivyDefaultSettings);
+            }
         }
 
         if (debug) {

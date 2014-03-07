@@ -32,8 +32,10 @@ import org.apache.ivy.plugins.parser.AbstractModuleDescriptorParser;
 import org.apache.ivy.plugins.parser.ModuleDescriptorParser;
 import org.apache.ivy.plugins.parser.ParserSettings;
 import org.apache.ivy.plugins.repository.Resource;
+import org.apache.ivy.plugins.repository.url.URLResource;
 import org.yaml.snakeyaml.Yaml;
 
+import play.Logger;
 import play.Play;
 
 public class YamlParser extends AbstractModuleDescriptorParser {
@@ -48,12 +50,15 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     public boolean accept(Resource rsrc) {
         return rsrc.exists() && rsrc.getName().endsWith(".yml");
     }
+    
+    
+    
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
-        return  parseDescriptor( ps,  url, rsrc.openStream(), rsrc.getLastModified(),  bln);
-    }
-        
-    public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, InputStream srcStream, long lastModified, boolean bln) throws ParseException, IOException {
+        Logger.warn("parseDescriptor");
         try {
+            InputStream srcStream =  rsrc.openStream();
+            long lastModified = (rsrc != null?rsrc.getLastModified():0L);
+            
             Yaml yaml = new Yaml();
             Object o = null;
 
@@ -258,7 +263,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
         YamlParser parser = new YamlParser();
 
-        ModuleDescriptor md = parser.parseDescriptor(null, null, new FileInputStream(file), 0, true);
+        ModuleDescriptor md = parser.parseDescriptor(null, null, new URLResource(file.toURI().toURL()), true);
 
         DependencyDescriptor[] rules = md.getDependencies();
         for (DependencyDescriptor dep : rules) {
@@ -273,20 +278,21 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     
       
     private static String filterModuleName(ModuleRevisionId rev) {
-        if (!"play".equals(rev.getName())) {
+        if (rev != null && !"play".equals(rev.getName())) {
             File moduleDir = new File(Play.applicationPath, "modules");
-            // create new filename filter to check if it is a module (lib will
-            // be skipped)
-            File[] filterFiles = moduleDir.listFiles(new ModuleFilter(rev));
-            if (filterFiles != null && filterFiles.length > 0) {
-                return filterFiles[0].getName();
+            if(moduleDir != null && moduleDir.isDirectory()){
+                // create new filename filter to check if it is a module (lib will
+                // be skipped)
+                File[] filterFiles = moduleDir.listFiles(new ModuleFilter(rev));
+                if (filterFiles != null && filterFiles.length > 0) {
+                    return filterFiles[0].getName();
+               }
             }
         }
 
         return null;
 
     }
-
     private static class ModuleFilter implements FilenameFilter {
 
         private ModuleRevisionId moduleRevision;
@@ -298,13 +304,14 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         @Override
         public boolean accept(File dir, String name) {
             // Accept module with the same name or with a version number
-            if (name.equals(moduleRevision.getName())
+            if (name != null && moduleRevision != null &&
+                    (name.equals(moduleRevision.getName())
                     || name.equals(moduleRevision.getName() + "-" + moduleRevision.getRevision())
-                    || name.startsWith(moduleRevision.getName() + "-")) {
+                    || name.startsWith(moduleRevision.getName() + "-"))) {
                 return true;
             }
             return false;
         }
     }
-    
+
 }

@@ -13,11 +13,13 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import play.Play;
 import play.PlayBuilder;
 
+@Ignore
 public class YamlParserTest {
     
     @BeforeClass

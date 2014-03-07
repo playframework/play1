@@ -717,18 +717,20 @@ public class Play {
 		// See #781
 		// the yaml parser wants play.version as an environment variable
 		System.setProperty("play.version", Play.version);
-		DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, null);
 
 		File localModules = Play.getFile("modules");
 		List<String> modules = new ArrayList<String>();
-		if (localModules.exists() && localModules.isDirectory()) {
+		if (localModules != null && localModules.exists() && localModules.isDirectory()) {
 			try {
+			        File userHome  = new File(System.getProperty("user.home"));
+			        DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
 				Logger.error("There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)", e);
 				// Load module without considering the dependencies.yml order
 				modules = Arrays.asList(localModules.list());		
 			}
+
 			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
 				String moduleName = (String) iter.next();
 
@@ -757,7 +759,7 @@ public class Play {
         if (Play.runingInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
-        
+
         if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }

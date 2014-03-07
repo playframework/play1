@@ -228,9 +228,11 @@ public class JPAPlugin extends PlayPlugin {
     public void onApplicationStop() {
         // Close all presistence units
         for(EntityManagerFactory emf: JPA.emfs.values()) {
-            emf.close();
+            if(emf.isOpen()){
+                emf.close();
+            }
         }
-        
+        JPA.emfs.clear();    
     }
   
     @Override
