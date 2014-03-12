@@ -716,18 +716,20 @@ public class Play {
 		// See #781
 		// the yaml parser wants play.version as an environment variable
 		System.setProperty("play.version", Play.version);
-		DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, null);
 
 		File localModules = Play.getFile("modules");
 		List<String> modules = new ArrayList<String>();
-		if (localModules.exists() && localModules.isDirectory()) {
+		if (localModules != null && localModules.exists() && localModules.isDirectory()) {
 			try {
+			        File userHome  = new File(System.getProperty("user.home"));
+			        DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
-				Logger.error("There was a problem parsing "+ DependenciesManager.MODULE_ORDER_CONF +" (module will not be loaded in order of the dependencies.yml)", e);
+				Logger.error("There was a problem parsing depencies.yml (module will not be loaded in order of the dependencies.yml)", e);
 				// Load module without considering the dependencies.yml order
 				modules = Arrays.asList(localModules.list());		
 			}
+
 			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
 				String moduleName = (String) iter.next();
 
@@ -736,11 +738,12 @@ public class Play {
 				if (moduleName.contains("-")) {
 					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
 				}
-
-				if (module.isDirectory()) {
+				
+				if(module == null || !module.exists()){
+				        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, module.getAbsolutePath());
+				} else if (module.isDirectory()) {
 					addModule(moduleName, module);
 				} else {
-
 					File modulePath = new File(IO.readContentAsString(module).trim());
 					if (!modulePath.exists() || !modulePath.isDirectory()) {
 						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
@@ -755,7 +758,7 @@ public class Play {
         if (Play.runningInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
-        
+
         if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }
