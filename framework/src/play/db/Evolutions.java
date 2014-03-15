@@ -617,17 +617,17 @@ public class Evolutions extends PlayPlugin {
     private static void checkAndUpdateEvolutionsForMultiModuleSupport(Connection connection) throws SQLException {
         ResultSet rs = connection.getMetaData().getColumns(null, null, "play_evolutions", "module_key");
 
-        if(!rs.next()) {
-            
+        if (!rs.next()) {
             System.out.println("!!! - Updating the play_evolutions table to cope with multiple modules - !!!");
             execute("alter table play_evolutions add module_key varchar(255);");
             execute("alter table play_evolutions drop primary key;");
-            execute("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);");
-
+            
             System.out.println("!!! - Assigning any existing evolutions to the parent project - !!!");
             PreparedStatement statement = connection.prepareStatement("update play_evolutions set module_key = ? where module_key is null");
             statement.setString(1, Play.configuration.getProperty("application.name"));
             statement.execute();
+            
+            execute("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);");
         }
     }
 
