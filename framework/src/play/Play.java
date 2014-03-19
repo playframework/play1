@@ -717,6 +717,7 @@ public class Play {
 		// See #781
 		// the yaml parser wants play.version as an environment variable
 		System.setProperty("play.version", Play.version);
+		System.setProperty("application.path", applicationPath.getAbsolutePath());
 
 		File localModules = Play.getFile("modules");
 		List<String> modules = new ArrayList<String>();
