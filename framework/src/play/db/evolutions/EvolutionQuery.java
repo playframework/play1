@@ -166,11 +166,15 @@ public class EvolutionQuery{
     }
 
     public static Connection getNewConnection() throws SQLException {
-        Connection connection = getDatasource().getConnection();
-        connection.setAutoCommit(true); // Yes we want auto-commit
-        return connection;
+        return getNewConnection(true); // Yes we want auto-commit
     }
 
+    public static Connection getNewConnection(boolean autoCommit) throws SQLException {
+        Connection connection = getDatasource().getConnection();
+        connection.setAutoCommit(autoCommit);
+        return connection;
+    }
+    
     public static void closeConnection(Connection connection) {
         try {
             if (connection != null) {

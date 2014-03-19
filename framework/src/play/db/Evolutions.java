@@ -320,7 +320,19 @@ public class Evolutions extends PlayPlugin {
         return "false".equals(Play.configuration.getProperty(name + ".evolutions.enabled", "true")); 
     }
     
-  public static synchronized void resolve(String moduleKey, int revision) {
+    public static boolean autoCommit() {
+        return ! "false".equals(Play.configuration.getProperty("evolutions.autocommit", "true"));
+    }
+    
+    public static synchronized void resolve(int revision) {
+        try {
+            EvolutionQuery.resolve(revision, Play.configuration.getProperty("application.name"));
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+    
+    public static synchronized void resolve(String moduleKey, int revision) {
         try {
             EvolutionQuery.resolve(revision, moduleKey);
         } catch (Exception e) {
@@ -330,7 +342,7 @@ public class Evolutions extends PlayPlugin {
 
     public static synchronized boolean applyScript(boolean runScript, String moduleKey, VirtualFile evolutionsDirectory) {
         try {
-            Connection connection = EvolutionQuery.getNewConnection();
+            Connection connection =  EvolutionQuery.getNewConnection(Evolutions.autoCommit());
             int applying = -1;
             try {
                 for (Evolution evolution : getEvolutionScript(moduleKey, evolutionsDirectory)) {
