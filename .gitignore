@@ -6,6 +6,7 @@
 # Files related to Play build or usage
 id
 dist
+bin
 framework/classes
 framework/test-classes
 framework/tests-results
