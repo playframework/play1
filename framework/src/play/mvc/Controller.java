@@ -529,7 +529,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             throw new RedirectToStatic(Router.reverse(Play.getVirtualFile(file)));
         } catch (NoRouteFoundException e) {
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
             if (element != null) {
                 throw new NoRouteFoundException(file, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
             } else {
@@ -612,7 +612,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                     throw new Redirect(actionDefinition.toString(), permanent);
                 }
             } catch (NoRouteFoundException e) {
-                StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+                StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
                 if (element != null) {
                     throw new NoRouteFoundException(action, newArgs, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
                 } else {
@@ -678,7 +678,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             if (ex.isSourceAvailable()) {
                 throw ex;
             }
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex);
             if (element != null) {
                 ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
                 if (applicationClass != null) {

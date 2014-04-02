@@ -28,7 +28,7 @@ public abstract class PlayExceptionWithJavaSource extends PlayException implemen
     protected PlayExceptionWithJavaSource(String message, Throwable cause) {
         super(message, cause);
 
-        StackTraceElement element = getInterestingStrackTraceElement(cause);
+        StackTraceElement element = getInterestingStackTraceElement(cause);
         if (element != null) {
             applicationClass = Play.classes.getApplicationClass(element.getClassName());
             line = element.getLineNumber();
