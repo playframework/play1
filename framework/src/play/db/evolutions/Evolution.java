@@ -1,7 +1,6 @@
 package play.db.evolutions;
 
 import play.libs.Codec;
-import java.sql.Date;
 
 
 public class Evolution implements Comparable<Evolution> {
