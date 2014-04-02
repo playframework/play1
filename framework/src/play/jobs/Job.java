@@ -185,7 +185,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 } catch (PlayException e) {
                     throw e;
                 } catch (Exception e) {
-                    StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+                    StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
                     if (element != null) {
                         throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), e);
                     }

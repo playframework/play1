@@ -232,7 +232,7 @@ public class ActionInvoker {
                 if (ex.getTargetException() instanceof PlayException) {
                     throw (PlayException) ex.getTargetException();
                 }
-                StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+                StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
                 if (element != null) {
                     throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
                 }
@@ -436,7 +436,7 @@ public class ActionInvoker {
                 }
             }
         } catch (InvocationTargetException ex) {
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
             if (element != null) {
                 throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
             }
