@@ -24,7 +24,7 @@ import com.sun.rowset.CachedRowSetImpl;
 
 public class EvolutionQuery{
     
-    public static void createTable() throws SQLException {
+    public static void createTable(String dbName) throws SQLException {
         // If you are having problems with the default datatype text (clob for Oracle), you can
         // specify your own datatype using the 'evolution.PLAY_EVOLUTIONS.textType'-property
         String textDataType = Play.configuration.getProperty("evolution.PLAY_EVOLUTIONS.textType");
@@ -36,34 +36,43 @@ public class EvolutionQuery{
             }
         }
         
-	execute("create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ", module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
+	execute(dbName, "create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ", module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
     }
     
     public static void alterForModuleSupport(Connection connection) throws SQLException{
         // Add new column
-	execute("alter table play_evolutions add module_key varchar(255);");
+        PreparedStatement ps1 = connection.prepareStatement("alter table play_evolutions add module_key varchar(255);");
+        ps1.execute();
+        closeStatement(ps1);
         
         // Set default value Assigning any existing evolutions to the parent project
         System.out.println("!!! - Assigning any existing evolutions to the parent project - !!!");
         PreparedStatement statement = connection.prepareStatement("update play_evolutions set module_key = ? where module_key is null");
         statement.setString(1, Play.configuration.getProperty("application.name"));
         statement.execute();
+        closeStatement(statement);
        
         
         if(isMySqlDialectInUse()){
             // Drop previous primary key
-            execute("alter table play_evolutions drop primary key;");
+            PreparedStatement ps2 = connection.prepareStatement( "alter table play_evolutions drop primary key;");
+            ps2.execute();
+            closeStatement(ps2);
         }else{
             // Drop previous primary key
-            execute("alter table play_evolutions drop constraint play_evolutions_pkey;");  
+            PreparedStatement ps3 = connection.prepareStatement("alter table play_evolutions drop constraint play_evolutions_pkey;");  
+            ps3.execute();
+            closeStatement(ps3);
         }
         
         // Add new primary key
-        execute("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);"); 
+        PreparedStatement ps4 = connection.prepareStatement("alter table play_evolutions add constraint pk_id_module_key primary key (id,module_key);");
+        ps4.execute();
+        closeStatement(ps4);
     }
     
-    public static void resolve(int revision, String moduleKey) throws SQLException {
-	Connection connection = getNewConnection();
+    public static void resolve(String dbName, int revision, String moduleKey) throws SQLException {
+	Connection connection = getNewConnection(dbName);
         PreparedStatement ps = connection.prepareStatement("update play_evolutions set state = ?, last_problem = ?  where state = ? and id = ? and module_key = ?" );
         ps.setString(1, EvolutionState.APPLIED.getStateWord() );
         ps.setString(2, "");
@@ -71,15 +80,17 @@ public class EvolutionQuery{
         ps.setInt(4, revision);
         ps.setString(5, moduleKey);
         ps.execute();
+        closeStatement(ps);
         
         PreparedStatement ps2 = connection.prepareStatement("delete from play_evolutions where state = ? and id = ? and module_key = ?" );
         ps2.setString(1, EvolutionState.APPLYING_DOWN.getStateWord() );
         ps2.setInt(2, revision);
         ps2.setString(3, moduleKey);
         ps2.execute();
+        closeStatement(ps2);
     }
     
-    public static void apply(Connection connection,boolean runScript, Evolution evolution, String moduleKey) throws SQLException {
+    public static void apply(Connection connection, boolean runScript, Evolution evolution, String moduleKey) throws SQLException {
         if (evolution.applyUp) {
             PreparedStatement ps = connection.prepareStatement("insert into play_evolutions values(?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setInt(1, evolution.revision);
@@ -181,11 +192,11 @@ public class EvolutionQuery{
     }
     
     // JDBC Utils
-    private static void execute(String sql) throws SQLException {
+    private static void execute(String dbName, String sql) throws SQLException {
         Connection connection = null;
         Statement statement = null;
         try {
-            connection = getNewConnection();
+            connection = getNewConnection(dbName);
             statement = connection.createStatement();
             statement.execute(sql);
         } catch (SQLException e) {
@@ -197,11 +208,15 @@ public class EvolutionQuery{
     }
     
     public static Connection getNewConnection() throws SQLException {
-        return getNewConnection(true); // Yes we want auto-commit
+        return getNewConnection(DB.DEFAULT, true); // Yes we want auto-commit
+    }
+    
+    public static Connection getNewConnection(String dbName) throws SQLException {
+        return getNewConnection(dbName, true); // Yes we want auto-commit
     }
 
-    public static Connection getNewConnection(boolean autoCommit) throws SQLException {
-        Connection connection = DB.datasource.getConnection();
+    public static Connection getNewConnection(String dbName, boolean autoCommit) throws SQLException {
+        Connection connection = DB.getDataSource(dbName).getConnection();
         connection.setAutoCommit(autoCommit); 
         return connection;
     }

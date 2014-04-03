@@ -33,8 +33,16 @@ public class DB {
 
     public static class ExtendedDatasource {
 
+        /**
+         * Connection to the physical data source
+         */
         private DataSource datasource;
+        
+        /**
+         * The method used to destroy the data source
+         */
         private String destroyMethod;
+        
         public ExtendedDatasource(DataSource ds, String destroyMethod) {
             this.datasource = ds;
             this.destroyMethod = destroyMethod;
@@ -50,10 +58,22 @@ public class DB {
 
     }
 
+    /**
+     * @deprecated
+     * Use datasources instead
+     * @since 1.3.0
+     * @see datasources
+     * @see ExtendedDatasource
+     */
     @Deprecated
     public static DataSource datasource = null;
-      /**
+     /**
      * The method used to destroy the datasource
+     * @deprecated
+     * Use datasources instead
+     * @since 1.3.0
+     *  @see datasources
+     * @see ExtendedDatasource
      */
     @Deprecated
     public static String destroyMethod = "";
