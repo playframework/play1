@@ -342,21 +342,18 @@ public class Evolutions extends PlayPlugin {
         try {
             checkEvolutionsState();
         } catch (InvalidDatabaseRevision e) {
-        	Logger.info("Automatically applying evolutions in in-memory database");
             // Convert all the properties and covert them for multi DB support
             Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
-            List<String> dBNames = Configuration.getDbNames(playConfig);
-            for (String dbName : dBNames) {
-                for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
-                    if ("mem".equals(Play.configuration.getProperty("db"))
-                            && listDatabaseEvolutions(dbName, moduleRoot.getKey()).peek().revision == 0) {
-                        Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
-                        applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
-                    } else {
-                        throw e;
-                    }
+            for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
+                if ("mem".equals(playConfig.getProperty("db"))
+                        && listDatabaseEvolutions(e.getDbName(), moduleRoot.getKey()).peek().revision == 0) {
+                    Logger.info("Automatically applying evolutions in in-memory database");
+                    Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
+                    applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
+                } else {
+                    throw e;
                 }
-            }
+            }    
         }
     }
 
@@ -527,7 +524,7 @@ public class Evolutions extends PlayPlugin {
                         }
                         script = "# --- Rev:" + revision + "," + (EvolutionState.APPLYING_UP.getStateWord().equals(state) ? "Ups" : "Downs") + " - " + hash + "\n\n" + script;
                         String error = rs.getString("last_problem");
-                        throw new InconsistentDatabase(script, error, revision, moduleRoot.getKey());
+                        throw new InconsistentDatabase(dbName, script, error, revision, moduleRoot.getKey());
                     }
                 } catch (SQLException e) {
                     throw new UnexpectedException(e);
@@ -536,7 +533,7 @@ public class Evolutions extends PlayPlugin {
                 }
 
                 if (!evolutionScript.isEmpty()) {
-                    throw new InvalidDatabaseRevision(toHumanReadableScript(evolutionScript));
+                    throw new InvalidDatabaseRevision(dbName, toHumanReadableScript(evolutionScript));
                 }
             }
         }
