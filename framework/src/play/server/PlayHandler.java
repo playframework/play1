@@ -589,15 +589,31 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             host = "";
             port = 80;
             domain = "";
-        } else {
-            if (host.contains(":")) {
-                final String[] hosts = host.split(":");
-                port = Integer.parseInt(hosts[1]);
-                domain = hosts[0];
-            } else {
-                port = 80;
+        }
+        // Check for IPv6 address
+        else if (host.startsWith("[")) {
+            // There is no port
+            if (host.endsWith("]")) {
                 domain = host;
+                port = 80;
             }
+            else {
+                // There is a port so take from the last colon
+                int portStart = host.lastIndexOf(':');
+                if (portStart > 0 && (portStart + 1) < host.length()) {
+                    domain = host.substring(0, portStart);
+                    port = Integer.parseInt(host.substring(portStart + 1));
+                }
+            }
+        }
+        // Non IPv6 but has port
+        else if (host.contains(":")) {
+            final String[] hosts = host.split(":");
+            port = Integer.parseInt(hosts[1]);
+            domain = hosts[0];
+        } else {
+            port = 80;
+            domain = host;
         }
 
         boolean secure = false;
