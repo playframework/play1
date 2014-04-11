@@ -4,28 +4,37 @@ import play.exceptions.PlayException;
 
 //Exceptions
 public class InconsistentDatabase extends PlayException {
+    /**
+     * The name of the Database concern by the exception
+     */
+    private String dbName;
     private String evolutionScript;
     private String error;
     private int revision;
     private String moduleKey;
 
-    public InconsistentDatabase(String evolutionScript, String error, int revision, String moduleKey) {
+    public InconsistentDatabase(String dbName, String evolutionScript, String error, int revision, String moduleKey) {
+        this.dbName = dbName;
         this.evolutionScript = evolutionScript;
         this.error = error;
         this.revision = revision;
         this.moduleKey = moduleKey;
     }
     
+    public String getDbName() {
+        return this.dbName;
+    }
+    
     public String getEvolutionScript() {
-        return evolutionScript;
+        return this.evolutionScript;
     }
 
     public String getError() {
-        return error;
+        return this.error;
     }
 
     public int getRevision() {
-        return revision;
+        return this.revision;
     }
     
 

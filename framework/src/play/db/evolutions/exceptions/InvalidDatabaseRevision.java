@@ -5,12 +5,21 @@ import play.exceptions.PlayException;
 //Exceptions
 public class InvalidDatabaseRevision extends PlayException {
 
+    /**
+     * The name of the Database concern by the exception
+     */
+    private String dbName;
     private String evolutionScript;
 
-    public InvalidDatabaseRevision(String evolutionScript) {
+    public InvalidDatabaseRevision(String dbName, String evolutionScript) {
+        this.dbName = dbName;
         this.evolutionScript = evolutionScript;
     }
 
+    public String getDbName() {
+        return this.dbName;
+    }
+    
     public String getEvolutionScript() {
         return evolutionScript;
     }
