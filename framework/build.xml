@@ -52,7 +52,7 @@
     </target>
 
     <target name="version" unless="version">
-        <exec executable="git" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
+        <exec executable="git2" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
             <arg value="describe" />
             <arg value="--always" />
         </exec>
