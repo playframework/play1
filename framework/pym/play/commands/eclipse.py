@@ -29,6 +29,10 @@ def execute(**kargs):
     vm_arguments = app.readConf('jvm.memory')
     # JDK 7 compat
     vm_arguments = vm_arguments +' -XX:-UseSplitVerifier'
+    
+    # JDK 8 compatible
+    vm_arguments = vm_arguments +' -noverify'
+
     if application_name:
         application_name = application_name.replace("/", " ")
     else:
