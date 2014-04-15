@@ -55,6 +55,8 @@ public class ApplicationCompiler {
             javaVersion = CompilerOptions.VERSION_1_6;
         } else if (System.getProperty("java.version").startsWith("1.7")) {
             javaVersion = CompilerOptions.VERSION_1_7;
+        } else if (System.getProperty("java.version").startsWith("1.8")) {
+            javaVersion = CompilerOptions.VERSION_1_8;
         }
         if("1.5".equals(Play.configuration.get("java.source"))) {
             javaVersion = CompilerOptions.VERSION_1_5;
@@ -62,6 +64,8 @@ public class ApplicationCompiler {
             javaVersion = CompilerOptions.VERSION_1_6;
         } else if("1.7".equals(Play.configuration.get("java.source"))) {
             javaVersion = CompilerOptions.VERSION_1_7;
+        }else if("1.8".equals(Play.configuration.get("java.source"))) {
+            javaVersion = CompilerOptions.VERSION_1_8;
         }
         this.settings.put(CompilerOptions.OPTION_Source, javaVersion);
         this.settings.put(CompilerOptions.OPTION_TargetPlatform, javaVersion);
@@ -112,6 +116,12 @@ public class ApplicationCompiler {
 
         public char[][] getPackageName() {
             return packageName;
+        }
+
+        @Override
+        public boolean ignoreOptionalProblems() {
+            // TODO Auto-generated method stub
+            return false;
         }
     }
 
