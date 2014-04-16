@@ -1,0 +1,11 @@
+# Application dependencies
+
+require:
+    - play
+    - com.google.guava -> guava r09
+    - org.hamcrest -> hamcrest-core 1.3
+    - org.hamcrest -> hamcrest-library 1.3
+
+repositories:
+    - mavenCentral:
+        type:           iBiblio

@@ -7,8 +7,7 @@ from play.utils import *
 
 COMMANDS = ['javadoc', 'jd']
 
-DEFAULT_JAVA_API_VERSION = "7"
-DEFAULT_API_VERSION = "1.2.7"
+DEFAULT_API_VERSION = "1.3.0"
 
 HELP = {
     'javadoc': 'Generate your application Javadoc'
@@ -66,21 +65,19 @@ def defineJavadocOptions(app, outdir, args):
         print "~ Build project Javadoc with links to :"
         args.remove('--links')
         # Add link to JavaDoc of JAVA
-        sp = subprocess.Popen(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        javaVersion = sp.communicate()
-        javaVersion =  str( javaVersion)
         
-        regexp = re.compile('1.6')
-        if regexp.search(javaVersion) is not None:
-            print "~    Java(TM) Platform, Standard Edition  API Specification"        
-            print "~    Java(TM) EE  Specification APIs"
-            f.write(' -link http://docs.oracle.com/javase/6/docs/api/')
-            f.write(' -link http://docs.oracle.com/javaee/6/api/')         
-        else:   
-            print "~    Java(TM) Platform, Standard Edition 7 API Specification"        
-            print "~    Java(TM) EE 7 Specification APIs"
-            f.write(' -link http://docs.oracle.com/javase/' + DEFAULT_JAVA_API_VERSION + '/docs/api/')
-            f.write(' -link http://docs.oracle.com/javaee/' + DEFAULT_JAVA_API_VERSION + '/api/')
+        javaVersion = getJavaVersion()
+        if javaVersion == "1.5":
+            print "~    Java(TM) Platform, Platform Standard Edition 5.0"        
+            print "~    Java(TM) EE 5 Specification APIs"
+            f.write(' -link http://docs.oracle.com/javase/1.5.0/docs/api/')
+            f.write(' -link http://docs.oracle.com/javaee/5/api/')   
+        else:
+            urlVersion = javaVersion[2:]
+            print "~    Java(TM) Platform, Standard Edition " + urlVersion + " API Specification"        
+            print "~    Java(TM) EE " + urlVersion + "Specification APIs"
+            f.write(' -link http://docs.oracle.com/javase/' + urlVersion + '/docs/api/')
+            f.write(' -link http://docs.oracle.com/javaee/' + urlVersion + '/api/')         
      
        
         # Add link to JavaDoc of Play Framework
