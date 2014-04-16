@@ -10,6 +10,7 @@ import play.Play;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Scope;
 
 /**
  * Language support
@@ -80,7 +81,7 @@ public class Lang {
             Response response = Response.current();
             if ( response != null ) {
                 // We have a current response in scope - set the language-cookie to store the selected language for the next requests
-                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, null, "/", null, Scope.COOKIE_SECURE);
             }
         }
 
@@ -152,7 +153,7 @@ public class Lang {
                     return;
                 }
                 // could not use locale from cookie - clear the locale-cookie
-                Response.current().setCookie(cn, "");
+                Response.current().setCookie(cn, "", null, "/", null, Scope.COOKIE_SECURE);
 
             }
 
