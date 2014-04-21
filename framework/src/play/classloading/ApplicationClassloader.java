@@ -406,7 +406,7 @@ public class ApplicationClassloader extends ClassLoader {
 
             } else {
 
-                if(!Play.pluginCollection.compileSources()) {
+                if (!Play.pluginCollection.compileSources()) {
 
                     List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
@@ -415,7 +415,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                     List<String> classNames = new ArrayList<String>();
                     for (int i = 0; i < all.size(); i++) {
-                            ApplicationClass applicationClass = all.get(i);
+                        ApplicationClass applicationClass = all.get(i);
                         if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
                             classNames.add(all.get(i).name);
                         }

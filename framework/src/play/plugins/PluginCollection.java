@@ -55,7 +55,6 @@ public class PluginCollection {
      */
     protected String play_plugins_resourceName = "play.plugins";
 
-    protected Object lock = new Object();
     /**
      * List that holds all loaded plugins, enabled or disabled
      */
@@ -115,7 +114,7 @@ public class PluginCollection {
                 return res;
             }
 
-            // index is equal in both plugins.
+            // Index is equal in both plugins.
             // sort on name to get consistent order
             return name.compareTo(o.name);
         }
@@ -128,7 +127,7 @@ public class PluginCollection {
         // Play! plugins
         Enumeration<URL> urls = null;
         try {
-            urls = Play.classloader.getResources( play_plugins_resourceName);
+            urls = Play.classloader.getResources(play_plugins_resourceName);
         } catch (Exception e) {
             Logger.error("Error loading play.plugins", e);
             return ;
@@ -159,34 +158,33 @@ public class PluginCollection {
 
         }
 
-        // sort it
         Collections.sort(pluginsToLoad);
 
-        for ( LoadingPluginInfo info : pluginsToLoad) {
+        for (LoadingPluginInfo info : pluginsToLoad) {
             Logger.trace("Loading plugin %s", info.name);
             try {
-                PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(info.name).newInstance();
+                PlayPlugin plugin = (PlayPlugin)Play.classloader.loadClass(info.name).newInstance();
                 plugin.index = info.index;
-                if( addPlugin(plugin) ){
-                    Logger.trace("Loaded plugin %s", plugin);
-                }else{
+                if (addPlugin(plugin)) {
+                    Logger.trace("Plugin %s loaded", plugin);
+                } else {
                     Logger.warn("Did not load plugin %s. Already loaded", plugin);
                 }
             } catch (Exception ex) {
                 Logger.error(ex, "Error loading plugin %s", info.toString());
             }
         }
-        //now we must call onLoad for all plugins - and we must detect if a plugin
-        //disables another plugin the old way, by removing it from Play.plugins.
-        for( PlayPlugin plugin : getEnabledPlugins()){
+        // Mow we must call onLoad for all plugins - and we must detect if a plugin
+        // disables another plugin the old way, by removing it from Play.plugins.
+        for (PlayPlugin plugin : getEnabledPlugins()) {
 
             //is this plugin still enabled?
-            if( isEnabled(plugin)){
+            if (isEnabled(plugin)) {
                 initializePlugin(plugin);
             }
         }
 
-        //must update Play.plugins-list one last time
+        // Must update Play.plugins-list one last time
         updatePlayPluginsList();
 
     }
@@ -195,35 +193,35 @@ public class PluginCollection {
      * Reloads all loaded plugins that is application-supplied.
      */
     public void reloadApplicationPlugins() throws Exception{
+       
         Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
-
         for (PlayPlugin plugin : getAllPlugins()) {
 
-            //Is this plugin an application-supplied-plugin?
+            // Is this plugin an application-supplied-plugin?
             if (isLoadedByApplicationClassloader(plugin)) {
-                //This plugin is application-supplied - Must reload it
+                // This plugin is application-supplied - Must reload it
                 String pluginClassName = plugin.getClass().getName();
                 Class pluginClazz = Play.classloader.loadClass( pluginClassName);
 
-                //first looking for constructors the old way
+                // First look for constructors the old way
                 Constructor<?>[] constructors = pluginClazz.getConstructors();
 
                 if( constructors.length == 0){
-                    //no constructors in plugin
-                    //using getDeclaredConstructors() instead of getConstructors() to make it work for plugins without constructor
+                    // No constructors in plugin
+                    // using getDeclaredConstructors() instead of getConstructors() to make it work for plugins without constructor
                     constructors = pluginClazz.getDeclaredConstructors();
                 }
 
                 PlayPlugin newPlugin = (PlayPlugin) constructors[0].newInstance();
                 newPlugin.index = plugin.index;
-                //replace this plugin
+                // Replace this plugin
                 replacePlugin(plugin, newPlugin);
                 reloadedPlugins.add(newPlugin);
             }
         }
 
-        //now we must call onLoad for all reloaded plugins
-        for( PlayPlugin plugin : reloadedPlugins ){
+        // Now we must call onLoad for all reloaded plugins
+        for (PlayPlugin plugin : reloadedPlugins) {
             initializePlugin( plugin );
         }
 
@@ -244,17 +242,17 @@ public class PluginCollection {
     @SuppressWarnings({"deprecation"})
     protected void initializePlugin(PlayPlugin plugin) {
         Logger.trace("Initializing plugin " + plugin);
-        //we're ready to call onLoad for this plugin.
-        //must create a unique Play.plugins-list for this onLoad-method-call so
-        //we can detect if some plugins are removed/disabled
-        Play.plugins = new ArrayList<PlayPlugin>( getEnabledPlugins() );
+        // We're ready to call onLoad for this plugin.
+        // must create a unique Play.plugins-list for this onLoad-method-call so
+        // we can detect if some plugins are removed/disabled
+        Play.plugins = new ArrayList<PlayPlugin>(getEnabledPlugins());
         plugin.onLoad();
-        //check for missing/removed plugins
-        for( PlayPlugin enabledPlugin : getEnabledPlugins()){
-            if( !Play.plugins.contains( enabledPlugin)) {
+        // Check for missing/removed plugins
+        for (PlayPlugin enabledPlugin : getEnabledPlugins()) {
+            if (!Play.plugins.contains(enabledPlugin)) {
                 Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
-                //this enabled plugin was disabled.
-                //must disable it in pluginCollection
+                // This enabled plugin was disabled.
+                // must disable it in pluginCollection
                 disablePlugin( enabledPlugin);
             }
         }
@@ -266,34 +264,29 @@ public class PluginCollection {
      * @param plugin
      * @return true if plugin was new and was added
      */
-    protected boolean addPlugin( PlayPlugin plugin ){
-        synchronized( lock ){
-            if( !allPlugins.contains(plugin) ){
-                allPlugins.add( plugin );
-                Collections.sort(allPlugins);
-                allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);
-                enablePlugin(plugin);
-                return true;
-            }
+    protected synchronized boolean addPlugin(PlayPlugin plugin) {
+        if (!allPlugins.contains(plugin)) {
+            allPlugins.add( plugin );
+            Collections.sort(allPlugins);
+            allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
+            enablePlugin(plugin);
+            return true;
         }
         return false;
     }
 
-    protected void replacePlugin( PlayPlugin oldPlugin, PlayPlugin newPlugin){
-        synchronized( lock ){
-            if( allPlugins.remove( oldPlugin )){
-                allPlugins.add( newPlugin);
-                Collections.sort( allPlugins);
-                allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);
-            }
-
-            if( enabledPlugins.remove( oldPlugin )){
-                enabledPlugins.add(newPlugin);
-                Collections.sort( enabledPlugins);
-                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
-            }
-
+    protected synchronized void replacePlugin(PlayPlugin oldPlugin, PlayPlugin newPlugin) {
+        if (allPlugins.remove(oldPlugin)) {
+            allPlugins.add(newPlugin);
+            Collections.sort(allPlugins);
+            allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
         }
+
+        if (enabledPlugins.remove(oldPlugin)) {
+            enabledPlugins.add(newPlugin);
+            Collections.sort(enabledPlugins);
+            enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
+        }        
     }
 
     /**
@@ -302,21 +295,19 @@ public class PluginCollection {
      * @param plugin
      * @return true if plugin exists and was enabled now
      */
-    public boolean enablePlugin( PlayPlugin plugin ){
-        synchronized( lock ){
-            if( allPlugins.contains( plugin )){
-                //the plugin exists
-                if( !enabledPlugins.contains( plugin )){
-                    //plugin not currently enabled
-                    enabledPlugins.add( plugin );
-                    Collections.sort( enabledPlugins);
-                    enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
-                    updatePlayPluginsList();
-                    Logger.trace("Plugin " + plugin + " enabled");
-                    return true;
-                }
+    public synchronized boolean enablePlugin(PlayPlugin plugin) {
+        if (allPlugins.contains(plugin)) {
+            // the plugin exists
+            if (!enabledPlugins.contains(plugin)) {
+                // plugin not currently enabled
+                enabledPlugins.add(plugin);
+                Collections.sort(enabledPlugins);
+                enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
+                updatePlayPluginsList();
+                Logger.trace("Plugin " + plugin + " enabled");
+                return true;
             }
-        }
+        }      
         return false;
     }
 
@@ -324,7 +315,7 @@ public class PluginCollection {
      * enable plugin of specified type
      * @return true if plugin was enabled
      */
-    public boolean enablePlugin( Class<? extends PlayPlugin> pluginClazz ){
+    public boolean enablePlugin(Class<? extends PlayPlugin> pluginClazz) {
         return enablePlugin(getPluginInstance(pluginClazz));
     }
 
@@ -334,12 +325,10 @@ public class PluginCollection {
      * @param pluginClazz
      * @return
      */
-    public PlayPlugin getPluginInstance( Class<? extends PlayPlugin> pluginClazz){
-        synchronized( lock ){
-            for( PlayPlugin p : getAllPlugins()){
-                if (pluginClazz.isInstance(p)) {
-                    return p;
-                }
+    public synchronized PlayPlugin getPluginInstance(Class<? extends PlayPlugin> pluginClazz) {
+        for (PlayPlugin p : getAllPlugins()) {
+            if (pluginClazz.isInstance(p)) {
+                return p;
             }
         }
         return null;
@@ -351,16 +340,14 @@ public class PluginCollection {
      * @param plugin
      * @return true if plugin was enabled and now is disabled
      */
-    public boolean disablePlugin( PlayPlugin plugin ){
-        synchronized( lock ){
-            //try to disable it?
-            if( enabledPlugins.remove( plugin ) ){
-                //plugin was removed
-                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
-                updatePlayPluginsList();
-                Logger.trace("Plugin " + plugin + " disabled");
-                return true;
-            }
+    public synchronized boolean disablePlugin(PlayPlugin plugin ){
+        //try to disable it?
+        if (enabledPlugins.remove(plugin)) {
+            //plugin was removed
+            enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+            updatePlayPluginsList();
+            Logger.trace("Plugin " + plugin + " disabled");
+            return true;
         }
         return false;
     }
@@ -369,8 +356,8 @@ public class PluginCollection {
      * disable plugin of specified type
      * @return true if plugin was enabled and now is disabled
      */
-    public boolean disablePlugin( Class<? extends PlayPlugin> pluginClazz ){
-        return disablePlugin( getPluginInstance( pluginClazz));
+    public boolean disablePlugin(Class<? extends PlayPlugin> pluginClazz) {
+        return disablePlugin(getPluginInstance( pluginClazz));
     }
 
 
@@ -379,15 +366,15 @@ public class PluginCollection {
      * Must update Play.plugins-list to be backward compatible
      */
     @SuppressWarnings({"deprecation"})
-    public void updatePlayPluginsList(){
-        Play.plugins = Collections.unmodifiableList( getEnabledPlugins() );
+    public void updatePlayPluginsList() {
+        Play.plugins = Collections.unmodifiableList(getEnabledPlugins());
     }
 
     /**
      * Returns new readonly list of all enabled plugins
      * @return
      */
-    public List<PlayPlugin> getEnabledPlugins(){
+    public List<PlayPlugin> getEnabledPlugins() {
         return enabledPlugins_readOnlyCopy;
     }
     
@@ -430,7 +417,7 @@ public class PluginCollection {
      * Returns new readonly list of all plugins
      * @return
      */
-    public List<PlayPlugin> getAllPlugins(){
+    public List<PlayPlugin> getAllPlugins() {
         return allPlugins_readOnlyCopy;
     }
 
@@ -440,13 +427,13 @@ public class PluginCollection {
      * @param plugin
      * @return true if plugin is enabled
      */
-    public boolean isEnabled( PlayPlugin plugin){
-        return getEnabledPlugins().contains( plugin );
+    public boolean isEnabled(PlayPlugin plugin) {
+        return getEnabledPlugins().contains(plugin);
     }
 
     public boolean compileSources() {
-        for( PlayPlugin plugin : getEnabledPlugins() ){
-            if(plugin.compileSources()) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            if (plugin.compileSources()) {
                 return true;
             }
         }
@@ -454,34 +441,34 @@ public class PluginCollection {
     }
 
     public boolean detectClassesChange() {
-        for(PlayPlugin plugin : getEnabledPlugins()){
-            if(plugin.detectClassesChange()) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            if (plugin.detectClassesChange()) {
                 return true;
             }
         }
         return false;
     }
 
-    public void invocationFinally(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+    public void invocationFinally() {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.invocationFinally();
         }
     }
 
-    public void beforeInvocation(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+    public void beforeInvocation() {
+        for( PlayPlugin plugin : getEnabledPlugins()) {
             plugin.beforeInvocation();
         }
     }
 
     public void afterInvocation(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterInvocation();
         }
     }
 
     public void onInvocationSuccess(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onInvocationSuccess();
         }
     }
@@ -497,25 +484,25 @@ public class PluginCollection {
     }
 
     public void beforeDetectingChanges(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.beforeDetectingChanges();
         }
     }
 
     public void detectChange(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.detectChange();
         }
     }
 
     public void onApplicationReady(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onApplicationReady();
         }
     }
 
     public void onConfigurationRead(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onConfigurationRead();
         }
     }
@@ -527,13 +514,13 @@ public class PluginCollection {
     }
 
     public void afterApplicationStart(){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterApplicationStart();
         }
     }
 
     public void onApplicationStop(){
-        for( PlayPlugin plugin : getReversedEnabledPlugins() ){
+        for (PlayPlugin plugin : getReversedEnabledPlugins()) {
             try {
               plugin.onApplicationStop();
             }
@@ -548,13 +535,13 @@ public class PluginCollection {
         }
     }
 
-    public void onEvent(String message, Object context){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+    public void onEvent(String message, Object context) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onEvent(message, context);
         }
     }
 
-    public void enhance(ApplicationClasses.ApplicationClass applicationClass){
+    public void enhance(ApplicationClasses.ApplicationClass applicationClass) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             try {
                 long start = System.currentTimeMillis();
@@ -571,15 +558,15 @@ public class PluginCollection {
     @Deprecated
     public List<ApplicationClasses.ApplicationClass> onClassesChange(List<ApplicationClasses.ApplicationClass> modified){
         List<ApplicationClasses.ApplicationClass> modifiedWithDependencies = new ArrayList<ApplicationClasses.ApplicationClass>();
-        for( PlayPlugin plugin : getEnabledPlugins() ){
-            modifiedWithDependencies.addAll( plugin.onClassesChange(modified) );
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            modifiedWithDependencies.addAll(plugin.onClassesChange(modified));
         }
         return modifiedWithDependencies;
     }
 
     @Deprecated
-    public void compileAll(List<ApplicationClasses.ApplicationClass> classes){
-        for( PlayPlugin plugin : getEnabledPlugins() ){
+    public void compileAll(List<ApplicationClasses.ApplicationClass> classes) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.compileAll(classes);
         }
     }
@@ -594,7 +581,7 @@ public class PluginCollection {
         return null;
     }
 
-    public Object bindBean(RootParamNode rootParamNode, String name, Object bean){
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Object result = plugin.bindBean(rootParamNode, name, bean);
             if (result != null) {
@@ -604,7 +591,7 @@ public class PluginCollection {
         return null;
     }
 
-    public Map<String, Object> unBind(Object src, String name){
+    public Map<String, Object> unBind(Object src, String name) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Map<String, Object> r = plugin.unBind(src, name);
             if (r != null) {
@@ -614,7 +601,7 @@ public class PluginCollection {
         return null;
     }
 
-    public Object willBeValidated(Object value){
+    public Object willBeValidated(Object value) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Object newValue = plugin.willBeValidated(value);
             if (newValue != null) {
@@ -624,8 +611,8 @@ public class PluginCollection {
         return value;
     }
 
-    public Model.Factory modelFactory(Class<? extends Model> modelClass){
-        for(PlayPlugin plugin : getEnabledPlugins()) {
+    public Model.Factory modelFactory(Class<? extends Model> modelClass) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             Model.Factory factory = plugin.modelFactory(modelClass);
             if(factory != null) {
                 return factory;
@@ -634,7 +621,7 @@ public class PluginCollection {
         return null;
     }
 
-    public String getMessage(String locale, Object key, Object... args){
+    public String getMessage(String locale, Object key, Object... args) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             String message = plugin.getMessage(locale, key, args);
             if(message != null) {
@@ -644,13 +631,13 @@ public class PluginCollection {
         return null;
     }
 
-    public void beforeActionInvocation(Method actionMethod){
+    public void beforeActionInvocation(Method actionMethod) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.beforeActionInvocation(actionMethod);
         }
     }
 
-    public void onActionInvocationResult(Result result){
+    public void onActionInvocationResult(Result result) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onActionInvocationResult(result);
         }
@@ -662,28 +649,27 @@ public class PluginCollection {
         }
     }
 
-    public void routeRequest(Http.Request request){
+    public void routeRequest(Http.Request request) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.routeRequest(request);
         }
     }
 
-    public void onRequestRouting(Router.Route route){
+    public void onRequestRouting(Router.Route route) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onRequestRouting(route);
         }
     }
 
-    public void onRoutesLoaded(){
+    public void onRoutesLoaded() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onRoutesLoaded();
         }
     }
 
-    public boolean rawInvocation(Http.Request request, Http.Response response)throws Exception{
+    public boolean rawInvocation(Http.Request request, Http.Response response) throws Exception {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             if (plugin.rawInvocation(request, response)) {
-                //raw = true;
                 return true;
             }
         }
@@ -691,17 +677,16 @@ public class PluginCollection {
     }
 
 
-    public boolean serveStatic(VirtualFile file, Http.Request request, Http.Response response){
+    public boolean serveStatic(VirtualFile file, Http.Request request, Http.Response response) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             if (plugin.serveStatic(file, request, response)) {
-                //raw = true;
                 return true;
             }
         }
         return false;
     }
 
-    public List<String> addTemplateExtensions(){
+    public List<String> addTemplateExtensions() {
         List<String> list = new ArrayList<String>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             list.addAll(plugin.addTemplateExtensions());
@@ -709,8 +694,8 @@ public class PluginCollection {
         return list;
     }
 
-    public String overrideTemplateSource(BaseTemplate template, String source){
-        for(PlayPlugin plugin : getEnabledPlugins()) {
+    public String overrideTemplateSource(BaseTemplate template, String source) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             String newSource = plugin.overrideTemplateSource(template, source);
             if(newSource != null) {
                 source = newSource;
@@ -719,8 +704,8 @@ public class PluginCollection {
         return source;
     }
 
-    public Template loadTemplate(VirtualFile file){
-        for(PlayPlugin plugin : getEnabledPlugins() ) {
+    public Template loadTemplate(VirtualFile file) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             Template pluginProvided = plugin.loadTemplate(file);
             if(pluginProvided != null) {
                 return pluginProvided;
@@ -729,13 +714,13 @@ public class PluginCollection {
         return null;
     }
 
-    public void afterFixtureLoad(){
+    public void afterFixtureLoad() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterFixtureLoad();
         }
     }
 
-    public TestEngine.TestResults runTest(Class<BaseTest> clazz){
+    public TestEngine.TestResults runTest(Class<BaseTest> clazz) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             TestEngine.TestResults pluginTestResults = plugin.runTest(clazz);
             if (pluginTestResults != null) {
