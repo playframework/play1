@@ -325,20 +325,20 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     // ~~~~~
     public int compareTo(PlayPlugin o) {
         int res = index < o.index ? -1 : (index == o.index ? 0 : 1);
-        if (res!=0) {
+        if (res != 0) {
             return res;
         }
 
         // index is equal in both plugins.
-        // sort on classtype to get consistent order
+        // Sort on classtype to get consistent order
         res = this.getClass().getName().compareTo(o.getClass().getName());
-        if (res != 0 ) {
+        if (res != 0) {
             // classnames where different
             return res;
         }
 
-        // identical classnames.
-        // sort on instance to get consistent order.
+        // Identical classnames.
+        // Sort on instance to get consistent order.
         // We only return 0 (equal) if both identityHashCode are identical
         // which is only the case if both this and other are the same object instance.
         // This is consistent with equals() when no special equals-method is implemented.

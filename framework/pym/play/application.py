@@ -68,7 +68,10 @@ class PlayApplication(object):
 
     def modules(self):
         modules = []
-        if self.readConf('application.mode').lower() == 'dev':
+        application_mode = self.readConf('application.mode').lower()
+        if not application_mode:
+            application_mode = "dev"
+        if application_mode == 'dev':
             #Load docviewer module
 			modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/docviewer')))
 			
@@ -273,6 +276,10 @@ class PlayApplication(object):
             self.jpda_port = self.play_env['jpda.port']
 
         application_mode = self.readConf('application.mode').lower()
+        if not application_mode:
+            print "~ Warning: no application.mode defined in you conf/application.conf. Using DEV mode."
+            application_mode = "dev"
+
 
         if application_mode == 'prod':
             java_args.append('-server')
@@ -299,7 +306,7 @@ class PlayApplication(object):
             
         java_args.append('-Dfile.encoding=utf-8')
 
-        if self.readConf('application.mode').lower() == 'dev':
+        if application_mode == 'dev':
             self.check_jpda()
             java_args.append('-Xdebug')
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
