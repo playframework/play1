@@ -31,9 +31,11 @@ public class Expression {
     static Pattern expression = Pattern.compile("^\\$\\{(.*)\\}$");
 
     public static Object evaluate(String value, String defaultValue) {
-        Matcher matcher = expression.matcher(value);
-        if (matcher.matches()) {
-            return Play.configuration.getProperty(matcher.group(1), defaultValue);
+        if (value != null) {
+            Matcher matcher = expression.matcher(value);
+            if (matcher.matches()) {
+              return Play.configuration.getProperty(matcher.group(1), defaultValue);
+            }
         }
         return value;
     }
