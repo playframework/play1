@@ -151,7 +151,7 @@ public class ValidationPlugin extends PlayPlugin {
         if (Validation.errors().isEmpty()) {
             // Only send "delete cookie" header when the cookie was present in the request
             if(Http.Request.current().cookies.containsKey(Scope.COOKIE_PREFIX + "_ERRORS") || !Scope.SESSION_SEND_ONLY_IF_CHANGED) {
-                Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+                Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", null, "/", 0, Scope.COOKIE_SECURE);
             }
             return;
         }
@@ -171,7 +171,7 @@ public class ValidationPlugin extends PlayPlugin {
                 }
             }
             String errorsData = URLEncoder.encode(errors.toString(), "utf-8");
-            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", errorsData);
+            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", errorsData, null, "/", null, Scope.COOKIE_SECURE);
         } catch (Exception e) {
             throw new UnexpectedException("Errors serializationProblem", e);
         }
