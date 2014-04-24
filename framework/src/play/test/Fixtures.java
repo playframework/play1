@@ -10,6 +10,8 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
+import play.data.binding.As;
+import play.data.binding.NoBinding;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
@@ -29,6 +31,7 @@ import play.vfs.VirtualFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -39,9 +42,15 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import javax.persistence.Entity;
 
+@As(Fixtures.PROFILE_NAME)
 public class Fixtures {
+    /** Name of the profile use when loading fixture
+     * Allow to define the behavior when loading fixtures
+     */
+    public static final String PROFILE_NAME = "Fixtures";
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
     // Allows people to clear the cache, so Fixture is not stateful
@@ -197,7 +206,8 @@ public class Fixtures {
 
             Yaml yaml = new Yaml();
             Object o = yaml.load(renderedYaml);
-            if (o instanceof LinkedHashMap<?, ?>) {
+            if (o instanceof LinkedHashMap<?, ?>) {  
+                Annotation[] annotations = Fixtures.class.getAnnotations();
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
@@ -231,7 +241,7 @@ public class Fixtures {
                         // This is kind of hacky. This basically says that if we have an embedded class we should ignore it.
                         if (Model.class.isAssignableFrom(cType)) {
 
-                            Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, null);
+                            Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, annotations);
                             for(Field f : model.getClass().getFields()) {
                                 if (f.getType().isAssignableFrom(Map.class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
@@ -249,7 +259,7 @@ public class Fixtures {
                             }
                         }
                         else {
-                            idCache.put(cType.getName() + "-" + id, Binder.bind(rootParamNode, "object", cType, cType, null));
+                            idCache.put(cType.getName() + "-" + id, Binder.bind(rootParamNode, "object", cType, cType, annotations));
                         }
                     }
                 }
