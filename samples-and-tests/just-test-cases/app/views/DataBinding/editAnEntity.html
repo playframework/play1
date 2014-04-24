@@ -21,6 +21,16 @@
             <th>yip: (Binder + UnBinder differents):</th>
             <td><input style="width:250px;" id="entity_yip" type="text" name="entity.yip" value="${entity?.yip}"/></td>
         </tr>
+        <tr>
+        <th>Parent:</th>
+            <td>
+             #{select 'entity.parent', value:entity.parent?.id}
+               #{list items:parents, as:'elem'}
+                 #{option elem.id}${elem.prop}#{/option}
+               #{/list}
+             #{/select}
+            </td>
+        </tr>
         </tbody>
     </table>
     <input type="hidden" name="entity.id" value="${entity?.id}"/>
