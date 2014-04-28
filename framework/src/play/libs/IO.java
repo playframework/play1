@@ -203,7 +203,7 @@ public class IO {
     public static void writeContent(CharSequence content, OutputStream os, String encoding) {
         try {
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
-            printWriter.println(content);
+            printWriter.print(content);
             printWriter.flush();
             os.flush();
         } catch(IOException e) {
