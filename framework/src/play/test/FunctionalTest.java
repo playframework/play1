@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 import java.net.MalformedURLException;
 
 import org.junit.Before;
-import play.Invoker.InvocationContext;
 
+import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
@@ -25,13 +25,16 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope.RenderArgs;
 
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
+
 import play.Invoker;
 import play.mvc.Controller;
 import play.mvc.Router.ActionDefinition;
@@ -192,7 +195,7 @@ public abstract class FunctionalTest extends BaseTest {
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), null); 
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), new FluentCaseInsensitiveStringsMap()); 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             requestEntity.writeRequest(baos);
