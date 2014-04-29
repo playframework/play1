@@ -237,7 +237,7 @@ public class IO {
         try {
             os = new FileOutputStream(file);
             printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
-            printWriter.println(content);
+            printWriter.print(content);
             printWriter.flush();
             os.flush();
         } catch(IOException e) {
