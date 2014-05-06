@@ -1,17 +1,5 @@
 package play;
 
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.LineNumberReader;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -24,6 +12,26 @@ import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
 import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Main framework class
@@ -164,6 +172,7 @@ public class Play {
     static boolean firstStart = true;
     public static boolean usePrecompiled = false;
     public static boolean forceProd = false;
+    public static boolean disableHotswap = false;
     /**
      * Lazy load the templates on demand
      */
@@ -251,7 +260,7 @@ public class Play {
         // Force the Production mode if forceProd or precompile is activate
         // Set to the Prod mode must be done before loadModules call
         // as some modules (e.g. DocViewver) is only available in DEV
-        if (usePrecompiled || forceProd || System.getProperty("precompile") != null) {
+        if (forceProd) {
             mode = Mode.PROD;
         }
 
@@ -302,9 +311,12 @@ public class Play {
         // Plugins
         pluginCollection.loadPlugins();
 
+        disableHotswap = Boolean.valueOf(System.getProperty("play.disableHotswap", "false"));
+        usePrecompiled = Boolean.valueOf(System.getProperty("precompiled", "false"));
+
         // Done !
-        if (mode == Mode.PROD) {
-            if (preCompile() && System.getProperty("precompile") == null) {
+        if (mode == Mode.PROD || System.getProperty("precompile") != null || usePrecompiled) {
+            if (preCompile() && (System.getProperty("precompile") == null || usePrecompiled)) {
                 start();
             } else {
                 return;
@@ -472,7 +484,7 @@ public class Play {
                 }
             }
 
-            if (mode == Mode.DEV) {
+            if (!usePrecompiled && mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 // Put it in the current context for any code that relies on having it there
@@ -626,7 +638,7 @@ public class Play {
      * Detect sources modifications
      */
     public static synchronized void detectChanges() {
-        if (mode == Mode.PROD) {
+        if (usePrecompiled || mode == Mode.PROD || disableHotswap) {
             return;
         }
         try {
@@ -778,6 +790,11 @@ public class Play {
         }
         if (root.child("conf/routes").exists()) {
             modulesRoutes.put(name, root.child("conf/routes"));
+        }
+        if (Play.runingInTestMode() || Play.mode == Mode.DEV) {
+            if (root.child("test").exists()) {
+                javaPath.add(root.child("test"));
+            }
         }
         roots.add(root);
         if (!name.startsWith("_")) {
