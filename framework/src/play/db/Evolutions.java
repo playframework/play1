@@ -83,6 +83,7 @@ public class Evolutions extends PlayPlugin {
         
         // Look over all the DB
         List<String> dBNames = Configuration.getDbNames(playConfig);
+        boolean defaultExitCode = true;
                 
         for (String dbName : dBNames) {
             /** Connected **/
@@ -103,6 +104,7 @@ public class Evolutions extends PlayPlugin {
                     try {
                         checkEvolutionsState(dbName);
                     } catch (InconsistentDatabase e) {
+                        defaultExitCode = false;
                         System.out.println("~");
                         System.out.println("~ Your database " + dbName + " is in an inconsistent state!");
                         System.out.println("~");
@@ -135,10 +137,15 @@ public class Evolutions extends PlayPlugin {
                         System.out.println("~");
                     } else {
                         if ("apply".equals(System.getProperty("mode"))) {
-                            handleApplyAction(dbName, moduleRoot, evolutions);
+                            if (!handleApplyAction(dbName, moduleRoot, evolutions)) {
+                                defaultExitCode = false;
+                            }
                         } else if ("markApplied".equals(System.getProperty("mode"))) {
-                            handleMarkAppliedAction(dbName, moduleRoot, evolutions);
+                            if (!handleMarkAppliedAction(dbName, moduleRoot, evolutions)) {
+                                defaultExitCode = false;
+                            }
                         } else {
+                            defaultExitCode = false;
                             handleDefaultAction(dbName, moduleRoot, evolutions);
                         }
                     }
@@ -146,7 +153,9 @@ public class Evolutions extends PlayPlugin {
             }
         }
         
-        System.exit(-1);
+        if (!defaultExitCode) {
+            System.exit(-1);
+        }
     }
     /**
      * Method to handle the "default" action
@@ -203,8 +212,9 @@ public class Evolutions extends PlayPlugin {
      * @param dbName : database name
      * @param moduleRoot : the module root of evolutions
      * @param evolutions : list of evolutions
+     * @return true if action was applied successfully, false otherwise
      */
-    private static void handleApplyAction(String dbName,  Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions){
+    private static boolean handleApplyAction(String dbName,  Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions){
         System.out.println("~ Applying evolutions for " + moduleRoot.getKey() + ":");
         System.out.println("");
         System.out
@@ -220,10 +230,12 @@ public class Evolutions extends PlayPlugin {
             System.out.println("~ Evolutions script successfully applied for " + moduleRoot.getKey()
                     + "!");
             System.out.println("~");
+            return true;
         } else {
             System.out.println("~");
             System.out.println("~ Can't apply evolutions for " + moduleRoot.getKey() + "...");
             System.out.println("~");
+            return false;
         }
     }
     
@@ -232,15 +244,18 @@ public class Evolutions extends PlayPlugin {
      * @param dbName : database name
      * @param moduleRoot : the module root of evolutions
      * @param evolutions : list of evolutions
+     * @return true if action was applied successfully, false otherwise
      */
-    private static void handleMarkAppliedAction(String dbName,  Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions){ 
+    private static boolean handleMarkAppliedAction(String dbName,  Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions){ 
         if (applyScript(dbName, false, moduleRoot.getKey(), moduleRoot.getValue())) {
             System.out
                     .println("~ Evolutions script marked as applied for " + moduleRoot.getKey() + "!");
             System.out.println("~");
+            return true;
         } else {
             System.out.println("~ Can't apply evolutions for " + moduleRoot.getKey() + "...");
             System.out.println("~");
+            return false;
         }
     }
     
