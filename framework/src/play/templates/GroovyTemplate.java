@@ -516,27 +516,30 @@ public class GroovyTemplate extends BaseTemplate {
                         Map<String, Object> r = new HashMap<String, Object>();
                         Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
                         String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
+
                         if (param instanceof Object[]) {
-                            if(((Object[])param).length == 1 && ((Object[])param)[0] instanceof Map) {
-                                r = (Map<String,Object>)((Object[])param)[0];
+                            Object[] params = (Object[])param;
+                            if (params.length == 1 && params[0] instanceof Map) {
+                                r = (Map<String,Object>)params[0];
                             } else {
                                 // too many parameters versus action, possibly a developer error. we must warn him.
-                                if (names.length < ((Object[]) param).length) {
+                                if (names.length < params.length) {
                                     throw new NoRouteFoundException(action, null);
                                 }
-                                for (int i = 0; i < ((Object[]) param).length; i++) {
-                                    if (((Object[]) param)[i] instanceof Router.ActionDefinition && ((Object[]) param)[i] != null) {
-                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                for (int i = 0; i < params.length; i++) {
+                                    if (params[i] instanceof Router.ActionDefinition && params[i] != null) {
+                                        Unbinder.unBind(r, params[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                     } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
-                                        if (((Object[]) param)[i] != null) {
-                                            Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                        if (params[i] != null) {
+                                            Unbinder.unBind(r, params[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                         }
                                     } else {
-                                        Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                        Unbinder.unBind(r, params[i], i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                     }
                                 }
                             }
                         }
+
                         Router.ActionDefinition def = Router.reverse(action, r);
                         if (absolute) {
                             def.absolute();
