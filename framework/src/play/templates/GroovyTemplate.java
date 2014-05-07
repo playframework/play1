@@ -527,9 +527,7 @@ public class GroovyTemplate extends BaseTemplate {
                                     throw new NoRouteFoundException(action, null);
                                 }
                                 for (int i = 0; i < params.length; i++) {
-                                    if (params[i] instanceof Router.ActionDefinition && params[i] != null) {
-                                        Unbinder.unBind(r, params[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
-                                    } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
+                                    if (params[i] instanceof Router.ActionDefinition || isSimpleParam(actionMethod.getParameterTypes()[i])) {
                                         if (params[i] != null) {
                                             Unbinder.unBind(r, params[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                         }
