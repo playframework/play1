@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -336,7 +337,7 @@ public class Scope {
             return current.get();
         }
         boolean requestIsParsed;
-        public Map<String, String[]> data = new HashMap<String, String[]>();
+        public Map<String, String[]> data = new LinkedHashMap<String, String[]>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
