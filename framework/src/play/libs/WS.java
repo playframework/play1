@@ -602,8 +602,7 @@ public class WS extends PlayPlugin {
             try {
                 InputSource source = new InputSource(getStream());
                 source.setEncoding(encoding);
-                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                builder.setEntityResolver(new NoOpEntityResolver());
+                DocumentBuilder builder = XML.newDocumentBuilder();
                 return builder.parse(source);
             } catch (Exception e) {
                 throw new RuntimeException(e);
