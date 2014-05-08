@@ -1,9 +1,6 @@
 package play.libs;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.security.Key;
 import java.security.Provider;
 import java.security.interfaces.RSAPrivateKey;
@@ -109,6 +106,21 @@ public class XML {
         InputSource source = new InputSource(new StringReader(xml));
         try {
             return newDocumentBuilder().parse(source);
+        } catch (SAXException e) {
+            Logger.warn("Parsing error when building Document object from xml data.", e);
+        } catch (IOException e) {
+            Logger.warn("Reading error when building Document object from xml data.", e);
+        }
+        return null;
+    }
+
+    /**
+     * Parse an XML coming from an input stream to DOM
+     * @return null if an error occurs during parsing.
+     */
+    public static Document getDocument(InputStream stream) {
+        try {
+            return newDocumentBuilder().parse(stream);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml data.", e);
         } catch (IOException e) {
