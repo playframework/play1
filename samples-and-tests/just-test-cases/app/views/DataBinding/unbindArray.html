@@ -1,0 +1,8 @@
+#{extends 'main.html'/}
+
+Bound array: ${array?.toList()}
+<br>
+Bound value: ${value}
+
+<hr>
+<a href="@{DataBinding.unbindArray([1, 2, 3], 4)}">This link should unbind and then bind an array</a>
