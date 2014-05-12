@@ -1,24 +1,20 @@
 package controllers;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.text.SimpleDateFormat;
-
 import models.AnEntity;
 import models.MyBook;
 import models.Person;
-
 import org.apache.commons.io.IOUtils;
-
-import play.Logger;
 import play.data.binding.As;
 import play.data.validation.Valid;
 import play.i18n.Lang;
 import play.mvc.Controller;
 import play.utils.Utils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class DataBinding extends Controller {
     
@@ -138,5 +134,8 @@ public class DataBinding extends Controller {
         editAnEntity(entity);
     }
 
+  public static void unbindArray(Long[] array, Long value) {
+    render(array, value);
+  }
 }
 

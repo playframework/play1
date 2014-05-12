@@ -3,16 +3,12 @@ package play.data.binding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import play.Logger;
 import play.Play;
-import play.data.binding.types.DateBinder;
 import play.libs.I18N;
-import play.utils.Utils;
 
 /**
  * Try to unbind an object to a Map<String,String>
@@ -20,11 +16,8 @@ import play.utils.Utils;
 public class Unbinder {
 
     public static void unBind(Map<String, Object> result, Object src, String name, Annotation[] annotations) {
-        if (src == null) {
+        if (src == null || src instanceof Class) {
             return;
-        }
-        if (src instanceof  Class) {
-            return ;
         }
         unBind(result, src, src.getClass(), name, annotations);
     }
@@ -36,26 +29,26 @@ public class Unbinder {
     }
     
     private static void unbindArray(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
-        if(src == null){
+        if (src == null) {
             directUnbind( result, src,  srcClazz,  name, annotations);
-        }else{
-            Class<?> clazz = src.getClass().getComponentType();
+        } else {
             int size = Array.getLength(src);
             for (int i = 0; i < size; i++) {
-                unBind(result, Array.get(src, i), clazz, name + "[" + i + "]", annotations);
+              Object value = Array.get(src, i);
+              unBind(result, value, value.getClass(), name + "[" + i + "]", annotations);
             }
         }
     }
     
     private static void unbindCollection(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
-        if(src == null){
+        if (src == null) {
             directUnbind( result, src,  srcClazz,  name, annotations);
-        }else if (Map.class.isAssignableFrom(src.getClass())) {
+        } else if (Map.class.isAssignableFrom(src.getClass())) {
             throw new UnsupportedOperationException("Unbind won't work with maps yet");
         } else {
             Collection<?> c = (Collection<?>) src;
             Object[] srcArray = c.toArray();
-            unBind(result, srcArray, srcArray.getClass(), name, annotations);
+            unbindArray(result, srcArray, srcArray.getClass(), name, annotations);
         }
     }
     
@@ -139,14 +132,14 @@ public class Unbinder {
         }
         
         if (isDirect(srcClazz) || src == null) {
-            directUnbind(result, src, srcClazz, name, annotations);           
-        }else if (src.getClass().isArray()) {
+            directUnbind(result, src, srcClazz, name, annotations);
+        } else if (src.getClass().isArray()) {
             unbindArray(result, src, src.getClass(), name, annotations);           
         } else if (Collection.class.isAssignableFrom(src.getClass())) {
             unbindCollection(result, src, src.getClass(), name, annotations);
         } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
             unbindDate(result, src, src.getClass(), name, annotations);
-        } else{    
+        } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {
                 if ((field.getModifiers() & BeanWrapper.notwritableField) != 0) {
@@ -176,7 +169,7 @@ public class Unbinder {
                     throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
-                }finally{
+                } finally {
                     field.setAccessible(oldAcc);
                 }
             }
