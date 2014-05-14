@@ -12,7 +12,7 @@ public class Configuration {
      public static Properties convertToMultiDB(Properties p) {
         final String OLD_DB_CONFIG_PATTERN = "^db\\.([^\\.]*)$";
         final String OLD_JPA_CONFIG_PATTERN = "^jpa\\.([^\\.]*)$";
-        final String OLD_HIBERNATE_CONFIG_PATTERN = "^hibernate\\.([a-zA-Z.-]*)$";
+        final String OLD_HIBERNATE_CONFIG_PATTERN = "^hibernate\\.([a-zA-Z.-_]*)$";
         
         Properties newProperties = convertPattern(p, OLD_DB_CONFIG_PATTERN, "db.default");
         newProperties = convertPattern(newProperties, OLD_JPA_CONFIG_PATTERN, "jpa.default");  
