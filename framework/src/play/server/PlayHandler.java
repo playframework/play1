@@ -436,7 +436,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
                 } else {
-                    nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
+                    if (response.contentType != null) {
+                        nettyResponse.setHeader(CONTENT_TYPE, response.contentType);
+                    } else {
+                        nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
+                    }
                     final RandomAccessFile raf = new RandomAccessFile(file, "r");
                     try {
                         long fileLength = raf.length();
