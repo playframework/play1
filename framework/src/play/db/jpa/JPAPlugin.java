@@ -17,6 +17,7 @@ import play.db.Model;
 import play.db.Configuration;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
+
 import javax.persistence.*;
 
 import java.beans.PropertyDescriptor;
@@ -25,7 +26,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
-import java.util.Collections;
 
 
 
@@ -65,7 +65,7 @@ public class JPAPlugin extends PlayPlugin {
                     }
                     Query query = em.createQuery(q.toString());
                     // The primary key can be a composite.
-                    Class[] pk = new JPAModelLoader(clazz).keyTypes();
+                    Class<?>[] pk = new JPAModelLoader(clazz).keyTypes();
                     int j = 0;
                     for (ParamNode id : ids) {
                         if (id.getValues() == null || id.getValues().length == 0 || id.getFirstValue(null)== null || id.getFirstValue(null).trim().length() <= 0 ) {

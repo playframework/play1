@@ -8,8 +8,10 @@ import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 
+import play.data.binding.types.DateBinder;
 import play.i18n.Lang;
 import play.libs.I18N;
+import play.test.Fixtures;
 
 public class AnnotationHelper {
 
@@ -32,7 +34,11 @@ public class AnnotationHelper {
                 As as = (As) annotation;
                 Locale locale = Lang.getLocale();
                 String format = as.value()[0];
-                if (!StringUtils.isEmpty(format)) {
+                // According to Binder.java line 328 : Fixtures can use (iso) dates as default
+                if(format != null && format.equals(Fixtures.PROFILE_NAME)){
+                    format = DateBinder.ISO8601;
+                    locale = null;
+                } else if (!StringUtils.isEmpty(format)) {
                     // This can be comma separated
                     Tuple tuple = getLocale(as.lang());
                     if (tuple != null) {
@@ -44,10 +50,14 @@ public class AnnotationHelper {
                 if (StringUtils.isEmpty(format)) {
                     format = I18N.getDateFormat();
                 }
-                SimpleDateFormat sdf = new SimpleDateFormat(format, locale);
+                SimpleDateFormat sdf = null;
+                if(locale != null) {
+                    sdf = new SimpleDateFormat(format, locale);
+                } else {
+                    sdf = new SimpleDateFormat(format);      
+                }
                 sdf.setLenient(false);
                 return sdf.parse(value);
-
             }
         }
         return null;
