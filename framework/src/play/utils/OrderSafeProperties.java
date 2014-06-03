@@ -1,6 +1,6 @@
 package play.utils;
 
-import net.sf.oval.internal.util.LinkedSet;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -82,7 +82,7 @@ public class OrderSafeProperties extends java.util.Properties {
 
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        Set<Map.Entry<Object, Object>> entrySet = new LinkedSet<Map.Entry<Object, Object>>(keys.size());
+        Set<Map.Entry<Object, Object>> entrySet = new LinkedHashSet<Map.Entry<Object, Object>>(keys.size());
         for (Object key : keys) {
             entrySet.add(new Entry(key, get(key)));
         }
