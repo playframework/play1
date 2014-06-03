@@ -12,7 +12,6 @@ public abstract class PlayException extends RuntimeException {
     String id;
 
     public PlayException() {
-        super();
         setId();
     }
 
