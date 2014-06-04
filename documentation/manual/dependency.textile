@@ -124,7 +124,7 @@ require:
     - play 1.2
     - com.google.guava -> guava r07
 
-3. You can exclude any specific dependency explicitely:
+3. You can exclude any specific dependency explicitly:
 
 bc. # Application dependencies
     
@@ -133,6 +133,34 @@ require:
     - com.google.guava -> guava r07:
         exclude:
             - com.google.code.findbugs -> *
+
+4. You can alter the ant configuration mappings used during resolution. See "Custom Configuration Mappings":#config_mappings
+
+h3(#config_mappings).  Custom Configuration Mappings
+
+By default, Play will use the @default->*@ ant mapping. This means all transtive ant configurations (or maven scopes) are pulled in as dependencies.
+
+You can customize this behavior by using the @configurations@ block in @dependencies.yml@:
+
+bc. # Application dependencies
+    
+configurations:
+    - optional:
+        exclude: true
+
+This will map to @default -> *, !optional@, or all configurations except @optional@. The way this functions is if no configs are provided then the default mapping of @default -> *@ is used. If only exclude mappings are provided, then the mapping becomes @default -> *, !excludedConfig1, !excludedConfig2,....@. Ivy will then depend on all configurations that are not excluded. If at least one non-excluded configuration is provided, then the listed configurations are all that will be used. For example:
+
+bc. # Application dependencies
+    
+configurations:
+    - compile
+    - runtime
+    - optional:
+        exclude: true
+
+This will map to @default -> compile, runtime, !optional@.
+
+For more information on ant configuration mapping, please refer to the <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/configurations.html" target="_blank">ant documentation</a>
 
 h3. Keep lib/ and modules/ directory in sync
 
