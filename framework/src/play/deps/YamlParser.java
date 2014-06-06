@@ -110,6 +110,39 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
             boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
             
+            List<String> confs = new ArrayList<String>();
+            if (data.containsKey("configurations")) {
+                if (data.get("configurations") instanceof List) {
+                    boolean allExcludes = true;
+                    List configurations = (List) data.get("configurations");
+                    for (Object conf : configurations) {
+                        String confName;
+                        Map options;
+                        
+                        if (conf instanceof String) {
+                            confName = ((String) conf).trim();
+                            options = new HashMap();
+                        } else if (conf instanceof Map) {
+                            confName = ((Map) conf).keySet().iterator().next().toString().trim();
+                            options = (Map) ((Map) conf).values().iterator().next();
+                        } else {
+                            throw new Oops("Unknown configuration format -> " + conf);
+                        }
+                        boolean exclude = options.containsKey("exclude") && options.get("exclude") instanceof Boolean ? (Boolean) options.get("exclude") : false;
+                        allExcludes &=  exclude;
+                        confs.add((exclude ? "!" : "") + confName);
+                    }
+                    
+                    if (allExcludes) {
+                        confs.add(0, "*");
+                    }
+                } else {
+                    throw new Oops("Unknown \"configurations\" format -> " + data.get("self"));
+                }
+            } else {
+                confs.add("*");
+            }
+            
             if (data.containsKey("require")) {
                 if (data.get("require") instanceof List) {
 
@@ -162,7 +195,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         boolean changing = options.containsKey("changing") && options.get("changing") instanceof Boolean ? (Boolean) options.get("changing") : false;
 
                         DefaultDependencyDescriptor depDescriptor = new DefaultDependencyDescriptor(descriptor, depId, force, changing, transitive);
-                        depDescriptor.addDependencyConfiguration("default", "*");
+                        for (String conf : confs) {
+                            depDescriptor.addDependencyConfiguration("default", conf);
+                        }
 
                         // Exclude transitive dependencies
                         if (options.containsKey("exclude") && options.get("exclude") instanceof List) {
