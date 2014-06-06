@@ -134,6 +134,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                     if (allExcludes) {
                         confs.add(0, "*");
                     }
+                } else {
+                    throw new Oops("Unknown \"configurations\" format -> " + data.get("self"));
                 }
             } else {
                 confs.add("*");
