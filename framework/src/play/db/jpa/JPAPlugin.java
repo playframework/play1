@@ -134,10 +134,10 @@ public class JPAPlugin extends PlayPlugin {
                     PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
                     if (pu != null && pu.name().equals(dbName)) {
                       cfg.addAnnotatedClass(clazz);
-                      Logger.info("Add JPA Model : %s to db %s", clazz, dbName);
+                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
                     } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
                       cfg.addAnnotatedClass(clazz);
-                      Logger.info("Add JPA Model : %s to db %s", clazz, dbName);
+                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
                     }                    
                 }
             }
