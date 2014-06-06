@@ -158,11 +158,11 @@ public class DataBinding extends Controller {
     
 
     public static void saveChild(Child child) {  
-	renderText(child.toSimpleJSON());
+        renderText(child.toSimpleJSON());
     }
     
     public static void saveChildAsSecure(@As("secure") Child child) {
-	renderJSON(child.toSimpleJSON());
+        renderJSON(child.toSimpleJSON());
     }
 
 }

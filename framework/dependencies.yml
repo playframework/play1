@@ -11,8 +11,8 @@ require:    &allDependencies
     - c3p0 0.9.1.2
     - cglib -> cglib-nodep 3.1
     - com.google.code.gson -> gson 2.2.4 
-    - com.jamonapi -> jamon 2.7
-    - com.ning -> async-http-client 1.8.8
+    - com.jamonapi -> jamon 2.75
+    - com.ning -> async-http-client 1.8.9
     - commons-beanutils 1.8.3  
     - commons-codec 1.8
     - commons-collections 3.2.1
@@ -23,7 +23,7 @@ require:    &allDependencies
     - commons-lang 2.6
     - commons-logging 1.1.3
     - dom4j 1.6.1
-    - com.h2database -> h2 1.3.173
+    - com.h2database -> h2 1.3.176
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.7
     - javax.inject 1.0
@@ -33,11 +33,11 @@ require:    &allDependencies
     - junit 4.11
     - jregex 1.2_01
     - log4j 1.2.17
-    - net.sf.ehcache -> ehcache-core 2.4.3
-    - net.sf.ezmorph -> ezmorph 1.0.3
+    - net.sf.ehcache -> ehcache-core 2.6.9
+    - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.0
-    - net.sf.oval -> oval 1.82
-    - mysql -> mysql-connector-java 5.1.20
+    - net.sf.oval -> oval 1.84
+    - mysql -> mysql-connector-java 5.1.30
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.3.0
@@ -51,12 +51,12 @@ require:    &allDependencies
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.javassist -> javassist 3.18.1-GA
-    - org.jboss.netty -> netty 3.9.0.Final
+    - org.jboss.netty -> netty 3.9.1.Final
     - org.postgresql -> postgresql 9.0
-    - org.slf4j -> slf4j-api 1.7.5
-    - org.slf4j -> slf4j-log4j12 1.7.5
-    - org.yaml -> snakeyaml 1.12
-    - spy -> memcached 2.6
+    - org.slf4j -> slf4j-api 1.7.7
+    - org.slf4j -> slf4j-log4j12 1.7.7
+    - org.yaml -> snakeyaml 1.13
+    - spy -> spymemcached 2.10.3
     - com.thoughtworks.xstream -> xstream 1.4.2
     - xmlpull 1.1.3.1
 
