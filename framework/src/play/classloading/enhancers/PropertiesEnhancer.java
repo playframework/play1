@@ -143,6 +143,11 @@ public class PropertiesEnhancer extends Enhancer {
 
                             // Getter or setter ?
                             String propertyName = null;
+                            
+                            CtField field = fieldAccess.getField();
+                            CtClass c = field.getDeclaringClass();
+                            CtClass ct = ctMethod.getDeclaringClass();
+                            
                             if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
                                 || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
                                 if ((ctMethod.getName().startsWith("get") || (!isFinal(fieldAccess.getField()) && ctMethod.getName().startsWith("set"))) && ctMethod.getName().length() > 3) {

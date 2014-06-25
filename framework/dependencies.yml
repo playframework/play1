@@ -19,7 +19,7 @@ require:    &allDependencies
     - commons-email 1.3.1
     - commons-fileupload 1.3
     - commons-io 2.4
-    - commons-javaflow 1209105
+    - commons-javaflow 1590792
     - commons-lang 2.6
     - commons-logging 1.1.3
     - dom4j 1.6.1
@@ -42,7 +42,7 @@ require:    &allDependencies
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.3.0
     - org.bouncycastle -> bcprov-jdk15 1.45
-    - org.codehaus.groovy -> groovy-all 1.8.6
+    - org.codehaus.groovy -> groovy-all 2.3.1
     - org.eclipse.jdt.core 3.9.50.v20140317-1741
     - org.hibernate -> hibernate-core 4.1.3.Final
     - org.hibernate -> hibernate-commons-annotations 4.0.1.Final
@@ -50,14 +50,14 @@ require:    &allDependencies
     - org.hibernate -> jboss-logging 3.1.0.GA
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
-    - org.javassist -> javassist 3.18.1-GA
+    - org.javassist -> javassist 3.18.2-GA
     - org.jboss.netty -> netty 3.9.1.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.7
     - org.slf4j -> slf4j-log4j12 1.7.7
     - org.yaml -> snakeyaml 1.13
-    - spy -> spymemcached 2.10.3
-    - com.thoughtworks.xstream -> xstream 1.4.2
+    - spy -> memcached 2.6
+    - com.thoughtworks.xstream -> xstream 1.4.7
     - xmlpull 1.1.3.1
 
 # Default repositories, used for all projects
