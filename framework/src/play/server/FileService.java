@@ -50,7 +50,12 @@ public class FileService  {
                 nettyResponse.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(fileLength));
             }
 
-            nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            if (response.contentType != null) {
+                nettyResponse.setHeader(CONTENT_TYPE, response.contentType);
+            } else {
+                nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            }
+
             nettyResponse.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
 
             // Write the initial line and the header.
