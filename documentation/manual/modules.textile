@@ -38,7 +38,7 @@ If you are running a Play application that uses one or more modules with documen
 
 h2. <a name="repository">Using the module repository</a>
 
-The "module repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
+The "module repository":http://www.playframework.com/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
 
 You can also browse the module repository using the @play list-modules@ command. 
 
@@ -49,18 +49,18 @@ bc. gbo-mac:~ guillaume$ play list-modules
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, http://www.playframework.com
 ~
-~ You can also browse this list online at http://www.playframework.org/modules
+~ You can also browse this list online at http://www.playframework.com/modules
 ~
 ~ [bespin]
 ~   Bespin online editor
-~   http://www.playframework.org/modules/bespin
+~   http://www.playframework.com/modules/bespin
 ~   Versions: 1.0, 1.0.1
 ~
 ~ [cobertura]
 ~   Cobertura
-~   http://www.playframework.org/modules/cobertura
+~   http://www.playframework.com/modules/cobertura
 ~   Versions: 1.0
 ...
 
@@ -97,7 +97,7 @@ h3. <a name="register">Module registration</a>
 
 To use your Google account as your OpenID, you need to discover its full URL, as follows.
 
-# On "http://www.playframework.org/modules":http://www.playframework.org/modules, under _Developer login_ enter @https://www.google.com/accounts/o8/id@ and click the _Login_ button.
+# On "http://www.playframework.com/modules":http://www.playframework.com/modules, under _Developer login_ enter @https://www.google.com/accounts/o8/id@ and click the _Login_ button.
 # Log in to your Google account.
 # Make a note of the full Google OpenID URL under _Developer login_, e.g. @https://www.google.com/accounts/o8/id?id=BItOawk7q69CFhRarQIo@
 
@@ -129,8 +129,8 @@ To release your module:
 
 # set the module version number in the first line of @conf/dependency.yml@, e.g. @self: play -> jqueryui 1.0@
 # build the module with the @play build-module@ command
-# log in to "http://www.playframework.org/modules":http://www.playframework.org/modules under _Developer login_
-# browse to your module’s page, via the link on "http://www.playframework.org/modules/developers":http://www.playframework.org/modules/developers under _Your modules_
+# log in to "http://www.playframework.com/modules":http://www.playframework.com/modules under _Developer login_
+# browse to your module’s page, via the link on "http://www.playframework.com/modules/developers":http://www.playframework.com/modules/developers under _Your modules_
 # upload the generated ZIP file from your your module’s @dist/@ directory, using the form under _Manage module releases_
 
 You can of course use the offical Google Group to provide help and share information about your work.

@@ -16,7 +16,7 @@ h2. <a name="format">依存性の書式</a>
 
 bc. organisation -> name revision
 
-このため、例えば "Play PDF モジュール":http://www.playframework.org/modules/pdf のバージョン 1.0 は以下のように表現されます:
+このため、例えば "Play PDF モジュール":http://www.playframework.com/modules/pdf のバージョン 1.0 は以下のように表現されます:
 
 bc. play -> pdf 1.0
 
@@ -71,7 +71,7 @@ bc. $ play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, http://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -140,7 +140,7 @@ bc. $ play deps
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, http://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -199,7 +199,7 @@ bc. play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, http://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -234,7 +234,7 @@ require:
 
 h2. <a name="repositories">新しいリポジトリの追加</a>
 
-デフォルトでは、Play は "Maven 中央リポジトリ":http://repo1.maven.org/maven2/ から **JAR** 依存性を探し、 "Play モジュール中央リポジトリ":http://www.playframework.org/modules から **Play モジュール** を探します。
+デフォルトでは、Play は "Maven 中央リポジトリ":http://repo1.maven.org/maven2/ から **JAR** 依存性を探し、 "Play モジュール中央リポジトリ":http://www.playframework.com/modules から **Play モジュール** を探します。
 
 もちろん、 @repositories@ 節で新しいカスタムリポジトリを指定することができます:
 

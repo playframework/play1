@@ -38,7 +38,7 @@ h2. <a name="documentation">モジュールにドキュメントを追加する<
 
 h2. <a name="repository">モジュールリポジトリの使用</a>
 
-"モジュールリポジトリ":http://www.playframework.org/modules は、コミュニティによって寄付されたすべてのモジュールを識別します。モジュールはいくつかのバージョンを持つことができます。使用するフレームワークのバージョンに必要なのはどのバージョンのモジュールなのか、モジュールのドキュメントをチェックする必要があります。
+"モジュールリポジトリ":http://www.playframework.com/modules は、コミュニティによって寄付されたすべてのモジュールを識別します。モジュールはいくつかのバージョンを持つことができます。使用するフレームワークのバージョンに必要なのはどのバージョンのモジュールなのか、モジュールのドキュメントをチェックする必要があります。
 
 @play list-modules@ コマンドを使ってモジュールリポジトリを閲覧することもできます。
 
@@ -49,18 +49,18 @@ bc. gbo-mac:‾ guillaume$ play list-modules
 ‾ |  __/|_|¥____|¥__ (_)
 ‾ |_|            |__/   
 ‾
-‾ play! 1.2, http://www.playframework.org
+‾ play! 1.2, http://www.playframework.com
 ‾
-‾ You can also browse this list online at http://www.playframework.org/modules
+‾ You can also browse this list online at http://www.playframework.com/modules
 ‾
 ‾ [bespin]
 ‾   Bespin online editor
-‾   http://www.playframework.org/modules/bespin
+‾   http://www.playframework.com/modules/bespin
 ‾   Versions: 1.0, 1.0.1
 ‾
 ‾ [cobertura]
 ‾   Cobertura
-‾   http://www.playframework.org/modules/cobertura
+‾   http://www.playframework.com/modules/cobertura
 ‾   Versions: 1.0
 ...
 
@@ -96,7 +96,7 @@ h3. <a name="register">モジュールの登録</a>
 
 Google アカウントを OpenID として使用するためには、以下のようにしてその完全な URL を見つける必要があります。
 
-# "http://www.playframework.org/modules":http://www.playframework.org/modules の _Developer login_ の下に @https://www.google.com/accounts/o8/id@ を入力し、 _Login_ ボタンをクリックします。
+# "http://www.playframework.com/modules":http://www.playframework.com/modules の _Developer login_ の下に @https://www.google.com/accounts/o8/id@ を入力し、 _Login_ ボタンをクリックします。
 # Google アカウントにログインします。
 # 例えば @https://www.google.com/accounts/o8/id?id=BItOawk7q69CFhRarQIo@ のように、 _Developer login_ の下の完全な Google OpenID URL をメモします。
 
@@ -128,8 +128,8 @@ h3. <a name="release">モジュールのリリース</a>
 
 # 例えば @self: play -> jqueryui 1.0@ のように、 @conf/dependency.yml@ の最初の行にモジュールのバージョン番号を設定します
 # @play build-module@ コマンドでモジュールをビルドします
-# _Developer login_ の下から "http://www.playframework.org/modules":http://www.playframework.org/modules にログインします
-# "http://www.playframework.org/modules/developers":http://www.playframework.org/modules/developers の _Your modules_ の下にあるリンクからあなたのモジュールのページを閲覧します
+# _Developer login_ の下から "http://www.playframework.com/modules":http://www.playframework.com/modules にログインします
+# "http://www.playframework.com/modules/developers":http://www.playframework.com/modules/developers の _Your modules_ の下にあるリンクからあなたのモジュールのページを閲覧します
 # _Manage module releases_ の下にあるフォームを使って、あなたのモジュールの @dist/@　ディレクトリから生成した ZIP ファイルをアップロードします
 
 もちろん、ヘルプを提供したり情報を共有するために公式の Google Group を使用することができます。

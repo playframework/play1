@@ -199,7 +199,7 @@ bc. ~        _            _
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! master-localbuild, http://www.playframework.org
+~ play! master-localbuild, http://www.playframework.com
 ~ framework ID is prod
 ~
 ~ Ctrl+C to stop
@@ -240,7 +240,7 @@ bc. $ play evolutions
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! master-localbuild, http://www.playframework.org
+~ play! master-localbuild, http://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Connected to jdbc:mysql://localhost

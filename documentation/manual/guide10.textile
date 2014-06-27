@@ -180,7 +180,7 @@ h2. <a name="cobertura">Measuring code coverage</a>
 
 Of course we haven’t written all required test cases for the application. But it’s enough for this tutorial. Now in a real-world project, how can we know if we have written enough test cases? We need something called **‘code coverage’**. 
 
-The ""Cobertura module":http://www.playframework.org/modules/cobertura generates code coverage reports using the "Cobertura":http://cobertura.sourceforge.net/ tool. Install the module using the @install@ command:
+The "Cobertura module":http://www.playframework.com/modules/cobertura generates code coverage reports using the "Cobertura":http://cobertura.sourceforge.net/ tool. Install the module using the @install@ command:
 
 bc. play install cobertura-{version}
 

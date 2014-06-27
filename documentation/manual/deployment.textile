@@ -119,17 +119,17 @@ h3. <a name="elasticbeanstalk">AWS Elastic Beanstalk</a>
 
 h3. <a name="cloudbees">CloudBees</a>
 
-"CloudBees":http://www.cloudbees.com/ is a Java application hosting platform. For more information, see the "CloudBees module":http://www.playframework.org/modules/cloudbees.
+"CloudBees":http://www.cloudbees.com/ is a Java application hosting platform. For more information, see the "CloudBees module":http://www.playframework.com/modules/cloudbees.
 
 
 h3. <a name="cloudfondry">Cloud Foundry</a>
 
-"Cloud Foundry":http://www.cloudfoundry.com/ is VMware’s cloud provider. For more information, see "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html and the "CloudFoundry module":http://www.playframework.org/modules/cloudfoundry.
+"Cloud Foundry":http://www.cloudfoundry.com/ is VMware’s cloud provider. For more information, see "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html and the "CloudFoundry module":http://www.playframework.com/modules/cloudfoundry.
 
 
 h3. <a name="gae">Google App Engine (GAE)</a>
 
-The "Google App Engine":http://code.google.com/appengine/ is one of the first cloud hosting platforms, which has different pros and cons compared to generic hosting solutions. In particular, GAE does not support JPA persistence. For more information, see the "GAE module":http://www.playframework.org/modules/gae.
+The "Google App Engine":http://code.google.com/appengine/ is one of the first cloud hosting platforms, which has different pros and cons compared to generic hosting solutions. In particular, GAE does not support JPA persistence. For more information, see the "GAE module":http://www.playframework.com/modules/gae.
 
 
 h3. <a name="heroku">Heroku</a>
@@ -192,4 +192,4 @@ For more information, see the "Heroku Dev Center":http://devcenter.heroku.com.
 
 h3. <a name="playapps">playapps.net</a>
 
-"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":http://www.playframework.org/modules/playapps.
+"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":http://www.playframework.com/modules/playapps.
