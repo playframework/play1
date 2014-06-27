@@ -117,7 +117,7 @@ bc. @@{application.index}
 
 例えば、playframework.org の webサイト内のジョブから e メールを送信する場合、設定は以下のようになるでしょう:
 
-bc. application.baseUrl=http://www.playframework.org/
+bc. application.baseUrl=http://www.playframework.com/
 
 h2. <a name="smtp">SMTP の設定</a>
 
@@ -142,7 +142,7 @@ mail.smtp=mock
 
 h3. <a name="gmail">Gmailの使用</a>
 
-Gmailサーバーを使用するには、以下の設定を使用してください(例: "playapps":http://www.playframework.org/modules/playapps へのデプロイ): 
+Gmailサーバーを使用するには、以下の設定を使用してください(例: "playapps":http://www.playframework.com/modules/playapps へのデプロイ): 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin

@@ -117,7 +117,7 @@ If you send mails from Jobs you have to set "application.baseUrl":configuration#
 
 For example, to send an e-mail from a Job running on the playframework.org web site, the configuration would look like this:
 
-bc. application.baseUrl=http://www.playframework.org/
+bc. application.baseUrl=http://www.playframework.com/
 
 h3. Links to embedded images
 
@@ -166,7 +166,7 @@ mail.smtp=mock
 
 h3. <a name="gmail">Using Gmail</a>
 
-To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.org/modules/playapps, use this configuration: 
+To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.com/modules/playapps, use this configuration: 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin
