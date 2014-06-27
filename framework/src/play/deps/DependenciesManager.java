@@ -2,13 +2,12 @@ package play.deps;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
@@ -160,10 +159,10 @@ public class DependenciesManager {
     }
 
     // Retrieve the list of modules in the order they were defined in the dependencies.yml.
-    public List<String> retrieveModules() throws Exception {
+    public Set<String> retrieveModules() throws Exception {
     	File ivyModule = new File(application, "conf/dependencies.yml");
         if(ivyModule == null || !ivyModule.exists()) {
-            return new ArrayList<String>();
+            return new LinkedHashSet<String>();
         }
     	return YamlParser.getOrderedModuleList(ivyModule);
     }
