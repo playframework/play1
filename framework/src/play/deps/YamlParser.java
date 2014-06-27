@@ -9,9 +9,11 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +39,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import play.Logger;
 import play.Play;
+import play.libs.IO;
 
 public class YamlParser extends AbstractModuleDescriptorParser {
 
@@ -288,8 +291,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return o;
     }
 
-    public static List<String> getOrderedModuleList(File file) throws FileNotFoundException, ParseException, IOException {
-        List<String> modules = new ArrayList<String>();
+    public static Set<String> getOrderedModuleList(File file) throws FileNotFoundException, ParseException, IOException {
+        Set<String> modules = new LinkedHashSet<String>();
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
         }
@@ -300,11 +303,30 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         ModuleDescriptor md = parser.parseDescriptor(null, null, new URLResource(file.toURI().toURL()), true);
 
         DependencyDescriptor[] rules = md.getDependencies();
+        File localModules = Play.getFile("modules");
         for (DependencyDescriptor dep : rules) {
             ModuleRevisionId rev = dep.getDependencyRevisionId();
             String moduleName = filterModuleName(rev);
             if (moduleName != null) {
+                // Add the given module
                 modules.add(moduleName);
+                
+                // Need to load module dependencies of this given module 
+                File module = new File(localModules, moduleName);
+                if(module != null && module.isDirectory()) {  
+                    File ivyModule = new File(module, "conf/dependencies.yml");
+                    if(ivyModule != null && ivyModule.exists()) {
+                        modules.addAll(getOrderedModuleList(ivyModule));
+                    }    
+                } else {
+                    File modulePath = new File(IO.readContentAsString(module).trim());
+                    if (modulePath.exists() && modulePath.isDirectory()) {
+                        File ivyModule = new File(modulePath, "conf/dependencies.yml");
+                        if(ivyModule != null && ivyModule.exists()) {
+                            modules.addAll(getOrderedModuleList(ivyModule));
+                        } 
+                    }
+                }
             }
         }
         return modules;

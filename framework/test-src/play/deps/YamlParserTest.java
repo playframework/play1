@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -58,7 +60,7 @@ public class YamlParserTest {
     
     @Test(expected = FileNotFoundException.class)
     public void fileNotFoundTest() throws Exception {    
-        List<String> modules = null;
+        Set<String> modules = null;
         try {
             modules =  YamlParser.getOrderedModuleList(new File(Play.applicationPath, "fakeFile.yml"));
         } catch (Exception e) {
@@ -70,7 +72,7 @@ public class YamlParserTest {
 
     @Test
     public void retrieveModulesTest() {    
-        List<String> modules = null;
+        Set<String> modules = null;
         try {
             modules =  YamlParser.getOrderedModuleList(new File(getClass().getResource("/play/deps/dependencies_test1.yml").toURI()));
         } catch (Exception e) {
@@ -78,14 +80,23 @@ public class YamlParserTest {
             e.printStackTrace();
         }
         assertNotNull(modules);
-        assertEquals("crud", modules.get(0));
-        assertEquals("deadbolt-1.5.4", modules.get(1));
-        assertEquals("pdf-1.5", modules.get(2));     
+        Iterator<String> it = modules.iterator(); 
+        assertTrue(it.hasNext());
+        String moduleName = it.next();   
+        assertEquals("crud", moduleName);
+        assertTrue(it.hasNext());
+        
+        moduleName = it.next();
+        assertEquals("deadbolt-1.5.4", moduleName);
+        
+        assertTrue(it.hasNext());
+        moduleName = it.next();
+        assertEquals("pdf-1.5", moduleName);     
     }
     
     @Test
     public void retrieveModulesTest2() {    
-        List<String> modules = null;
+        Set<String> modules = null;
         try {
             modules =  YamlParser.getOrderedModuleList(new File(getClass().getResource("/play/deps/dependencies_test2.yml").toURI()));
         } catch (Exception e) {
@@ -93,10 +104,18 @@ public class YamlParserTest {
             e.printStackTrace();
         }
         assertNotNull(modules);
-        assertEquals("pdf-1.5", modules.get(0));
-        assertEquals("deadbolt-1.5.4", modules.get(1));
-        assertEquals("crud", modules.get(2));     
+        Iterator<String> it = modules.iterator(); 
+        assertTrue(it.hasNext());
+        String moduleName = it.next();   
+        
+        assertEquals("pdf-1.5",moduleName);
+        
+        assertTrue(it.hasNext());
+        moduleName = it.next();  
+        assertEquals("deadbolt-1.5.4", moduleName);
+        
+        assertTrue(it.hasNext());
+        moduleName = it.next();  
+        assertEquals("crud", moduleName);     
     }
-    
-    
 }

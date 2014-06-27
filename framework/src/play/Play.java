@@ -720,16 +720,16 @@ public class Play {
 		System.setProperty("application.path", applicationPath.getAbsolutePath());
 
 		File localModules = Play.getFile("modules");
-		List<String> modules = new ArrayList<String>();
+		Set<String> modules = new LinkedHashSet<String>();
 		if (localModules != null && localModules.exists() && localModules.isDirectory()) {
 			try {
-			        File userHome  = new File(System.getProperty("user.home"));
-			        DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
+			    File userHome  = new File(System.getProperty("user.home"));
+			    DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
 				modules = dm.retrieveModules();
 			} catch (Exception e) {
 				Logger.error("There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)", e);
 				// Load module without considering the dependencies.yml order
-				modules = Arrays.asList(localModules.list());		
+				modules.addAll(Arrays.asList(localModules.list()));		
 			}
 
 			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
