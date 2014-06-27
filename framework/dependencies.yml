@@ -52,7 +52,7 @@ require:    &allDependencies
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.javassist -> javassist 3.18.2-GA
-    - org.jboss.netty -> netty 3.9.1.Final
+    - org.jboss.netty -> netty 3.9.2.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.7
     - org.slf4j -> slf4j-log4j12 1.7.7
