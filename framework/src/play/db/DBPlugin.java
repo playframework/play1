@@ -304,7 +304,7 @@ public class DBPlugin extends PlayPlugin {
                 p.put("db." + dbName + ".driver", "org.postgresql.Driver");
                 p.put("db." + dbName + ".url", "jdbc:postgresql://" + (host == null ? "localhost" : host) + "/" + name);
                 if (user != null) {
-                    p.put("db.user", user);
+                    p.put("db." + dbName + ".user", user);
                 }
                 if (password != null) {
                     p.put("db." + dbName + ".pass", password);
