@@ -1,6 +1,10 @@
 h1. Use a cache
 
-To create high-performance systems, sometimes you need to cache data. Play has a cache library and will use "Memcached":http://www.danga.com/memcached/ when used in a distributed environment.
+To create high-performance systems, sometimes you need to cache data. Play provides a cache infrastructure that you may use via: 
+  - the cache API
+  - the @cacheFor@ to annotate your actions
+
+Play will use "Memcached":http://www.danga.com/memcached/ when used in a distributed environment.
 
 If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the ‘share nothing’ assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
@@ -15,6 +19,16 @@ bc. public static void allProducts() {
         Cache.set("products", products, "30mn");
     }
     render(products);
+}
+
+h2. <a name="cacheFor">The cacheFor annotation</a>
+
+bc.  public class Application extends Controller {
+        @CacheFor("5s")
+        public static void indexCacheFor() {
+            Date date = new Date();
+	        renderText("Current time is: " + date);
+	    }
 }
 
 h2. <a name="api">The cache API</a>
