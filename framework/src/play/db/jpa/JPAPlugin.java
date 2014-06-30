@@ -161,8 +161,6 @@ public class JPAPlugin extends PlayPlugin {
             cfg.configure(Configuration.addHibernateProperties(properties, dbName));
             cfg.setDataSource(DB.getDataSource(dbName));
           
-            JPA.emfs.put(dbName, cfg.buildEntityManagerFactory());
-            
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
                 field.setAccessible(true);
@@ -172,6 +170,8 @@ public class JPAPlugin extends PlayPlugin {
             }
             
             cfg.setInterceptor(new HibernateInterceptor());
+
+            JPA.emfs.put(dbName, cfg.buildEntityManagerFactory());
         }
         JPQL.instance = new JPQL();
     }
