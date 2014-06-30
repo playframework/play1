@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 
@@ -82,7 +83,7 @@ public class Evolutions extends PlayPlugin {
         Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
         
         // Look over all the DB
-        List<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames(playConfig);
         boolean defaultExitCode = true;
                 
         for (String dbName : dBNames) {
@@ -439,7 +440,7 @@ public class Evolutions extends PlayPlugin {
         Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
         
         // Look over all the DB
-        List<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames(playConfig);
         for(String dbName: dBNames){
             return applyScript(dbName, runScript, moduleKey, evolutionsDirectory);
         }
@@ -511,7 +512,7 @@ public class Evolutions extends PlayPlugin {
         Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
         
         // Look over all the DB
-        List<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames(playConfig);
         for(String dbName: dBNames){
             checkEvolutionsState(dbName);
         }

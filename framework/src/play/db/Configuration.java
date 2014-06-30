@@ -27,21 +27,18 @@ public class Configuration {
          for (String property : propertiesNames) {
              Matcher m = pattern.matcher(property);
              if (m.matches()) {
-                 //String[] name = property.split("\\.");
                  p.put(newFormat + "." + m.group(1), p.get(property));
-                 //newProperties.remove(property);
              }
               // Special case db=...
              if ("db".equals(property)) {
                  p.put(newFormat, p.get(property));
-                // newProperties.remove(property);
              }
          }
                   
         return p;
      }
 
-    public static List<String> getDbNames(Properties p) {
+    public static Set<String> getDbNames(Properties p) {
         TreeSet<String> dbNames = new TreeSet<String>();
         final String DB_CONFIG_PATTERN = "^db\\.([^\\.]*)\\.([^\\.]*)$";
         for (String property : p.stringPropertyNames()) {
@@ -54,7 +51,7 @@ public class Configuration {
                 dbNames.add("default");
             }
         }
-        return new ArrayList<String>(dbNames);
+        return new TreeSet<String>(dbNames);
     }
 
 

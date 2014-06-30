@@ -10,8 +10,12 @@ import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -19,7 +23,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import jregex.Matcher;
-
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -73,15 +76,18 @@ public class DBPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         if (changed()) {
+            String dbName = "";
             try {
-
                 // Destroy all connections
                 if (!DB.datasources.isEmpty()) {
                     DB.destroyAll();
                 }
                 // convert all 'db.x' to 'db.default'
                 Properties p = Configuration.convertToMultiDB(Play.configuration);
-                for (String dbName : Configuration.getDbNames(p)) {
+                Set<String> dbNames = Configuration.getDbNames(p);
+                Iterator<String> it = dbNames.iterator();
+                while(it.hasNext()) {
+                    dbName = it.next();
                     boolean isJndiDatasource = false;
                     String datasourceName = p.getProperty("db." + dbName, "");
 
@@ -92,7 +98,6 @@ public class DBPlugin extends PlayPlugin {
                     }
 
                     if (isJndiDatasource || datasourceName.startsWith("java:")) {
-
                         Context ctx = new InitialContext();
                         DB.datasource = (DataSource) ctx.lookup(datasourceName);
 
@@ -104,7 +109,7 @@ public class DBPlugin extends PlayPlugin {
                             Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
                             DriverManager.registerDriver(new ProxyDriver(d));
                         } catch (Exception e) {
-                            throw new Exception("Driver not found (" + driver + ")");
+                            throw new Exception("Database [" + dbName + "] Driver not found (" + driver + ")");
                         }
 
                         // Try the connection
@@ -179,11 +184,11 @@ public class DBPlugin extends PlayPlugin {
                 
             } catch (Exception e) {
                 DB.datasource = null;
-                Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
+                Logger.error(e, "Database [%s] Cannot connected to the database : %s", dbName, e.getMessage());
                 if (e.getCause() instanceof InterruptedException) {
-                    throw new DatabaseException("Cannot connected to the database. Check the configuration.", e);
+                    throw new DatabaseException("Cannot connected to the database["+ dbName + "]. Check the configuration.", e);
                 }
-                throw new DatabaseException("Cannot connected to the database, " + e.getMessage(), e);
+                throw new DatabaseException("Cannot connected to the database["+ dbName + "], " + e.getMessage(), e);
             }
         }
     }

@@ -143,8 +143,8 @@ public class JPAPlugin extends PlayPlugin {
             }
 
 
-            if (!Play.configuration.getProperty(dbName + ".jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
-                cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty(dbName + ".jpa.ddl", "update"));
+            if (!Play.configuration.getProperty("jpa."+ dbName + ".ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
+                cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa."+ dbName + ".ddl", "update"));
             }
           
             Map<String, String> properties = Configuration.getProperties(dbName);
