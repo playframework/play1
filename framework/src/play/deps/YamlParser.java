@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -293,10 +292,14 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
     public static Set<String> getOrderedModuleList(File file) throws FileNotFoundException, ParseException, IOException {
         Set<String> modules = new LinkedHashSet<String>();
+        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
+        return getOrderedModuleList(modules, file);
+    }
+        
+   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws FileNotFoundException, ParseException, IOException {
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
         }
-        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
 
         YamlParser parser = new YamlParser();
 
@@ -307,7 +310,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         for (DependencyDescriptor dep : rules) {
             ModuleRevisionId rev = dep.getDependencyRevisionId();
             String moduleName = filterModuleName(rev);
-            if (moduleName != null) {
+            
+            // Check if the module was already load to avoid circular parsing
+            if (moduleName != null && !modules.contains(moduleName)) {
                 // Add the given module
                 modules.add(moduleName);
                 
@@ -316,14 +321,14 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                 if(module != null && module.isDirectory()) {  
                     File ivyModule = new File(module, "conf/dependencies.yml");
                     if(ivyModule != null && ivyModule.exists()) {
-                        modules.addAll(getOrderedModuleList(ivyModule));
+                        getOrderedModuleList(modules, ivyModule);
                     }    
                 } else {
                     File modulePath = new File(IO.readContentAsString(module).trim());
                     if (modulePath.exists() && modulePath.isDirectory()) {
                         File ivyModule = new File(modulePath, "conf/dependencies.yml");
                         if(ivyModule != null && ivyModule.exists()) {
-                            modules.addAll(getOrderedModuleList(ivyModule));
+                            getOrderedModuleList(modules, ivyModule);
                         } 
                     }
                 }
