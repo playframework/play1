@@ -31,7 +31,7 @@ For example, the "GAE module":http://www.playframework.com/modules/gae configure
 
 h2. <a name="cacheFor">The cacheFor annotation</a>
 
-The @cacheFor@ annotation provides an easy way to cache the HTML ouput of an action.
+The @cacheFor@ annotation provides an easy way to cache the ouput (HTML, JSON, etc) of an action.
 
 bc.  import play.cache.*;
 public class Application extends Controller {
@@ -51,6 +51,10 @@ The annotation takes an optional @duration@ parameter to specify the expiration 
 The expiration can be specified in days, hours, minutes or seconds using respectively the following shorthands @d@, @h@, @min@ or @s@.
 
 The *default expiration* is @1h@.
+
+p(note). **Using expiration 0s**
+ 
+When specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations
 
 h2. <a name="api">The cache API</a>
 
