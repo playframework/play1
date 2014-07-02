@@ -55,10 +55,10 @@ public class BytecodeCache {
                     offset++;
                 }
                 if (!hash(source).equals(hash.toString())) {
-
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
                     }
+                    fis.close();
                     return null;
                 }
                 byte[] byteCode = new byte[(int) f.length() - (offset + 1)];

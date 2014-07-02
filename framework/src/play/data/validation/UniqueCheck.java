@@ -7,7 +7,6 @@ import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.FieldContext;
 import net.sf.oval.context.OValContext;
-import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPQL;
 import play.db.jpa.Model;

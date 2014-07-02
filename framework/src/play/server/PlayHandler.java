@@ -62,6 +62,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     private static final String ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private static final Charset ASCII = Charset.forName("ASCII");
     private static final MessageDigest SHA_1;
+    
+    /** 
+     * The Pipeline is given for a PlayHandler 
+     */
+    public Map<String, ChannelHandler> pipelines = new HashMap<String, ChannelHandler>();
 
     private WebSocketServerHandshaker handshaker;
 
@@ -414,6 +419,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             stream = (ChunkedInput) obj;
         }
 
+       
         final boolean keepAlive = isKeepAlive(nettyRequest);
         if (file != null && file.isFile()) {
             try {
@@ -430,7 +436,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
                 } else {
-                    nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
+                    if (response.contentType != null) {
+                        nettyResponse.setHeader(CONTENT_TYPE, response.contentType);
+                    } else {
+                        nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
+                    }
                     final RandomAccessFile raf = new RandomAccessFile(file, "r");
                     try {
                         long fileLength = raf.length();
@@ -583,15 +593,31 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             host = "";
             port = 80;
             domain = "";
-        } else {
-            if (host.contains(":")) {
-                final String[] hosts = host.split(":");
-                port = Integer.parseInt(hosts[1]);
-                domain = hosts[0];
-            } else {
-                port = 80;
+        }
+        // Check for IPv6 address
+        else if (host.startsWith("[")) {
+            // There is no port
+            if (host.endsWith("]")) {
                 domain = host;
+                port = 80;
             }
+            else {
+                // There is a port so take from the last colon
+                int portStart = host.lastIndexOf(':');
+                if (portStart > 0 && (portStart + 1) < host.length()) {
+                    domain = host.substring(0, portStart);
+                    port = Integer.parseInt(host.substring(portStart + 1));
+                }
+            }
+        }
+        // Non IPv6 but has port
+        else if (host.contains(":")) {
+            final String[] hosts = host.split(":");
+            port = Integer.parseInt(hosts[1]);
+            domain = hosts[0];
+        } else {
+            port = 80;
+            domain = host;
         }
 
         boolean secure = false;
@@ -1065,11 +1091,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 copyResponse(ctx, playRequest, playResponse, nettyRequest);
             }
             ((LazyChunkedInput) playResponse.direct).writeChunk(chunk);
-            if (Server.pipelines.get("ChunkedWriteHandler") != null) {
-                ((ChunkedWriteHandler)Server.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
+            
+            if (this.pipelines.get("ChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)this.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
             }
-             if (Server.pipelines.get("SslChunkedWriteHandler") != null) {
-                ((ChunkedWriteHandler)Server.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
+             if (this.pipelines.get("SslChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)this.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
@@ -1079,11 +1106,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public void closeChunked(Request playRequest, Response playResponse, ChannelHandlerContext ctx, HttpRequest nettyRequest) {
         try {
             ((LazyChunkedInput) playResponse.direct).close();
-            if (Server.pipelines.get("ChunkedWriteHandler") != null) {
-                ((ChunkedWriteHandler)Server.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
+            if (this.pipelines.get("ChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)this.pipelines.get("ChunkedWriteHandler")).resumeTransfer();
             }
-             if (Server.pipelines.get("SslChunkedWriteHandler") != null) {
-                ((ChunkedWriteHandler)Server.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
+             if (this.pipelines.get("SslChunkedWriteHandler") != null) {
+                ((ChunkedWriteHandler)this.pipelines.get("SslChunkedWriteHandler")).resumeTransfer();
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
@@ -1150,7 +1177,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
 
         // Inbound
-        Http.Inbound inbound = new Http.Inbound() {
+        Http.Inbound inbound = new Http.Inbound(ctx) {
 
             @Override
             public boolean isOpen() {

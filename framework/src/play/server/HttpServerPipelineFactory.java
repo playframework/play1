@@ -2,9 +2,6 @@ package play.server;
 
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.channel.ChannelHandler;
 import play.Play;
 import play.Logger;
@@ -22,30 +19,41 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
 
         ChannelPipeline pipeline = pipeline();
-        // Get all the pipeline. Give the user the opportunity to add their own
-        String[] handlers = pipelineConfig.split(",");
-        for (int i = 0; i < handlers.length - 1; i++) {
-            String handler = handlers[i];
-            try {
-                String name = getName(handler.trim());
-                ChannelHandler instance = getInstance(handler);
-                if (instance != null) {
-                    pipeline.addLast(name, instance); 
-                    Server.pipelines.put(name, instance);
-                }
-            } catch(Throwable e) {
-                Logger.error(" error adding " + handler, e);
-            }
-
-        }
-
-        // The last one is always the play handler
+        
+        String[] handlers = pipelineConfig.split(",");  
+        if(handlers.length <= 0){
+            Logger.error("You must defined at least the playHandler in \"play.netty.pipeline\"");
+            return pipeline;
+        }       
+        
+        // Create the play Handler (always the last one)
         String handler = handlers[handlers.length - 1];
         ChannelHandler instance = getInstance(handler);
-        if (instance != null) {
-            pipeline.addLast("handler", instance); 
-            Server.pipelines.put("handler", instance);
+        PlayHandler playHandler = (PlayHandler) instance;
+        if (playHandler == null) {
+            Logger.error("The last handler must be the playHandler in \"play.netty.pipeline\"");
+            return pipeline;
         }
+      
+        // Get all the pipeline. Give the user the opportunity to add their own
+        for (int i = 0; i < handlers.length - 1; i++) {
+            handler = handlers[i];
+            try {
+                String name = getName(handler.trim());
+                instance = getInstance(handler);
+                if (instance != null) {
+                    pipeline.addLast(name, instance);
+                    playHandler.pipelines.put(name, instance);
+                }
+            } catch (Throwable e) {
+                Logger.error(" error adding " + handler, e);
+            }
+        }
+               
+        if (playHandler != null) {
+            pipeline.addLast("handler", playHandler);
+            playHandler.pipelines.put("handler", playHandler);
+        } 
        
         return pipeline;
     }

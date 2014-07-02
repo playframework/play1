@@ -5,4 +5,28 @@ Parent(P1):
     code: parent
     name: parent
     children:
+        - c1   
+         
+Parent(mother):
+    code: mother
+    name: mother
+    children:
         - c1
+
+Person(person_tutor):
+    userName: tutor
+    password: tutor
+    role: "tutor"
+
+Person(person_new_tutor):
+    userName: new_tutor
+    password: new_tutor
+    role: "tutor"
+ 
+Child(c2):
+    name: child_2
+    father: P1
+    mother: mother
+    tutor: person_tutor
+    test: testFixtureNoBinding
+    

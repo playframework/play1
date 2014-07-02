@@ -15,6 +15,9 @@ import java.lang.annotation.Target;
 @Inherited
 @Target(value={ElementType.METHOD,ElementType.TYPE})
 public @interface NoTransaction {
-
+	/**
+	 * Db name we do not want transaction.
+	 */
+	String value() default "default";
 }
 

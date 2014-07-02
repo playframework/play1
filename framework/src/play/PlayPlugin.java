@@ -325,20 +325,20 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     // ~~~~~
     public int compareTo(PlayPlugin o) {
         int res = index < o.index ? -1 : (index == o.index ? 0 : 1);
-        if (res!=0) {
+        if (res != 0) {
             return res;
         }
 
         // index is equal in both plugins.
-        // sort on classtype to get consistent order
+        // Sort on classtype to get consistent order
         res = this.getClass().getName().compareTo(o.getClass().getName());
-        if (res != 0 ) {
+        if (res != 0) {
             // classnames where different
             return res;
         }
 
-        // identical classnames.
-        // sort on instance to get consistent order.
+        // Identical classnames.
+        // Sort on instance to get consistent order.
         // We only return 0 (equal) if both identityHashCode are identical
         // which is only the case if both this and other are the same object instance.
         // This is consistent with equals() when no special equals-method is implemented.
@@ -386,4 +386,32 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Collection<Class> getFunctionalTests() {
         return Collections.emptyList();
     }
+
+    /** 
+     * Class that define a filter. A filter is a class that wrap a certain behavior around an action.
+     * You can access your Request and Response object within the filter. See the JPA plugin for an example.
+     * The JPA plugin wraps a transaction around an action. The filter applies a transaction to the current Action.
+     */
+    public abstract class Filter<T> {
+        String name;
+
+        public Filter(String name) {
+            this.name = name;
+        }
+        
+        public abstract T withinFilter(play.libs.F.Function0<T> fct) throws Throwable;
+
+        public String getName() {
+            return name;
+        }
+    }
+    
+    /**
+     * Return the filter implementation for this plugin. 
+     */ 
+    public Filter getFilter() {
+        return null;
+    }
+
+
 }

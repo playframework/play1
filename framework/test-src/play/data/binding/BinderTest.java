@@ -36,7 +36,6 @@ public class BinderTest {
         Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
         RootParamNode root = ParamNode.convert(r2);
         assertThat(Binder.bind(root, "myInt", Integer.class, null, null)).isEqualTo(myInt);
-        int a = 0;
     }
 
     @Test
@@ -131,7 +130,6 @@ public class BinderTest {
 
 	        Map<String, String[]> params = new HashMap<String, String[]>();
 
-	        Data2 data2;
 	        List<Data2> lst = new ArrayList<Data2>();
 			// build the parameters
 	        params.put("data2[0].a", new String[] { "a0" });
@@ -241,10 +239,16 @@ public class BinderTest {
         Data1[] datasArray = {d1, d2};
         List<Data1> datas = Arrays.asList(new Data1[]{d2, d1, d3});
 
+        Map<String, Data1> mapData = new HashMap<String, Data1>();
+        mapData.put(d1.a, d1);
+        mapData.put(d2.a, d2);
+        mapData.put(d3.a, d3);
+
         Data4 original = new Data4();
         original.s = "some";
         original.datas = datas;
         original.datasArray = datasArray;
+        original.mapDatas = mapData;
 
         Map<String, Object> result = new HashMap<String, Object>();
         Unbinder.unBind(result, original, "data", noAnnotations);

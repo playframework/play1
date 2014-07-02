@@ -1,9 +1,6 @@
 package play.libs;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.security.Key;
 import java.security.Provider;
 import java.security.interfaces.RSAPrivateKey;
@@ -26,6 +23,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
@@ -45,6 +43,24 @@ import play.Logger;
  * XML utils
  */
 public class XML {
+
+    public static DocumentBuilderFactory newDocumentBuilderFactory() {
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            return dbf;
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static DocumentBuilder newDocumentBuilder() {
+        try {
+            return newDocumentBuilderFactory().newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Serialize to XML String
@@ -72,15 +88,12 @@ public class XML {
      * 
      */
     public static Document getDocument(File file) {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            return dbf.newDocumentBuilder().parse(file);
+            return newDocumentBuilder().parse(file);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml file '" + file + "'.", e);
         } catch (IOException e) {
             Logger.warn("Reading error when building Document object from xml file '" + file + "'.", e);
-        } catch (ParserConfigurationException e) {
-            Logger.warn("Parsing error when building Document object from xml file '" + file + "'.", e);
         }
         return null;
     }
@@ -91,15 +104,27 @@ public class XML {
      */
     public static Document getDocument(String xml) {
         InputSource source = new InputSource(new StringReader(xml));
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            return dbf.newDocumentBuilder().parse(source);
+            return newDocumentBuilder().parse(source);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml data.", e);
         } catch (IOException e) {
             Logger.warn("Reading error when building Document object from xml data.", e);
-        } catch (ParserConfigurationException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Parse an XML coming from an input stream to DOM
+     * @return null if an error occurs during parsing.
+     */
+    public static Document getDocument(InputStream stream) {
+        try {
+            return newDocumentBuilder().parse(stream);
+        } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml data.", e);
+        } catch (IOException e) {
+            Logger.warn("Reading error when building Document object from xml data.", e);
         }
         return null;
     }

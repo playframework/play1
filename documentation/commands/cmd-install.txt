@@ -10,7 +10,7 @@
 ~ ~~~~~~~~~~~~
 ~ Modules are 3rd party software to extend Play's capabilities.
 ~ Available modules are listed with the play list-modules command,
-~ or online at http://www.playframework.org/modules
+~ or online at http://www.playframework.com/modules
 ~
 ~ By default only the official repository is used, but you can add
 ~ other repositories (for example your ozn internal repository) by

@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 

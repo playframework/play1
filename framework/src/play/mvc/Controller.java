@@ -17,7 +17,6 @@ import org.w3c.dom.Document;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
-import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -60,8 +59,6 @@ import java.lang.reflect.Type;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.libs.F;
-
-import javax.management.RuntimeErrorException;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -217,7 +214,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Return a 200 OK application/binary response
+     * Return a 200 OK application/binary response.
+     * Content is fully loaded in memory, so it should not be used with large data.
      * @param is The stream to copy
      */
     protected static void renderBinary(InputStream is) {
@@ -236,6 +234,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
      *
      * @param is The stream to copy
      * @param name Name of file user is downloading.
@@ -257,6 +256,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
      *
      * @param is The stream to copy
      * @param name Name of file user is downloading.
@@ -279,7 +279,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     * Content is fully loaded in memory, so it should not be used with large data.
+     * 
      * @param is The stream to copy
      * @param name The attachment name
      * @param contentType The content type of the attachment
@@ -1017,7 +1019,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
-        
+
         if(future.isDone()) {
             try {
                 return future.get();

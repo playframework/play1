@@ -16,6 +16,7 @@ import play.mvc.Http.Header;
 import play.test.UnitTest;
 
 import com.google.gson.JsonObject;
+
 import controllers.Rest;
 
 
@@ -124,20 +125,24 @@ public class RestTest extends UnitTest {
         
         
     }
-
+    
     @Test
     public void testEncodingEcho() {
         // verify that we have no encoding regression bugs related to raw urls and params
         if ( play.Play.defaultWebEncoding.equalsIgnoreCase("utf-8") ) {
-            assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%C3%A6%C3%B8%C3%A5?a=%C3%A6%C3%B8%C3%A5&a=x&b=%C3%A6%C3%B8%C3%A5").get().getString());
+            assertEquals("æøå|id|æøå|a|æøå|a|x|b|æøå|body|", WS.url("http://localhost:9003/encoding/echo/%C3%A6%C3%B8%C3%A5?a=%C3%A6%C3%B8%C3%A5&a=x&b=%C3%A6%C3%B8%C3%A5").get().getString());
         }
-        assertEquals("abc|id|abc|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå").get().getString());
-        assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?a=æøå&a=x&b=æøå", "æøå").get().getString());
-        assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?", "æøå").setParameter("a",new String[]{"æøå","x"}).setParameter("b","æøå").get().getString());
+        assertEquals("abc|id|abc|a|æøå|a|x|b|æøå|body|", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå").get().getString());
+        assertEquals("æøå|id|æøå|a|æøå|a|x|b|æøå|body|", WS.url("http://localhost:9003/encoding/echo/%s?a=æøå&a=x&b=æøå", "æøå").get().getString());
+        assertEquals("æøå|id|æøå|a|æøå|a|x|b|æøå|body|", WS.url("http://localhost:9003/encoding/echo/%s?", "æøå").setParameter("a",new String[]{"æøå","x"}).setParameter("b","æøå").get().getString());
         // test with value including '='
-        assertEquals("abc|id|abc|body||b|æøå=|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå=").get().getString());
+        assertEquals("abc|id|abc|a|æøå|a|x|b|æøå=|body|", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå=").get().getString());
         //test with 'flag'
-        assertEquals("abc|id|abc|body||b|flag|a|flag", WS.url("http://localhost:9003/encoding/echo/abc?a&b=").get().getString());
+        // if = is present, the value will be handle as empty string
+        // cf UrlEncodedParser::parse, "b=".substring(2) returns "" (an empty string) 
+        // according to http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#substring%28int%29
+        // when beginIndex == string.length
+        assertEquals("abc|id|abc|a|flag|b||body|", WS.url("http://localhost:9003/encoding/echo/abc?a&b=").get().getString());
         
         // verify url ending with only ? or none
         assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc?").get().getString());

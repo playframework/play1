@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.sql.DataSource;
 import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
@@ -17,6 +19,7 @@ import com.sun.rowset.CachedRowSetImpl;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
 import play.Logger;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Database connection utilities.
@@ -26,64 +29,165 @@ public class DB {
     /**
      * The loaded datasource.
      */
-    public static DataSource datasource = null;
+    protected static final Map<String,ExtendedDatasource> datasources = new ConcurrentHashMap<String,ExtendedDatasource>();
+
+    public static class ExtendedDatasource {
+
+        /**
+         * Connection to the physical data source
+         */
+        private DataSource datasource;
+        
+        /**
+         * The method used to destroy the data source
+         */
+        private String destroyMethod;
+        
+        public ExtendedDatasource(DataSource ds, String destroyMethod) {
+            this.datasource = ds;
+            this.destroyMethod = destroyMethod;
+        }
+
+        public String getDestroyMethod() {
+            return destroyMethod;
+        }
+
+        public DataSource getDataSource() {
+            return datasource;
+        }
+
+    }
 
     /**
-     * The method used to destroy the datasource
+     * @deprecated
+     * Use datasources instead
+     * @since 1.3.0
+     * @see datasources
+     * @see ExtendedDatasource
      */
+    @Deprecated
+    public static DataSource datasource = null;
+     /**
+     * The method used to destroy the datasource
+     * @deprecated
+     * Use datasources instead
+     * @since 1.3.0
+     *  @see datasources
+     * @see ExtendedDatasource
+     */
+    @Deprecated
     public static String destroyMethod = "";
 
+  
+    public final static String DEFAULT = "default";
+
+    static ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<Map<String, Connection>>();
+
+   
+    public static DataSource getDataSource(String name) {
+        if (datasources.get(name) != null) {
+            return datasources.get(name).getDataSource();
+        }
+        return null;
+    }
+
+    public static DataSource getDataSource() {
+        return getDataSource(DEFAULT);
+    }
+
+    public static Connection getConnection(String name, boolean autocommit) {
+        try {
+            Connection connection = getDataSource(name).getConnection();
+            connection.setAutoCommit(autocommit);
+            return connection;
+        } catch(Exception e) {
+            // Exception
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    private static Connection getLocalConnection(String name) {
+        Map<String, Connection> map = localConnection.get();
+        if (map != null) {
+            Connection connection = map.get(name);
+            return connection;   
+        } 
+        return null;
+    }
+
+    private static Connection getLocalConnection() {
+       return getLocalConnection(DEFAULT);   
+    }
+
+    private static void registerLocalConnection(String name, Connection connection) {
+       Map<String, Connection> map = localConnection.get();
+       if (map == null) {
+            map = new HashMap<String, Connection>();
+       }
+       map.put(name, connection);
+       localConnection.set(map);
+    }
+
     /**
-     * Close the connection opened for the current thread.
+     * Close all the open connections for the current thread.
      */
     public static void close() {
         if (localConnection.get() != null) {
+            Map<String, Connection> map = localConnection.get();
+            Connection connection = map.get(DEFAULT);
+            map.remove(DEFAULT);
+            localConnection.set(map);
             try {
-                Connection connection = localConnection.get();
-                localConnection.set(null);
                 connection.close();
             } catch (Exception e) {
                 throw new DatabaseException("It's possible than the connection was not properly closed !", e);
             }
         }
     }
-    static ThreadLocal<Connection> localConnection = new ThreadLocal<Connection>();
-
+    
     /**
      * Open a connection for the current thread.
      * @return A valid SQL connection
      */
-    @SuppressWarnings("deprecation")
-    public static Connection getConnection() {
+    public static Connection getConnection(String name) {
         try {
             if (JPA.isEnabled()) {
-                return ((SessionImpl)((org.hibernate.ejb.EntityManagerImpl) JPA.em()).getSession()).connection();
+               return ((SessionImpl)((org.hibernate.ejb.EntityManagerImpl) JPA.em(name)).getSession()).connection();
             }
-            if (localConnection.get() != null) {
-                return localConnection.get();
+            
+            final Connection localConnection = getLocalConnection(name);
+            if (localConnection != null) {
+                return localConnection;
             }
-            Connection connection = datasource.getConnection();
-            localConnection.set(connection);
+
+            // We have no connection
+            Connection connection = getDataSource(name).getConnection();
+            registerLocalConnection(name, connection);
             return connection;
-        } catch (SQLException ex) {
-            throw new DatabaseException("Cannot obtain a new connection (" + ex.getMessage() + ")", ex);
         } catch (NullPointerException e) {
-            if (datasource == null) {
-                throw new DatabaseException("No database found. Check the configuration of your application.", e);
-            }
-            throw e;
+           if (datasource == null) {
+               throw new DatabaseException("No database found. Check the configuration of your application.", e);
+           }
+           throw e;
+        } catch(Exception e) {
+            // Exception
+            throw new DatabaseException(e.getMessage());
         }
     }
 
+    public static Connection getConnection() {
+        return getConnection(DEFAULT);
+    }
+   
     /**
      * Execute an SQL update
      * @param SQL
      * @return true if the next result is a ResultSet object; false if it is an update count or there are no more results 
      */
-    public static boolean execute(String SQL) {
+    public static boolean execute(String name, String SQL) {
         Statement statement = null;
         try {
-            statement = getConnection().createStatement();
+            statement = getConnection(name).createStatement();
             if(statement != null){
                 return statement.execute(SQL);
             }
@@ -95,12 +199,20 @@ public class DB {
         return false; 
     }
 
+    public static boolean execute(String SQL) {
+        return execute(DEFAULT, SQL);
+    }    
+
+
+    public static RowSet executeQuery(String SQL) {
+        return executeQuery(DEFAULT, SQL);
+    }
     /**
      * Execute an SQL query
      * @param SQL
      * @return The rowSet of the query
      */
-    public static RowSet executeQuery(String SQL) {
+    public static RowSet executeQuery(String name, String SQL) {
         Statement statement = null;
         ResultSet rs = null;
         try {
@@ -141,21 +253,39 @@ public class DB {
         }
     }
 
-    /**
+     /**
      * Destroy the datasource
      */
-    public static void destroy() {
+    public static void destroy(String name) {
         try {
-            if (DB.datasource != null && DB.destroyMethod != null && !DB.destroyMethod.equals("")) {
-                Method close = DB.datasource.getClass().getMethod(DB.destroyMethod, new Class[] {});
+            ExtendedDatasource extDatasource = datasources.get(name);
+            if (extDatasource != null && extDatasource.getDestroyMethod() != null) {
+                Method close = datasource.getClass().getMethod(extDatasource.getDestroyMethod() , new Class[] {});
                 if (close != null) {
-                    close.invoke(DB.datasource, new Object[] {});
+                    close.invoke(extDatasource.getDataSource(), new Object[] {});
+                    datasources.remove(name);
                     DB.datasource = null;
                     Logger.trace("Datasource destroyed");
                 }
             }
         } catch (Throwable t) {
              Logger.error("Couldn't destroy the datasource", t);
+        }
+    }
+
+    /**
+     * Destroy the datasource
+     */
+    public static void destroy() {
+        destroy(DEFAULT);
+    }
+
+     /**
+     * Destroy all datasources
+     */
+    public static void destroyAll() {
+        for (String name : datasources.keySet()) {
+            destroy(name);
         }
     }
 }

@@ -3,16 +3,12 @@ package play.data.binding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import play.Logger;
 import play.Play;
-import play.data.binding.types.DateBinder;
 import play.libs.I18N;
-import play.utils.Utils;
 
 /**
  * Try to unbind an object to a Map<String,String>
@@ -46,19 +42,42 @@ public class Unbinder {
             }
         }
     }
-    
+        
     private static void unbindCollection(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         if(src == null){
             directUnbind( result, src,  srcClazz,  name, annotations);
-        }else if (Map.class.isAssignableFrom(src.getClass())) {
-            throw new UnsupportedOperationException("Unbind won't work with maps yet");
         } else {
-            Collection<?> c = (Collection<?>) src;
-            Object[] srcArray = c.toArray();
-            unBind(result, srcArray, srcArray.getClass(), name, annotations);
+            Collection<?> c = (Collection<?>) src;  
+            if (Map.class.isAssignableFrom(src.getClass())) {
+                throw new UnsupportedOperationException("Unbind won't work with maps yet");
+            } else {
+                 int i = 0;
+                 // We cannot convert it to array, as the class of the array will be object instead of the real object class
+                 // Moreover the list could contains different classes (all elements extends from a parent class)
+                 for (Object object : c) {
+                     unBind(result, object, object.getClass(), name + "[" + (i++) + "]", annotations);
+                 }
+            } 
         }
     }
-    
+
+    private static void unbindMap(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
+        if(src == null){
+            directUnbind( result, src,  srcClazz,  name, annotations);
+        } else {
+            Map<?,?> map = (Map) src;
+
+            for (Map.Entry entry : map.entrySet()) {
+                Object key = entry.getKey();
+                if (!isDirect(key.getClass())) {
+                    throw new UnsupportedOperationException("Unbind won't work with indirect map keys yet");
+                }
+                String paramKey = name + '.' + key.toString();
+                Unbinder.unBind(result, entry.getValue(), paramKey, annotations);
+            }
+        }
+    }
+
     private static void unbindDate(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         // Get the date format from the controller
         boolean isAsAnnotation = false;
@@ -144,6 +163,8 @@ public class Unbinder {
             unbindArray(result, src, src.getClass(), name, annotations);           
         } else if (Collection.class.isAssignableFrom(src.getClass())) {
             unbindCollection(result, src, src.getClass(), name, annotations);
+        } else if (Map.class.isAssignableFrom(src.getClass())) {
+            unbindMap(result, src, src.getClass(), name, annotations);
         } else if (Date.class.isAssignableFrom(src.getClass()) || Calendar.class.isAssignableFrom(src.getClass())) {
             unbindDate(result, src, src.getClass(), name, annotations);
         } else{    

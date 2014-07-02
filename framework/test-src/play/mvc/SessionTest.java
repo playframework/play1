@@ -1,12 +1,9 @@
 package play.mvc;
 
 import java.lang.reflect.*;
-import java.util.HashMap;
-
 import org.junit.*;
 
 import play.Play;
-import play.libs.Crypto;
 import play.PlayBuilder;
 import play.mvc.Http.*;
 import play.mvc.Scope.Session;

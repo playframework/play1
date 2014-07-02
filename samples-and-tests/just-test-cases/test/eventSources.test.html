@@ -1,0 +1,21 @@
+#{fixture delete:'all' /}
+
+#{selenium 'Test EventSource'}
+
+    openAndWait('@{EventSources.index()}')
+   
+//    Not supported in html unit
+//    waitForTextPresent('connected: true')
+//    assertTextPresent('connected: true') 
+//    waitForTextPresent('message: hello 1')
+//    assertTextPresent('message: hello 1')
+//    waitForTextPresent('message: hello 2')
+//    assertTextPresent('message: hello 2')
+//    waitForTextPresent('message: hello 3')
+//    assertTextPresent('message: hello 3')
+//    waitForTextPresent('message: bye')
+//    assertTextPresent('message: bye')
+//    waitForTextPresent('connected: false')
+//    assertTextPresent('connected: false')     
+#{/selenium}
+

@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play start [app_path] ] [-f] [--deps] [--%fwk_id]  [--http[s].port=<value>] [--jpda.port=<value>] [--pid_file=<file>] [--java_options]
+~ play start [app_path] [-f] [--deps] [--%fwk_id]  [--http[s].port=<value>] [--jpda.port=<value>] [--pid_file=<file>] [--java_options]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~

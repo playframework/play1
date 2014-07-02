@@ -5,12 +5,6 @@ import org.junit.Test;
 import play.Play;
 import play.PlayBuilder;
 import play.PlayPlugin;
-import play.classloading.ApplicationClasses;
-import play.classloading.ApplicationClassloader;
-import play.vfs.VirtualFile;
-
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

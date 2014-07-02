@@ -2,10 +2,7 @@ package play.classloading.enhancers;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -84,7 +81,6 @@ public class ContinuationEnhancer extends Enhancer {
             return false;
         }
 
-        boolean needsContinuations = false;
         final boolean[] _needsContinuations = new boolean[]{false};
 
         for (CtMethod m : ctClass.getDeclaredMethods()) {
