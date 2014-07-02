@@ -30,7 +30,6 @@ eclipse
 .settings
 .classpath
 .project
-framework/tests/tmp
 id
 framework/tests-tmp
 framework/docs
@@ -49,8 +48,6 @@ modules/gwt/lib/play-gwt.jar
 tmp
 test-result
 logs
-logs
-tmp
 db
 *.pyc
 test-result
@@ -142,5 +139,5 @@ samples-and-tests/zencontact/precompiled
 !modules/secure
 !modules/testrunner
 !framework/src/play/db
-.idea
+!framework/test-src/play/db
 *~

@@ -82,14 +82,15 @@ public class DBPlugin extends PlayPlugin {
                 if (!DB.datasources.isEmpty()) {
                     DB.destroyAll();
                 }
-                // convert all 'db.x' to 'db.default'
-                Properties p = Configuration.convertToMultiDB(Play.configuration);
-                Set<String> dbNames = Configuration.getDbNames(p);
+                
+                Set<String> dbNames = Configuration.getDbNames();
                 Iterator<String> it = dbNames.iterator();
                 while(it.hasNext()) {
                     dbName = it.next();
+                    Configuration dbConfig = new Configuration(dbName);
+                    
                     boolean isJndiDatasource = false;
-                    String datasourceName = p.getProperty("db." + dbName, "");
+                    String datasourceName = dbConfig.getProperty("db", "");
 
                     // Identify datasource JNDI lookup name by 'jndi:' or 'java:' prefix 
                     if (datasourceName.startsWith("jndi:")) {
@@ -104,7 +105,7 @@ public class DBPlugin extends PlayPlugin {
                     } else {
 
                         // Try the driver
-                        String driver = p.getProperty("db." + dbName + ".driver");
+                        String driver = dbConfig.getProperty("db.driver");
                         try {
                             Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
                             DriverManager.registerDriver(new ProxyDriver(d));
@@ -115,10 +116,10 @@ public class DBPlugin extends PlayPlugin {
                         // Try the connection
                         Connection fake = null;
                         try {
-                            if (p.getProperty("db." + dbName + ".user") == null) {
-                                fake = DriverManager.getConnection(p.getProperty("db." + dbName + ".url"));
+                            if (dbConfig.getProperty("db.user") == null) {
+                                fake = DriverManager.getConnection(dbConfig.getProperty("db.url"));
                             } else {
-                                fake = DriverManager.getConnection(p.getProperty("db." + dbName + ".url"), p.getProperty("db." + dbName + ".user"), p.getProperty("db." + dbName + ".pass"));
+                                fake = DriverManager.getConnection(dbConfig.getProperty("db.url"), dbConfig.getProperty("db.user"), dbConfig.getProperty("db.pass"));
                             }
                         } finally {
                             if (fake != null) {
@@ -128,24 +129,25 @@ public class DBPlugin extends PlayPlugin {
 
                         System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
                         System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
+                        
                         ComboPooledDataSource ds = new ComboPooledDataSource();
-                        ds.setDriverClass(p.getProperty("db." + dbName + ".driver"));
-                        ds.setJdbcUrl(p.getProperty("db." + dbName + ".url"));
-                        ds.setUser(p.getProperty("db." + dbName + ".user"));
-                        ds.setPassword(p.getProperty("db." + dbName + ".pass"));
+                        ds.setDriverClass(dbConfig.getProperty("db.driver"));
+                        ds.setJdbcUrl(dbConfig.getProperty("db.url"));
+                        ds.setUser(dbConfig.getProperty("db.user"));
+                        ds.setPassword(dbConfig.getProperty("db.pass"));
                         ds.setAcquireRetryAttempts(10);
-                        ds.setCheckoutTimeout(Integer.parseInt(p.getProperty("db." + dbName + ".pool.timeout", "5000")));
+                        ds.setCheckoutTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.timeout", "5000")));
                         ds.setBreakAfterAcquireFailure(false);
-                        ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db." + dbName + ".pool.maxSize", "30")));
-                        ds.setMinPoolSize(Integer.parseInt(p.getProperty("db." + dbName + ".pool.minSize", "1")));
-                        ds.setMaxIdleTimeExcessConnections(Integer.parseInt(p.getProperty("db." + dbName + ".pool.maxIdleTimeExcessConnections", "0")));
+                        ds.setMaxPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.maxSize", "30")));
+                        ds.setMinPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.minSize", "1")));
+                        ds.setMaxIdleTimeExcessConnections(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleTimeExcessConnections", "0")));
                         ds.setIdleConnectionTestPeriod(10);
                         ds.setTestConnectionOnCheckin(true);
 
-                        if (p.getProperty("db." + dbName + ".testquery") != null) {
-                            ds.setPreferredTestQuery(p.getProperty("db." + dbName + ".testquery"));
+                        if (dbConfig.getProperty("db.testquery") != null) {
+                            ds.setPreferredTestQuery(dbConfig.getProperty("db.testquery"));
                         } else {
-                            String driverClass = p.getProperty("db." + dbName + ".driver");
+                            String driverClass = dbConfig.getProperty("db.driver");
                             /*
                              * Pulled from http://dev.mysql.com/doc/refman/5.5/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html
                              * Yes, the select 1 also needs to be in there.
@@ -157,12 +159,12 @@ public class DBPlugin extends PlayPlugin {
 
                         // This check is not required, but here to make it clear that nothing changes for people
                         // that don't set this configuration property. It may be safely removed.
-                        if(p.getProperty("db." + dbName + ".isolation") != null) {
+                        if(dbConfig.getProperty("db.isolation") != null) {
                             ds.setConnectionCustomizerClassName(play.db.DBPlugin.PlayConnectionCustomizer.class.getName());
                         }
                        
                         // Current datasource. This is actually deprecated. 
-                        String destroyMethod = p.getProperty("db." + dbName + ".destroyMethod", "");
+                        String destroyMethod = dbConfig.getProperty("db.destroyMethod", "");
                         DB.datasource = ds;
                         DB.destroyMethod = destroyMethod;
 
@@ -203,10 +205,10 @@ public class DBPlugin extends PlayPlugin {
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();
-        PrintWriter out = new PrintWriter(sw);
-        Properties p = Configuration.convertToMultiDB(Play.configuration);
+        PrintWriter out = new PrintWriter(sw);     
+        Set<String> dbNames = Configuration.getDbNames();
                
-        for (String dbName : Configuration.getDbNames(p)) {
+        for (String dbName : dbNames) {
             DataSource ds = DB.getDataSource(dbName);
             if (ds == null || !(ds instanceof ComboPooledDataSource)) {
                 out.println("Datasource:");
@@ -238,45 +240,46 @@ public class DBPlugin extends PlayPlugin {
         DB.close();
     }
 
-    private static void check(Properties p, String mode, String property) {
-        if (!StringUtils.isEmpty(p.getProperty(property))) {
+    private static void check(Configuration config, String mode, String property) {
+        if (!StringUtils.isEmpty(config.getProperty(property))) {
             Logger.warn("Ignoring " + property + " because running the in " + mode + " db.");
         }
     }
 
     private static boolean changed() {
-        Properties p = Configuration.convertToMultiDB(Play.configuration);
-        for (String dbName : Configuration.getDbNames(p)) {
-    
-            if ("mem".equals(p.getProperty("db." + dbName)) && p.getProperty("db." + dbName + ".url") == null) {
-                p.put("db." + dbName + ".driver", "org.h2.Driver");
-                p.put("db." + dbName + ".url", "jdbc:h2:mem:play;MODE=MYSQL");
-                p.put("db." + dbName + ".user", "sa");
-                p.put("db." + dbName + ".pass", "");
+        Set<String> dbNames = Configuration.getDbNames();
+        
+        for (String dbName : dbNames) {
+            Configuration dbConfig = new Configuration(dbName);
+            
+            if ("mem".equals(dbConfig.getProperty("db")) && dbConfig.getProperty("db.url") == null) {
+                dbConfig.put("db.driver", "org.h2.Driver");
+                dbConfig.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL");
+                dbConfig.put("db.user", "sa");
+                dbConfig.put("db.pass", "");
             }
 
-            if ("fs".equals(p.getProperty("db." + dbName)) && p.getProperty("db." + dbName + ".url") == null) {
-                p.put("db." + dbName + ".driver", "org.h2.Driver");
-                p.put("db." + dbName + ".url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
-                p.put("db." + dbName + ".user", "sa");
-                p.put("db." + dbName + ".pass", "");
+            if ("fs".equals(dbConfig.getProperty("db")) && dbConfig.getProperty("db.url") == null) {
+                dbConfig.put("db.driver", "org.h2.Driver");
+                dbConfig.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
+                dbConfig.put("db.user", "sa");
+                dbConfig.put("db.pass", "");
             }
-            String datasourceName = p.getProperty("db." + dbName, "");
+            String datasourceName = dbConfig.getProperty("db", "");
             DataSource ds = DB.getDataSource(dbName);
                      
-            if ((datasourceName.startsWith("java:")) && p.getProperty("db.url") == null) {
+            if ((datasourceName.startsWith("java:")) && dbConfig.getProperty("db.url") == null) {
                 if (ds == null) {
-                    Play.configuration = p;
                     return true;
                 }
             } else {
                 // Internal pool is c3p0, we should call the close() method to destroy it.
-                check(p, "internal pool", "db." + dbName +".destroyMethod");
+                check(dbConfig, "internal pool", "db.destroyMethod");
 
-                p.put("db." + dbName + ".destroyMethod", "close");
+                dbConfig.put("db.destroyMethod", "close");
             }
 
-            Matcher m = new jregex.Pattern("^mysql:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[a-zA-Z0-9_]+)(\\?)?({parameters}[^\\s]+)?$").matcher(p.getProperty("db." + dbName, ""));
+            Matcher m = new jregex.Pattern("^mysql:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[a-zA-Z0-9_]+)(\\?)?({parameters}[^\\s]+)?$").matcher(dbConfig.getProperty("db", ""));
             if (m.matches()) {
                 String user = m.group("user");
                 String password = m.group("pwd");
@@ -290,40 +293,39 @@ public class DBPlugin extends PlayPlugin {
                 paramMap.put("connectionCollation", "utf8_general_ci");
                 addParameters(paramMap, parameters);
                 
-                p.put("db." + dbName + ".driver", "com.mysql.jdbc.Driver");
-                p.put("db." + dbName + ".url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?" + toQueryString(paramMap));
+                dbConfig.put("db.driver", "com.mysql.jdbc.Driver");
+                dbConfig.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?" + toQueryString(paramMap));
                 if (user != null) {
-                    p.put("db." + dbName + ".user", user);
+                    dbConfig.put("db.user", user);
                 }
                 if (password != null) {
-                    p.put("db." + dbName + ".pass", password);
+                    dbConfig.put("db.pass", password);
                 }
             }
             
-            m = new jregex.Pattern("^postgres:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[^\\s]+)$").matcher(p.getProperty("db." + dbName, ""));
+            m = new jregex.Pattern("^postgres:(//)?(({user}[a-zA-Z0-9_]+)(:({pwd}[^@]+))?@)?(({host}[^/]+)/)?({name}[^\\s]+)$").matcher(dbConfig.getProperty("db", ""));
             if (m.matches()) {
                 String user = m.group("user");
                 String password = m.group("pwd");
                 String name = m.group("name");
                 String host = m.group("host");
-                p.put("db." + dbName + ".driver", "org.postgresql.Driver");
-                p.put("db." + dbName + ".url", "jdbc:postgresql://" + (host == null ? "localhost" : host) + "/" + name);
+                dbConfig.put("db.driver", "org.postgresql.Driver");
+                dbConfig.put("db.url", "jdbc:postgresql://" + (host == null ? "localhost" : host) + "/" + name);
                 if (user != null) {
-                    p.put("db." + dbName + ".user", user);
+                    dbConfig.put("db.user", user);
                 }
                 if (password != null) {
-                    p.put("db." + dbName + ".pass", password);
+                    dbConfig.put("db.pass", password);
                 }
             }
 
-            if(p.getProperty("db." + dbName + ".url") != null && p.getProperty("db." + dbName + ".url").startsWith("jdbc:h2:mem:")) {
-                p.put("db." + dbName + ".driver", "org.h2.Driver");
-                p.put("db." + dbName + ".user", "sa");
-                p.put("db." + dbName + ".pass", "");
+            if(dbConfig.getProperty("db.url") != null && dbConfig.getProperty("db.url").startsWith("jdbc:h2:mem:")) {
+                dbConfig.put("db.driver", "org.h2.Driver");
+                dbConfig.put("db.user", "sa");
+                dbConfig.put("db.pass", "");
             }
 
-            Play.configuration = p;
-            if ((p.getProperty("db." + dbName + ".driver") == null) || (p.getProperty("db." + dbName + ".url") == null)) {
+            if ((dbConfig.getProperty("db.driver") == null) || (dbConfig.getProperty("db.url") == null)) {
                 return false;
             }
             
@@ -331,23 +333,23 @@ public class DBPlugin extends PlayPlugin {
                 return true;
             } else {
                 ComboPooledDataSource cds = (ComboPooledDataSource) ds;
-                if (!p.getProperty("db." + dbName + ".driver").equals(cds.getDriverClass())) {
+                if (!dbConfig.getProperty("db.driver").equals(cds.getDriverClass())) {
                     return true;
                 }
-                if (!p.getProperty("db." + dbName + ".url").equals(cds.getJdbcUrl())) {
+                if (!dbConfig.getProperty("db.url").equals(cds.getJdbcUrl())) {
                     return true;
                 }
-                if (!p.getProperty("db." + dbName + ".user", "").equals(cds.getUser())) {
+                if (!dbConfig.getProperty("db.user", "").equals(cds.getUser())) {
                     return true;
                 }
-                if (!p.getProperty("db." + dbName + ".pass", "").equals(cds.getPassword())) {
+                if (!dbConfig.getProperty("db.pass", "").equals(cds.getPassword())) {
                     return true;
                 }
             }
 
             ExtendedDatasource extDataSource = DB.datasources.get(dbName);
 
-            if (extDataSource != null && !p.getProperty("db." + dbName + ".destroyMethod", "").equals(extDataSource.getDestroyMethod())) {
+            if (extDataSource != null && !dbConfig.getProperty("db.destroyMethod", "").equals(extDataSource.getDestroyMethod())) {
                 return true;
             }
         }
@@ -360,7 +362,7 @@ public class DBPlugin extends PlayPlugin {
 	    	for (String param : params) {
 				String[] parts = param.split("[=]");
 				if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
-					paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
+				    paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
 				}
 			}
     	}
