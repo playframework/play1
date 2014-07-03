@@ -1,6 +1,14 @@
 h1. Use a cache
 
-To create high-performance systems, sometimes you need to cache data. Play has a cache library and will use "Memcached":http://www.danga.com/memcached/ when used in a distributed environment.
+To create high-performance systems, sometimes you need to cache data. 
+
+Play provides a pluggable cache infrastructure that you may use via: 
+* the @cacheFor@ annotation your actions
+* the cache API
+
+h2. Configuration
+
+Play will use "Memcached":http://www.danga.com/memcached/ when used in a distributed environment.
 
 If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the ‘share nothing’ assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
@@ -16,6 +24,37 @@ bc. public static void allProducts() {
     }
     render(products);
 }
+
+p(note). **Modules might configure the cache for you**
+ 
+For example, the "GAE module":http://www.playframework.com/modules/gae configures the cache to use "Google cache":https://developers.google.com/appengine/docs/java/memcache when deployed to the GAE servers.
+
+h2. <a name="cacheFor">The cacheFor annotation</a>
+
+The @cacheFor@ annotation provides an easy way to cache the ouput (HTML, JSON, etc) of an action.
+
+bc.  import play.cache.*;
+public class Application extends Controller {
+        @CacheFor("5s")
+        public static void indexCachedInSeconds() {
+            Date date = new Date();
+	        renderText("Current time is: " + date);
+	    }
+        @CacheFor("1min")
+        public static void indexCachedInMinutes() {
+            Date date = new Date();
+	        renderText("Current time is: " + date);
+	    }
+}
+
+The annotation takes an optional @duration@ parameter to specify the expiration of the cached content. 
+The expiration can be specified in days, hours, minutes or seconds using respectively the following shorthands @d@, @h@, @min@ or @s@.
+
+The *default expiration* is @1h@.
+
+p(note). **Using expiration 0s**
+ 
+When specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations
 
 h2. <a name="api">The cache API</a>
 
