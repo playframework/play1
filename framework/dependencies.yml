@@ -27,6 +27,7 @@ require:    &allDependencies
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.7
     - javax.inject 1.0
+    - javax.validation -> validation-api 1.0.0.GA
     - jaxen 1.1
     - joda-time 2.3 
     - org.hamcrest -> hamcrest-core 1.3
@@ -47,6 +48,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-core 4.1.3.Final
     - org.hibernate -> hibernate-commons-annotations 4.0.1.Final
     - org.hibernate -> hibernate-entitymanager 4.1.3.Final
+    - org.hibernate -> hibernate-validator 4.1.0.Final
     - org.hibernate -> jboss-logging 3.1.0.GA
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
