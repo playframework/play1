@@ -28,7 +28,7 @@ h3. Template decorators : #{extends  /} and  #{doLayout  /}
 
 Decorators provide a clean solution to share a page layout (or design) across several templates. 
 
-p(note). Use "#{get}":tags#ageta and "#{set}":tags#aseta tags to share variables between the template and the decorator. 
+p(note). Use "#{get}":tags#get and "#{set}":tags#set tags to share variables between the template and the decorator. 
 
 Embedding a page in a decorator is the matter of a one liner:
 
