@@ -2,6 +2,7 @@ package play.db.evolutions;
 
 import play.Logger;
 import play.Play;
+import play.db.Configuration;
 import play.db.DB;
 import play.db.SQLSplitter;
 import play.db.jpa.JPAPlugin;
@@ -29,17 +30,17 @@ public class EvolutionQuery{
         // specify your own datatype using the 'evolution.PLAY_EVOLUTIONS.textType'-property
         String textDataType = Play.configuration.getProperty("evolution.PLAY_EVOLUTIONS.textType");
         if (textDataType == null) {
-            if (isOracleDialectInUse()) {
+            if (isOracleDialectInUse(dbName)) {
                 textDataType = "clob";
             } else {
                 textDataType = "text";
             }
         }
         
-	execute(dbName, "create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ", module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
+        execute(dbName, "create table play_evolutions (id int not null, hash varchar(255) not null, applied_at timestamp not null, apply_script " + textDataType + ", revert_script " + textDataType + ", state varchar(255), last_problem " + textDataType + ", module_key varchar(255), constraint pk_id_module_key primary key (id, module_key))");
     }
     
-    public static void alterForModuleSupport(Connection connection) throws SQLException{
+    public static void alterForModuleSupport(String dbName, Connection connection) throws SQLException{
         // Add new column
         PreparedStatement ps1 = connection.prepareStatement("alter table play_evolutions add module_key varchar(255);");
         ps1.execute();
@@ -53,7 +54,7 @@ public class EvolutionQuery{
         closeStatement(statement);
        
         
-        if(isMySqlDialectInUse()){
+        if(isMySqlDialectInUse(dbName)){
             // Drop previous primary key
             PreparedStatement ps2 = connection.prepareStatement( "alter table play_evolutions drop primary key;");
             ps2.execute();
@@ -251,10 +252,10 @@ public class EvolutionQuery{
         }
     }
 
-    private synchronized static boolean isOracleDialectInUse() {
+    private synchronized static boolean isOracleDialectInUse(String dbName) {
         boolean isOracle = false;
-
-        String jpaDialect = JPAPlugin.getDefaultDialect(Play.configuration.getProperty("db.driver")); 
+        Configuration dbConfig = new Configuration(dbName);
+        String jpaDialect = JPAPlugin.getDefaultDialect(dbConfig.getProperty("db.driver")); 
         if (jpaDialect != null) {
             try {
                 Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
@@ -269,22 +270,22 @@ public class EvolutionQuery{
         return isOracle;
     }
     
-    private static boolean isMySqlDialectInUse() {
+    private static boolean isMySqlDialectInUse(String dbName) {
         boolean isMySQl = false;
-	String jpaDialect = JPAPlugin.getDefaultDialect(Play.configuration.getProperty("db.driver")); 
-	 if (jpaDialect != null) {
-	    try {
-		Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
+        Configuration dbConfig = new Configuration(dbName);
+        String jpaDialect = JPAPlugin.getDefaultDialect(dbConfig.getProperty("db.driver"));
+        if (jpaDialect != null) {
+            try {
+                Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
 
-		// MySQLDialect is the base class for MySQL dialects
-		isMySQl = play.db.jpa.MySQLDialect.class
-			.isAssignableFrom(dialectClass);
-	    } catch (ClassNotFoundException e) {
-		// swallow
-		Logger.warn("jpa.dialect class %s not found", jpaDialect);
-	    }
-	}
-	return isMySQl;
+                // MySQLDialect is the base class for MySQL dialects
+                isMySQl = play.db.jpa.MySQLDialect.class.isAssignableFrom(dialectClass);
+            } catch (ClassNotFoundException e) {
+                // swallow
+                Logger.warn("jpa.dialect class %s not found", jpaDialect);
+            }
+        }
+        return isMySQl;
     }
 
 }

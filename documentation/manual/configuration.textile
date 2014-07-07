@@ -252,8 +252,10 @@ To configure an additional database, add a dot and a suffix (name of the databas
 Example:
 
 @db@ will be replaced by @db.[DB_name]@ where @[DB_name]@ is the name of the database
+@jpa@ will be replaced by @jpa.[DB_name]@ where @[DB_name]@ is the name of the database
+@hibernate@ will be replaced by @hibernate.[DB_name]@ where @[DB_name]@ is the name of the database
 
-This database configuration is now called 'DB_name' in Play. For example, configure JPA for this 'DB_name' configuration like this:
+This database configuration is now called 'DB_name' in Play. For example, configure DB/JPA/hibernate for this 'DB_name' configuration like this:
 
 Example, with 3 tables "default", "student" and "teacher"
 

@@ -78,15 +78,13 @@ public class Evolutions extends PlayPlugin {
         Logger.init();
         Logger.setUp("ERROR");
         new DBPlugin().onApplicationStart();
-
-        // Convert all the properties and covert them for multi DB support
-        Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
         
         // Look over all the DB
-        Set<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames();
         boolean defaultExitCode = true;
                 
         for (String dbName : dBNames) {
+            Configuration dbConfig = new Configuration(dbName);
             /** Connected **/
             System.out.println("~ Connected to " + DB.getDataSource(dbName).getConnection().getMetaData().getURL());
 
@@ -358,18 +356,21 @@ public class Evolutions extends PlayPlugin {
         try {
             checkEvolutionsState();
         } catch (InvalidDatabaseRevision e) {
-            // Convert all the properties and covert them for multi DB support
-            Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
-            for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
-                if ("mem".equals(playConfig.getProperty("db"))
-                        && listDatabaseEvolutions(e.getDbName(), moduleRoot.getKey()).peek().revision == 0) {
-                    Logger.info("Automatically applying evolutions in in-memory database");
-                    Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
-                    applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
-                } else {
-                    throw e;
-                }
-            }    
+            Set<String> dbNames = Configuration.getDbNames();
+            for (String dbName : dbNames) {
+                Configuration dbConfig = new Configuration(dbName);
+              
+                for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
+                    if ("mem".equals(dbConfig.getProperty("db"))
+                            && listDatabaseEvolutions(e.getDbName(), moduleRoot.getKey()).peek().revision == 0) {
+                        Logger.info("Automatically applying evolutions in in-memory database");
+                        Logger.info("Applying evolutions for '" + moduleRoot.getKey() + "'");
+                        applyScript(true, moduleRoot.getKey(), moduleRoot.getValue());
+                    } else {
+                        throw e;
+                    }
+                }  
+            }
         }
     }
 
@@ -435,12 +436,9 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    public static synchronized boolean applyScript(boolean runScript, String moduleKey, VirtualFile evolutionsDirectory) {
-        // Convert all the properties and covert them for multi DB support
-        Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
-        
+    public static synchronized boolean applyScript(boolean runScript, String moduleKey, VirtualFile evolutionsDirectory) {       
         // Look over all the DB
-        Set<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames();
         for(String dbName: dBNames){
             return applyScript(dbName, runScript, moduleKey, evolutionsDirectory);
         }
@@ -507,12 +505,9 @@ public class Evolutions extends PlayPlugin {
         return sql.toString().trim();
     }
     
-    public synchronized static void checkEvolutionsState() {
-        // Convert all the properties and covert them for multi DB support
-        Properties playConfig = Configuration.convertToMultiDB(Play.configuration);
-        
+    public synchronized static void checkEvolutionsState() {        
         // Look over all the DB
-        Set<String> dBNames = Configuration.getDbNames(playConfig);
+        Set<String> dBNames = Configuration.getDbNames();
         for(String dbName: dBNames){
             checkEvolutionsState(dbName);
         }
@@ -658,7 +653,7 @@ public class Evolutions extends PlayPlugin {
             connection = EvolutionQuery.getNewConnection(dbName);    
             // Do we have a
             if (isEvolutionsTableExist(connection) ) {           
-                checkAndUpdateEvolutionsForMultiModuleSupport(connection);                    
+                checkAndUpdateEvolutionsForMultiModuleSupport(dbName, connection);                    
 
                 ResultSet databaseEvolutions = EvolutionQuery.getEvolutions(connection, moduleKey);
                                 
@@ -679,11 +674,11 @@ public class Evolutions extends PlayPlugin {
         return evolutions;
     }
     
-    private static void checkAndUpdateEvolutionsForMultiModuleSupport(Connection connection) throws SQLException {
+    private static void checkAndUpdateEvolutionsForMultiModuleSupport(String dbName, Connection connection) throws SQLException {
         ResultSet rs = connection.getMetaData().getColumns(null, null, "play_evolutions", "module_key");
         if (!rs.next()) {
             System.out.println("!!! - Updating the play_evolutions table to cope with multiple modules - !!!");
-            EvolutionQuery.alterForModuleSupport(connection);
+            EvolutionQuery.alterForModuleSupport(dbName, connection);
         }
     }
    
