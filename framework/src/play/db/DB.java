@@ -134,13 +134,14 @@ public class DB {
     public static void close() {
         if (localConnection.get() != null) {
             Map<String, Connection> map = localConnection.get();
-            Connection connection = map.get(DEFAULT);
-            map.remove(DEFAULT);
-            localConnection.set(map);
-            try {
-                connection.close();
-            } catch (Exception e) {
-                throw new DatabaseException("It's possible than the connection was not properly closed !", e);
+            localConnection.remove();
+
+            for (Map.Entry<String, Connection> entry : map.entrySet()) {
+              try {
+                entry.getValue().close();
+              } catch (Exception e) {
+                throw new DatabaseException("It's possible than the connection '" + entry.getKey() + "' was not properly closed !", e);
+              }
             }
         }
     }
