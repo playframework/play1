@@ -100,8 +100,11 @@ public class DBPlugin extends PlayPlugin {
 
                     if (isJndiDatasource || datasourceName.startsWith("java:")) {
                         Context ctx = new InitialContext();
-                        DB.datasource = (DataSource) ctx.lookup(datasourceName);
-
+                        DataSource ds =  (DataSource) ctx.lookup(datasourceName);
+                        DB.datasource = ds;
+                        DB.destroyMethod = "";
+                        DB.ExtendedDatasource extDs = new DB.ExtendedDatasource(ds, "");
+                        DB.datasources.put(dbName, extDs);  
                     } else {
 
                         // Try the driver

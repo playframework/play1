@@ -165,7 +165,7 @@ public class DB {
             registerLocalConnection(name, connection);
             return connection;
         } catch (NullPointerException e) {
-           if (datasource == null) {
+           if (getDataSource(name) == null) {
                throw new DatabaseException("No database found. Check the configuration of your application.", e);
            }
            throw e;
@@ -260,7 +260,7 @@ public class DB {
         try {
             ExtendedDatasource extDatasource = datasources.get(name);
             if (extDatasource != null && extDatasource.getDestroyMethod() != null) {
-                Method close = datasource.getClass().getMethod(extDatasource.getDestroyMethod() , new Class[] {});
+                Method close = extDatasource.datasource.getClass().getMethod(extDatasource.getDestroyMethod() , new Class[] {});
                 if (close != null) {
                     close.invoke(extDatasource.getDataSource(), new Object[] {});
                     datasources.remove(name);
