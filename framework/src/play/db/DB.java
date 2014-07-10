@@ -140,7 +140,7 @@ public class DB {
               try {
                 entry.getValue().close();
               } catch (Exception e) {
-                throw new DatabaseException("It's possible than the connection '" + entry.getKey() + "' was not properly closed !", e);
+                throw new DatabaseException("It's possible that the connection '" + entry.getKey() + "' was not properly closed !", e);
               }
             }
         }
