@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import javax.sql.DataSource;
 import javax.sql.RowSet;
@@ -129,22 +130,40 @@ public class DB {
     }
 
     /**
-     * Close all the open connections for the current thread.
+     * Close a specific open connection for the current thread.
+     */
+    public static void close(String name) {
+      Map<String, Connection> connectionMap = localConnection.get();
+      if (connectionMap != null) {
+        Connection connection = connectionMap.remove(name);
+        if (connection != null) {
+          try {
+            connection.close();
+          } catch (Exception e) {
+            throw new DatabaseException("It's possible that the connection '" + name + "' was not properly closed !", e);
+          }
+        }
+      }
+    }
+
+    /**
+     * Close the default open connection for the current thread.
      */
     public static void close() {
-        if (localConnection.get() != null) {
-            Map<String, Connection> map = localConnection.get();
-            Connection connection = map.get(DEFAULT);
-            map.remove(DEFAULT);
-            localConnection.set(map);
-            try {
-                connection.close();
-            } catch (Exception e) {
-                throw new DatabaseException("It's possible than the connection was not properly closed !", e);
-            }
-        }
+      close(DEFAULT);
     }
-    
+
+    /**
+     * Close all the open connections for the current thread.
+     */
+    public static void closeAll() {
+      if (localConnection.get() != null) {
+        for (String name : new HashSet<String>(localConnection.get().keySet())) {
+          close(name);
+        }
+      }
+    }
+
     /**
      * Open a connection for the current thread.
      * @return A valid SQL connection
@@ -284,7 +303,7 @@ public class DB {
      * Destroy all datasources
      */
     public static void destroyAll() {
-        for (String name : datasources.keySet()) {
+        for (String name : new HashSet<String>(datasources.keySet())) {
             destroy(name);
         }
     }
