@@ -201,7 +201,7 @@ public class DBPlugin extends PlayPlugin {
     @Override
     public void onApplicationStop() {
         if (Play.mode.isProd()) {
-            DB.destroy();
+            DB.destroyAll();
         }
     }
 
@@ -240,7 +240,7 @@ public class DBPlugin extends PlayPlugin {
 
     @Override
     public void invocationFinally() {
-        DB.close();
+        DB.closeAll();
     }
 
     private static void check(Configuration config, String mode, String property) {
