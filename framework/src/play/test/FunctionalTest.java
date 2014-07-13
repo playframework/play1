@@ -32,6 +32,8 @@ import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
@@ -274,7 +276,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         final CountDownLatch actionCompleted = new CountDownLatch(1);
-        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        final Future<?> invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
             public void execute() throws Exception {
@@ -318,9 +320,16 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
+            // We can not simply wait on the future result because of how continuations
+            // are implemented. Only when the latch is counted down the action is really
+            // completed. Therefore, wait on the latch.
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
             }
+            // We still call this to raise any exception that might have
+            // occurred during execution of the invocation.
+            invocationResult.get();
+
             if (savedCookies == null) {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
