@@ -36,6 +36,8 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.RenderArgs;
 
@@ -307,7 +309,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         final CountDownLatch actionCompleted = new CountDownLatch(1);
-        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        final Future<?> invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
             public void execute() throws Exception {
@@ -350,9 +352,16 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
+            // We can not simply wait on the future result because of how continuations
+            // are implemented. Only when the latch is counted down the action is really
+            // completed. Therefore, wait on the latch.
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
             }
+            // We still call this to raise any exception that might have
+            // occurred during execution of the invocation.
+            invocationResult.get();
+
             if (savedCookies == null) {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
