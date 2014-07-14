@@ -2,6 +2,7 @@ import org.junit.*;
 
 import play.test.*;
 import play.mvc.Http.*;
+import play.mvc.results.*;
 import models.*;
 
 import java.util.HashMap;
@@ -133,7 +134,7 @@ public class FunctionalTestTest extends FunctionalTest {
     /**
      * When a route is called that is not even defined, an exception is expected.
      */
-    @Test(expected = Exception.class)
+    @Test(expected = NotFound.class)
     public void testNoRoute() {
         GET("/status/route-not-defined/");
     }
@@ -152,7 +153,7 @@ public class FunctionalTestTest extends FunctionalTest {
      * When a controller throws a normal exception, an exception is expected in
      * the test method as well.
      */
-    @Test(expected = Exception.class)
+    @Test(expected = UnsupportedOperationException.class)
     public void testFailure() {
       GET("/status/failure/");
     }

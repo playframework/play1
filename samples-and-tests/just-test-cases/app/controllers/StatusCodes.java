@@ -30,7 +30,7 @@ public class StatusCodes extends Controller {
   }
 
   public static void throwsException() throws Exception {
-    throw new Exception("Whoops");
+    throw new UnsupportedOperationException("Whoops");
   }
 
 }
