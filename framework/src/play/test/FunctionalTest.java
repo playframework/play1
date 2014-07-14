@@ -31,6 +31,8 @@ import com.ning.http.client.multipart.StringPart;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.exceptions.JavaExecutionException;
+import play.exceptions.UnexpectedException;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -358,10 +360,21 @@ public abstract class FunctionalTest extends BaseTest {
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
             }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        try {
             // We still call this to raise any exception that might have
             // occurred during execution of the invocation.
             invocationResult.get();
-
+        }
+        catch (ExecutionException e) {
+            throw unwrapOriginalException(e);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
             if (savedCookies == null) {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
@@ -381,6 +394,21 @@ public abstract class FunctionalTest extends BaseTest {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private static RuntimeException unwrapOriginalException(final ExecutionException e) {
+        // Check if the original exceptions fits the usual patterns. If yes, throw the very
+        // original runtime exception
+        final Throwable executionCause = e.getCause();
+        if (executionCause != null
+              && (executionCause instanceof JavaExecutionException || executionCause instanceof UnexpectedException)) {
+            final Throwable originalCause = executionCause.getCause();
+            if (originalCause != null && originalCause instanceof RuntimeException) {
+                throw (RuntimeException) originalCause;
+            }
+        }
+        // As a last fallback, just wrap everything up
+        return new RuntimeException(e);
     }
 
     public static Response makeRequest(final Request request) {
