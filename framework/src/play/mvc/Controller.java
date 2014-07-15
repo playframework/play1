@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -663,30 +664,39 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param args The template data.
      */
     protected static void renderTemplate(String templateName, Map<String,Object> args) {
-        // Template datas
-        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
-        templateBinding.data.putAll(args);
-        templateBinding.put("session", Scope.Session.current());
-        templateBinding.put("request", Http.Request.current());
-        templateBinding.put("flash", Scope.Flash.current());
-        templateBinding.put("params", Scope.Params.current());
-        templateBinding.put("errors", Validation.errors());
-        try {
-            Template template = TemplateLoader.load(template(templateName));
-            throw new RenderTemplate(template, templateBinding.data);
-        } catch (TemplateNotFoundException ex) {
-            if (ex.isSourceAvailable()) {
-                throw ex;
-            }
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
-            if (element != null) {
-                ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
-                if (applicationClass != null) {
-                    throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
-                }
-            }
-            throw ex;
-        }
+        PlayPlugin.postEvent("template.render.before", templateName);
+		Template template = null ;
+		try
+		{
+			// Template datas
+			Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+			templateBinding.data.putAll(args);
+			templateBinding.put("session", Scope.Session.current());
+			templateBinding.put("request", Http.Request.current());
+			templateBinding.put("flash", Scope.Flash.current());
+			templateBinding.put("params", Scope.Params.current());
+			templateBinding.put("errors", Validation.errors());
+			try {
+				template = TemplateLoader.load(template(templateName));
+				throw new RenderTemplate(template, templateBinding.data);
+			} catch (TemplateNotFoundException ex) {
+				if (ex.isSourceAvailable()) {
+					throw ex;
+				}
+				StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
+				if (element != null) {
+					ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
+					if (applicationClass != null) {
+						throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
+					}
+				}
+				throw ex;
+			}
+		}
+		finally
+		{
+			PlayPlugin.postEvent("template.render.after", template);
+		}
     }
 
     /**
