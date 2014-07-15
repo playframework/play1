@@ -94,23 +94,29 @@ public class Configuration {
     public Map<String, String> getProperties() {
         Map<String, String> properties = new HashMap<String, String>();
         Properties props = Play.configuration;
-        Set<String> dBNames = Configuration.getDbNames();
         
         for (Object key : Collections.list(props.keys())) {
-            if (key.toString().startsWith("db." + this.configName) || key.toString().startsWith("hibernate." + this.configName) ) {
-                String type = key.toString().substring(0, key.toString().indexOf('.'));
-                String newKey = type + "." + key.toString().substring((type + "." + this.configName).length() + 1);
-                properties.put(newKey, props.get(key).toString());
-            }else if(this.isDefault()){
-                boolean isDefaultProperty = true; 
-                for(String dbName : dBNames){
-                    if(key.toString().startsWith("db." + dbName) || key.toString().startsWith("hibernate." + dbName)){
-                        isDefaultProperty = false;
-                        break;
+            String keyName = key.toString();
+            if (keyName.startsWith("db") || keyName.startsWith("hibernate") ) {
+                if (keyName.startsWith("db." + this.configName) || keyName.startsWith("hibernate." + this.configName) ) {
+                    String type = keyName.substring(0, keyName.indexOf('.'));
+                    String newKey = type;
+                    if(keyName.length() > (type + "." + this.configName).length()){
+                        newKey  += "." + keyName.substring((type + "." + this.configName).length() + 1);
                     }
-                }
-                if(isDefaultProperty){
-                    properties.put(key.toString(), props.get(key).toString());
+                    properties.put(newKey, props.get(key).toString());
+                }else if(this.isDefault()){
+                    boolean isDefaultProperty = true; 
+                    Set<String> dBNames = Configuration.getDbNames();
+                    for(String dbName : dBNames){
+                        if(key.toString().startsWith("db." + dbName) || key.toString().startsWith("hibernate." + dbName)){
+                            isDefaultProperty = false;
+                            break;
+                        }
+                    }
+                    if(isDefaultProperty){
+                        properties.put(key.toString(), props.get(key).toString());
+                    }
                 }
             }
         } 
