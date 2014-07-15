@@ -3,3 +3,11 @@
 require:
     - play
     - crud
+    - org.playframework -> example 1.0-SNAPSHOT
+
+repositories:
+    - localJarRep:
+        type: local
+        artifact: "${application.path}/../customJars/example/jar/example-1.0-SNAPSHOT.jar"
+        contains:
+            - org.playframework -> *

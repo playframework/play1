@@ -140,7 +140,42 @@ public class JPAPlugin extends PlayPlugin {
                     }                    
                 }
             }
+            
+            // Add entities
+            String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
+            for (String entity : moreEntities) {
+                if (entity.trim().equals("")) {
+                    continue;
+                }
+                try {
+                    Class<?> clazz = Play.classloader.loadClass(entity);  
+                    // Do we have a transactional annotation matching our dbname?
+                    PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
+                    if (pu != null && pu.name().equals(dbName)) {
+                      cfg.addAnnotatedClass(clazz);
+                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
+                    } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
+                      cfg.addAnnotatedClass(clazz);
+                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
+                    }         
+                } catch (Exception e) {
+                    Logger.warn("JPA -> Entity not found: %s", entity);
+                }
+            }
+            
+            for (ApplicationClass applicationClass : Play.classes.all()) {
+                if (applicationClass.isClass() || applicationClass.javaPackage == null) {
+                    continue;
+                }
+                Package p = applicationClass.javaPackage;
+                Logger.info("JPA -> Adding package: %s", p.getName());
+                cfg.addPackage(p.getName());
+            }
 
+            String mappingFile = dbConfig.getProperty("jpa.mapping-file", "");
+            if (mappingFile != null && mappingFile.length() > 0) {
+                cfg.addResource(mappingFile);
+            }
 
             if (!dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", dbConfig.getProperty("jpa.ddl", "update"));
@@ -169,6 +204,10 @@ public class JPAPlugin extends PlayPlugin {
             }
             
             cfg.setInterceptor(new HibernateInterceptor());
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Initializing JPA for %s...", dbName);
+            }
 
             JPA.emfs.put(dbName, cfg.buildEntityManagerFactory());
         }
