@@ -22,6 +22,15 @@ import play.libs.Crypto;
 import play.libs.Time;
 import play.utils.Utils;
 
+import java.lang.annotation.Annotation;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * All application Scopes
  */
@@ -29,6 +38,7 @@ public class Scope {
 
     public static final String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
     public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
+    public static final boolean COOKIE_HTTPONLY = Play.configuration.getProperty("application.cookies.httpOnly", "false").toLowerCase().equals("true");
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
     public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
@@ -61,13 +71,13 @@ public class Scope {
             }
             if (out.isEmpty()) {
                 if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE, COOKIE_HTTPONLY);
                 }
                 return;
             }
             try {
                 String flashData = CookieDataCodec.encode(out);
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE, COOKIE_HTTPONLY);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
