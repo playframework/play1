@@ -267,7 +267,7 @@ public class Play {
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
-        if (appRoot.child("app/views").exists()) {
+        if (appRoot.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
             templatesPath = new ArrayList<VirtualFile>(2);
             templatesPath.add(appRoot.child("app/views"));
         } else {
@@ -281,7 +281,7 @@ public class Play {
         modulesRoutes = new HashMap<String, VirtualFile>(16);
 
         // Load modules
-        loadModules();
+        loadModules(appRoot);
 
         // Load the templates from the framework after the one from the modules
         templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
@@ -690,10 +690,19 @@ public class Play {
     }
 
     /**
-     * Load all modules.
-     * You can even specify the list using the MODULES environement variable.
+     * Load all modules. You can even specify the list using the MODULES
+     * environment variable.
      */
     public static void loadModules() {
+        loadModules(VirtualFile.open(applicationPath));
+    }
+
+    /**
+     * Load all modules.
+     * You can even specify the list using the MODULES environment variable.
+     * @param appRoot : the application path virtual file
+     */
+    public static void loadModules(VirtualFile appRoot) {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
             if (System.getenv("MODULES") != null && System.getenv("MODULES").trim().length() > 0) {
@@ -706,7 +715,7 @@ public class Play {
                         final String moduleName = modulePathName.contains("-") ?
                                 modulePathName.substring(0, modulePathName.lastIndexOf("-")) :
                                 modulePathName;
-                        addModule(moduleName, modulePath);
+                        addModule(appRoot, moduleName, modulePath);
                     }
                 }
             }
@@ -744,13 +753,13 @@ public class Play {
 				if(module == null || !module.exists()){
 				        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, module.getAbsolutePath());
 				} else if (module.isDirectory()) {
-					addModule(moduleName, module);
+					addModule(appRoot, moduleName, module);
 				} else {
 					File modulePath = new File(IO.readContentAsString(module).trim());
 					if (!modulePath.exists() || !modulePath.isDirectory()) {
 						Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
 					} else {
-						addModule(moduleName, modulePath);
+						addModule(appRoot, moduleName, modulePath);
 					}
 				}
 			}
@@ -758,29 +767,46 @@ public class Play {
 
         // Auto add special modules
         if (Play.runingInTestMode()) {
-            addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
+            addModule(appRoot, "_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
 
         if (Play.mode == Mode.DEV) {
-            addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
+            addModule(appRoot, "_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }
     }
 
     /**
      * Add a play application (as plugin)
      *
-     * @param path The application path
+     * @param name
+     *            : the module name
+     * @param path
+     *            The application path
      */
     public static void addModule(String name, File path) {
+        addModule(VirtualFile.open(applicationPath), name, path);
+    }
+    
+    /**
+     * Add a play application (as plugin)
+     *
+     * @param appRoot
+     *            : the application path virtual file
+     * @param name
+     *            : the module name
+     * @param path
+     *            The application path
+     */
+    public static void addModule(VirtualFile appRoot, String name, File path) {
         VirtualFile root = VirtualFile.open(path);
         modules.put(name, root);
         if (root.child("app").exists()) {
             javaPath.add(root.child("app"));
         }
-        if (root.child("app/views").exists()) {
+        if (root.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/from_module_" + name + "/app/views").exists())) {
             templatesPath.add(root.child("app/views"));
         }
-        if (root.child("conf/routes").exists()) {
+        if (root.child("conf/routes").exists() || (usePrecompiled && appRoot.child("precompiled/templates/from_module_" + name + "/conf/routes").exists())) {
             modulesRoutes.put(name, root.child("conf/routes"));
         }
         roots.add(root);
