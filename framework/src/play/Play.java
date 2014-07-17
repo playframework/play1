@@ -690,8 +690,17 @@ public class Play {
     }
 
     /**
+     * Load all modules. You can even specify the list using the MODULES
+     * environment variable.
+     */
+    public static void loadModules() {
+        loadModules(VirtualFile.open(applicationPath));
+    }
+
+    /**
      * Load all modules.
-     * You can even specify the list using the MODULES environement variable.
+     * You can even specify the list using the MODULES environment variable.
+     * @param appRoot : the application path virtual file
      */
     public static void loadModules(VirtualFile appRoot) {
         if (System.getenv("MODULES") != null) {
@@ -769,7 +778,24 @@ public class Play {
     /**
      * Add a play application (as plugin)
      *
-     * @param path The application path
+     * @param name
+     *            : the module name
+     * @param path
+     *            The application path
+     */
+    public static void addModule(String name, File path) {
+        addModule(VirtualFile.open(applicationPath), name, path);
+    }
+    
+    /**
+     * Add a play application (as plugin)
+     *
+     * @param appRoot
+     *            : the application path virtual file
+     * @param name
+     *            : the module name
+     * @param path
+     *            The application path
      */
     public static void addModule(VirtualFile appRoot, String name, File path) {
         VirtualFile root = VirtualFile.open(path);

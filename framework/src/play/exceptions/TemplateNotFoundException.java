@@ -43,7 +43,7 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     @Override
@@ -53,23 +53,26 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
 
     @Override
     public String getErrorDescription() {
-        return String.format("The template <strong>%s</strong> does not exist.", path);
+        return String.format("The template <strong>%s</strong> does not exist.", this.path);
     }
 
     @Override
     public boolean isSourceAvailable() {
-        return source != null;
+        return this.source != null;
     }
 
+    @Override
     public String getSourceFile() {
-        return sourceFile;
+        return this.sourceFile;
     }
 
+    @Override
     public List<String> getSource() {
-        return source;
+        return this.source;
     }
 
+    @Override
     public Integer getLineNumber() {
-        return line;
+        return this.line;
     }
 }
