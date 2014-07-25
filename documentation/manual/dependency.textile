@@ -5,6 +5,7 @@ Play’s dependency management system allows you to express your application’s
 A Play application can have three kinds of dependencies:
 
 * The Play framework itself, since a Play application always depends on the Play framework.
+* Some Play framework modules: CRUD and secure module
 * Any Java library, provided as **JAR** file installed in your application’s @lib/@ directory.
 * A Play module (in fact an application fragment) installed in your application’s @modules/@ directory.
 
@@ -12,7 +13,12 @@ Once you have expressed these dependencies in your application’s @conf/depende
 
 h2. <a name="format">Dependency format</a>
 
-A dependency is described by an organisation a name a revision number and optionally a classifier. In the @dependencies.yml@ file you will write it like this:
+A dependency is described by :
+* an organisation a name, 
+* a revision number 
+* a classifier _(optional)_
+
+In the @dependencies.yml@ file you will write it like this:
 
 bc. organisation -> name revision [classifier]
 
@@ -32,13 +38,28 @@ When your dependency has a classifier, you can use this:
 
 bc. net.sf.json-lib -> json-lib 2.4 jdk15
 
+For Play and Play framework modules (CRUD and secure module), the revision number is not required:
+
+bc. play
+play -> crud
+play -> secure
 
 h3. Dynamic revisions
 
 The revision can be fixed (1.2, for instance) or dynamic. A dynamic revision expresses a range of allowed revisions. 
 
-For example:
+There are many things you can configure: see the "Ivy version-matchers documentation":http://ant.apache.org/ivy/history/2.3.0/settings/version-matchers.html.
 
+For example:
+Sub Revision Matcher
+* @1.0.+@ matches all revisions starting with '1.0.', like 1.0.1, 1.0.5, 1.0.a
+* @1.1+@ matches all revisions starting with '1.1', like 1.1, 1.1.5, but also 1.10, 1.11
+Latest (Status) Matcher
+* @latest.integration@ matches all versions
+* @latest.milestone@ matches all modules having at least 'milestone' as status
+* @latest.release@ matches all modules having at least 'release' as status
+* @latest.[any status]@ all modules having at least the specified status
+Version Range Matcher
 * @[1.0,2.0]@ matches all versions greater or equal to 1.0 and lower or equal to 2.0
 * @[1.0,2.0[@ matches all versions greater or equal to 1.0 and lower than 2.0
 * @]1.0,2.0]@ matches all versions greater than 1.0 and lower or equal to 2.0
@@ -399,7 +420,7 @@ bc. <!-- .ivy2/ivysettings.xml -->
   </resolvers>
 </ivy-settings>
 
-There are many things you can configure: see the "Ivy settings documentation":http://ant.apache.org/ivy/history/2.1.0/settings.html.
+There are many things you can configure: see the "Ivy settings documentation":http://ant.apache.org/ivy/history/2.3.0/settings.html.
 
 
 h3. Clearing the Ivy cache

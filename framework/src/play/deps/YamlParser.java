@@ -174,11 +174,15 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             depName = "play -> secure " + System.getProperty("play.version");
                         }
 
+                        // Pattern compile to match [organisation name] - > [artifact] [revision] [classifier]
                         Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);
                         if (!m.matches()) {
+                         // Pattern compile to match [artifact] [revision] [classifier]
                             m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);
                             if (!m.matches()) {
                                 throw new Oops("Unknown dependency format -> " + depName);
+                            } else if( m.groupCount() >= 3 && m.group(3).trim().equals("->")){
+                                throw new Oops("Missing revision in dependency format (use \"latest.integration\" to  matches all versions) -> " + depName);
                             }
                         }
                         HashMap extraAttributesMap = null;
@@ -306,7 +310,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         DependencyDescriptor[] rules = md.getDependencies();
         File localModules = Play.getFile("modules");
         for (DependencyDescriptor dep : rules) {
-            ModuleRevisionId rev = dep.getDependencyRevisionId();
+            ModuleRevisionId rev = dep.getDependencyRevisionId();       
             String moduleName = filterModuleName(rev);
             
             // Check if the module was already load to avoid circular parsing
@@ -330,6 +334,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         } 
                     }
                 }
+            } else if(moduleName == null && rev.getRevision().equals("->")){
+                Logger.error("Revision is required, module [%s -> %s] will not be loaded.", rev.getName(), rev.getExtraAttribute("classifier"));
             }
         }
         return modules;
