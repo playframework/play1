@@ -1,6 +1,0 @@
-----
-Download Hibernate 4.1.0.Final source code, apply the patch, and build with gradle (tip use export GRADLE_OPTS=-Xmx1G -XX:MaxPermSize=512m)
-----
-
-DRY RUN -> patch --dry-run -p1 -i hibernate-4.1.x.Final.patch
-APPLY -> patch -p1 -i hibernate-4.1.x.Final.patch

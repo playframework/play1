@@ -16,4 +16,6 @@ public class LevelOne extends Model {
     @OneToMany(mappedBy = "levelOne", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<LevelTwo> levelTwos = new ArrayList<LevelTwo>();
 
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<BaseModel> children = new ArrayList<BaseModel>();
 }
