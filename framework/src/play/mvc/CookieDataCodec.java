@@ -4,17 +4,38 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides operations around the encoding and decoding of Cookie data.
  */
 public class CookieDataCodec {
+
+    /** 
+     * Cookie session parser for cookie created by version 1.2.5 or before.
+     * <p>We need it to support old Play 1.2.5 session data encoding so that the cookie data doesn't become invalid when
+     * applications are upgraded to a newer version of Play</p>
+     */
+    public static Pattern oldCookieSessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+
     /**
      * @param map  the map to decode data into.
      * @param data the data to decode.
      * @throws UnsupportedEncodingException
      */
     public static void decode(Map<String, String> map, String data) throws UnsupportedEncodingException {
+        // support old Play 1.2.5 session data encoding so that the cookie data doesn't become invalid when
+        // applications are upgraded to a newer version of Play
+        if (data.startsWith("%00") && data.contains("%3A") && data.endsWith("%00")) {
+            String sessionData = URLDecoder.decode(data, "utf-8");
+            Matcher matcher = oldCookieSessionParser.matcher(sessionData);
+            while (matcher.find()) {
+                map.put(matcher.group(1), matcher.group(2));
+            }
+            return;
+        }
+
         String[] keyValues = data.split("&");
         for (String keyValue : keyValues) {
             String[] splitted = keyValue.split("=", 2);
