@@ -3,6 +3,7 @@ package play.classloading;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -323,11 +324,34 @@ public class ApplicationClasses {
         if (fileName.contains("$")) {
             fileName = fileName.substring(0, fileName.indexOf("$"));
         }
-        fileName = fileName.replace(".", "/") + ".java";
+        // the local variable fileOrDir is important!
+        String fileOrDir = fileName.replace(".", "/");
+        fileName = fileOrDir + ".java";
         for (VirtualFile path : Play.javaPath) {
-            VirtualFile javaFile = path.child(fileName);
+            // 1. check if there is a folder (without extension)
+            VirtualFile javaFile = path.child(fileOrDir);
+            if (javaFile.exists() && javaFile.isDirectory()) {
+                return null; // we found a package
+            }
+            // 2. check if there is a file
+            javaFile = path.child(fileName);
             if (javaFile.exists()) {
-                return javaFile;
+                /*
+                 * the canonical form is system-dependent. we need to check this
+                 * especially for windows
+                 */
+                String canonicalName = null;
+                try {
+                    canonicalName = javaFile.getRealFile().getCanonicalFile()
+                            .getName();
+                } catch (IOException e) {
+                    // ignoring
+                }
+                if (canonicalName == null || !fileName.endsWith(canonicalName)) {
+                    return null;
+                } else {
+                    return javaFile;
+                }
             }
         }
         return null;
