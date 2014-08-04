@@ -3,6 +3,7 @@ package play.classloading;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -334,8 +335,9 @@ public class ApplicationClasses {
             // 1. check if there is a folder (without extension)
             VirtualFile javaFile = path.child(fileOrDir);
                   
-            if (javaFile.exists() && javaFile.isDirectory() && javaFile.matchName(fileName)) {
-                return javaFile;
+            if (javaFile.exists() && javaFile.isDirectory() && javaFile.matchName(fileOrDir)) {
+                // we found a directory (package)
+                return null;
             }
             // 2. check if there is a file
             javaFile = path.child(fileName);
