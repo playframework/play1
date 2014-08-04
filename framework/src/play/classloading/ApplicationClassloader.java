@@ -198,8 +198,8 @@ public class ApplicationClassloader extends ClassLoader {
         } else {
             className = "package-info";
         }
-        if (findLoadedClass(className) == null) {
-            loadApplicationClass(className);
+        if (this.findLoadedClass(className) == null) {
+            this.loadApplicationClass(className);
         }
     }
 
@@ -208,7 +208,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     protected byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
-        InputStream is = getResourceAsStream(name);
+        InputStream is = this.getResourceAsStream(name);
         if (is == null) {
             return null;
         }
@@ -242,6 +242,18 @@ public class ApplicationClassloader extends ClassLoader {
                 return res.inputstream();
             }
         }
+        URL url = this.getResource(name);
+        if (url != null) {
+            try {
+                File file = new File(url.toURI());
+                String fileName = file.getCanonicalFile().getName();
+                if (!name.endsWith(fileName)) {
+                    return null;
+                }
+            } catch (Exception e) {
+            }
+        }
+
         return super.getResourceAsStream(name);
     }
 
