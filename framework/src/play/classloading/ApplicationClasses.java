@@ -45,10 +45,14 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        if (!classes.containsKey(name) && getJava(name) != null) {
-            classes.put(name, new ApplicationClass(name));
+        VirtualFile javaFile = getJava(name);
+        if(javaFile != null){
+            if (!classes.containsKey(name)) {
+                classes.put(name, new ApplicationClass(name));
+            }
+            return classes.get(name);
         }
-        return classes.get(name);
+        return null;
     }
 
     /**
@@ -323,10 +327,19 @@ public class ApplicationClasses {
         if (fileName.contains("$")) {
             fileName = fileName.substring(0, fileName.indexOf("$"));
         }
-        fileName = fileName.replace(".", "/") + ".java";
+        // the local variable fileOrDir is important!
+        String fileOrDir = fileName.replace(".", "/");
+        fileName = fileOrDir + ".java";
         for (VirtualFile path : Play.javaPath) {
-            VirtualFile javaFile = path.child(fileName);
-            if (javaFile.exists()) {
+            // 1. check if there is a folder (without extension)
+            VirtualFile javaFile = path.child(fileOrDir);
+                  
+            if (javaFile.exists() && javaFile.isDirectory() && javaFile.matchName(fileName)) {
+                return javaFile;
+            }
+            // 2. check if there is a file
+            javaFile = path.child(fileName);
+            if (javaFile.exists() && javaFile.matchName(fileName)) {
                 return javaFile;
             }
         }
