@@ -331,22 +331,15 @@ public class ApplicationClasses {
             // 1. check if there is a folder (without extension)
             VirtualFile javaFile = path.child(fileOrDir);
             if (javaFile.exists() && javaFile.isDirectory()) {
-                return null; // we found a package
+                String canonicalName = getCanonicalName(javaFile);
+                if (canonicalName != null && fileOrDir.endsWith(canonicalName)) {
+                    return null; // we found a package
+                }
             }
             // 2. check if there is a file
             javaFile = path.child(fileName);
             if (javaFile.exists()) {
-                /*
-                 * the canonical form is system-dependent. we need to check this
-                 * especially for windows
-                 */
-                String canonicalName = null;
-                try {
-                    canonicalName = javaFile.getRealFile().getCanonicalFile()
-                            .getName();
-                } catch (IOException e) {
-                    // ignoring
-                }
+                String canonicalName = getCanonicalName(javaFile);
                 if (canonicalName == null || !fileName.endsWith(canonicalName)) {
                     return null;
                 } else {
@@ -355,6 +348,20 @@ public class ApplicationClasses {
             }
         }
         return null;
+    }
+
+    private static String getCanonicalName(VirtualFile javaFile) {
+        /*
+         * the canonical form is system-dependent. we need to check this
+         * especially for windows
+         */
+        String canonicalName = null;
+        try {
+            canonicalName = javaFile.getRealFile().getCanonicalFile().getName();
+        } catch (IOException e) {
+            // ignoring
+        }
+        return canonicalName;
     }
 
     @Override
