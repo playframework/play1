@@ -20,7 +20,7 @@ public class Animal extends Model {
     public List<Meal> meals;
 
     public Animal() {
-	this.meals = new ArrayList<>();
+	this.meals = new ArrayList<Meal>();
 	meals.add(new Meal());
     }
     
