@@ -1,10 +1,5 @@
 package play.i18n;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-
 import play.Logger;
 import play.Play;
 import play.mvc.Http;
@@ -12,6 +7,9 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 
 /**

@@ -1,13 +1,5 @@
 package play.mvc;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
@@ -23,13 +15,10 @@ import play.libs.Time;
 import play.utils.Utils;
 
 import java.lang.annotation.Annotation;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * All application Scopes
