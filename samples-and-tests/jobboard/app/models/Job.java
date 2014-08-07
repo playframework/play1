@@ -50,7 +50,7 @@ public class Job extends Model {
             return find("from Job where online = true order by postedAt DESC").fetch();
         }
         if (tags.length == 0) {
-            return find("category.code = ? and online = true order by postedAt DESC", category).fetch();
+            return find("category.code = ?1 and online = true order by postedAt DESC", category).fetch();
         }
         String query = "select job from Job job where job.online = true and " + (category != null ? "job.category.code = '" + category + "' and " : "");
         Object[] tagEntities = new Tag[tags.length];
