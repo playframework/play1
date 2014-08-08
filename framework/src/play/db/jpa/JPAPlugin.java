@@ -395,7 +395,7 @@ public class JPAPlugin extends PlayPlugin {
      *
      * @param rollback shall current transaction be committed (false) or cancelled (true)
      */
-    protected static void closeTx(boolean rollback) {
+    public static void closeTx(boolean rollback) {
         if (autoTxs) {
             JPA.closeTx(rollback);
         }
