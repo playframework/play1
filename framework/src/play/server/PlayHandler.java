@@ -104,6 +104,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Http.Response.current.set(response);
 
                 final Request request = parseRequest(ctx, nettyRequest, messageEvent);
+                Http.Request.current.set(request);
 
                 // Buffered in memory output
                 response.out = new ByteArrayOutputStream();
