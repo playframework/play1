@@ -34,7 +34,7 @@ public class TemplateLoader {
      * This method returns a unique representation of the path which is usable as part of a classname
      *
      * @param path
-     * @return
+     * @return a unique representation of the path which is usable as part of a classname
      */
     public static String getUniqueNumberForTemplateFile(String path) {
         //a path cannot be a valid classname so we have to convert it somehow.

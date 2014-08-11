@@ -272,8 +272,8 @@ public class WSUrlFetch implements WSImpl {
         private Map<String, List<String>> headersMap;
 
         /**
-         * you shouldnt have to create an HttpResponse yourself
-         * @param method
+         * you shouldn't have to create an HttpResponse yourself
+         * @param connection
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
             try {

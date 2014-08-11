@@ -81,7 +81,7 @@ public class PluginCollection {
     /**
      * Using readonly list to crash if someone tries to modify the copy.
      * @param list
-     * @return
+     * @return Read only list of plugins
      */
     protected List<PlayPlugin> createReadonlyCopy( List<PlayPlugin> list ){
         return Collections.unmodifiableList( new ArrayList<PlayPlugin>( list ));
@@ -323,7 +323,7 @@ public class PluginCollection {
     /**
      * Returns the first instance of a loaded plugin of specified type
      * @param pluginClazz
-     * @return
+     * @return PlayPlugin
      */
     public synchronized PlayPlugin getPluginInstance(Class<? extends PlayPlugin> pluginClazz) {
         for (PlayPlugin p : getAllPlugins()) {
@@ -372,7 +372,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all enabled plugins
-     * @return
+     * @return List of plugins
      */
     public List<PlayPlugin> getEnabledPlugins() {
         return enabledPlugins_readOnlyCopy;
@@ -380,7 +380,7 @@ public class PluginCollection {
     
     /**
      * Returns readonly view of all enabled plugins in reversed order
-     * @return
+     * @return Collection of plugins
      */
     public Collection<PlayPlugin> getReversedEnabledPlugins() {
         return new AbstractCollection<PlayPlugin>() {
@@ -415,7 +415,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all plugins
-     * @return
+     * @return List of plugins
      */
     public List<PlayPlugin> getAllPlugins() {
         return allPlugins_readOnlyCopy;

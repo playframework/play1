@@ -50,7 +50,7 @@ public class Messages {
      * Return several messages for a locale
      * @param locale the locale code, e.g. fr, fr_FR
      * @param keys the keys to get messages from. Wildcards can be used at the end: {'title', 'login.*'}
-     * @returnmessages as a {@link java.util.Properties java.util.Properties}
+     * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties find(String locale, Set<String> keys) {
         Properties result = new Properties();

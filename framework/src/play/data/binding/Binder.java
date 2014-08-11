@@ -480,7 +480,7 @@ public abstract class Binder {
     /**
      * @param value
      * @param clazz
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String value, Class<?> clazz) throws Exception {
@@ -492,8 +492,7 @@ public abstract class Binder {
      * @param annotations
      * @param value
      * @param clazz
-     * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
@@ -505,7 +504,7 @@ public abstract class Binder {
      * @param value
      * @param clazz
      * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
@@ -520,7 +519,7 @@ public abstract class Binder {
      * @param value
      * @param clazz
      * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
