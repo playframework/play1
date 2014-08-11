@@ -317,8 +317,9 @@ public class JPAPlugin extends PlayPlugin {
      *
      * @param readonly true for a readonly transaction
      * @param autoCommit true to automatically commit the DB transaction after each JPA statement
-     * @Deprecated see JPA startTx() method
+     * @deprecated see JPA startTx() method
      */
+    @Deprecated
     public static void startTx(boolean readonly) {
         if (!JPA.isEnabled()) {
              return;
@@ -336,8 +337,9 @@ public class JPAPlugin extends PlayPlugin {
     /**
      * clear current JPA context and transaction 
      * @param rollback shall current transaction be committed (false) or cancelled (true)
-     * @Deprecated see JPA rollback() and closeTx() method
+     * @deprecated see {@link JPA#rollbackTx} and {@link JPA#closeTx} method
      */
+    @Deprecated
     public static void closeTx(boolean rollback) {
         if (!JPA.isEnabled() || JPA.currentEntityManager.get() == null || JPA.currentEntityManager.get().get(JPA.DEFAULT) == null || JPA.currentEntityManager.get().get(JPA.DEFAULT).entityManager == null) {
             return;

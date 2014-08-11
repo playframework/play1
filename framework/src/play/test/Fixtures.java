@@ -11,7 +11,6 @@ import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
 import play.data.binding.As;
-import play.data.binding.NoBinding;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
@@ -90,7 +89,7 @@ public class Fixtures {
 
     /**
      * Delete all Model instances for the given types using the underlying persistence mechanisms
-     * @param types Types to delete
+     * @param classes Types to delete
      */
     public static void delete(List<Class<? extends Model>> classes) {
         @SuppressWarnings("unchecked")
@@ -118,7 +117,7 @@ public class Fixtures {
 
     /**
      * Use deleteDatabase() instead
-     * @deprecated use {@link deleteDatabase()} instead
+     * @deprecated use {@link #deleteDatabase()} instead
      */
     @Deprecated
     public static void deleteAll() {
@@ -157,7 +156,7 @@ public class Fixtures {
 
     /**
      * @param name
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
     public static void load(String name) {
@@ -276,7 +275,7 @@ public class Fixtures {
     }
 
     /**
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
     public static void load(String... names) {
@@ -286,14 +285,14 @@ public class Fixtures {
     }
 
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(String name)
      */
     public static void loadModels(String... names) {
         loadModels(true, names);
     }
     
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(boolean loadAsTemplate, String name)
      */
     public static void loadModels(boolean loadAsTemplate, String... names) {
         for (String name : names) {
@@ -302,21 +301,21 @@ public class Fixtures {
     }
 
     /**
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     public static void load(List<String> names) {
         loadModels(names);
     }
 
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(String name)
      */
     public static void loadModels(List<String> names) {
         loadModels(true, names);
     }
     
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(boolean, String...)
      */
     public static void loadModels(boolean loadAsTemplate, List<String> names) {
         String[] tNames = new String[names.size()];

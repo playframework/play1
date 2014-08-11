@@ -247,7 +247,7 @@ public class JPABase implements Serializable, play.db.Model {
     }
 
     /**
-     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #key key} and class</strong>
+     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #_key key} and class</strong>
      *
      * @param other
      * @return true if equality condition above is verified

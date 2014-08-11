@@ -444,7 +444,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Check that the token submitted from a form is valid.
      *
-     * @see play.templates.FastTags._authenticityToken()
+     * @see play.templates.FastTags#_authenticityToken
      */
     protected static void checkAuthenticity() {
         if(Scope.Params.current().get("authenticityToken") == null || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
@@ -900,7 +900,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
      * be called again as if there was a new HTTP request.
      *
-     * @param tasks
+     * @param task
      */
     @Deprecated
     protected static void waitFor(Future<?> task) {
