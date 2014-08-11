@@ -1,27 +1,25 @@
 package play.libs.ws;
 
-import java.io.*;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.AsyncHttpClientConfig.Builder;
+import com.ning.http.client.ByteArrayPart;
+import com.ning.http.client.FilePart;
+import com.ning.http.client.Part;
+import com.ning.http.client.PerRequestConfig;
+import com.ning.http.client.ProxyServer;
+import com.ning.http.client.Realm.AuthScheme;
+import com.ning.http.client.Realm.RealmBuilder;
+import com.ning.http.client.Response;
+import com.ning.http.client.providers.jdk.JDKAsyncHttpProvider;
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
-
 import org.apache.commons.lang.NotImplementedException;
-
 import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
@@ -32,16 +30,18 @@ import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
 
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig.Builder;
-import com.ning.http.client.FilePart;
-import com.ning.http.client.PerRequestConfig;
-import com.ning.http.client.ProxyServer;
-import com.ning.http.client.Realm.AuthScheme;
-import com.ning.http.client.Realm.RealmBuilder;
-import com.ning.http.client.Response;
-
-import javax.net.ssl.*;
+import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -116,7 +116,7 @@ public class WSAsync implements WSImpl {
         // when using raw urls, AHC does not encode the params in url.
         // this means we can/must encode it(with correct encoding) before passing it to AHC
         confBuilder.setUseRawUrl(true);
-        httpClient = new AsyncHttpClient(confBuilder.build());
+        httpClient = new AsyncHttpClient(new JDKAsyncHttpProvider(confBuilder.build()));
     }
 
     public void stop() {
