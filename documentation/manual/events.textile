@@ -1,11 +1,11 @@
 Play lets plugins send events to send notification the framework and other plugins.
 
-bc.import play.PlayPlugin;
+bc. import play.PlayPlugin;
 
 ... 
 PlayPlugin.postEvent("something happens", this);
 
-Plugins listen to these events in the the @@ method
+Plugins listen to these events in the the @onEvent@ method
 
 bc. public class My Plugin extends PlayPlugin {
   
