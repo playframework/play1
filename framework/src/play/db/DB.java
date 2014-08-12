@@ -31,6 +31,7 @@ public class DB {
 
     /**
      * The loaded datasource.
+     * @see ExtendedDatasource
      */
     protected static final Map<String, ExtendedDatasource> datasources = new ConcurrentHashMap<String, ExtendedDatasource>();
 
@@ -64,7 +65,7 @@ public class DB {
     /**
      * @deprecated Use datasources instead
      * @since 1.3.0
-     * @see datasources
+     * @see #datasources
      * @see ExtendedDatasource
      */
     @Deprecated
@@ -74,7 +75,7 @@ public class DB {
      * 
      * @deprecated Use datasources instead
      * @since 1.3.0
-     * @see datasources
+     * @see #datasources
      * @see ExtendedDatasource
      */
     @Deprecated

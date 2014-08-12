@@ -639,8 +639,11 @@ public class WS extends PlayPlugin {
             Map<String, String> result = new HashMap<String, String>();
             String body = getString();
             for (String entry: body.split("&")) {
-                if (entry.indexOf("=") > 0) {
-                    result.put(entry.split("=")[0], entry.split("=")[1]);
+                int pos = entry.indexOf("=");
+                if (pos > -1) {
+                    result.put(entry.substring(0,pos), entry.substring(pos+1));
+                } else {
+                    result.put(entry, "");
                 }
             }
             return result;

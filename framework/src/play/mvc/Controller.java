@@ -445,7 +445,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Check that the token submitted from a form is valid.
      *
-     * @see play.templates.FastTags._authenticityToken()
+     * @see play.templates.FastTags#_authenticityToken
      */
     protected static void checkAuthenticity() {
         if(Scope.Params.current().get("authenticityToken") == null || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
@@ -530,7 +530,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             throw new RedirectToStatic(Router.reverse(Play.getVirtualFile(file)));
         } catch (NoRouteFoundException e) {
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
             if (element != null) {
                 throw new NoRouteFoundException(file, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
             } else {
@@ -613,7 +613,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                     throw new Redirect(actionDefinition.toString(), permanent);
                 }
             } catch (NoRouteFoundException e) {
-                StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+                StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
                 if (element != null) {
                     throw new NoRouteFoundException(action, newArgs, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
                 } else {
@@ -668,29 +668,30 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 		Template template = null ;
 		try
 		{
-			// Template datas
-			Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
-			templateBinding.data.putAll(args);
-			templateBinding.put("session", Scope.Session.current());
-			templateBinding.put("request", Http.Request.current());
-			templateBinding.put("flash", Scope.Flash.current());
-			templateBinding.put("params", Scope.Params.current());
-			templateBinding.put("errors", Validation.errors());
-			try {
-				template = TemplateLoader.load(template(templateName));
-				throw new RenderTemplate(template, templateBinding.data);
-			} catch (TemplateNotFoundException ex) {
-				if (ex.isSourceAvailable()) {
-					throw ex;
+	        // Template datas
+	        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+	        templateBinding.data.putAll(args);
+	        templateBinding.put("session", Scope.Session.current());
+	        templateBinding.put("request", Http.Request.current());
+	        templateBinding.put("flash", Scope.Flash.current());
+	        templateBinding.put("params", Scope.Params.current());
+	        templateBinding.put("errors", Validation.errors());
+	        try {
+	            Template template = TemplateLoader.load(template(templateName));
+	            throw new RenderTemplate(template, templateBinding.data);
+	        } catch (TemplateNotFoundException ex) {
+	            if (ex.isSourceAvailable()) {
+	                throw ex;
+	            }
+	            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex);
+	            if (element != null) {
+	                ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
+	                if (applicationClass != null) {
+	                    throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
+	                }
+	            }
+	            throw ex;
 				}
-				StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
-				if (element != null) {
-					ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
-					if (applicationClass != null) {
-						throw new TemplateNotFoundException(templateName, applicationClass, element.getLineNumber());
-					}
-				}
-				throw ex;
 			}
 		}
 		finally
@@ -910,7 +911,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
      * be called again as if there was a new HTTP request.
      *
-     * @param tasks
+     * @param task
      */
     @Deprecated
     protected static void waitFor(Future<?> task) {

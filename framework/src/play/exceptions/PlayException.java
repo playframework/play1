@@ -1,7 +1,8 @@
 package play.exceptions;
 
-import java.util.concurrent.atomic.AtomicLong;
 import play.Play;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The super class for all Play! exceptions
@@ -50,7 +51,18 @@ public abstract class PlayException extends RuntimeException {
         return id;
     }
 
+    /**
+     * Get the stack trace element
+     * @deprecated since 1.3.0
+     * @param cause
+     * @return the stack trace element
+     */
+    @Deprecated
     public static StackTraceElement getInterestingStrackTraceElement(Throwable cause) {
+      return getInterestingStackTraceElement(cause);
+    }
+
+    public static StackTraceElement getInterestingStackTraceElement(Throwable cause) {
         for (StackTraceElement stackTraceElement : cause.getStackTrace()) {
             if (stackTraceElement.getLineNumber() > 0 && Play.classes.hasClass(stackTraceElement.getClassName())) {
                 return stackTraceElement;

@@ -231,11 +231,11 @@ public class JPA {
     /**
      * Run a block of code in a JPA transaction.
      *
-     * @param name The persistence unit name
+     * @param dbName The persistence unit name
      * @param readOnly Is the transaction read-only?
      * @param block Block of code to execute.
      */
-    public static <T> T withTransaction(String dbName, boolean readonly, play.libs.F.Function0<T> block) throws Throwable {
+    public static <T> T withTransaction(String dbName, boolean readOnly, play.libs.F.Function0<T> block) throws Throwable {
         if (isEnabled()) {
             List<EntityManager> em = new ArrayList<EntityManager>();
             List<EntityTransaction> tx = new ArrayList<EntityTransaction>();
@@ -248,10 +248,10 @@ public class JPA {
                 // at this stage
                 for (String name : emfs.keySet()) {
                     EntityManager localEm = JPA.newEntityManager(name);
-                    JPA.bindForCurrentThread(name, localEm, readonly);
+                    JPA.bindForCurrentThread(name, localEm, readOnly);
                     em.add(localEm);
 
-                    if (!readonly) {
+                    if (!readOnly) {
                         EntityTransaction localTx = localEm.getTransaction();
                     
                         localTx.begin();
@@ -335,15 +335,15 @@ public class JPA {
      /**
      * initialize the JPA context and starts a JPA transaction
      *
-     * @param readonly true for a readonly transaction
-     * @param autoCommit true to automatically commit the DB transaction after each JPA statement
+     * @param name The persistence unit name
+     * @param readOnly true for a readonly transaction
      */
-    public static void startTx(String name, boolean readonly) {
+    public static void startTx(String name, boolean readOnly) {
         EntityManager manager = createEntityManager(name);
         manager.setFlushMode(FlushModeType.COMMIT);
-        manager.setProperty("org.hibernate.readOnly", readonly);
+        manager.setProperty("org.hibernate.readOnly", readOnly);
         manager.getTransaction().begin();
-        createContext(manager, readonly);
+        createContext(manager, readOnly);
     }
 
     public static void closeTx(String name) {

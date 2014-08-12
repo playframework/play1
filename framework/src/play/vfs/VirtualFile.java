@@ -77,7 +77,9 @@ public class VirtualFile {
     String isRoot(File f) {
         for (VirtualFile vf : Play.roots) {
             if (vf.realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
-                return "{module:" + vf.getName() + "}";
+                String modulePathName = vf.getName();
+                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-")) : modulePathName;
+                return "{module:" + moduleName + "}";
             }
         }
         return null;
@@ -253,5 +255,24 @@ public class VirtualFile {
         }
 
         return null;
+    }
+
+    /**
+     * Method to check if the name really match (very useful on system without case sensibility (like windows))
+     * @param fileName
+     * @return true if match
+     */
+    public boolean matchName(String fileName) {
+        // we need to check the name case to be sure we is not conflict with a file with the same name
+        String canonicalName = null; 
+        try {
+            canonicalName = this.realFile.getCanonicalFile().getName();
+        } catch (IOException e) {
+        }
+        // Name case match
+        if (fileName != null && canonicalName != null && fileName.endsWith(canonicalName)) {
+            return true;
+        }
+        return false;
     }
 }

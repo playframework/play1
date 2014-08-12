@@ -531,7 +531,13 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
             // Begins searching / after 9th character (last / of https://)
-            uri = uri.substring(uri.indexOf("/", 9));
+            int index = uri.indexOf("/", 9);
+            // prevent the IndexOutOfBoundsException that was occurring
+            if (index >= 0){
+              uri = uri.substring(index);
+            } else {
+              uri = "/";
+            }
         }
 
         String contentType = nettyRequest.getHeader(CONTENT_TYPE);
