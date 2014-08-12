@@ -155,10 +155,10 @@ public class JPQL {
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, query, params));
         List results = bindParameters(q, params).getResultList();
-        if (results.size() == 0) {
-            return null;
-        }
-        JPABase result = (JPABase) results.get(0);
+        JPABase result = null ;
+		if (results.size() != 0) {
+		    result = (JPABase) results.get(0);
+		}
 		PlayPlugin.postEvent("JPQL.findOneBy.after", this);
 		return result ;
     }

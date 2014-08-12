@@ -677,7 +677,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 	        templateBinding.put("params", Scope.Params.current());
 	        templateBinding.put("errors", Validation.errors());
 	        try {
-	            Template template = TemplateLoader.load(template(templateName));
+	            template = TemplateLoader.load(template(templateName));
 	            throw new RenderTemplate(template, templateBinding.data);
 	        } catch (TemplateNotFoundException ex) {
 	            if (ex.isSourceAvailable()) {
@@ -693,7 +693,6 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 	            throw ex;
 				}
 			}
-		}
 		finally
 		{
 			PlayPlugin.postEvent("template.render.after", template);

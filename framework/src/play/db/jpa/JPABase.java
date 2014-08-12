@@ -95,13 +95,14 @@ public class JPABase implements Serializable, play.db.Model {
                 saveAndCascade(false);
             } finally {
                 avoidCascadeSaveLoops.get().clear();
-            }
-            PlayPlugin.postEvent("JPASupport.objectDeleted", this);
+            }     
         } catch (PersistenceException e) {
             throw e;
         } catch (Throwable e) {
             throw new RuntimeException(e);
-        }
+        } finally {
+			PlayPlugin.postEvent("JPASupport.objectDeleted", this);
+		}
     }
 
     public Object _key() {
@@ -118,9 +119,6 @@ public class JPABase implements Serializable, play.db.Model {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
-            if (willBeSaved) {
-                PlayPlugin.postEvent("JPASupport.objectUpdated", this);
-            }
         }
         // Cascade save
         try {
