@@ -20,7 +20,6 @@ h2. Available events
 At the moment the following events are defined 
 
 | Class      | Method         | Event                      | Parameter                   |
-|------------|----------------|----------------------------|-----------------------------|
 | Controller | renderTemplate | template.render.before     | @string@: the template name |
 |            |                | template.render.after      | idem                        |
 | JPABase    | _save          | JPASupport.objectPersisted | @JPABase@: the object       |
