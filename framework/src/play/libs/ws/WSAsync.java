@@ -13,7 +13,6 @@ import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
-import com.ning.http.client.providers.jdk.JDKAsyncHttpProvider;
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -116,7 +115,7 @@ public class WSAsync implements WSImpl {
         // when using raw urls, AHC does not encode the params in url.
         // this means we can/must encode it(with correct encoding) before passing it to AHC
         confBuilder.setUseRawUrl(true);
-        httpClient = new AsyncHttpClient(new JDKAsyncHttpProvider(confBuilder.build()));
+        httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
     public void stop() {

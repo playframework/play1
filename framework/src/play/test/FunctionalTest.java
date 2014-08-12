@@ -43,13 +43,16 @@ public abstract class FunctionalTest extends BaseTest {
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 
-    private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
-
+    private static Map<String, Http.Cookie> savedCookies = new HashMap<String, Http.Cookie>();
     private static Map<String, Object> renderArgs = new HashMap<String, Object>();
     
     @Before
     public void clearCookies(){
-        savedCookies = null;
+        savedCookies.clear();
+    }
+
+    public void addCookies(final Map<String, Http.Cookie> cookies) {
+        savedCookies.putAll(cookies);
     }
 
     // Requests
@@ -316,9 +319,6 @@ public abstract class FunctionalTest extends BaseTest {
         try {
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
-            }
-            if (savedCookies == null) {
-                savedCookies = new HashMap<String, Http.Cookie>();
             }
             for(Map.Entry<String,Http.Cookie> e : response.cookies.entrySet()) {
                 // If Max-Age is unset, browsers discard on exit; if
