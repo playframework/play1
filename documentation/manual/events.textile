@@ -5,9 +5,7 @@ bc.. import play.PlayPlugin;
 ... 
 PlayPlugin.postEvent("something happens", this);
 
-p.
-
-Plugins listen to these events in the the @onEvent@ method
+p. Plugins listen to these events in the the @onEvent@ method
 
 bc.. public class My Plugin extends PlayPlugin {
   
@@ -16,7 +14,6 @@ bc.. public class My Plugin extends PlayPlugin {
   ... 
   }
 
-p.
 
 h2. Available events 
 
