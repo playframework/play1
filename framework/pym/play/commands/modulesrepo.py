@@ -279,6 +279,7 @@ def build(app, args, env):
                 splitted = nameAndVersion.split(" ")
                 if len(splitted) == 2:
                    version = splitted.pop()
+                   name = splitted.pop()
         for dep in deps["require"]:
             if isinstance(dep, basestring):
                 splitted = dep.split(" ")
