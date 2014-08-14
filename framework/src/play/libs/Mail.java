@@ -12,7 +12,10 @@ import play.libs.mail.*;
 import play.libs.mail.test.LegacyMockMailSystem;
 
 import javax.mail.*;
+
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.*;
 
