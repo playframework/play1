@@ -39,8 +39,8 @@ public class FileService  {
             boolean isKeepAlive = HttpHeaders.isKeepAlive(nettyRequest) && nettyRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_1);
             
             if(Logger.isTraceEnabled()) {
-                Logger.trace("keep alive " + isKeepAlive);
-                Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+                Logger.trace("keep alive %s", String.valueOf(isKeepAlive));
+                Logger.trace("content type %s", (response.contentType != null ? response.contentType : MimeTypes.getContentType(localFile.getName(), "text/plain")));
             }
             
             if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
