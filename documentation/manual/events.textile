@@ -1,11 +1,13 @@
-Play lets plugins send events to send notification the framework and other plugins.
+Events are a
+
+The API to send event is pretty straightforward: an event is a `string` and an `Object`.
 
 bc.. import play.PlayPlugin;
 
 ... 
 PlayPlugin.postEvent("something happens", this);
 
-p. Plugins listen to these events in the the @onEvent@ method
+p. Plugins can listen to these events in the the @onEvent@ method: 
 
 bc.. public class My Plugin extends PlayPlugin {
   
@@ -17,7 +19,10 @@ bc.. public class My Plugin extends PlayPlugin {
 
 h2. Available events 
 
-At the moment the following events are defined 
+At the moment the following events are sent by Play framework. The events go in pair signaling the beginning and the end of a framework operation. 
+
+Usually the `context` provided before and after events are the same except for JPQL category. In this case, the before event gives the entity name while the after give the JPQL instance.
+
 
 | Class      | Method         | Event                      | Parameter                   |
 | Controller | renderTemplate | template.render.before     | @string@: the template name |
@@ -26,8 +31,6 @@ At the moment the following events are defined
 |            |                | JPASupport.objectSaved     | idem                        |
 |            | _delete        | JPASupport.objectDeleting  | idem                        |
 |            |                | JPASupport.objectDeleted   | idem                        |
-| BUG!!      | saveAndCascade | JPASupport.objectUpdated   | idem                        |
-|            |                | JPASupport.objectUpdated   | idem                        |
 | JPQL       | count          | JPQL.count.before          | @string@: the entity name   |
 |            |                | JPQL.count.after           | @JPQL@: the object          |
 |            | findAll        | JPQL.findAll.before        | idem                        |
@@ -42,7 +45,7 @@ At the moment the following events are defined
 |            |                | JPQL.delete.after          | idem                        |
 |            | deleteAll      | JPQL.deleteAll.before      | idem                        |
 |            |                | JPQL.deleteAll.after       | idem                        |
-| BUG        | findOneBy      | JPQL.findOneBy.before      | idem                        |
+|            | findOneBy      | JPQL.findOneBy.before      | idem                        |
 |            |                | JPQL.findOneBy.after       | idem                        |
 |            | create         | JPQL.create.before         | idem                        |
 |            |                | JPQL.create.after          |                             |
