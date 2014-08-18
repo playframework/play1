@@ -1,0 +1,51 @@
+Events are a
+
+The API to send event is pretty straightforward: an event is a `string` and an `Object`.
+
+bc.. import play.PlayPlugin;
+
+... 
+PlayPlugin.postEvent("something happens", this);
+
+p. Plugins can listen to these events in the the @onEvent@ method: 
+
+bc.. public class My Plugin extends PlayPlugin {
+  
+  @Override
+  public void onEvent(String message, Object context) {
+  ... 
+  }
+
+
+h2. Available events 
+
+At the moment the following events are sent by Play framework. The events go in pair signaling the beginning and the end of a framework operation. 
+
+Usually the `context` provided before and after events are the same except for JPQL category. In this case, the before event gives the entity name while the after give the JPQL instance.
+
+
+| Class      | Method         | Event                      | Parameter                   |
+| Controller | renderTemplate | template.render.before     | @string@: the template name |
+|            |                | template.render.after      | idem                        |
+| JPABase    | _save          | JPASupport.objectPersisted | @JPABase@: the object       |
+|            |                | JPASupport.objectSaved     | idem                        |
+|            | _delete        | JPASupport.objectDeleting  | idem                        |
+|            |                | JPASupport.objectDeleted   | idem                        |
+| JPQL       | count          | JPQL.count.before          | @string@: the entity name   |
+|            |                | JPQL.count.after           | @JPQL@: the object          |
+|            | findAll        | JPQL.findAll.before        | idem                        |
+|            |                | JPQL.findAll.after         | idem                        |
+|            | findBy         | JPQL.findBy.before         | idem                        |
+|            |                | JPQL.findBy.after          | idem                        |
+|            | find           | JPQL.find.before           | idem                        |
+|            |                | JPQL.find.after            | idem                        |
+|            | all            | JPQL.all.before            | idem                        |
+|            |                | JPQL.all.after             | idem                        |
+|            | delete         | JPQL.delete.before         | idem                        |
+|            |                | JPQL.delete.after          | idem                        |
+|            | deleteAll      | JPQL.deleteAll.before      | idem                        |
+|            |                | JPQL.deleteAll.after       | idem                        |
+|            | findOneBy      | JPQL.findOneBy.before      | idem                        |
+|            |                | JPQL.findOneBy.after       | idem                        |
+|            | create         | JPQL.create.before         | idem                        |
+|            |                | JPQL.create.after          |                             |
