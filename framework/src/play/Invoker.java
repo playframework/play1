@@ -264,11 +264,15 @@ public class Invoker {
             InvocationContext.current.remove();
         }
 
-        private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
-          for( PlayPlugin plugin :  Play.pluginCollection.getEnabledPlugins() ) {
-               if (plugin.getFilter() != null)
-                plugin.getFilter().withinFilter(fct);
-           }
+        private boolean withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
+            boolean withinFilterFctFound = false;
+            for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
+                if (plugin.getFilter() != null){
+                    withinFilterFctFound = true;
+                    plugin.getFilter().withinFilter(fct);
+                }
+            }
+            return withinFilterFctFound;
         }
 
         /**
@@ -282,12 +286,16 @@ public class Invoker {
                 preInit();
                 if (init()) {
                     before();
-                    withinFilter(new play.libs.F.Function0<Void>() {
+                    boolean withinFilterFctFound = this.withinFilter(new play.libs.F.Function0<Void>() {
                         public Void apply() throws Throwable {
                             execute();
                             return null;
                         }
                     });
+                    // No filter function found => we need to execute anyway( as before the use of withinFilter )
+                    if(!withinFilterFctFound){
+                        execute();
+                    }
                     after();
                     onSuccess();
                 }
