@@ -79,7 +79,7 @@ class Release:
         if not self.rest: self.rest = "Z"
 
     def url(self):
-        return "http://download.playframework.org/releases/play-" + self.strversion + ".zip"
+        return "http://download.playframework.com/releases/play-" + self.strversion + ".zip"
 
     def __eq__(self, other):
         return self.strversion == other.strversion

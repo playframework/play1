@@ -48,7 +48,7 @@ def main_help(commands, play_env):
             if 'HELP' in dir(commands[cmd]) and cmd in commands[cmd].HELP:
                 print "~ " + cmd + (' ' * (20 - len(cmd))) + commands[cmd].HELP[cmd]
     print "~"
-    print "~ Also refer to documentation at http://www.playframework.org/documentation"
+    print "~ Also refer to documentation at https://www.playframework.com/documentation"
     print "~"
 
 def isCore(mod, play_env):

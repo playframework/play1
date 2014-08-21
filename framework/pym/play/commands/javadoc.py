@@ -87,7 +87,7 @@ def defineJavadocOptions(app, outdir, args):
             playVersion = DEFAULT_API_VERSION
 
         print "~    Play Framework V" + playVersion + " API documentation"     
-        f.write(' -link http://www.playframework.com/documentation/' + playVersion + '/api/')
+        f.write(' -link https://www.playframework.com/documentation/' + playVersion + '/api/')
 
    
     argsCmd = ' '.join(args)

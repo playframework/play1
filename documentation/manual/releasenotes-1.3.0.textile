@@ -22,11 +22,12 @@ Next to these, there are also some new features in this release:
 
 Migration notes
 
-*  Java 1.5 is no longer supported
-*  run 'play deps' to make sure your dependencies are up-to-date
+* Java 1.5 is no longer supported
+* Modules dependencies resolution change from http://www.playframework.org to https://www.playframework.com 
+* run 'play deps' to make sure your dependencies are up-to-date
 
 Known issues
 
 * cobertura does not work
 
-A *big* thankyou to all who made this release possible
+A *big* thank you to all who made this release possible

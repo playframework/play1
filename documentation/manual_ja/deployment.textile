@@ -6,7 +6,7 @@ h2. <a name="standalone">スタンドアロン Play アプリケーション</a>
 
 もっとも簡単で堅牢な方法は、Play アプリケーションをどのコンテナにも乗せずに実行することです。バーチャルホストのような高度な HTTP の機能が必要な場合は、フロントに Lighttpd や Apache のような HTTP サーバを使用することができます。
 
-内蔵の HTTP サーバは 1 秒あたり数千の HTTP リクエストを捌くことができるので、これが性能のボトルネックになることは決してありません。さらに、この HTTP サーバはより効率的なスレッドモデルを使用します (Servlet コンテナは 1 リクエストあたり 1 つのスレッドを使用します) 。"モジュール":http://playframework.org/modules を使うことで、別のサーバ (Grizzly、Netty、その他...) を使用することもできます。
+内蔵の HTTP サーバは 1 秒あたり数千の HTTP リクエストを捌くことができるので、これが性能のボトルネックになることは決してありません。さらに、この HTTP サーバはより効率的なスレッドモデルを使用します (Servlet コンテナは 1 リクエストあたり 1 つのスレッドを使用します) 。"モジュール":http://playframework.com/modules を使うことで、別のサーバ (Grizzly、Netty、その他...) を使用することもできます。
 
 これらのサーバは、長時間のポーリングをサポートしており、実行スレッドをブロックせずに非常に長い (長時間タスクの完了を待つ) リクエストや、ファイルオブジェクト (それから、Content-Length を指定すれば、どのような入力ストリームでも) の直接ストリーミングを管理することができます。
 
@@ -119,17 +119,17 @@ h3. <a name="elasticbeanstalk">AWS Elastic Beanstalk</a>
 
 h3. <a name="cloudbees">CloudBees</a>
 
-"CloudBees":http://www.cloudbees.com/ は Java アプリケーションのホスティングプラットフォームです。詳しい情報は "CloudBees module":http://www.playframework.com/modules/cloudbees を参照してください。
+"CloudBees":http://www.cloudbees.com/ は Java アプリケーションのホスティングプラットフォームです。詳しい情報は "CloudBees module":https://www.playframework.com/modules/cloudbees を参照してください。
 
 
 h3. <a name="cloudfondry">Cloud Foundry</a>
 
-"Cloud Foundry":http://www.cloudfoundry.com/ は VMWare のクラウドプロバイダです。詳しい情報は "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html と "CloudFoundry module":http://www.playframework.com/modules/cloudfoundry を参照してください。
+"Cloud Foundry":http://www.cloudfoundry.com/ は VMWare のクラウドプロバイダです。詳しい情報は "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html と "CloudFoundry module":https://www.playframework.com/modules/cloudfoundry を参照してください。
 
 
 h3. <a name="gae">Google App Engine (GAE)</a>
 
-"Google App Engine":http://code.google.com/appengine/ は、一般的なホスティングソリューションと比較して異なった長所と短所を持つ最初のクラウドホスティングプラットフォームの一つです。特に、GAE は JPA 永続性をサポートしません。詳しい情報は "GAE module":http://www.playframework.com/modules/gae を参照してください。
+"Google App Engine":http://code.google.com/appengine/ は、一般的なホスティングソリューションと比較して異なった長所と短所を持つ最初のクラウドホスティングプラットフォームの一つです。特に、GAE は JPA 永続性をサポートしません。詳しい情報は "GAE module":https://www.playframework.com/modules/gae を参照してください。
 
 
 h3. <a name="heroku">Heroku</a>
@@ -192,4 +192,4 @@ bc. %prod.db=${DATABASE_URL}
 
 h3. <a name="playapps">playapps.net</a>
 
-"playapps.net":http://www.playapps.net/ は、Play を作成した Zenexity による PLay に特化したホスティングプラットフォームです。詳しい情報は "playapps.net module":http://www.playframework.com/modules/playapps を参照してください。
+"playapps.net":http://www.playapps.net/ は、Play を作成した Zenexity による PLay に特化したホスティングプラットフォームです。詳しい情報は "playapps.net module":https://www.playframework.com/modules/playapps を参照してください。

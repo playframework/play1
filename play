@@ -66,7 +66,7 @@ try:
     play_env["version"] = open(play_version_file).readline().strip()
 
     if showLogo:
-        print "~ play! %s, http://www.playframework.com" % (play_env["version"])
+        print "~ play! %s, https://www.playframework.com" % (play_env["version"])
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
     application_path = None

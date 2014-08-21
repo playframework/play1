@@ -179,7 +179,7 @@ Extended references for day-to-day hacking.
 
 h2. <a name="modules">Distribution Modules</a>
 
-These optional modules are included with the standard distribution. "More modules":http://www.playframework.com/modules.
+These optional modules are included with the standard distribution. "More modules":https://www.playframework.com/modules.
 
 # "CRUD":crud
 # "Secure":secure

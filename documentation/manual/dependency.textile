@@ -22,7 +22,7 @@ In the @dependencies.yml@ file you will write it like this:
 
 bc. organisation -> name revision [classifier]
 
-So, for instance version 1.0 of the "Play PDF module":http://www.playframework.com/modules/pdf is expressed like this:
+So, for instance version 1.0 of the "Play PDF module":https://www.playframework.com/modules/pdf is expressed like this:
 
 bc. play -> pdf 1.0
 
@@ -97,7 +97,7 @@ bc. $ play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.com
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -194,7 +194,7 @@ bc. $ play deps
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.com
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -253,7 +253,7 @@ bc. play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.com
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -288,7 +288,7 @@ require:
 
 h2. <a name="repositories">Adding new repositories</a>
 
-By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.com/modules. 
+By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":https://www.playframework.com/modules. 
 
 You can, of course, specify new custom repositories in the @repositories@ section:
 

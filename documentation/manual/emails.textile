@@ -115,9 +115,9 @@ bc. @@{application.index}
 
 If you send mails from Jobs you have to set "application.baseUrl":configuration#application.baseUrl to a valid external base URL for your application.
 
-For example, to send an e-mail from a Job running on the playframework.org web site, the configuration would look like this:
+For example, to send an e-mail from a Job running on the playframework.com web site, the configuration would look like this:
 
-bc. application.baseUrl=http://www.playframework.com/
+bc. application.baseUrl=https://www.playframework.com/
 
 h3. Links to embedded images
 
@@ -131,7 +131,7 @@ You can add links to embedded images by using the embeddedImage tag like this:
 
 Distant image:
 
-bc. #{embeddedImage src:'http://www.playframework.com/assets/images/logo.png', name:'distantImage' /}
+bc. #{embeddedImage src:'https://www.playframework.com/assets/images/logo.png', name:'distantImage' /}
 
 Locale image:
 
@@ -166,7 +166,7 @@ mail.smtp=mock
 
 h3. <a name="gmail">Using Gmail</a>
 
-To use Gmail’s servers, for example when you deploy with "playapps":http://www.playframework.com/modules/playapps, use this configuration: 
+To use Gmail’s servers, for example when you deploy with "playapps":https://www.playframework.com/modules/playapps, use this configuration: 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin

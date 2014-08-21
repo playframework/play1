@@ -107,8 +107,8 @@ repositories:
 
             - playContributedModules:
                 type:       http
-                descriptor: "http://www.playframework.org/modules/repo/[module]/[revision]/dependencies.yml"
-                artifact:   "http://www.playframework.org/modules/[module]-[revision].zip"
+                descriptor: "https://www.playframework.com/modules/repo/[module]/[revision]/dependencies.yml"
+                artifact:   "https://www.playframework.com/modules/[module]-[revision].zip"
                 
         contains:
             - play -> *
