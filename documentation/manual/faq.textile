@@ -2,7 +2,7 @@ h1. Frequently Asked Questions
 
 h2. <a>Where do I ask questions that are not answered here?</a>
 
-The "Community":http://www.playframework.com/community page links to various places where you can read and post about Play. In general, the best place to ask questions is the "play-framework Google Group":http://groups.google.com/group/play-framework.
+The "Community":https://www.playframework.com/community page links to various places where you can read and post about Play. In general, the best place to ask questions is the "play-framework Google Group":http://groups.google.com/group/play-framework.
 
 h2. <a>How does Play compare to framework X?</a>
 
@@ -40,7 +40,7 @@ The biggest CPU consumer in the Play stack at the moment is the Groovy-based tem
 
 h2. <a>Can I already use Play for a production application?</a>
 
-Sure, "a lot of people":http://www.playframework.com/community/testimonials already use Play in production. The 1.0 branch is now in maintenance mode, which means that we will just fix bugs and keep API compatibility in that branch.
+Sure, "a lot of people":https://www.playframework.com/community/testimonials already use Play in production. The 1.0 branch is now in maintenance mode, which means that we will just fix bugs and keep API compatibility in that branch.
 
 h2. <a>Is library X supported?</a>
 

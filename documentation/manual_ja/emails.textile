@@ -115,9 +115,9 @@ bc. @@{application.index}
 
 ジョブからメールを送る場合、 アプリケーションに有効な外部基礎URLを "application.baseUrl":configuration#application.baseUrl に設定しなければなりません。
 
-例えば、playframework.org の webサイト内のジョブから e メールを送信する場合、設定は以下のようになるでしょう:
+例えば、playframework.com の webサイト内のジョブから e メールを送信する場合、設定は以下のようになるでしょう:
 
-bc. application.baseUrl=http://www.playframework.com/
+bc. application.baseUrl=https://www.playframework.com/
 
 h2. <a name="smtp">SMTP の設定</a>
 
@@ -142,7 +142,7 @@ mail.smtp=mock
 
 h3. <a name="gmail">Gmailの使用</a>
 
-Gmailサーバーを使用するには、以下の設定を使用してください(例: "playapps":http://www.playframework.com/modules/playapps へのデプロイ): 
+Gmailサーバーを使用するには、以下の設定を使用してください(例: "playapps":https://www.playframework.com/modules/playapps へのデプロイ): 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin

@@ -2,7 +2,7 @@ h1. よくある質問
 
 h2. <a>ここで答えられていない質問はどこにすればいいですか?</a>
 
-"コミュニティ":http://www.playframework.com/community ページに Play について読み書きできる様々なサイトへのリンクがあります。一般的に、質問をするのに最適な場所は "play-framework Google グループ":http://groups.google.com/group/play-framework です。
+"コミュニティ":https://www.playframework.com/community ページに Play について読み書きできる様々なサイトへのリンクがあります。一般的に、質問をするのに最適な場所は "play-framework Google グループ":http://groups.google.com/group/play-framework です。
 
 h2. <a>X framework と比べて Play はどうですか?</a>
 
@@ -40,7 +40,7 @@ h2. <a>Play は速いですか?</a>
 
 h2. <a>Play は製品としてのアプリケーションに使用できる段階にあるでしょうか?</a>
 
-はい、既に "多くの方々":http://www.playframework.com/community/testimonials が Play を製品アプリケーションに使用しています。1.0 ブランチは現在、メンテナンスモードであり、バグ修正のみが行われ、API の互換性は保ち続けられます。
+はい、既に "多くの方々":https://www.playframework.com/community/testimonials が Play を製品アプリケーションに使用しています。1.0 ブランチは現在、メンテナンスモードであり、バグ修正のみが行われ、API の互換性は保ち続けられます。
 
 h2. <a>X ライブラリをサポートしていますか?</a>
 

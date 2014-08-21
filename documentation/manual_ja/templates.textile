@@ -316,7 +316,7 @@ bc. <ul>
 
 @java.util.Date@ にも同様に適用することができます。
 
-型ごとに利用できるメソッドの一覧は "API ドキュメント":http://www.playframework.org/@api/play/templates/JavaExtensions.html で見つけることができます。
+型ごとに利用できるメソッドの一覧は "API ドキュメント":https://www.playframework.com/@api/play/templates/JavaExtensions.html で見つけることができます。
 
 
 h3. 独自拡張の作成

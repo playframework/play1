@@ -36,8 +36,8 @@ public class MailTest {
 
 		simpleEmail =
 			new SimpleEmail()
-				.setFrom("from@playframework.org")
-				.addTo("to@playframework.org")
+				.setFrom("from@playframework.com")
+				.addTo("to@playframework.com")
 				.setSubject("subject");
 
 		spyingMailSystem = new SpyingMailSystem();
@@ -46,7 +46,7 @@ public class MailTest {
 	@Test(expected = MailException.class)
 	public void buildMessageWithoutFrom() throws EmailException {
 		Email emailWithoutFrom = new SimpleEmail();
-		emailWithoutFrom.addTo("from@playframework.org");
+		emailWithoutFrom.addTo("from@playframework.com");
 		emailWithoutFrom.setSubject("subject");
 		Mail.buildMessage(new SimpleEmail());
 	}
@@ -55,7 +55,7 @@ public class MailTest {
 	public void buildMessageWithoutRecipient() throws EmailException {
 		Email emailWithoutRecipients =
 			new SimpleEmail()
-				.setFrom("from@playframework.org")
+				.setFrom("from@playframework.com")
 				.setSubject("subject");
 		Mail.buildMessage(emailWithoutRecipients);
 	}
@@ -63,25 +63,25 @@ public class MailTest {
 	@Test(expected = MailException.class)
 	public void buildMessageWithoutSubject() throws EmailException {
 		Email emailWithoutSubject = new SimpleEmail();
-		emailWithoutSubject.setFrom("from@playframework.org");
-		emailWithoutSubject.addTo("to@playframework.org");
+		emailWithoutSubject.setFrom("from@playframework.com");
+		emailWithoutSubject.addTo("to@playframework.com");
 		Mail.buildMessage(emailWithoutSubject);
 	}
 
 	@Test
 	public void buildValidMessages() throws EmailException {
 		Mail.buildMessage(
-			emailWitoutRecipients().addTo("to@playframework.org"));
+			emailWitoutRecipients().addTo("to@playframework.com"));
 		Mail.buildMessage(
-			emailWitoutRecipients().addCc("cc@playframework.org"));
+			emailWitoutRecipients().addCc("cc@playframework.com"));
 		Mail.buildMessage(
-			emailWitoutRecipients().addBcc("bcc@playframework.org"));
+			emailWitoutRecipients().addBcc("bcc@playframework.com"));
 	}
 
 	protected Email emailWitoutRecipients() throws EmailException {
 		return
 			new SimpleEmail()
-				.setFrom("from@playframework.org")
+				.setFrom("from@playframework.com")
 				.setSubject("subject");
 	}
 

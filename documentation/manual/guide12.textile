@@ -88,7 +88,7 @@ Once you have saved these changes, you can see the different language versions i
 
 h2. <a>Application model localisation</a>
 
-If you use that link to log in to the blog's 'admin' pages, you can access lists of posts, tags, comments and users. These pages are provided by the "CRUD":http://www.playframework.com/documentation/1.0.1/crud module. For each of these pages, the title (light pink) and the column headers are terms from the application's model, i.e. JavaBean class and property names. 
+If you use that link to log in to the blog's 'admin' pages, you can access lists of posts, tags, comments and users. These pages are provided by the "CRUD":https://www.playframework.com/documentation/1.0.1/crud module. For each of these pages, the title (light pink) and the column headers are terms from the application's model, i.e. JavaBean class and property names. 
 
 The CRUD module internationalises these names using the JavaBean class or property name as the message key, which means you can localise them with messages such as the following. 
 

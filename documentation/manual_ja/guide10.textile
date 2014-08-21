@@ -180,7 +180,7 @@ h2. <a name="cobertura">コードカバレッジ計測</a>
 
 もちろん、アプリケーションに必要なすべてのテストケースを書いたわけではありません。しかし、このチュートリアルにはこれで充分です。ところで、実世界のプロジェクトの場合では、どうすれば充分なテストを書いたと知ることができるのでしょうか? これは **'コードカバレッジ'** などと呼ばれます。
 
-"Cobertura モジュール":http://www.playframework.com/modules/cobertura は "Cobertura":http://cobertura.sourceforge.net/ ツールを使ってコードカバレッジレポートを生成します。 @install@ コマンドを使ってこのモジュールをインストールしてください:
+"Cobertura モジュール":https://www.playframework.com/modules/cobertura は "Cobertura":http://cobertura.sourceforge.net/ ツールを使ってコードカバレッジレポートを生成します。 @install@ コマンドを使ってこのモジュールをインストールしてください:
 
 bc. play install cobertura-{version}
 

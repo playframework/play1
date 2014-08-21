@@ -27,7 +27,7 @@ bc. public static void allProducts() {
 
 p(note). **Modules might configure the cache for you**
  
-For example, the "GAE module":http://www.playframework.com/modules/gae configures the cache to use "Google cache":https://developers.google.com/appengine/docs/java/memcache when deployed to the GAE servers.
+For example, the "GAE module":https://www.playframework.com/modules/gae configures the cache to use "Google cache":https://developers.google.com/appengine/docs/java/memcache when deployed to the GAE servers.
 
 h2. <a name="cacheFor">The cacheFor annotation</a>
 
