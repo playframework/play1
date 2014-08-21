@@ -203,7 +203,7 @@ public class IO {
     public static void writeContent(CharSequence content, OutputStream os, String encoding) {
         try {
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
-            printWriter.println(content);
+            printWriter.print(content);
             printWriter.flush();
             os.flush();
         } catch(IOException e) {
@@ -233,10 +233,11 @@ public class IO {
      */
     public static void writeContent(CharSequence content, File file, String encoding) {
         OutputStream os = null;
+        PrintWriter printWriter = null;
         try {
             os = new FileOutputStream(file);
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
-            printWriter.println(content);
+            printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
+            printWriter.print(content);
             printWriter.flush();
             os.flush();
         } catch(IOException e) {
@@ -244,6 +245,9 @@ public class IO {
         } finally {
             try {
                 if(os != null) os.close();
+                if(printWriter != null){
+                    printWriter.close();
+                }
             } catch(Exception e) {
                 //
             }

@@ -102,10 +102,11 @@ public class PlayConfigurationLoadTask {
         if (!srcFile.exists()) {
             throw new BuildException("No application configuration found! " + srcFile.getAbsolutePath());
         }
+        BufferedReader reader = null;
         try {
             properties = new HashMap<String,String>();
             Map<String,String> idSpecific = new HashMap<String,String>();
-            BufferedReader reader = new BufferedReader(new FileReader(srcFile));
+            reader = new BufferedReader(new FileReader(srcFile));
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -131,6 +132,14 @@ public class PlayConfigurationLoadTask {
             return properties;
         } catch (IOException e) {
             throw new BuildException("Failed to load configuration file: " + srcFile.getAbsolutePath(), e);
+        } finally{
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                throw new BuildException("Failed to close configuration file: " + srcFile.getAbsolutePath(), e);
+            }
         }
     }
 

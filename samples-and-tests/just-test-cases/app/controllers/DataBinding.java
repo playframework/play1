@@ -1,16 +1,26 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+import models.AnEntity;
+import models.AnotherEntity;
+import models.Child;
 import models.MyBook;
 import models.Person;
+
 import org.apache.commons.io.IOUtils;
+
+import com.google.gson.Gson;
+
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Valid;
 import play.i18n.Lang;
 import play.mvc.Controller;
 import play.utils.Utils;
@@ -123,6 +133,36 @@ public class DataBinding extends Controller {
         }
         
         renderText("b.ba.length=" + b.ba.length);
+    }
+    
+    public static void editAnEntity(@Valid AnEntity entity) {        
+	List<AnotherEntity> parents = AnotherEntity.findAll();
+	if(parents == null){
+	    parents = new ArrayList<AnotherEntity>();
+	}
+	if (parents.size() < 5) {
+	    for (Integer i = 0; i < 5; i++) {
+		AnotherEntity parent = new AnotherEntity();
+		parent.save();
+		parent.prop = "parent " + parent.id.toString();
+		parent.save();
+		parents.add(parent);
+	    }
+	}
+        render(entity, parents);
+    }
+    
+    public static void dispatchAnEntity(@Valid AnEntity entity) {
+        editAnEntity(entity);
+    }
+    
+
+    public static void saveChild(Child child) {  
+        renderText(child.toSimpleJSON());
+    }
+    
+    public static void saveChildAsSecure(@As("secure") Child child) {
+        renderJSON(child.toSimpleJSON());
     }
 
 }

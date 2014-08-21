@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<h1>Multi DB demo</h1>
+
+<p>We are accessing two differents databases</p>
+ #{if students.size()}
+
+        <div class="students">
+            <h3>Students <span class="from">extracted from datasource 'default'</span></h3>
+            <ul>
+	            #{list items:students, as:'student'}
+	               <li><img src="${student.email.gravatar()}?s=45"/> ${student.name} <small>${student.birthdate}</small></li>
+	            #{/list}
+            </ul>
+        </div>
+    #{/if}
+
+ #{if teachers.size()}
+
+        <div class="teachers">
+            <h3>Teachers <span class="from">extracted from datasource 'teacher'</span></h3>
+            <ul>
+            #{list items:teachers, as:'teacher'}
+                <li><img src="${teacher.email.gravatar()}?s=45"/> ${teacher.name} <small>${teacher.topic}</small></li>
+            #{/list}
+            </ul>
+        </div>
+
+
+    #{/if}

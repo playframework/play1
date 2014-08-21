@@ -180,14 +180,14 @@ h2. <a name="cobertura">コードカバレッジ計測</a>
 
 もちろん、アプリケーションに必要なすべてのテストケースを書いたわけではありません。しかし、このチュートリアルにはこれで充分です。ところで、実世界のプロジェクトの場合では、どうすれば充分なテストを書いたと知ることができるのでしょうか? これは **'コードカバレッジ'** などと呼ばれます。
 
-"Cobertura モジュール":http://www.playframework.org/modules/cobertura は "Cobertura":http://cobertura.sourceforge.net/ ツールを使ってコードカバレッジレポートを生成します。 @install@ コマンドを使ってこのモジュールをインストールしてください:
+"Cobertura モジュール":https://www.playframework.com/modules/cobertura は "Cobertura":http://cobertura.sourceforge.net/ ツールを使ってコードカバレッジレポートを生成します。 @install@ コマンドを使ってこのモジュールをインストールしてください:
 
 bc. play install cobertura-{version}
 
-このモジュールはテストモードのときだけ有効にする必要があります。そこで、以下の行を @application.conf@ に追加し、アプリケーションをテストモードで再起動します。
+このモジュールはテストモードのときだけ有効にする必要があります。そこで、以下の行を @conf/dependencies.yml@ に追加し、アプリケーションをテストモードで再起動します。
 
-bc. # Import the cobertura module in test mode
-%test.module.cobertura=${play.path}/modules/cobertura
+bc. # Import the cobertura module in appplication
+    - play -> cobertura {version}
 
 ここで、ブラウザから "http://localhost:9000/@tests":http://localhost:9000/@tests URL を再度開き、すべてのテストを選択して実行してください。すべてグリーンになるはずです。
 

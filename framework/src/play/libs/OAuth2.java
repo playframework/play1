@@ -50,13 +50,15 @@ public class OAuth2 {
 	}
 
 	/**
-	 * First step of the oAuth2 process. This redirects the user to the authorisation page on the oAuth2 provider. This is a helper method that only takes one parameter name,value pair and then
+	 * First step of the oAuth2 process. This redirects the user to the authorization page on the oAuth2 provider. This is a helper method that only takes one parameter name,value pair and then
 	 * converts them into a map to be used by {@link #retrieveVerificationCode(String, Map)}
 	 * 
 	 * @param callbackURL
-	 *            The URL to redirect the user to after authorisation
-	 * @param parameters
-	 *            Any additional parameters that weren't included in the constructor. For example you might need to add a response_type.
+	 *            The URL to redirect the user to after authorization
+	 * @param parameterName 
+	 *                      An additional parameter name
+	 * @param parameterValue
+	 *            An additional parameter value
 	 */
 	public void retrieveVerificationCode(String callbackURL, String parameterName, String parameterValue) {
 		Map<String, String> parameters = new HashMap<String, String>();

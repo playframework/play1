@@ -9,75 +9,122 @@ import javax.persistence.Query;
 import play.Play;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
+import play.db.Configuration;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Scope.Params;
 
 public class JPQL {
 
-    public EntityManager em() {
-        return JPA.em();
+    public EntityManager em(String dbName) {
+        return JPA.em(dbName);
     }
 
-    public long count(String entity) {
-        return Long.parseLong(em().createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
+     public EntityManager em() {
+        return JPA.em(JPA.DEFAULT);
+    }
+
+     public long count(String entity) {
+        return count(JPA.DEFAULT, entity);
+    }
+
+    public long count(String dbName, String entity) {
+        return Long.parseLong(em(dbName).createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
     }
 
     public long count(String entity, String query, Object[] params) {
+        return count(JPA.DEFAULT, entity, query, params);
+    }
+
+    public long count(String dbName, String entity, String query, Object[] params) {
         return Long.parseLong(
-                bindParameters(em().createQuery(
-                createCountQuery(entity, entity, query, params)), params).getSingleResult().toString());
+                bindParameters(em(dbName).createQuery(
+                createCountQuery(dbName, entity, entity, query, params)), params).getSingleResult().toString());
     }
 
     public List findAll(String entity) {
-        return em().createQuery("select e from " + entity + " e").getResultList();
+        return findAll(JPA.DEFAULT, entity);
+    }
+
+     public List findAll(String dbName, String entity) {
+        return em(dbName).createQuery("select e from " + entity + " e").getResultList();
     }
 
     public JPABase findById(String entity, Object id) throws Exception {
-        return (JPABase) em().find(Play.classloader.loadClass(entity), id);
+        return findById(JPA.DEFAULT, entity, id);
+    }
+
+    public JPABase findById(String dbName, String entity, Object id) throws Exception {
+        return (JPABase) em(dbName).find(Play.classloader.loadClass(entity), id);
     }
 
     public List findBy(String entity, String query, Object[] params) {
-        Query q = em().createQuery(
-                createFindByQuery(entity, entity, query, params));
+       return findBy(JPA.DEFAULT, entity, query, params);
+    }
+
+    public List findBy(String dbName, String entity, String query, Object[] params) {
+        Query q = em(dbName).createQuery(
+                createFindByQuery(dbName, entity, entity, query, params));
         return bindParameters(q, params).getResultList();
     }
 
     public JPAQuery find(String entity, String query, Object[] params) {
-        Query q = em().createQuery(
-                createFindByQuery(entity, entity, query, params));
+      return find(JPA.DEFAULT, entity, query, params);
+    }
+
+
+    public JPAQuery find(String dbName, String entity, String query, Object[] params) {
+        Query q = em(dbName).createQuery(
+                createFindByQuery(dbName, entity, entity, query, params));
         return new JPAQuery(
-                createFindByQuery(entity, entity, query, params), bindParameters(q, params));
+                createFindByQuery(dbName, entity, entity, query, params), bindParameters(q, params));
     }
 
     public JPAQuery find(String entity) {
-        Query q = em().createQuery(
-                createFindByQuery(entity, entity, null));
+        return find(JPA.DEFAULT, entity);
+    }
+
+    public JPAQuery find(String dbName, String entity) {
+        Query q = em(dbName).createQuery(
+                createFindByQuery(dbName, entity, entity, null));
         return new JPAQuery(
-                createFindByQuery(entity, entity, null), bindParameters(q));
+                createFindByQuery(dbName, entity, entity, null), bindParameters(q));
     }
 
     public JPAQuery all(String entity) {
-        Query q = em().createQuery(
-                createFindByQuery(entity, entity, null));
-        return new JPAQuery(
-                createFindByQuery(entity, entity, null), bindParameters(q));
+        return all(JPA.DEFAULT, entity);
     }
 
-    public int delete(String entity, String query, Object[] params) {
-        Query q = em().createQuery(
+    public JPAQuery all(String dbName, String entity) {
+        Query q = em(dbName).createQuery(
+                createFindByQuery(dbName, entity, entity, null));
+        return new JPAQuery(
+                createFindByQuery(dbName, entity, entity, null), bindParameters(q));
+    }
+
+    public int delete(String dbName, String entity, String query, Object[] params) {
+        Query q = em(dbName).createQuery(
                 createDeleteQuery(entity, entity, query, params));
         return bindParameters(q, params).executeUpdate();
     }
 
-    public int deleteAll(String entity) {
-        Query q = em().createQuery(
+    public int delete(String entity, String query, Object[] params) {
+       return delete(JPA.DEFAULT, entity, query, params);
+    }
+
+
+    public int deleteAll(String dbName, String entity) {
+        Query q = em(dbName).createQuery(
                 createDeleteQuery(entity, entity, null));
         return bindParameters(q).executeUpdate();
     }
 
-    public JPABase findOneBy(String entity, String query, Object[] params) {
-        Query q = em().createQuery(
-                createFindByQuery(entity, entity, query, params));
+    public int deleteAll(String entity) {
+       return deleteAll(JPA.DEFAULT, entity);
+    }
+
+    public JPABase findOneBy(String dbName, String entity, String query, Object[] params) {
+        Query q = em(dbName).createQuery(
+                createFindByQuery(dbName, entity, entity, query, params));
         List results = bindParameters(q, params).getResultList();
         if (results.size() == 0) {
             return null;
@@ -85,7 +132,15 @@ public class JPQL {
         return (JPABase) results.get(0);
     }
 
+    public JPABase findOneBy(String entity, String query, Object[] params) {
+       return findOneBy(JPA.DEFAULT, entity, query, params);
+    }
+
     public JPABase create(String entity, String name, Params params) throws Exception {
+        return create(JPA.DEFAULT, entity, name, params);
+    }
+
+    public JPABase create(String dbName, String entity, String name, Params params) throws Exception {
         Object o = Play.classloader.loadClass(entity).newInstance();
 
         RootParamNode rootParamNode = ParamNode.convert(params.all());
@@ -93,12 +148,12 @@ public class JPQL {
         return ((GenericModel) o).edit(rootParamNode, name);
     }
 
-    public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
+    public String createFindByQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
         if (query == null || query.trim().length() == 0) {
             return "from " + entityName;
         }
         if (query.matches("^by[A-Z].*$")) {
-            return "from " + entityName + " where " + findByToJPQL(query);
+            return "from " + entityName + " where " + findByToJPQL(dbName, query);
         }
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
@@ -137,12 +192,12 @@ public class JPQL {
         return "delete from " + entityName + " where " + query;
     }
 
-    public String createCountQuery(String entityName, String entityClass, String query, Object... params) {
+    public String createCountQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
         }
         if (query.matches("^by[A-Z].*$")) {
-            return "select count(*) from " + entityName + " where " + findByToJPQL(query);
+            return "select count(*) from " + entityName + " where " + findByToJPQL(dbName, query);
         }
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "select count(*) " + query;
@@ -185,11 +240,13 @@ public class JPQL {
         }
         return q;
     }
-
+    
     public String findByToJPQL(String findBy) {
+        return findByToJPQL(JPA.DEFAULT, findBy);
+    }
+
+    public String findByToJPQL(String dbName, String findBy) {
         findBy = findBy.substring(2);
-
-
         StringBuilder jpql = new StringBuilder();
         String subRequest;
         if (findBy.contains("OrderBy"))
@@ -229,14 +286,14 @@ public class JPQL {
             } else if (part.endsWith("Like")) {
                 String prop = extractProp(part, "Like");
                 // HSQL -> LCASE, all other dbs lower
-                if (isHSQL()) {
+                if (this.isHSQL(dbName)) {
                     jpql.append("LCASE(").append(prop).append(") like ?").append(index++);
                 } else {
                     jpql.append("LOWER(").append(prop).append(") like ?").append(index++);
                 }
             } else if (part.endsWith("Ilike")) {
                 String prop = extractProp(part, "Ilike");
-                 if (isHSQL()) {
+                 if (this.isHSQL(dbName)) {
                     jpql.append("LCASE(").append(prop).append(") like LCASE(?").append(index++).append(")");
                  } else {
                     jpql.append("LOWER(").append(prop).append(") like LOWER(?").append(index++).append(")");
@@ -255,9 +312,10 @@ public class JPQL {
         return jpql.toString();
     }
 
-    private boolean isHSQL() {
-        String db = Play.configuration.getProperty("db");
-        return ("mem".equals(db) || "fs".equals(db) || "org.hsqldb.jdbcDriver".equals(Play.configuration.getProperty("db.driver")));
+    private boolean isHSQL(String dbName) {
+        Configuration dbConfig = new Configuration(dbName);
+        String db = dbConfig.getProperty("db");
+        return ("mem".equals(db) || "fs".equals(db) || "org.hsqldb.jdbcDriver".equals(dbConfig.getProperty("db.driver")));
     }
 
     protected static String extractProp(String part, String end) {

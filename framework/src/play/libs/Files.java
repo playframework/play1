@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.io.FileUtils;
 import play.exceptions.UnexpectedException;
 
@@ -96,9 +97,10 @@ public class Files {
     }
 
     public static void unzip(File from, File to) {
+        ZipFile zipFile = null;
         try {
             String outDir = to.getCanonicalPath();
-            ZipFile zipFile = new ZipFile(from);
+            zipFile = new ZipFile(from);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
@@ -118,6 +120,14 @@ public class Files {
             zipFile.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }finally{
+            try {
+                if (zipFile != null) {
+                    zipFile.close();
+                }
+            } catch (IOException e) {
+                throw new UnexpectedException(e);
+            }
         }
     }
 

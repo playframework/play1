@@ -10,22 +10,16 @@ import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelException;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.channel.ChannelHandler;
-
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.libs.IO;
 import play.server.ssl.SslHttpServerPipelineFactory;
-import play.vfs.VirtualFile;
-import java.util.Map;
-import java.util.HashMap;
 
 public class Server {
 
     public static int httpPort;
     public static int httpsPort;
-    public static Map<String, ChannelHandler> pipelines = new HashMap<String, ChannelHandler>();
 
     public final static String PID_FILE = "server.pid";
 
@@ -130,7 +124,7 @@ public class Server {
             Logger.error("Could not bind on port " + httpsPort, e);
             Play.fatalServerErrorOccurred();
         }
-        if (Play.mode == Mode.DEV) {
+        if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
            // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
            System.out.println("~ Server is up and running");
 	}

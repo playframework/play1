@@ -17,7 +17,7 @@ h3. Generic instructions
 In general, the installation instructions are as follows.
 
 # Install Java.
-# Download the latest "Play binary package":http://download.playframework.org/ and extract the archive.
+# Download the latest "Play binary package":http://download.playframework.com/ and extract the archive.
 # Add the ‘play’ command to your system path and make sure it is executable.
 
 
@@ -25,7 +25,7 @@ h3. Mac OS X
 
 Java is built-in, or installed automatically, so you can skip the first step.
 
-# Download the latest "Play binary package":http://download.playframework.org/ and extract it in @/Applications@.
+# Download the latest "Play binary package":http://download.playframework.com/ and extract it in @/Applications@.
 # Edit @/etc/paths@ and add the line @/Applications/play-1.2.5@ (for example).
 
 An alternative on OS X is:

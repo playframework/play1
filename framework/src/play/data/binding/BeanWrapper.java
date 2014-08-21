@@ -7,7 +7,6 @@ import java.util.*;
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
-import play.utils.Utils;
 
 /**
  * Parameters map to POJO binder.

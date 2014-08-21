@@ -49,15 +49,16 @@ public class BytecodeCache {
                 int offset = 0;
                 int read = -1;
                 StringBuilder hash = new StringBuilder();
-                while ((read = fis.read()) != 0) {
+                // look for null byte, or end-of file
+                while ((read = fis.read()) > 0) {
                     hash.append((char) read);
                     offset++;
                 }
                 if (!hash(source).equals(hash.toString())) {
-
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
                     }
+                    fis.close();
                     return null;
                 }
                 byte[] byteCode = new byte[(int) f.length() - (offset + 1)];

@@ -390,8 +390,14 @@ public abstract class Binder {
         }
 
         Class componentClass = String.class;
+        Type componentType = String.class;
         if (type instanceof ParameterizedType) {
-            componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+            componentType = ((ParameterizedType) type).getActualTypeArguments()[0];
+            if(componentType instanceof ParameterizedType) {
+                componentClass = (Class) ((ParameterizedType) componentType).getRawType();
+            } else {
+                componentClass = (Class) componentType;
+            }
         }
 
         if (paramNode.getAllChildren().isEmpty()) {
@@ -417,7 +423,7 @@ public abstract class Binder {
             Collection l = (Collection) clazz.newInstance();
             for (int i = 0; i < values.length; i++) {
                 try {
-                    Object value = directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass, componentClass);
+                    Object value = directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass, componentType);
                     l.add(value);
                 } catch (Exception e) {
                     // Just ignore the exception and continue on the next item
@@ -448,7 +454,7 @@ public abstract class Binder {
 
             for (String index : indexes) {
                 ParamNode child = paramNode.getChild(index);
-                Object childValue = internalBind(child, componentClass, componentClass, bindingAnnotations);
+                Object childValue = internalBind(child, componentClass, componentType, bindingAnnotations);
                 if (childValue != NO_BINDING && childValue != MISSING) {
 
                     // must make sure we place the value at the correct position
@@ -469,7 +475,7 @@ public abstract class Binder {
         }
 
         for (ParamNode child : paramNode.getAllChildren()) {
-            Object childValue = internalBind(child, componentClass, componentClass, bindingAnnotations);
+            Object childValue = internalBind(child, componentClass, componentType, bindingAnnotations);
             if (childValue != NO_BINDING && childValue != MISSING) {
                 r.add(childValue);
             }
@@ -481,7 +487,7 @@ public abstract class Binder {
     /**
      * @param value
      * @param clazz
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String value, Class<?> clazz) throws Exception {
@@ -493,8 +499,7 @@ public abstract class Binder {
      * @param annotations
      * @param value
      * @param clazz
-     * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
@@ -506,7 +511,7 @@ public abstract class Binder {
      * @param value
      * @param clazz
      * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
@@ -521,7 +526,7 @@ public abstract class Binder {
      * @param value
      * @param clazz
      * @param type
-     * @return
+     * @return The binding object
      * @throws Exception
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {

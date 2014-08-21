@@ -326,15 +326,25 @@ public static void editProfile(@As("profile") User user) {
 
 In this case, the @isAdmin@ field will never be bound from the @editProfile@ action, even if an malicious user includes a @user.isAdmin=true@ field in a fake form post.
 
-h3. <a name="typebinder">play.data.binding.TypeBinder</a>
+h3. <a name="typebinder">play.data.binding.TypeBinder / TypeUnbinder</a>
 
-The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of @TypeBinder@ that you define in your project. For example:
+The *@As* annotation also allows you to define a completely custom binder and/or unbinder. A custom binder / unbinder is subclass of @TypeBinder@ / @TypeUnbinder@ that you define in your project. For example:
 
-bc. public class MyCustomStringBinder implements TypeBinder<String> {
+bc. public class MyCustomStringBinder implements TypeBinder<String>, TypeUnbinder<String>  {
  
     public Object bind(String name, Annotation[] anns, String value, 
     Class clazz) {
         return "!!" + value + "!!";
+    }
+    
+    @Override
+    public void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, 
+        String name, Annotation[] annotations) throws Exception {
+        String value = (String) src;
+        if(value != null){
+            value = value.replaceAll("^!!", "").replaceAll("!!$", "");
+        }
+        result.put(name, value);
     }
 }
 

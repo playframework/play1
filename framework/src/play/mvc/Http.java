@@ -17,11 +17,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jboss.netty.channel.ChannelHandlerContext;
+
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.F;
+import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.F.EventStream;
@@ -181,7 +185,11 @@ public class Http {
          */
         public String querystring;
         /**
-         * Full url
+         * URL path (excluding scheme, host and port), starting with '/'<br/>
+         * 
+         * <b>Example:</b><br/>
+         * With this full URL <code>http://localhost:9000/path0/path1</code> <br/>
+         * => <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
         /**
@@ -416,9 +424,18 @@ public class Http {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
-                String[] decodedData = new String(Codec.decodeBASE64(data)).split(":");
-                user = decodedData.length > 0 ? decodedData[0] : null;
-                password = decodedData.length > 1 ? decodedData[1] : null;
+                //In basic auth, the password can contain a colon as well so split(":") may split the string into
+                //3 parts....username, part1 of password and part2 of password so don't use split here
+                String decoded = new String(Codec.decodeBASE64(data));
+                //splitting on ONLY first : allows user's password to contain a :
+                int indexOf = decoded.indexOf(":");
+                if(indexOf < 0)
+                	return;
+                
+                String username = decoded.substring(0, indexOf);
+                String thePasswd = decoded.substring(indexOf+1);
+                user = username.length() > 0 ? username : null;
+                password = thePasswd.length() > 0 ? thePasswd : null;
             }
         }
 
@@ -813,11 +830,17 @@ public class Http {
     public abstract static class Inbound {
 
         public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+        final BlockingEventStream<WebSocketEvent> stream;
 
+
+        public Inbound(ChannelHandlerContext ctx) {
+        	stream = new BlockingEventStream<WebSocketEvent>(ctx);
+		}
+        
         public static Inbound current() {
             return current.get();
         }
-        final EventStream<WebSocketEvent> stream = new EventStream<WebSocketEvent>();
+
 
         public void _received(WebSocketFrame frame) {
             stream.publish(frame);

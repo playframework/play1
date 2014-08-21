@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
 
 import play.Logger;
 import play.Play;
@@ -22,7 +23,7 @@ public class TemplateLoader {
      * See getUniqueNumberForTemplateFile() for more info
      */
     private static AtomicLong nextUniqueNumber = new AtomicLong(1000);//we start on 1000
-    private static Map<String, String> templateFile2UniqueNumber = new HashMap<String, String>();
+    private static Map<String, String> templateFile2UniqueNumber = Collections.synchronizedMap(new HashMap<String, String>());
 
     /**
      * All loaded templates is cached in the templates-list using a key.
@@ -33,7 +34,7 @@ public class TemplateLoader {
      * This method returns a unique representation of the path which is usable as part of a classname
      *
      * @param path
-     * @return
+     * @return a unique representation of the path which is usable as part of a classname
      */
     public static String getUniqueNumberForTemplateFile(String path) {
         //a path cannot be a valid classname so we have to convert it somehow.
@@ -63,10 +64,11 @@ public class TemplateLoader {
         }
 
         // Use default engine
-        final String key = getUniqueNumberForTemplateFile(file.relativePath());
+        final String fileRelativePath = file.relativePath();
+        final String key = getUniqueNumberForTemplateFile(fileRelativePath);
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
-                BaseTemplate template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
+                BaseTemplate template = new GroovyTemplate(fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");
                 try {
                     template.loadPrecompiled();
                     templates.put(key, template);
@@ -75,7 +77,7 @@ public class TemplateLoader {
                     Logger.warn("Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
                 }
             }
-            BaseTemplate template = new GroovyTemplate(file.relativePath(), file.contentAsString());
+            BaseTemplate template = new GroovyTemplate(fileRelativePath, file.contentAsString());
             if (template.loadFromCache()) {
                 templates.put(key, template);
             } else {
@@ -88,7 +90,7 @@ public class TemplateLoader {
             }
         }
         if (templates.get(key) == null) {
-            throw new TemplateNotFoundException(file.relativePath());
+            throw new TemplateNotFoundException(fileRelativePath);
         }
         return templates.get(key);
     }
@@ -168,7 +170,12 @@ public class TemplateLoader {
                 continue;
             }
             VirtualFile tf = vf.child(path);
-            if (tf.exists()) {
+            boolean templateExists = tf.exists();
+            if (!templateExists && Play.usePrecompiled) {
+                String name = tf.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent");
+                templateExists = Play.getFile("precompiled/templates/" + name).exists();
+            }
+            if (templateExists) {
                 template = TemplateLoader.load(tf);
                 break;
             }

@@ -13,9 +13,10 @@ import play.Logger;
  * offload the database and simplify scalability. Ehcache is robust, proven and
  * full-featured and this has made it the most widely-used Java-based cache.</p>
  *
- * @see http://ehcache.org/
+ * Expiration is specified in seconds
+ * 
+ * @see <a href="http://ehcache.org/">http://ehcache.org/</a>
  *
- * expiration is specified in seconds
  */
 public class EhCacheImpl implements CacheImpl {
 

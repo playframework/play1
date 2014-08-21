@@ -1,0 +1,3 @@
+h1. Play 1.2.7 -- Release notes
+
+Play 1.2.7 has been to fix a regression introduced in play 1.2.6 which caused the flash scope to become 'persistent', see "lighthouse ticket #1702":http://play.lighthouseapp.com/projects/57987/tickets/1702-data-stored-in-the-flash-scope-can-become-persistent . 

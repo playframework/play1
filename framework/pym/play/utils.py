@@ -6,6 +6,7 @@ import fileinput
 import getopt
 import shutil
 import zipfile
+import subprocess
 
 def playVersion(play_env):
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
@@ -239,3 +240,17 @@ def copy_directory(source, target, exclude = None):
 
 def isTestFrameworkId( framework_id ):
     return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
+
+def getJavaVersion():
+    sp = subprocess.Popen(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    javaVersion = sp.communicate()
+    javaVersion =  str( javaVersion)
+    
+    if re.compile('1.5').search(javaVersion) is not None:
+        return "1.5"  
+    elif re.compile('1.6').search(javaVersion) is not None:
+        return "1.6" 
+    elif re.compile('1.7').search(javaVersion) is not None:
+        return "1.7" 
+    else:
+        return "1.8"

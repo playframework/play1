@@ -1,5 +1,6 @@
 import sys
-import os, os.path
+import os
+import os.path
 import re
 import shutil
 import socket
@@ -33,7 +34,12 @@ class PlayApplication(object):
         else:
             self.conf = None
         self.play_env = env
-        self.jpda_port = self.readConf('jpda.port')
+
+        if env.has_key('jpda.port'):
+            self.jpda_port = env['jpda.port']
+        else:
+            self.jpda_port = self.readConf('jpda.port')
+
         self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
@@ -62,7 +68,10 @@ class PlayApplication(object):
 
     def modules(self):
         modules = []
-        if self.readConf('application.mode').lower() == 'dev':
+        application_mode = self.readConf('application.mode').lower()
+        if not application_mode:
+            application_mode = "dev"
+        if application_mode == 'dev':
             #Load docviewer module
 			modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/docviewer')))
 			
@@ -223,9 +232,30 @@ class PlayApplication(object):
             s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
-            print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
-            self.jpda_port = 0
+            if self.play_env["disable_random_jpda"]:
+                print 'JPDA port %s is already used, and command line option "-f" was specified. Cannot start server\n' % self.jpda_port
+                sys.exit(-1)
+            else:
+                print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
+                self.jpda_port = 0
 
+    def java_args_memory(self, java_args):
+        args_memory = []
+        memory_in_args=False    
+        for arg in java_args:
+            if arg.startswith('-Xm'):
+                memory_in_args=True
+                args_memory.append(arg)
+            
+        if not memory_in_args:
+            memory = self.readConf('jvm.memory')
+            if memory:
+                args_memory = args_memory + memory.split(' ')
+            elif 'JAVA_OPTS' in os.environ:
+                args_memory = args_memory + os.environ['JAVA_OPTS'].split(' ')
+                
+        return args_memory        
+    
     def java_cmd(self, java_args, cp_args=None, className='play.server.Server', args = None):
         if args is None:
             args = ['']
@@ -242,14 +272,25 @@ class PlayApplication(object):
         if cp_args is None:
             cp_args = self.cp_args()
 
-        self.jpda_port = self.readConf('jpda.port')
+        if self.play_env.has_key('jpda.port'):
+            self.jpda_port = self.play_env['jpda.port']
 
         application_mode = self.readConf('application.mode').lower()
+        if not application_mode:
+            print "~ Warning: no application.mode defined in you conf/application.conf. Using DEV mode."
+            application_mode = "dev"
+
 
         if application_mode == 'prod':
             java_args.append('-server')
-	# JDK 7 compat
-	java_args.append('-XX:-UseSplitVerifier')
+
+        javaVersion = getJavaVersion()
+        if javaVersion == "1.7":
+            # JDK 7 compat
+            java_args.append('-XX:-UseSplitVerifier')
+        elif javaVersion == "1.8":
+            java_args.append('-noverify')
+
         java_policy = self.readConf('java.policy')
         if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)
@@ -265,8 +306,8 @@ class PlayApplication(object):
             
         java_args.append('-Dfile.encoding=utf-8')
 
-        if self.readConf('application.mode').lower() == 'dev':
-            if not self.play_env["disable_check_jpda"]: self.check_jpda()
+        if application_mode == 'dev':
+            self.check_jpda()
             java_args.append('-Xdebug')
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
             java_args.append('-Dplay.debug=yes')
@@ -303,6 +344,8 @@ class PlayConfParser:
     def __init__(self, confFolder, env):
         self.id = env["id"]
         self.entries = self.readFile(confFolder, "application.conf")
+        if env.has_key('jpda.port'):
+            self.entries['jpda.port'] = env['jpda.port']
         if env.has_key('http.port'):
             self.entries['http.port'] = env['http.port']
 

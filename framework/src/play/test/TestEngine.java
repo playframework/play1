@@ -3,8 +3,6 @@ package play.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,9 +18,6 @@ import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.model.TestClass;
-
 import play.Logger;
 import play.Play;
 import play.mvc.Http.Request;
@@ -129,17 +124,31 @@ public class TestEngine {
         if (cleanTestAnnot == null || (cleanTestAnnot != null && cleanTestAnnot.createDefault() == true)) {
             if (Request.current() == null) {
                 // Use base URL to create a request for this host
+                // host => with port
+                // domain => without port
                 String host = Router.getBaseUrl();
-                if(host == null || host.equals("application.baseUrl")){
-                    host = "localhost";
-                }else if(host.contains("http://")){
-                    host = host.replaceAll("http://", ""); 
-                }else if(host.contains("https://")){
-                    host = host.replaceAll("https://", ""); 
-                 }
-                Request request = Request.createRequest(null, "GET", "/", "",
-                        null, null, null, null, false, 80, host, false,
-                        null, null);
+                String domain = null;
+                Integer port = 80;
+                boolean isSecure = false;
+                if (host == null || host.equals("application.baseUrl")) {
+                    host = "localhost:" + port;
+                    domain = "localhost";
+                } else if (host.contains("http://")) {
+                    host = host.replaceAll("http://", "");
+                } else if (host.contains("https://")) {
+                    host = host.replaceAll("https://", "");
+                    port = 443;
+                    isSecure = true;         
+                }
+                int colonPos =  host.indexOf(':');
+                if(colonPos > -1){
+                    domain = host.substring(0, colonPos);
+                    port = Integer.parseInt(host.substring(colonPos+1));
+                }else{
+                   domain = host;
+                }
+                Request request = Request.createRequest(null, "GET", "/", "", null,
+                        null, null, host, false, port, domain, isSecure, null, null);
                 request.body = new ByteArrayInputStream(new byte[0]);
                 Request.current.set(request);
             }

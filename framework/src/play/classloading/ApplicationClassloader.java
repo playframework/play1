@@ -18,12 +18,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import play.Logger;
 import play.Play;
@@ -205,8 +202,8 @@ public class ApplicationClassloader extends ClassLoader {
         } else {
             className = "package-info";
         }
-        if (findLoadedClass(className) == null) {
-            loadApplicationClass(className);
+        if (this.findLoadedClass(className) == null) {
+            this.loadApplicationClass(className);
         }
     }
 
@@ -215,7 +212,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     protected byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
-        InputStream is = getResourceAsStream(name);
+        InputStream is = this.getResourceAsStream(name);
         if (is == null) {
             return null;
         }
@@ -249,6 +246,18 @@ public class ApplicationClassloader extends ClassLoader {
                 return res.inputstream();
             }
         }
+        URL url = this.getResource(name);
+        if (url != null) {
+            try {
+                File file = new File(url.toURI());
+                String fileName = file.getCanonicalFile().getName();
+                if (!name.endsWith(fileName)) {
+                    return null;
+                }
+            } catch (Exception e) {
+            }
+        }
+
         return super.getResourceAsStream(name);
     }
 
@@ -413,7 +422,7 @@ public class ApplicationClassloader extends ClassLoader {
 
             } else {
 
-                if(!Play.pluginCollection.compileSources()) {
+                if (!Play.pluginCollection.compileSources()) {
 
                     List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
@@ -422,7 +431,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                     List<String> classNames = new ArrayList<String>();
                     for (int i = 0; i < all.size(); i++) {
-                            ApplicationClass applicationClass = all.get(i);
+                        ApplicationClass applicationClass = all.get(i);
                         if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
                             classNames.add(all.get(i).name);
                         }

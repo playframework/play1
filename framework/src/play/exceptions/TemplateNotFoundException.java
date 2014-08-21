@@ -1,6 +1,7 @@
 package play.exceptions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.templates.Template;
@@ -22,8 +23,15 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
     
     public TemplateNotFoundException(String path, ApplicationClass applicationClass, Integer line) {
         this(path);
-        this.sourceFile = applicationClass.javaFile.relativePath();
-        this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
+        //This occurs with using property -Dprecompiled=true and no file is found
+        if (applicationClass.javaFile != null) {
+            this.sourceFile = applicationClass.javaFile.relativePath();
+            this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
+        }
+        else {
+            this.sourceFile = "{unknown source file.  appclass=" + applicationClass + "}";
+            this.source = Collections.emptyList();
+        }
         this.line = line;
     }
     
@@ -35,7 +43,7 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     @Override
@@ -45,23 +53,26 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
 
     @Override
     public String getErrorDescription() {
-        return String.format("The template <strong>%s</strong> does not exist.", path);
+        return String.format("The template <strong>%s</strong> does not exist.", this.path);
     }
 
     @Override
     public boolean isSourceAvailable() {
-        return source != null;
+        return this.source != null;
     }
 
+    @Override
     public String getSourceFile() {
-        return sourceFile;
+        return this.sourceFile;
     }
 
+    @Override
     public List<String> getSource() {
-        return source;
+        return this.source;
     }
 
+    @Override
     public Integer getLineNumber() {
-        return line;
+        return this.line;
     }
 }

@@ -25,7 +25,6 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.i18n.Lang;
 import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
@@ -109,7 +108,7 @@ public class ActionInvoker {
         try {
 
             resolve(request, response);
-            Method actionMethod = request.invokedMethod;
+            final Method actionMethod = request.invokedMethod;
 
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
@@ -232,7 +231,7 @@ public class ActionInvoker {
                 if (ex.getTargetException() instanceof PlayException) {
                     throw (PlayException) ex.getTargetException();
                 }
-                StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+                StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
                 if (element != null) {
                     throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
                 }
@@ -436,7 +435,7 @@ public class ActionInvoker {
                 }
             }
         } catch (InvocationTargetException ex) {
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
             if (element != null) {
                 throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
             }

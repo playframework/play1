@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 
@@ -50,7 +49,7 @@ public class Messages {
      * Return several messages for a locale
      * @param locale the locale code, e.g. fr, fr_FR
      * @param keys the keys to get messages from. Wildcards can be used at the end: {'title', 'login.*'}
-     * @returnmessages as a {@link java.util.Properties java.util.Properties}
+     * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties find(String locale, Set<String> keys) {
         Properties result = new Properties();
@@ -93,18 +92,26 @@ public class Messages {
         if (locales.containsKey(locale)) {
             value = locales.get(locale).getProperty(key.toString());
         }
+        if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+            value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
+        }
         if (value == null) {
             value = defaults.getProperty(key.toString());
         }
         if (value == null) {
             value = key.toString();
         }
-
-        return formatString(value, args);
+        Locale l = Lang.getLocaleOrDefault(locale);
+        return formatString(l, value, args);
     }
 
     public static String formatString(String value, Object... args) {
-        String message = String.format(value, coolStuff(value, args));
+        return formatString(Lang.getLocale(), value, args);
+    }
+
+    public static String formatString(Locale locale, String value, Object... args) {
+        String message = String.format(locale, value, coolStuff(value, args));
+
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
         while(matcher.find()) {
@@ -173,6 +180,9 @@ public class Messages {
             return defaults;
         Properties mergedMessages = new Properties();
         mergedMessages.putAll(defaults);
+        if (locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+        	mergedMessages.putAll(locales.get(locale.substring(0, 2)));
+        }
         mergedMessages.putAll(locales.get(locale));
         return mergedMessages;
     }

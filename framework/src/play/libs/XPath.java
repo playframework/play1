@@ -19,7 +19,7 @@ public class XPath {
      * @param node
      * @param namespaces Namespaces that need to be available in the xpath, where the key is the
      * prefix and the value the namespace URI
-     * @return
+     * @return Nodes in document-order
      */
     @SuppressWarnings("unchecked")
     public static List<Node> selectNodes(String path, Object node, Map<String, String> namespaces) {
@@ -35,7 +35,7 @@ public class XPath {
      * multiple nodes will be returned. Nodes will be returned in document-order,
      * @param path
      * @param node
-     * @return
+     * @return Nodes in document-order
      */
     public static List<Node> selectNodes(String path, Object node) {
         return selectNodes(path, node, null);

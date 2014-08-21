@@ -33,4 +33,13 @@ public class Data1 {
         result = 31 * result + b;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Data1{" +
+                "f='" + f + '\'' +
+                ", a='" + a + '\'' +
+                ", b=" + b +
+                '}';
+    }
 }

@@ -12,7 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -35,6 +34,7 @@ public class PlayBuilder {
     @SuppressWarnings({"deprecation"})
     public void build(){
         
+        Play.version = "localbuild";
         Play.configuration = configuration;
         Play.classes = new ApplicationClasses();
         Play.javaPath = new ArrayList<VirtualFile>();

@@ -2,9 +2,7 @@ package play.libs;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -607,8 +605,7 @@ public class WS extends PlayPlugin {
             try {
                 InputSource source = new InputSource(getStream());
                 source.setEncoding(encoding);
-                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                builder.setEntityResolver(new NoOpEntityResolver());
+                DocumentBuilder builder = XML.newDocumentBuilder();
                 return builder.parse(source);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -642,8 +639,11 @@ public class WS extends PlayPlugin {
             Map<String, String> result = new HashMap<String, String>();
             String body = getString();
             for (String entry: body.split("&")) {
-                if (entry.indexOf("=") > 0) {
-                    result.put(entry.split("=")[0], entry.split("=")[1]);
+                int pos = entry.indexOf("=");
+                if (pos > -1) {
+                    result.put(entry.substring(0,pos), entry.substring(pos+1));
+                } else {
+                    result.put(entry, "");
                 }
             }
             return result;

@@ -14,6 +14,10 @@ Play tracks your database evolutions using several **evolutions script**. These 
 
 The first script is named @1.sql@, the second script @2.sql@, and so on…
 
+p(note). Evolutions can also be used in a multiDB context:
+To manage evolutions an additional database, script file must be named @DB_name.1.sql@, @DB_name.2.sql@, and so on…
+DB_name is the name of the database you configure in the @application.conf@
+
 Each script contains two parts:
 
 * The *Ups* part the describe the required transformations.
@@ -198,7 +202,7 @@ bc. ~        _            _
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! master-localbuild, http://www.playframework.org
+~ play! master-localbuild, https://www.playframework.com
 ~ framework ID is prod
 ~
 ~ Ctrl+C to stop
@@ -239,7 +243,7 @@ bc. $ play evolutions
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! master-localbuild, http://www.playframework.org
+~ play! master-localbuild, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Connected to jdbc:mysql://localhost
@@ -313,6 +317,19 @@ or for a single module:
 bc. $play evolutions:apply -Dmodules=module3
 
 p(note).  If you use the command-line switch, your application will **NOT** be included by default, unless you specify it in the list of modules.
+
+If you wish to only work with the application's evolutions, you can use the @modules.evolutions.enabled@ parameters to configure the evolutions from all modules
+
+bc. modules.evolutions.enabled=false
+
+Default: @true@
+
+If you wish to disable evolutions from a specific module, you can use the @[module name].evolutions.enabled@ parameters to configure the evolutions from the given module
+
+bc. [module name].evolutions.enabled=false
+
+Default: @true@
+
 
 p(note). **Continuing the discussion**
 
