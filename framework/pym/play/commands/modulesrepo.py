@@ -16,18 +16,20 @@ NM = ['new-module', 'nm']
 LM = ['list-modules', 'lm']
 BM = ['build-module', 'bm']
 AM = ['add']
-IM = ['install']
+IM = ['install', 'i']
+IA = ['install', 'ia']
 
-COMMANDS = NM + LM + BM + IM + AM
+COMMANDS = NM + LM + BM + IM + AM + IA
 
 HELP = {
     'new-module': "Create a module",
     'build-module': "Build and package a module",
     'list-modules': "List modules available from the central modules repository",
-    'install': "Install a module"
+    'install': "Install a module",
+    'installall': "Install all module if not has"
 }
 
-DEFAULT_REPO = 'https://www.playframework.com'
+DEFAULT_REPO = 'http://www.playframework.com'
 
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -58,6 +60,8 @@ def execute(**kargs):
         install(app, args, env)
     elif command in AM:
         add(app, args, env)
+    elif command in IA:
+        installall(app, args, env)
 
 def get_repositories(play_base):
     repopath = os.path.join(play_base, 'repositories')
@@ -207,7 +211,8 @@ def new(app, args, play_env):
     os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
 
     print "~ OK, the module is created."
-    print "~ Start using it by adding it to the dependencies.yml of your project, as decribed in the documentation."
+    print "~ Start using it by adding this line in the application.conf modules list: "
+    print "~ module.%s=%s" % (application_name, os.path.normpath(app.path))
     print "~"
     print "~ Have fun!"
     print "~"
@@ -246,13 +251,11 @@ def list(app, args):
     print "~ play install module (eg: play install scala)"
     print "~"
 
-
 def build(app, args, env):
     ftb = env["basedir"]
     version = None
     name = None
     fwkMatch = None
-    origModuleDefinition = None
 
     try:
         optlist, args = getopt.getopt(args, '', ['framework=', 'version=', 'require='])
@@ -272,13 +275,10 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         deps = yaml.load(f.read())
-	if 'self' in deps:
-           splitted = deps["self"].split(" -> ")
-           if len(splitted) == 2:
-            	nameAndVersion = splitted.pop().strip()
-                splitted = nameAndVersion.split(" ")
-                if len(splitted) == 2:
-                   version = splitted.pop()
+        self = deps["self"].split(" ")
+        versionCandidate = self.pop()
+        name = self.pop()
+        version = versionCandidate
         for dep in deps["require"]:
             if isinstance(dep, basestring):
                 splitted = dep.split(" ")
@@ -292,25 +292,6 @@ def build(app, args, env):
         version = raw_input("~ What is the module version number? ")
     if fwkMatch is None:
         fwkMatch = raw_input("~ What are the playframework versions required? ")
-
-    if os.path.exists(deps_file):
-        f = open(deps_file)
-        deps = yaml.load(f.read())
-	if 'self' in deps:
-           splitted = deps["self"].split(" -> ")
-           f.close()
-           if len(splitted) == 2:
-               nameAndVersion = splitted.pop().strip()
-               splitted = nameAndVersion.split(" ")
-               if len(splitted) == 1:
-                  try:
-                    deps = open(deps_file).read()
-                    origModuleDefinition = re.search(r'self:\s*(.*)\s*', deps).group(1)
-                    modifiedModuleDefinition = '%s %s' % (origModuleDefinition, version)
-                    replaceAll(deps_file, origModuleDefinition, modifiedModuleDefinition)
-                  except:
-                    pass
-        
 
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
@@ -346,13 +327,6 @@ def build(app, args, env):
     zip.close()
 
     os.remove(manifest)
-    
-    # Reset the module definition
-    if origModuleDefinition:
-        try:
-            replaceAll(deps_file, '%s %s' % (origModuleDefinition, version), origModuleDefinition)
-        except:
-            pass
 
     print "~"
     print "~ Done!"
@@ -513,3 +487,25 @@ def load_modules_from(modules_server):
         print "~ Cannot fetch the modules list from %s ..." % (url)
         print "~"
         sys.exit(-1)
+
+
+def installall(app, args, env):
+    modules_list = load_module_list()
+    fetch = None
+    version = None
+    module = None
+
+    for mod in modules_list:
+        module = mod['name']
+        for v in mod['versions']:
+            if version is None and v['isDefault']:
+                print '~ Will install %s-%s' % (module, v['version'])
+                print '~ This module is compatible with: %s' % v['matches']
+                print '~ Installing module %s-%s...' % (module, v['version'])
+                fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
+                archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
+		if not os.path.exists(archive):
+                    print '~ Fetching %s' % fetch
+                    Downloader().retrieve(fetch, archive)
+                    
+    sys.exit(0)
