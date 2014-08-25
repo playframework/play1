@@ -1,0 +1,10 @@
+`import models.japidsample.Post;
+`args String blogTitle,  List <Post> allPost
+
+`for (Post post: allPost) { 
+	- title: ${post.title}
+	- date: ${post.postedAt}
+	- author ${post.author.name} ${post.author.gender}
+	the real title: 你好
+`}
+

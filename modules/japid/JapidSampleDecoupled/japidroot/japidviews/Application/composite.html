@@ -1,0 +1,21 @@
+`extends lcomposite2.html
+`args models.japidsample.Post post 
+`import controllers.more.*
+
+
+
+<p>This action won't be cached, unless the action has CacheFor annotation.</p>
+<div>#{invoke Application.authorPanel(post.getAuthor())/}</div>
+<div>Another one in sub package: #{invoke SubController.foo(post.getAuthor().name)/}</div>
+
+<div>this one has full cache control</div>
+<div>#{invoke Application.authorPanel(post.getAuthor()), "10s"/}</div>
+
+<div>This one invokes an action with two params. Note the twoPrams() result is cached since the action carries CacheFor annotation.</div>
+<div>#{invoke Application.twoParams("hello", 10)/}</div>
+
+<p>Let's invoke a tag which invokes an action</p>
+
+`tag invokeInTag
+
+<p>let's invoke an action that renders a template that contains another invoke: #{invoke Application.authorPanel2(post.getAuthor())/}</p>

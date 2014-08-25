@@ -1,0 +1,26 @@
+`import models.japidsample.*
+`(List<Post> posts)
+
+*{ 
+	currently the invoke tag cannot use a none-final local variable as part the parameters. 
+	an intermediate final variable should be used to transfer the value.
+	
+ }*
+<p>	Since JDK 8 this is not necessary!!
+</p>
+`for (int i = 0; i < 3;i++) {
+	`int j = i * 2;
+	<p>
+	#{invoke Application.echo(j) /}
+	</p>
+`}
+<br/>
+
+*{ now for object type in short for loop}*
+
+`for (final Post p : posts) {
+    another notation for invoking actions:  
+    <p>
+    `a Application.echoPost(p)
+    </p>
+`}

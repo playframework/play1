@@ -1,0 +1,40 @@
+`(List<String> posts)
+`stopwatch on
+
+<p>
+The "each/Each" command is a "for" loop on steroid, with lots of looping information. 
+</p>
+
+<p> 
+The instance variable is defined after the | line, the same way as any tag render-back
+</p>
+
+<p>
+`each posts | String p
+    <p>index: $_index, parity: $_parity, is odd? $_isOdd, is first? $_isFirst, is last? $_isLast, total size: $_size </p>
+    call a tag:  `tag SampleTag p
+`
+</p>
+
+<p>
+`tag SampleTag "each call end"
+</p>
+
+<p> now we have an enhanced for loop (the "open for loop") that also makes all the loop properties available</p>
+
+`int k = 1;
+`for String p : posts
+    <p>index: $_index, parity: $_parity, is odd? $_isOdd, is first? $_isFirst, is last? $_isLast, total size: $_size </p>
+    call a tag:  `tag SampleTag p
+`
+
+
+`final int[] ints = {1, 2, 3, 4};
+`for int i : ints
+    --> ~i
+    `if (i == 2) {
+        `return; // this will work as continue
+    `} else {
+         :---
+    `}
+`

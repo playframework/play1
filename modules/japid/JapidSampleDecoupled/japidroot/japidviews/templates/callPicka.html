@@ -1,0 +1,43 @@
+`stopwatch on
+`tracefile off
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+`traceFile(); // must use traceFile() method to control where to insert the template file name
+<p>beginning...<p>
+<p>
+<p>call a simple tag</p>
+
+Another simple tag aTag, which locates in the same directory as this template:
+
+first define something in a Java code block. 
+
+` List<String> strings = new ArrayList<String>(){{add("you tu");add("me");add("everyone");}};
+
+`t aTag(strings)
+
+note: the picka tag is defined in the japidviews/_tags directory
+
+`tag picka("a", "b" + "c") | String rr
+    the tag chosed: $rr
+    <p>and we can can call a tag recursively?</p>
+    `tag SampleTag(rr)
+`
+</p>
+
+<p>
+we can call without the body part:
+
+`tag picka a = "aa", b = "bb"
+
+or 
+`tag picka "cc", "dd"
+
+</p>
+<p>
+Or using the full path of the tag
+</p>
+
+`tag japidviews/templates/aTag(strings)
+
+<p>You can use "." instead of "/" on the path:</p>
+
+`tag japidviews.templates.aTag(strings)

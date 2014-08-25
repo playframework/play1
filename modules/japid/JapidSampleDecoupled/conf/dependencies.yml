@@ -1,0 +1,13 @@
+require:
+    - cn.bran -> japid 0.9.5
+    - cn.bran -> japidplay 0.9.5
+    - com.google.code.javaparser -> javaparser 1.0.8
+    - com.fasterxml.jackson.core -> jackson-databind 2.3.0
+  
+# My custom repositories
+repositories:
+    - bran:
+        type:       http
+        artifact:   "https://raw.github.com/branaway/Japid/jdk8/dist-lib/[module]-[revision].[ext]"
+        contains:
+            - cn.bran -> *

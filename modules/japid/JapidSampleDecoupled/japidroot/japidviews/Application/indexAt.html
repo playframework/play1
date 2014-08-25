@@ -1,0 +1,93 @@
+<h2>Some Samples that demonstrate Japid features.</h2>
+
+<p>Please follow the controller actions and render paths for the
+source code.</p>
+
+<ul>
+	<li><a href="@{hello()}">Hello Japid, using an overridden
+	version of renderText()</a></li>
+	<li><a href="/application/callTag">using tags in a template</a></li>
+	<li><a href="/renderJapidWith/templates/def.html"><em>def</em>
+	tag: define a method that return a string that can be invoked from
+	super template. Compare this to the <b>set</b> tag</a></li>
+*{ this is a little too complicated
+	<li><a href="/application/composite">demo how to composite a
+	page with independent segments with the <b>invoke</b> tag</a></li>
+}*
+	<li><a href="/more.Portlets/index">demo how to composite a
+	page with independent segments with the <b>invoke</b> tag</a>
+	</li>
+
+	<li><a href="/application/renderByPosition">implicit template
+	binding with <b>JapidController.renderJapid()</b> </a></li>
+	<li><a href="/application/postList">a template with template
+	and tags etc...</a></li>
+	<li><a href="/renderJapidWith/templates/log.html">use the log
+	macro in a template. watch the output in the console</a></li>
+	<li><a href="/renderJapidWith/templates/Msg.html">i18n, use
+	predefined messages</a></li>
+	<li><a href="/application/postlist">looping and tag calling</a></li>
+	<li><a href="/application/each">the "open for" loop and the now deprecated "*Each* tag</a></li>
+	<li><a href="/application/ifs2">open if statement: minimalistic if-else statement can can take any expression rather than boolean values as the condition.</a>
+	   <p>example: </p>
+	   <pre>
+		    `@if expr
+		        xxx
+		    `@else if expr
+		        yyy
+		    `@else
+		        zzz
+		    `@
+	   </pre>
+	</li>
+	<li><a href="/application/invokeInLoop">using invoke tag with
+	local variables requires final attribute</a></li>
+	<li><a href="/renderJapidWith/templates/suppressNull.html">suppressNull,
+	a directive to allow safe navigation in expression, default off</a></li>
+	<li><a href="/application/dumpPost">show how to dump a post
+	detail with japid.dump.request spec in the application.conf. see
+	console for output.</a></li>
+	<li><a href="/application/cacheWithRenderJapid?a=hi">cache with
+	renderJapid</a></li>
+	<li><a href="/application/testCacheFor">using the CacheFor
+	annotation</a></li>
+	<li><a href="/application/in">action forwarding with
+	dontRedirect() from JapidController</a></li>
+	<li><a href="/renderJapidWith/templates/openBrace.html"> use { in if and while </a></li>
+	<li><a href="/application/escapedExpr"> @verbatim
+	raw expression with ${} and html-safe expression with ~{}
+	@
+	</li>
+	<li><a href="/more.ContentNegotiation/index"> content
+	negotiation.</a> Use tools like CURL to test it: <pre>curl -i -H "Accept: application/json" http://127.0.0.1:9000/more.ContentNegotiation/index</pre>
+	<p>Content negotiation works with renderJapid(), which does
+	implicit parameter binding and template picking.</p>
+	<p>For more doc: see <a
+		href="http://www.playframework.org/documentation/1.1/routes#content-negotiation">Play
+	Content Negotiation</a></p>
+	</li>
+	<li><a href="/more.MyController/quickview"> Use relative path
+	in layout spec and tags</a>: prefix the layout name or the tag name with a
+	dot "." to let the compiler prefix the path with the current package.
+	This saves using the full and long class qualifications.</li>
+
+    @String na = "bran";
+    @int ag = 123;
+	
+	<li><a href="@{validate(na, ag)}">validation and errors</a></li>
+    <li> using the <em>flash</em> object
+		<ul>
+			<li><a href="/application/flashgood">flash with success</a></li>
+			<li><a href="/application/flashbad">flash with errors</a></li>
+			<li><a href="/application/flashmsg">flash with a message</a></li>
+			<li><a href="@{reverseUrl()}">flash with a message</a></li>
+		</ul>
+    </li>
+    <li>
+	   @ SearchParams sp = new  SearchParams("key1, key2", "AND");
+	   <a href="@{search(sp)}">reverse URL lookup with complex object</a>
+	</li>
+    *{
+    }*
+</ul>
+

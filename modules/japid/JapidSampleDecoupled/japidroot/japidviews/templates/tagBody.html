@@ -1,0 +1,21 @@
+
+Note: the last | is the separator for the tag arguments and the call back parameters. 
+It must present even if the parameters are empty.
+<p/>
+before
+
+<p/>
+`tag fooTag("hi") | 
+    `final String echo = "secret";
+
+    well ${echo}
+
+	`tag anotherTag(echo) | String what
+	    got $what and $echo
+		`tag moreTag(echo) | String more
+		   got $what and $echo and $more
+		`
+	`
+`
+<p/>
+after
