@@ -1,0 +1,34 @@
+`args String title, DataModel.User user, ArrayList<DataModel.Entry> entries
+
+`extends perfmain (user)
+
+`set title:"Home"
+
+`stopwatch off
+
+`set title:title
+
+`if (entries.size() > 0 ) {
+	`for (DataModel.Entry entry : entries) {
+		<div id="entries">
+		    Entry Id: ${entry.getEntryId()}, Date: ${entry.getEntryDate()}
+		    <h2>${entry.getTitle()}</h2>
+		    <div>Submitted By: ${entry.getOwner().getUserName()} - ${entry.getOwner().getEmail()}</div>
+		    <div>${entry.getBody()}</div>
+		    `if(entry.getComments().size() > 0) {
+                `for (DataModel.Comment comment: entry.getComments()) {
+				    <div>
+				        <div>Comment by: ${comment.getOwner().getUserName()}</div>
+				        <div>${comment.getCommentText()}</div>
+				    </div>
+                `}
+            `} else {
+		      <div>No comments yet</div>
+		    `}
+		</div>
+	`}
+`} else {
+	<div>
+	    <div>No Entries Found</div>
+	</div>
+`}

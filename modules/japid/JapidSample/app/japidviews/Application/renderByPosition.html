@@ -1,0 +1,10 @@
+@import models.japidsample.*
+@(String ss, int ii, Author au1, Author au2, Author2 au22)
+
+got: $ss
+got: $ii
+got: $au1.name, $au2.name, $au22.who
+
+<p>Lets call a tag by name:</p>
+
+@tag tagPrimitives (s="hello", b=true, f=1.2f, d = 3.6)

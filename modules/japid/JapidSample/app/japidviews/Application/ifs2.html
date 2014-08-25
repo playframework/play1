@@ -1,0 +1,51 @@
+`args int i, String[] ss
+
+OK, the minimalism if-else statement, no parenthesis, no braces, like command 
+<p>
+
+<pre>
+    ``if expr
+        xxx
+    ``else if expr
+        yyy
+    ``else
+        zzz
+    ``
+</pre>
+
+<p>
+    is equals to
+</p>
+<p>
+<pre>
+    ``if(asBoolean(expr)){
+        xxx
+    ``} else if(asBoolean(expr)){
+        yyy
+    ``} else {
+        zzz
+    ``}
+</pre>
+
+<p/>
+`if ss
+    well got ss
+    `each ss | String s 
+        call a tag
+        `t SampleTag s
+    `
+`else if ss
+    finally got $ss
+    `each ss | String s 
+        call a tag
+        `t SampleTag s
+    `
+`else
+    `if "assd"
+        a true
+    `else
+        a false
+    `
+    ss is empty
+`
+

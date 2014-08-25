@@ -1,0 +1,15 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                       Application.index
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+GET		/go/{<.+>template}             Application.go
+
+# the staticFile is only available from 1.1.x trunk. Not in the 1.1 release.
+GET /favicon.ico                                staticFile:/public/images/favicon.png
+# Catch all rule
+*       /{controller}/{action}                  {controller}.{action}
