@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src.japidplay"/>
+	<classpathentry kind="src" path="src.japid"/>
+	<classpathentry kind="src" path="tests"/>
+	<classpathentry kind="src" path="plainjapid"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/javaparser-1.0.8.jar" sourcepath="/javaparser"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/play-git"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib.plain/org.eclipse.jdt.core_3.9.50.v20140317-1741.jar"/>
+	<classpathentry kind="output" path="eclipse/classes"/>
+</classpath>
