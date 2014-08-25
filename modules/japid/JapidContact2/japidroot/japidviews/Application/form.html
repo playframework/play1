@@ -1,0 +1,44 @@
+`args Contact contact
+`extends main
+`set title:"Form" 
+`suppressNull on
+
+<form action="@{save()}" method="POST">
+    $authenticityToken()
+    <input type="hidden" name="contact.id" value="${contact.id}">
+	<p>
+        <span class="error">${errors}</span>
+    </p>
+    
+    <p class="field">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="contact.name" value="${contact.name}">
+        <span class="error">${error("contact.name")}</span>
+    </p>
+
+    <p class="field">
+        <label for="firstname">First name:</label>
+        <input type="text" id="firstname" name="contact.firstname" value="${contact.firstname}">
+        <span class="error">${error("contact.firstname")}</span>
+    </p>
+
+    <p class="field">
+        <label for="birthdate">Birth date:</label>
+        <input type="text" id="birthdate" name="contact.birthdate" value="${format(contact.birthdate, "yyyy-MM-dd")}">
+        <span class="error">${error("contact.birthdate")}</span>
+    </p>
+
+    <p class="field">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="contact.email" value="${contact.email}">
+        <span class="error">${error("contact.email")}</span>
+    </p>
+
+    <p class="buttons">
+        <a href="@{list()}">Cancel</a> or <input type="submit" value="Save this contact" id="saveContact">
+    </p>
+    
+    <script type="text/javascript" charset="utf-8">
+        $("#birthdate").datepicker({dateFormat:'yy-mm-dd', showAnim:'fadeIn'})
+    </script>
+</form>

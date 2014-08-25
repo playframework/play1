@@ -1,0 +1,60 @@
+*{ You can use plain selenium command using the selenium tag }*
+
+#{fixture delete:'all', load:'test-data.yml' /}
+
+#{selenium}
+    // Open the home page, and check that no error occured
+    open('/')
+    assertNotTitle('Application error')
+    assertTextPresent('Zencontact')
+    assertTextPresent('by zenexity')
+    
+    // Test time update
+    storeText('time', 'oldTime')
+    pause(1100)
+    storeText('time', 'newTime')
+    assertNotEquals('$[oldTime]', '$[newTime]')
+    
+    // Go to List page
+    clickAndWait('link=List')
+    assertTextPresent('Bort')
+    assertTextPresent('Guillaume')
+    assertTextPresent('guillaume.bort@gmail.com')
+    assertTextPresent('みがえらせ')
+    
+    // Go to detail
+    clickAndWait('link=>')
+    
+    // Update form
+    type('firstname', 'Jojo')
+    type('email', 'xxx')
+    
+    // Validate
+    clickAndWait('saveContact')
+    assertTextPresent('Invalid email address')
+    type('email', 'gbo@zenexity.fr')
+    clickAndWait('saveContact')
+    
+    // Check updated list
+    //clickAndWait('link=List')
+    assertTextPresent('Bort')
+    assertTextNotPresent('Guillaume')
+    assertTextNotPresent('guillaume.bort@gmail.com')
+    assertTextPresent('Jojo')
+    assertTextPresent('gbo@zenexity.fr')
+    
+    // New contact  
+    clickAndWait('link=New')
+    type('name', 'Bond')
+    type('firstname', 'James')
+    type('birthdate', '1970-03-02')
+    type('email', 'james@bond.com')
+    clickAndWait('saveContact')
+    
+    assertTextPresent('James')
+    assertTextPresent('Bond')
+    assertTextPresent('james@bond.com')
+    assertTextPresent('1970-03-02')
+    
+    
+#{/selenium}
