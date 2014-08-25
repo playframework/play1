@@ -1,0 +1,444 @@
+/* ----------------------------------------------
+ * RESET
+ * ------------------------------------------- */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, hr {margin: 0;padding: 0;border: 0;outline: 0;font-size: 100%;vertical-align: baseline;background: transparent;}
+body { line-height: 1; }
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
+:focus { outline: 0; }
+ins { text-decoration: none; }
+del { text-decoration: line-through; }
+table {border-collapse: separate;border-spacing: 0;}
+
+/* ----------------------------------------------
+ * GENERAL
+ * ------------------------------------------- */
+html
+{
+	margin: 0;
+
+	background: #eee;
+
+	color: #fff;
+	font: 13px "Helvetica";
+}
+
+@font-face 
+{
+    font-family: 'Qlassik Bold';
+    src: url(qlassik_tb_d7b9.otf);
+}
+
+/* ----------------------------------------------
+ * MAIN BOX
+ * ------------------------------------------- */
+#zencontact
+{
+	width: 500px;
+	margin: 100px auto 20px;
+	padding: 0 10px 10px;
+	position: relative;
+	min-height: 300px;
+
+	background: #699f08;
+	background: -webkit-gradient(radial,50% -50,50,50% -100,220, from(rgba(143,221,9,1)), to(rgba(143,221,9,0))) no-repeat, -webkit-gradient(linear, left top, left bottom, from(#699f08), to(#172302)) no-repeat;
+	background: -moz-radial-gradient(50% 10%, closest-side, rgba(143,221,9,1), rgba(143,221,9,0)) no-repeat, -moz-linear-gradient(-90deg, #699f08, #172302) no-repeat;
+	-webkit-box-shadow: rgba(0,0,0,0.4) 0 15px 40px, #060a01 0 1px 1px, #92dd10 0 -1px 0px;
+	-moz-box-shadow: rgba(0,0,0,0.4) 0 15px 40px, #060a01 0 1px 1px, #92dd10 0 -1px 0px;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+}
+
+/* ----------------------------------------------
+ * HEADER
+ * ------------------------------------------- */
+#logo
+{
+	position: absolute;
+	top: -40px;
+	left: 170px;
+}
+
+h1
+{
+	padding: 30px 0 10px;
+
+	color: rgba(0,0,0,0.7);
+	font-family: 'Qlassik Bold';
+	text-shadow: rgba(255,255,255,0.5) 0 1px 1px, rgba(0,0,0,0.5) 0 -1px 1px;
+	font-size: 50px;
+}
+
+h1 span
+{
+    display: block;
+    font-size: 16px;
+    opacity: .8;
+}
+
+/* ----------------------------------------------
+ * MENU
+ * ------------------------------------------- */
+nav
+{
+	position: absolute;
+	top: 48px;
+	right: 10px;
+}
+
+nav a
+{
+	padding: 4px 6px;
+	margin: 0 2px;
+
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background-color: #62034b;
+	background: -webkit-gradient(linear, left top, left bottom, from(#9c037c), to(#62034b));
+	background: -moz-linear-gradient(-90deg, #9c037c, #62034b);
+	-webkit-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.2) 0 3px 3px;
+	-moz-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.2) 0 3px 3px;
+	
+	color: #ed76d4;
+	font-family: "Qlassik Bold";
+	font-size: 18px;
+	text-shadow: rgba(0,0,0,0.8) 0 -1px 1px;
+	text-decoration: none;
+}
+
+nav a:hover
+{
+	color: #fff;
+	-webkit-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.3) 0 5px 4px;
+	-moz-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.3) 0 5px 4px;
+}
+
+nav a:active
+{
+	position: relative;
+	top: 1px;
+}
+
+nav a.selected
+{
+    color: #fff;
+}
+
+/* ----------------------------------------------
+ * CONTENT
+ * ------------------------------------------- */
+#time 
+{
+    color: rgba(255,255,255,.6);
+    text-align: center;
+    font-family: "Qlassik Bold";
+	text-shadow: rgba(255,255,255,0.5) 0 1px 0px, rgba(0,0,0,0.8) 0 -1px 1px;
+	font-size: 70px;
+	padding: 40px 0;
+}
+
+#time span {
+    display: block;
+    font-size: 30px;
+}
+
+/* ----------------------------------------------
+ * LIST
+ * ------------------------------------------- */
+table
+{
+	width: 100%;
+	table-layout: fixed;
+
+	font-family: "Qlassik Bold";
+	text-align: left;
+	font-size: 15px;
+	
+	border: 1px solid rgba(0,0,0,0.1);
+}
+
+thead
+{
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+
+	background: #355203;
+	background: -webkit-gradient(linear, left top, left bottom, from(#355203), to(#243503));
+	background: -moz-linear-gradient(-90deg, #355203, #243503);
+	border: 1px solid #1f3003;
+
+	color: #619604;
+	text-shadow: rgba(0,0,0,0.5) 0 -1px 1px;
+}
+
+th
+{
+	padding: 10px 5px 5px;
+}
+
+
+tbody tr
+{
+	opacity: 0.8;
+	text-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+}
+
+tbody tr:hover
+{
+	opacity: 1;
+}
+
+tbody tr:nth-child(even)
+{
+	background: rgba(0,0,0,0.05);
+}
+
+tbody tr:nth-child(odd)
+{
+	background: rgba(255,255,255,0.05);
+}
+
+td
+{
+	padding: 5px;
+	border-top: 1px solid rgba(255,255,255,0.1);
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space:nowrap;
+}
+
+td a, td input[type=submit]
+{
+    text-decoration: none;
+    background: #fff;
+    font-family: "Qlassik Bold";
+    font-weight: bold;
+    xtext-shadow: none;
+    padding: 0 3px 0 5px;
+    color: #3E6300;
+    -webkit-border-radius: 10px;
+    -webkit-box-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+    -moz-border-radius: 10px;
+    -moz-box-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+td a:active, td input[type=submit]:active
+{
+    position: relative;
+    top: 1px;
+}
+
+td input
+{
+    font-family: "Qlassik Bold";
+	text-align: left;
+	font-size: 15px;
+	padding: 0;
+	border: none;
+	border-bottom: 1px solid rgba(255, 255, 0, .3);
+	background: transparent;
+	color: gold;
+	display: block;
+	margin: -3px -1px;
+	width: 200px;
+}
+
+td.editing 
+{
+    padding: 0px 5px;
+}
+
+th.name, td.name input
+{
+    width: 85px;
+}
+
+th.firstname, td.firstname input
+{
+    width: 90px;
+}
+
+th.birthdate, td.birthdate input
+{
+    width: 80px;
+}
+
+th.email, td.email input
+{
+    width: 170px;
+}
+
+th.edit 
+{
+    width: 25px;
+}
+
+/* ----------------------------------------------
+ * ADD
+ * ------------------------------------------- */
+
+form 
+{
+    margin: 10px 0;
+    font-family: "Qlassik Bold";
+}
+
+form label 
+{
+    display: block;
+    font-size: 16px;
+    text-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+    opacity: .8;
+    float: left;
+    width: 150px;
+    padding: 4px 0;
+}
+
+form p.field
+{
+    padding: 5px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+} 
+
+form p.field:nth-child(even)
+{
+	background: rgba(0,0,0,0.05);
+}
+
+form p.field:nth-child(odd)
+{
+	background: rgba(255,255,255,0.05);
+}
+
+form p.buttons 
+{
+    padding: 20px 0;
+    color: rgba(255,255,255,.6);
+    text-align: right;
+}
+
+form p.buttons a
+{
+    font-size: 16px;
+    color: #fff;
+    padding-right: 10px;
+}
+
+form p.buttons input {
+    width: auto;
+    margin-left: 10px;
+    padding: 2px 10px;
+    cursor: pointer;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background-color: #62034b;
+	background: -webkit-gradient(linear, left top, left bottom, from(#9c037c), to(#62034b));
+	background: -moz-linear-gradient(-90deg, #9c037c, #62034b);
+	-webkit-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.2) 0 3px 3px;
+	-moz-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.2) 0 3px 3px;
+	
+	color: #ed76d4;
+	font-family: "Qlassik Bold";
+	font-size: 18px;
+	text-shadow: rgba(0,0,0,0.8) 0 -1px 1px;
+	text-decoration: none;
+}
+
+form p.buttons input:hover 
+{
+	color: #fff;
+	-webkit-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.3) 0 5px 4px;
+	-moz-box-shadow: #d03eb1 0 -1px 1px, rgba(0,0,0,0.5) 0 1px 1px, rgba(0,0,0,0.3) 0 5px 4px; 
+	background: -moz-linear-gradient(-90deg, #9c037c, #62034b);
+}
+
+form p.buttons input:active 
+{
+	position: relative;
+	top: 1px;
+}
+
+form p input 
+{
+    font-family: "Qlassik Bold"; 
+    font-size: 16px;
+    border: none;
+    padding: 2px 4px;
+    background: rgba(255, 255, 255, .4);
+    width: 200px;
+    -webkit-border-radius: 3px;
+    -webkit-box-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+    -moz-border-radius: 3px;
+    -moz-box-shadow: rgba(0,0,0,0.5) 0 1px 1px;
+}
+
+form p input:focus 
+{
+    background: rgba(255, 255, 255, .8);
+}
+
+form #birthdate 
+{
+    width: 100px;
+}
+
+form #email 
+{
+    width: 300px;
+}
+
+form .error 
+{
+    display: block;
+    color: pink;
+    padding-left: 150px;
+    padding-top: 3px;
+}
+
+
+/* ----------------------------------------------
+ * FOOTER
+ * ------------------------------------------- */
+footer
+{
+	color: rgba(0,0,0,0.5);
+
+	position: absolute;
+	bottom: -58px;
+	text-align: center;
+	width: 100%;
+	padding: 20px 0;
+	cursor: default;
+}
+
+footer a
+{
+	color: #111;
+	font-family: "Qlassik Bold";
+	text-shadow: rgba(255,255,255,1) 0 1px 1px;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+footer a:hover
+{
+	opacity: .7;
+}
+
+/* ----------------------------------------------
+ * FIXES
+ * ------------------------------------------- */
+[draggable=true] 
+{
+   -khtml-user-drag: element;
+}
+ 

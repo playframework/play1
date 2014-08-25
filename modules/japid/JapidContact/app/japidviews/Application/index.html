@@ -1,0 +1,15 @@
+`(Date now)
+`extends main
+`set title:"Home"
+
+
+<p id="time">
+    <span>${format(now, "EEEE',' MMMM dd',' yyyy")}</span>
+    ${format(now, "hh'h' MM'mn' ss's'")}
+</p>
+
+<script type="text/javascript" charset="utf-8">
+    setInterval(function() {
+        $('section').load('@{index()} #time')
+    }, 1000)
+</script>
