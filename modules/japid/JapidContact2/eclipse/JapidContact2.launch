@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/play-git/framework/src/play/server/Server.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="play.server.Server"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="JapidContact2"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dplay.debug=yes -Dplay.id= -Dapplication.path=&quot;${project_loc:JapidContact2}&quot; -javaagent:&quot;/Users/bran/projects/play-git/framework/lib/PlayAgent.jar&quot;"/>
+</launchConfiguration>

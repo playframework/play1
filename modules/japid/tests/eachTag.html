@@ -1,0 +1,15 @@
+`each sa | String a
+    hello ${a} $_size,  $_index | $_parity, ^ $_isOdd, @ $_isFirst, # $_isLast
+`
+
+or using an enhanced for which is basically each in another form.
+
+`for String a : sa
+    hello ${a} $_size,  $_index | $_parity, ^ $_isOdd, @ $_isFirst, # $_isLast
+`
+
+`def content
+    `for String s : new String[]{"aaa","bbb","ccc"}
+      alert('$s');
+    `
+`

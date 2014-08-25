@@ -1,0 +1,4 @@
+*{ 
+for use in a form to prevent CSRF attack. The controller side uses checkAuthenticity()to verify the existence of this field in requests
+}*
+<input type="hidden" name="authenticityToken" value="${session.getAuthenticityToken()}"/ >

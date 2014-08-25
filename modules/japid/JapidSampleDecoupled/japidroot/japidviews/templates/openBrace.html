@@ -1,0 +1,23 @@
+<p>hello</p>
+@int i = 3;
+@if true 
+    @while (i-- > 0) {
+        <p>in while $i</p>
+    @}
+    <p>good</p>
+@
+
+<p>
+@for(i =0; i < 4; i++){
+    $i, 
+@}
+<p/>
+<p>good2</p>
+
+@if (true) {
+    <p>good 3</p>
+@}
+<p/>
+<p>
+the result is @if true@got you!@ @.
+</p>

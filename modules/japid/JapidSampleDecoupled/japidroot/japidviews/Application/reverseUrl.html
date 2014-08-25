@@ -1,0 +1,15 @@
+`String name = "bran";
+<a href="@{validate(name)}">simple reverse lookup</a>
+<p/>
+<a href="@@{validate(name, 12)}">simple reverse lookup with absolute url</a>
+<p/>
+<form action="@{validate()}">
+    <input type="hidden" name="name" value="bran"/>
+    <input type="hidden" name="age" value="12"/>
+    <input type="submit"/>
+</form>
+<p/>
+<a href="@{more.MyController.echo(name)}">simple reverse lookup</a>
+<p/>
+
+

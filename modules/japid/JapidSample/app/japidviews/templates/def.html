@@ -1,0 +1,45 @@
+`extends defLayout
+
+<p>check 1</p>
+*{ define a method that return a String }*
+
+
+`def foo2(String p)
+	<p>hi $p!,</p> 
+	<p>from $request.action</p>
+	<p>OK you can call a tag:</p>
+	`tag dummyTag p
+`
+
+<p>check 2</p>
+`def foo
+	`String s = "hi there";
+	<p>foo hello $foo2(s)</p>
+`
+<p>check 3</p>
+
+*{ the old syntax of def }*
+
+#{def bar}
+	`String s = "hi2";
+	<p>bar hi $s!</p>
+#{/}
+
+<p>check 4</p>
+#{dummyTag get("bar")/}
+
+`// can call it directly 
+<p>check 5</p>
+
+$foo()
+
+<p>check 6</p>
+
+%{
+    String a = "";
+    a += "bssdfsdf";
+}%
+`    if (a.length() > 0) {
+`      p(a);
+`    }
+

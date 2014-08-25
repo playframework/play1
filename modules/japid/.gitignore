@@ -1,0 +1,11 @@
+*.class
+/eclipse/*
+JapidSample/eclipse/*
+JapidSample/tmp/*
+/dist/*
+*~
+.DS_Store
+.settings/
+.pydevproject
+JapidSample/test-result/
+commands.pyc

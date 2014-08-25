@@ -1,0 +1,1 @@
+this directory is used to test plain Japid. Please see the JapidRenderTest.java for regenerating the code.

@@ -1,0 +1,10 @@
+`(String name, Integer age)
+
+`if hasErrors()
+    <p>Got some errors:</p>
+    `for (Error e: errors()){
+        <p>$e.getKey() : $e</p>
+    `}
+`else
+	name is: $name, age is: $age
+`

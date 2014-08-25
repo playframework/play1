@@ -1,0 +1,13 @@
+`// this is for demo the flash object, which is a wrapper of the Play's flash object
+
+`if flash.hasError() 
+    $flash.error()
+`else if flash.hasSuccess()
+    ${flash.success()}
+`else
+    `if flash.contains("msg")
+        the message: $flash("msg")
+    `else
+        oh well
+    `
+`

@@ -1,0 +1,24 @@
+
+<p>
+you should be able to see all Japid command un-interpreted.    	
+</p>
+
+`verbatim
+
+	`args models.japidsample.Author a
+	
+	<p>author name: $a.name</p>
+	<p>his birthdate: $a.birthDate</p>
+	<p>and his is a '${a.getGender()}'</p>
+	    `tag SampleTag "end"
+    
+`
+<p>got it?</p>
+
+`final String[] ss = new String[]{"a", "b"};
+`each ss |String s
+    <p>loop: $s</p>
+    `verbatim
+    <p>please use ` to start command and $s to get the value</p>
+    `
+`

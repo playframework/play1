@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="views/**" kind="src" path="app"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="src" path="docviewer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/japid"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/play-git"/>
+	<classpathentry kind="output" path="eclipse/classes"/>
+</classpath>
