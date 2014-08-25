@@ -1,0 +1,6 @@
+`args String blogTitle
+{
+   "blog title":"$blogTitle"
+}
+
+

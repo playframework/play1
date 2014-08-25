@@ -1,0 +1,139 @@
+`import play.exceptions.*
+`(Exception exp)
+
+<style type="text/css">
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: Helvetica, Arial, Sans;
+        background: #EEEEEE;
+    }
+    .block {
+        padding: 20px;
+        border-bottom: 1px solid #aaa;
+    }
+    #header h1 {
+        font-weight: normal;
+        font-size: 28px;
+        margin: 0;
+    }
+    #more {
+        color: #666;
+        font-size: 80%;
+        border: none;
+    }
+    #header {
+        background: #fcd2da;
+    }
+    #header p {
+        color: #333;
+    }
+    #source {
+        background: #f6f6f6;
+    }
+    #source h2 {
+        font-weight: normal;
+        font-size: 18px;
+        margin: 0 0 10px 0;
+    }
+    #source .lineNumber {
+        float: left;
+        display: block;
+        width: 40px;
+        text-align: right;
+        margin-right: 10px;
+        font-size: 14px;
+        font-family: monospace;
+        background: #333;
+        color: #fff;
+    }
+    #source .line {
+        clear: both;
+        color: #333;
+        margin-bottom: 1px;
+    }
+    #source pre {
+        font-size: 14px;
+        margin: 0;
+        overflow-x: hidden;
+    }
+    #source .error {
+        color: #c00 !important;
+    }
+    #source .error .lineNumber {
+        background: #c00;
+    }
+    #source a {
+        text-decoration: none;
+    }
+    #source a:hover * {
+        cursor: pointer !important;
+    }
+    #source a:hover pre {
+        background: #FAFFCF !important;
+    }
+    #source em {
+        font-style: normal;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+    #source strong {
+        font-style: normal;
+        font-weight: bold;
+    }
+</style>
+`Exception exp = cn.bran.play.util.PlayExceptionUtils.mapJapidJavaCodeError(this.exp);
+
+`if exp instanceof PlayException
+	`PlayException exception = (PlayException) exp;
+	`Integer lineNumber = exception.getLineNumber();
+	`String mode = play.Play.mode.name();
+	`List<String> source = exception.isSourceAvailable() ? ((SourceAttachment)exception).getSource() : null;
+	`int sourceSize = source == null? -1 : source.size();
+    <div id="header" class="block">
+        <h1>
+            ~{exception.getErrorTitle()} 
+        </h1>
+        `if mode.equals("DEV")
+	        <p>
+	            ~{exception.getErrorDescription()}
+	        </p>
+        `
+        `if mode.equals("PROD")
+	        <p>
+	            ... Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
+	        </p>
+        `
+    </div>
+    `if exception.isSourceAvailable() && lineNumber != null && mode.equals("DEV")
+	    <div id="source" class="block">
+	        <h2>In ${exception.getSourceFile()} (around line ${lineNumber})</h2>
+            
+            `int from = lineNumber - 5 >= 0 && lineNumber <= sourceSize ? lineNumber - 5 : 0;
+            `int to = lineNumber + 5  < sourceSize ? lineNumber + 5 : sourceSize - 1;
+            
+            `for(int i = from; i <= to; i++) {
+            	`String line = source.get(i);
+                <div class="line ${lineNumber == i + from ? "error":""}">
+                    <span class="lineNumber">${i + from}:</span>
+                    <pre>&nbsp;~{line}</pre>
+                </div>
+	        `}
+	    </div>
+    `
+    
+    `String moreHtml = exception.getMoreHTML();
+    `if moreHtml
+        <div id="specific" class="block">
+            $moreHtml
+        </div>
+    `
+    <div id="more" class="block">
+        This exception has been logged with id <strong>$exception.getId()</strong>
+    </div>
+`else
+    <div id="header" class="block">
+        <h1>${exp.getMessage() ?:""}</h1>
+    </div>
+`
+

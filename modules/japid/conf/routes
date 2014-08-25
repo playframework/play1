@@ -1,0 +1,10 @@
+# This file defines all module routes (Higher priority routes first)
+#
+# import these routes in the main app as :
+# *     /                       module:japid
+#
+# ~~~~
+#GET     /japid                      japid.SampleController.index
+# Catch all
+#*       /{controller}/{action}                  {controller}.{action}
+# GET /renderJapidWith/{template}         cn.bran.play.JapidController.renderJapidWith

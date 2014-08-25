@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<p>hello</p>
+@int i = 3;
+@if true 
+    @while (i-- > 0) {
+        <p>in while $i</p>
+    @}
+    <p>good2</p>
+@
+
+<p>
+@for(i =0; i < 4; i++){
+    $i, 
+@}
+<p/>
+<p>good22</p>
+
+@if (true) {
+    <p>good 3</p>
+@}
+<p/>
+the result is @if true@got you!@ @.
+</body>
+</html>

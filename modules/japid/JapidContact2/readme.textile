@@ -1,0 +1,24 @@
+h1. Porting ZenContact, Play! Version, to Japid
+
+Bing Ran, bing.ran@gmail.com
+
+2013-08-06
+
+update:
+
+2013-08-06: using dependencies.yml to reference Japid hosted on github
+
+
+This sample app uses the newly introduced JapidController2 which is more "agile" than the old way of using Japid with Play 1.2.x. 
+
+The main difference:
+
+1. All controllers inherit from JapidController2. 
+2. The japid views are now located in the japidroot directory in the application root. 
+
+
+h2. How to run:
+
+1. "play deps" to get the required libraries. 
+2. "play run"
+

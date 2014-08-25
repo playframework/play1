@@ -1,0 +1,27 @@
+`args String a, String b
+`tracefile on
+
+<p>The outer most content is cached for 20 seconds, using the CacheFor annotation. <em>${new Date()}</em></p>
+
+<div>
+	<p>this part is never cached.</p>
+	`invoke controllers.more.Portlets.panel1(a)
+</div>
+
+<div>
+    <p>this part is cached for 10 seconds. Note the timeout spec with invoke overrides CacheFor annotation. </p>
+    `a controllers.more.Portlets.panel2(b), "10s"
+</div>
+<div>
+ <a href="evict2">Let's evict the panel2 cache!</a>
+</div>
+
+<div>
+    <p>this part is cached for 4 seconds, 
+    specified with CacheFor annotation in the controller. </p>
+    `a controllers.more.Portlets.panel3(a + b)
+</div>
+<div>
+ <a href="evict3">Let's evict the panel3 cache!</a>
+</div>
+`log "-- is this cool?"

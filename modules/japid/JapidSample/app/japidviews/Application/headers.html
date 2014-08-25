@@ -1,0 +1,20 @@
+`	extends superheaders.html
+`	setHeader Server			nginx/0.8.26
+`	setHeader Date				Tue, 23 Feb 2010 13:42:34 GMT
+`	setHeader Cache-Control	max-age=600
+`	setHeader Expires			Tue, 23 Feb 2010 13:47:34 GMT
+`	setHeader Last-Modified	Tue, 23 Feb 2010 13:40:01 GMT
+
+<p>
+"setHeader" is for adding a http response header to the response. One cannot use "" to surround the value part
+</p>
+
+<p>
+The header name and the value are separated by white spaces (space or tab)
+</p>
+
+<p>
+Notes: If a response includes both an Expires header and a max-age directive, the max-age directive overrides the Expires header, even if the Expires header is more restrictive.
+</p>
+
+

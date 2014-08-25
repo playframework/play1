@@ -1,0 +1,30 @@
+`stopwatch on
+`(String a, String b)
+`tracefile on
+<h1>To demonstrate various ways to composing complex pages with cached <b>invoke</b></h1>
+<h3>Each parts render themselves with own cache control</h3>
+
+<p>The outer most content is cached for 20 seconds, using the CacheFor annotation. <em>${new Date()}</em></p>
+
+<p>this part is never cached: 
+`invoke controllers.more.Portlets.panel1("\"never cached\"")` 
+</p>
+
+<p>this part is cached for 10 seconds. Note the timeout spec with invoke overrides CacheFor annotation. 
+`a controllers.more.Portlets.panel2(b), "10s"
+</p>
+
+<div>
+ <a href="evict2">Let's evict the panel2 cache!</a>
+</div>
+
+<div>
+    <p>this part is cached for 4 seconds, 
+    specified with CacheFor annotation in the controller. 
+    `a controllers.more.Portlets.panel3(a + b)
+    </p>
+</div>
+<div>
+ <a href="evict3">Let's evict the panel3 cache!</a>
+</div>
+`log "-- is this cool?"

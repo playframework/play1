@@ -16,9 +16,10 @@ NM = ['new-module', 'nm']
 LM = ['list-modules', 'lm']
 BM = ['build-module', 'bm']
 AM = ['add']
-IM = ['install']
+IM = ['install', 'i']
+IA = ['installall', 'ia']
 
-COMMANDS = NM + LM + BM + IM + AM
+COMMANDS = NM + LM + BM + IM + AM + IA
 
 HELP = {
     'new-module': "Create a module",
@@ -27,7 +28,7 @@ HELP = {
     'install': "Install a module"
 }
 
-DEFAULT_REPO = 'https://www.playframework.com'
+DEFAULT_REPO = 'http://www.playframework.com'
 
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -58,6 +59,8 @@ def execute(**kargs):
         install(app, args, env)
     elif command in AM:
         add(app, args, env)
+    elif command in IA:
+        installall(app, args, env)
 
 def get_repositories(play_base):
     repopath = os.path.join(play_base, 'repositories')
@@ -514,3 +517,24 @@ def load_modules_from(modules_server):
         print "~ Cannot fetch the modules list from %s ..." % (url)
         print "~"
         sys.exit(-1)
+
+def installall(app, args, env):
+    modules_list = load_module_list()
+    fetch = None
+    version = None
+    module = None
+
+    for mod in modules_list:
+        module = mod['name']
+        for v in mod['versions']:
+            if version is None and v['isDefault']:
+                print '~ Will install %s-%s' % (module, v['version'])
+                print '~ This module is compatible with: %s' % v['matches']
+                print '~ Installing module %s-%s...' % (module, v['version'])
+                fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
+                archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
+        if not os.path.exists(archive):
+                    print '~ Fetching %s' % fetch
+                    Downloader().retrieve(fetch, archive)
+                    
+    sys.exit(0)

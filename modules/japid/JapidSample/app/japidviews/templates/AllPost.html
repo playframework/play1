@@ -1,0 +1,29 @@
+@extends 	Layout
+@import	 	models.japidsample.Post
+@(
+    String blogTitle,
+    List<Post> allPost
+)
+
+@stopwatch on
+
+@set title = "Home: " + blogTitle
+
+*{ 
+@for Post p: allPost
+}*
+@allPost.forEach( (Post p) -> {
+        *{ now we call a tag, with a body content that take a parameter title of String type }*
+
+	    @t Display(post=p, as="home2") | String title
+		   The real title iiiis: $title
+	    @
+@});
+
+*{
+@
+}*
+
+@t Tag2(msg=blogTitle, age = 100)
+
+<p>cool</p>

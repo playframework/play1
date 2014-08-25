@@ -1,0 +1,92 @@
+`args String str, Collection col, boolean b, Object[] a1, int[] a2, int i, String s2
+
+<p>
+<pre>
+`verbatim
+    `if expr {
+        xxx
+    `} else if expr {
+        yyy
+    `} else {
+        zzz
+    `}
+`
+</pre>
+</p>
+<p>
+    is equals to
+</p>
+<p>
+<pre>
+`verbatim
+    `if(cn.bran.play.WebUtils.asBoolean(expr)){
+        xxx
+    `} else if(cn.bran.play.WebUtils.asBoolean(expr)){
+        yyy
+    `} else {
+        zzz
+    `}
+`
+<pre>
+
+<p/>
+`if str {
+    Got $str
+`} else if str {
+    finally got $str
+`} else {
+    str is empty
+`}
+<p/>
+
+`if col {
+    Got data from col: $col
+`} else {
+    col is empty
+`}
+
+<p/>
+`if b {
+    right
+`} else {
+    wrong
+`}
+
+<p/>
+`if a1 {
+    got a1: $a1
+`} else {
+    a1 is empty
+`}
+<p/>
+`if a2{
+    got a2: $a2
+`} else {
+    a2 is empty
+`}
+<p/>
+`if i{
+    got i: $i
+`} else {
+    i == 0
+`}
+<p/>
+`if s2 {
+    got s2: $s2
+`} else {
+    s2 is empty
+`}
+
+<p>try the negation</p>
+`String ss = str;
+`if ! ss
+    ss is empty
+`else if !ss 
+    again...
+`else
+    ss has something
+`
+
+
+
+

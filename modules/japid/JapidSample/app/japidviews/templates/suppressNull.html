@@ -1,0 +1,8 @@
+*{ suppressNull, a directive to allow safe navigation in expression, default off }*
+` suppressNull on
+
+` String a = "a";
+safe to do a.something: $a.length()
+
+` a = null;
+safe to do a.something too: $a.length()

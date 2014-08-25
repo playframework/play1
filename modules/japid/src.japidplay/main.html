@@ -1,0 +1,24 @@
+@(String msg)
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Computers Database with Japid 0.6.1 - $msg</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="$routes.Assets.at("stylesheets/bootstrap.min.css")"> 
+        <link rel="stylesheet" type="text/css" media="screen" href="$routes.Assets.at("stylesheets/main.css")"> 
+    </head>
+    <body>
+        
+        <header class="topbar">
+            <h1 class="fill">
+                <a href="$routes.Application.index()">
+                    Play 2.0/Japid sample application &mdash; Computer database
+                </a>
+            </h1>
+        </header>
+        
+        <section id="main">
+            @doLayout
+        </section>
+        
+    </body>
+</html>

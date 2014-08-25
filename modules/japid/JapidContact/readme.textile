@@ -1,0 +1,728 @@
+h1. Porting ZenContact, Play! Version, to Japid
+
+Bing Ran, bing_ran@hotmail.com
+
+2014-7-16
+
+The *ZenContact* application is one of the samples in Play!'s distribution. It's a very simple application involving only one model class and one controller with a few views. I feel it would make a good example of a simple Japid/Play application and how to port a Play application using the default rendering engine to using Japid. 
+
+I'm using the code in the 1.2.x from the Github. Since I'm using Eclipse as my primary/only IDE, I'll reference some Eclipse specific steps occasionally. I'm using Eclipse Luna. 
+
+Please keep "The Japid User Guide":https://github.com/branaway/Japid/wiki/Japid-User-Guide handy in case you don't understand some of the Japid usage.
+
+h2. Installing the application
+
+* Go to the @samples-and-tests/zencontact@ directory of your Play installation. 
+* Create an Eclipse project: @play eclipsify@
+* Import the application to Eclipse. I suppose the readers know the detailed steps.
+* Run the application by using the *Zenconatct, by zenexity.launch* script. 
+
+The application would start fine. 
+
+h2. Porting the application to Japid/Play. 
+
+Japid can get along with the default template engine well. One action can using the default template system and another can use Japid. 
+
+h3. Install the Japid module. 
+
+create a file named "dependencies.yml" in the conf directory, with content as in the following block:
+
+<code>
+# Application dependencies
+
+require:
+    - cn.bran -> japid 0.9.27
+    - cn.bran -> japidplay 0.9.27
+    - com.google.code.javaparser -> javaparser 1.0.8
+    - org.hibernate -> hibernate-validator 5.0.1.Final
+
+
+# My custom repositories
+repositories:
+    - bran:
+        type:       http
+        artifact:   "https://raw.github.com/branaway/Japid/master/dist-lib/[module]-[revision].[ext]"
+        contains:
+            - cn.bran -> *
+
+</code>
+
+Tha above code define a repository mapped to japid github directory.
+
+* Create the necessary Japid template tree root:
+
+@play japid:gen@
+
+This step is not necessary if you use the Japid plugin for Eclipse, as explained later. Neither is it necessary if you write code while you're running the app in DEV mode. 
+
+* Re-create the Eclipse project:
+
+@play eclipsify@
+
+* Refresh or reload the project into the Eclipse IDE. 
+
+Japid transforms html-based templates to Java source files to integrate into the rest of the Play applications. Every time the author changes a template file, the derived Java file will be updated too. For the IDE to display any changes made to the derived Java files, it's highly recommended to turn on *auto-refresh* on external file changes. Take Eclipse for an example:
+
+# Open the @Window@ menu in the main menu bar and open the @Preferences@ menu item. 
+# Open the @General -> Workspace@ panel and check the @Refresh automatically@ checkbox. 
+
+Now the changes to the artifacts of Japid transforming process will be displayed instantaneously or with a short delay, depending on the size of the project and the OS you're running. If you have an error in your template, the derived Java file will be marked with an error marker and you can take a look at it to find out what's wrong with it. This is the next best thing to using the Eclipse plugin.
+
+
+h3. Optionally install the Japid plugin for Eclipse
+
+* Copy the @org.playframework.playclipse_0.8.7.jar@ in the @{play_root}\modules\japid-0.7.1\eclipse-plugin@ to @{eclipse_root}/dropins@ directory. Remove any previously installed PlayClipse jar if there is one. 
+* Start/Restart the Eclipse IDE. Please verify that a new menu named *JapidPlay* is installed in the main menu bar. Start Eclipse with @-clean@ option if you don't see the new menu. 
+* Right click on the project and issue the @JapidPlay -> Add Play! nature@, you'll notice a new directory tree is created in the @app/japidviews@. 
+
+Please note that you don't need this plugin to develop with Japid. Developing with Japid in a plain Eclipse project is almost as easy as developing with the plain Play! application without a plugin. 
+
+
+Now let's get started porting the code.
+
+Make sure that your have this line in the @conf/application.conf@:
+
+<pre>
+application.mode=dev
+</pre> 
+
+and start the application. Hit @http://localhost:9000/@ and verify that the application works. 
+
+We are going to take advantage of the hot code replacement of Play! and edit code while the server is running in "development" mode.
+
+h3. The "Home" page
+
+* Open the @controller.Application.java@ file. 
+* Change the super class to @cn.bran.play.JapidController@ so it looks like this:
+
+<pre><code>
+package controllers;
+
+import java.util.Date;
+import java.util.List;
+
+import models.Contact;
+import play.data.validation.Valid;
+import cn.bran.play.JapidController;
+
+public class Application extends JapidController {
+    //....
+}
+</code></pre>
+
+Reload the home page and you'll find that that everything should just work since the @JapidController@ is a subclass of @Controller@ class. 
+
+h4. Change the @index@ method 
+
+from:
+
+<pre><code>
+    public static void index() {
+        Date now = new Date();
+        render(now);
+    }
+</code></pre>
+
+to:
+
+<pre><code>
+    public static void index() {
+        Date now = new Date();
+        renderJapid(now);
+    }
+</code></pre>
+
+Essentially change @render(now)@ to @renderJapid(now)@. 
+
+
+h4. Create the Japid template for this action
+
+There are a couple of ways to create the view template file at the right location. 
+
+# Manually by following the naming pattern: Copy the @app/views/Application/index.html@ to @app/japidviews/Application/index.html@, which is the default template for the @index@ action using Japid. Create the necessary file path structure if ti's missing. 
+# With the Japid plugin for Eclipse installed, leave you cursor anywhere on the action method definition and press @ctrl-alt-v@, which is the shortcut for "Go to the view", A dialog will pop up and ask if you would like to create the view file. Hit "Yes" and a default view file is created for you. You then copy the content of the @app/views/Application/index.html@ to override the default sample content. 
+
+
+* Modify the new index.html from:
+
+<pre><code>
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<p id="time">
+    <span>${now.format("EEEE',' MMMM dd',' yyyy")}</span>${now.format("hh'h' MM'mn' ss's'")}
+</p>
+
+<script type="text/javascript" charset="utf-8">
+    setInterval(function() {
+        $('section').load('@{index()} #time')
+    }, 1000)
+</script>
+</code></pre>
+
+to:
+
+<pre><code>
+`args Date now
+`extends main
+`set title:"Home"
+
+<p id="time">
+    <span>${format(now, "EEEE',' MMMM dd',' yyyy")}</span>${format(now, "hh'h' MM'mn' ss's'")}
+</p>
+
+<script type="text/javascript" charset="utf-8">
+    setInterval(function() {
+        $('section').load('@{index()} #time')
+    }, 1000)
+</script>
+</code></pre>
+
+Changes made:
+
+# added @`args Date now@. All Japid templates will need to have @`args ...@ if they actually render any dynamic data. The @Date@ type is actually @java.util.Date@, I don't need to use the FQN since the @java.util@ package is automatically imported in Japid templates. 
+# Changed @#{extends 'main.html' /}@ to @`extends main@. Actually you don't need to do this. Japid supports the classic syntax. But I like the new syntax. Note The location of the layout is changed too. See later.
+# Changed @#{set title:'Home' /}@ to @`set title:"Home"@. Again I have changed this solely for showing the new simple syntax. 
+# Changed all @now.format(...)@ to @format(now, ....)@. The former syntax takes advantage of Groovy's object extension mechanism and adds new methods in the Play! @JavaExtensions@ class and make them look as if they're the methods of the extended object, @java.util.Date@ in this case. The latter is a simple invocation of the @javaExtensions.format()@ method. All of the "utility methods defined in the JavaExtensions":http://www.playframework.org/documentation/1.1.1/javaextensions class are automatically imported in Japid templates. 
+
+
+h4. Change the layout file
+
+* Copy the @app/views/main.html@ to @app/japidviews/_layouts@. The default layout location is the @_layouts@ directory in Japid. 
+
+We'll need to make a few changes to the layout file. 
+
+The original file is:
+
+<pre><code>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Zencontact, by zenexity  ★ #{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" reef="@{'public/stylesheets/style.css'}" />
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'public/stylesheets/south-street/jquery-ui-1.7.2.custom.css'}" />
+        <script src="@{'public/javascripts/jquery-1.4.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'public/javascripts/jquery-ui-1.7.2.custom.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'public/javascripts/jquery.editinplace.packed.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="zencontact">
+            <header>
+                <img src="@{'public/images/logo.png'}" alt="logo" id="logo" />
+                <h1>Zencontact <span>by zenexity</span></h1>
+            </header>
+            <nav>
+                <a id="home" href="@{index()}" class="${request.action =~ /index/ ? 'selected' : ''}">Home</a>
+                <a id="list" href="@{list()}" class="${request.action =~ /list/ ? 'selected' : ''}">List</a>
+                <a id="new" href="@{form()}" class="${request.action =~ /form|save/ ? 'selected' : ''}">New</a>
+            </nav>
+            <section>
+                #{doLayout /}
+            </section>
+            <footer>
+                <a href="http://www.w3.org/TR/html5/">html5</a> - 
+                <a href="http://www.w3.org/TR/css3-roadmap/">css3</a> - 
+                <a href="http://www.playframework.org/">playframework</a> 
+            </footer>
+        </div>
+    </body>
+</html>
+</code></pre> 
+
+
+Let's make a few changes:
+
+* Change @#{get 'title' /}@ to @`get title`@. Both are good Japid syntax, the but the new syntax is a lot less verbose.
+* The only necessary change is this line: @${request.action =~ /index/ ? 'selected' : ''}@ for each of the anchors in the @nav@ block. 
+1) the straightforward translation: @${request.action.matches(".*index") ? "selected" : ""}@
+2) The above works. But it is repeated three times and it's a lot of typing. Let's simplify it with Japid *local methods*. Go to the end of the file and add:
+<pre><code>
+`def selected(String pattern)
+${request.action.matches(pattern) ? "selected" : ""}
+`
+</code></pre>
+Here I have defined a local method named "selected" that returns a string from the one line template. 
+
+Now the class selector looks like this: @class="${selected(".*index")}"@, much cleaner. The other two anchors are changed likewise. 
+
+* Change <code>#{doLayout/}</code> to <code>`doLayout</code>. Again both syntax are supported but the new syntax is cleaner.
+ 
+
+*The final main.html*
+
+<pre><code>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>JapidContact, by zenexity/Bing Ran  ★ `get title` </title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'public/stylesheets/style.css'}" />
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'public/stylesheets/south-street/jquery-ui-1.7.2.custom.css'}" />
+        <script src="@{'public/javascripts/jquery-1.4.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'public/javascripts/jquery-ui-1.7.2.custom.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'public/javascripts/jquery.editinplace.packed.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="zencontact">
+            <header>
+                <img src="@{'public/images/logo.png'}" alt="logo" id="logo" />
+                <h1>Japid Contact <span>by zenexity & Bing Ran</span></h1>
+            </header>
+            <nav>
+                <a id="home" href="@{index()}" class="${selected(".*index")}">Home</a>
+                <a id="list" href="@{list()}" class="${selected(".*list")}">List</a>
+                <a id="new" href="@{form()}" class="${selected(".*form|.*save")}">New</a>
+            </nav>
+            <section>
+                `doLayout
+            </section>
+            <footer>
+                <a href="http://www.w3.org/TR/html5/">html5</a> - 
+                <a href="http://www.w3.org/TR/css3-roadmap/">css3</a> - 
+                <a href="http://www.playframework.org/">playframework with Japid</a> 
+            </footer>
+        </div>
+    </body>
+</html>
+
+`def selected(String pattern)
+${request.action.matches(pattern) ? "selected" : ""}
+`
+</code></pre>
+
+Now hit @http://localhost:9000@ you'll get the home page that's rendered with Japid while the rest of the application is still using the classic template system. The point to take away is that porting to Japid does not have to be a all-or-none case. One can port the actions and views one-by-one and have great confidence in each step to ensure a smooth transition. 
+
+
+h3. The "List" page
+
+The List page displays all the contacts in the database. 
+
+h4. The action
+
+Open the @Application@ controller and change the action @list()@ from:
+
+<pre><code>
+   public static void list() {
+        List<Contact> contacts = Contact.find("order by name, firstname").fetch();
+        render(contacts);
+    }
+</code></pre>
+
+to:
+
+<pre><code>
+    public static void list() {
+        List<Contact> contacts = Contact.find("order by name, firstname").fetch();
+        renderJapidWith("@listAll", contacts);
+    }
+</code></pre>
+
+It's a one line change from <code>render(contacts);</code> to <code>renderJapidWith("@listAll", contacts);</code>. 
+
+I should have been able to change it to 
+ 
+ <pre>
+    renderJapid(contacts);
+ </pre>
+ 
+But for some unknown reason, I could not use @list.html@, the default template for the @list@ action, as the template name, just for this particular application.  The Play! compiler would complain that the list class had already compiled or it should have been in a separate file. So I work around this and invoke another template named @listAll.html@ to render to the contact list. The *at* sign before the listAll indicates that the template is named @listAll@ in the same directory as the default template directory of this controller. 
+ 
+h4. Create the listAll.html
+
+* Copy @app/views/Application/list.html@ to @app/japidviews/Application/listAll.html@. 
+
+* Change the content from:
+
+<pre>
+<code>
+#{extends 'main.html' /}
+#{set title:'List' /}
+
+<table>
+    <thead>
+        <tr>
+            <th class="name">Name</th>
+            <th class="firstname">First name</th>
+            <th class="birthdate">Birth date</th>
+            <th class="email">Email</th>
+            <th class="edit"></th>
+        </tr>
+    </thead>
+    <tbody>
+        #{list contacts, as:'contact'}
+        <tr class="contact" contactId="${contact.id}" draggable="true">
+            <td id="name-${contact.id}">${contact.name}</td>
+            <td id="firstname-${contact.id}">${contact.firstname}</td>
+            <td id="birthdate-${contact.id}">${contact.birthdate?.format('yyyy-MM-dd')}</td>
+            <td id="email-${contact.id}">${contact.email}</td>
+            <td><a href="@{form(contact.id)}">&gt;</a></td>
+        </tr>
+        #{/list}
+        <tr>
+            #{form @save()}
+            <td><input type="text" name="contact.name"></td>
+            <td><input type="text" name="contact.firstname"></td>
+            <td><input type="text" name="contact.birthdate"></td>
+            <td><input type="text" name="contact.email"></td>
+            <td><input type="submit" value="+"></td>
+            #{/form}
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript" charset="utf-8">
+
+    // In place edition
+    $(".contact td").editInPlace({
+        bg_over: 'transparent',
+        callback: function(el, n, o) {
+            var m = /([a-z]+)-(\d+)/.exec(el), data = {}
+            data['contact.id'] = m[2]
+            data['contact.' + m[1]] = n
+            
+            // Save result
+            $.ajax({
+                url: '@{save()}',
+                type: 'POST',
+                data: data,
+                success: function() {$('#' + el).html(n)},
+                error: function() {$('#' + el).html(o)}
+            })
+            
+            return true
+        }
+    })
+    
+    // Drag & Drop
+    var dragIcon = document.createElement('img')
+    dragIcon.src = '@{'public/images/avatar.png'}'  
+    var action = #{jsAction @form(':id') /}    
+    var cancel = function cancel(e) {e.preventDefault()}
+    
+    $('#new')
+        .bind('dragover', cancel)
+        .bind('dragenter', cancel)
+        .bind('drop', function(e) {
+            document.location = action({id: e.originalEvent.dataTransfer.getData('contactId')})            
+        })
+      
+    $('[draggable]').bind('dragstart', function(e) {
+        e.originalEvent.dataTransfer.setData('contactId', $(this).attr('contactId'));
+        e.originalEvent.dataTransfer.setDragImage(dragIcon, 0, -10);
+    })
+    
+</script>
+</code>
+</pre>
+
+ to:
+ 
+<pre>
+<code>
+`args List<Contact> contacts
+`extends main
+`set title:"List of all"
+
+<table>
+    <thead>
+        <tr>
+            <th class="name">Name</th>
+            <th class="firstname">First name</th>
+            <th class="birthdate">Birth date</th>
+            <th class="email">Email</th>
+            <th class="edit"></th>
+        </tr>
+    </thead>
+    <tbody>
+        `for (Contact contact : contacts) {
+            <tr class="contact" contactId="${contact.id}" draggable="true">
+                <td id="name-${contact.id}">${contact.name}</td>
+                <td id="firstname-${contact.id}">${contact.firstname}</td>
+                <td id="birthdate-${contact.id}">${format(contact.birthdate, "yyyy-MM-dd") ?: ""}</td>
+                <td id="email-${contact.id}">${contact.email}</td>
+                <td><a href="@{form(contact.id)}">&gt;</a></td>
+            </tr>
+        `}
+        <tr>
+            <form action="@{save()}" method="POST">
+                <td><input type="text" name="contact.name"></td>
+                <td><input type="text" name="contact.firstname"></td>
+                <td><input type="text" name="contact.birthdate"></td>
+                <td><input type="text" name="contact.email"></td>
+                <td><input type="submit" value="+"></td>
+            </form>
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript" charset="utf-8">
+
+    // In place edition
+    $(".contact td").editInPlace({
+        bg_over: 'transparent',
+        callback: function(el, n, o) {
+            var m = /([a-z]+)-(\d+)/.exec(el), data = {}
+            data['contact.id'] = m[2]
+            data['contact.' + m[1]] = n
+            
+            // Save result
+            $.ajax({
+                url: '@{save()}',
+                type: 'POST',
+                data: data,
+                success: function() {$('#' + el).html(n)},
+                error: function() {$('#' + el).html(o)}
+            })
+            
+            return true
+        }
+    })
+
+        
+    *{
+    }*
+    // Drag & Drop
+    var dragIcon = document.createElement('img')
+    dragIcon.src = '@{'public/images/avatar.png'}'  
+    var action = $jsAction("form", ":id")
+    var cancel = function cancel(e) {e.preventDefault()}
+    
+    $('#new')
+        .bind('dragover', cancel)
+        .bind('dragenter', cancel)
+        .bind('drop', function(e) {
+            document.location = action({id: e.originalEvent.dataTransfer.getData('contactId')})            
+        })
+      
+    $('[draggable]').bind('dragstart', function(e) {
+        e.originalEvent.dataTransfer.setData('contactId', $(this).attr('contactId'));
+        e.originalEvent.dataTransfer.setDragImage(dragIcon, 0, -10);
+    })
+    
+</script>
+
+</code>
+</pre>
+
+Here are the changes to make:
+
+* added: @`args List<Contact> contacts@
+* @#{extends 'main.html' /}@ ->  @`extends main@
+* @#{set title:'List' /}@ -> @`set title:"List"@
+* @#{list contacts, as:'contact'}@ -> @`for (Contact contact : contacts) {@. Since we're not using any extra loop properties, a simple Java for loop is used.
+* @#{/list}@ -> @`}@ to close the Java for loop.
+* @${contact.birthdate?.format('yyyy-MM-dd')}@ -> @${format(contact.birthdate, "yyyy-MM-dd") ?: ""}@. Two things here:
+1) the use of the @format()@ static method imported from the @JavaExtensions@ class.
+2) the use of the @?:@, the @Elvis@ operator, in Japid expressions, to catch a missing birthdate field. 
+* <code>#{form @ save()}</code> -> <code><form action="@ {save()}" method="POST"></code>
+* Accordingly we change @#{/form}@ to the plain @</form>@
+* added: @${authenticityToken()}@ right below the form tag.
+* <code>#{jsAction @form(':id') /}</code> ->  <code>$jsAction("form", ":id")</code>. Japid provides a method to do the same thing as the @#{jsAction}@. 
+
+Now click on the @list@  button on the home page you should be able to the contact list rendered by the Japid template. 
+
+
+
+h3. Creating new Contact or Editing a contact
+
+The two use case hinge upon the @form.html@ template. But let's start with the controller first. 
+
+h4. The controller actions
+
+There are two methods to change. 
+
+*before change*
+
+<pre><code>
+    public static void form(Long id) {
+        if(id == null) {
+            render();
+        }
+        Contact contact = Contact.findById(id);
+        render(contact);
+    }
+    
+    public static void save(@Valid Contact contact) {
+        if(validation.hasErrors()) {
+            if(request.isAjax()) 
+                error("Invalid value");
+            render("@form", contact);
+        }
+        System.out.println(contact.toString());
+        contact.save();
+        list();
+    }
+
+</code></pre>
+
+*after change*
+
+<pre><code>
+    /**
+     * for editing or displaying a new contact form
+     */
+    public static void form(Long id) {
+        if(id == null) {
+            renderJapid((Object)null);
+        }
+        Contact contact = Contact.findById(id);
+        renderJapid(contact);
+    }
+    
+    /**
+     * for saving a contact
+     */
+    public static void save(@Valid Contact contact) {
+        if(validation.hasErrors()) {
+            if(request.isAjax()) 
+                error("Invalid value");
+            renderJapidWith("@form", contact);
+        }
+        System.out.println(contact.toString());
+        contact.save();
+        list();
+    }
+
+</code></pre>
+
+Again the changes are made to the @render()@ method invocations. The only notable thing is  the @render()@ -> @renderJapidWith(null)@. Japid requires the argument list to perfectly match that in the template. The template accepts one @Contact@ object, so we pass a null for creating a new contact. 
+
+
+
+h4. Modifying the template
+
+The template is the @form.html@ file. 
+
+* Copy @app/views/Application/form.html@ to @app/japidviews/Application/form.html@
+
+*The original form.html*
+
+<pre><code>
+#{extends 'main.html' /}
+#{set title:'Form' /}
+
+#{form @save()}
+    <input type="hidden" name="contact.id" value="${contact?.id}">
+    
+    <p class="field">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="contact.name" value="${contact?.name}">
+        <span class="error">${errors.forKey('contact.name')}</span>
+    </p>
+
+    <p class="field">
+        <label for="firstname">First name:</label>
+        <input type="text" id="firstname" name="contact.firstname" value="${contact?.firstname}">
+        <span class="error">${errors.forKey('contact.firstname')}</span>
+    </p>
+
+    <p class="field">
+        <label for="birthdate">Birth date:</label>
+        <input type="text" id="birthdate" name="contact.birthdate" value="${contact?.birthdate?.format('yyyy-MM-dd')}">
+        <span class="error">${errors.forKey('contact.birthdate')}</span>
+    </p>
+
+    <p class="field">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="contact.email" value="${contact?.email}">
+        <span class="error">${errors.forKey('contact.email')}</span>
+    </p>
+
+    <p class="buttons">
+        <a href="@{list()}">Cancel</a> or <input type="submit" value="Save this contact" id="saveContact">
+    </p>
+    
+    <script type="text/javascript" charset="utf-8">
+        $("#birthdate").datepicker({dateFormat:'yy-mm-dd', showAnim:'fadeIn'})
+    </script>
+#{/form}
+</code></pre>
+
+Changes to make:
+
+* modify the "headers" from 
+
+<pre><code>
+#{extends 'main.html' /}
+#{set title:'Form' /}
+</code></pre>
+
+to:
+
+<pre><code>
+`args Contact contact
+`extends main
+`set title:"Form" 
+`suppressNull on
+</code></pre>
+
+Nothing has not be seen except the @`suppressNull@ directive. This directive will catch any @NullPointerException@ thrown in any Japid expressions, the @${}@ expression, and output an empty string instead. Effectively you can use Java "dot" notation to safely access bean properties. 
+
+* Change <code>#{form @save()}</code> to <code><form action="@{save()}" method="POST"></code>.
+* Add @$authenticityToken()@ right after the form tag. 
+* Replace all instances of @?.@, the Groovy safe bean navigation operator, to a simple @.@. Thanks to @supressNull@, we don't need that any more. 
+* Change @${errors.forKey('contact.name')}@ to @${error("contact.name")}@, The @error(...)@ is a Japid method that is a simple wrapper of @errors.forKey()@. Alternatively you just change it to use double quotation marks to make it a valid Java method invocation: @${errors.forKey("contact.name")}@. 
+* Go into each of the fields to fix the @errors.forKey()@. 
+* For the "birthdate" field, change the @value@ attribute from @${contact?.birthdate?.format('yyyy-MM-dd')}@ to @${format(contact.birthdate, "yyyy-MM-dd")}@. 
+* Change @#{/form}@ to @</form>@. 
+
+*The form.html after change*
+
+<pre><code>
+`args Contact contact
+`extends main
+`set title:"Form" 
+`suppressNull on
+
+<form action="@{save()}" method="POST">
+    $authenticityToken()
+    <input type="hidden" name="contact.id" value="${contact.id}">
+    
+    <p class="field">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="contact.name" value="${contact.name}">
+        <span class="error">${error("contact.name")}</span>
+    </p>
+
+    <p class="field">
+        <label for="firstname">First name:</label>
+        <input type="text" id="firstname" name="contact.firstname" value="${contact.firstname}">
+        <span class="error">${error("contact.firstname")}</span>
+    </p>
+
+    <p class="field">
+        <label for="birthdate">Birth date:</label>
+        <input type="text" id="birthdate" name="contact.birthdate" value="${format(contact.birthdate, "yyyy-MM-dd")}">
+        <span class="error">${error("contact.birthdate")}</span>
+    </p>
+
+    <p class="field">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="contact.email" value="${contact.email}">
+        <span class="error">${error("contact.email")}</span>
+    </p>
+
+    <p class="buttons">
+        <a href="@{list()}">Cancel</a> or <input type="submit" value="Save this contact" id="saveContact">
+    </p>
+    
+    <script type="text/javascript" charset="utf-8">
+        $("#birthdate").datepicker({dateFormat:'yy-mm-dd', showAnim:'fadeIn'})
+    </script>
+</form>
+</code></pre>
+
+Now the porting work is pretty much finished.
+
+h3. Conclusions
+
+Porting to Japid is mostly straightforward. 
+
+Japid provides @`@ leading directives for many of the built-in tags in the classic Play! templates.
+
+If you see any errors, inpecting the Java files derived from the templates is a great way to debug your templates.
+
+h4. References
+
+* "The Japid User Guide":https://github.com/branaway/Japid/wiki/Japid-User-Guide    

@@ -1,0 +1,8 @@
+# You can specialize this file for each language.
+# For example, for French create a messages.fr file
+#
+login.name = hello me 你好情, 者， 兵， 病， 冉。。。
+cus.name = %s why 我的名字
+fullname = First name is %s and last name is: %s
+validation.required=%s is required/不能为空
+validation.min=Cannot be lower than/不能小于 %2$d

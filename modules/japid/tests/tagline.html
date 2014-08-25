@@ -1,0 +1,22 @@
+`   args String s
+
+`tag my.tag(a)
+`t my.tag(a)
+`t my.tag
+`t my.tag(a) | String a
+    yyyy
+`
+
+`tag your.tag(a + 123)
+
+`long t = 0L, a = 1L;
+
+*{ will this be confused with tag call? }*
+` t = t+1;
+
+*{ will this be confused with action invoke? }*
+
+` a = a + 1;
+
+`invoke Application.echoPost(p)
+`a Application.echoPost(p)

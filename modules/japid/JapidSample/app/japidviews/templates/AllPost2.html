@@ -1,0 +1,21 @@
+`import	 	models.japidsample.Post
+`extends 	Layout.html
+`args		String blogTitle, List <Post> allPost
+
+`set title:"Home"
+
+
+`if (allPost.size() > 0 ) {
+	<p></p>
+	`for (Post p: allPost) {
+	    `tag Display post=p, as="home" |String title
+			<p>The real title is: $title;</p>
+	    `
+	`}
+`} else {
+	<p>There is no post at this moment</p>
+`}
+
+`tag Tag2(msg=blogTitle, age=1000)
+
+<p>end of it</p>
