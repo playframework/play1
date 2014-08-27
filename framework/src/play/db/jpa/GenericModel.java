@@ -127,7 +127,7 @@ public class GenericModel extends JPABase {
                                 // Remove it to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
-                                    if (_id.equals("")) {
+                                    if (_id == null || _id.equals("")) {
                                         continue;
                                     }
                                  
@@ -204,6 +204,12 @@ public class GenericModel extends JPABase {
         return (T) this;
     }
 
+    public <T extends GenericModel> T edit(String dbName, ParamNode rootParamNode, String name) {
+        edit(dbName, rootParamNode, name, this, null);
+        return (T) this;
+    }
+    
+    
     public boolean validateAndSave() {
         if (Validation.current().valid(this).ok) {
             save();
