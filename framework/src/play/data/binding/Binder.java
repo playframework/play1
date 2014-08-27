@@ -406,9 +406,9 @@ public abstract class Binder {
                     if (annotation.annotationType().equals(As.class)) {
                         As as = ((As) annotation);
                         final String separator = as.value()[0];
-			if (separator != null && !separator.isEmpty()){
+                        if (separator != null && !separator.isEmpty()){
                         	values = values[0].split(separator);
-			}
+                        }
                     }
                 }
             }
