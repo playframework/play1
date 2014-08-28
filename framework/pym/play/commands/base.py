@@ -259,6 +259,7 @@ def autotest(app, args):
 
     # Run FirePhoque
     print "~"
+    print "~ Starting FirePhoque..."
 
     headless_browser = ''
     if app.readConf('headlessBrowser'):

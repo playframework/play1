@@ -3,7 +3,7 @@ package play.libs;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import play.libs.WS.HttpResponse;
@@ -43,7 +43,13 @@ public class TestHttpResponse extends HttpResponse {
 
     @Override
     public InputStream getStream() {
-        return new ByteArrayInputStream(this.queryContent.getBytes(StandardCharsets.UTF_8));
+        try {
+            return new ByteArrayInputStream(this.queryContent.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
