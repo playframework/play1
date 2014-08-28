@@ -3,6 +3,7 @@ package play.mvc;
 import java.lang.annotation.Annotation;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -401,6 +402,19 @@ public class Scope {
             // make sure rootsParamsNode is regenerated if needed
             rootParamsNodeIsGenerated = false;
         }
+        
+        public void removeStartWith(String prefix) {
+            checkAndParse();
+            Iterator<Map.Entry<String, String[]>> iterator = data.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String[]> entry = iterator.next();
+                if (entry.getKey().startsWith(prefix)) {
+                    iterator.remove();
+                }
+            }
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
+        }
 
         public String get(String key) {
             if (!_contains(key)) {
@@ -452,7 +466,7 @@ public class Scope {
 
         public Map<String, String[]> sub(String prefix) {
             checkAndParse();
-            Map<String, String[]> result = new HashMap<String, String[]>();
+            Map<String, String[]> result = new LinkedHashMap<String, String[]>();
             for (String key : data.keySet()) {
                 if (key.startsWith(prefix + ".")) {
                     result.put(key.substring(prefix.length() + 1), data.get(key));
