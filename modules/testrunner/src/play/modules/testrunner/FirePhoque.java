@@ -38,8 +38,9 @@ public class FirePhoque {
         File root = null;
         String selenium = null;
         List<String> tests = null;
+        BufferedReader in = null;
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(new URL(app + "/@tests.list").openStream(), "utf-8"));
+            in = new BufferedReader(new InputStreamReader(new URL(app + "/@tests.list").openStream(), "utf-8"));
             String marker = in.readLine();
             if (!marker.equals("---")) {
                 throw new RuntimeException("Oops");
@@ -51,30 +52,36 @@ public class FirePhoque {
             while ((line = in.readLine()) != null) {
                 tests.add(line);
             }
-            in.close();
         } catch(Exception e) {
-            System.out.println("~ The application does not start. There are errors: " + e);
+            System.out.println("~ The application does not start. There are errors: " + e.getMessage());
+            e.printStackTrace();
             System.exit(-1);
+        } finally {
+            try {
+                if(in != null){
+                    in.close();
+                }
+            } catch (IOException e) {
+            }
         }
 
         // Let's tweak WebClient
 
-	String headlessBrowser = System.getProperty("headlessBrowser",
-		"FIREFOX_24");
-	BrowserVersion browserVersion;
-	if ("CHROME".equals(headlessBrowser)) {
-	    browserVersion = BrowserVersion.CHROME;
-	} else if ("FIREFOX_17".equals(headlessBrowser)) {
-	    browserVersion = BrowserVersion.FIREFOX_17;
-	} else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
-	    browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
-	} else if ("INTERNET_EXPLORER_9".equals(headlessBrowser)) {
-	    browserVersion = BrowserVersion.INTERNET_EXPLORER_9;
-	} else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
-	    browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
-	} else {
-	    browserVersion = BrowserVersion.FIREFOX_24;
-	}
+        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_24");
+        BrowserVersion browserVersion;
+        if ("CHROME".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.CHROME;
+        } else if ("FIREFOX_17".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_17;
+        } else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
+        } else if ("INTERNET_EXPLORER_9".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_9;
+        } else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
+        } else {
+            browserVersion = BrowserVersion.FIREFOX_24;
+        }
 
         WebClient firephoque = new WebClient(browserVersion);
         firephoque.setPageCreator(new DefaultPageCreator() {
