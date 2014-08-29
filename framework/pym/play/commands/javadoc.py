@@ -36,7 +36,7 @@ def execute(**kargs):
         os.makedirs(outdir)      
     defineJavadocOptions(app, outdir, args)
     defineJavadocFiles(app, outdir)
-    javadoc_cmd = [javadoc_path, '@'+os.path.join('javadoc','javadocOptions'), '@'+os.path.join('javadoc','javadocFiles')]
+    javadoc_cmd = [javadoc_path, '@'+os.path.join(outdir,'javadocOptions'), '@'+os.path.join(outdir,'javadocFiles')]
     
     print "Generating Javadoc in " + outdir + "..."
     subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
