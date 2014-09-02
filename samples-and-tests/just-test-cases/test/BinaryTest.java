@@ -28,7 +28,7 @@ public class BinaryTest extends FunctionalTest {
         Response deletedResponse = GET(deleteURL);
         assertStatus(200, deletedResponse);
     }
-    
+
     @Test
     public void testUploadSomething() {
         URL imageURL = reverse(); {
@@ -170,11 +170,13 @@ public class BinaryTest extends FunctionalTest {
         assertTrue(Binary.emptyInputStreamClosed);
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testGetErrorBinary() {
-        Response response = GET("/binary/getErrorBinary");
-        // This does not work. See Lighthouse ticket #1637.
-        // assertStatus(500, response);
-        assertTrue(Binary.errorInputStreamClosed);
+        try {
+            GET("/binary/getErrorBinary");
+        }
+        finally {
+            assertTrue(Binary.errorInputStreamClosed);
+        }
     }
 }
