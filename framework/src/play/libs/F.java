@@ -485,7 +485,6 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() > bufferSize) {
-            	Logger.trace("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(event);
@@ -692,7 +691,6 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() >= archiveSize) {
-            	Logger.trace("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(new IndexedEvent(event));
