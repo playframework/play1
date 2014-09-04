@@ -1,11 +1,14 @@
 package play.libs;
 
+import org.jboss.netty.channel.ChannelHandlerContext;
+import play.Logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,10 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.jboss.netty.channel.ChannelHandlerContext;
-
-import play.Logger;
 
 public class F {
 
@@ -486,7 +485,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() > bufferSize) {
-            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+            	Logger.trace("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(event);
@@ -693,7 +692,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() >= archiveSize) {
-            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+            	Logger.trace("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(new IndexedEvent(event));
