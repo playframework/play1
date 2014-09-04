@@ -13,7 +13,7 @@ require:    &allDependencies
     - cglib -> cglib-nodep 3.1
     - com.google.code.gson -> gson 2.2.4 
     - com.jamonapi -> jamon 2.75
-    - com.ning -> async-http-client 1.8.9
+    - com.ning -> async-http-client 1.8.13
     - commons-beanutils 1.8.3  
     - commons-codec 1.8
     - commons-collections 3.2.1
@@ -56,7 +56,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-c3p0 4.2.15.Final
     - com.mchange -> mchange-commons-java 0.2.3.4
     - org.javassist -> javassist 3.18.2-GA
-    - org.jboss.netty -> netty 3.9.3.Final
+    - org.jboss.netty -> netty 3.9.4.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.7
     - org.slf4j -> slf4j-log4j12 1.7.7
