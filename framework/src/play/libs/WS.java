@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -28,8 +26,6 @@ import play.libs.ws.WSUrlFetch;
 import play.mvc.Http;
 import play.mvc.Http.Header;
 import play.utils.HTTP;
-import play.utils.NoOpEntityResolver;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 

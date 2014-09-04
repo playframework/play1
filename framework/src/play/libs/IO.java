@@ -60,12 +60,6 @@ public class IO {
             res = IOUtils.toString(is, encoding);
         } catch(Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                is.close();
-            } catch(Exception e) {
-                //
-            }
         }
         return res;
     }
