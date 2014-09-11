@@ -285,10 +285,11 @@ class PlayApplication(object):
             java_args.append('-server')
 
         javaVersion = getJavaVersion()
-        if javaVersion == "1.7":
+        print "~ using java version \"%s\"" % javaVersion
+        if javaVersion.startswith("1.7"):
             # JDK 7 compat
             java_args.append('-XX:-UseSplitVerifier')
-        elif javaVersion == "1.8":
+        elif javaVersion.startswith("1.8"):
             java_args.append('-noverify')
 
         java_policy = self.readConf('java.policy')

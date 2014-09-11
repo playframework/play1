@@ -67,15 +67,16 @@ def defineJavadocOptions(app, outdir, args):
         # Add link to JavaDoc of JAVA
         
         javaVersion = getJavaVersion()
-        if javaVersion == "1.5":
+        print "~ using java version \"%s\"" % javaVersion
+        if javaVersion.startswith("1.5"):
             print "~    Java(TM) Platform, Platform Standard Edition 5.0"        
             print "~    Java(TM) EE 5 Specification APIs"
             f.write(' -link http://docs.oracle.com/javase/1.5.0/docs/api/')
             f.write(' -link http://docs.oracle.com/javaee/5/api/')   
         else:
-            urlVersion = javaVersion[2:]
+            urlVersion = javaVersion[2:3]
             print "~    Java(TM) Platform, Standard Edition " + urlVersion + " API Specification"        
-            print "~    Java(TM) EE " + urlVersion + "Specification APIs"
+            print "~    Java(TM) EE " + urlVersion + " Specification APIs"
             f.write(' -link http://docs.oracle.com/javase/' + urlVersion + '/docs/api/')
             f.write(' -link http://docs.oracle.com/javaee/' + urlVersion + '/api/')         
      
