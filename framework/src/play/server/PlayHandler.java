@@ -13,10 +13,12 @@ import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
+
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
+import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -177,6 +179,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             Request.current.set(request);
             Response.current.set(response);
+            
+            Scope.Params.current.set(request.params);
+            Scope.RenderArgs.current.set(new Scope.RenderArgs());
+            Scope.RouteArgs.current.set(new Scope.RouteArgs());
+            Scope.Session.current.set(Scope.Session.restore());
+            Scope.Flash.current.set(Scope.Flash.restore());
+            CachedBoundActionMethodArgs.init();
+            
             try {
                 if (Play.mode == Play.Mode.DEV) {
                     Router.detectChanges(Play.ctxPath);

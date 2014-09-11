@@ -43,7 +43,7 @@ public class Scope {
         Map<String, String> data = new HashMap<String, String>();
         Map<String, String> out = new HashMap<String, String>();
 
-        static Flash restore() {
+        public static Flash restore() {
             try {
                 Flash flash = new Flash();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
@@ -159,7 +159,7 @@ public class Scope {
         static final String ID_KEY = "___ID";
         static final String TS_KEY = "___TS";
 
-        static Session restore() {
+        public static Session restore() {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
