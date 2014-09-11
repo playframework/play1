@@ -1,5 +1,7 @@
 import org.junit.*;
+
 import play.test.*;
+import play.libs.WS;
 import play.mvc.Http.*;
 import models.*;
 
@@ -112,11 +114,17 @@ public class FunctionalTestTest extends FunctionalTest {
     
     @Test
     public void canGetRenderArgs() {
-		Response response = GET("/users/edit");
+	Response response = GET("/users/edit");
         assertIsOk(response);
         assertNotNull(renderArgs("u"));
         User u = (User) renderArgs("u");
         assertEquals("Guillaume", u.name);
+    }
+    
+    @Test
+    public void testGettingStaticFile() {
+	Response response = GET("http://localhost:9003/public/session.test?req=1");
+	assertIsOk(response);
     }
 }
 
