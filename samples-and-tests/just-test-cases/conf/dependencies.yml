@@ -4,6 +4,7 @@ require:
     - play
     - crud
     - org.playframework -> example 1.0-SNAPSHOT
+    - play.test.modules  -> testModule latest.integration
 
 repositories:
     - localJarRep:
@@ -11,3 +12,9 @@ repositories:
         artifact: "${application.path}/../customJars/example/jar/example-1.0-SNAPSHOT.jar"
         contains:
             - org.playframework -> *
+    - playLocalTestModulesRep:
+        type: local
+        descriptor: ${application.path}/../modules/[module]/conf/dependencies.yml
+        artifact: ${application.path}/../modules/[module]
+        contains:
+            - play.test.modules -> *

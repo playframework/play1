@@ -237,10 +237,16 @@
             <include name="**/*.java"/>
         </javac>
     </target>
+    
+    <target name="build-test-modules">
+        <ant antfile="build.xml" target="build" dir="../samples-and-tests/modules/testModule" >
+            <property name="play.path" value="../../../"/>
+        </ant>
+    </target>
 
     <!-- Launch all *Test.java -->
 
-    <target name="test" depends="clean,jar" description="run tests suite">
+    <target name="test" depends="clean,jar,build-test-modules" description="run tests suite">
         <condition property="playExtension" value=".bat">
             <and><os family="windows"/></and>
         </condition>
