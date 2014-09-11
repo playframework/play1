@@ -262,7 +262,7 @@ public class GroovyTemplate extends BaseTemplate {
                 compiledTemplate = null;
                 BytecodeCache.deleteBytecode(name);
             }
-            Exception ex = (Exception) e.getCause();
+            Throwable ex = e.getCause();
             throwException(ex);
         } catch (Throwable e) {
             if (Play.mode == Mode.DEV) {
