@@ -246,11 +246,4 @@ def getJavaVersion():
     javaVersion = sp.communicate()
     javaVersion =  str( javaVersion)
     
-    if re.compile('1.5').search(javaVersion) is not None:
-        return "1.5"  
-    elif re.compile('1.6').search(javaVersion) is not None:
-        return "1.6" 
-    elif re.compile('1.7').search(javaVersion) is not None:
-        return "1.7" 
-    else:
-        return "1.8"
+    return re.search('java version "([0-9\.-_]{1,})"', javaVersion).group(1)
