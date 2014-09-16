@@ -123,6 +123,9 @@ public class GroovyTemplate extends BaseTemplate {
                 // ~~~ Please !
                 CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
                 compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+                compilerConfiguration.getOptimizationOptions().put("int", false);
+                compilerConfiguration.getOptimizationOptions().put("indy", true);
+
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                 compilationUnit.addSource(new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
