@@ -76,6 +76,8 @@ public class GroovyTemplate extends BaseTemplate {
         new GroovyShell().evaluate("java.lang.String.metaClass.if = { condition -> if(condition) delegate; else '' }");
     }
 
+    private boolean groovyIndy = "true".equals(Play.configuration.getProperty("groovy.indy", "false"));
+  
     public GroovyTemplate(String name, String source) {
         super(name, source);
     }
@@ -96,7 +98,7 @@ public class GroovyTemplate extends BaseTemplate {
     }
 
     @SuppressWarnings("unchecked")
-    void directLoad(byte[] code) throws Exception {
+    @Override protected void directLoad(byte[] code) throws Exception {
         TClassLoader tClassLoader = new TClassLoader();
         String[] lines = new String(code, "utf-8").split("\n");
         this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
@@ -111,7 +113,7 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    public void compile() {
+    @Override public void compile() {
         if (compiledTemplate == null) {
             try {
                 long start = System.currentTimeMillis();
@@ -123,8 +125,10 @@ public class GroovyTemplate extends BaseTemplate {
                 // ~~~ Please !
                 CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
                 compilerConfiguration.setSourceEncoding("utf-8"); // ouf
-                compilerConfiguration.getOptimizationOptions().put("int", false);
-                compilerConfiguration.getOptimizationOptions().put("indy", true);
+                if (groovyIndy) {
+                  compilerConfiguration.getOptimizationOptions().put("int", false);
+                  compilerConfiguration.getOptimizationOptions().put("indy", true);
+                }
 
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                 compilationUnit.addSource(new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
