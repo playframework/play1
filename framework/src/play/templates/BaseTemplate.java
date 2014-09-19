@@ -93,7 +93,7 @@ public abstract class BaseTemplate extends Template {
         throw new RuntimeException(e);
     }
 
-    abstract Throwable cleanStackTrace(Throwable e);
+    protected abstract Throwable cleanStackTrace(Throwable e);
     public static ThreadLocal<BaseTemplate> layout = new ThreadLocal<BaseTemplate>();
     public static ThreadLocal<Map<Object, Object>> layoutData = new ThreadLocal<Map<Object, Object>>();
     public static ThreadLocal<BaseTemplate> currentTemplate = new ThreadLocal<BaseTemplate>();

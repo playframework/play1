@@ -42,7 +42,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    String source() {
+    protected String source() {
         String source = template.source;
 
         // If a plugin has something to change in the template before the compilation
@@ -111,7 +111,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void head() {
+    protected void head() {
         print("class ");
         //This generated classname is parsed when creating cleanStackTrace.
         //The part after "Template_" is used as key when
@@ -131,7 +131,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
     @Override
     @SuppressWarnings("unused")
-    void end() {
+    protected void end() {
         for (String n : extensionsClassnames) {
             println(" } ");
         }
@@ -148,7 +148,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
      */
 
     @Override
-    void plain() {
+    protected void plain() {
         String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
         if (skipLineBreak && text.startsWith("\n")) {
             text = text.substring(1);
@@ -184,7 +184,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void script() {
+    protected void script() {
         String text = parser.getToken();
         if (text.indexOf("\n") > -1) {
             String[] lines = parser.getToken().split("\n");
@@ -202,7 +202,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void expr() {
+    protected void expr() {
         String expr = parser.getToken().trim();
         print(";out.print(__safeFaster("+expr+"))");
         markLine(parser.getLine());
@@ -210,7 +210,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void message() {
+    protected void message() {
         String expr = parser.getToken().trim();
         print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
@@ -218,7 +218,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void action(boolean absolute) {
+    protected void action(boolean absolute) {
         String action = parser.getToken().trim();
         if (action.trim().matches("^'.*'$")) {
             if (absolute) {
@@ -241,7 +241,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void startTag() {
+    protected void startTag() {
         tagIndex++;
         String tagText = parser.getToken().trim().replaceAll("\r", "").replaceAll("\n", " ");
         String tagName = "";
@@ -302,7 +302,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void endTag() {
+    protected void endTag() {
         String tagName = parser.getToken().trim();
         if (tagsStack.isEmpty()) {
             throw new TemplateCompilationException(template, parser.getLine(), "#{/" + tagName + "} is not opened.");
