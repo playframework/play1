@@ -28,23 +28,23 @@ public abstract class TemplateCompiler {
         return compile(new GroovyTemplate(file.relativePath(), file.contentAsString()));
     }
 
-    StringBuilder compiledSource = new StringBuilder();
-    BaseTemplate template;
-    TemplateParser parser;
-    boolean doNextScan = true;
-    TemplateParser.Token state;
-    Stack<Tag> tagsStack = new Stack<Tag>();
-    int tagIndex;
-    boolean skipLineBreak;
-    int currentLine = 1;
+    protected StringBuilder compiledSource = new StringBuilder();
+    protected BaseTemplate template;
+    protected TemplateParser parser;
+    protected boolean doNextScan = true;
+    protected TemplateParser.Token state;
+    protected Stack<Tag> tagsStack = new Stack<Tag>();
+    protected int tagIndex;
+    protected boolean skipLineBreak;
+    protected int currentLine = 1;
 
-    static class Tag {
+    protected static class Tag {
         String name;
         int startLine;
         boolean hasBody;
     }
 
-    void generate(BaseTemplate template) {
+    protected void generate(BaseTemplate template) {
         this.template = template;
         String source = source();
         this.parser = new TemplateParser(source);
@@ -113,41 +113,41 @@ public abstract class TemplateCompiler {
 
     }
 
-    abstract String source();
+    protected abstract String source();
 
-    abstract void head();
+    protected abstract void head();
 
-    abstract void end();
+    protected abstract void end();
 
-    abstract void plain();
+    protected abstract void plain();
 
-    abstract void script();
+    protected abstract void script();
 
-    abstract void expr();
+    protected abstract void expr();
 
-    abstract void message();
+    protected abstract void message();
 
-    abstract void action(boolean absolute);
+    protected abstract void action(boolean absolute);
 
-    abstract void startTag();
+    protected abstract void startTag();
 
-    abstract void endTag();
+    protected abstract void endTag();
 
-    void markLine(int line) {
+    protected void markLine(int line) {
         compiledSource.append("// line ").append(line);
         template.linesMatrix.put(currentLine, line);
     }
 
-    void println() {
+    protected void println() {
         compiledSource.append("\n");
         currentLine++;
     }
 
-    void print(String text) {
+    protected void print(String text) {
         compiledSource.append(text);
     }
 
-    void println(String text) {
+    protected void println(String text) {
         compiledSource.append(text);
         println();
     }
