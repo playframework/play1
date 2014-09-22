@@ -2,6 +2,7 @@ package play.templates;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import groovy.lang.GroovyClassLoader;
@@ -9,6 +10,7 @@ import groovy.lang.GroovyObjectSupport;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -23,13 +25,19 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.control.SourceUnit;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
+import org.codehaus.groovy.control.messages.ExceptionMessage;
+import org.codehaus.groovy.control.messages.Message;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
+
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.classloading.ApplicationClassloader;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Unbinder;
@@ -61,7 +69,7 @@ import play.utils.HTML;
 public class GroovyTemplate extends BaseTemplate {
 
     static final Map<String, SafeFormatter> safeFormatters = new HashMap<String, SafeFormatter>();
-
+    
     static {
         safeFormatters.put("csv", new SafeCSVFormatter());
         safeFormatters.put("html", new SafeHTMLFormatter());
@@ -75,7 +83,7 @@ public class GroovyTemplate extends BaseTemplate {
     static {
         new GroovyShell().evaluate("java.lang.String.metaClass.if = { condition -> if(condition) delegate; else '' }");
     }
-
+    
     public GroovyTemplate(String name, String source) {
         super(name, source);
     }
@@ -89,7 +97,7 @@ public class GroovyTemplate extends BaseTemplate {
         public TClassLoader() {
             super(Play.classloader);
         }
-
+       
         public Class defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
@@ -110,6 +118,19 @@ public class GroovyTemplate extends BaseTemplate {
             }
         }
     }
+    
+    /**
+     * Define the Compiler configuration
+     * @return the compiler Configuration
+     */
+    protected CompilerConfiguration setUpCompilerConfiguration(){
+        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();        
+        compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+        return compilerConfiguration;
+    }
+    
+    protected void onCompileEnd(){  
+    }
 
     public void compile() {
         if (compiledTemplate == null) {
@@ -117,14 +138,14 @@ public class GroovyTemplate extends BaseTemplate {
                 long start = System.currentTimeMillis();
 
                 TClassLoader tClassLoader = new TClassLoader();
-
                 // Let's compile the groovy source
                 final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
                 // ~~~ Please !
-                CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-                compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+                CompilerConfiguration compilerConfiguration = this.setUpCompilerConfiguration();
+                
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-                compilationUnit.addSource(new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
+                compilationUnit.addSource(new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));         
+
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
                 LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
@@ -175,21 +196,32 @@ public class GroovyTemplate extends BaseTemplate {
 
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
-                    SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
-                    SyntaxException syntaxException = errorMessage.getCause();
-                    Integer line = this.linesMatrix.get(syntaxException.getLine());
-                    if (line == null) {
-                        line = 0;
+                    Message errorMsg = e.getErrorCollector().getLastError();
+                    if (errorMsg instanceof SyntaxErrorMessage) {
+                        SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
+                        SyntaxException syntaxException = errorMessage.getCause();
+                        Integer line = this.linesMatrix.get(syntaxException.getLine());
+                        if (line == null) {
+                            line = 0;
+                        }
+                        String message = syntaxException.getMessage();
+                        if (message.indexOf("@") > 0) {
+                            message = message.substring(0, message.lastIndexOf("@"));
+                        }
+                        throw new TemplateCompilationException(this, line, message);
+                    } else{
+                        ExceptionMessage  errorMessage = (ExceptionMessage ) e.getErrorCollector().getLastError();
+                        Exception exception = errorMessage.getCause();
+                        Integer line = 0;
+                        String message = exception.getMessage();
+                        throw new TemplateCompilationException(this, line, message); 
                     }
-                    String message = syntaxException.getMessage();
-                    if (message.indexOf("@") > 0) {
-                        message = message.substring(0, message.lastIndexOf("@"));
-                    }
-                    throw new TemplateCompilationException(this, line, message);
                 }
                 throw new UnexpectedException(e);
             } catch (Exception e) {
                 throw new UnexpectedException(e);
+            } finally{
+                this.onCompileEnd();
             }
         }
         compiledTemplateName = compiledTemplate.getName();
@@ -204,13 +236,20 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    @Override
-    protected String internalRender(Map<String, Object> args) {
-        compile();
+    protected Binding setUpBindingVariables(Map<String, Object> args){
         Binding binding = new Binding(args);
         binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
+        return binding;
+    }
+    
+    @Override
+    protected String internalRender(Map<String, Object> args) {
+        compile();
+
+        Binding binding = this.setUpBindingVariables(args);
+        
         // If current response-object is present, add _response_encoding'
         Http.Response currentResponse = Http.Response.current();
         if (currentResponse != null) {
@@ -299,7 +338,7 @@ public class GroovyTemplate extends BaseTemplate {
         return null;
     }
 
-    Throwable cleanStackTrace(Throwable e) {
+    protected Throwable cleanStackTrace(Throwable e) {
         List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
         for (StackTraceElement se : e.getStackTrace()) {
             //Here we are parsing the classname to find the file on disk the template was generated from.
@@ -406,7 +445,22 @@ public class GroovyTemplate extends BaseTemplate {
             TagContext.exitTag();
         }
 
+        /**
+         * @deprecated '_' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on
+         * use {@link #__loadClass} instead
+         */
+        @Deprecated
         public Class _(String className) throws Exception {
+            return __loadClass(className);
+        }
+        
+        /**
+         * Load the class from Pay Class loader
+         * @param className : the class name
+         * @return the given class
+         * @throws Exception
+         */
+        public Class __loadClass(String className) throws Exception {
             try {
                 return Play.classloader.loadClass(className);
             } catch (ClassNotFoundException e) {
@@ -557,7 +611,7 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    static boolean isSimpleParam(Class type) {
+    protected static boolean isSimpleParam(Class type) {
         return Number.class.isAssignableFrom(type) || type.equals(String.class) || type.isPrimitive();
     }
 }
