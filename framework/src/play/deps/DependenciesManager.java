@@ -302,7 +302,11 @@ public class DependenciesManager {
     }
 
     private boolean isPlayModule(ArtifactDownloadReport artifact) throws Exception {
-        boolean isPlayModule = artifact.getLocalFile().getName().endsWith(".zip");
+        String name = artifact.getLocalFile().getName();
+        if (name.endsWith(".jar")) {
+            return false;
+        }
+        boolean isPlayModule = name.endsWith(".zip");
         if (!isPlayModule) {
             // Check again from origin location
             if (!artifact.getArtifactOrigin().isLocal() && artifact.getArtifactOrigin().getLocation().endsWith(".zip")) {
