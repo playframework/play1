@@ -73,10 +73,11 @@ public class JPA {
      * Get the EntityManager for specified persistence unit for this thread.
      */
     public static EntityManager em(String key) {
-        if ( currentEntityManager.get() != null &&  currentEntityManager.get().get(key) != null)
-            return  currentEntityManager.get().get(key).entityManager;
-        return newEntityManager(key);
-    } 
+      JPAContext jpaContext = currentEntityManager.get().get(key);
+      if (jpaContext == null)
+        throw new RuntimeException("No active EntityManager for name [" + key + "], transaction not started?");
+      return jpaContext.entityManager;
+    }
 
      /**
      * Bind an EntityManager to the current thread.
@@ -117,9 +118,7 @@ public class JPA {
      * Retrieve the current entityManager
      */
     public static EntityManager em() {
-        if (currentEntityManager.get() != null &&  currentEntityManager.get().get(DEFAULT) != null)
-            return  currentEntityManager.get().get(DEFAULT).entityManager;
-        return newEntityManager(DEFAULT);
+        return em(DEFAULT);
     }
 
     /*
