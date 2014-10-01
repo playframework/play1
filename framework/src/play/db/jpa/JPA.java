@@ -347,7 +347,7 @@ public class JPA {
     }
 
     public static void closeTx(String name) {
-        if (JPA.isInsideTransaction()) {
+        if (JPA.isInsideTransaction(name)) {
              EntityManager manager = em(name);
              try {
                     // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
