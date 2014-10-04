@@ -699,15 +699,15 @@ public class Play {
     public static void loadModules(VirtualFile appRoot) {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
-            if (System.getenv("MODULES") != null && System.getenv("MODULES").trim().length() > 0) {
-                for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
+            if (System.getenv("MODULES") != null && !System.getenv("MODULES").trim().isEmpty()) {
+                for (String m : System.getenv("MODULES").split(File.pathSeparator)) {
                     File modulePath = new File(m);
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                     } else {
                         final String modulePathName = modulePath.getName();
                         final String moduleName = modulePathName.contains("-") ?
-                                modulePathName.substring(0, modulePathName.lastIndexOf("-")) :
+                                modulePathName.substring(0, modulePathName.lastIndexOf('-')) :
                                 modulePathName;
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -735,15 +735,13 @@ public class Play {
 				modules.addAll(Arrays.asList(localModules.list()));		
 			}
 
-			for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
-				String moduleName = (String) iter.next();
-
+      for (String moduleName : modules) {
 				File module = new File(localModules, moduleName);
 
 				if (moduleName.contains("-")) {
-					moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+					moduleName = moduleName.substring(0, moduleName.lastIndexOf('-'));
 				}
-				
+
 				if(module == null || !module.exists()){
 				        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, module.getAbsolutePath());
 				} else if (module.isDirectory()) {
