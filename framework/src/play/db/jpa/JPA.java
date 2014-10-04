@@ -35,6 +35,10 @@ public class JPA {
         public boolean autoCommit = false;
     }
 
+    public static boolean isInitialized(){
+        return get(DEFAULT) != null;
+    }
+
     static Map<String, JPAContext> get() {
         return currentEntityManager.get();
     }
@@ -48,7 +52,7 @@ public class JPA {
     }
 
     static void createContext(EntityManager entityManager, boolean readonly) {
-        if (get(DEFAULT) != null) {
+        if (isInitialized()) {
             try {
                 get(DEFAULT).entityManager.close();
             } catch (Exception e) {
