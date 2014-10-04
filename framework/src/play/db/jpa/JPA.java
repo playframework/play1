@@ -10,8 +10,6 @@ import play.Invoker.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 
 import javax.persistence.*;
 import play.db.DB;
@@ -64,12 +62,12 @@ public class JPA {
     public static EntityManager newEntityManager(String key) {
         JPAPlugin jpaPlugin = Play.plugin(JPAPlugin.class);
         if(jpaPlugin == null) {
-            throw new RuntimeException("No JPA Plugin.");
+            throw new JPAException("No JPA Plugin.");
         }
 
         EntityManager em = jpaPlugin.em(key);
         if(em == null) {
-            throw new RuntimeException("No JPA EntityManagerFactory configured for name [" + key + "]");
+            throw new JPAException("No JPA EntityManagerFactory configured for name [" + key + "]");
         }
         return em;
     }
@@ -79,7 +77,7 @@ public class JPA {
     public static EntityManager em(String key) {
       JPAContext jpaContext = get(key);
       if (jpaContext == null)
-        throw new RuntimeException("No active EntityManager for name [" + key + "], transaction not started?");
+        throw new JPAException("No active EntityManager for name [" + key + "], transaction not started?");
       return jpaContext.entityManager;
     }
 
@@ -168,12 +166,8 @@ public class JPA {
     }
 
     public static boolean isInsideTransaction(String name) {
-        try {
-            JPAContext jpaContext = get(name);
-            return jpaContext != null && jpaContext.entityManager != null && jpaContext.entityManager.getTransaction() != null;
-        } catch (JPAException e) {
-            return false;
-        }
+        JPAContext jpaContext = get(name);
+        return jpaContext != null && jpaContext.entityManager != null && jpaContext.entityManager.getTransaction() != null;
     }
 
     public static <T> T withinFilter(F.Function0<T> block) throws Throwable {
