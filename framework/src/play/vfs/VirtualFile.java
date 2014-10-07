@@ -1,14 +1,12 @@
 package play.vfs;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.commons.io.IOUtils;
+import play.Play;
+import play.exceptions.UnexpectedException;
+import play.libs.IO;
+
+import java.io.*;
 import java.nio.channels.Channel;
-import java.nio.channels.FileChannel;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,9 +16,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import play.Play;
-import play.exceptions.UnexpectedException;
-import play.libs.IO;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * The VFS used by Play!
@@ -160,8 +156,12 @@ public class VirtualFile {
     public Channel channel() {
         try {
             FileInputStream fis = new FileInputStream(realFile);
-            FileChannel ch = fis.getChannel();
-            return ch;
+            try {
+                return fis.getChannel();
+            }
+            finally {
+                closeQuietly(fis);
+            }
         } catch (FileNotFoundException e) {
             return null;
         }
@@ -178,7 +178,13 @@ public class VirtualFile {
 
     public String contentAsString() {
         try {
-            return IO.readContentAsString(inputstream());
+            InputStream is = inputstream();
+            try {
+                return IO.readContentAsString(is);
+            }
+            finally {
+                closeQuietly(is);
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -197,12 +203,14 @@ public class VirtualFile {
     }
 
     public byte[] content() {
-        byte[] buffer = new byte[(int) length()];
         try {
             InputStream is = inputstream();
-            is.read(buffer);
-            is.close();
-            return buffer;
+            try {
+                return IOUtils.toByteArray(is);
+            }
+            finally {
+                closeQuietly(is);
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
