@@ -1,21 +1,5 @@
 package play.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.FutureTask;
-
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
@@ -30,7 +14,17 @@ import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Finally;
 import play.mvc.With;
+
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.FutureTask;
+
 import static java.util.Collections.addAll;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * Java utils
@@ -345,11 +339,14 @@ public class Java {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         try {
             ObjectInputStream oi = new ObjectInputStream(bais);
-            return oi.readObject();
-        } finally {
-            if (bais != null) {
-                bais.close();
+            try {
+                return oi.readObject();
             }
+            finally {
+                closeQuietly(oi);
+            }
+        } finally {
+            closeQuietly(bais);
         }
     }
 
@@ -360,7 +357,7 @@ public class Java {
      */
     public static class FieldWrapper {
 
-        final static int unwritableModifiers = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
+        static final int unwritableModifiers = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
         private Method setter;
         private Method getter;
         private Field field;

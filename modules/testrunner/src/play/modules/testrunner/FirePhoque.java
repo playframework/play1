@@ -57,12 +57,7 @@ public class FirePhoque {
             e.printStackTrace();
             System.exit(-1);
         } finally {
-            try {
-                if(in != null){
-                    in.close();
-                }
-            } catch (IOException e) {
-            }
+            closeQuietly(in);
         }
 
         // Let's tweak WebClient
