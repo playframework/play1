@@ -6,7 +6,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.scanner.ScannerException;
-
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
@@ -17,8 +16,8 @@ import play.data.binding.RootParamNode;
 import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
-import play.db.SQLSplitter;
 import play.db.Model;
+import play.db.SQLSplitter;
 import play.db.jpa.JPAPlugin;
 import play.exceptions.DatabaseException;
 import play.exceptions.UnexpectedException;
@@ -27,6 +26,7 @@ import play.libs.IO;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
+import javax.persistence.Entity;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,9 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-import javax.persistence.Entity;
 
 @As(Fixtures.PROFILE_NAME)
 public class Fixtures {
@@ -569,8 +566,6 @@ public class Fixtures {
         }
 
         if (DBPlugin.url.startsWith("jdbc:sqlserver:")) {
-            Statement exec=null;
-
             try {
                 List<String> names = new ArrayList<String>();
                 Connection connection = DB.getConnection();
@@ -582,11 +577,15 @@ public class Fixtures {
                 }
 
                     // Then we disable all foreign keys
-                exec = connection.createStatement();
-                for (String tableName:names)
-                    exec.addBatch("ALTER TABLE " + tableName+" NOCHECK CONSTRAINT ALL");
-                exec.executeBatch();
-                exec.close();
+                Statement exec = connection.createStatement();
+                try {
+                    for (String tableName : names)
+                        exec.addBatch("ALTER TABLE " + tableName + " NOCHECK CONSTRAINT ALL");
+                    exec.executeBatch();
+                }
+                finally {
+                    exec.close();
+                }
 
                 return;
             } catch (SQLException ex) {
