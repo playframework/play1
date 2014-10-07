@@ -83,10 +83,12 @@ public class SslHttpServerContextFactory {
         X509Certificate[] chain;
 
         public PEMKeyManager() {
+            PEMReader keyReader = null;
+            PEMReader reader = null;
             try {
                 final Properties p = Play.configuration;
 
-                PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file",
+                keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file",
                                                                                                "conf/host.key"))),
                                                     new PasswordFinder() {
                     public char[] getPassword() {
@@ -95,15 +97,15 @@ public class SslHttpServerContextFactory {
                 });
                 key = ((KeyPair) keyReader.readObject()).getPrivate();
 
-                PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
+                reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
 
-		X509Certificate cert;
-		Vector chainVector = new Vector();
-
-		while ((cert = (X509Certificate) reader.readObject()) != null) {
-		    chainVector.add(cert);
-		}
-		chain = (X509Certificate[])chainVector.toArray(new X509Certificate[1]);
+        		X509Certificate cert;
+        		Vector chainVector = new Vector();
+        
+        		while ((cert = (X509Certificate) reader.readObject()) != null) {
+        		    chainVector.add(cert);
+        		}
+        		chain = (X509Certificate[])chainVector.toArray(new X509Certificate[1]);
             } catch (Exception e) {
                 e.printStackTrace();
                 Logger.error(e, "");

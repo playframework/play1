@@ -4,15 +4,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import play.exceptions.UnexpectedException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 /**
  * Files utils
@@ -84,25 +81,29 @@ public class Files {
 
     public static void unzip(File from, File to) {
         try {
+            String outDir = to.getCanonicalPath();
             ZipFile zipFile = new ZipFile(from);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (entry.isDirectory()) {
-                    new File(to, entry.getName()).mkdir();
-                    continue;
+            try {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (entry.isDirectory()) {
+                        new File(to, entry.getName()).mkdir();
+                        continue;
+                    }
+                    File f = new File(to, entry.getName());
+                    if (!f.getCanonicalPath().startsWith(outDir)) {
+                        throw new IOException("Corrupted zip file");
+                    }
+                    f.getParentFile().mkdirs();
+                    copyInputStreamToFile(zipFile.getInputStream(entry), f);
                 }
-                File f = new File(to, entry.getName());
-                f.getParentFile().mkdirs();
-                FileOutputStream os = new FileOutputStream(f);
-                IO.copy(zipFile.getInputStream(entry), os);
-                os.close();
             }
-            zipFile.close();
+            finally {
+               zipFile.close();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }finally{
-            closeQuietly(zipFile);
         }
     }
 
