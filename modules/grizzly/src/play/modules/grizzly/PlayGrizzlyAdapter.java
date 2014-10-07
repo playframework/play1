@@ -391,7 +391,7 @@ public class PlayGrizzlyAdapter extends GrizzlyAdapter {
     private void copyStream(GrizzlyResponse grizzlyResponse, InputStream is) throws IOException {
         OutputStream os = grizzlyResponse.getOutputStream();
         try {
-            IOUtils.copyLarge(is, os, 8096);
+            IOUtils.copyLarge(is, os);
             os.flush();
         }
         finally {

@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
 public class FirePhoque {
 
     public static void main(String[] args) throws Exception {
