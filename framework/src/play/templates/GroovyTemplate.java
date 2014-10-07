@@ -2,67 +2,44 @@ package play.templates;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-
-import groovy.lang.Binding;
-import groovy.lang.Closure;
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyObjectSupport;
-import groovy.lang.GroovyShell;
-import groovy.lang.MissingPropertyException;
-import groovy.lang.Script;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-
+import groovy.lang.*;
+import org.apache.commons.io.FileUtils;
+import org.codehaus.groovy.control.*;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.MultipleCompilationErrorsException;
-import org.codehaus.groovy.control.Phases;
-import org.codehaus.groovy.control.SourceUnit;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
 import org.codehaus.groovy.control.messages.ExceptionMessage;
 import org.codehaus.groovy.control.messages.Message;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
-
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
-import play.classloading.ApplicationClassloader;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.Unbinder;
-import play.exceptions.ActionNotFoundException;
-import play.exceptions.NoRouteFoundException;
-import play.exceptions.PlayException;
-import play.exceptions.TagInternalException;
-import play.exceptions.TemplateCompilationException;
-import play.exceptions.TemplateExecutionException;
+import play.exceptions.*;
 import play.exceptions.TemplateExecutionException.DoBodyException;
-import play.exceptions.TemplateNotFoundException;
-import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
-import play.mvc.Http;
-import play.utils.Java;
 import play.mvc.ActionInvoker;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Router;
 import play.templates.types.SafeCSVFormatter;
 import play.templates.types.SafeHTMLFormatter;
 import play.templates.types.SafeXMLFormatter;
 import play.utils.HTML;
+import play.utils.Java;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * A template
@@ -183,9 +160,7 @@ public class GroovyTemplate extends BaseTemplate {
                         // emit bytecode to standard class layout as well
                         File f = Play.getFile("precompiled/templates/" + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
                         f.getParentFile().mkdirs();
-                        FileOutputStream fos = new FileOutputStream(f);
-                        fos.write(sb.toString().getBytes("utf-8"));
-                        fos.close();
+                        FileUtils.write(f, sb.toString(), "utf-8");
                     } catch (Exception e) {
                         Logger.warn(e, "Unexpected");
                     }

@@ -1,34 +1,24 @@
 package play.libs;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageOutputStream;
-import jj.play.ns.nl.captcha.backgrounds.BackgroundProducer;
-import jj.play.ns.nl.captcha.backgrounds.FlatColorBackgroundProducer;
-import jj.play.ns.nl.captcha.backgrounds.GradiatedBackgroundProducer;
-import jj.play.ns.nl.captcha.backgrounds.SquigglesBackgroundProducer;
-import jj.play.ns.nl.captcha.backgrounds.TransparentBackgroundProducer;
+import jj.play.ns.nl.captcha.backgrounds.*;
 import jj.play.ns.nl.captcha.gimpy.GimpyRenderer;
 import jj.play.ns.nl.captcha.gimpy.RippleGimpyRenderer;
 import jj.play.ns.nl.captcha.noise.CurvedLineNoiseProducer;
 import jj.play.ns.nl.captcha.text.renderer.DefaultWordRenderer;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Response;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Images utils
@@ -105,11 +95,15 @@ public class Images {
             ImageWriter writer = ImageIO.getImageWritersByMIMEType(mimeType).next();
             ImageWriteParam params = writer.getDefaultWriteParam();
             FileImageOutputStream toFs = new FileImageOutputStream(to);
-            writer.setOutput(toFs);
-            IIOImage image = new IIOImage(dest, null, null);
-            writer.write(null, image, params);
-            toFs.flush();
-            toFs.close();
+            try {
+                writer.setOutput(toFs);
+                IIOImage image = new IIOImage(dest, null, null);
+                writer.write(null, image, params);
+                toFs.flush();
+            }
+            finally {
+                toFs.close();
+            }
             writer.dispose();
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -21,9 +21,6 @@ public class Properties extends HashMap<String, String> {
 
     private static final long serialVersionUID = 1L;
 
-    public Properties() {
-    }
-
     public synchronized void load(InputStream is) throws IOException {
         load(is, "utf-8");
     }
@@ -33,29 +30,33 @@ public class Properties extends HashMap<String, String> {
             throw new NullPointerException("Can't read from null stream");
         }
         BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding));
-        while (true) {
-            String tmp = rd.readLine();
-            if (tmp == null) {
-                break;
-            }
-            tmp = tmp.trim();
+        try {
+            while (true) {
+                String tmp = rd.readLine();
+                if (tmp == null) {
+                    break;
+                }
+                tmp = tmp.trim();
 
-            if (tmp.startsWith("#")) {
-                continue;
-            }
-            if (!tmp.contains("=")) {
-                put(tmp, "");
-                continue;
-            }
+                if (tmp.startsWith("#")) {
+                    continue;
+                }
+                if (!tmp.contains("=")) {
+                    put(tmp, "");
+                    continue;
+                }
 
-            String[] kv = tmp.split("=", 2);
-            if (kv.length == 2) {
-                put(kv[0], kv[1]);
-            } else {
-                put(kv[0], "");
+                String[] kv = tmp.split("=", 2);
+                if (kv.length == 2) {
+                    put(kv[0], kv[1]);
+                } else {
+                    put(kv[0], "");
+                }
             }
         }
-        rd.close();
+        finally {
+            rd.close();
+        }
     }
 
     public String get(String key, String defaultValue) {
