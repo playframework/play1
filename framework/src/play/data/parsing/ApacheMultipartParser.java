@@ -1,31 +1,13 @@
 package play.data.parsing;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
 import org.apache.commons.fileupload.*;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.fileupload.util.Streams;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
-import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FileCleaningTracker;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
-
 import play.Logger;
 import play.Play;
 import play.data.FileUpload;
@@ -34,6 +16,11 @@ import play.data.Upload;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.utils.HTTP;
+
+import java.io.*;
+import java.util.*;
+
+import static org.apache.commons.io.FileUtils.readFileToByteArray;
 
 /**
  * From Apache commons fileupload.
@@ -251,25 +238,11 @@ public class ApacheMultipartParser extends DataParser {
                 return cachedContent;
             }
 
-            byte[] fileData = new byte[(int) getSize()];
-            FileInputStream fis = null;
-
             try {
-                fis = new FileInputStream(dfos.getFile());
-                fis.read(fileData);
+                return readFileToByteArray(dfos.getFile());
             } catch (IOException e) {
-                fileData = null;
-            } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        // ignore
-                    }
-                }
+                return null;
             }
-
-            return fileData;
         }
 
         /**
@@ -329,15 +302,7 @@ public class ApacheMultipartParser extends DataParser {
          */
         public void write(File file) throws Exception {
             if (isInMemory()) {
-                FileOutputStream fout = null;
-                try {
-                    fout = new FileOutputStream(file);
-                    fout.write(get());
-                } finally {
-                    if (fout != null) {
-                        fout.close();
-                    }
-                }
+                FileUtils.writeByteArrayToFile(file, get());
             } else {
                 File outputFile = getStoreLocation();
                 if (outputFile != null) {
@@ -347,34 +312,7 @@ public class ApacheMultipartParser extends DataParser {
                      * desired file.
                      */
                     if (!outputFile.renameTo(file)) {
-                        BufferedInputStream in = null;
-                        BufferedOutputStream out = null;
-                        try {
-                            in = new BufferedInputStream(
-                                    new FileInputStream(outputFile));
-                            out = new BufferedOutputStream(
-                                    new FileOutputStream(file));
-                            byte[] bytes = new byte[WRITE_BUFFER_SIZE];
-                            int s = 0;
-                            while ((s = in.read(bytes)) != -1) {
-                                out.write(bytes, 0, s);
-                            }
-                        } finally {
-                            if (in != null) {
-                                try {
-                                    in.close();
-                                } catch (IOException e) {
-                                    // ignore
-                                }
-                            }
-                            if (out != null) {
-                                try {
-                                    out.close();
-                                } catch (IOException e) {
-                                    // ignore
-                                }
-                            }
-                        }
+                        FileUtils.copyFile(outputFile, file);
                     }
                 } else {
                     /*

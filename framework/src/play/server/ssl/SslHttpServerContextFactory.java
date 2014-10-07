@@ -6,14 +6,16 @@ import org.bouncycastle.openssl.PasswordFinder;
 import play.Logger;
 import play.Play;
 
-import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.Socket;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.Vector;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class SslHttpServerContextFactory {
 
@@ -105,6 +107,9 @@ public class SslHttpServerContextFactory {
             } catch (Exception e) {
                 e.printStackTrace();
                 Logger.error(e, "");
+            } finally {
+                closeQuietly(keyReader);
+                closeQuietly(reader);
             }
         }
 
