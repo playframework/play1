@@ -178,14 +178,6 @@ public class ActionInvoker {
                             // @Catch
                             Object[] args = new Object[]{ex.getTargetException()};
                             List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
-                            Collections.sort(catches, new Comparator<Method>() {
-
-                                public int compare(Method m1, Method m2) {
-                                    Catch catch1 = m1.getAnnotation(Catch.class);
-                                    Catch catch2 = m2.getAnnotation(Catch.class);
-                                    return catch1.priority() - catch2.priority();
-                                }
-                            });
                             ControllerInstrumentation.stopActionCall();
                             for (Method mCatch : catches) {
                                 Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
@@ -290,14 +282,6 @@ public class ActionInvoker {
 
     private static void handleBefores(Http.Request request) throws Exception {
         List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
-        Collections.sort(befores, new Comparator<Method>() {
-
-            public int compare(Method m1, Method m2) {
-                Before before1 = m1.getAnnotation(Before.class);
-                Before before2 = m2.getAnnotation(Before.class);
-                return before1.priority() - before2.priority();
-            }
-        });
         ControllerInstrumentation.stopActionCall();
         for (Method before : befores) {
             String[] unless = before.getAnnotation(Before.class).unless();
@@ -332,14 +316,6 @@ public class ActionInvoker {
 
     private static void handleAfters(Http.Request request) throws Exception {
         List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
-        Collections.sort(afters, new Comparator<Method>() {
-
-            public int compare(Method m1, Method m2) {
-                After after1 = m1.getAnnotation(After.class);
-                After after2 = m2.getAnnotation(After.class);
-                return after1.priority() - after2.priority();
-            }
-        });
         ControllerInstrumentation.stopActionCall();
         for (Method after : afters) {
             String[] unless = after.getAnnotation(After.class).unless();
@@ -388,14 +364,6 @@ public class ActionInvoker {
 
         try {
             List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
-            Collections.sort(allFinally, new Comparator<Method>() {
-
-                public int compare(Method m1, Method m2) {
-                    Finally finally1 = m1.getAnnotation(Finally.class);
-                    Finally finally2 = m2.getAnnotation(Finally.class);
-                    return finally1.priority() - finally2.priority();
-                }
-            });
             ControllerInstrumentation.stopActionCall();
             for (Method aFinally : allFinally) {
                 String[] unless = aFinally.getAnnotation(Finally.class).unless();
