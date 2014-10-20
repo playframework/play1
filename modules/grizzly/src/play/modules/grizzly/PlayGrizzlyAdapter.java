@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 import play.Invoker;
 import play.Logger;
 import play.Play;
@@ -388,13 +390,13 @@ public class PlayGrizzlyAdapter extends GrizzlyAdapter {
 
     private void copyStream(GrizzlyResponse grizzlyResponse, InputStream is) throws IOException {
         OutputStream os = grizzlyResponse.getOutputStream();
-        byte[] buffer = new byte[8096];
-        int read = 0;
-        while ((read = is.read(buffer)) > 0) {
-            os.write(buffer, 0, read);
+        try {
+            IOUtils.copyLarge(is, os);
+            os.flush();
         }
-        os.flush();
-        is.close();
+        finally {
+            is.close();
+        }
     }
 
     public class GrizzlyInvocation extends Invoker.DirectInvocation {

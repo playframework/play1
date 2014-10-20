@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
 public class FirePhoque {
 
     public static void main(String[] args) throws Exception {
@@ -57,12 +59,7 @@ public class FirePhoque {
             e.printStackTrace();
             System.exit(-1);
         } finally {
-            try {
-                if(in != null){
-                    in.close();
-                }
-            } catch (IOException e) {
-            }
+            closeQuietly(in);
         }
 
         // Let's tweak WebClient
