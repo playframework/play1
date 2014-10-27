@@ -30,31 +30,42 @@ public class JPABase implements Serializable, play.db.Model {
 
    
     public void _save() {
+ 		boolean saving = false ;
         String dbName = JPA.getDBName(this.getClass());
         if (!em(dbName).contains(this)) {
+			saving = true ;
+            PlayPlugin.postEvent("JPASupport.objectSaving", this);
+			PlayPlugin.postEvent("JPASupport.objectPersisting", this);
             em(dbName).persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
-        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
-        try {
-            saveAndCascade(true);
-        } finally {
-            avoidCascadeSaveLoops.get().clear();
-        }
-        try {
-            em(dbName).flush();
-        } catch (PersistenceException e) {
-            if (e.getCause() instanceof GenericJDBCException) {
-                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(), e);
-            } else {
-                throw e;
-            }
-        }
-        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
-        try {
-            saveAndCascade(false);
-        } finally {
-            avoidCascadeSaveLoops.get().clear();
+		try{
+			avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+			try {
+				saveAndCascade(true);
+			} finally {
+				avoidCascadeSaveLoops.get().clear();
+			}
+			try {
+				em(dbName).flush();
+			} catch (PersistenceException e) {
+				if (e.getCause() instanceof GenericJDBCException) {
+					throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(), e);
+				} else {
+					throw e;
+				}
+			}
+			avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+			try {
+				saveAndCascade(false);
+			} finally {
+				avoidCascadeSaveLoops.get().clear();
+			}
+		}
+        finally
+        {
+			if( saving ) 
+				PlayPlugin.postEvent("JPASupport.objectSaved", this);
         }
     }
 
@@ -62,6 +73,7 @@ public class JPABase implements Serializable, play.db.Model {
         String dbName = JPA.getDBName(this.getClass());
          
         try {
+            PlayPlugin.postEvent("JPASupport.objectDeleting", this);
             avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
                 saveAndCascade(true);
@@ -83,13 +95,14 @@ public class JPABase implements Serializable, play.db.Model {
                 saveAndCascade(false);
             } finally {
                 avoidCascadeSaveLoops.get().clear();
-            }
-            PlayPlugin.postEvent("JPASupport.objectDeleted", this);
+            }     
         } catch (PersistenceException e) {
             throw e;
         } catch (Throwable e) {
             throw new RuntimeException(e);
-        }
+        } finally {
+			PlayPlugin.postEvent("JPASupport.objectDeleted", this);
+		}
     }
 
     public Object _key() {
@@ -106,9 +119,6 @@ public class JPABase implements Serializable, play.db.Model {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
-            if (willBeSaved) {
-                PlayPlugin.postEvent("JPASupport.objectUpdated", this);
-            }
         }
         // Cascade save
         try {

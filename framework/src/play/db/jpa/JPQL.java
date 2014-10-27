@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import play.Play;
+import play.PlayPlugin;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
 import play.db.Configuration;
@@ -28,7 +29,10 @@ public class JPQL {
     }
 
     public long count(String dbName, String entity) {
-        return Long.parseLong(em(dbName).createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
+   	    PlayPlugin.postEvent("JPQL.count.before", entity);
+        long result = Long.parseLong(em(dbName).createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
+		PlayPlugin.postEvent("JPQL.count.after", this);
+		return result ;
     }
 
     public long count(String entity, String query, Object[] params) {
@@ -36,9 +40,12 @@ public class JPQL {
     }
 
     public long count(String dbName, String entity, String query, Object[] params) {
-        return Long.parseLong(
+   	    PlayPlugin.postEvent("JPQL.count.before", entity);
+        long result = Long.parseLong(
                 bindParameters(em(dbName).createQuery(
                 createCountQuery(dbName, entity, entity, query, params)), params).getSingleResult().toString());
+		PlayPlugin.postEvent("JPQL.count.after", this);
+		return result ;
     }
 
     public List findAll(String entity) {
@@ -46,7 +53,10 @@ public class JPQL {
     }
 
      public List findAll(String dbName, String entity) {
-        return em(dbName).createQuery("select e from " + entity + " e").getResultList();
+  	    PlayPlugin.postEvent("JPQL.findAll.before", entity);
+        List result = em(dbName).createQuery("select e from " + entity + " e").getResultList();
+		PlayPlugin.postEvent("JPQL.findAll.after", this);
+		return result ;
     }
 
     public JPABase findById(String entity, Object id) throws Exception {
@@ -62,9 +72,12 @@ public class JPQL {
     }
 
     public List findBy(String dbName, String entity, String query, Object[] params) {
+  	    PlayPlugin.postEvent("JPQL.findBy.before", entity);
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, query, params));
-        return bindParameters(q, params).getResultList();
+        List result = bindParameters(q, params).getResultList();
+		PlayPlugin.postEvent("JPQL.findBy.after", this);
+		return result ;
     }
 
     public JPAQuery find(String entity, String query, Object[] params) {
@@ -73,10 +86,13 @@ public class JPQL {
 
 
     public JPAQuery find(String dbName, String entity, String query, Object[] params) {
+  	    PlayPlugin.postEvent("JPQL.find.before", entity);
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, query, params));
-        return new JPAQuery(
+        JPAQuery result = new JPAQuery(
                 createFindByQuery(dbName, entity, entity, query, params), bindParameters(q, params));
+		PlayPlugin.postEvent("JPQL.find.after", this);
+		return result ;
     }
 
     public JPAQuery find(String entity) {
@@ -84,10 +100,13 @@ public class JPQL {
     }
 
     public JPAQuery find(String dbName, String entity) {
+  	    PlayPlugin.postEvent("JPQL.find.before", entity);
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, null));
-        return new JPAQuery(
+        JPAQuery result = new JPAQuery(
                 createFindByQuery(dbName, entity, entity, null), bindParameters(q));
+		PlayPlugin.postEvent("JPQL.find.after", this);
+		return result ;
     }
 
     public JPAQuery all(String entity) {
@@ -95,16 +114,22 @@ public class JPQL {
     }
 
     public JPAQuery all(String dbName, String entity) {
+  	    PlayPlugin.postEvent("JPQL.all.before", entity);
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, null));
-        return new JPAQuery(
+        JPAQuery result = new JPAQuery(
                 createFindByQuery(dbName, entity, entity, null), bindParameters(q));
+		PlayPlugin.postEvent("JPQL.all.after", this);
+		return result ;
     }
 
     public int delete(String dbName, String entity, String query, Object[] params) {
+  	    PlayPlugin.postEvent("JPQL.delete.before", entity);
         Query q = em(dbName).createQuery(
                 createDeleteQuery(entity, entity, query, params));
-        return bindParameters(q, params).executeUpdate();
+        int result = bindParameters(q, params).executeUpdate();
+		PlayPlugin.postEvent("JPQL.delete.after", this);
+		return result ;
     }
 
     public int delete(String entity, String query, Object[] params) {
@@ -113,9 +138,12 @@ public class JPQL {
 
 
     public int deleteAll(String dbName, String entity) {
+  	    PlayPlugin.postEvent("JPQL.deleteAll.before", entity);
         Query q = em(dbName).createQuery(
                 createDeleteQuery(entity, entity, null));
-        return bindParameters(q).executeUpdate();
+        int result = bindParameters(q).executeUpdate();
+		PlayPlugin.postEvent("JPQL.deleteAll.after", this);
+		return result ;
     }
 
     public int deleteAll(String entity) {
@@ -123,13 +151,16 @@ public class JPQL {
     }
 
     public JPABase findOneBy(String dbName, String entity, String query, Object[] params) {
+  	    PlayPlugin.postEvent("JPQL.findOneBy.before", entity);
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, query, params));
         List results = bindParameters(q, params).getResultList();
-        if (results.size() == 0) {
-            return null;
-        }
-        return (JPABase) results.get(0);
+        JPABase result = null ;
+		if (results.size() != 0) {
+		    result = (JPABase) results.get(0);
+		}
+		PlayPlugin.postEvent("JPQL.findOneBy.after", this);
+		return result ;
     }
 
     public JPABase findOneBy(String entity, String query, Object[] params) {
@@ -141,11 +172,14 @@ public class JPQL {
     }
 
     public JPABase create(String dbName, String entity, String name, Params params) throws Exception {
+  	    PlayPlugin.postEvent("JPQL.create.before", entity);
         Object o = Play.classloader.loadClass(entity).newInstance();
 
         RootParamNode rootParamNode = ParamNode.convert(params.all());
 
-        return ((GenericModel) o).edit(rootParamNode, name);
+        JPABase result = ((GenericModel) o).edit(rootParamNode, name);
+		PlayPlugin.postEvent("JPQL.create.after", this);
+		return result ;
     }
 
     public String createFindByQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
