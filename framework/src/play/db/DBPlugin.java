@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -23,6 +22,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import jregex.Matcher;
+import org.apache.log4j.Level;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -130,9 +130,9 @@ public class DBPlugin extends PlayPlugin {
                             }
                         }
 
-                        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
-                        System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
-                        
+                        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.log4j.Log4jMLog");
+                        org.apache.log4j.Logger.getLogger("com.mchange").setLevel(Level.OFF);
+
                         ComboPooledDataSource ds = new ComboPooledDataSource();
                         ds.setDriverClass(dbConfig.getProperty("db.driver"));
                         ds.setJdbcUrl(dbConfig.getProperty("db.url"));

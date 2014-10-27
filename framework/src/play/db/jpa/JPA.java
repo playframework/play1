@@ -10,19 +10,23 @@ import play.Invoker.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 
 import javax.persistence.*;
 import play.db.DB;
 import play.Logger;
+import play.libs.F;
+
 /**
  * JPA Support
  */
 public class JPA {
 
     protected static Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<String,EntityManagerFactory>();
-    public static ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>();
+    public static final ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>() {
+      @Override protected Map<String, JPAContext> initialValue() {
+        return new ConcurrentHashMap<String, JPAContext>();
+      }
+    };
     public static String DEFAULT = "default";
 
     public static class JPAContext {
@@ -32,27 +36,29 @@ public class JPA {
     }
 
     public static boolean isInitialized(){
-        return (currentEntityManager.get() != null);
+        return get(DEFAULT) != null;
     }
-    public static Map<String, JPAContext> get() {
-        if (!isInitialized()) {
-            throw new JPAException("The JPA context is not initialized. JPA Entity Manager automatically start when one or more classes annotated with the @javax.persistence.Entity annotation are found in the application.");
-        }
+
+    static Map<String, JPAContext> get() {
         return currentEntityManager.get();
     }
 
+    static JPAContext get(String name) {
+        return get().get(name);
+    }
+
     static void clearContext() {
-         currentEntityManager.remove();
+        get().clear();
     }
 
     static void createContext(EntityManager entityManager, boolean readonly) {
-        if (currentEntityManager.get() != null) {
+        if (isInitialized()) {
             try {
-                currentEntityManager.get().get(DEFAULT).entityManager.close();
+                get(DEFAULT).entityManager.close();
             } catch (Exception e) {
                 // Let's it fail
             }
-            currentEntityManager.remove();
+            clearContext();
         }
        bindForCurrentThread(DEFAULT, entityManager, readonly);
     }
@@ -60,12 +66,12 @@ public class JPA {
     public static EntityManager newEntityManager(String key) {
         JPAPlugin jpaPlugin = Play.plugin(JPAPlugin.class);
         if(jpaPlugin == null) {
-            throw new RuntimeException("No JPA Plugin.");
+            throw new JPAException("No JPA Plugin.");
         }
 
         EntityManager em = jpaPlugin.em(key);
         if(em == null) {
-            throw new RuntimeException("No JPA EntityManagerFactory configured for name [" + key + "]");
+            throw new JPAException("No JPA EntityManagerFactory configured for name [" + key + "]");
         }
         return em;
     }
@@ -73,43 +79,27 @@ public class JPA {
      * Get the EntityManager for specified persistence unit for this thread.
      */
     public static EntityManager em(String key) {
-        if ( currentEntityManager.get() != null &&  currentEntityManager.get().get(key) != null)
-            return  currentEntityManager.get().get(key).entityManager;
-        return newEntityManager(key);
-    } 
+      JPAContext jpaContext = get(key);
+      if (jpaContext == null)
+        throw new JPAException("No active EntityManager for name [" + key + "], transaction not started?");
+      return jpaContext.entityManager;
+    }
 
      /**
      * Bind an EntityManager to the current thread.
      */
     public static void bindForCurrentThread(String name, EntityManager em, boolean readonly) {
-      
         JPAContext context = new JPAContext();
         context.entityManager = em;
         context.readonly = readonly;
 
         // Get all our context for our current thread
-        Map<String, JPAContext> jpaContexts = currentEntityManager.get();
-        if (jpaContexts == null) {
-            jpaContexts = new ConcurrentHashMap<String, JPAContext>();
-        }
-        jpaContexts.put(name, context);
-
-        currentEntityManager.set(jpaContexts);
+        get().put(name, context);
     }
 
     public static void unbindForCurrentThread(String name) {
-      
         // Get all our context for our current thread
-        Map<String, JPAContext> jpaContexts = currentEntityManager.get();
-        if (jpaContexts != null) {
-            jpaContexts.remove(name);
-            // Remove our em
-            if (jpaContexts.isEmpty()) {
-                currentEntityManager.remove();
-            } else {
-                currentEntityManager.set(jpaContexts);
-            }
-        }
+        get().remove(name);
     }
 
     // ~~~~~~~~~~~
@@ -117,9 +107,7 @@ public class JPA {
      * Retrieve the current entityManager
      */
     public static EntityManager em() {
-        if (currentEntityManager.get() != null &&  currentEntityManager.get().get(DEFAULT) != null)
-            return  currentEntityManager.get().get(DEFAULT).entityManager;
-        return newEntityManager(DEFAULT);
+        return em(DEFAULT);
     }
 
     /*
@@ -130,7 +118,7 @@ public class JPA {
     }
 
     public static void setRollbackOnly(String em) {
-         currentEntityManager.get().get(em).entityManager.getTransaction().setRollbackOnly();
+         get(em).entityManager.getTransaction().setRollbackOnly();
     }
 
     /**
@@ -169,8 +157,7 @@ public class JPA {
 
     public static EntityManager createEntityManager(String name) {
         if (isEnabled(name)) {
-            EntityManager manager = emfs.get(name).createEntityManager();
-            return manager;
+            return emfs.get(name).createEntityManager();
         }
         return null;
     }
@@ -183,20 +170,11 @@ public class JPA {
     }
 
     public static boolean isInsideTransaction(String name) {
-        try {
-            EntityManager em = (currentEntityManager.get() != null && currentEntityManager.get().get(name) != null) ?
-                em = currentEntityManager.get().get(name).entityManager : null;
-            if (em == null) {
-                return false;
-            }
-            EntityTransaction transaction = em.getTransaction();
-            return transaction != null;
-        } catch (JPAException e) {
-            return false;
-        }
+        JPAContext jpaContext = get(name);
+        return jpaContext != null && jpaContext.entityManager != null && jpaContext.entityManager.getTransaction() != null;
     }
 
-    public static <T> T withinFilter(play.libs.F.Function0<T> block) throws Throwable {
+    public static <T> T withinFilter(F.Function0<T> block) throws Throwable {
         if(InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
             //Called method or class is annotated with @NoTransaction telling us that
             //we should not start a transaction
@@ -235,10 +213,8 @@ public class JPA {
      * @param readOnly Is the transaction read-only?
      * @param block Block of code to execute.
      */
-    public static <T> T withTransaction(String dbName, boolean readOnly, play.libs.F.Function0<T> block) throws Throwable {
+    public static <T> T withTransaction(String dbName, boolean readOnly, F.Function0<T> block) throws Throwable {
         if (isEnabled()) {
-            List<EntityManager> em = new ArrayList<EntityManager>();
-            List<EntityTransaction> tx = new ArrayList<EntityTransaction>();
             boolean closeEm = true;
             // For each existing persisence unit
            
@@ -249,13 +225,9 @@ public class JPA {
                 for (String name : emfs.keySet()) {
                     EntityManager localEm = JPA.newEntityManager(name);
                     JPA.bindForCurrentThread(name, localEm, readOnly);
-                    em.add(localEm);
 
                     if (!readOnly) {
-                        EntityTransaction localTx = localEm.getTransaction();
-                    
-                        localTx.begin();
-                        tx.add(localTx);
+                        localEm.getTransaction().begin();
                     }
                 }
 
@@ -264,9 +236,8 @@ public class JPA {
                 boolean rollbackAll = false;
                 // Get back our entity managers
                 // Because people might have mess up with the current entity managers
-                Map<String, JPAContext> ems = currentEntityManager.get();
-                for (String db : ems.keySet()) {
-                    EntityManager m = ems.get(db).entityManager;
+                for (JPAContext jpaContext : get().values()) {
+                    EntityManager m = jpaContext.entityManager;
                     EntityTransaction localTx = m.getTransaction();
                     // The resource transaction must be in progress in order to determine if it has been marked for rollback
                     if (localTx.isActive() && localTx.getRollbackOnly()) {
@@ -274,9 +245,9 @@ public class JPA {
                     }
                 }
 
-                for (String db : ems.keySet()) {
-                    EntityManager m = ems.get(db).entityManager;
-                    boolean ro = ems.get(db).readonly;
+                for (JPAContext jpaContext : get().values()) {
+                    EntityManager m = jpaContext.entityManager;
+                    boolean ro = jpaContext.readonly;
                     EntityTransaction localTx = m.getTransaction();
                     // transaction must be active to make some rollback or commit
                     if (localTx.isActive()) {
@@ -294,29 +265,24 @@ public class JPA {
                 closeEm = false;
                 throw e;
             } catch(Throwable t) {
-                if(tx != null) {
-                    // Because people might have mess up with the current entity managers
-                    Map<String, JPAContext> ems = currentEntityManager.get();
-                    for (String db : ems.keySet()) {
-                        EntityManager m = ems.get(db).entityManager;
-                        EntityTransaction localTx = m.getTransaction();
-                        try { 
-                            // transaction must be active to make some rollback or commit
-                            if (localTx.isActive()) {
-                                localTx.rollback(); 
-                            }
-                        } catch(Throwable e) {
-                            
+                // Because people might have mess up with the current entity managers
+                for (JPAContext jpaContext : get().values()) {
+                    EntityManager m = jpaContext.entityManager;
+                    EntityTransaction localTx = m.getTransaction();
+                    try {
+                        // transaction must be active to make some rollback or commit
+                        if (localTx.isActive()) {
+                            localTx.rollback();
                         }
+                    } catch(Throwable e) {
                     }
                 }
-                
+
                 throw t;
             } finally {
                 if (closeEm) {
-                    Map<String, JPAContext> ems = currentEntityManager.get();
-                    for (String db : ems.keySet()) {
-                        EntityManager localEm = ems.get(db).entityManager;
+                    for (JPAContext jpaContext : get().values()) {
+                        EntityManager localEm = jpaContext.entityManager;
                         if (localEm.isOpen()) {
                             localEm.close();
                         }
@@ -347,7 +313,7 @@ public class JPA {
     }
 
     public static void closeTx(String name) {
-        if (JPA.isInsideTransaction()) {
+        if (JPA.isInsideTransaction(name)) {
              EntityManager manager = em(name);
              try {
                     // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
