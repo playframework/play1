@@ -48,6 +48,7 @@ public class XML {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbf.setFeature("http://xml.org/sax/features/external-paramater-entities", false);
             return dbf;
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
@@ -74,7 +75,7 @@ public class XML {
             Transformer transformer = factory.newTransformer();
             DOMSource domSource = new DOMSource(document);
             StreamResult streamResult = new StreamResult(writer);
-            transformer.transform(domSource, streamResult); 
+            transformer.transform(domSource, streamResult);
         } catch (TransformerException e) {
             throw new RuntimeException(
                     "Error when serializing XML document.", e);
@@ -85,7 +86,7 @@ public class XML {
     /**
      * Parse an XML file to DOM
      * @return null if an error occurs during parsing.
-     * 
+     *
      */
     public static Document getDocument(File file) {
         try {
