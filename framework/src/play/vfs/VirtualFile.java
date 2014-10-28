@@ -8,10 +8,7 @@ import play.libs.IO;
 import java.io.*;
 import java.nio.channels.Channel;
 import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +19,13 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  * The VFS used by Play!
  */
 public class VirtualFile {
+
+    private static class CacheEntry {
+        long cachedAt;
+        List<VirtualFile> list;
+    }
+
+    private static Map<String,CacheEntry> childrenCache = new HashMap<String,CacheEntry>();
 
     File realFile;
 
@@ -82,13 +86,30 @@ public class VirtualFile {
     }
 
     public List<VirtualFile> list() {
-        List<VirtualFile> res = new ArrayList<VirtualFile>();
-        if (exists()) {
-            File[] children = realFile.listFiles();
-            for (int i = 0; i < children.length; i++) {
-                res.add(new VirtualFile(children[i]));
+        if (!exists()) {
+            return Collections.emptyList();
+        }
+        String cacheKey = realFile.getAbsolutePath();
+        if (childrenCache.containsKey(cacheKey)) {
+            CacheEntry cacheEntry = childrenCache.get(cacheKey);
+            if (cacheEntry.cachedAt < realFile.lastModified()) {
+                childrenCache.remove(cacheKey);
+
+            } else {
+                // cache found
+                return cacheEntry.list;
             }
         }
+        List<VirtualFile> res = new ArrayList<VirtualFile>();
+        File[] children = realFile.listFiles();
+        for (int i = 0; i < children.length; i++) {
+            res.add(new VirtualFile(children[i]));
+        }
+        // store to cache
+        CacheEntry newCache = new CacheEntry();
+        newCache.cachedAt = new Date().getTime();
+        newCache.list = res;
+        childrenCache.put(cacheKey, newCache);
         return res;
     }
 
