@@ -513,7 +513,8 @@ public class JPAPlugin extends PlayPlugin {
                 tclazz = tclazz.getSuperclass();
             }
             for (Field f : fields) {
-                if (Modifier.isTransient(f.getModifiers())) {
+                int mod = f.getModifiers();
+                if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                     continue;
                 }
                 if (f.isAnnotationPresent(Transient.class)) {
@@ -585,7 +586,8 @@ public class JPAPlugin extends PlayPlugin {
                 properties = new HashMap<String, Model.Property>();
                 Set<Field> fields = getModelFields(clazz);
                 for (Field f : fields) {
-                    if (Modifier.isTransient(f.getModifiers())) {
+                    int mod = f.getModifiers();
+                    if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                         continue;
                     }
                     if (f.isAnnotationPresent(Transient.class)) {
@@ -880,7 +882,7 @@ public class JPAPlugin extends PlayPlugin {
 				} else {
 					return ((JPABase) o).willBeSaved;
 				}
-                   } 
+                   }
 			} else {
            		System.out.println("HOO: Case not handled !!!");
         	}
@@ -905,17 +907,17 @@ public class JPAPlugin extends PlayPlugin {
 		}
 
 		protected ThreadLocal<Object> entities = new ThreadLocal<Object>();
-		
+
 		@Override
 	 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)  {
 			entities.set(entity);
 			return super.onSave(entity, id, state, propertyNames, types);
 		}
-				
+
 		@Override
 		public void afterTransactionCompletion(org.hibernate.Transaction tx) {
 			entities.remove();
 		}
-    
+
     }
 }
