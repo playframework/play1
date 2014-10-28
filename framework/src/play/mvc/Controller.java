@@ -356,6 +356,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Render a 200 OK application/json response.
+     * @param o The Java object to serialize
+     * @param gson The GSON serializer object use
+     */
+    protected static void renderJSON(Object o, Gson gson) {
+        throw new RenderJson(o, gson);
+    }
+
+    /**
      * Send a 304 Not Modified response
      */
     protected static void notModified() {
