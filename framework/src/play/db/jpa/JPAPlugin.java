@@ -477,7 +477,8 @@ public class JPAPlugin extends PlayPlugin {
                 tclazz = tclazz.getSuperclass();
             }
             for (Field f : fields) {
-                if (Modifier.isTransient(f.getModifiers())) {
+                int mod = f.getModifiers();
+                if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                     continue;
                 }
                 if (f.isAnnotationPresent(Transient.class)) {
@@ -549,7 +550,8 @@ public class JPAPlugin extends PlayPlugin {
                 properties = new HashMap<String,Model.Property>();
                 Set<Field> fields = getModelFields(clazz);
                 for (Field f : fields) {
-                    if (Modifier.isTransient(f.getModifiers())) {
+                    int mod = f.getModifiers();
+                    if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                         continue;
                     }
                     if (f.isAnnotationPresent(Transient.class)) {
