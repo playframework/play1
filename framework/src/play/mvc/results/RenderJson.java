@@ -37,6 +37,10 @@ public class RenderJson extends Result {
         json = jsonString;
     }
 
+    public RenderJson(Object o, Gson gson) {
+        json = gson.toJson(o);
+    }
+
     public void apply(Request request, Response response) {
         try {
             String encoding = getEncoding();
