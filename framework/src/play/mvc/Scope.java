@@ -61,13 +61,13 @@ public class Scope {
             }
             if (out.isEmpty()) {
                 if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
                 }
                 return;
             }
             try {
                 String flashData = CookieDataCodec.encode(out);
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
