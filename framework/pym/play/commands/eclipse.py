@@ -107,7 +107,9 @@ def execute(**kargs):
                         cpXML += '</attributes>\n\t'
                         cpXML += '</classpathentry>\n\t'
                     else:
-                        cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
+                        # If the jar is a source jar or javadoc jar, don't add it to the classpath
+                        if not el.endswith('-sources.jar') and not el.endswith('-javadoc.jar'):
+                            cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
     if not is_application:
         cpXML += '<classpathentry kind="src" path="src"/>'
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
