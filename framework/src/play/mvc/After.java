@@ -23,4 +23,9 @@ public @interface After {
      */
     int priority() default 0;
 
+    /**
+     * Should we ignore classNames in only/unless, thus enabling usage in a
+     * subclass controller (default false)
+     */
+    boolean ignoreClassNames() default false;
 }

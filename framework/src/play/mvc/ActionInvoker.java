@@ -286,12 +286,13 @@ public class ActionInvoker {
         for (Method before : befores) {
             String[] unless = before.getAnnotation(Before.class).unless();
             String[] only = before.getAnnotation(Before.class).only();
+            boolean ignoreClassNames = before.getAnnotation(Before.class).ignoreClassNames();
             boolean skip = false;
             for (String un : only) {
-                if (!un.contains(".")) {
+                if (!un.contains(".") && !ignoreClassNames) {
                     un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
                 }
-                if (un.equals(request.action)) {
+                if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                     skip = false;
                     break;
                 } else {
@@ -299,10 +300,10 @@ public class ActionInvoker {
                 }
             }
             for (String un : unless) {
-                if (!un.contains(".")) {
+                if (!un.contains(".") && !ignoreClassNames) {
                     un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
                 }
-                if (un.equals(request.action)) {
+                if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                     skip = true;
                     break;
                 }
@@ -314,18 +315,20 @@ public class ActionInvoker {
         }
     }
 
+
     private static void handleAfters(Http.Request request) throws Exception {
         List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
         ControllerInstrumentation.stopActionCall();
         for (Method after : afters) {
             String[] unless = after.getAnnotation(After.class).unless();
             String[] only = after.getAnnotation(After.class).only();
+            boolean ignoreClassNames = after.getAnnotation(After.class).ignoreClassNames();
             boolean skip = false;
             for (String un : only) {
-                if (!un.contains(".")) {
+                if (!un.contains(".") && !ignoreClassNames) {
                     un = after.getDeclaringClass().getName().substring(12) + "." + un;
                 }
-                if (un.equals(request.action)) {
+                if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                     skip = false;
                     break;
                 } else {
@@ -333,10 +336,10 @@ public class ActionInvoker {
                 }
             }
             for (String un : unless) {
-                if (!un.contains(".")) {
+                if (!un.contains(".") && !ignoreClassNames) {
                     un = after.getDeclaringClass().getName().substring(12) + "." + un;
                 }
-                if (un.equals(request.action)) {
+                if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                     skip = true;
                     break;
                 }
@@ -368,12 +371,13 @@ public class ActionInvoker {
             for (Method aFinally : allFinally) {
                 String[] unless = aFinally.getAnnotation(Finally.class).unless();
                 String[] only = aFinally.getAnnotation(Finally.class).only();
+                boolean ignoreClassNames = aFinally.getAnnotation(Finally.class).ignoreClassNames();
                 boolean skip = false;
                 for (String un : only) {
-                    if (!un.contains(".")) {
+                    if (!un.contains(".") && !ignoreClassNames) {
                         un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
                     }
-                    if (un.equals(request.action)) {
+                    if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                         skip = false;
                         break;
                     } else {
@@ -381,10 +385,10 @@ public class ActionInvoker {
                     }
                 }
                 for (String un : unless) {
-                    if (!un.contains(".")) {
+                    if (!un.contains(".") && !ignoreClassNames) {
                         un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
                     }
-                    if (un.equals(request.action)) {
+                    if (compareActionToAnnotation(request.action, un, ignoreClassNames)) {
                         skip = true;
                         break;
                     }
@@ -629,4 +633,29 @@ public class ActionInvoker {
         return rArgs;
     }
 
+    /**
+     * Private util method to compare only/unless values to action method,
+     * taking into account the ignoreClass flag on the annotation. Used for
+     * Befores,Afters and Finallies
+     *
+     * @param actionValue
+     * @param annotationValue
+     * @param ignoreClassNames
+     * @return
+     */
+    private static boolean compareActionToAnnotation(String actionValue, String annotationValue, boolean ignoreClassNames) {
+        String act = actionValue;
+        String ann = annotationValue;
+
+        if (ignoreClassNames) {
+            if (act.contains(".")) {
+                act = act.substring(act.lastIndexOf(".") + 1);
+            }
+            if (ann.contains(".")) {
+                ann = ann.substring(ann.lastIndexOf(".") + 1);
+            }
+        }
+
+        return ann.equals(act);
+    }
 }
