@@ -48,7 +48,7 @@ public class XML {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            dbf.setFeature("http://xml.org/sax/features/external-paramater-entities", false);
+            dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             return dbf;
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
