@@ -26,6 +26,7 @@ import org.apache.log4j.Level;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.db.Configuration;
 import play.exceptions.DatabaseException;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -65,8 +66,21 @@ public class DBPlugin extends PlayPlugin {
             
             h2Server = org.h2.tools.Server.createWebServer(serverOptions);
             h2Server.start();
-
-            response.setHeader("Location", "http://" + domain + ":8082/");
+            
+            String h2WebPort = "8082";
+            Configuration dbConfig = new Configuration("default");
+            String h2WebPortConfig = dbConfig.getProperty("db.h2.webport");
+            try {
+	            if(h2WebPortConfig != null && Integer.valueOf(h2WebPortConfig) > 0) {
+	                h2WebPort = h2WebPortConfig;
+	            }
+            } catch (NumberFormatException e){
+            	// default to default port
+            	h2WebPort = "8082";
+            }
+            
+            play.Logger.info("Starting H2 db web server at: http://%s:%s", domain, h2WebPort);
+            response.setHeader("Location", "http://" + domain + ":" + h2WebPort + "/");
             return true;
         }
         return false;
