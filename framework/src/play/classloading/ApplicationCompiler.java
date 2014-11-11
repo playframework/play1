@@ -218,10 +218,10 @@ public class ApplicationCompiler {
                 sb.append(new String(packageName));
                 String name = sb.toString();
                 if (packagesCache.containsKey(name)) {
-                    return packagesCache.get(name).booleanValue();
+                    return packagesCache.get(name);
                 }
-                // Check if thera a .java or .class for this ressource
-                if (Play.classloader.getClassDefinition(name) != null) {
+                // Check if there are .java or .class for this resource
+                if (Play.classloader.getResource(name.replace('.', '/') + ".class") != null) {
                     packagesCache.put(name, false);
                     return false;
                 }
