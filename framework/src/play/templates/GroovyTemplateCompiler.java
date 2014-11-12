@@ -8,8 +8,12 @@ import play.templates.GroovyInlineTags.CALL;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * The template compiler
@@ -44,7 +48,83 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
         // If a plugin has something to change in the template before the compilation
         source = Play.pluginCollection.overrideTemplateSource(template, source);
+        
+        if(Boolean.parseBoolean(Play.configuration.getProperty("groovy.template.check.scala.comptatibility", "false"))){
+            source = this.checkScalaComptability(source);
+        }
+        
+        return source;
+    }
+    
+    /**
+     * Makes the code scala compatible (for the scala module).
+     */
+    protected String checkScalaComptability(String source){  
+        // Static access
+        List<String> names = new ArrayList<String>();
+        Map<String, String> originalNames = new HashMap<String, String>();
+        for (Class clazz : Play.classloader.getAllClasses()) {
+            if (clazz.getName().endsWith("$")) {
+                String name = clazz.getName().substring(0, clazz.getName().length() - 1).replace('$', '.') + '$';
+                names.add(name);
+                originalNames.put(name, clazz.getName());
+            } else {
+                String name = clazz.getName().replace('$', '.');
+                names.add(name);
+                originalNames.put(name, clazz.getName());
+            }
+        }
+        Collections.sort(names, new Comparator<String>() {
 
+            public int compare(String o1, String o2) {
+                return o2.length() - o1.length();
+            }
+        });
+
+        // We're about to do many many String.replaceAll() so we do some
+        // checking first
+        // to try to reduce the number of needed replaceAll-calls.
+        // Morten: I have tried to create a single regexp that can be used
+        // instead of all the replaceAll,
+        // but I failed to do so.. Such a single regexp would be much faster
+        // since
+        // we then we only would have to have one pass.
+
+        if (!names.isEmpty()) {
+
+            if (names.size() <= 1 || source.indexOf("new ") >= 0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('"
+                            + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf("instanceof") >= 0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('"
+                            + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf(".class") >= 0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class",
+                            "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')");
+
+                }
+            }
+
+            // With the current arg0 in replaceAll, it is not possible to do a
+            // quick indexOf-check for this one,
+            // so we have to run all the replaceAll-calls
+            for (String cName : names) { // dynamic class binding
+                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('"
+                        + originalNames.get(cName).replace("$", "\\$") + "')$2");
+
+            }
+
+        }
         return source;
     }
 
