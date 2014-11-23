@@ -470,11 +470,13 @@ public class ApplicationClassloader extends ClassLoader {
     public Class getClassIgnoreCase(String name) {
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
-            if (c.name.equalsIgnoreCase(name) || c.name.replace("$", ".").equalsIgnoreCase(name)) {
-                if (Play.usePrecompiled) {
-                    return c.javaClass;
-                }
-                return loadApplicationClass(c.name);
+            if (c.name.equalsIgnoreCase(name)) {
+                return Play.usePrecompiled ? c.javaClass : loadApplicationClass(c.name);
+            }
+        }
+        for (ApplicationClass c : Play.classes.all()) {
+            if (c.name.replace("$", ".").equalsIgnoreCase(name)) {
+                return Play.usePrecompiled ? c.javaClass : loadApplicationClass(c.name);
             }
         }
         return null;
