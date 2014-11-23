@@ -1,12 +1,12 @@
 package play.mvc.results;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 302 Redirect
@@ -29,10 +29,10 @@ public class Redirect extends Result {
 	 *            Parameters to be included at the end of the URL as a HTTP GET. This is a map whose entries are written out as key1=value1&amp;key2=value2 etc..
 	 */
 	public Redirect(String url, Map<String, String> parameters) {
-		StringBuffer urlSb = new StringBuffer(url);
-		char prepend = '?';
+    StringBuilder urlSb = new StringBuilder(url);
 
-		if (parameters != null && parameters.size() > 0) {
+		if (parameters != null && !parameters.isEmpty()) {
+      char prepend = '?';
 
 			for (Entry<String, String> parameter : parameters.entrySet()) {
 				urlSb.append(prepend).append(parameter.getKey()).append('=').append(parameter.getValue());

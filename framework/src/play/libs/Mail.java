@@ -3,18 +3,18 @@ package play.libs;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
-
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
-import play.libs.mail.*;
+import play.libs.mail.AbstractMailSystemFactory;
+import play.libs.mail.MailSystem;
 import play.libs.mail.test.LegacyMockMailSystem;
-import play.utils.Utils;
+import play.utils.Utils.Maps;
 
-import javax.mail.*;
-
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.*;
@@ -29,7 +29,7 @@ public class Mail {
 
         private final MailSystem mailSystem;
 
-        public StaticMailSystemFactory(MailSystem mailSystem) {
+        private StaticMailSystemFactory(MailSystem mailSystem) {
             this.mailSystem = mailSystem;
         }
 
@@ -84,16 +84,16 @@ public class Mail {
         } else if (email.getFromAddress() == null) {
             throw new MailException("Please define a 'from' email address", new NullPointerException());
         }
-        if ((email.getToAddresses() == null || email.getToAddresses().size() == 0) &&
-            (email.getCcAddresses() == null || email.getCcAddresses().size() == 0)  &&
-            (email.getBccAddresses() == null || email.getBccAddresses().size() == 0)) 
+        if ((email.getToAddresses() == null || email.getToAddresses().isEmpty()) &&
+            (email.getCcAddresses() == null || email.getCcAddresses().isEmpty())  &&
+            (email.getBccAddresses() == null || email.getBccAddresses().isEmpty())) 
         {
             throw new MailException("Please define a recipient email address", new NullPointerException());
         }
         if (email.getSubject() == null) {
             throw new MailException("Please define a subject", new NullPointerException());
         }
-        if (email.getReplyToAddresses() == null || email.getReplyToAddresses().size() == 0) {
+        if (email.getReplyToAddresses() == null || email.getReplyToAddresses().isEmpty()) {
             email.addReplyTo(email.getFromAddress().getAddress());
         }
 
@@ -107,22 +107,22 @@ public class Mail {
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host", "localhost"));
 
             String channelEncryption;
-            if (Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
+            if (Play.configuration.containsKey("mail.smtp.protocol") && "smtps".equals(Play.configuration.getProperty("mail.smtp.protocol", "smtp"))) {
                 // Backward compatibility before stable5
                 channelEncryption = "starttls";
             } else {
                 channelEncryption = Play.configuration.getProperty("mail.smtp.channel", "clear");
             }
 
-            if (channelEncryption.equals("clear")) {
+            if ("clear".equals(channelEncryption)) {
                 props.put("mail.smtp.port", "25");
-            } else if (channelEncryption.equals("ssl")) {
+            } else if ("ssl".equals(channelEncryption)) {
                 // port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a root ca.)
                 props.put("mail.smtp.port", "465");
                 props.put("mail.smtp.socketFactory.port", "465");
                 props.put("mail.smtp.socketFactory.class", "play.utils.YesSSLSocketFactory");
                 props.put("mail.smtp.socketFactory.fallback", "false");
-            } else if (channelEncryption.equals("starttls")) {
+            } else if ("starttls".equals(channelEncryption)) {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
@@ -131,9 +131,8 @@ public class Mail {
             }
 
             // Inject additional  mail.* settings declared in Play! configuration
-            Map<Object, Object> additionalSettings = new HashMap<Object, Object>();
-            additionalSettings = Utils.Maps.filterMap(Play.configuration, "^mail\\..*");
-            if(additionalSettings.size() > 0){
+            Map<Object, Object> additionalSettings = Maps.filterMap(Play.configuration, "^mail\\..*");
+            if (!additionalSettings.isEmpty()) {
                 // Remove "password" fields
                 additionalSettings.remove("mail.smtp.pass");
                 additionalSettings.remove("mail.smtp.password"); 
@@ -197,7 +196,7 @@ public class Mail {
                 }
             });
         } else {
-            final StringBuffer result = new StringBuffer();
+            final StringBuilder result = new StringBuilder();
             try {
                 msg.setSentDate(new Date());
                 msg.send();
@@ -220,11 +219,11 @@ public class Mail {
                     return true;
                 }
 
-                public Boolean get() throws InterruptedException, ExecutionException {
+                public Boolean get() {
                     return result.length() == 0;
                 }
 
-                public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                public Boolean get(long timeout, TimeUnit unit) {
                     return result.length() == 0;
                 }
             };

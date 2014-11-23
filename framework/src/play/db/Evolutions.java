@@ -1,7 +1,6 @@
 package play.db;
 
 import org.apache.commons.lang.StringUtils;
-
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -23,16 +22,8 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 
 
 /**
@@ -184,7 +175,6 @@ public class Evolutions extends PlayPlugin {
      * Method to handle the "resolve" action
      * @param dbName : database name
      * @param moduleRoot : the module root of evolutions
-     * @param evolutions : list of evolutions
      * @return true if need to check, false otherwise
      */
     private static boolean handleResolveAction(String dbName,  Entry<String, VirtualFile> moduleRoot){
@@ -600,9 +590,9 @@ public class Evolutions extends PlayPlugin {
                     }
                     
                     String sql = IO.readContentAsString(evolution);
-                    StringBuffer sql_up = new StringBuffer();
-                    StringBuffer sql_down = new StringBuffer();
-                    StringBuffer current = new StringBuffer();
+                    StringBuilder sql_up = new StringBuilder();
+                    StringBuilder sql_down = new StringBuilder();
+                    StringBuilder current = new StringBuilder();
                     for (String line : sql.split("\r?\n")) {
                         if (line.trim().matches("^#.*[!]Ups")) {
                             current = sql_up;

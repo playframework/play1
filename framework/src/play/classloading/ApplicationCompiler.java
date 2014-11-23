@@ -1,18 +1,9 @@
 package play.classloading;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringTokenizer;
-
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.*;
+import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ClassFile;
-import org.eclipse.jdt.internal.compiler.CompilationResult;
-import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
-import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
-import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
-import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
@@ -20,13 +11,16 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.jdt.internal.compiler.Compiler;
-
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.CompilationException;
 import play.exceptions.UnexpectedException;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Java compiler (uses eclipse JDT)
@@ -144,7 +138,7 @@ public class ApplicationCompiler {
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
             public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
-                final StringBuffer result = new StringBuffer();
+                final StringBuilder result = new StringBuilder(compoundTypeName.length * 7);
                 for (int i = 0; i < compoundTypeName.length; i++) {
                     if (i != 0) {
                         result.append('.');
@@ -155,7 +149,7 @@ public class ApplicationCompiler {
             }
 
             public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
-                final StringBuffer result = new StringBuffer();
+                final StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
                 for (int i = 0; i < packageName.length; i++) {
                     result.append(packageName[i]);
                     result.append('.');
@@ -208,15 +202,20 @@ public class ApplicationCompiler {
 
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
-                StringBuilder sb = new StringBuilder();
-                if (parentPackageName != null) {
+                String name;
+                if (parentPackageName == null) {
+                    name = new String(packageName);
+                }
+                else {
+                    StringBuilder sb = new StringBuilder(parentPackageName.length * 7 + packageName.length);
                     for (char[] p : parentPackageName) {
-                        sb.append(new String(p));
+                        sb.append(p);
                         sb.append(".");
                     }
+                    sb.append(new String(packageName));
+                    name = sb.toString();
                 }
-                sb.append(new String(packageName));
-                String name = sb.toString();
+                
                 if (packagesCache.containsKey(name)) {
                     return packagesCache.get(name);
                 }
@@ -261,7 +260,7 @@ public class ApplicationCompiler {
                 for (int i = 0; i < clazzFiles.length; i++) {
                     final ClassFile clazzFile = clazzFiles[i];
                     final char[][] compoundName = clazzFile.getCompoundName();
-                    final StringBuffer clazzName = new StringBuffer();
+                    final StringBuilder clazzName = new StringBuilder();
                     for (int j = 0; j < compoundName.length; j++) {
                         if (j != 0) {
                             clazzName.append('.');

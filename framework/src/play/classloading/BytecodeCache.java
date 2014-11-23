@@ -122,13 +122,13 @@ public class BytecodeCache {
      */
     static String hash(String text) {
         try {
-            StringBuffer plugins = new StringBuffer();
+            StringBuilder plugins = new StringBuilder();
             for(PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
                 plugins.append(plugin.getClass().getName());
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((Play.version + plugins.toString() + text).getBytes("utf-8"));
+            messageDigest.update((Play.version + plugins + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {
