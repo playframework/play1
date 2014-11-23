@@ -213,9 +213,7 @@ public class ApplicationClassloader extends ClassLoader {
             return null;
         }
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            IOUtils.copyLarge(is, os);
-            return os.toByteArray();
+            return IOUtils.toByteArray(is);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
