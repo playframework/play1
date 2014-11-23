@@ -6,13 +6,13 @@ import java.util.regex.Pattern;
 
 /**
  * Time utils
- * 
+ *
  * Provides a parser for time expression.
  * <p>
  * Time expressions provide the ability to specify complex time combinations
  * such as &quot;2d&quot;, &quot;1w2d3h10s&quot; or &quot;2d4h10s&quot;.
  * </p>
- * 
+ *
  */
 public class Time {
     private final static Pattern p = Pattern.compile("(([0-9]+?)((d|h|mi|min|mn|s)))+?");
@@ -22,7 +22,7 @@ public class Time {
 
     /**
      * Parse a duration
-     * 
+     *
      * @param duration
      *            3h, 2mn, 7s or combination 2d4h10s, 1w2d3h10s
      * @return The number of seconds
@@ -56,7 +56,7 @@ public class Time {
 
     /**
      * Parse a CRON expression
-     * 
+     *
      * @param cron
      *            The CRON String
      * @return The next Date that satisfy the expression
@@ -72,7 +72,7 @@ public class Time {
     /**
      * Compute the number of milliseconds between the next valid date and the
      * one after
-     * 
+     *
      * @param cron
      *            The CRON String
      * @return the number of milliseconds between the next valid date and the
@@ -85,7 +85,7 @@ public class Time {
     /**
      * Compute the number of milliseconds between the next valid date and the
      * one after
-     * 
+     *
      * @param cron
      *            The CRON String
      * @param date
