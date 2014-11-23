@@ -45,14 +45,13 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        VirtualFile javaFile = getJava(name);
-        if(javaFile != null){
-            if (!classes.containsKey(name)) {
-                classes.put(name, new ApplicationClass(name));
+        if (!classes.containsKey(name)) {
+            VirtualFile javaFile = getJava(name);
+            if (javaFile != null) {
+                classes.put(name, new ApplicationClass(name, javaFile));
             }
-            return classes.get(name);
         }
-        return null;
+        return classes.get(name);
     }
 
     /**
@@ -190,15 +189,19 @@ public class ApplicationClasses {
         }
 
         public ApplicationClass(String name) {
+            this(name, getJava(name));
+        }
+
+        public ApplicationClass(String name, VirtualFile javaFile) {
             this.name = name;
-            this.javaFile = getJava(name);
+            this.javaFile = javaFile;
             this.refresh();
         }
 
         /**
          * Need to refresh this class !
          */
-        public void refresh() {
+        public final void refresh() {
             if (this.javaFile != null) {
                 this.javaSource = this.javaFile.contentAsString();
             }
@@ -242,7 +245,7 @@ public class ApplicationClasses {
             if (System.getProperty("precompile") != null) {
                 try {
                     // emit bytecode to standard class layout as well
-                    File f = Play.getFile("precompiled/java/" + (name.replace(".", "/")) + ".class");
+                    File f = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
                     f.getParentFile().mkdirs();
                     FileOutputStream fos = new FileOutputStream(f);
                     try {
