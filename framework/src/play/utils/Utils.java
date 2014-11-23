@@ -1,22 +1,14 @@
 package play.utils;
 
+import play.Play;
+import play.mvc.Scope;
+
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import play.Play;
-import play.mvc.Scope;
+import java.util.*;
 
 /**
  * Generic utils
@@ -33,7 +25,7 @@ public class Utils {
         }
         StringBuilder toReturn = new StringBuilder(String.valueOf(iter.next()));
         while (iter.hasNext()) {
-            toReturn.append(separator + String.valueOf(iter.next()));
+            toReturn.append(separator).append(iter.next());
         }
         return toReturn.toString();
     }
@@ -57,7 +49,7 @@ public class Utils {
         }
         StringBuilder toReturn = new StringBuilder("@" + iter.next().annotationType().getSimpleName());
         while (iter.hasNext()) {
-            toReturn.append(", @" + iter.next().annotationType().getSimpleName());
+            toReturn.append(", @").append(iter.next().annotationType().getSimpleName());
         }
         return toReturn.toString();
     }

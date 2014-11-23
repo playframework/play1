@@ -128,7 +128,7 @@ public class BytecodeCache {
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((Play.version + plugins.toString() + text).getBytes("utf-8"));
+            messageDigest.update((Play.version + plugins + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

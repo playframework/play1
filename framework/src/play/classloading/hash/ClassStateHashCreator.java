@@ -58,7 +58,7 @@ public class ClassStateHashCreator {
                 buf.append( getClassDefsForFile(current));
             }
         } else if (!current.getName().startsWith(".")) {
-            // TODO: we could later optimizie it further if we check if the entire folder is unchanged
+            // TODO: we could later optimize it further if we check if the entire folder is unchanged
             for (VirtualFile virtualFile : current.list()) {
                 scan(buf, virtualFile);
             }
