@@ -49,6 +49,8 @@ public class XML {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
             dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbf.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             return dbf;
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
