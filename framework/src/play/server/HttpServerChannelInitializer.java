@@ -1,29 +1,33 @@
 package play.server;
 
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelHandler;
-import play.Play;
-import play.Logger;
-import java.util.Map;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.socket.SocketChannel;
+
 import java.util.HashMap;
+import java.util.Map;
 
-import static org.jboss.netty.channel.Channels.pipeline;
+import play.Logger;
+import play.Play;
 
-public class HttpServerPipelineFactory implements ChannelPipelineFactory {
+public class HttpServerChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     private String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
 
     protected static Map<String, Class> classes = new HashMap<String, Class>();
 
-    public ChannelPipeline getPipeline() throws Exception {
-
-        ChannelPipeline pipeline = pipeline();
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.netty.channel.ChannelInitializer#initChannel(io.netty.channel.Channel)
+	 */
+	@Override
+	protected void initChannel(SocketChannel ch) throws Exception {
         
         String[] handlers = pipelineConfig.split(",");  
-        if(handlers.length <= 0){
+        if (handlers.length <= 0) {
             Logger.error("You must defined at least the playHandler in \"play.netty.pipeline\"");
-            return pipeline;
+            return;
         }       
         
         // Create the play Handler (always the last one)
@@ -32,7 +36,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
         PlayHandler playHandler = (PlayHandler) instance;
         if (playHandler == null) {
             Logger.error("The last handler must be the playHandler in \"play.netty.pipeline\"");
-            return pipeline;
+            return;
         }
       
         // Get all the pipeline. Give the user the opportunity to add their own
@@ -41,9 +45,9 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
             try {
                 String name = getName(handler.trim());
                 instance = getInstance(handler);
+                
                 if (instance != null) {
-                    pipeline.addLast(name, instance);
-                    playHandler.pipelines.put(name, instance);
+                	ch.pipeline().addLast(name, instance);
                 }
             } catch (Throwable e) {
                 Logger.error(" error adding " + handler, e);
@@ -51,11 +55,8 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
         }
                
         if (playHandler != null) {
-            pipeline.addLast("handler", playHandler);
-            playHandler.pipelines.put("handler", playHandler);
+        	ch.pipeline().addLast("handler", playHandler);
         } 
-       
-        return pipeline;
     }
 
     protected String getName(String name) {
@@ -65,7 +66,6 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
     }
 
     protected ChannelHandler getInstance(String name) throws Exception {
-
         Class clazz = classes.get(name);
         if (clazz == null) {
             clazz = Class.forName(name);

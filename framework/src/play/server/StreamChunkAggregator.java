@@ -1,18 +1,16 @@
 package play.server;
 
 import org.apache.commons.io.IOUtils;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.codec.http.HttpChunk;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMessage;
+import io.netty.channel.*;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMessage;
 import play.Play;
 
 import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
-public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
+public class StreamChunkAggregator extends ChannelInboundHandlerAdapter {
 
     private volatile HttpMessage currentMessage;
     private volatile OutputStream out;
@@ -40,10 +38,10 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
                 final String localName = UUID.randomUUID().toString();
                 // A chunked message - remove 'Transfer-Encoding' header,
                 // initialize the cumulative buffer, and wait for incoming chunks.
-                List<String> encodings = m.getHeaders(HttpHeaders.Names.TRANSFER_ENCODING);
+                List<String> encodings = m.headers().getAll(HttpHeaders.Names.TRANSFER_ENCODING);
                 encodings.remove(HttpHeaders.Values.CHUNKED);
                 if (encodings.isEmpty()) {
-                    m.removeHeader(HttpHeaders.Names.TRANSFER_ENCODING);
+                    m.headers().remove(HttpHeaders.Names.TRANSFER_ENCODING);
                 }
                 this.currentMessage = m;
                 this.file = new File(Play.tmpDir, localName);
@@ -57,7 +55,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
             // Merge the received chunk into the content of the current message.
             final HttpChunk chunk = (HttpChunk) msg;
             if (maxContentLength != -1 && (localFile.length() > (maxContentLength - chunk.getContent().readableBytes()))) {
-                currentMessage.setHeader(HttpHeaders.Names.WARNING, "play.netty.content.length.exceeded");
+                currentMessage.headers().set(HttpHeaders.Names.WARNING, "play.netty.content.length.exceeded");
             } else {
                 IOUtils.copyLarge(new ChannelBufferInputStream(chunk.getContent()), this.out);
 
@@ -65,9 +63,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
                     this.out.flush();
                     this.out.close();
 
-                    currentMessage.setHeader(
-                            HttpHeaders.Names.CONTENT_LENGTH,
-                            String.valueOf(localFile.length()));
+                    currentMessage.headers().set(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(localFile.length()));
 
                     currentMessage.setContent(new FileChannelBuffer(localFile));
                     this.out = null;
@@ -81,4 +77,3 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
 
     }
 }
-

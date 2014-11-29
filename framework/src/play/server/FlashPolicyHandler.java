@@ -1,17 +1,19 @@
 package play.server;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
-import org.jboss.netty.util.CharsetUtil;
 
-public class FlashPolicyHandler extends FrameDecoder {
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.util.CharsetUtil;
+
+import java.util.List;
+
+public class FlashPolicyHandler extends ByteToMessageDecoder {
 	
 	private static final String XML = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
-    private ChannelBuffer policyResponse = ChannelBuffers.copiedBuffer(XML, CharsetUtil.UTF_8);
+    private ByteBuf policyResponse = Unpooled.copiedBuffer(XML, CharsetUtil.UTF_8);
 
     /**
      * Creates a handler allowing access from any domain and any port
@@ -24,30 +26,36 @@ public class FlashPolicyHandler extends FrameDecoder {
      * Create a handler with a custom XML response. Useful for defining your own domains and ports.
      * @param policyResponse Response XML to be passed back to a connecting client
      */
-    public FlashPolicyHandler(ChannelBuffer policyResponse) {
+    public FlashPolicyHandler(ByteBuf policyResponse) {
         super();
         this.policyResponse = policyResponse;
     }
-
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
-        if (buffer.readableBytes() < 2) {
-            return null;
+    
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.netty.handler.codec.ByteToMessageDecoder#decode(io.netty.channel.ChannelHandlerContext, io.netty.buffer.ByteBuf, java.util.List)
+	 */
+	@Override
+	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        if (in.readableBytes() < 2) {
+            return;
         }
 
-        final int magic1 = buffer.getUnsignedByte(buffer.readerIndex());
-        final int magic2 = buffer.getUnsignedByte(buffer.readerIndex() + 1);
+        final int magic1 = in.getUnsignedByte(in.readerIndex());
+        final int magic2 = in.getUnsignedByte(in.readerIndex() + 1);
         boolean isFlashPolicyRequest = (magic1 == '<' && magic2 == 'p');
 
         if (isFlashPolicyRequest) {
-            buffer.skipBytes(buffer.readableBytes()); // Discard everything
-            channel.write(policyResponse).addListener(ChannelFutureListener.CLOSE);
-            return null;
+        	in.skipBytes(in.readableBytes()); // Discard everything
+            ctx.channel().write(policyResponse).addListener(ChannelFutureListener.CLOSE);
+            return;
         }
 
         // Remove ourselves, important since the byte length check at top can hinder frame decoding
         // down the pipeline
-        ctx.getPipeline().remove(this);
-        return buffer.readBytes(buffer.readableBytes());
+        ctx.pipeline().remove(this);
+        
+        out.add(in.readBytes(in.readableBytes()));
     }
-
 }
