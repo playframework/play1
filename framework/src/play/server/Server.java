@@ -1,20 +1,23 @@
 package play.server;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelException;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelException;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.libs.IO;
-import play.server.ssl.SslHttpServerPipelineFactory;
+import play.server.ssl.SslHttpServerChannelInitializer;
 
 public class Server {
 
@@ -23,112 +26,135 @@ public class Server {
 
     public final static String PID_FILE = "server.pid";
 
-    public Server(String[] args) {
+	public Server(String[] args) {
 
-        System.setProperty("file.encoding", "utf-8");
-        final Properties p = Play.configuration;
+		System.setProperty("file.encoding", "utf-8");
+		final Properties p = Play.configuration;
 
-        httpPort = Integer.parseInt(getOpt(args, "http.port", p.getProperty("http.port", "-1")));
-        httpsPort = Integer.parseInt(getOpt(args, "https.port", p.getProperty("https.port", "-1")));
+		httpPort = Integer.parseInt(getOpt(args, "http.port", p.getProperty("http.port", "-1")));
+		httpsPort = Integer.parseInt(getOpt(args, "https.port", p.getProperty("https.port", "-1")));
 
-        if (httpPort == -1 && httpsPort == -1) {
-            httpPort = 9000;
-        }
+		if (httpPort == -1 && httpsPort == -1) {
+			httpPort = 9000;
+		}
 
-        if (httpPort == httpsPort) {
-            Logger.error("Could not bind on https and http on the same port " + httpPort);
-            Play.fatalServerErrorOccurred();
-        }
+		if (httpPort == httpsPort) {
+			Logger.error("Could not bind on https and http on the same port " + httpPort);
+			Play.fatalServerErrorOccurred();
+		}
 
-        InetAddress address = null;
-        InetAddress secureAddress = null;
-        try {
-            if (p.getProperty("http.address") != null) {
-                address = InetAddress.getByName(p.getProperty("http.address"));
-            } else if (System.getProperties().containsKey("http.address")) {
-                address = InetAddress.getByName(System.getProperty("http.address"));
-            }
+		InetAddress address = null;
+		InetAddress secureAddress = null;
+		try {
+			if (p.getProperty("http.address") != null) {
+				address = InetAddress.getByName(p.getProperty("http.address"));
+			} else if (System.getProperties().containsKey("http.address")) {
+				address = InetAddress.getByName(System.getProperty("http.address"));
+			}
 
-        } catch (Exception e) {
-            Logger.error(e, "Could not understand http.address");
-            Play.fatalServerErrorOccurred();
-        }
-        try {
-            if (p.getProperty("https.address") != null) {
-                secureAddress = InetAddress.getByName(p.getProperty("https.address"));
-            } else if (System.getProperties().containsKey("https.address")) {
-                secureAddress = InetAddress.getByName(System.getProperty("https.address"));
-            }
-        } catch (Exception e) {
-            Logger.error(e, "Could not understand https.address");
-            Play.fatalServerErrorOccurred();
-        }
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
-        try {
-            if (httpPort != -1) {
-                bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
+		} catch (Exception e) {
+			Logger.error(e, "Could not understand http.address");
+			Play.fatalServerErrorOccurred();
+		}
+		try {
+			if (p.getProperty("https.address") != null) {
+				secureAddress = InetAddress.getByName(p.getProperty("https.address"));
+			} else if (System.getProperties().containsKey("https.address")) {
+				secureAddress = InetAddress.getByName(System.getProperty("https.address"));
+			}
+		} catch (Exception e) {
+			Logger.error(e, "Could not understand https.address");
+			Play.fatalServerErrorOccurred();
+		}
+		
+		if (httpPort != -1) {
+			EventLoopGroup bossGroup = new NioEventLoopGroup();
+	        EventLoopGroup workerGroup = new NioEventLoopGroup();
+			
+			try {	
+				ServerBootstrap b = new ServerBootstrap();
+	            b.group(bossGroup, workerGroup)
+	             .channel(NioServerSocketChannel.class)
+	             .childHandler(new HttpServerChannelInitializer())
+//	             .option(ChannelOption.SO_BACKLOG, 128)
+//	             .childOption(ChannelOption.SO_KEEPALIVE, true)
+	             .childOption(ChannelOption.TCP_NODELAY, true);
+	            
+	            // Bind and start to accept incoming connections.
+	            ChannelFuture f = b.bind(address, httpPort).sync();
+	            
+	            // Wait until the server socket is closed.
+	            f.channel().closeFuture().sync();
+	            
+				if (Play.mode == Mode.DEV) {
+					if (address == null) {
+						Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+					} else {
+						Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
+					}
+				} else {
+					if (address == null) {
+						Logger.info("Listening for HTTP on port %s ...", httpPort);
+					} else {
+						Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
+					}
+				}
+			} catch (ChannelException | InterruptedException e) {
+				Logger.error("Could not bind on port " + httpPort, e);
+				Play.fatalServerErrorOccurred();
+			} finally {
+				workerGroup.shutdownGracefully();
+				bossGroup.shutdownGracefully();
+			}
+		}
+		
+		if (httpsPort != -1) {
+			EventLoopGroup bossGroup = new NioEventLoopGroup();
+	        EventLoopGroup workerGroup = new NioEventLoopGroup();
+	        
+			try {
+				ServerBootstrap b = new ServerBootstrap();
+	            b.group(bossGroup, workerGroup)
+	             .channel(NioServerSocketChannel.class)
+	             .childHandler(new SslHttpServerChannelInitializer())
+//	             .option(ChannelOption.SO_BACKLOG, 128)
+//	             .childOption(ChannelOption.SO_KEEPALIVE, true)
+	             .childOption(ChannelOption.TCP_NODELAY, true);
+	            
+	            // Bind and start to accept incoming connections.
+	            ChannelFuture f = b.bind(secureAddress, httpsPort).sync();
+	            
+	            // Wait until the server socket is closed.
+	            f.channel().closeFuture().sync();
 
-                bootstrap.bind(new InetSocketAddress(address, httpPort));
-                bootstrap.setOption("child.tcpNoDelay", true);
-
-                if (Play.mode == Mode.DEV) {
-                    if (address == null) {
-                        Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
-                    } else {
-                        Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
-                    }
-                } else {
-                    if (address == null) {
-                        Logger.info("Listening for HTTP on port %s ...", httpPort);
-                    } else {
-                        Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
-                    }
-                }
-
-            }
-
-        } catch (ChannelException e) {
-            Logger.error("Could not bind on port " + httpPort, e);
-            Play.fatalServerErrorOccurred();
-        }
-
-        bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
-
-        try {
-            if (httpsPort != -1) {
-                bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
-                bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort));
-                bootstrap.setOption("child.tcpNoDelay", true);
-
-                if (Play.mode == Mode.DEV) {
-                    if (secureAddress == null) {
-                        Logger.info("Listening for HTTPS on port %s (Waiting a first request to start) ...", httpsPort);
-                    } else {
-                        Logger.info("Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ...", httpsPort, secureAddress);
-                    }
-                } else {
-                    if (secureAddress == null) {
-                        Logger.info("Listening for HTTPS on port %s ...", httpsPort);
-                    } else {
-                        Logger.info("Listening for HTTPS at %2$s:%1$s  ...", httpsPort, secureAddress);
-                    }
-                }
-
-            }
-
-        } catch (ChannelException e) {
-            Logger.error("Could not bind on port " + httpsPort, e);
-            Play.fatalServerErrorOccurred();
-        }
-        if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
-           // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
-           System.out.println("~ Server is up and running");
+				if (Play.mode == Mode.DEV) {
+					if (secureAddress == null) {
+						Logger.info("Listening for HTTPS on port %s (Waiting a first request to start) ...", httpsPort);
+					} else {
+						Logger.info("Listening for HTTPS at %2$s:%1$s (Waiting a first request to start) ...", httpsPort, secureAddress);
+					}
+				} else {
+					if (secureAddress == null) {
+						Logger.info("Listening for HTTPS on port %s ...", httpsPort);
+					} else {
+						Logger.info("Listening for HTTPS at %2$s:%1$s  ...", httpsPort, secureAddress);
+					}
+				}
+			} catch (ChannelException | InterruptedException e) {
+				Logger.error("Could not bind on port " + httpsPort, e);
+				Play.fatalServerErrorOccurred();
+			} finally {
+				workerGroup.shutdownGracefully();
+				bossGroup.shutdownGracefully();
+			}
+		}
+		
+		if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
+			// print this line to STDOUT - not using logger, so auto test runner
+			// will not block if logger is misconfigured (see #1222)
+			System.out.println("~ Server is up and running");
+		}
 	}
-    }
 
     private String getOpt(String[] args, String arg, String defaultValue) {
         String s = "--" + arg + "=";
@@ -164,5 +190,4 @@ public class Server {
             Logger.info("Done.");
         }
     }
-
 }

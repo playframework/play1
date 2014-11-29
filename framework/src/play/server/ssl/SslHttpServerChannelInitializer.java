@@ -1,28 +1,22 @@
 package play.server.ssl;
 
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.SslHandler;
+
 import javax.net.ssl.SSLEngine;
 
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.ssl.SslHandler;
-import play.Play;
-import play.server.HttpServerPipelineFactory;
-
-import org.jboss.netty.channel.ChannelHandler;
-
 import play.Logger;
-import static org.jboss.netty.channel.Channels.pipeline;
+import play.Play;
+import play.server.HttpServerChannelInitializer;
 
 
-public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
-
+public class SslHttpServerChannelInitializer extends HttpServerChannelInitializer {
     private String pipelineConfig = Play.configuration.getProperty("play.ssl.netty.pipeline", "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
 
-    public ChannelPipeline getPipeline() throws Exception {
-
+    protected void initChannel(SocketChannel ch) throws Exception {
         String mode = Play.configuration.getProperty("play.netty.clientAuth", "none");
         String enabledCiphers = Play.configuration.getProperty("play.ssl.enabledCiphers", "");
-
-        ChannelPipeline pipeline = pipeline();
 
         // Add SSL handler first to encrypt and decrypt everything.
         SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
@@ -40,13 +34,13 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         
         engine.setEnableSessionCreation(true);
 
-        pipeline.addLast("ssl", new SslHandler(engine));
+        ch.pipeline().addLast("ssl", new SslHandler(engine));
         
         // Get all the pipeline. Give the user the opportunity to add their own
         String[] handlers = pipelineConfig.split(",");
-        if(handlers.length <= 0){
+        if (handlers.length <= 0) {
             Logger.error("You must defined at least the SslPlayHandler in \"play.netty.pipeline\"");
-            return pipeline;
+            return;
         }
         
         // Create the play Handler (always the last one)
@@ -55,7 +49,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         SslPlayHandler sslPlayHandler = (SslPlayHandler) instance;
         if (instance == null || !(instance instanceof SslPlayHandler) || sslPlayHandler == null) {
             Logger.error("The last handler must be the SslPlayHandler in \"play.netty.pipeline\"");
-            return pipeline;
+            return;
         }    
         
         for (int i = 0; i < handlers.length - 1; i++) {
@@ -64,7 +58,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
                 String name = getName(handler.trim());
                 instance = getInstance(handler);
                 if (instance != null) {
-                    pipeline.addLast(name, instance); 
+                    ch.pipeline().addLast(name, instance); 
                     sslPlayHandler.pipelines.put("Ssl" + name, instance);
                 }
             } catch(Throwable e) {
@@ -74,11 +68,9 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         }
 
         if (sslPlayHandler != null) {
-            pipeline.addLast("handler", sslPlayHandler);
+            ch.pipeline().addLast("handler", sslPlayHandler);
             sslPlayHandler.pipelines.put("SslHandler", sslPlayHandler);
         } 
-        
-        return pipeline;
     }
 }
 
