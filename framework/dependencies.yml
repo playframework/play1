@@ -9,7 +9,7 @@ transitiveDependencies: false
 require:    &allDependencies
     - antlr 2.7.7
     - bytecodeparser 0.3
-    - c3p0 0.9.2.1
+    - c3p0 0.9.5
     - cglib -> cglib-nodep 3.1
     - com.google.code.gson -> gson 2.2.4 
     - com.jamonapi -> jamon 2.75
@@ -54,7 +54,7 @@ require:    &allDependencies
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.1.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.hibernate -> hibernate-c3p0 4.2.15.Final
-    - com.mchange -> mchange-commons-java 0.2.3.4
+    - com.mchange -> mchange-commons-java 0.2.9
     - org.javassist -> javassist 3.18.2-GA
     - org.jboss.netty -> netty 3.9.4.Final
     - org.postgresql -> postgresql 9.0
