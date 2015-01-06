@@ -54,7 +54,7 @@ require:    &allDependencies
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.hibernate -> hibernate-c3p0 4.2.15.Final
     - com.mchange -> mchange-commons-java 0.2.3.4
-    - org.javassist -> javassist 3.19.0-RC1
+    - org.javassist -> javassist 3.19.0-GA
     - org.jboss.netty -> netty 3.9.4.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.7
