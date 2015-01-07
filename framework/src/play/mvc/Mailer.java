@@ -146,7 +146,7 @@ public class Mailer {
 			throw new UnexpectedException("Mailer not instrumented ?");
 		}
 		
-		InlineImage ii = new InlineImage(dataSource);
+		InlineImage inlinedImage = new InlineImage(dataSource);
 		
 		Map<String, InlineImage> inlineEmbeds = (Map<String, InlineImage>) map.get("inlineEmbeds");
 		if (inlineEmbeds == null) {
@@ -154,10 +154,10 @@ public class Mailer {
 			map.put("inlineEmbeds", inlineEmbeds);
 		}
 		
-		inlineEmbeds.put(name, ii);
+		inlineEmbeds.put(name, inlinedImage);
 		infos.set(map);
 		
-		return "cid:" + ii.cid;
+		return "cid:" + inlinedImage.cid;
 	}
 
     public static void setContentType(String contentType) {
