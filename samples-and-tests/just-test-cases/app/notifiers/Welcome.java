@@ -93,7 +93,7 @@ public class Welcome extends Mailer {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			ImageIO.write(image, "png", os);
 			
-			byte[] data = os.toByteArray();
+			final byte[] data = os.toByteArray();
 			
 			DataSource dataSource = new DataSource() {
 				@Override
