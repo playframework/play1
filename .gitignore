@@ -43,3 +43,5 @@ modules/*
 !modules/secure
 !modules/testrunner
 
+
+/out/

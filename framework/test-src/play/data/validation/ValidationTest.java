@@ -4,6 +4,7 @@ import org.junit.Test;
 import play.i18n.MessagesBuilder;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ValidationTest {
 
@@ -34,4 +35,14 @@ public class ValidationTest {
 
     }
 
+    @Test
+    public  void testURLCheck(){
+        assertTrue(new URLCheck().isSatisfied(null,"http://localhost",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://localhost:80",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://127.0.0.1",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://127.0.0.1:80",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://www.qq.com",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://www.playframework.com/modules",null,null));
+        assertTrue(new URLCheck().isSatisfied(null,"http://LOCALHOST",null,null));
+    }
 }
