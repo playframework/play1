@@ -8,11 +8,11 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.7
-    - c3p0 0.9.2.1
+    - c3p0 0.9.5
     - cglib -> cglib-nodep 3.1
     - com.google.code.gson -> gson 2.2.4 
     - com.jamonapi -> jamon 2.75
-    - com.ning -> async-http-client 1.8.13
+    - com.ning -> async-http-client 1.8.14
     - commons-beanutils 1.8.3  
     - commons-codec 1.8
     - commons-collections 3.2.1
@@ -53,8 +53,8 @@ require:    &allDependencies
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.1.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.hibernate -> hibernate-c3p0 4.2.15.Final
-    - com.mchange -> mchange-commons-java 0.2.3.4
-    - org.javassist -> javassist 3.18.2-GA
+    - com.mchange -> mchange-commons-java 0.2.9
+    - org.javassist -> javassist 3.19.0-GA
     - org.jboss.netty -> netty 3.9.4.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.7
