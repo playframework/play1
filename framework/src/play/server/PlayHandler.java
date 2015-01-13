@@ -387,7 +387,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (ctx.getChannel().isOpen()) {
             f = ctx.getChannel().write(nettyResponse);
         } else {
-            Logger.error("Try to write on a closed channel[keepAlive:%s]", keepAlive);
+            Logger.debug("Try to write on a closed channel[keepAlive:%s]: Remote host may have closed the connection", String.valueOf(keepAlive));
         }
 
         // Decide whether to close the connection or not.
