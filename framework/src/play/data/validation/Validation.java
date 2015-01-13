@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -70,10 +72,59 @@ public class Validation {
      * @param variables Message variables
      */
     public static void addError(String field, String message, String... variables) {
-        if (error(field) == null || !error(field).message.equals(message)) {
-            Validation.current().errors.add(new Error(field, message, variables));
+        insertError(Validation.current().errors.size(), field, message,  variables);
+    }
+    
+    /**
+     * Insert an error at the specified position in this list.
+     * @param index index at which the specified element is to be inserted
+     * @param field Field name
+     * @param message Message key
+     * @param variables Message variables
+     */
+    public static void insertError(int index, String field, String message, String... variables) {
+        Error error = error(field);
+        if (error == null || !error.message.equals(message)) {
+            Validation.current().errors.add(index, new Error(field, message, variables));
         }
     }
+    
+    /**
+     * Remove all errors on a field with the given message
+     * @param field Field name
+     * @param message Message key
+     */
+     public static void removeErrors(String field, String message) {
+         Validation validation = current.get();
+         if (validation != null) {
+             Iterator<Error> it = validation.errors.iterator();
+             while (it.hasNext()) {
+                 Error error = it.next();
+                 if (error.key != null && error.key.equals(field) && error.message.equals(message)) {
+                     it.remove();
+                 }
+             }
+         }
+     }
+     
+    /**
+    * Remove all errors on a field
+    * @param field Field name
+    */
+    public static void removeErrors(String field) {
+        Validation validation = current.get();
+        if (validation != null) {
+            Iterator<Error> it = validation.errors.iterator();
+            while (it.hasNext()) {
+                Error error = it.next();
+                if (error.key != null && error.key.equals(field)) {
+                    it.remove();
+                }
+            }
+        }
+    }
+    
+    
 
     /**
      * @return True if the current request has errors
@@ -83,6 +134,14 @@ public class Validation {
         return validation != null && validation.errors.size() > 0;
     }
 
+    /**
+     * @param field The field name
+     * @return true if field has some errors
+     */
+    public static boolean hasErrors(String field){
+        return error(field) != null;
+    }
+    
     /**
      * @param field The field name
      * @return First error related to this field
@@ -135,7 +194,9 @@ public class Validation {
 
     public static void clear() {
         current.get().errors.clear();
-        ValidationPlugin.keys.get().clear();
+        if(ValidationPlugin.keys.get() != null){
+            ValidationPlugin.keys.get().clear();
+        }
     }
 
     // ~~~~ Integration helper
