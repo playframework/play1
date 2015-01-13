@@ -140,6 +140,25 @@ public class Mailer implements LocalVariablesSupport {
        attachDataSource(dataSource, name, description, EmailAttachment.ATTACHMENT);
     }
     
+	public static String attachInlineEmbed(DataSource dataSource, String name) {
+		HashMap<String, Object> map = infos.get();
+		if (map == null) {
+			throw new UnexpectedException("Mailer not instrumented ?");
+		}
+		
+		InlineImage inlineImage = new InlineImage(dataSource);
+		
+		Map<String, InlineImage> inlineEmbeds = (Map<String, InlineImage>) map.get("inlineEmbeds");
+		if (inlineEmbeds == null) {
+			inlineEmbeds = new HashMap<String, InlineImage>();
+			map.put("inlineEmbeds", inlineEmbeds);
+		}
+		
+		inlineEmbeds.put(name, inlineImage);
+		infos.set(map);
+		
+		return "cid:" + inlineImage.cid;
+	}
 
     public static void setContentType(String contentType) {
         HashMap<String, Object> map = infos.get();
@@ -170,9 +189,13 @@ public class Mailer implements LocalVariablesSupport {
         /** <code>DataSource</code> for the content */
         private final DataSource dataSource;
 
+        public InlineImage(DataSource dataSource) {
+        	this(null, dataSource);
+        }
+
         public InlineImage(String cid, DataSource dataSource) {
             super();
-            this.cid = cid;
+            this.cid = cid != null ? cid : RandomStringUtils.randomAlphabetic(HtmlEmail.CID_LENGTH).toLowerCase();
             this.dataSource = dataSource;
         }
 
@@ -247,8 +270,7 @@ public class Mailer implements LocalVariablesSupport {
             try {
                 url = new URL(urlString);
             } catch (MalformedURLException e1) {
-                throw new UnexpectedException(
-                        "Invalid URL '" + urlString + "'", e1);
+                throw new UnexpectedException("Invalid URL '" + urlString + "'", e1);
             }
 
             if (name == null || name.isEmpty()) {
@@ -262,7 +284,7 @@ public class Mailer implements LocalVariablesSupport {
 
             dataSource = url.getProtocol().equals("file") ? new VirtualFileDataSource(
                     url.getFile()) : new URLDataSource(url);
-        }else{
+        } else {
             dataSource = new VirtualFileDataSource(img);
         }
 
@@ -309,18 +331,7 @@ public class Mailer implements LocalVariablesSupport {
             IOUtils.closeQuietly(is);
         }
 
-        String cid = RandomStringUtils.randomAlphabetic(HtmlEmail.CID_LENGTH)
-                .toLowerCase();
-        InlineImage ii = new InlineImage(cid, dataSource);
-
-        if (inlineEmbeds == null) {
-            inlineEmbeds = new HashMap<String, InlineImage>();
-            map.put("inlineEmbeds", inlineEmbeds);
-        }
-        inlineEmbeds.put(name, ii);
-        infos.set(map);
-
-        return "cid:" + cid;
+        return attachInlineEmbed(dataSource, name);
     }
 
     /**
