@@ -1,5 +1,6 @@
 package play.db.evolutions;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.db.DB;
@@ -7,15 +8,8 @@ import play.db.DBConfig;
 import play.db.SQLSplitter;
 import play.exceptions.UnexpectedException;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
-import org.apache.commons.lang.StringUtils;
+import java.sql.*;
 
 
 public class EvolutionQuery{
@@ -211,7 +205,7 @@ public class EvolutionQuery{
 		Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
 
 		// MySQLDialect is the base class for MySQL dialects
-		isMySQl = play.db.jpa.MySQLDialect.class
+		isMySQl = org.hibernate.dialect.MySQLDialect.class
 			.isAssignableFrom(dialectClass);
 	    } catch (ClassNotFoundException e) {
 		// swallow
