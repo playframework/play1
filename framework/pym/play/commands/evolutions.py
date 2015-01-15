@@ -46,7 +46,7 @@ def execute(**kargs):
         if arg in add_options:
             add_options.remove(arg)
 
-    java_cmd = [app.java_path()] + add_options + args_memory + ['-classpath', app.cp_args(), 'play.db.Evolutions']
+    java_cmd = [java_path()] + add_options + args_memory + ['-classpath', app.cp_args(), 'play.db.Evolutions']
     try:
         return_code = subprocess.call(java_cmd, env=os.environ)
         if 0 != return_code:
