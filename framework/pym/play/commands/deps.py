@@ -57,7 +57,7 @@ def execute(**kargs):
         elif not arg.startswith('-Xm'):
             print "~ WARNING: " + arg + " argument will be skipped"    
 
-    java_cmd = [app.java_path()] + add_options + args_memory + ['-classpath', app.fw_cp_args(), 'play.deps.DependenciesManager']
+    java_cmd = [java_path()] + add_options + args_memory + ['-classpath', app.fw_cp_args(), 'play.deps.DependenciesManager']
     try:
         return_code = subprocess.call(java_cmd, env=os.environ)
         if 0 != return_code:
