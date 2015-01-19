@@ -1,0 +1,184 @@
+From 3063617b2d9b1d8210566f974e98694598872f3f Mon Sep 17 00:00:00 2001
+From: Alexandre Chatiron <alexandre@payxpert.com>
+Date: Thu, 31 Jul 2014 08:47:11 +0800
+Subject: [PATCH] patch play 1.3.0 on hibernate 4.2.15
+
+---
+ .../main/java/org/hibernate/EmptyInterceptor.java  |  6 ++--
+ .../src/main/java/org/hibernate/Interceptor.java   |  6 ++--
+ .../internal/AbstractFlushingEventListener.java    | 36 ++++++++++++++++++----
+ .../test/interfaceproxy/DocumentInterceptor.java   |  6 ++--
+ .../hibernate/test/mixed/DocumentInterceptor.java  |  9 ++++--
+ 5 files changed, 45 insertions(+), 18 deletions(-)
+
+diff --git a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+index b3e0dc5..1cd6852 100755
+--- a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+@@ -111,10 +111,10 @@ public class EmptyInterceptor implements Interceptor, Serializable {
+ 		return sql;
+ 	}
+ 
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException { return true; }
+ 
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException { return true; }
+ 
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException { return true; }
+ 	
+ }
+\ No newline at end of file
+diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
+index 7664c36..f935942 100644
+--- a/hibernate-core/src/main/java/org/hibernate/Interceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
+@@ -132,7 +132,7 @@ public interface Interceptor {
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a collection is deleted.
+@@ -142,7 +142,7 @@ public interface Interceptor {
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a collection is updated.
+@@ -152,7 +152,7 @@ public interface Interceptor {
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
+ 
+ 	/**
+ 	 * Called before a flush
+diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+index 604803a..2bd10a1 100644
+--- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
++++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+@@ -152,6 +152,27 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ //		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
+ 			EntityEntry entry = (EntityEntry) me.getValue();
+ 			Status status = entry.getStatus();
++
++			// This entity will be saved?
++			boolean willBeSaved = true;
++			try {
++			    Object o = me.getKey();
++			    Class c = o.getClass();
++			    Class jpaBase = Class.forName("play.db.jpa.JPABase");
++			    while(!c.equals(Object.class)) {
++			        if(c.equals(jpaBase)) {
++						willBeSaved = (Boolean)(jpaBase.getDeclaredField("willBeSaved").get(o));
++						break;
++			         }
++			          c = c.getSuperclass();
++			    }
++			    if(!willBeSaved) {
++			        continue;
++			    }
++			} catch(Exception e) {
++			   e.printStackTrace();
++			}
++
+ 			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
+ 				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
+ 			}
+@@ -269,8 +290,8 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ 			CollectionEntry ce = me.getValue();
+ 
+ 			if ( ce.isDorecreate() ) {
+-				session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() )){
++                    actionQueue.addAction(
+ 						new CollectionRecreateAction(
+ 								coll,
+ 								ce.getCurrentPersister(),
+@@ -278,10 +299,11 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ 								session
+ 							)
+ 					);
++                 }
+ 			}
+ 			if ( ce.isDoremove() ) {
+-				session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() )){
++                    actionQueue.addAction(
+ 						new CollectionRemoveAction(
+ 								coll,
+ 								ce.getLoadedPersister(),
+@@ -290,10 +312,11 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ 								session
+ 							)
+ 					);
++                }
+ 			}
+ 			if ( ce.isDoupdate() ) {
+-				session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() )){
++                    actionQueue.addAction(
+ 						new CollectionUpdateAction(
+ 								coll,
+ 								ce.getLoadedPersister(),
+@@ -302,6 +325,7 @@ public abstract class AbstractFlushingEventListener implements Serializable {
+ 								session
+ 							)
+ 					);
++                }
+ 			}
+ 			if ( !coll.wasInitialized() && coll.hasQueuedOperations() ) {
+ 				actionQueue.addAction(
+diff --git a/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java b/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
+index 3455384..11ec47a 100755
+--- a/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
++++ b/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
+@@ -88,7 +88,7 @@ public class DocumentInterceptor implements Interceptor {
+ 		return sql;
+ 	}
+ 
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {}
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {}
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException { return true;}
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException { return true;}
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException { return true;}
+ }
+diff --git a/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java b/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
+index d781826..f3fad5c 100755
+--- a/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
++++ b/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
+@@ -104,13 +104,16 @@ public class DocumentInterceptor implements Interceptor {
+ 		return sql;
+ 	}
+ 
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+ 
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+ 
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+ 
+ }
+-- 
+1.9.2.msysgit.0
+
