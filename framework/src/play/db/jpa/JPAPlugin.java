@@ -100,11 +100,6 @@ public class JPAPlugin extends PlayPlugin {
     public void enhance(ApplicationClass applicationClass) throws Exception {
         new JPAEnhancer().enhanceThisClass(applicationClass);
     }
-
-
-    public void onConfigurationRead() {
-        Properties configuration = Play.configuration;
-    }
      
     public EntityManager em(String key) {
         EntityManagerFactory emf = JPA.emfs.get(key);
