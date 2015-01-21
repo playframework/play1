@@ -50,7 +50,7 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
-        String javaVersion = CompilerOptions.VERSION_1_5;
+        String javaVersion = CompilerOptions.VERSION_1_6;
         if(System.getProperty("java.version").startsWith("1.6")) {
             javaVersion = CompilerOptions.VERSION_1_6;
         } else if (System.getProperty("java.version").startsWith("1.7")) {
