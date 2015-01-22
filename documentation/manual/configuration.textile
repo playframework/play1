@@ -578,11 +578,11 @@ h3(#java.source). java.source
 
 Java source level, which overrides the @java.version@ system property. For example:
 
-bc. java.source=1.6
+bc. java.source=1.7
 
-Values:  @1.5@, @1.6@, @1.7@ (experimental).
+Values:  @1.5@ (No longer supported since 1.3.0), @1.6@, @1.7@, @1.8@ (experimental).
 
-Default: @1.5@
+Default: @1.6@
 
 
 h2(#jpa). JPA
