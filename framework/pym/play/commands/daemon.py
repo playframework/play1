@@ -3,7 +3,7 @@ import subprocess
 from play.utils import *
 import time
 if os.name == 'nt':
-    import win32pdh, string, win32api
+    import win32pdh, string, win32api, win32pdhutil
 
 COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 
@@ -140,12 +140,27 @@ def out(app):
 
 def kill(pid):
     if os.name == 'nt':
-        import ctypes
-        handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
-        if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
-            print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
-            print "~ "
-            sys.exit(-1)
+        import ctypes, ctypes.wintypes
+        Kernel32 = ctypes.WinDLL('kernel32.dll')
+        OpenProcess = Kernel32.OpenProcess
+        OpenProcess.restype = ctypes.wintypes.HANDLE
+        TerminateProcess = Kernel32.TerminateProcess
+        TerminateProcess.restype = ctypes.wintypes.BOOL
+        CloseHandle = Kernel32.CloseHandle
+
+        handle = OpenProcess(1, False, int(pid))
+        if handle:
+            if not TerminateProcess(handle, 0):
+                CloseHandle(handle)
+                print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
+                print "~ "
+                sys.exit(-1)
+            else:
+                print "~ Process with PID %s terminated" % pid
+            CloseHandle(handle)
+        else:
+            print "~ Process with PID %s not found" % pid
+            
     else:
         try:
             os.kill(int(pid), 15)
@@ -167,7 +182,8 @@ def process_running(pid):
 # loosely based on http://code.activestate.com/recipes/303339/
 def process_list_nt():
     #each instance is a process, you can have multiple processes w/same name
-    junk, instances = win32pdh.EnumObjectItems(None,None,'process', win32pdh.PERF_DETAIL_WIZARD)
+    object = win32pdhutil.find_pdh_counter_localized_name("Process")
+    items, instances = win32pdh.EnumObjectItems(None,None,object, win32pdh.PERF_DETAIL_WIZARD)
     proc_ids={}
     proc_dict={}
     for instance in instances:
@@ -175,14 +191,24 @@ def process_list_nt():
             proc_dict[instance] = proc_dict[instance] + 1
         else:
             proc_dict[instance]=0
+    items = [win32pdhutil.find_pdh_counter_localized_name("ID Process")] + items[:5]
     for instance, max_instances in proc_dict.items():
         for inum in xrange(max_instances+1):
             hq = win32pdh.OpenQuery() # initializes the query handle 
-            path = win32pdh.MakeCounterPath( (None,'process',instance, None, inum,'ID Process') )
-            counter_handle=win32pdh.AddCounter(hq, path) 
-            win32pdh.CollectQueryData(hq) #collects data for the counter 
-            type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG)
-            proc_ids[str(val)]=instance;
+            hcs = []
+            for item in items:
+                path = win32pdh.MakeCounterPath( (None,object,instance,
+                                                  None, inum, item) )
+                hcs.append(win32pdh.AddCounter(hq, path))
+            win32pdh.CollectQueryData(hq)
+            # as per http://support.microsoft.com/default.aspx?scid=kb;EN-US;q262938, some "%" based
+            # counters need two collections
+            time.sleep(0.01)
+            win32pdh.CollectQueryData(hq)
+            for hc in hcs:
+                type, val = win32pdh.GetFormattedCounterValue(hc, win32pdh.PDH_FMT_LONG)
+                proc_ids[str(val)]=instance;
+                win32pdh.RemoveCounter(hc)
             win32pdh.CloseQuery(hq) 
 
     return proc_ids
