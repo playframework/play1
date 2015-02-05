@@ -1,0 +1,4 @@
+h1. Play 1.2.6 -- Release notes
+
+Play 1.2.6 has been released of the 1.2.x maintaince branch. It only contains bugfixes. 
+It was released to fix a vulnerability in play's session management.

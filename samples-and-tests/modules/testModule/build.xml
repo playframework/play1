@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="testModule" default="build" basedir=".">
+
+    <target name="check" unless="play.path">
+        <fail message="Please specify Play framework path using -Dplay.path=/path/to/framework/home" />
+    </target>
+
+    <path id="project.classpath">
+        <pathelement path="${play.path}/framework/classes"/>
+        <fileset dir="${play.path}/framework/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${play.path}/framework">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="build" depends="compile">
+        <copy todir="tmp/classes">
+            <fileset dir="src">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+                <include name="**/play.plugins"/>
+                <include name="**/play.static"/>
+            </fileset>
+        </copy>
+        <jar destfile="lib/play-testModule.jar" basedir="tmp/classes">
+            <manifest>
+                <section name="Play-module">
+                    <attribute name="Specification-Title" value="testModule"/>
+                </section>
+            </manifest>
+        </jar>
+        <delete dir="tmp" />
+    </target>
+
+    <target name="compile" depends="check">
+        <mkdir dir="lib" />
+        <mkdir dir="tmp/classes" />
+        <javac srcdir="src" destdir="tmp/classes" source="1.6" target="1.6" debug="true">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+</project>

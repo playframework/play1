@@ -1,5 +1,6 @@
 package play.server;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -36,6 +37,8 @@ import java.net.URLDecoder;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.*;
+
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * Servlet implementation.
@@ -508,20 +511,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if (servletResponse != null && is != null) {
             try {
                 OutputStream os = servletResponse.getOutputStream();
-                byte[] buffer = new byte[8096];
-                int read = 0;
-                while ((read = is.read(buffer)) > 0) {
-                    os.write(buffer, 0, read);
-                }
+                IOUtils.copyLarge(is, os);
                 os.flush();
-            } catch (IOException ex) {
-                throw ex;
-            }finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Logger.error("Cannot close input stream.", e);
-                }
+            } finally {
+                closeQuietly(is);
             }
         }
     }

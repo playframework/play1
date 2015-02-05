@@ -9,6 +9,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
+import play.data.binding.As;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
@@ -16,8 +17,8 @@ import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBConfig;
 import play.db.DBPlugin;
-import play.db.SQLSplitter;
 import play.db.Model;
+import play.db.SQLSplitter;
 import play.db.jpa.JPAPlugin;
 import play.exceptions.DatabaseException;
 import play.exceptions.UnexpectedException;
@@ -26,9 +27,11 @@ import play.libs.IO;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
+import javax.persistence.Entity;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,9 +41,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.persistence.Entity;
 
+@As(Fixtures.PROFILE_NAME)
 public class Fixtures {
+    /** Name of the profile use when loading fixture
+     * Allow to define the behavior when loading fixtures
+     */
+    public static final String PROFILE_NAME = "Fixtures";
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
@@ -88,7 +95,7 @@ public class Fixtures {
 
     /**
      * Delete all Model instances for the given types using the underlying persistence mechanisms
-     * @param types Types to delete
+     * @param classes Types to delete
      */
     public static void delete(List<Class<? extends Model>> classes) {
         @SuppressWarnings("unchecked")
@@ -118,7 +125,7 @@ public class Fixtures {
 
     /**
      * Use deleteDatabase() instead
-     * @deprecated use {@link deleteDatabase()} instead
+     * @deprecated use {@link #deleteDatabase()} instead
      */
     @Deprecated
     public static void deleteAll() {
@@ -172,42 +179,63 @@ public class Fixtures {
 
     /**
      * @param name
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
     public static void load(String name) {
-        Map<String, Object> idCache = new HashMap<String, Object>();
-        loadModels(name, idCache);
+        loadModels(name);
     }
 
     public static void loadModels(String name) {
-        Map<String, Object> idCache = new HashMap<String, Object>();
-        loadModels(name, idCache);
+        loadModels(true, name);
     }
+
 
     /**
      * Load Model instances from a YAML file and persist them using the underlying persistence mechanism.
      * The format of the YAML file is constrained, see the Fixtures manual page
+     * @param loadAsTemplate : indicate if the file must interpreted as a Template
      * @param name Name of a YAML file somewhere in the classpath (or conf/)
      */
-    protected static void loadModels(String name, Map<String, Object> idCache) {
+    public static void loadModels(boolean loadAsTemplate, String name) {
+        Map<String, Object> idCache = new HashMap<String, Object>();
+        loadModels(loadAsTemplate, name, idCache);
+    }
+
+   
+    /**
+     * Load Model instances from a YAML file and persist them using the underlying persistence mechanism.
+     * The format of the YAML file is constrained, see the Fixtures manual page
+     * @param name Name of a YAML file somewhere in the classpath (or conf/)
+     * @param loadAsTemplate : indicate if the file must interpreted as a Template
+     */
+    protected static void loadModels(boolean loadAsTemplate, String name,  Map<String, Object> idCache) {
         VirtualFile yamlFile = null;
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                // Check that the vf exist and isn't a directory
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
-            if (yamlFile == null || !yamlFile.exists()) {
+            
+            // Check again the vf exist and isn't a directory
+            if (yamlFile == null || !yamlFile.exists() || yamlFile.isDirectory()) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
 
-            String renderedYaml = TemplateLoader.load(yamlFile).render();
+            String renderedYaml = null;
+            if(loadAsTemplate){
+                renderedYaml = TemplateLoader.load(yamlFile).render();
+            }else{
+                renderedYaml = yamlFile.contentAsString();
+            }
 
             Yaml yaml = new Yaml();
             Object o = yaml.load(renderedYaml);
-            if (o instanceof LinkedHashMap<?, ?>) {
+            if (o instanceof LinkedHashMap<?, ?>) {  
+                Annotation[] annotations = Fixtures.class.getAnnotations();
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
@@ -241,7 +269,7 @@ public class Fixtures {
                         // This is kind of hacky. This basically says that if we have an embedded class we should ignore it.
                         if (Model.class.isAssignableFrom(cType)) {
 
-                            Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, null);
+                            Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, annotations);
                             for(Field f : model.getClass().getFields()) {
                                 if (f.getType().isAssignableFrom(Map.class)) {
                                     f.set(model, objects.get(key).get(f.getName()));
@@ -259,7 +287,7 @@ public class Fixtures {
                             }
                         }
                         else {
-                            idCache.put(cType.getName() + "-" + id, Binder.bind(rootParamNode, "object", cType, cType, null));
+                            idCache.put(cType.getName() + "-" + id, Binder.bind(rootParamNode, "object", cType, cType, annotations));
                         }
                     }
                 }
@@ -276,42 +304,53 @@ public class Fixtures {
     }
 
     /**
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
     public static void load(String... names) {
-        Map<String, Object> idCache = new HashMap<String, Object>();
-        for (String name : names) {
-            loadModels(name, idCache);
-        }
+        loadModels(names);
     }
 
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(String name)
      */
     public static void loadModels(String... names) {
+        loadModels(true, names);
+    }
+    
+    /**
+     * @see #loadModels(boolean loadAsTemplate, String name)
+     */
+    public static void loadModels(boolean loadAsTemplate, String... names) {
         Map<String, Object> idCache = new HashMap<String, Object>();
         for (String name : names) {
-            loadModels(name, idCache);
+            loadModels(loadAsTemplate, name, idCache);
         }
     }
 
     /**
-     * @deprecated use {@link loadModels(String...)} instead
+     * @deprecated use {@link #loadModels(String...)} instead
      */
     public static void load(List<String> names) {
         loadModels(names);
     }
 
     /**
-     * @see loadModels(String name)
+     * @see #loadModels(String name)
      */
     public static void loadModels(List<String> names) {
+        loadModels(true, names);
+    }
+    
+    /**
+     * @see #loadModels(boolean, String...)
+     */
+    public static void loadModels(boolean loadAsTemplate, List<String> names) {
         String[] tNames = new String[names.size()];
         for (int i = 0; i < tNames.length; i++) {
             tNames[i] = names.get(i);
         }
-        load(tNames);
+        loadModels(loadAsTemplate, tNames);
     }
 
     /**
@@ -364,7 +403,7 @@ public class Fixtures {
         try {
             for (VirtualFile vf : Play.javaPath) {
                 yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
+                if (yamlFile != null && yamlFile.exists() && !yamlFile.isDirectory()) {
                     break;
                 }
             }
@@ -436,7 +475,7 @@ public class Fixtures {
                 m.find();
                 String file = m.group(1);
                 VirtualFile f = Play.getVirtualFile(file);
-                if (f != null && f.exists()) {
+                if (f != null && f.exists() && !f.isDirectory()) {
                     serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
                 }
             } else {
@@ -558,8 +597,6 @@ public class Fixtures {
         }
         
         if (dbConfig.getUrl().startsWith("jdbc:sqlserver:")) {
-            Statement exec=null;
-
             try {
                 List<String> names = new ArrayList<String>();
                 Connection connection=dbConfig.getConnection();
@@ -571,11 +608,15 @@ public class Fixtures {
                 }
 
                     // Then we disable all foreign keys
-                exec=connection.createStatement();
-                for (String tableName:names)
-                    exec.addBatch("ALTER TABLE " + tableName+" NOCHECK CONSTRAINT ALL");
-                exec.executeBatch();
-                exec.close();
+                Statement exec = connection.createStatement();
+                try {
+                    for (String tableName : names)
+                        exec.addBatch("ALTER TABLE " + tableName + " NOCHECK CONSTRAINT ALL");
+                    exec.executeBatch();
+                }
+                finally {
+                    exec.close();
+                }
 
                 return;
             } catch (SQLException ex) {

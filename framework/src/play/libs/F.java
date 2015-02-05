@@ -13,18 +13,21 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import play.exceptions.UnexpectedException;
+import org.jboss.netty.channel.ChannelHandlerContext;
+
+import play.Logger;
 
 public class F {
 
     public static class Promise<V> implements Future<V>, F.Action<V> {
 
-        final CountDownLatch taskLock = new CountDownLatch(1);
-        boolean cancelled = false;
+        protected final CountDownLatch taskLock = new CountDownLatch(1);
+        protected boolean cancelled = false;
 
         public boolean cancel(boolean mayInterruptIfRunning) {
             return false;
@@ -52,17 +55,20 @@ public class F {
         }
 
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            taskLock.await(timeout, unit);
+            if(!taskLock.await(timeout, unit)) {
+              throw new TimeoutException(String.format("Promise didn't redeem in %s %s", timeout, unit));
+            }
+            
             if (exception != null) {
                 // The result of the promise is an exception - throw it
                 throw new ExecutionException(exception);
             }
             return result;
         }
-        List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
-        boolean invoked = false;
-        V result = null;
-        Throwable exception = null;
+        protected List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
+        protected boolean invoked = false;
+        protected V result = null;
+        protected Throwable exception = null;
 
         public void invoke(V result) {
             invokeWithResultOrException(result, null);
@@ -480,6 +486,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() > bufferSize) {
+            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(event);
@@ -520,6 +527,99 @@ public class F {
             private void markAsRead(T value) {
                 if (value != null) {
                     events.remove(value);
+                }
+            }
+        }
+    }
+
+    public static class BlockingEventStream<T> {
+
+        final LinkedBlockingQueue<T> events;
+        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+        final ChannelHandlerContext ctx;
+        
+
+        public BlockingEventStream(ChannelHandlerContext ctx) {
+        	this(100, ctx);
+        }
+
+        public BlockingEventStream(int maxBufferSize, ChannelHandlerContext ctx) {
+        	this.ctx = ctx;
+        	events = new LinkedBlockingQueue<T>(maxBufferSize+10);
+        }
+
+        public synchronized Promise<T> nextEvent() {
+            if (events.isEmpty()) {
+                LazyTask task = new LazyTask(ctx);
+                waiting.add(task);
+                return task;
+            }
+            return new LazyTask(events.peek(), ctx);
+        }
+
+        //NOTE: cannot synchronize since events.put may block when system is overloaded.
+        //Normally, I HATE blocking an NIO thread, but to do this correct, we need a token from netty that we can use to disable
+        //the socket reads completely(ie. stop reading from socket when queue is full) as in normal NIO operations if you stop reading
+        //from the socket, the local nic buffer fills up, then the remote nic buffer fills(the client's nic), and so the client is informed
+        //he can't write anymore just yet (or he blocks if he is synchronous).
+        //Then when someone pulls from the queue, the token would be set to enabled allowing to read from nic buffer again and it all propogates
+        //This is normal flow control with NIO but since it is not done properly, this at least fixes the issue where websocket break down and
+        //skip packets.  They no longer skip packets anymore.
+        public void publish(T event) {
+        	try {
+            	//This method blocks if the queue is full(read publish method documentation just above)        		 
+        		if (events.remainingCapacity() == 10) {
+        			Logger.trace("events queue is full! Setting readable to false.");
+        			ctx.getChannel().setReadable(false);
+        		}
+				events.put(event);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+            notifyNewEvent();
+        }
+
+        synchronized void notifyNewEvent() {
+            T value = events.peek();
+            for (Promise<T> task : waiting) {
+                task.invoke(value);
+            }
+            waiting.clear();
+        }
+
+        class LazyTask extends Promise<T> {
+
+        	final ChannelHandlerContext ctx;
+        	
+            public LazyTask(ChannelHandlerContext ctx) {
+            	this.ctx = ctx;
+            }
+
+            public LazyTask(T value, ChannelHandlerContext ctx) {
+            	this.ctx = ctx;
+                invoke(value);
+            }
+
+            @Override
+            public T get() throws InterruptedException, ExecutionException {
+                T value = super.get();
+                markAsRead(value);
+                return value;
+            }
+
+            @Override
+            public T getOrNull() {
+                T value = super.getOrNull();
+                markAsRead(value);
+                return value;
+            }
+
+            private void markAsRead(T value) {
+                if (value != null) {
+                    events.remove(value);
+                    //Don't start back up until we get down to half the total capacity to prevent jittering:
+                    if (events.remainingCapacity() > events.size()) 
+                    	ctx.getChannel().setReadable(true);
                 }
             }
         }
@@ -593,6 +693,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() >= archiveSize) {
+            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(new IndexedEvent(event));

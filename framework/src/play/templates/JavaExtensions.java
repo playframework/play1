@@ -219,6 +219,10 @@ public class JavaExtensions {
         return Messages.get("since.years", years, pluralize(years));
     }
 
+    public static String asdate(Long timestamp) {
+        return asdate(timestamp, I18N.getDateFormat());
+    }
+    
     public static String asdate(Long timestamp, String pattern) {
         return asdate(timestamp, pattern, Lang.get());
     }

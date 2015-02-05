@@ -100,5 +100,20 @@
         assertTextPresent('noValue2 null')
         assertTextPresent('key value')
         assertTextPresent('noValue3 null')
+        
+   open('@{DataBinding.dispatchAnEntity()}') 
+   type('//input[@id='entity_date']','2013-10-03 11:33:05:125 AM')
+   type('//input[@id='entity_yop']','yop')
+   type('//input[@id='entity_yap']','--yap--')
+   type('//input[@id='entity_yip']','yip')
+   clickAndWait('id=submit')
 
+   assertHtmlSource('*2013-10-03 11:33:05:125 AM*')
+   assertHtmlSource('*yop*')
+   assertNotHtmlSource('*----yop----*')
+   assertHtmlSource('*yap*')
+   assertNotHtmlSource('*--yap--*')
+   assertHtmlSource('*yip*')
+   assertHtmlSource('*--##yip##--*')
+   assertNotHtmlSource('*----yip----*')
 #{/selenium}

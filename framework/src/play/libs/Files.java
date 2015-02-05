@@ -1,15 +1,15 @@
 package play.libs;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import play.exceptions.UnexpectedException;
+
+import java.io.*;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.FileUtils;
-import play.exceptions.UnexpectedException;
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 /**
  * Files utils
@@ -33,27 +33,11 @@ public class Files {
         if (from.getAbsolutePath().equals(to.getAbsolutePath())) {
             return;
         }
-        FileInputStream is = null;
-        FileOutputStream os = null;
+
         try {
-            is = new FileInputStream(from);
-            os = new FileOutputStream(to);
-            int read;
-            byte[] buffer = new byte[10000];
-            while ((read = is.read(buffer)) > 0) {
-                os.write(buffer, 0, read);
-            }
+            FileUtils.copyFile(from, to);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                is.close();
-            } catch (Exception ignored) {
-            }
-            try {
-                os.close();
-            } catch (Exception ignored) {
-            }
         }
     }
 
@@ -97,21 +81,27 @@ public class Files {
 
     public static void unzip(File from, File to) {
         try {
+            String outDir = to.getCanonicalPath();
             ZipFile zipFile = new ZipFile(from);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (entry.isDirectory()) {
-                    new File(to, entry.getName()).mkdir();
-                    continue;
+            try {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    ZipEntry entry = entries.nextElement();
+                    if (entry.isDirectory()) {
+                        new File(to, entry.getName()).mkdir();
+                        continue;
+                    }
+                    File f = new File(to, entry.getName());
+                    if (!f.getCanonicalPath().startsWith(outDir)) {
+                        throw new IOException("Corrupted zip file");
+                    }
+                    f.getParentFile().mkdirs();
+                    copyInputStreamToFile(zipFile.getInputStream(entry), f);
                 }
-                File f = new File(to, entry.getName());
-                f.getParentFile().mkdirs();
-                FileOutputStream os = new FileOutputStream(f);
-                IO.copy(zipFile.getInputStream(entry), os);
-                os.close();
             }
-            zipFile.close();
+            finally {
+               zipFile.close();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -120,10 +110,18 @@ public class Files {
     public static void zip(File directory, File zipFile) {
         try {
             FileOutputStream os = new FileOutputStream(zipFile);
-            ZipOutputStream zos = new ZipOutputStream(os);
-            zipDirectory(directory, directory, zos);
-            zos.close();
-            os.close();
+            try {
+                ZipOutputStream zos = new ZipOutputStream(os);
+                try {
+                    zipDirectory(directory, directory, zos);
+                }
+                finally {
+                    zos.close();
+                }
+            }
+            finally {
+                os.close();
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -182,16 +180,16 @@ public class Files {
             if (item.isDirectory()) {
                 zipDirectory(root, item, zos);
             } else {
-                byte[] readBuffer = new byte[2156];
-                int bytesIn;
                 FileInputStream fis = new FileInputStream(item);
-                String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
-                ZipEntry anEntry = new ZipEntry(path);
-                zos.putNextEntry(anEntry);
-                while ((bytesIn = fis.read(readBuffer)) != -1) {
-                    zos.write(readBuffer, 0, bytesIn);
+                try {
+                    String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+                    ZipEntry anEntry = new ZipEntry(path);
+                    zos.putNextEntry(anEntry);
+                    IOUtils.copyLarge(fis, zos);
                 }
-                fis.close();
+                finally {
+                    fis.close();
+                }
             }
         }
     }

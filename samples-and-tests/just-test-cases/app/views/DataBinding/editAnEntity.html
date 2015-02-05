@@ -1,0 +1,38 @@
+#{extends 'main.html' /}
+
+#{set 'title'}Data Binding anEntity test#{/set}
+
+<form action="@{DataBinding.dispatchAnEntity()}" method="post">
+    <table>
+        <tbody>
+        <tr>
+            <th>Date:</th>
+            <td ><input style="width:250px;" id="entity_date" type="text" name="entity.date" value="${entity?.getFormattedDate()}"/></td>
+        </tr>
+        <tr>
+            <th>yop (Binder + UnBinder):</th>
+            <td><input style="width:250px;" id="entity_yop" type="text" name="entity.yop" value="${entity?.yop}"/></td>
+        </tr>
+         <tr>
+            <th>yap (UnBinder only):</th>
+            <td><input style="width:250px;" id="entity_yap" type="text" name="entity.yap" value="${entity?.yap}"/></td>
+        </tr>
+        <tr>
+            <th>yip: (Binder + UnBinder differents):</th>
+            <td><input style="width:250px;" id="entity_yip" type="text" name="entity.yip" value="${entity?.yip}"/></td>
+        </tr>
+        <tr>
+        <th>Parent:</th>
+            <td>
+             #{select 'entity.parent', value:entity.parent?.id}
+               #{list items:parents, as:'elem'}
+                 #{option elem.id}${elem.prop}#{/option}
+               #{/list}
+             #{/select}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="hidden" name="entity.id" value="${entity?.id}"/>
+    <input id="submit" type="submit" value="Dispatch"/>
+</form>

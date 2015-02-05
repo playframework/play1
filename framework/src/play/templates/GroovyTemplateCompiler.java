@@ -1,6 +1,10 @@
 package play.templates;
 
 import groovy.lang.Closure;
+import play.Play;
+import play.exceptions.TemplateCompilationException;
+import play.templates.GroovyInlineTags.CALL;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,9 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import play.Play;
-import play.exceptions.TemplateCompilationException;
-import play.templates.GroovyInlineTags.CALL;
 
 /**
  * The template compiler
@@ -42,12 +43,23 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    String source() {
+    protected String source() {
         String source = template.source;
 
         // If a plugin has something to change in the template before the compilation
         source = Play.pluginCollection.overrideTemplateSource(template, source);
-
+        
+        if(Boolean.parseBoolean(Play.configuration.getProperty("groovy.template.check.scala.comptatibility", "false"))){
+            source = this.checkScalaComptability(source);
+        }
+        
+        return source;
+    }
+    
+    /**
+     * Makes the code scala compatible (for the scala module).
+     */
+    protected String checkScalaComptability(String source){  
         // Static access
         List<String> names = new ArrayList<String>();
         Map<String, String> originalNames = new HashMap<String, String>();
@@ -69,49 +81,55 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             }
         });
 
-        // We're about to do many many String.replaceAll() so we do some checking first
+        // We're about to do many many String.replaceAll() so we do some
+        // checking first
         // to try to reduce the number of needed replaceAll-calls.
-        // Morten: I have tried to create a single regexp that can be used instead of all the replaceAll,
-        // but I failed to do so.. Such a single regexp would be much faster since
+        // Morten: I have tried to create a single regexp that can be used
+        // instead of all the replaceAll,
+        // but I failed to do so.. Such a single regexp would be much faster
+        // since
         // we then we only would have to have one pass.
 
         if (!names.isEmpty()) {
 
-            if (names.size() <= 1 || source.indexOf("new ")>=0) {
+            if (names.size() <= 1 || source.indexOf("new ") >= 0) {
                 for (String cName : names) { // dynamic class binding
-                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
+                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('"
+                            + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
                 }
             }
 
-            if (names.size() <= 1 || source.indexOf("instanceof")>=0) {
+            if (names.size() <= 1 || source.indexOf("instanceof") >= 0) {
                 for (String cName : names) { // dynamic class binding
-                    source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
-
-                }
-            }
-
-            if (names.size() <= 1 || source.indexOf(".class")>=0) {
-                for (String cName : names) { // dynamic class binding
-                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')");
+                    source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('"
+                            + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
 
                 }
             }
 
-            // With the current arg0 in replaceAll, it is not possible to do a quick indexOf-check for this one,
+            if (names.size() <= 1 || source.indexOf(".class") >= 0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class",
+                            "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')");
+
+                }
+            }
+
+            // With the current arg0 in replaceAll, it is not possible to do a
+            // quick indexOf-check for this one,
             // so we have to run all the replaceAll-calls
             for (String cName : names) { // dynamic class binding
-                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('"
+                        + originalNames.get(cName).replace("$", "\\$") + "')$2");
 
             }
 
         }
-
-
         return source;
     }
 
     @Override
-    void head() {
+    protected void head() {
         print("class ");
         //This generated classname is parsed when creating cleanStackTrace.
         //The part after "Template_" is used as key when
@@ -131,7 +149,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
     @Override
     @SuppressWarnings("unused")
-    void end() {
+    protected void end() {
         for (String n : extensionsClassnames) {
             println(" } ");
         }
@@ -148,7 +166,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
      */
 
     @Override
-    void plain() {
+    protected void plain() {
         String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
         if (skipLineBreak && text.startsWith("\n")) {
             text = text.substring(1);
@@ -184,7 +202,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void script() {
+    protected void script() {
         String text = parser.getToken();
         if (text.indexOf("\n") > -1) {
             String[] lines = parser.getToken().split("\n");
@@ -202,7 +220,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void expr() {
+    protected void expr() {
         String expr = parser.getToken().trim();
         print(";out.print(__safeFaster("+expr+"))");
         markLine(parser.getLine());
@@ -210,7 +228,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void message() {
+    protected void message() {
         String expr = parser.getToken().trim();
         print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
@@ -218,7 +236,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void action(boolean absolute) {
+    protected void action(boolean absolute) {
         String action = parser.getToken().trim();
         if (action.trim().matches("^'.*'$")) {
             if (absolute) {
@@ -241,7 +259,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void startTag() {
+    protected void startTag() {
         tagIndex++;
         String tagText = parser.getToken().trim().replaceAll("\r", "").replaceAll("\n", " ");
         String tagName = "";
@@ -302,7 +320,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
-    void endTag() {
+    protected void endTag() {
         String tagName = parser.getToken().trim();
         if (tagsStack.isEmpty()) {
             throw new TemplateCompilationException(template, parser.getLine(), "#{/" + tagName + "} is not opened.");

@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play run [app_path] [--deps] [--%fwk_id] [-f] [--java_options]
+~ play run [app_path] [-f] [--deps] [--%fwk_id] [--http[s].port=<value>] [--jpda.port=<value>] [--java_options]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -37,3 +37,11 @@
 ~ --silent: 
 ~ Suppress output of the Play ASCII art logo and framework version information.
 ~
+~ --http.port=<value>:
+~ Override the http.port and %fwk_id.http.port variables in application.conf, and listen to the specified http port
+~
+~ --https.port=<value>:
+~ Override the https.port and %fwk_id.https.port variables in application.conf, and listen to the specified https port
+~
+~ --jpda.port=<value>:
+~ Override the jpda.port and %fwk_id.jpda.port variables in application.conf. Use the specified port (<value>) as the remote debugging port for the application. Can be combined with the option -f 

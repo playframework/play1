@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import play.Logger;
@@ -46,7 +47,7 @@ public class UrlEncodedParser extends DataParser {
         // Encoding is either retrieved from contentType or it is the default encoding
         final String encoding = Http.Request.current().encoding;
         try {
-            Map<String, String[]> params = new HashMap<String, String[]>();
+            Map<String, String[]> params = new LinkedHashMap<String, String[]>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -117,7 +118,7 @@ public class UrlEncodedParser extends DataParser {
             }
 
             // We're ready to decode the params
-            Map<String, String[]> decodedParams = new HashMap<String, String[]>(params.size());
+            Map<String, String[]> decodedParams = new LinkedHashMap<String, String[]>(params.size());
             URLCodec codec = new URLCodec();
             for (Map.Entry<String, String[]> e : params.entrySet()) {
                 String key = e.getKey();

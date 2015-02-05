@@ -1,0 +1,5 @@
+YamlModel(ym4):
+  id: 4
+  name: "&{'message.name.yamlModel4'}[${toto}]-Test"
+  binaryData: !!binary VGhpcyBTdHJpbmcgaXMgc3RvcmVkIGluIHlhbWwgZmlsZSB1c2luZyBiYXNlNjQ=
+

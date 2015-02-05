@@ -10,6 +10,7 @@ import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
 import play.utils.Utils.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
+import play.libs.I18N;
 
 @SuppressWarnings("serial")
 public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
@@ -44,13 +45,20 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
                 return false;
             }
         }
+        if (value instanceof Long) {
+            try {
+                return reference.before(new Date((Long) value));
+            } catch (Exception e) {
+                return false;
+            }
+        }
         return false;
     }
 
     @Override
     public Map<String, String> createMessageVariables() {
         Map<String, String> messageVariables = new HashMap<String, String>();
-        messageVariables.put("reference", new SimpleDateFormat("yyyy-MM-dd").format(reference));
+        messageVariables.put("reference", new SimpleDateFormat(I18N.getDateFormat()).format(reference));
         return messageVariables;
     }
    

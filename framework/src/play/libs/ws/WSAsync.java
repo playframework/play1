@@ -465,10 +465,9 @@ public class WSAsync implements WSImpl {
                         }
                     }
                     try {
-                        byte[] bodyBytes = sb.toString().getBytes( this.encoding );
-                        InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
-                        builder.setBody( bodyInStream );
-                    } catch ( UnsupportedEncodingException e) {
+                        byte[] bodyBytes = sb.toString().getBytes(this.encoding);
+                        builder.setBody(bodyBytes);
+                    } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
 
@@ -496,14 +495,13 @@ public class WSAsync implements WSImpl {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
-                if(this.body instanceof InputStream) {
+                if (this.body instanceof InputStream) {
                     builder.setBody((InputStream)this.body);
                 } else {
                     try {
-                        byte[] bodyBytes = this.body.toString().getBytes( this.encoding );
-                        InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
-                        builder.setBody( bodyInStream );
-                    } catch ( UnsupportedEncodingException e) {
+                        byte[] bodyBytes = this.body.toString().getBytes(this.encoding);
+                        builder.setBody(bodyBytes);
+                    } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
                 }

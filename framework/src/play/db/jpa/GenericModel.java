@@ -3,6 +3,7 @@ package play.db.jpa;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
+
 import javax.persistence.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +12,7 @@ import play.Play;
 import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
+import play.data.binding.BindingAnnotations;
 import play.data.binding.ParamNode;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
@@ -33,17 +35,17 @@ public class GenericModel extends JPABase {
      *  public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations)
      */
     @Deprecated
-    public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static Object create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return (T)create(rootParamNode, name, type, annotations);
+        return create(rootParamNode, name, type, annotations);
     }
 
-    public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
+    public static Object create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
             Object model = c.newInstance();
-            return (T) edit(rootParamNode, name, model, annotations);
+            return edit(rootParamNode, name, model, annotations);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -54,16 +56,18 @@ public class GenericModel extends JPABase {
      *
      *  public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations)
      *
-     * @return
+     * @see GenericModel#edit(ParamNode, String, Object, Annotation[])
+     * 
+     * @return the entity
      */
     @Deprecated
-    public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static Object edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         ParamNode rootParamNode = ParamNode.convert(params);
-        return (T)edit( rootParamNode, name, o, annotations);
+        return edit( rootParamNode, name, o, annotations);
     }
 
     @SuppressWarnings("deprecation")
-    public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
+    public static Object edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations) {
         // #1601 - If name is empty, we're dealing with "root" request parameters (without prefixes).
         // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
         ParamNode paramNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
@@ -74,7 +78,7 @@ public class GenericModel extends JPABase {
             BeanWrapper bw = BeanWrapper.forClass(o.getClass());
             // Start with relations
             Set<Field> fields = new HashSet<Field>();
-            Class clazz = o.getClass();
+            Class<?> clazz = o.getClass();
             while (!clazz.equals(Object.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());
                 clazz = clazz.getSuperclass();
@@ -83,13 +87,21 @@ public class GenericModel extends JPABase {
                 boolean isEntity = false;
                 String relation = null;
                 boolean multiple = false;
-                //
+                
+                // First try the field 
+                Annotation[] fieldAnnotations = field.getAnnotations();
+                // and check with the profiles annotations
+                final BindingAnnotations bindingAnnotations = new BindingAnnotations(fieldAnnotations, new BindingAnnotations(annotations).getProfiles());
+                if (bindingAnnotations.checkNoBinding()) {
+                    continue;
+                }
+                
                 if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                     isEntity = true;
                     relation = field.getType().getName();
                 }
                 if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
-                    Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     isEntity = true;
                     relation = fieldType.getName();
                     multiple = true;
@@ -115,7 +127,7 @@ public class GenericModel extends JPABase {
                                 // Remove it to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
-                                    if (_id.equals("")) {
+                                    if (_id == null || _id.equals("")) {
                                         continue;
                                     }
                                     Query q = em.createQuery("from " + relation + " where " + keyName + " = ?1");
@@ -166,7 +178,7 @@ public class GenericModel extends JPABase {
             // Must not call rootParamNode.getChild in that case, as it returns null. Use rootParamNode itself instead.
             ParamNode beanNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
             Binder.bindBean(beanNode, o, annotations);
-            return (T) o;
+            return o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {

@@ -1,11 +1,11 @@
 #{selenium 'Check invocation context resolution'}
 
 	open('@{Application.some1()}')
-	assertTextPresent('@play.db.jpa.Transactional(readOnly=false),')
-	
+	assertTextPresent('@play.db.jpa.Transactional')
+
 	open('@{Application.some2()}')
-	assertTextPresent('@utils.Youhou(value=),@play.db.jpa.Transactional(readOnly=false),')
-	
+	assertTextPresent('@utils.Youhou(value=),@play.db.jpa.Transactional')
+
 	open('@{Application.some3()}')
 	assertTextPresent('@utils.Youhou(value=fromJob),')
 

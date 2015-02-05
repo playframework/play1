@@ -3,19 +3,21 @@ package controllers;
 import helpers.CheatSheetHelper;
 import helpers.LangMenuHelper;
 import helpers.LangMenuHelper.LangMenu;
-import play.Play;
-import play.libs.IO;
-import play.modules.docviewer.DocumentationGenerator;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.vfs.VirtualFile;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import play.Play;
+import play.db.jpa.NoTransaction;
+import play.libs.IO;
+import play.modules.docviewer.DocumentationGenerator;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.vfs.VirtualFile;
 
+@NoTransaction
 public class PlayDocumentation extends Controller {
 
     public static DocumentationGenerator generator = new DocumentationGenerator();
@@ -28,8 +30,8 @@ public class PlayDocumentation extends Controller {
     }
 
     public static void page(String id, String module, String docLang) throws Exception {
-        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches(
-                "en-.*"))) ? "_" + docLang + "/" : "/";
+        String docLangDir = (docLang != null && (!"en".equalsIgnoreCase(docLang) && !docLang.matches("en-.*"))) ? "_"
+                + docLang + "/" : "/";
 
         File page = new File(Play.frameworkPath, "documentation/manual" + docLangDir + id + ".textile");
         if (!page.exists()) {

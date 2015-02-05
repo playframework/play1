@@ -144,6 +144,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                             // Getter or setter ?
                             String propertyName = null;
+                                                        
                             if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
                                 || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
                                 if ((ctMethod.getName().startsWith("get") || (!isFinal(fieldAccess.getField()) && ctMethod.getName().startsWith("set"))) && ctMethod.getName().length() > 3) {
@@ -192,7 +193,9 @@ public class PropertiesEnhancer extends Enhancer {
             return false;
         }
         return Modifier.isPublic(ctField.getModifiers())
-                && !Modifier.isStatic(ctField.getModifiers());
+                && !Modifier.isStatic(ctField.getModifiers())
+                // protected classes will be considered public by this call
+                && Modifier.isPublic(ctField.getDeclaringClass().getModifiers());
     }
 
     /**
@@ -220,7 +223,7 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
-                throw e;
+                return o.getClass().getField(property).get(o);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }

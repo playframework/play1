@@ -39,7 +39,7 @@ def execute(**kargs):
     msXML = ""
     jdXML = ""
     if os.path.exists(os.path.join(app.path, 'lib')):
-        msXML += '                  <root url="file://$MODULE_DIR$/lib" />'
+        mlXML += '<root url="file://$MODULE_DIR$/lib" />\n'
     if len(modules):
         for i, module in enumerate(modules):
             libpath = os.path.join(module, 'lib')
@@ -52,7 +52,7 @@ def execute(**kargs):
                 jdXML += '                <jarDirectory url="file://$MODULE_DIR$/%s" recursive="false"/>\n' % (app.toRelative(libpath).replace('\\', '/'))
     replaceAll(imlFile, r'%LINKS%', lXML)
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
-    replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', msXML)
+    replaceAll(imlFile, r'%MODULE_SOURCES%', msXML)
     replaceAll(imlFile, r'%MODULE_LIBRARIES%', jdXML)
     
     iprFile = os.path.join(app.path, application_name + '.ipr')

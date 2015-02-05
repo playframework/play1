@@ -164,9 +164,12 @@ def run(app, args):
 
 def clean(app):
     app.check()
-    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
-    if os.path.exists(os.path.join(app.path, 'tmp')):
-        shutil.rmtree(os.path.join(app.path, 'tmp'))
+    tmp = app.readConf('play.tmp')
+    if tmp is None or not tmp.strip():
+        tmp = 'tmp'
+    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, tmp))
+    if os.path.exists(os.path.join(app.path, tmp)):
+        shutil.rmtree(os.path.join(app.path, tmp))
     print "~"
 
 def show_modules(app, args):
@@ -256,6 +259,7 @@ def autotest(app, args):
 
     # Run FirePhoque
     print "~"
+    print "~ Starting FirePhoque..."
 
     headless_browser = ''
     if app.readConf('headlessBrowser'):
@@ -269,7 +273,7 @@ def autotest(app, args):
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
         cp_args = ';'.join(fpcp)    
-    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
+    java_cmd = [java_path(), '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
     if protocol == 'https':
         java_cmd.insert(-1, '-Djavax.net.ssl.trustStore=' + app.readConf('keystore.file'))
     try:

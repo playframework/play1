@@ -1,0 +1,7 @@
+<html><body><h3>This email contains some embedded images:</h3>
+<ul>
+<li>#{embeddedImage src:'http://localhost:9003/public/images/favicon.png', name:'distantImage', alt:'distantImage' /} : Distant image  (http protocol)</li>
+<li>#{embeddedImage src:'file:///public/images/favicon.png', name:'LocaleImage', alt:'LocaleImage' /} : Locale image (file protocol)</li>
+<li>#{embeddedImage src:'public/images/favicon.png', name:'LocaleImage2', alt:'LocaleImage2', class:'testClass' /} : Locale image (no protocol)</li>
+</ul>
+ </body></html>

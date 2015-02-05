@@ -27,6 +27,16 @@ def execute(**kargs):
     # if this is a module, we infer the name from the path
     application_name = app.readConf('application.name')
     vm_arguments = app.readConf('jvm.memory')
+    
+    javaVersion = getJavaVersion()
+    print "~ using java version \"%s\"" % javaVersion
+    if javaVersion.startswith("1.7"):
+        # JDK 7 compat
+        vm_arguments = vm_arguments +' -XX:-UseSplitVerifier'
+    elif javaVersion.startswith("1.8"):
+        # JDK 8 compatible
+        vm_arguments = vm_arguments +' -noverify'
+
     if application_name:
         application_name = application_name.replace("/", " ")
     else:

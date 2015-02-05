@@ -85,17 +85,23 @@
                author="false"
                version="true"
                use="true"
-               windowtitle="Play! API">
+               windowtitle="Play! API"
+               Encoding="UTF-8"
+               docencoding="UTF-8"
+               charset="UTF-8"
+               >
             <classpath refid="project.classpath"/>
+            <classpath refid="classpath.test"/>
             <doctitle><![CDATA[<h1>Play! ${version}</h1>]]></doctitle>
             <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> &amp; <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
             <tag name="todo" scope="all" description="To do:"/>
             <group title="Libs" packages="play.libs.*"/>
-            <link offline="false" href="http://java.sun.com/javaee/5/docs/api" />
-            <link offline="false" href="http://commons.apache.org/fileupload/apidocs" />
-            <link offline="false" href="http://google-gson.googlecode.com/svn/tags/1.2.3/docs/javadocs" />
-            <link offline="false" href="https://www.hibernate.org/hib_docs/v3/api" />
-            <link offline="false" href="http://www.mchange.com/projects/c3p0/apidocs" />
+            <link offline="false" href="http://docs.oracle.com/javaee/7/api/" />
+            <link offline="false" href="http://docs.oracle.com/javase/7/docs/api/" />      
+            <link offline="false" href="http://commons.apache.org/proper/commons-fileupload/apidocs/" />
+            <link offline="false" href="http://google-gson.googlecode.com/svn/tags/gson-2.2.4/docs/javadocs/" />
+            <link offline="false" href="https://docs.jboss.org/hibernate/orm/4.2/javadocs/" />
+            <link offline="false" href="http://www.mchange.com/projects/c3p0/apidocs/" />
         </javadoc>
     </target>
 
@@ -231,10 +237,16 @@
             <include name="**/*.java"/>
         </javac>
     </target>
+    
+    <target name="build-test-modules">
+        <ant antfile="build.xml" target="build" dir="../samples-and-tests/modules/testModule" >
+            <property name="play.path" value="../../../"/>
+        </ant>
+    </target>
 
     <!-- Launch all *Test.java -->
 
-    <target name="test" depends="clean,jar" description="run tests suite">
+    <target name="test" depends="clean,jar,build-test-modules" description="run tests suite">
         <condition property="playExtension" value=".bat">
             <and><os family="windows"/></and>
         </condition>
@@ -361,6 +373,7 @@
             <fileset dir="test-src">
                 <include name="**/*.properties"/>
                 <include name="**/*.sql"/>
+                <include name="**/*.yml"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.plugins"/>
             </fileset>

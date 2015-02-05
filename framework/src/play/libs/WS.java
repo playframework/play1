@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -29,8 +27,6 @@ import play.libs.ws.WSUrlFetch;
 import play.mvc.Http;
 import play.mvc.Http.Header;
 import play.utils.HTTP;
-import play.utils.NoOpEntityResolver;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -602,8 +598,7 @@ public class WS extends PlayPlugin {
             try {
                 InputSource source = new InputSource(getStream());
                 source.setEncoding(encoding);
-                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                builder.setEntityResolver(new NoOpEntityResolver());
+                DocumentBuilder builder = XML.newDocumentBuilder();
                 return builder.parse(source);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -637,8 +632,11 @@ public class WS extends PlayPlugin {
             Map<String, String> result = new HashMap<String, String>();
             String body = getString();
             for (String entry: body.split("&")) {
-                if (entry.indexOf("=") > 0) {
-                    result.put(entry.split("=")[0], entry.split("=")[1]);
+                int pos = entry.indexOf("=");
+                if (pos > -1) {
+                    result.put(entry.substring(0,pos), entry.substring(pos+1));
+                } else {
+                    result.put(entry, "");
                 }
             }
             return result;

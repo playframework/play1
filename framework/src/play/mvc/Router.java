@@ -156,8 +156,8 @@ public class Router {
      */
     static void parse(VirtualFile routeFile, String prefix) {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
-        String content = routeFile.contentAsString();
-        if (content.indexOf("${") > -1 || content.indexOf("#{") > -1 || content.indexOf("%{") > -1) {
+        String content = Play.usePrecompiled ? "" : routeFile.contentAsString();
+        if (Play.usePrecompiled || content.indexOf("${") > -1 || content.indexOf("#{") > -1 || content.indexOf("%{") > -1) {
             // Mutable map needs to be passed in.
             content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>(16));
         }
@@ -680,6 +680,7 @@ public class Router {
                         Logger.warn("Static route cannot have a dynamic host name");
                         return;
                     }
+                    this.hostPattern = new Pattern(host.replaceAll("\\.", "\\\\."));
                 }
                 if (!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
                     Logger.warn("Static route only support GET method");

@@ -17,7 +17,7 @@ h3. 一般的な手順
 通常、インストール手順は次のとおりです。
 
 # Java をインストールします。
-# 最新の "Play binary package":http://download.playframework.org/ ダウンロードし、アーカイブを展開します。
+# 最新の "Play binary package":http://download.playframework.com/ ダウンロードし、アーカイブを展開します。
 # ‘play’ コマンドをシステムパスに追加し、実行できることを確認します。
 
 
@@ -25,7 +25,7 @@ h3. Mac OS X
 
 Java は組み込まれているか、自動的にインストールされるので、最初の手順は省略することができます。
 
-# 最新の "Play binary package":http://download.playframework.org/ をダウンロードし、 @/Applications@ に展開します。
+# 最新の "Play binary package":http://download.playframework.com/ をダウンロードし、 @/Applications@ に展開します。
 # @/etc/paths@ を編集し、(例えば) @/Applications/play-1.2.5@ 行を追加します。
 
 OS X における代替手順は次のとおりです:

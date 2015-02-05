@@ -29,5 +29,10 @@ public class StaticContentTest extends UnitTest {
         assertEquals("NorwegianLetters: æøåÆØÅ", WS.url("http://localhost:9003/public/fileWithNoneStandardLetters_stored_in_iso_8859_1.html").get().getString("iso-8859-1"));
     }
     
+    @Test
+    public void testGettingStaticFile() {
+        assertEquals("test", WS.url("http://localhost:9003/public/session.test?req=1").get().getString("UTF-8"));
+    }
+    
 
 }

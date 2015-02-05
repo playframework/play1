@@ -1,5 +1,18 @@
 package play.server;
 
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.handler.stream.ChunkedFile;
+import org.jboss.netty.handler.stream.ChunkedInput;
+import play.Logger;
+import play.exceptions.UnexpectedException;
+import play.libs.MimeTypes;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,26 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.handler.stream.ChunkedFile;
-import org.jboss.netty.handler.stream.ChunkedInput;
-import static org.jboss.netty.buffer.ChannelBuffers.*;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
-
-import play.Logger;
-import play.exceptions.UnexpectedException;
-import play.libs.MimeTypes;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
+import static org.apache.commons.io.IOUtils.closeQuietly;
+import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 
 public class FileService  {
 
@@ -39,8 +35,8 @@ public class FileService  {
             boolean isKeepAlive = HttpHeaders.isKeepAlive(nettyRequest) && nettyRequest.getProtocolVersion().equals(HttpVersion.HTTP_1_1);
             
             if(Logger.isTraceEnabled()) {
-                Logger.trace("keep alive " + isKeepAlive);
-                Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+                Logger.trace("keep alive %s", String.valueOf(isKeepAlive));
+                Logger.trace("content type %s", (response.contentType != null ? response.contentType : MimeTypes.getContentType(localFile.getName(), "text/plain")));
             }
             
             if (!nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
@@ -50,7 +46,12 @@ public class FileService  {
                 nettyResponse.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(fileLength));
             }
 
-            nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            if (response.contentType != null) {
+                nettyResponse.setHeader(CONTENT_TYPE, response.contentType);
+            } else {
+                nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+            }
+
             nettyResponse.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
 
             // Write the initial line and the header.
@@ -71,9 +72,7 @@ public class FileService  {
             }
         } catch (Throwable exx) {
             exx.printStackTrace();
-            try {
-                raf.close();
-            } catch (Throwable ex) { /* Left empty */ }
+            closeQuietly(raf);
             try {
                 ctx.getChannel().close();
             } catch (Throwable ex) { /* Left empty */ }

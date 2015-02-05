@@ -1,5 +1,15 @@
 package play.classloading;
 
+import org.apache.commons.io.IOUtils;
+import play.Logger;
+import play.Play;
+import play.cache.Cache;
+import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.hash.ClassStateHashCreator;
+import play.exceptions.UnexpectedException;
+import play.libs.IO;
+import play.vfs.VirtualFile;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,23 +23,9 @@ import java.security.CodeSource;
 import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import play.Logger;
-import play.Play;
-import play.classloading.hash.ClassStateHashCreator;
-import play.vfs.VirtualFile;
-import play.cache.Cache;
-import play.classloading.ApplicationClasses.ApplicationClass;
-import play.exceptions.UnexpectedException;
-import play.libs.IO;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * The application classLoader. 
@@ -198,8 +194,8 @@ public class ApplicationClassloader extends ClassLoader {
         } else {
             className = "package-info";
         }
-        if (findLoadedClass(className) == null) {
-            loadApplicationClass(className);
+        if (this.findLoadedClass(className) == null) {
+            this.loadApplicationClass(className);
         }
     }
 
@@ -208,26 +204,18 @@ public class ApplicationClassloader extends ClassLoader {
      */
     protected byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
-        InputStream is = getResourceAsStream(name);
+        InputStream is = this.getResourceAsStream(name);
         if (is == null) {
             return null;
         }
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            byte[] buffer = new byte[8192];
-            int count;
-            while ((count = is.read(buffer, 0, buffer.length)) > 0) {
-                os.write(buffer, 0, count);
-            }
+            IOUtils.copyLarge(is, os);
             return os.toByteArray();
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                throw new UnexpectedException(e);
-            }
+            closeQuietly(is);
         }
     }
 
@@ -242,6 +230,18 @@ public class ApplicationClassloader extends ClassLoader {
                 return res.inputstream();
             }
         }
+        URL url = this.getResource(name);
+        if (url != null) {
+            try {
+                File file = new File(url.toURI());
+                String fileName = file.getCanonicalFile().getName();
+                if (!name.endsWith(fileName)) {
+                    return null;
+                }
+            } catch (Exception e) {
+            }
+        }
+
         return super.getResourceAsStream(name);
     }
 
@@ -406,7 +406,7 @@ public class ApplicationClassloader extends ClassLoader {
 
             } else {
 
-                if(!Play.pluginCollection.compileSources()) {
+                if (!Play.pluginCollection.compileSources()) {
 
                     List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
@@ -415,7 +415,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                     List<String> classNames = new ArrayList<String>();
                     for (int i = 0; i < all.size(); i++) {
-                            ApplicationClass applicationClass = all.get(i);
+                        ApplicationClass applicationClass = all.get(i);
                         if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
                             classNames.add(all.get(i).name);
                         }

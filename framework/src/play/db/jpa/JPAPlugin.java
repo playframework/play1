@@ -55,7 +55,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public Object bind(RootParamNode rootParamNode, String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations) {
         // TODO need to be more generic in order to work with JPASupport
-        if (JPABase.class.isAssignableFrom(clazz)) {
+    	if(clazz.isAnnotationPresent(Entity.class)) {
 
             ParamNode paramNode = rootParamNode.getChild(name, true);
 
@@ -294,7 +294,7 @@ public class JPAPlugin extends PlayPlugin {
     }
 
 
-    static String getDefaultDialect(String propPrefix, String driver) {
+    public static String getDefaultDialect(String propPrefix, String driver) {
         String dialect = Play.configuration.getProperty(propPrefix + "jpa.dialect");
         if (dialect != null) {
             return dialect;
@@ -395,7 +395,7 @@ public class JPAPlugin extends PlayPlugin {
      *
      * @param rollback shall current transaction be committed (false) or cancelled (true)
      */
-    protected static void closeTx(boolean rollback) {
+    public static void closeTx(boolean rollback) {
         if (autoTxs) {
             JPA.closeTx(rollback);
         }
@@ -513,7 +513,8 @@ public class JPAPlugin extends PlayPlugin {
                 tclazz = tclazz.getSuperclass();
             }
             for (Field f : fields) {
-                if (Modifier.isTransient(f.getModifiers())) {
+                int mod = f.getModifiers();
+                if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                     continue;
                 }
                 if (f.isAnnotationPresent(Transient.class)) {
@@ -585,7 +586,8 @@ public class JPAPlugin extends PlayPlugin {
                 properties = new HashMap<String, Model.Property>();
                 Set<Field> fields = getModelFields(clazz);
                 for (Field f : fields) {
-                    if (Modifier.isTransient(f.getModifiers())) {
+                    int mod = f.getModifiers();
+                    if (Modifier.isTransient(mod) || Modifier.isStatic(mod)) {
                         continue;
                     }
                     if (f.isAnnotationPresent(Transient.class)) {
@@ -880,7 +882,7 @@ public class JPAPlugin extends PlayPlugin {
 				} else {
 					return ((JPABase) o).willBeSaved;
 				}
-                   } 
+                   }
 			} else {
            		System.out.println("HOO: Case not handled !!!");
         	}
@@ -905,17 +907,17 @@ public class JPAPlugin extends PlayPlugin {
 		}
 
 		protected ThreadLocal<Object> entities = new ThreadLocal<Object>();
-		
+
 		@Override
 	 	public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)  {
 			entities.set(entity);
 			return super.onSave(entity, id, state, propertyNames, types);
 		}
-				
+
 		@Override
 		public void afterTransactionCompletion(org.hibernate.Transaction tx) {
 			entities.remove();
 		}
-    
+
     }
 }

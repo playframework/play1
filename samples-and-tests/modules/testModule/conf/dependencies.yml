@@ -1,0 +1,4 @@
+self: play.test.modules -> testModule 0.1
+
+require:
+    - play

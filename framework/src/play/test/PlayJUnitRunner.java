@@ -42,7 +42,10 @@ public class PlayJUnitRunner extends Runner implements Filterable {
             if (!Play.started) {
                 Play.init(new File("."), PlayJUnitRunner.getPlayId());
                 Play.javaPath.add(Play.getVirtualFile("test"));
-                Play.start();
+                // Assure that Play is not start (start can be called in the Play.init method)
+                if (!Play.started) {
+                    Play.start();
+                }
                 useCustomRunner = true;
                 Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
             }

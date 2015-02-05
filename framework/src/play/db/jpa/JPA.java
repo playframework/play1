@@ -76,7 +76,7 @@ public class JPA {
             try {
                 jpaConfig.close();
             } catch (Exception e) {
-                Logger.error("Error closing JPA config "+jpaConfig.getConfigName(), e);
+                Logger.error(e, "Error closing JPA config "+jpaConfig.getConfigName());
             }
         }
         jpaConfigs.clear();
@@ -95,7 +95,7 @@ public class JPA {
                 try {
                     jpaConfig.getJPAContext().closeTx(rollback);
                 } catch (Exception e) {
-                    Logger.error("Error closing transaction "+jpaConfig.getConfigName(), e);
+                    Logger.error(e, "Error closing transaction "+jpaConfig.getConfigName());
                     error=true;
                 }
             }

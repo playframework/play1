@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,10 +17,17 @@ public @interface As {
     String[] lang() default {"*"};
     String[] format() default {"html"};
     Class<? extends TypeBinder<?>> binder() default DEFAULT.class;
+    Class<? extends TypeUnbinder<?>> unbinder() default DEFAULT.class;
 
-    public static final class DEFAULT implements TypeBinder<Object> {
+    public static final class DEFAULT implements TypeBinder<Object>, TypeUnbinder<Object> {
         public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
             throw new UnsupportedOperationException("Not supported.");
+        }
+
+        @Override
+        public boolean unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name,
+                Annotation[] annotations) throws Exception {
+            throw new UnsupportedOperationException("Not supported.");   
         }
     }
     

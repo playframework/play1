@@ -6,7 +6,7 @@ h2. <a name="standalone">Standalone Play applications</a>
 
 The simplest and the most robust way is to simply run your Play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
 
-The built-in HTTP server can serve thousands of HTTP requests per second so it will never be the performance bottleneck. Moreover it uses a more efficient threading model (where a Servlet container uses 1 thread per request). Different "modules":http://playframework.org/modules allow you to use different servers (Grizzly, Netty, etc...) as well.
+The built-in HTTP server can serve thousands of HTTP requests per second so it will never be the performance bottleneck. Moreover it uses a more efficient threading model (where a Servlet container uses 1 thread per request). Different "modules":http://playframework.com/modules allow you to use different servers (Grizzly, Netty, etc...) as well.
 
 Those servers support long polling and allow to manage very long requests (waiting for a long task to complete), and direct streaming of File objects (and any InputStream if you specify the Content-Length), without blocking the execution thread.
 
@@ -119,17 +119,17 @@ h3. <a name="elasticbeanstalk">AWS Elastic Beanstalk</a>
 
 h3. <a name="cloudbees">CloudBees</a>
 
-"CloudBees":http://www.cloudbees.com/ is a Java application hosting platform. For more information, see the "CloudBees module":http://www.playframework.org/modules/cloudbees.
+"CloudBees":http://www.cloudbees.com/ is a Java application hosting platform. For more information, see the "CloudBees module":https://www.playframework.com/modules/cloudbees.
 
 
 h3. <a name="cloudfondry">Cloud Foundry</a>
 
-"Cloud Foundry":http://www.cloudfoundry.com/ is VMware’s cloud provider. For more information, see "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html and the "CloudFoundry module":http://www.playframework.org/modules/cloudfoundry.
+"Cloud Foundry":http://www.cloudfoundry.com/ is VMware’s cloud provider. For more information, see "Running Play Framework Application on CloudFoundry":http://iambivas.blogspot.com/2011/08/running-play-framework-application-on.html and the "CloudFoundry module":https://www.playframework.com/modules/cloudfoundry.
 
 
 h3. <a name="gae">Google App Engine (GAE)</a>
 
-The "Google App Engine":http://code.google.com/appengine/ is one of the first cloud hosting platforms, which has different pros and cons compared to generic hosting solutions. In particular, GAE does not support JPA persistence. For more information, see the "GAE module":http://www.playframework.org/modules/gae.
+The "Google App Engine":http://code.google.com/appengine/ is one of the first cloud hosting platforms, which has different pros and cons compared to generic hosting solutions. In particular, GAE does not support JPA persistence. For more information, see the "GAE module":https://www.playframework.com/modules/gae.
 
 
 h3. <a name="heroku">Heroku</a>
@@ -192,4 +192,28 @@ For more information, see the "Heroku Dev Center":http://devcenter.heroku.com.
 
 h3. <a name="playapps">playapps.net</a>
 
-"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":http://www.playframework.org/modules/playapps.
+"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":https://www.playframework.com/modules/playapps.
+
+h3. <a name="upstart">VPS / Custom Server</a>
+
+If you want to run play as a service on your own server you can start it with this simple upstart script
+This upstart script works with ubuntu 10.04 and upwards (upstart 1.4)
+
+bc.
+description "Play Framework"
+version "1.0"
+env PLAY_BIN=/opt/playframework/play
+env PROFILE=prod
+start on runlevel [2345]
+stop on runlevel [016]
+respawn
+respawn limit 10 5
+umask 022
+setuid youruser
+setgid www-data
+chdir /home/youruser/app/current
+pre-start script
+    test -x $PLAY_BIN || { stop; exit 0; }
+    rm /home/youruser/app/current/server.pid || true
+end script
+exec $PLAY_BIN run $HOME -Xms1024M -Xmx1024M --%$PROFILE

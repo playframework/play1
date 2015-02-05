@@ -1,7 +1,12 @@
+import static org.junit.Assert.assertEquals;
+
+import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import play.libs.WS;
+import play.libs.WS.HttpResponse;
 import play.libs.ws.WSUrlFetch;
 import play.test.UnitTest;
 
@@ -62,5 +67,15 @@ public class WSUrlFetchTest extends UnitTest {
 
         // Head does not appear to work with UrlFetch
         // assertEquals("HEAD", WS.url(url).head().getString());
+    }
+    
+    @Test
+    public void multipleGetContentTest(){
+        String url = "http://google.com";
+        HttpResponse response = WS.url( url ).post();
+        String resp1 = response.getString();        
+        String resp2 = response.getString();
+        assertEquals(resp1, resp2);  
+        assertNotEquals("", resp2);   
     }
 }

@@ -5,6 +5,7 @@ Play’s dependency management system allows you to express your application’s
 A Play application can have three kinds of dependencies:
 
 * The Play framework itself, since a Play application always depends on the Play framework.
+* Some Play framework modules: CRUD and secure module
 * Any Java library, provided as **JAR** file installed in your application’s @lib/@ directory.
 * A Play module (in fact an application fragment) installed in your application’s @modules/@ directory.
 
@@ -12,11 +13,16 @@ Once you have expressed these dependencies in your application’s @conf/depende
 
 h2. <a name="format">Dependency format</a>
 
-A dependency is described by an organisation a name a revision number and optionally a classifier. In the @dependencies.yml@ file you will write it like this:
+A dependency is described by :
+* an organisation a name, 
+* a revision number 
+* a classifier _(optional)_
+
+In the @dependencies.yml@ file you will write it like this:
 
 bc. organisation -> name revision [classifier]
 
-So, for instance version 1.0 of the "Play PDF module":http://www.playframework.org/modules/pdf is expressed like this:
+So, for instance version 1.0 of the "Play PDF module":https://www.playframework.com/modules/pdf is expressed like this:
 
 bc. play -> pdf 1.0
 
@@ -32,13 +38,28 @@ When your dependency has a classifier, you can use this:
 
 bc. net.sf.json-lib -> json-lib 2.4 jdk15
 
+For Play and Play framework modules (CRUD and secure module), the revision number is not required:
+
+bc. play
+play -> crud
+play -> secure
 
 h3. Dynamic revisions
 
 The revision can be fixed (1.2, for instance) or dynamic. A dynamic revision expresses a range of allowed revisions. 
 
-For example:
+There are many things you can configure: see the "Ivy version-matchers documentation":http://ant.apache.org/ivy/history/2.3.0/settings/version-matchers.html.
 
+For example:
+Sub Revision Matcher
+* @1.0.+@ matches all revisions starting with '1.0.', like 1.0.1, 1.0.5, 1.0.a
+* @1.1+@ matches all revisions starting with '1.1', like 1.1, 1.1.5, but also 1.10, 1.11
+Latest (Status) Matcher
+* @latest.integration@ matches all versions
+* @latest.milestone@ matches all modules having at least 'milestone' as status
+* @latest.release@ matches all modules having at least 'release' as status
+* @latest.[any status]@ all modules having at least the specified status
+Version Range Matcher
 * @[1.0,2.0]@ matches all versions greater or equal to 1.0 and lower or equal to 2.0
 * @[1.0,2.0[@ matches all versions greater or equal to 1.0 and lower than 2.0
 * @]1.0,2.0]@ matches all versions greater than 1.0 and lower or equal to 2.0
@@ -76,7 +97,7 @@ bc. $ play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -124,7 +145,7 @@ require:
     - play 1.2
     - com.google.guava -> guava r07
 
-3. You can exclude any specific dependency explicitely:
+3. You can exclude any specific dependency explicitly:
 
 bc. # Application dependencies
     
@@ -133,6 +154,34 @@ require:
     - com.google.guava -> guava r07:
         exclude:
             - com.google.code.findbugs -> *
+
+4. You can alter the ant configuration mappings used during resolution. See "Custom Configuration Mappings":#config_mappings
+
+h3(#config_mappings).  Custom Configuration Mappings
+
+By default, Play will use the @default->*@ ant mapping. This means all transtive ant configurations (or maven scopes) are pulled in as dependencies.
+
+You can customize this behavior by using the @configurations@ block in @dependencies.yml@:
+
+bc. # Application dependencies
+    
+configurations:
+    - optional:
+        exclude: true
+
+This will map to @default -> *, !optional@, or all configurations except @optional@. The way this functions is if no configs are provided then the default mapping of @default -> *@ is used. If only exclude mappings are provided, then the mapping becomes @default -> *, !excludedConfig1, !excludedConfig2,....@. Ivy will then depend on all configurations that are not excluded. If at least one non-excluded configuration is provided, then the listed configurations are all that will be used. For example:
+
+bc. # Application dependencies
+    
+configurations:
+    - compile
+    - runtime
+    - optional:
+        exclude: true
+
+This will map to @default -> compile, runtime, !optional@.
+
+For more information on ant configuration mapping, please refer to the <a href="http://ant.apache.org/ivy/history/latest-milestone/ivyfile/configurations.html" target="_blank">ant documentation</a>
 
 h3. Keep lib/ and modules/ directory in sync
 
@@ -145,7 +194,7 @@ bc. $ play deps
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -204,7 +253,7 @@ bc. play dependencies
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.2, http://www.playframework.org
+~ play! 1.2, https://www.playframework.com
 ~ framework ID is gbo
 ~
 ~ Resolving dependencies using ~/Documents/coco/conf/dependencies.yml,
@@ -239,7 +288,7 @@ require:
 
 h2. <a name="repositories">Adding new repositories</a>
 
-By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.org/modules. 
+By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":https://www.playframework.com/modules. 
 
 You can, of course, specify new custom repositories in the @repositories@ section:
 
@@ -371,7 +420,7 @@ bc. <!-- .ivy2/ivysettings.xml -->
   </resolvers>
 </ivy-settings>
 
-There are many things you can configure: see the "Ivy settings documentation":http://ant.apache.org/ivy/history/2.1.0/settings.html.
+There are many things you can configure: see the "Ivy settings documentation":http://ant.apache.org/ivy/history/2.3.0/settings.html.
 
 
 h3. Clearing the Ivy cache

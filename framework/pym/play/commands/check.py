@@ -11,7 +11,7 @@ HELP = {
     'check': 'Check for a release newer than the current one'
 }
 
-TAGS_URL = "http://github.com/api/v2/json/repos/show/playframework/play/tags"
+TAGS_URL = "https://api.github.com/repos/playframework/play1/tags"
 
 
 def execute(**kargs):
@@ -44,8 +44,13 @@ def allreleases():
         req = urllib2.Request(TAGS_URL)
         req.add_header('Accept', 'application/json')
         opener = urllib2.build_opener()
-        result = opener.open(req)
-        return map(lambda x: Release(x), json.loads(result.read())["tags"])
+        result = opener.open(req)  
+        jsonObject = json.loads(result.read())    
+        releases = []
+        for tagObj in jsonObject:
+            releases.append(Release(tagObj["name"]))
+        
+        return releases
     except urllib2.HTTPError, e:
         print "~ Oops,"
         print "~ Cannot contact github..."
@@ -74,7 +79,7 @@ class Release:
         if not self.rest: self.rest = "Z"
 
     def url(self):
-        return "http://download.playframework.org/releases/play-" + self.strversion + ".zip"
+        return "http://download.playframework.com/releases/play-" + self.strversion + ".zip"
 
     def __eq__(self, other):
         return self.strversion == other.strversion

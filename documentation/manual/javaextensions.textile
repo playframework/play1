@@ -99,6 +99,13 @@ Jan 1, 2010
 h2. <a name="long">Long extensions</a>
 
 
+h3. <a name="asdate">asdate()</a>
+
+Formats a time stamp as a date according to pattern from the I18N Configuration. Returns: @String@ - a formatted date.
+
+bc. ${1275910970000.asdate()}
+07 June 2010 01:42:50
+
 h3. <a name="asdate">asdate(format)</a>
 
 Formats a time stamp as a date. Returns: @String@ - a formatted date.

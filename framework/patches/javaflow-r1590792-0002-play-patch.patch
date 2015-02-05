@@ -1,0 +1,53 @@
+From e26dafd0622bf1c5b070e47fb286d2e77e57ed6a Mon Sep 17 00:00:00 2001
+Date: Fri, 16 May 2014 11:04:57 +0800
+Subject: [PATCH 2/2] play patch
+
+---
+ src/main/java/org/apache/commons/javaflow/Continuation.java           | 4 ++--
+ src/main/java/org/apache/commons/javaflow/bytecode/StackRecorder.java | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/main/java/org/apache/commons/javaflow/Continuation.java b/src/main/java/org/apache/commons/javaflow/Continuation.java
+index e2f4a69..a173e3d 100644
+--- a/src/main/java/org/apache/commons/javaflow/Continuation.java
++++ b/src/main/java/org/apache/commons/javaflow/Continuation.java
+@@ -42,12 +42,12 @@ public final class Continuation implements Serializable {
+     private static final Log log = LogFactory.getLog(Continuation.class);
+     private static final long serialVersionUID = 2L;
+     
+-    private final StackRecorder stackRecorder;
++    public final StackRecorder stackRecorder;
+ 
+     /**
+      * Create a new continuation, which continue a previous continuation.
+      */
+-    private Continuation( final StackRecorder pStackRecorder ) {
++    public Continuation( final StackRecorder pStackRecorder ) {
+         stackRecorder = pStackRecorder;
+     }
+ 
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/StackRecorder.java b/src/main/java/org/apache/commons/javaflow/bytecode/StackRecorder.java
+index d60b36e..bc0798c 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/StackRecorder.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/StackRecorder.java
+@@ -140,7 +140,7 @@ public final class StackRecorder extends Stack {
+     /**
+      * Bind this stack recorder to running thread.
+      */
+-    private StackRecorder registerThread() {
++    public StackRecorder registerThread() {
+         final StackRecorder old = get();
+         threadMap.set(this);
+         return old;
+@@ -149,7 +149,7 @@ public final class StackRecorder extends Stack {
+     /**
+      * Unbind the current stack recorder to running thread.
+      */
+-    private void deregisterThread(final StackRecorder old) {
++    public void deregisterThread(final StackRecorder old) {
+         threadMap.set(old);
+     }
+ 
+-- 
+1.9.0.msysgit.0
+

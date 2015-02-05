@@ -1,3 +1,4 @@
+import org.junit.Ignore;
 import org.junit.Test;
 
 import play.mvc.Http.Response;
@@ -29,7 +30,7 @@ public class TransactionalJPATest extends FunctionalTest {
         assertIsOk(response);
         assertEquals("isInsideTransaction: false", getContent(response));
         
-        //verify that a method cannot use a tranaction if the controller-class
+        //verify that a method cannot use a transaction if the controller-class
         //is annotated with @NoTransaction
         response = GET("/Transactional2/disabledTransactionTest");
         assertIsOk(response);
@@ -37,6 +38,8 @@ public class TransactionalJPATest extends FunctionalTest {
         
     }
     
+    //FIXME Need to fix issue http://play.lighthouseapp.com/projects/57987/tickets/1805-persistenceunit-on-package-not-working
+    @Ignore("Wait for fix issue #1805")
     @Test
     public void testMultipleJPASupport() {
         Fixtures.delete(EntityInOtherDb.class);

@@ -211,13 +211,18 @@ p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
 
 For Selenium tests, you can use the @#{fixture /}@ tag:
 
-bc. #{fixture delete:'all', loadModels:'data.yml' /}
- 
+bc. #{fixture delete:'all', load:'data.yml' /}
 #{selenium}
     
     // Write your test here
  
 #{/selenium}
+
+p(note). Or you can use @loadModels@ instead of @load@, the two parameters are synonyms.
+
+#{fixture delete:'all', loadModels:'data.yml' /}
+ 
+
 
 Sometimes it is convenient to split data into several YAML files. You can load fixtures from multiple files at once:
 
@@ -226,6 +231,10 @@ bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
 and for Selenium tests:
 
 bc. #{fixture delete:'all', loadModels:['users.yml', 'roles.yml', 'permissions.yml'] /}
+
+p(note). The fixture file will be loaded as a Template by default.
+To avoid this, you can use the @loadModels(boolean loadAsTemplate, String name)@ with loadAsTemplate set to @false@
+or for Selenium tests @#{fixture delete:'all', loadAsTemplate:false, load:'data.yml' /}@
 
 h2. <a name="running">Running the tests</a>
 

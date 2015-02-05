@@ -2,7 +2,10 @@ package play.plugins;
 
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.junit.Before;
 import org.junit.Test;
+
 import play.CorePlugin;
 import play.Play;
 import play.PlayBuilder;
@@ -18,7 +21,6 @@ import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
 import play.test.UnitTest;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -29,10 +31,14 @@ import static org.fest.assertions.Assertions.assertThat;
  * To change this template use File | Settings | File Templates.
  */
 public class PluginCollectionTest {
+    
+    @Before
+    public void init(){
+        new PlayBuilder().build();
+    }
 
     @Test
     public void verifyLoading() {
-        new PlayBuilder().build();
         PluginCollection pc = new PluginCollection();
         pc.loadPlugins();
 
@@ -52,9 +58,6 @@ public class PluginCollectionTest {
 
     @Test
     public void verifyLoadingFromFilesWithBlankLines() throws Exception {
-        //verify that only application specific plugins gets reloaded
-        new PlayBuilder().build();
-
         //create custom PluginCollection that fakes that TestPlugin is application plugin
         PluginCollection pc = new PluginCollection(){
             @Override
@@ -79,10 +82,6 @@ public class PluginCollectionTest {
 
     @Test
     public void verifyReloading() throws Exception{
-        //verify that only application specific plugins gets reloaded
-        new PlayBuilder().build();
-
-
         //create custom PluginCollection that fakes that TestPlugin is application plugin
         PluginCollection pc = new PluginCollection(){
             @Override
@@ -119,8 +118,6 @@ public class PluginCollectionTest {
     @SuppressWarnings({"deprecation"})
     @Test
     public void verifyUpdatePlayPluginsList(){
-        new PlayBuilder().build();
-
         assertThat(Play.plugins).isEmpty();
 
         PluginCollection pc = new PluginCollection();

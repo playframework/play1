@@ -27,7 +27,7 @@ HELP = {
     'install': "Install a module"
 }
 
-DEFAULT_REPO = 'http://www.playframework.org'
+DEFAULT_REPO = 'https://www.playframework.com'
 
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
@@ -279,6 +279,7 @@ def build(app, args, env):
                 splitted = nameAndVersion.split(" ")
                 if len(splitted) == 2:
                    version = splitted.pop()
+                   name = splitted.pop()
         for dep in deps["require"]:
             if isinstance(dep, basestring):
                 splitted = dep.split(" ")
