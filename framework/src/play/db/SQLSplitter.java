@@ -190,12 +190,17 @@ public class SQLSplitter implements Iterable<CharSequence> {
 			}
 
 			public CharSequence next() {
+				final StringBuilder sb = new StringBuilder();
 				while ( i < sql.length() ) {
 					if ( sql.charAt(i) == ';' ) {
-						++i;
-						CharSequence ret = sql.subSequence(prev, i);
-						prev = i;
-						return ret;
+                        ++i;
+                        sb.append(sql.subSequence(prev, i));
+                        if ( sql.length() <= i || sql.charAt(i) != ';' ) {
+                            prev = i;
+                            return sb.toString();
+                        }
+                        // replace ';;' to ';', and continue reading sql.
+                        prev = ++i;
 					}
 					i = nextChar(sql, i);
 				}

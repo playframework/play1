@@ -109,4 +109,10 @@ public class SQLSplitterTest {
 		srcArr = srcArrList.toArray(srcArr);		
 		assertEquals(readFile("/play/db/test2.out.sql").split("==="), srcArr);
 	}
+
+    @Test
+    public void verifyDoubleSemicolon() throws Exception {
+        java.util.ArrayList<CharSequence> srcArrList = SQLSplitter.splitSQL(readFile("/play/db/semicolon.sql"));
+        assertEquals(readFile("/play/db/semicolon.out.sql"), srcArrList.get(0));
+    }
 }
