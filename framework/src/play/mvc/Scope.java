@@ -211,7 +211,7 @@ public class Scope {
 
         public String getId() {
             if (!data.containsKey(ID_KEY)) {
-                data.put(ID_KEY, Codec.UUID());
+                this.put(ID_KEY, Codec.UUID());
             }
             return data.get(ID_KEY);
 
@@ -223,7 +223,7 @@ public class Scope {
 
         public String getAuthenticityToken() {
             if (!data.containsKey(AT_KEY)) {
-                data.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+                this.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
             }
             return data.get(AT_KEY);
         }

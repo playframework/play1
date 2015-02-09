@@ -279,7 +279,7 @@ public class EvolutionQuery{
                 Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
 
                 // MySQLDialect is the base class for MySQL dialects
-                isMySQl = play.db.jpa.MySQLDialect.class.isAssignableFrom(dialectClass);
+                isMySQl = org.hibernate.dialect.MySQLDialect.class.isAssignableFrom(dialectClass);
             } catch (ClassNotFoundException e) {
                 // swallow
                 Logger.warn("jpa.dialect class %s not found", jpaDialect);

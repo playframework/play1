@@ -9,7 +9,6 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.codec.http.websocketx.*;
-import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
@@ -384,10 +383,15 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             setContentLength(nettyResponse, response.out.size());
         }
 
-        ChannelFuture f = ctx.getChannel().write(nettyResponse);
+        ChannelFuture f = null;
+        if (ctx.getChannel().isOpen()) {
+            f = ctx.getChannel().write(nettyResponse);
+        } else {
+            Logger.debug("Try to write on a closed channel[keepAlive:%s]: Remote host may have closed the connection", String.valueOf(keepAlive));
+        }
 
         // Decide whether to close the connection or not.
-        if (!keepAlive) {
+        if (f != null && !keepAlive) {
             // Close the connection when the whole content is written out.
             f.addListener(ChannelFutureListener.CLOSE);
         }
