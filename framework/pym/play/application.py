@@ -274,7 +274,7 @@ class PlayApplication(object):
         if application_mode == 'prod':
             java_args.append('-server')
 
-        javaVersion = getJavaVersion()
+        javaVersion = self.readConf('java.source')
         print "~ using java version \"%s\"" % javaVersion
         if javaVersion.startswith("1.7"):
             # JDK 7 compat
