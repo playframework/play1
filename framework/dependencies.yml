@@ -57,8 +57,8 @@ require:    &allDependencies
     - org.javassist -> javassist 3.19.0-GA
     - org.jboss.netty -> netty 3.9.4.Final
     - org.postgresql -> postgresql 9.0
-    - org.slf4j -> slf4j-api 1.7.7
-    - org.slf4j -> slf4j-log4j12 1.7.7
+    - org.slf4j -> slf4j-api 1.7.10
+    - org.slf4j -> slf4j-log4j12 1.7.10
     - org.yaml -> snakeyaml 1.13
     - spy -> spymemcached 2.10.3
     - com.thoughtworks.xstream -> xstream 1.4.7
