@@ -219,7 +219,6 @@ class PlayApplication(object):
         return log_path
 
     def check_jpda(self):
-        self.jpda_port = self.readConf('jpda.port')
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.bind(('', int(self.jpda_port)))
@@ -277,7 +276,10 @@ class PlayApplication(object):
         if application_mode == 'prod':
             java_args.append('-server')
 
-        javaVersion = self.readConf('java.source')
+        if self.play_env.has_key('jvm_version'):
+            javaVersion = self.play_env['jvm_version']
+        else:
+            javaVersion = getJavaVersion() 
         print "~ using java version \"%s\"" % javaVersion
         if javaVersion.startswith("1.7"):
             # JDK 7 compat
@@ -342,6 +344,8 @@ class PlayConfParser:
             self.entries['jpda.port'] = env['jpda.port']
         if env.has_key('http.port'):
             self.entries['http.port'] = env['http.port']
+        if env.has_key('jvm_version'):
+            self.entries['jvm_version'] = env['jvm_version']
 
     def readFile(self, confFolder, filename):
         f = file(confFolder + filename)
