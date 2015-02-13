@@ -98,6 +98,9 @@ try:
     # ~~~~~~~~~~~~~~~~~ Override pid_file
     get_opt(remaining_args, "pid_file", play_env)
 
+    # ~~~~~~~~~~~~~~~~~ Override jvm_version
+    get_opt(remaining_args, "jvm_version", play_env)
+
     # ~~~~~~~~~~~~~~~~~ Override port
     get_opt(remaining_args, "http.port", play_env)
     get_opt(remaining_args, "https.port", play_env)

@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play start [app_path] [-f] [--deps] [--%fwk_id]  [--http[s].port=<value>] [--jpda.port=<value>] [--pid_file=<file>] [--java_options]
+~ play start [app_path] [-f] [--deps] [--%fwk_id]  [--http[s].port=<value>] [--jpda.port=<value>] [--pid_file=<file>] [--java_options] [--jvm_version=<value>]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -45,3 +45,6 @@
 ~
 ~ --jpda.port=<value>:
 ~ Override the jpda.port and %fwk_id.jpda.port variables in application.conf. Use the specified port (<value>) as the remote debugging port for the application. Can be combined with the option -f
+~
+~ --jvm_version=<value>:
+~ Specify which version of JVM runs the application. If omitted, the script will spawn a sub-process to obtain the value. This will have repercussions in environments where forking behaviour needs to be deterministic (e.g. Upstart).
