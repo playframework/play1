@@ -10,11 +10,17 @@ public class Error {
     String message;
     String key;
     String[] variables;
+    int severity = 0;
 
     public Error(String key, String message, String[] variables) {
+        this(key, message, variables, 0);
+    }
+
+    public Error(String key, String message, String[] variables, int severity) {
         this.message = message;
         this.key = key;
         this.variables = variables;
+        this.severity = severity;
     }
     
     /**
@@ -46,6 +52,14 @@ public class Error {
     @Override
     public String toString() {
         return message();
+    }
+
+    public int getSeverity() {
+        return severity;
+    }
+
+    public String getMessageKey() {
+        return message;
     }
 
 }
