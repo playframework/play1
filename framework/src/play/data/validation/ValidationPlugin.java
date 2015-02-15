@@ -73,7 +73,14 @@ public class ValidationPlugin extends PlayPlugin {
             ArrayList<Error> errors = new ArrayList<Error>();
             String[] paramNames = Java.parameterNames(actionMethod);
             for (ConstraintViolation violation : violations) {
-                errors.add(new Error(paramNames[((MethodParameterContext) violation.getContext()).getParameterIndex()], violation.getMessage(), violation.getMessageVariables() == null ? new String[0] : violation.getMessageVariables().values().toArray(new String[0])));
+                errors.add(new Error(
+                        paramNames[((MethodParameterContext) violation
+                                .getContext()).getParameterIndex()], violation
+                                .getMessage(),
+                        violation.getMessageVariables() == null ? new String[0]
+                                : violation.getMessageVariables().values()
+                                        .toArray(new String[0]), violation
+                                .getSeverity()));
             }
             Validation.current.get().errors.addAll(errors);
         } catch (Exception e) {
