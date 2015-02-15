@@ -62,7 +62,8 @@ GET         /index2                          Application.index2
 
 # Catch all
 *           /async/{controller}/{action}    async.{controller}.{action}
-*           /sample/{controller}/{action}    sample.{controller}.{action}
+*           /sample/{controller}/{action}      sample.{controller}.{action}
+*           /tagDemos/{controller}/{action}    tagDemos.{controller}.{action}
 *           /{controller}/{action}           {controller}.{action}
 
 # Data binding
