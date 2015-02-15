@@ -538,7 +538,7 @@ public class Fixtures {
             DB.execute("begin\n"
                     + "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n"
                     + "and status = 'ENABLED') LOOP\n"
-                    + "execute immediate 'alter table '||i.table_name||' disable constraint '||i.constraint_name||'';\n"
+                    + "execute immediate 'alter table \"'||i.table_name||'\" disable constraint '||i.constraint_name||'';\n"
                     + "end loop;\n"
                     + "end;"
             );
@@ -602,7 +602,7 @@ public class Fixtures {
             DB.execute("begin\n"
                     + "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n"
                     + "and status = 'DISABLED') LOOP\n"
-                    + "execute immediate 'alter table '||i.table_name||' enable constraint '||i.constraint_name||'';\n"
+                    + "execute immediate 'alter table \"'||i.table_name||'\" enable constraint '||i.constraint_name||'';\n"
                     + "end loop;\n"
                     + "end;"
             );
