@@ -512,7 +512,13 @@ public class Validation {
         try {
             ValidationResult result = new ValidationResult();
             if (!check.isSatisfied(o, o, null, null)) {
-                Error error = new Error(key, check.getClass().getDeclaredField("mes").get(null) + "", check.getMessageVariables() == null ? new String[0] : check.getMessageVariables().values().toArray(new String[0]));
+                Error error = new Error(key, check.getClass()
+                        .getDeclaredField("mes").get(null)
+                        + "",
+                        check.getMessageVariables() == null ? new String[0]
+                                : check.getMessageVariables().values()
+                                        .toArray(new String[0]),
+                        check.getSeverity());
                 Validation.current().errors.add(error);
                 result.error = error;
                 result.ok = false;
