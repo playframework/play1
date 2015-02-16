@@ -6,6 +6,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.groovy.runtime.NullObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -214,7 +215,9 @@ public class JavaExtensionsTest {
         assertEquals(no, JavaExtensions.yesno(testCollection, yesNo));
         testCollection.add("1");
         assertEquals(yes, JavaExtensions.yesno(testCollection, yesNo));
-        
+        // NullObject
+        NullObject nullOject = NullObject.getNullObject();
+        assertEquals(no, JavaExtensions.yesno(nullOject, yesNo));
     }
 
     @Test 
