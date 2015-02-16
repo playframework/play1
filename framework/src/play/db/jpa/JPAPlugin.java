@@ -115,6 +115,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {  
         org.hibernate.ejb.HibernatePersistence persistence = new org.hibernate.ejb.HibernatePersistence();
+        org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
 
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
@@ -181,10 +182,8 @@ public class JPAPlugin extends PlayPlugin {
             properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
             properties.put("hibernate.dialect", getDefaultDialect(dbConfig, dbConfig.getProperty("db.driver")));
             
-             if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
+            if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
-            } else {
-                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
             }
 
             cfg.configure(properties);
