@@ -182,9 +182,15 @@ def new(app, args, play_env):
         print "~"
         sys.exit(-1)
 
+    application_name = os.path.basename(app.path)
+    groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', application_name)
+    if not groups.group(3) == None:
+        print "~ Oops. Module names cannot contain dash characters: '%s'" % application_name
+        print "~"
+        sys.exit(-1)
+    
     print "~ The new module will be created in %s" % os.path.normpath(app.path)
     print "~"
-    application_name = os.path.basename(app.path)
     copy_directory(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
     # check_application()
     replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)

@@ -194,6 +194,21 @@ class IamADeveloper(unittest.TestCase):
         step("done testing jobapp")
     
 
+    def testModuleName(self):
+        
+        # Well
+        step('Hello, I\'m testing module name')
+        
+        self.working_directory = bootstrapWorkingDirectory('i-am-testing-modulenames')
+
+        # play new yop
+        step('Create a new module')
+        
+        self.play = callPlay(self, ['new-module', '%s/mymodule-123' % self.working_directory])
+        self.assert_(waitFor(self.play, "Oops. Module names cannot contain dash characters: 'mymodule-123'"))
+
+        step("done testing module name")
+        
     def testSimpleProjectCreation(self):
 
         # Well
