@@ -1,6 +1,7 @@
 package play;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -10,10 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -23,6 +21,9 @@ import play.i18n.Lang;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.utils.PThreadFactory;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * Run some code in a Play! context
@@ -264,15 +265,11 @@ public class Invoker {
             InvocationContext.current.remove();
         }
 
-        private boolean withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
-            boolean withinFilterFctFound = false;
-            for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
-                if (plugin.getFilter() != null){
-                    withinFilterFctFound = true;
-                    plugin.getFilter().withinFilter(fct);
-                }
-            }
-            return withinFilterFctFound;
+        private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
+          for( PlayPlugin plugin :  Play.pluginCollection.getEnabledPlugins() ) {
+               if (plugin.getFilter() != null)
+                plugin.getFilter().withinFilter(fct);
+           }
         }
 
         /**
@@ -286,14 +283,16 @@ public class Invoker {
                 preInit();
                 if (init()) {
                     before();
-                    boolean withinFilterFctFound = this.withinFilter(new play.libs.F.Function0<Void>() {
+                    final AtomicBoolean executed = new AtomicBoolean(false);
+                    withinFilter(new play.libs.F.Function0<Void>() {
                         public Void apply() throws Throwable {
+                            executed.set(true);
                             execute();
                             return null;
                         }
                     });
                     // No filter function found => we need to execute anyway( as before the use of withinFilter )
-                    if(!withinFilterFctFound){
+                    if (!executed.get()) {
                         execute();
                     }
                     after();
