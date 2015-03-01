@@ -57,8 +57,11 @@ public class DBPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
-        System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
+	if ( play.Logger.usesJuli() ) {
+	    System.setProperty("com.mchange.v2.log.MLog", "jul");
+	} else {
+	    System.setProperty("com.mchange.v2.log.MLog", "log4j");
+	}
 
         List<String> dbConfigNames = new ArrayList<String>(1);
 
