@@ -284,7 +284,7 @@ public class Invoker {
                 if (init()) {
                     before();
                     final AtomicBoolean executed = new AtomicBoolean(false);
-                    withinFilter(new play.libs.F.Function0<Void>() {
+                    this.withinFilter(new play.libs.F.Function0<Void>() {
                         public Void apply() throws Throwable {
                             executed.set(true);
                             execute();

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -15,8 +16,8 @@ import play.exceptions.UnexpectedException;
 import play.libs.F.Promise;
 import play.libs.Time;
 import play.mvc.Http;
-
 import play.PlayPlugin;
+
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 
@@ -191,11 +192,18 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                     monitor = MonitorFactory.start(getClass().getName()+".doJob()");
                     
                     // If we have a plugin, get him to execute the job within the filter. 
-                    result = withinFilter(new play.libs.F.Function0<V>() {
+                    final AtomicBoolean executed = new AtomicBoolean(false);
+                    result = this.withinFilter(new play.libs.F.Function0<V>() {
                         public V apply() throws Throwable {
-                          return doJobWithResult();
+                            executed.set(true);
+                            return doJobWithResult();
                         }
                     });
+                    
+                    // No filter function found => we need to execute anyway( as before the use of withinFilter )
+                    if (!executed.get()) {
+                        result = doJobWithResult();
+                    }
                    
                     monitor.stop();
                     monitor = null;
