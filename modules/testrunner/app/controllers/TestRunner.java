@@ -26,20 +26,42 @@ public class TestRunner extends Controller {
         render(unitTests, functionalTests, seleniumTests);
     }
 
-    public static void list() {
+    public static void list(Boolean runUnitTests, Boolean runFunctionalTests, Boolean runSeleniumTests) {
         StringWriter list = new StringWriter();
         PrintWriter p = new PrintWriter(list);
         p.println("---");
         p.println(Play.getFile("test-result").getAbsolutePath());
         p.println(Router.reverse(Play.modules.get("_testrunner").child("/public/test-runner/selenium/TestRunner.html")));
-        for(Class c : TestEngine.allUnitTests()) {
-            p.println(c.getName() + ".class");
+        
+        List<Class> unitTests = null;
+        List<Class> functionalTests =  null;
+        List<String> seleniumTests = null;
+        // Check configuration of test
+        // method parameters have priority on configuration param
+        if (runUnitTests == null || runUnitTests) {
+            unitTests = TestEngine.allUnitTests();
         }
-        for(Class c : TestEngine.allFunctionalTests()) {
-            p.println(c.getName() + ".class");
+        if (runFunctionalTests == null || runFunctionalTests) {
+            functionalTests = TestEngine.allFunctionalTests();
         }
-        for(String c : TestEngine.allSeleniumTests()) {
-            p.println(c);
+        if (runSeleniumTests == null || runSeleniumTests) {
+            seleniumTests = TestEngine.allSeleniumTests();
+        }
+        
+        if(unitTests != null){
+            for(Class c : unitTests) {
+                p.println(c.getName() + ".class");
+            }
+        }
+        if(functionalTests != null){
+            for(Class c : functionalTests) {
+                p.println(c.getName() + ".class");
+            }
+        }
+        if(seleniumTests != null){
+            for(String c : seleniumTests) {
+                p.println(c);
+            }
         }
         renderText(list);
     }
