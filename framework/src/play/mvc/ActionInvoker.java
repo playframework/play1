@@ -447,31 +447,31 @@ public class ActionInvoker {
     }
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
-        if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return invoke(method, null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
-        } else if (Modifier.isStatic(method.getModifiers())) {
-            Object[] args = getActionMethodArgs(method, null);
-            args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
-            return invoke(method, null, args);
-        } else {
-            Object instance = null;
+        boolean isStatic = Modifier.isStatic(method.getModifiers());
+        String declaringClassName = method.getDeclaringClass().getName();
+        boolean isProbablyScala = declaringClassName.contains("$");
+
+        Object instance = isStatic ? null : Http.Request.current().controllerClass.newInstance();
+        Object[] args = forceArgs != null ? forceArgs : getActionMethodArgs(method, instance);
+
+        if (isProbablyScala) {
             try {
-                instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-            } catch (Exception e) {
-                Annotation[] annotations = method.getDeclaredAnnotations();
-                String annotation = Utils.getSimpleNames(annotations);
-                if (!StringUtils.isEmpty(annotation)) {
-                    throw new UnexpectedException("Method public static void " + method.getName() + "() annotated with " + annotation + " in class " + method.getDeclaringClass().getName() + " is not static.");
+                Object scalaInstance = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
+                if (declaringClassName.endsWith("$class")) {
+                    args[0] = scalaInstance; // Scala trait method
+                } else {
+                    instance = scalaInstance; // Scala object method
                 }
-                // TODO: Find a better error report
-                throw new ActionNotFoundException(Http.Request.current().action, e);
+            } catch (NoSuchFieldException e) {
+                // not Scala
             }
-            return invoke(method, instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
         }
+
+        return invoke(method, instance, args);
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        if(isActionMethod(method)) {
+        if (isActionMethod(method)) {
             return invokeWithContinuation(method, instance, realArgs);
         } else {
             return method.invoke(instance, realArgs);
