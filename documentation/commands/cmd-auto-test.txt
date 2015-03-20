@@ -1,10 +1,14 @@
 ~ Name:
 ~ ~~~~~
 ~ auto-test -- Automatically run all application tests
-~ 
+~
+~ Alias:
+~ ~~~~~
+~ autotest
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play auto-test [app_path] [--deps]
+~ play auto-test [app_path] [--deps] [--unit] [--functional] [--selenium]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -35,4 +39,9 @@
 ~ ~~~~~~~~~
 ~ --deps: 
 ~ Resolve and install dependencies before running the command.
-~
+~ --unit: 
+~ Run the unit tests.
+~ --functional: 
+~ Run the functional tests.
+~ --selenium: 
+~ Run the selenium tests.
