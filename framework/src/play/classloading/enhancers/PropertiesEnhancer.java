@@ -31,6 +31,8 @@ public class PropertiesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
+        if(!Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"))) return;
+
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
             return;
