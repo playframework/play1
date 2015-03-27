@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
-
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class FirePhoque {
@@ -41,8 +40,26 @@ public class FirePhoque {
         String selenium = null;
         List<String> tests = null;
         BufferedReader in = null;
+        StringBuilder urlStringBuilder = new StringBuilder(app).append("/@tests.list");
+            
+        String runUnitTests = System.getProperty("runUnitTests");
+        String runFunctionalTests = System.getProperty("runFunctionalTests");
+        String runSeleniumTests = System.getProperty("runSeleniumTests");
+        
+        if(runUnitTests != null || runFunctionalTests != null || runSeleniumTests != null){
+            urlStringBuilder.append("?");
+            urlStringBuilder.append("runUnitTests=").append(runUnitTests != null ? true : false);
+            System.out.println("~ Run unit tests:" + (runUnitTests != null ? true : false));
+
+            urlStringBuilder.append("&runFunctionalTests=").append(runFunctionalTests != null ? true : false);
+            System.out.println("~ Run functional tests:" + (runFunctionalTests != null ? true : false));
+
+            urlStringBuilder.append("&runSeleniumTests=").append(runSeleniumTests != null ? true : false);
+            System.out.println("~ Run selenium tests:" + (runSeleniumTests != null ? true : false));
+        }
+        
         try {
-            in = new BufferedReader(new InputStreamReader(new URL(app + "/@tests.list").openStream(), "utf-8"));
+            in = new BufferedReader(new InputStreamReader(new URL(urlStringBuilder.toString()).openStream(), "utf-8"));
             String marker = in.readLine();
             if (!marker.equals("---")) {
                 throw new RuntimeException("Oops");

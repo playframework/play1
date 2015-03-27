@@ -555,7 +555,7 @@ public class WS extends PlayPlugin {
          * @return the content type of the http response
          */
         public String getContentType() {
-            return getHeader("content-type");
+            return getHeader("content-type") !=null ? getHeader("content-type") : getHeader("Content-Type");
         }
 
         public String getEncoding() {

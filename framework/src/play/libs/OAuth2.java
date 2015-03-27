@@ -3,6 +3,7 @@ package play.libs;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.JsonElement;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
@@ -126,17 +127,23 @@ public class OAuth2 {
         }
         public Response(WS.HttpResponse response) {
             this.httpResponse = response;
-            Map<String, String> querystring = response.getQueryString();
-            if (querystring.containsKey("access_token")) {
-                this.accessToken = querystring.get("access_token");
+            this.accessToken = getAccessToken(response);
+            if (this.accessToken != null) {
                 this.error = null;
             } else {
-                this.accessToken = null;
                 this.error = Error.oauth2(response);
             }
         }
         public static Response error(Error error, WS.HttpResponse response) {
             return new Response(null, error, response);
+        }
+        private String getAccessToken(WS.HttpResponse httpResponse) {
+            if(httpResponse.getContentType().contains("application/json")) {
+                JsonElement accessToken = httpResponse.getJson().getAsJsonObject().get("access_token");
+                return accessToken != null ? accessToken.getAsString() : null;
+            } else {
+                return httpResponse.getQueryString().get("access_token");
+            }
         }
     }
 
