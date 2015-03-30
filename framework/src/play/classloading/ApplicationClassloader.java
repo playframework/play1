@@ -464,7 +464,7 @@ public class ApplicationClassloader extends ClassLoader {
     public List<Class> getAssignableClasses(Class clazz) {
         final List<Class> cachedAssignableClasses = assignableClassesCache.get(clazz);
         if (cachedAssignableClasses != null) {
-            return cachedAssignableClasses;
+            return new ArrayList<Class>(cachedAssignableClasses);
         }
 
         getAllClasses();
@@ -502,7 +502,7 @@ public class ApplicationClassloader extends ClassLoader {
     public List<Class> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         final List<Class> cachedAnnotatedClasses = annotatedClassesCache.get(clazz);
         if (cachedAnnotatedClasses != null) {
-            return cachedAnnotatedClasses;
+            return new ArrayList<Class>(cachedAnnotatedClasses);
         }
 
         getAllClasses();
