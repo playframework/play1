@@ -1,5 +1,6 @@
 package play.classloading;
 
+import org.apache.commons.collections.map.LRUMap;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -27,9 +28,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,6 +41,12 @@ public class ApplicationClassloader extends ClassLoader {
 
 
     private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
+
+    // commons collection LRU cache (this version at least,) isn't templated
+    @SuppressWarnings("unchecked")
+    Map<Class, List<Class>> assignableClassesCache = Collections.synchronizedMap(new LRUMap(1000));
+    @SuppressWarnings("unchecked")
+    Map<Class<? extends Annotation>, List<Class>> annotatedClassesCache = Collections.synchronizedMap(new LRUMap(1000));
 
     /**
      * A representation of the current state of the ApplicationClassloader.
@@ -455,11 +462,17 @@ public class ApplicationClassloader extends ClassLoader {
      * @return A list of class
      */
     public List<Class> getAssignableClasses(Class clazz) {
+        final List<Class> cachedAssignableClasses = assignableClassesCache.get(clazz);
+        if (cachedAssignableClasses != null) {
+            return cachedAssignableClasses;
+        }
+
         getAllClasses();
         List<Class> results = new ArrayList<Class>();
         for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
             results.add(c.javaClass);
         }
+        assignableClassesCache.put(clazz, new ArrayList<Class>(results));
         return results;
     }
 
@@ -487,11 +500,18 @@ public class ApplicationClassloader extends ClassLoader {
      * @return A list of class
      */
     public List<Class> getAnnotatedClasses(Class<? extends Annotation> clazz) {
+        final List<Class> cachedAnnotatedClasses = annotatedClassesCache.get(clazz);
+        if (cachedAnnotatedClasses != null) {
+            return cachedAnnotatedClasses;
+        }
+
         getAllClasses();
         List<Class> results = new ArrayList<Class>();
         for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
             results.add(c.javaClass);
         }
+
+        annotatedClassesCache.put(clazz, new ArrayList<Class>(results));
         return results;
     }
 
