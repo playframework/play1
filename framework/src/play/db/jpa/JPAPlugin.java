@@ -36,6 +36,7 @@ public class JPAPlugin extends PlayPlugin {
 
 
     public static boolean autoTxs = true;
+    public static boolean modelChanged = true;
 
   
     @Override
@@ -172,10 +173,10 @@ public class JPAPlugin extends PlayPlugin {
                 cfg.addResource(mappingFile);
             }
 
-            if (!dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
+            if (modelChanged && !dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", dbConfig.getProperty("jpa.ddl", "update"));
             }
-          
+
             Map<String, String> properties = dbConfig.getProperties();
             properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
             properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
@@ -794,4 +795,20 @@ public class JPAPlugin extends PlayPlugin {
             return modelProperty;
         }
     }
+
+  @Override
+  public boolean detectClassesChange() {
+    if (!Play.started || Play.mode.isProd()) {
+      JPAPlugin.modelChanged = true;
+    } else {
+      JPAPlugin.modelChanged = false;
+      for (ApplicationClass applicationClass : Play.classes.getAssignableClasses(JPABase.class)) {
+        if (applicationClass.timestamp < applicationClass.javaFile.lastModified()) {
+            JPAPlugin.modelChanged = true;
+            break;
+        }
+      }
+    }
+    return super.detectClassesChange();
+  }
 }
