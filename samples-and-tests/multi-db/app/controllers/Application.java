@@ -1,10 +1,13 @@
 package controllers;
 
 import play.*;
+import play.db.jpa.JPA;
+import play.libs.F.Promise;
 import play.mvc.*;
 
 import java.util.*;
 
+import jobs.SomeJob;
 import models.*;
 
 public class Application extends Controller {
@@ -18,4 +21,17 @@ public class Application extends Controller {
         render(students, teachers);
     }
 
+    public static void connectionLeak() {
+        JPA.closeTx(JPA.DEFAULT);
+        renderText("View Connection leaked!");
+    }
+
+
+    public static void noTransactionJob() {
+        SomeJob job = new SomeJob();
+        Promise p = job.now();
+        await(p);
+        renderText("Job Connection leaked!");
+    }
+    
 }
