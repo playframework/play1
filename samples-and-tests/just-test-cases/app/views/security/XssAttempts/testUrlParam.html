@@ -1,0 +1,8 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+URL param value : ${url} <br/>
+
+XSS test on <a>
+<a href="@{security.XssAttempts.testUrlParam(url)}">asd</a>
+

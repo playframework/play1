@@ -1,0 +1,10 @@
+#{selenium 'Test the cache tag'}
+   %{ def customCode = "\"><script>alert(\"toto\");</script>" ; }%
+   
+   open('@{security.XssAttempts.testUrlParam(customCode )}')    
+   assertHtmlSource('*href="/security.xssattempts/testurlparam?url=${customCode.urlEncode()}*')
+   
+   open('@{security.XssAttempts.testUrlParam(":" + customCode )}')    
+   assertHtmlSource('*href="/security.xssattempts/testurlparam?url=:${customCode.urlEncode()}*')
+
+#{/selenium}
