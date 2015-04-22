@@ -509,11 +509,13 @@ public class Router {
                                         try {
                                             queryString.append(URLEncoder.encode(key, encoding));
                                             queryString.append("=");
-                                            if (object.toString().startsWith(":")) {
-                                                queryString.append(object.toString());
-                                            } else {
-                                                queryString.append(URLEncoder.encode(object.toString() + "", encoding));
-                                            }
+                                            String objStr = object.toString();
+                                            // Special case to handle jsAction tag
+                                            if (objStr.startsWith(":")  && objStr.length() > 1) {
+                                              queryString.append(':');
+                                              objStr = objStr.substring(1);
+                                            } 
+                                            queryString.append(URLEncoder.encode(objStr + "", encoding));
                                             queryString.append("&");
                                         } catch (UnsupportedEncodingException ex) {
                                         }
@@ -524,11 +526,13 @@ public class Router {
                                     try {
                                         queryString.append(URLEncoder.encode(key, encoding));
                                         queryString.append("=");
-                                        if (value.toString().startsWith(":")) {
-                                            queryString.append(value.toString());
-                                        } else {
-                                            queryString.append(URLEncoder.encode(value.toString() + "", encoding));
-                                        }
+                                        String objStr = value.toString();
+                                        // Special case to handle jsAction tag
+                                        if (objStr.startsWith(":") && objStr.length() > 1) {
+                                          queryString.append(':');
+                                          objStr = objStr.substring(1);
+                                        } 
+                                        queryString.append(URLEncoder.encode(objStr + "", encoding));
                                         queryString.append("&");
                                     } catch (UnsupportedEncodingException ex) {
                                     }
