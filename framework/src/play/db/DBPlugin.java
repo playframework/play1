@@ -83,6 +83,13 @@ public class DBPlugin extends PlayPlugin {
                     DB.destroyAll();
                 }
                 
+                // Define common parameter here
+                if (play.Logger.usesJuli()) {
+                    System.setProperty("com.mchange.v2.log.MLog", "jul");
+                } else {
+                    System.setProperty("com.mchange.v2.log.MLog", "log4j");
+                }
+                
                 Set<String> dbNames = Configuration.getDbNames();
                 Iterator<String> it = dbNames.iterator();
                 while(it.hasNext()) {
@@ -129,9 +136,6 @@ public class DBPlugin extends PlayPlugin {
                                 fake.close();
                             }
                         }
-
-                        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.log4j.Log4jMLog");
-                        org.apache.log4j.Logger.getLogger("com.mchange").setLevel(Level.OFF);
 
                         ComboPooledDataSource ds = new ComboPooledDataSource();
                         ds.setDriverClass(dbConfig.getProperty("db.driver"));
