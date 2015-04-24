@@ -53,6 +53,7 @@ GET         static2.foo.com/x                staticDir:public2/assets2
 #bug in router.reverse
 GET         /notmatch/{name}/{action}        Application.{action}
 GET         /index2                          Application.index2
+GET         /xsstest                         security.XssAttempts.testUrlParam
 
 # Catch all
 *           /sample/{controller}/{action}    sample.{controller}.{action}

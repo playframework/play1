@@ -1,0 +1,7 @@
+#{selenium 'Test xss attack'}
+
+  open('@{security.XssAttempts.testUrlParam(':"><script>alert("oh")</script>')}')
+  // assert that script tags are properly escaped
+  assertAttribute('link=actionxsstest@href','/xsstest?url=:%22%3E%3Cscript%3Ealert%28%22oh%22%29%3C%2Fscript%3E')
+
+#{/selenium}
