@@ -1,0 +1,54 @@
+#{extends 'main.html' /}
+<script src="@{'/public/jquery.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+
+<script type="text/javascript" charset="${_response_encoding}" >
+    var showUserAction = #{jsAction @Users.showId(':id')/}
+    // check accents in keys
+    var showUserNameAction = #{jsAction @Users.showName(':nâmë'), encodeURI:false, minimize:true /}
+    var showUserNameActionEncodeURI = #{jsAction @Users.showName(':name'), encodeURI:true, minimize:false /}
+    var showUserNameActionCustomScript= #{jsAction @Users.showName(':name'), customScript:"encodeURIComponent(val.replace('&amp;', '&'))", minimize:false /}
+    
+    $(document).ready(function() {
+    	var html = ""
+    	var id = 1;
+    	
+    	#{list items:users, as:'user'}
+          html ="<tr id=\"" + ${user_index} +"\">";
+    	  html += "<td>" + "${user.name}" + "</td>"; 	  
+          html += "<td></td>";
+          html += "<td></td>";
+          html += "<td></td>";
+          html += "<td></td>";
+          html += "</tr>";
+          $('#content tbody').append(html);
+          
+          $('#' + ${user_index} + ' td').eq(1).load( showUserAction({id: "${user?.id}"}) );
+          $('#' + ${user_index} + ' td').eq(2).load( showUserNameAction({nâmë: "${user?.name?.urlEncode()}"}) );
+          $('#' + ${user_index} + ' td').eq(3).load( showUserNameActionEncodeURI({name:  "${user?.name}" }) ); 
+          $('#' + ${user_index} + ' td').eq(4).load( showUserNameActionCustomScript({name:  "${user?.name}" }) ); 
+          id = "${user?.id}";
+       #{/list}
+       
+       // manual add
+       html ="<tr id=\"javascript_add\">";
+       html += "<td>" + "name with special characters [c c ; %20 , / ? : @ & = + $ #]" + "</td>"; 	  
+       html += "<td></td>";
+       html += "<td></td>";
+       html += "<td></td>";
+       html += "<td></td>";
+       html += "</tr>";
+       $('#content tbody').append(html);
+       $('#' + 'javascript_add' + ' td').eq(1).load( showUserAction({id: id}) );
+       $('#' + 'javascript_add' + ' td').eq(2).load( showUserNameAction({nâmë: encodeURIComponent("name with special characters [c c ; %20 , / ? : @ & = + $ #]") }) );
+       $('#' + 'javascript_add' + ' td').eq(3).load( showUserNameActionEncodeURI({name:  "name with special characters [c c ; %20 , / ? : @ & = + $ #]" }) );  
+       $('#' + 'javascript_add' + ' td').eq(4).load( showUserNameActionCustomScript({name:  "name with special characters [c c ; %20 , / ? : @ & = + $ #]" }) );
+    });
+    
+</script>	
+
+
+<table id="content">
+  <thead><tr><th>Name</th><th>Name From ID</th> <th>UrlEncode</th><th>jsAction urlEncode</th><th>jsAction customScript</th></tr></thead>
+  <tbody></tbody>
+</table>
+  
