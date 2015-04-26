@@ -34,21 +34,37 @@ public class Clients extends Controller {
         Client client = Client.findById(id);
         render(client);
     }
- 
-    public static void delete(Long id) {
+     
+    public void delete(Long id) {
         Client client = Client.findById(id);
         client.delete();
     }
  
 }
 
-Each public, static method in a Controller is called an action. The signature for an action method is always:
+Each public method in a Controller is called an action. In case an action method is not static, a new instance of the controller class is created for each request, and all controller methods are invoked on the same instance. This works only if the controller has a zero-argument constructor (or no constructors at all).
 
-bc. public static void action_name(params...);
+The signature for an action method is:
+
+bc. public void static action_name(params...);
+
+or 
+
+bc. public void action_name(params...);
 
 You can define parameters in the action method signature. These parameters will be automatically resolved by the framework from the corresponding HTTP parameters.
 
 Usually, an action method doesn’t include a return statement. The method exit is done by the invocation of a **result** method. In this example, @render(…)@ is a result method that executes and displays a template.
+
+h2. Static or non-static?
+
+In the past, all controller methods had to be static. However, non-static methods have many advantages in Java:
+
+* They can be overridden in subclasses.
+* They are easier to mock/unit-test.
+* They allow storing of request-scoped state in controller fields, if needed.
+
+Having that said, both static and non-static controller methods are supported.
 
 h2. <a name="params">Retrieving HTTP parameters</a>
 
@@ -162,7 +178,7 @@ bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
 
 You can of course refine the date format according to the language. For example:
 
-bc.  public static void articlesSince(@As(lang={"fr,de","*"}, 
+bc.  public static void articlesSince(@As(lang={"fr,de","*"},
         value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
@@ -350,7 +366,7 @@ bc. public class MyCustomStringBinder implements TypeBinder<String>, TypeUnbinde
 
 You can use it in any action, like:
 
-bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) 
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class)
 String name) {
     …
 }
@@ -453,10 +469,10 @@ h3. <a name="binary">Return binary content</a>
 
 To serve binary data, such as a "file stored on the server":jpa#file, use the @renderBinary@ method. For example, if you have a @User@ model with a @play.db.jpa.Blob photo@ property, add a controller method to load the model object and render the image with the stored MIME type:
 
-bc. public static void userPhoto(long id) { 
-   final User user = User.findById(id); 
+bc. public static void userPhoto(long id) {
+   final User user = User.findById(id);
    response.setContentTypeIfNotSet(user.photo.type());
-   java.io.InputStream binaryData = user.photo.get();
+   InputStream binaryData = user.photo.get();
    renderBinary(binaryData);
 } 
 
@@ -606,7 +622,7 @@ h2. <a name="interceptions">Interceptions</a>
 
 A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It’s a useful way to define treatments that are common to all actions: verifying that a user is authenticated, loading request-scope information…
 
-These methods have to be @static@ but not @public@. You have to annotate these methods with a valid interception marker.
+These methods have to be @static@ or not but not @public@, but same as action methods, they can be either @static@ or non-static. You have to annotate these methods with a valid interception marker.
 
 h3. <a name="before">@Before</a>
 
@@ -650,7 +666,7 @@ Or if you want the @Before method to intercept a list of action calls, you can s
 bc. public class Admin extends Controller {
  
     @Before(only={"login","logout"})
-    static void doSomething() {  
+    static void doSomething() {
         …  
     }
     …
