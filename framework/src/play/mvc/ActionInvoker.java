@@ -3,13 +3,11 @@ package play.mvc;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
@@ -451,23 +449,28 @@ public class ActionInvoker {
         String declaringClassName = method.getDeclaringClass().getName();
         boolean isProbablyScala = declaringClassName.contains("$");
 
-        Object instance = isStatic ? null : Http.Request.current().controllerClass.newInstance();
-        Object[] args = forceArgs != null ? forceArgs : getActionMethodArgs(method, instance);
+        Http.Request request = Http.Request.current();
+
+        if (!isStatic && request.controllerInstance == null) {
+            request.controllerInstance = request.controllerClass.newInstance();
+        }
+
+        Object[] args = forceArgs != null ? forceArgs : getActionMethodArgs(method, request.controllerInstance);
 
         if (isProbablyScala) {
             try {
-                Object scalaInstance = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
+                Object scalaInstance = request.controllerClass.getDeclaredField("MODULE$").get(null);
                 if (declaringClassName.endsWith("$class")) {
                     args[0] = scalaInstance; // Scala trait method
                 } else {
-                    instance = scalaInstance; // Scala object method
+                    request.controllerInstance = (Controller) scalaInstance; // Scala object method
                 }
             } catch (NoSuchFieldException e) {
                 // not Scala
             }
         }
 
-        return invoke(method, instance, args);
+        return invoke(method, request.controllerInstance, args);
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {

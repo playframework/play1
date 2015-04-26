@@ -266,6 +266,10 @@ public class Http {
          */
         public transient Class<? extends Controller> controllerClass;
         /**
+         * The instance of invoked controller in case it uses non-static action methods.
+         */
+        public transient Controller controllerInstance;
+        /**
          * Free space to store your request specific data
          */
         public Map<String, Object> args = new HashMap<String, Object>(16);

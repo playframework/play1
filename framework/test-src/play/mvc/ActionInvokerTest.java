@@ -4,6 +4,7 @@ import org.junit.*;
 import org.junit.Before;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class ActionInvokerTest {
     private Object[] noArgs = new Object[0];
@@ -37,6 +38,20 @@ public class ActionInvokerTest {
         assertEquals("static-with-object", ActionInvoker.invokeControllerMethod(TestScalaTrait$class.class.getMethod("traitMethod", Object.class), new Object[] {null}));
     }
 
+    @Test
+    public void controllerInstanceIsPreservedForAllControllerMethodInvocations() throws Exception {
+        Http.Request.current().controllerClass = FullCycleTestController.class;
+
+        Controller controllerInstance = (Controller) ActionInvoker.invokeControllerMethod(FullCycleTestController.class.getMethod("before"), noArgs);
+        assertSame(controllerInstance, Http.Request.current().controllerInstance);
+
+        controllerInstance = (Controller) ActionInvoker.invokeControllerMethod(FullCycleTestController.class.getMethod("action"), noArgs);
+        assertSame(controllerInstance, Http.Request.current().controllerInstance);
+
+        controllerInstance = (Controller) ActionInvoker.invokeControllerMethod(FullCycleTestController.class.getMethod("after"), noArgs);
+        assertSame(controllerInstance, Http.Request.current().controllerInstance);
+    }
+
     public static class TestController extends Controller {
         public static String staticJavaMethod() {
             return "static";
@@ -44,6 +59,20 @@ public class ActionInvokerTest {
 
         public String nonStaticJavaMethod() {
             return "non-static";
+        }
+    }
+
+    public static class FullCycleTestController extends Controller {
+        @play.mvc.Before  public Controller before() {
+            return this;
+        }
+
+        public Controller action() {
+            return this;
+        }
+
+        @play.mvc.After public Controller after() {
+            return this;
         }
     }
 
