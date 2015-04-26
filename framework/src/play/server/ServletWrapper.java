@@ -2,6 +2,9 @@ package play.server;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
+
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
@@ -31,6 +34,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -46,6 +50,69 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
+	//Play/server/ServletWrapper.java called from serve500 and serve404
+	private static void reportError(Exception e, Scope.Session s, Http.Request r, Scope.Flash f, Scope.Params p){
+    	String eId = "";
+		//if(e instanceof PlayException) eId=((PlayException) e).getId();
+		StringBuilder m = new StringBuilder();
+    	m.append(e.getLocalizedMessage()+"\n\n");
+    	if(s!=null && s.all()!=null){
+    		m.append("Session:\n");
+    		for(String k: s.all().keySet()){
+    			String v = s.all().get(k);
+    			if(v!=null) m.append(k+": "+v+"\n");
+    		}
+    	}
+    	if(r!=null){
+    		m.append("\n\nRequest:\n"+r.url+"\n\n");
+    		if(r.headers!=null){
+    			for(String k: r.headers.keySet()){
+    				m.append(k+": ");
+    				if(r.headers.get(k)!=null){
+    					m.append(r.headers.get(k).name+" ");
+    					for(String v:r.headers.get(k).values){
+    						m.append(v+"\n");
+    	    			}
+    					m.append("\n");
+    				}
+    			}
+    		}
+    	}
+    	if(f!=null){
+    		m.append("Flash:"+f.toString()+"\n");
+    	}
+    	if(p!=null & p.data!=null){
+    		m.append("Params:\n");
+    		for(String k:p.data.keySet()){
+    			m.append(k+": ");
+    			for(String v:p.data.get(k)){
+    				m.append(v+"\n");
+    			}
+    			m.append("\n");
+    		}
+    	}    	
+	
+    	java.util.Properties prop  = Play.configuration;
+    	String errorMonitorigType = prop.getProperty("errormonitoring.type","none");
+    	if(errorMonitorigType.equalsIgnoreCase("email")){
+	        	try{
+	    			SimpleEmail emailer = new SimpleEmail();
+	    			emailer.setHostName(prop.getProperty("errormonitoring.smtphost","smtp.gmail.com"));
+	    			emailer.setAuthentication(prop.getProperty("errormonitoring.user",""),prop.getProperty("errormonitoring.password",""));
+	    			emailer.setSSL((prop.getProperty("errormonitoring.emailssl","true").equalsIgnoreCase("true")));
+	    			emailer.setSslSmtpPort(prop.getProperty("errormonitoring.port","465"));
+	    			emailer.setMsg(m.toString());
+	    			emailer.setFrom(prop.getProperty("errormonitoring.emailfrom",""));
+	    			emailer.addTo(prop.getProperty("errormonitoring.emailto",""));
+	    			emailer.setSubject(prop.getProperty("application.name","Play!")+" Error "+eId);
+	    			emailer.send();
+	        	}
+	        	catch (EmailException e1){
+	        		//
+	        	}
+    	}
+    }		
+	
     public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String IF_NONE_MATCH = "If-None-Match";
 
@@ -381,6 +448,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         } catch (Exception fex) {
             Logger.error(fex, "(encoding ?)");
         }
+        reportError(e,Scope.Session.current(),Http.Request.current(),Scope.Flash.current(),Scope.Params.current());
     }
 
     public void serve500(Exception e, HttpServletRequest request, HttpServletResponse response) {
@@ -434,12 +502,15 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.getOutputStream().write(errorHtml.getBytes(Response.current().encoding));
                 Logger.error(e, "Internal Server Error (500)");
+                reportError(e,Scope.Session.current(),Http.Request.current(),Scope.Flash.current(),Scope.Params.current());
             } catch (Throwable ex) {
                 Logger.error(e, "Internal Server Error (500)");
                 Logger.error(ex, "Error during the 500 response generation");
+                reportError(e,Scope.Session.current(),Http.Request.current(),Scope.Flash.current(),Scope.Params.current());
                 throw ex;
             }
         } catch (Throwable exxx) {
+        	reportError(e,Scope.Session.current(),Http.Request.current(),Scope.Flash.current(),Scope.Params.current());
             if (exxx instanceof RuntimeException) {
                 throw (RuntimeException) exxx;
             }
