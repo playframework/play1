@@ -59,7 +59,28 @@ public class FastTags {
     }
 
     public static void _jsAction(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-		out.println("function(options) {var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "'; for(var key in options) { pattern = pattern.replace(':'+key, options[key] || ''); } return pattern }");
+        String html = "";
+        String minimize = "";
+        if(args.containsKey("minimize") && Boolean.FALSE.equals(Boolean.valueOf(args.get("minimize").toString()))){
+            minimize = "\n";
+        }
+        html += "function(options) {" + minimize;
+        html += "var pattern = '" + args.get("arg").toString().replace("&amp;", "&") + "';" + minimize;;
+        html += "for(key in options) {" + minimize;;
+        html += "var val = options[key];" + minimize;
+        // Encode URI script
+        if(args.containsKey("encodeURI") && Boolean.TRUE.equals(Boolean.valueOf(args.get("encodeURI").toString()))){ 
+            html += "val = encodeURIComponent(val.replace('&amp;', '&'));" + minimize;
+        }
+        //Custom script
+        if(args.containsKey("customScript")){
+            html += "val = " + args.get("customScript") + minimize;
+        }
+        html += "pattern = pattern.replace(':' + encodeURIComponent(key), val || '');"+ minimize;
+        html += "}" + minimize;;
+        html += "return pattern;" + minimize;;
+        html += "}" + minimize;
+	out.println(html);
     }
 
     public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
