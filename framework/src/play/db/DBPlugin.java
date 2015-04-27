@@ -11,15 +11,19 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import jregex.Matcher;
+
 import org.apache.commons.lang.StringUtils;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -337,6 +341,17 @@ public class DBPlugin extends PlayPlugin {
 
         public boolean jdbcCompliant() {
             return this.driver.jdbcCompliant();
+        }
+        
+        // Method not annotated with @Override since getParentLogger() is a new method
+        // in the CommonDataSource interface starting with JDK7 and this annotation
+        // would cause compilation errors with JDK6.
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            try {
+                return (java.util.logging.Logger) Driver.class.getDeclaredMethod("getParentLogger").invoke(this.driver);
+            } catch (Throwable e) {
+                return null;
+            }
         }
     }
 
