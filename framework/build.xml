@@ -264,6 +264,10 @@
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
         </exec>
 
+        <exec executable="python" failonerror="true">
+            <arg value="${basedir}/../samples-and-tests/i-am-a-developer/test_jvm_version_flag.py" />
+        </exec>
+
         <echo message="Using ${basedir}/../play${playExtension}" />
 
         <antcall target="play-test">
