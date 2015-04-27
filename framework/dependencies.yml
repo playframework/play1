@@ -11,7 +11,7 @@ require:    &allDependencies
     - c3p0 0.9.5
     - cglib -> cglib-nodep 3.1
     - com.google.code.gson -> gson 2.3.1
-    - com.jamonapi -> jamon 2.75
+    - com.jamonapi -> jamon 2.81
     - com.ning -> async-http-client 1.8.14
     - commons-beanutils 1.8.3  
     - commons-codec 1.8
