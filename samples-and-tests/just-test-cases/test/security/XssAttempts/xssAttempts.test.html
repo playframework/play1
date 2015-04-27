@@ -2,10 +2,10 @@
    %{ def customCode = "\"><script>alert(\"toto\");</script>" ; }%
    
    open('@{security.XssAttempts.testUrlParam(customCode )}')    
-   assertHtmlSource('*href="/security.xssattempts/testurlparam?url=${customCode.urlEncode()}*')
+   assertHtmlSource('*href="/xsstest?url=${customCode.urlEncode()}*')
    
    open('@{security.XssAttempts.testUrlParam(":" + customCode )}')    
-   assertHtmlSource('*href="/security.xssattempts/testurlparam?url=:${customCode.urlEncode()}*')
+   assertHtmlSource('*href="/xsstest?url=:${customCode.urlEncode()}*')
 
 #{/selenium}
 
