@@ -76,7 +76,7 @@ public class FastTags {
         if(args.containsKey("customScript")){
             html += "val = " + args.get("customScript") + minimize;
         }
-        html += "pattern = pattern.replace(':'+key, val || '');"+ minimize;
+        html += "pattern = pattern.replace(':' + encodeURIComponent(key), val || '');"+ minimize;
         html += "}" + minimize;;
         html += "return pattern;" + minimize;;
         html += "}" + minimize;
