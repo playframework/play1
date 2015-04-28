@@ -38,39 +38,59 @@ public class Users extends Controller {
     }
 
     public static void edit() {
-		User u = fresh();
-		render(u);
+	User u = fresh();
+	render(u);
+    }
+
+    public static void save() {
+	User u = fresh();
+	u.edit(params.getRootParamNode(), "u");
+	render(u);
+    }
+
+    static User fresh() {
+	try {
+	    User u = new User();
+	    u.name = "Guillaume";
+	    u.b = true;
+	    u.l = 356L;
+	    u.birth = new SimpleDateFormat("dd/MM/yyyy").parse("21/12/1980");
+	    return u;
+	} catch (Exception e) {
+	    throw new RuntimeException(e);
 	}
-	
-	public static void save() {
-		User u = fresh();
-		u.edit(params.getRootParamNode(), "u");
-		render(u);
-	}
-		
-	static User fresh() {
-		try {
-			User u = new User();
-			u.name = "Guillaume";
-			u.b = true;
-			u.l = 356L;
-			u.birth = new SimpleDateFormat("dd/MM/yyyy").parse("21/12/1980");
-			return u;
-		} catch(Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public static void wbyte(byte a, Byte b) {
-	    renderText(a+","+b);
-	}
-	
-	public static void newUser(String name) {
-	   User u = new User();
-	   u.name = name;
-	   u.save();
-	   renderText("Created user with name %s", u.name);
-	}
+    }
+
+    public static void wbyte(byte a, Byte b) {
+	renderText(a + "," + b);
+    }
+
+    public static void newUser(String name) {
+	User u = new User();
+	u.name = name;
+	u.save();
+	renderText("Created user with name %s", u.name);
+    }
     
+    public static void showAll() {
+        List<User> users = User.find("order by name ASC").fetch();
+        render(users);
+    }
+    
+    public static void showId(Long id) {
+        User u = User.findById(id);
+        if (u != null) {
+            renderText(u.name);
+        }
+        renderText("");
+    }
+
+    public static void showName(String name) {
+        User u = User.find("byName", name).first();
+        if (u != null) {
+            renderText(u.name);
+        }
+        renderText("");
+    }
 }
 

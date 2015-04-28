@@ -1,0 +1,18 @@
+#{selenium 'Test the cache tag'}
+   %{ def customCode = "\"><script>alert(\"toto\");</script>" ; }%
+   
+   open('@{security.XssAttempts.testUrlParam(customCode )}')    
+   assertHtmlSource('*href="/xsstest?url=${customCode.urlEncode()}*')
+   
+   open('@{security.XssAttempts.testUrlParam(":" + customCode )}')    
+   assertHtmlSource('*href="/xsstest?url=:${customCode.urlEncode()}*')
+
+#{/selenium}
+
+#{selenium 'Test xss attack'}
+
+  open('@{security.XssAttempts.testUrlParam(':"><script>alert("oh")</script>')}')
+  // assert that script tags are properly escaped
+  assertAttribute('xpath=//a[1]@href','/xsstest?url=:%22%3E%3Cscript%3Ealert%28%22oh%22%29%3C%2Fscript%3E')
+
+#{/selenium}
