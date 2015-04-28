@@ -35,7 +35,7 @@ require:    &allDependencies
     - junit 4.12
     - jregex 1.2_01
     - log4j 1.2.17
-    - net.sf.ehcache -> ehcache-core 2.6.9
+    - net.sf.ehcache -> ehcache-core 2.6.11
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.0
     - net.sf.oval -> oval 1.84
