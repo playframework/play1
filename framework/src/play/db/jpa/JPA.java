@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceUnit;
+
 import play.exceptions.JPAException;
 import play.Play;
 import play.Invoker.*;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 import javax.persistence.*;
+
 import play.db.DB;
 import play.Logger;
 import play.libs.F;
@@ -30,6 +32,7 @@ public class JPA {
     public static String DEFAULT = "default";
 
     public static class JPAContext {
+        public String dbName = JPA.DEFAULT;
         public EntityManager entityManager;
         public boolean readonly = true;
         public boolean autoCommit = false;
@@ -47,20 +50,38 @@ public class JPA {
         return get().get(name);
     }
 
+    /**
+     * @deprecated Use clearContext instead
+     * @since 1.3.0
+     * @see #clearContext(String)
+     */
+    @Deprecated
     static void clearContext() {
         get().clear();
     }
+    
+    /**
+     * 
+     * @param name : the DB name
+     */
+    static void clearContext(String name) {
+        get().remove(name);
+    }
 
     static void createContext(EntityManager entityManager, boolean readonly) {
+        createContext(JPA.DEFAULT, entityManager, readonly);
+    }
+    
+    static void createContext(String dbName, EntityManager entityManager, boolean readonly) {
         if (isInitialized()) {
             try {
-                get(DEFAULT).entityManager.close();
+                get(dbName).entityManager.close();
             } catch (Exception e) {
                 // Let's it fail
             }
-            clearContext();
+            clearContext(dbName);
         }
-       bindForCurrentThread(DEFAULT, entityManager, readonly);
+       bindForCurrentThread(dbName, entityManager, readonly);
     }
 
     public static EntityManager newEntityManager(String key) {
@@ -90,6 +111,7 @@ public class JPA {
      */
     public static void bindForCurrentThread(String name, EntityManager em, boolean readonly) {
         JPAContext context = new JPAContext();
+        context.dbName = name;
         context.entityManager = em;
         context.readonly = readonly;
 
@@ -196,11 +218,13 @@ public class JPA {
     }
 
 
-    public static String getDBName(Class clazz) {
+    public static String getDBName(Class<?> clazz) {
         String name = JPA.DEFAULT;
-        PersistenceUnit pu = (PersistenceUnit)clazz.getAnnotation(PersistenceUnit.class);
-        if (pu != null) {
-            name = pu.name();
+        if(clazz != null){
+            PersistenceUnit pu = (PersistenceUnit)clazz.getAnnotation(PersistenceUnit.class);
+            if (pu != null) {
+                name = pu.name();
+            }
         }
         return name;
     }
@@ -286,7 +310,7 @@ public class JPA {
                         if (localEm.isOpen()) {
                             localEm.close();
                         }
-                        JPA.clearContext();
+                        JPA.clearContext(jpaContext.dbName);
                     }
                     for (String name : emfs.keySet()) {
                         JPA.unbindForCurrentThread(name);
@@ -309,7 +333,7 @@ public class JPA {
         manager.setFlushMode(FlushModeType.COMMIT);
         manager.setProperty("org.hibernate.readOnly", readOnly);
         manager.getTransaction().begin();
-        createContext(manager, readOnly);
+        createContext(name, manager, readOnly);
     }
 
     public static void closeTx(String name) {
@@ -318,7 +342,7 @@ public class JPA {
              try {
                     // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
                 try {
-                    DB.getConnection().setAutoCommit(false);
+                    DB.getConnection(name).setAutoCommit(false);
                 } catch(Exception e) {
                     Logger.error(e, "Why the driver complains here?");
                 }
@@ -348,7 +372,7 @@ public class JPA {
                 if (manager.isOpen()) {
                     manager.close();
                 }
-                JPA.clearContext();
+                JPA.clearContext(name);
             }
         }
     }
@@ -359,7 +383,7 @@ public class JPA {
              try {
                     // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
                 try {
-                    DB.getConnection().setAutoCommit(false);
+                    DB.getConnection(name).setAutoCommit(false);
                 } catch(Exception e) {
                     Logger.error(e, "Why the driver complains here?");
                 }
@@ -386,7 +410,7 @@ public class JPA {
                 if (manager.isOpen()) {
                     manager.close();
                 }
-                JPA.clearContext();
+                JPA.clearContext(name);
             }
         }
     }

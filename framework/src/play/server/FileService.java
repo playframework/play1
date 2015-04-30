@@ -7,6 +7,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedInput;
+
 import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
@@ -56,26 +57,36 @@ public class FileService  {
             nettyResponse.addHeader(HttpHeaders.Names.ACCEPT_RANGES, HttpHeaders.Values.BYTES);
 
             // Write the initial line and the header.
-            ChannelFuture writeFuture;
+            ChannelFuture writeFuture = null;
 
             // Write the content.
             if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
                 ChunkedInput chunkedInput = getChunckedInput(raf, MimeTypes.getContentType(localFile.getName(), "text/plain"), channel, nettyRequest, nettyResponse);
-                channel.write(nettyResponse);
-                writeFuture = channel.write(chunkedInput);
+                if (channel.isOpen()) {
+                    channel.write(nettyResponse);
+                    writeFuture = channel.write(chunkedInput);
+                }else{
+                    Logger.debug("Try to write on a closed channel[keepAlive:%s]: Remote host may have closed the connection", String.valueOf(isKeepAlive)); 
+                }
             } else {
-                writeFuture = channel.write(nettyResponse);
+                if (channel.isOpen()) {
+                    writeFuture = channel.write(nettyResponse);
+                }else{
+                    Logger.debug("Try to write on a closed channel[keepAlive:%s]: Remote host may have closed the connection", String.valueOf(isKeepAlive)); 
+                }
                 raf.close();
             }
 
-            if (!isKeepAlive) {
+            if (writeFuture != null && !isKeepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
             }
         } catch (Throwable exx) {
             exx.printStackTrace();
             closeQuietly(raf);
             try {
-                ctx.getChannel().close();
+                if (ctx.getChannel().isOpen()) {
+                    ctx.getChannel().close();
+                }
             } catch (Throwable ex) { /* Left empty */ }
         }
     }

@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.scanner.ScannerException;
+
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
@@ -18,6 +19,7 @@ import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
 import play.db.SQLSplitter;
+import play.db.jpa.JPAModelLoader;
 import play.db.jpa.JPAPlugin;
 import play.exceptions.DatabaseException;
 import play.exceptions.UnexpectedException;
@@ -27,6 +29,7 @@ import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
 import javax.persistence.Entity;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -478,7 +481,7 @@ public class Fixtures {
         // @Embedded are not managed by the JPA plugin
         // This is not the nicest way of doing things.
          //modelFields =  Model.Manager.factoryFor(type).listProperties();
-        final List<Model.Property> modelFields =  new JPAPlugin.JPAModelLoader(type).listProperties();
+        final List<Model.Property> modelFields =  new JPAModelLoader(type).listProperties();
 
         for (Model.Property field : modelFields) {
             // If we have a relation, get the matching object

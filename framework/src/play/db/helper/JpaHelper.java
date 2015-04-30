@@ -8,9 +8,13 @@ public class JpaHelper {
 
     private JpaHelper() {
     }
-
+    
     public static Query execute(String sql, Object ... params) {
-        Query query = JPA.em().createQuery(sql);
+        return execute(JPA.DEFAULT, sql, params);
+    }
+
+    public static Query execute(String dbName, String sql, Object ... params) {
+        Query query = JPA.em(dbName).createQuery(sql);
         int index = 0;
         for (Object param : params) {
             query.setParameter(++index, param);
@@ -19,7 +23,11 @@ public class JpaHelper {
     }
 
     public static Query executeList(String sql, List<Object> params) {
-        Query query = JPA.em().createQuery(sql);
+        return executeList(JPA.DEFAULT, sql, params);
+    }
+    
+    public static Query executeList(String dbName, String sql, List<Object> params) {
+        Query query = JPA.em(dbName).createQuery(sql);
         int index = 0;
         for (Object param : params) {
             query.setParameter(++index, param);
@@ -28,7 +36,11 @@ public class JpaHelper {
     }
 
     public static Query execute(SqlQuery query) {
-        return executeList(query.toString(), query.getParams());
+        return execute(JPA.DEFAULT, query);
+    }
+    
+    public static Query execute(String dbName, SqlQuery query) {
+        return executeList(dbName, query.toString(), query.getParams());
     }
 
 }

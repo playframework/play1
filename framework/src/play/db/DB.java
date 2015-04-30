@@ -116,10 +116,6 @@ public class DB {
         return null;
     }
 
-    private static Connection getLocalConnection() {
-        return getLocalConnection(DEFAULT);
-    }
-
     private static void registerLocalConnection(String name, Connection connection) {
         Map<String, Connection> map = localConnection.get();
         if (map == null) {

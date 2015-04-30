@@ -1,9 +1,10 @@
 *{
  *  insert a script tag in the template.
  *  by convention, referred script must be put under /public/javascripts
- *    src     (required)   : script filename, without the leading path "/public/javascripts"
+ *    src     (required)   : script filename, without the leading path (default: "/public/javascripts")
  *    id      (opt.)       : sets script id attribute
  *    charset (opt.)       : sets source encoding - defaults to current response encoding
+ *    path    (opt.)       : sets the path defaults to "/public/javascripts"
  *
  *    #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'${_response_encoding}' /}
 }*
@@ -13,7 +14,7 @@
     if (!_src) {
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for script tag");
     }
-    _src = "/public/javascripts/" + _src
+    _src = (_path ? _path : "/public/javascripts/") + _src
     try {
         _abs = play.mvc.Router.reverseWithCheck(_src, play.Play.getVirtualFile(_src), false);
     } catch (Exception ex) {
