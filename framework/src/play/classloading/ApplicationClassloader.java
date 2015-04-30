@@ -47,6 +47,8 @@ public class ApplicationClassloader extends ClassLoader {
     Map<Class, List<Class>> assignableClassesCache = Collections.synchronizedMap(new LRUMap(1000));
     @SuppressWarnings("unchecked")
     Map<Class<? extends Annotation>, List<Class>> annotatedClassesCache = Collections.synchronizedMap(new LRUMap(1000));
+    @SuppressWarnings("unchecked")
+    Map<String, Class> nameToClassCache = Collections.synchronizedMap(new LRUMap(1000));
 
     /**
      * A representation of the current state of the ApplicationClassloader.
@@ -315,6 +317,9 @@ public class ApplicationClassloader extends ClassLoader {
      * Detect Java changes
      */
     public void detectChanges() {
+        // blow away caches
+        purgeCaches();
+
         // Now check for file modification
         List<ApplicationClass> modifieds = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : Play.classes.all()) {
@@ -482,13 +487,21 @@ public class ApplicationClassloader extends ClassLoader {
      * @return a class
      */
     public Class getClassIgnoreCase(String name) {
+        final Class candidateMatch = nameToClassCache.get(name);
+        if (candidateMatch != null) {
+            return candidateMatch;
+        }
+
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
             if (c.name.equalsIgnoreCase(name) || c.name.replace("$", ".").equalsIgnoreCase(name)) {
                 if (Play.usePrecompiled) {
+                    nameToClassCache.put(name, c.javaClass);
                     return c.javaClass;
                 }
-                return loadApplicationClass(c.name);
+                final Class loadedClass = loadApplicationClass(c.name);
+                nameToClassCache.put(name, loadedClass);
+                return loadedClass;
             }
         }
         return null;
@@ -571,6 +584,12 @@ public class ApplicationClassloader extends ClassLoader {
                 scanPrecompiled(classes, packageName + current.getName() + ".", virtualFile);
             }
         }
+    }
+
+    public void purgeCaches() {
+        nameToClassCache.clear();
+        annotatedClassesCache.clear();
+        assignableClassesCache.clear();
     }
 
     @Override
