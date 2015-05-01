@@ -199,7 +199,7 @@ public class JPAPlugin extends PlayPlugin {
                 Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
             
-            cfg.setInterceptor(new HibernateInterceptor());
+//            cfg.setInterceptor(new HibernateInterceptor());
 
             if (Logger.isTraceEnabled()) {
                 Logger.trace("Initializing JPA for %s...", dbName);
