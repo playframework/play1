@@ -1,0 +1,4 @@
+h1. Play 1.2.5.5 -- Release notes
+
+Play 1.2.5.5 has been released of the 1.2.5.x-security maintenance branch.
+It was released to fix a vulnerability in play's URL builder (jsAction tag).
