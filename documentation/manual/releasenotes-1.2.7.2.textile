@@ -1,0 +1,4 @@
+h1. Play 1.2.7.2 -- Release notes
+
+Play 1.2.7.2 has been released of the 1.2.x maintenance branch.
+It was released to fix a vulnerability in play's URL builder (jsAction tag).
