@@ -1,0 +1,15 @@
+h1. Play 1.3.1 -- Release notes
+
+Play 1.3.1 has been released of the 1.3.x maintenance branch.
+
+The changes in this release are listed in the "Play 1.3.1 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/208206-131 on Lighthouse, including 26 resolved tickets. 
+Play 1.3.1 is a maintenance release so it mostly contains bug fixes. The most important are:
+
+* It was released to fix a vulnerability in play's URL builder (jsAction tag).
+* Handle diacritics fro keys back into jsaction
+* Fix Multidb configuration glitches 
+* c3p0 logging configuration for multiDB configuration
+* Fix some exceptions in SSL mode server ssl 
+* yesno() evaluates NullObject as true
+* Add optional parameter in script / stylesheet tags to define a custom path
+* Add ability to enable some kind off test in test mode
