@@ -13,7 +13,6 @@ public class HibernateInterceptor extends EmptyInterceptor {
   public HibernateInterceptor() {
 
   }
-  @Override
   public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
     if (o instanceof JPABase && !((JPABase) o).willBeSaved) {
       return new int[0];
@@ -21,7 +20,6 @@ public class HibernateInterceptor extends EmptyInterceptor {
     return null;
   }
 
-  @Override
   public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
     if (collection instanceof PersistentCollection) {
       Object o = ((PersistentCollection) collection).getOwner();
@@ -38,7 +36,6 @@ public class HibernateInterceptor extends EmptyInterceptor {
   return super.onCollectionUpdate(collection, key);
 }
 
-@Override
 public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
   if (collection instanceof PersistentCollection) {
     Object o = ((PersistentCollection) collection).getOwner();
@@ -48,7 +45,7 @@ public boolean onCollectionRecreate(Object collection, Serializable key) throws 
      } else {
        return ((JPABase) o).willBeSaved;
      }
-   } 
+   }
  } else {
    System.out.println("HOO: Case not handled !!!");
  }
@@ -56,7 +53,6 @@ public boolean onCollectionRecreate(Object collection, Serializable key) throws 
  return super.onCollectionRecreate(collection, key);
 }
 
-@Override
 public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
  if (collection instanceof PersistentCollection) {
   Object o = ((PersistentCollection) collection).getOwner();

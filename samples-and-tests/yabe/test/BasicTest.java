@@ -192,7 +192,9 @@ public class BasicTest extends UnitTest {
                 return m1.get("tag").toString().compareTo(m2.get("tag").toString());
             }
         });
-        assertEquals("[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]", cloud.toString());
+		
+        assertTrue("[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]".equals(cloud.toString())
+				|| "[{pound=1, tag=Blue}, {pound=1, tag=Green}, {pound=2, tag=Red}]".equals(cloud.toString()));
         
     }
  
