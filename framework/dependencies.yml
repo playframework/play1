@@ -14,11 +14,11 @@ require:    &allDependencies
     - com.jamonapi -> jamon 2.7
     - com.ning -> async-http-client 1.8.13
     - commons-beanutils 1.8.3  
-    - commons-codec 1.6
-    - commons-collections 3.1
+    - commons-codec 1.10
+    - commons-collections 3.2.1
     - commons-email 1.2
     - commons-fileupload 1.2.2
-    - commons-io 2.0.1
+    - commons-io 2.4
     - commons-javaflow 1209105
     - commons-lang 2.6
     - commons-logging 1.1.1
