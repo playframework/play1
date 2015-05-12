@@ -951,4 +951,12 @@ A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP r
 
 Default: @127.0.0.1@
 
+h2(#enhancers). Enhancers
 
+h3(#play.propertiesEnhancer.enabled). play.propertiesEnhancer.enabled
+
+Used to disable play enhancing of play class (can be used to switch off getter/setter generation). For example:
+
+bc. play.propertiesEnhancer.enabled=false
+
+Default: @true@

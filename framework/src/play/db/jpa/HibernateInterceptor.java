@@ -6,6 +6,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import org.hibernate.CallbackException;
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.type.Type;
+
 //Explicit SAVE for JPABase is implemented here
 // ~~~~~~
 // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update,remove,recreation
@@ -16,7 +21,7 @@ import javax.persistence.MappedSuperclass;
 // }
 //
 // This is really hacky. We should move to something better than Hibernate like EBEAN
-private class HibernateInterceptor extends EmptyInterceptor {
+public class HibernateInterceptor extends EmptyInterceptor {
 
     public HibernateInterceptor() {
 
