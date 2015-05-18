@@ -374,8 +374,8 @@ def install(app, args, env):
     server = None
     if args is not None:
         for param in args:
-            if param.startswith("--server="):
-                server = param[9:]
+            if param.startswith("--force-server="):
+                server = param[15:]
     modules_list = load_module_list(server)
     fetch = None
 
