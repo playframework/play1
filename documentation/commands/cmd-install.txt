@@ -4,7 +4,7 @@
 ~
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play install [module_name]
+~ play install [module_name] [--force-server]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -20,3 +20,7 @@
 ~ Once installed, Play modules can be included in any Play application
 ~ by adding the correct line to conf/application.conf.
 ~
+~ Options:
+~ ~~~~~~~~~
+~ --force-server: 
+~ Specify just one custom repository for module installation.
