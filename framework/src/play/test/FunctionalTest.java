@@ -3,7 +3,6 @@ package play.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 
@@ -26,10 +26,12 @@ import play.mvc.Http.Response;
 import play.mvc.Scope.RenderArgs;
 
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.multipart.FilePart;
-import com.ning.http.multipart.MultipartRequestEntity;
-import com.ning.http.multipart.Part;
-import com.ning.http.multipart.StringPart;
+
+
+import com.ning.http.client.multipart.FilePart;
+import com.ning.http.client.multipart.Part;
+import com.ning.http.client.multipart.StringPart;
+import com.ning.http.client.providers.jdk.MultipartRequestEntity;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
@@ -181,21 +183,17 @@ public abstract class FunctionalTest extends BaseTest {
         List<Part> parts = new ArrayList<Part>();
 
         for (String key : parameters.keySet()) {
-            final StringPart stringPart = new StringPart(key, parameters.get(key), request.encoding);
+            final StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
             parts.add(stringPart);
         }
 
         for (String key : files.keySet()) {
             Part filePart;
-            try {
-                filePart = new FilePart(key, files.get(key));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            filePart = new FilePart(key, files.get(key));
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), new FluentCaseInsensitiveStringsMap()); 
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts, new FluentCaseInsensitiveStringsMap()); 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             requestEntity.writeRequest(baos);
