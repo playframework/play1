@@ -318,7 +318,7 @@ def build(app, args, env):
         print "~"
         print "~ Building..."
         print "~"
-        os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
+        os.system('ant -f %s -Dplay.path="%s"' % (build_file, ftb) )
         print "~"
 
     mv = '%s-%s' % (name, version)
