@@ -24,17 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class handling all plugins used by Play.
@@ -118,6 +108,26 @@ public class PluginCollection {
             // sort on name to get consistent order
             return name.compareTo(o.name);
         }
+
+      @Override
+      public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LoadingPluginInfo that = (LoadingPluginInfo) o;
+
+        if (index != that.index) return false;
+        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+
+        return true;
+      }
+
+      @Override
+      public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + index;
+        return result;
+      }
     }
     /**
      * Enable found plugins
@@ -133,11 +143,17 @@ public class PluginCollection {
             return ;
         }
 
-        // First we build one big list of all plugins to load, then we sort it based
-        // on index before we load the classes.
+        // First we build one big SortedSet of all plugins to load (sorted based on index)
         // This must be done to make sure the enhancing is happening
         // when loading plugins using other classes that must be enhanced.
-        List<LoadingPluginInfo> pluginsToLoad = new ArrayList<LoadingPluginInfo>();
+        // Data structure is a SortedSet instead of a List to avoid including the same class+index twice --
+        // this happened in the past under a range of circumstances, including:
+        //  1. Class path on NTFS or other case insensitive file system includes play.plugins directory 2x
+        //       (C:/myproject/conf;c:/myproject/conf)
+        //  2. https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
+        // I can see loading the same plugin with different indexes, but I can't think of a reasonable use case for
+        // loading the same plugin multiple times at the same priority.
+        SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<LoadingPluginInfo>();
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             Logger.trace("Found one plugins descriptor, %s", url);
@@ -158,7 +174,6 @@ public class PluginCollection {
 
         }
 
-        Collections.sort(pluginsToLoad);
 
         for (LoadingPluginInfo info : pluginsToLoad) {
             Logger.trace("Loading plugin %s", info.name);
