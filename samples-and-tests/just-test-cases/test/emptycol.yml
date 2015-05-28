@@ -1,0 +1,8 @@
+orphans.collections.DefaultModel(b1):
+  levelOnes: []
+
+orphans.collections.LevelOne(l1):
+  baseModel: b1
+
+orphans.collections.LevelOne(l2):
+  baseModel: b1

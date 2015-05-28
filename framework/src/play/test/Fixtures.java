@@ -233,7 +233,7 @@ public class Fixtures {
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
                         final Map<String, String[]> resolvedFields = resolveDependencies(cType, fields);
 
-                        RootParamNode rootParamNode = ParamNode.convert(resolvedFields);
+                        RootParamNode rootParamNode = ParamNode.convert(resolvedFields, true);
                         // This is kind of hacky. This basically says that if we have an embedded class we should ignore it.
                         if (Model.class.isAssignableFrom(cType)) {
 

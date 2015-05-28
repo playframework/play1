@@ -132,12 +132,16 @@ public class ParamNode {
     }
 
     public static RootParamNode convert(Map<String, String[]> params) {
+    	return convert(params, false);
+    }
+
+    public static RootParamNode convert(Map<String, String[]> params, boolean paramsFromYaml) {
         RootParamNode root = new RootParamNode( params);
 
         for (Map.Entry<String, String[]> e : params.entrySet()) {
             String key = e.getKey();
             String[] values = e.getValue();
-            if (values != null && values.length == 0) {
+            if (!paramsFromYaml && values != null && values.length == 0) {
                 values = null;
             }
 

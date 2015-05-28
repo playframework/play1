@@ -4,6 +4,8 @@ import play.db.jpa.Model;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Entity(name = "collections.BaseModel")
 @Table(name = "collections_base_model")
+@Inheritance(strategy=InheritanceType.JOINED)
 public class BaseModel extends Model {
 
     @OneToMany(mappedBy = "baseModel", cascade = CascadeType.ALL, orphanRemoval = true)
