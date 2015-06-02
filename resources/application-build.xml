@@ -86,6 +86,7 @@ And then run play just by:
 
     <taskdef classname="play.ant.PlayConfigurationLoadTask" name="playconfload">
         <classpath>
+            <path refid="play.classpath"/>
             <pathelement location="${play.path}/framework/play-${version}.jar"/>
         </classpath>
     </taskdef>
