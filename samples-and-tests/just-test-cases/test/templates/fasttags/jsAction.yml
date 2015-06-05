@@ -24,5 +24,12 @@ User(d):
     l: 10000
     i: 34  
     
+User(e):
+    name: "我是法國人"
+    b: false
+    c: true
+    l: 10000
+    i: 0 
+    
     
     
