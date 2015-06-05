@@ -2,12 +2,12 @@
 <script src="@{'/public/jquery.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 
 <script type="text/javascript" charset="${_response_encoding}" >
-    var showUserAction = #{jsAction @Users.showId(':id')/}
+    var showUserAction = #{jsAction @Users.showId(':id'), minimize:false/}
     // check accents in keys
     var showUserNameAction = #{jsAction @Users.showName(':nâmë'), encodeURI:false, minimize:true /}
     var showUserNameActionEncodeURI = #{jsAction @Users.showName(':name'), encodeURI:true, minimize:false /}
     var showUserNameActionCustomScript= #{jsAction @Users.showName(':name'), customScript:"encodeURIComponent(val.replace('&amp;', '&'))", minimize:false /}
-    
+        
     $(document).ready(function() {
     	var html = ""
     	var id = 1;
@@ -26,7 +26,7 @@
           $('#' + ${user_index} + ' td').eq(2).load( showUserNameAction({nâmë: "${user?.name?.urlEncode()}"}) );
           $('#' + ${user_index} + ' td').eq(3).load( showUserNameActionEncodeURI({name:  "${user?.name}" }) ); 
           $('#' + ${user_index} + ' td').eq(4).load( showUserNameActionCustomScript({name:  "${user?.name}" }) ); 
-          id = "${user?.id}";
+          #{if user_index == 4}id = "${user?.id}";#{/if}
        #{/list}
        
        // manual add
@@ -42,6 +42,17 @@
        $('#' + 'javascript_add' + ' td').eq(2).load( showUserNameAction({nâmë: encodeURIComponent("name with special characters [c c ; %20 , / ? : @ & = + $ #]") }) );
        $('#' + 'javascript_add' + ' td').eq(3).load( showUserNameActionEncodeURI({name:  "name with special characters [c c ; %20 , / ? : @ & = + $ #]" }) );  
        $('#' + 'javascript_add' + ' td').eq(4).load( showUserNameActionCustomScript({name:  "name with special characters [c c ; %20 , / ? : @ & = + $ #]" }) );
+   
+       $('#urlBuildInteger td').eq(1).text( showUserAction({id: 0}) );
+       $('#urlBuildInteger td').eq(2).text( showUserAction({id: -1}) );
+       $('#urlBuildInteger td').eq(3).text( showUserAction({id: 0000}) );
+       $('#urlBuildInteger td').eq(4).text( showUserAction({id: 00001}) );
+       
+       $('#urlBuildBoolean td').eq(1).text( showUserAction({id: false}) );
+       $('#urlBuildBoolean td').eq(2).text( showUserAction({id: true}) );
+       $('#urlBuildBoolean td').eq(3).text( showUserAction({id: undefined}) );
+       $('#urlBuildBoolean td').eq(4).text( showUserAction({id: null}) );
+
     });
     
 </script>	
@@ -51,4 +62,24 @@
   <thead><tr><th>Name</th><th>Name From ID</th> <th>UrlEncode</th><th>jsAction urlEncode</th><th>jsAction customScript</th></tr></thead>
   <tbody></tbody>
 </table>
+
+<table >
+<tbody>
+	<tr id="urlBuildInteger"><td>URL from integer:</td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+    <tr id="urlBuildBoolean"><td>URL from boolean:</td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+    	<td></td>
+     </tr>
+</tbody>
+</table>
+
+
+
   
