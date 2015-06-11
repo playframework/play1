@@ -130,6 +130,71 @@ public class BinaryTest extends FunctionalTest {
         assertEquals("Size does not match", "2440", size);
     }
 
+    @Test
+    public void testUploadZeroLenghtFile() {
+
+        Map<String,String> parameters= new HashMap<String,String>();
+
+        Map<String, File> files= new HashMap<String, File>();
+        File file = Play.getFile("test/zeroLenghtFile.txt");
+        assertTrue(file.exists());
+        files.put("file", file);
+        Response uploadResponse = POST("/Binary/uploadFile", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        String size = uploadResponse.getHeader("Content-Length");
+
+        assertEquals("Size does not match", "0", size);
+    }
+
+    @Test
+    public void testUploadZeroLenghtFile2() {
+
+        Map<String,String> parameters= new HashMap<String,String>();
+
+        Map<String, File> files= new HashMap<String, File>();
+        File file = Play.getFile("test/zeroLenghtFile.txt");
+        assertTrue(file.exists());
+
+        files.put("upload", file);
+        Response uploadResponse = POST("/Binary/upload", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        String size = uploadResponse.getHeader("Content-Length");
+
+        assertEquals("Size does not match", "0", size);
+    }
+    
+    @Test
+    public void testUploadNoFile() {
+
+        Map<String,String> parameters= new HashMap<String,String>();
+
+        Map<String, File> files= new HashMap<String, File>();
+        files.put("file", null);
+        Response uploadResponse = POST("/Binary/uploadFile", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        assertContentMatch("File is null" , uploadResponse);
+    }
+
+    @Test
+    public void testUploadNoFile2() {
+
+        Map<String,String> parameters= new HashMap<String,String>();
+
+        Map<String, File> files= new HashMap<String, File>();
+        files.put("upload", null);
+        Response uploadResponse = POST("/Binary/upload", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        assertContentMatch("Upload is null" , uploadResponse);
+    }
+    
 //  TODO: Missing possibility to upload multiple files at once
 //  See: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/472-functionaltest-and-ws-client-library-dont-allow-upload-of-multiple-file#ticket-472-2 
 //    @Test
