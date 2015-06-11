@@ -41,13 +41,21 @@ public class Binary extends Controller {
     }
 
     public static void uploadFile(File file) {
-        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(file.length())));
-        renderBinary(file);
+    	if(file != null){
+    		Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(file.length())));
+    		renderBinary(file);
+    	}else{
+    		renderText("File is null");
+    	}
     }
 
     public static void upload(Upload upload) {
-        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(upload.asBytes().length)));
-        renderBinary(upload.asFile());
+    	if(upload != null){
+	        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(upload.asBytes().length)));
+	        renderBinary(upload.asFile());
+        }else{
+    		renderText("Upload is null");
+        }
     }
 
     public static void uploadMultipleFiles(List<File> files) {
