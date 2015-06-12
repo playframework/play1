@@ -186,9 +186,16 @@ public class Images {
             graphics.drawImage(croppedImage, 0, 0, null);
             ImageWriter writer = ImageIO.getImageWritersByMIMEType(mimeType).next();
             ImageWriteParam params = writer.getDefaultWriteParam();
-            writer.setOutput(new FileImageOutputStream(to));
-            IIOImage image = new IIOImage(dest, null, null);
-            writer.write(null, image, params);
+
+            FileImageOutputStream toFs = new FileImageOutputStream(to);
+            try {
+                writer.setOutput(toFs);
+                IIOImage image = new IIOImage(dest, null, null);
+                writer.write(null, image, params);
+                toFs.flush();
+            } finally {
+                toFs.close();
+            }
             writer.dispose();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -205,8 +212,7 @@ public class Images {
      * @throws java.io.IOException
      */
     public static String toBase64(File image) throws IOException {
-        return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64,"
-                + Codec.encodeBASE64(IO.readContent(image));
+        return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64," + Codec.encodeBASE64(IO.readContent(image));
     }
 
     /**
