@@ -131,7 +131,15 @@ public class ApplicationClassloader extends ClassLoader {
         }
 
         long start = System.currentTimeMillis();
-        ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
+        VirtualFile javaFile = ApplicationClasses.getJava(name);
+        ApplicationClass applicationClass1 = null;
+        if(javaFile != null){
+            if (!Play.classes.hasClass(name)) {
+                Play.classes.classes.put(name, new ApplicationClass(name));
+            }
+            applicationClass1 = Play.classes.classes.get(name);
+        }
+        ApplicationClass applicationClass = applicationClass1;
         if (applicationClass != null) {
             if (applicationClass.isDefinable()) {
                 return applicationClass.javaClass;
