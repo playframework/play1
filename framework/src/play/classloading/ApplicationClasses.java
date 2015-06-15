@@ -46,13 +46,14 @@ public class ApplicationClasses {
      */
     public ApplicationClass getApplicationClass(String name) {
         VirtualFile javaFile = getJava(name);
+        ApplicationClass applicationClass = null;
         if(javaFile != null){
             if (!classes.containsKey(name)) {
                 classes.put(name, new ApplicationClass(name));
             }
-            return classes.get(name);
+            applicationClass = classes.get(name);
         }
-        return null;
+        return applicationClass;
     }
 
     /**
