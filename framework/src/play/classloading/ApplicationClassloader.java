@@ -1,14 +1,6 @@
 package play.classloading;
 
-import org.apache.commons.io.IOUtils;
-import play.Logger;
-import play.Play;
-import play.cache.Cache;
-import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.hash.ClassStateHashCreator;
-import play.exceptions.UnexpectedException;
-import play.libs.IO;
-import play.vfs.VirtualFile;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,9 +15,25 @@ import java.security.CodeSource;
 import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.commons.io.IOUtils;
+
+import play.Logger;
+import play.Play;
+import play.cache.Cache;
+import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.hash.ClassStateHashCreator;
+import play.exceptions.UnexpectedException;
+import play.libs.IO;
+import play.vfs.VirtualFile;
 
 /**
  * The application classLoader. 
@@ -132,14 +140,16 @@ public class ApplicationClassloader extends ClassLoader {
 
         long start = System.currentTimeMillis();
         VirtualFile javaFile = ApplicationClasses.getJava(name);
-        ApplicationClass applicationClass1 = null;
+        ApplicationClass applicationClass = null;
+        boolean notKnown = false;
         if(javaFile != null){
-            if (!Play.classes.hasClass(name)) {
-                Play.classes.classes.put(name, new ApplicationClass(name));
+            notKnown = !Play.classes.hasClass(name);
+            if (notKnown) {
+                applicationClass = new ApplicationClass(name);
+            } else {
+                applicationClass = Play.classes.get(name);
             }
-            applicationClass1 = Play.classes.classes.get(name);
         }
-        ApplicationClass applicationClass = applicationClass1;
         if (applicationClass != null) {
             if (applicationClass.isDefinable()) {
                 return applicationClass.javaClass;
@@ -169,24 +179,45 @@ public class ApplicationClassloader extends ClassLoader {
 
                 return applicationClass.javaClass;
             }
-            if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
-                applicationClass.enhance();
-                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
-                BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
-                resolveClass(applicationClass.javaClass);
-                if (!applicationClass.isClass()) {
-                    applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+            if (applicationClass.javaByteCode != null || applicationClass.compile(notKnown) != null) {
+                Class<?> dynamicEnhance = null;
+                try {
+                    dynamicEnhance = dynamicEnhance(name, start, applicationClass);
+                } catch (Throwable e) {
+                    if (Logger.isTraceEnabled()) {
+                        // trace not good handled stuff
+                        Logger.trace("p.c.ApplicationClassloader.loadApplicationClass:: dynamic bytecode compile/enhence: %s", e.toString());
+                    }
+                    if (e instanceof NoClassDefFoundError) {
+                        Logger.warn(e, "");
+                        if (Thread.holdsLock(lock)) { // we are called from play.classloading.ApplicationClassloader#loadClass(String, boolean)
+                            return null; //therefore let the parent classloader decide
+                        }
+                    }
+                    throw new UnexpectedException(e);
                 }
-
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
-                }
-
-                return applicationClass.javaClass;
+                if (notKnown) Play.classes.add(applicationClass);
+                return dynamicEnhance;
             }
-            Play.classes.classes.remove(name);
+            Play.classes.remove(name);
         }
         return null;
+    }
+
+    private Class<?> dynamicEnhance(String name, long start, ApplicationClass applicationClass) throws ClassFormatError {
+        applicationClass.enhance();
+        applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+        BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
+        resolveClass(applicationClass.javaClass);
+        if (!applicationClass.isClass()) {
+            applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+        }
+
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
+        }
+
+        return applicationClass.javaClass;
     }
 
     private String getPackageName(String name) {
@@ -332,7 +363,7 @@ public class ApplicationClassloader extends ClassLoader {
         boolean dirtySig = false;
         for (ApplicationClass applicationClass : modifiedWithDependencies) {
             if (applicationClass.compile() == null) {
-                Play.classes.classes.remove(applicationClass.name);
+                Play.classes.remove(applicationClass);
                 currentState = new ApplicationClassloaderState();//show others that we have changed..
             } else {
                 int sigChecksum = applicationClass.sigChecksum;
@@ -368,17 +399,17 @@ public class ApplicationClassloader extends ClassLoader {
             // Remove class for deleted files !!
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 if (!applicationClass.javaFile.exists()) {
-                    Play.classes.classes.remove(applicationClass.name);
+                    Play.classes.remove(applicationClass);
                     currentState = new ApplicationClassloaderState();//show others that we have changed..
                 }
                 if (applicationClass.name.contains("$")) {
-                    Play.classes.classes.remove(applicationClass.name);
+                    Play.classes.remove(applicationClass);
                     currentState = new ApplicationClassloaderState();//show others that we have changed..
                     // Ok we have to remove all classes from the same file ...
                     VirtualFile vf = applicationClass.javaFile;
                     for (ApplicationClass ac : Play.classes.all()) {
                         if (ac.javaFile.equals(vf)) {
-                            Play.classes.classes.remove(ac.name);
+                            Play.classes.remove(ac);
                         }
                     }
                 }
