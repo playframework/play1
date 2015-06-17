@@ -1,10 +1,11 @@
 package play.data.validation;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import play.data.validation.Validation.ValidationResult;
 import play.i18n.MessagesBuilder;
-import static org.junit.Assert.assertEquals;
 
 public class PhoneTest {
 
@@ -32,9 +33,9 @@ public class PhoneTest {
         // UK
         assertValidPhone(true, "(020) 1234 1234");
     }
-    
+
     @Test
-    public void invalidalidPhoneValidationTest() {
+    public void invalidPhoneValidationTest() {
         new MessagesBuilder().build();
         Validation.current.set(new Validation());
 
@@ -43,18 +44,18 @@ public class PhoneTest {
         assertValidPhone(false, "+330147376224");
         assertValidPhone(false, "+33(0)147376224");
         assertValidPhone(false, "+33  (0)1 47 37 62 24 x3");
-        
+
         // China
         assertValidPhone(false, "+86(10)69445464");
         assertValidPhone(false, "+86(0)69445464");
-        
+
         assertValidPhone(false, "+1229 343433345");
     }
-    
-    public void assertValidPhone(Boolean valid, String phone){
+
+    public void assertValidPhone(Boolean valid, String phone) {
         Validation.clear();
-        ValidationResult result = Validation.phone("phone", phone); 
+        ValidationResult result = Validation.phone("phone", phone);
         assertEquals("Validation phone [" + phone + "] should be " + valid, valid, result.ok);
     }
-    
+
 }
