@@ -281,10 +281,11 @@ public class ApplicationCompiler {
                         Logger.trace("Compiled %s", clazzName);
                     }
 
-                    if (preInitializedClass != null) {
+                    String name = clazzName.toString();
+                    if (preInitializedClass != null && preInitializedClass.name.equals(name)) {
                         preInitializedClass.compiled(clazzFile.getBytes());
                     } else {
-                        applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
+                        applicationClasses.getApplicationClass(name).compiled(clazzFile.getBytes());
                     }
                 }
             }

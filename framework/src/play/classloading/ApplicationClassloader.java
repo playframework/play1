@@ -150,58 +150,67 @@ public class ApplicationClassloader extends ClassLoader {
                 applicationClass = Play.classes.get(name);
             }
         }
+        Class<?> javaClass = null;
         if (applicationClass != null) {
             if (applicationClass.isDefinable()) {
-                return applicationClass.javaClass;
-            }
-            byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
-
-            if (Logger.isTraceEnabled()) {
-                Logger.trace("Compiling code for %s", name);
-            }
-
-            if (!applicationClass.isClass()) {
-                definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
+                javaClass = applicationClass.javaClass;
             } else {
-                loadPackage(name);
-            }
-            if (bc != null) {
-                applicationClass.enhancedByteCode = bc;
-                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
-                resolveClass(applicationClass.javaClass);
-                if (!applicationClass.isClass()) {
-                    applicationClass.javaPackage = applicationClass.javaClass.getPackage();
-                }
+              byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
 
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
-                }
+              if (Logger.isTraceEnabled()) {
+                  Logger.trace("Compiling code for %s", name);
+              }
 
-                return applicationClass.javaClass;
-            }
-            if (applicationClass.javaByteCode != null || applicationClass.compile(notKnown) != null) {
-                Class<?> dynamicEnhance = null;
-                try {
-                    dynamicEnhance = dynamicEnhance(name, start, applicationClass);
-                } catch (Throwable e) {
-                    if (Logger.isTraceEnabled()) {
-                        // trace not good handled stuff
-                        Logger.trace("p.c.ApplicationClassloader.loadApplicationClass:: dynamic bytecode compile/enhence: %s", e.toString());
-                    }
-                    if (e instanceof NoClassDefFoundError) {
-                        Logger.warn(e, "");
-                        if (Thread.holdsLock(lock)) { // we are called from play.classloading.ApplicationClassloader#loadClass(String, boolean)
-                            return null; //therefore let the parent classloader decide
+              if (!applicationClass.isClass()) {
+                  definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
+              } else {
+                  loadPackage(name);
+              }
+              if (bc != null) {
+                  applicationClass.enhancedByteCode = bc;
+                  applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+                  resolveClass(applicationClass.javaClass);
+                  if (!applicationClass.isClass()) {
+                      applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                  }
+
+                  if (Logger.isTraceEnabled()) {
+                      Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
+                  }
+
+                  javaClass = applicationClass.javaClass;
+                } else {
+                    if (applicationClass.javaByteCode != null || applicationClass.compile(notKnown) != null) {
+                        try {
+                            javaClass = dynamicEnhance(name, start, applicationClass);
+                        } catch (Throwable e) {
+                            if (Logger.isTraceEnabled()) {
+                                Logger.trace("p.c.ApplicationClassloader.loadApplicationClass:: dynamic bytecode compile/enhence: %s", e.toString());
+                            }
+                            if (e instanceof NoClassDefFoundError) {
+                                Logger.warn(e, "");
+                            }
+                            /* play.classloading.ApplicationClassloader#loadClass
+                             * not called by / at least not a element of stack */
+                            if (!Thread.holdsLock(lock)) {
+                                throw new UnexpectedException(e);
+                            }
                         }
+                    } else {
+                        /* it was known by Play.classes probably because of 
+                         * play.classloading.ApplicationClassloader#scan(List<ApplicationClass>, String, VirtualFile)
+                         * e.g. look into samples-and-tests/just-test-cases/app/controllers/Oops.java */
+                        if (!notKnown) Play.classes.remove(applicationClass);
+                        /* else case "notKnown"==true when temporary applicationClasses 
+                         * e.g. classLoader queries by  java.beans.Introspector (groovy)
+                         * or metamodel generated class (hibernate) which probably should not go into 
+                         * our classloader */
                     }
-                    throw new UnexpectedException(e);
                 }
-                if (notKnown) Play.classes.add(applicationClass);
-                return dynamicEnhance;
             }
-            Play.classes.remove(name);
         }
-        return null;
+        if (javaClass != null && notKnown) Play.classes.add(applicationClass);
+        return javaClass;
     }
 
     private Class<?> dynamicEnhance(String name, long start, ApplicationClass applicationClass) throws ClassFormatError {
