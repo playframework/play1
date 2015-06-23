@@ -202,31 +202,14 @@ public class JPAPlugin extends PlayPlugin {
 
             //play.db.jpa.HibernateInterceptor is a Hibernate interceptor that modifies Hibernate's behavior to support
             //Play's .willBeSaved property on Entities (among other things).
-            //Here we allow the user to disable this standard hibernate interceptor altogether, or replace it with
-            //their own interceptor.
+            //Here we allow the user to disable this interceptor.  The user can set up their own interceptor using
+            //hibernate.ejb.interceptor.session_scoped if desired.
             if (!dbConfig.getProperty("hibernate.interceptor.disabled", "false").toLowerCase().trim().equals("true"))
             {
-                final String interceptorClassName = dbConfig.getProperty("hibernate.interceptor", play.db.jpa.HibernateInterceptor.class.getCanonicalName());
-                Logger.info(String.format("Loading Hibernate interceptor %s for db %s...", interceptorClassName, dbName));
-                try
-                {
-                    final Class interceptorClass = Play.classloader.loadClass(interceptorClassName);
-                    if (!(org.hibernate.Interceptor.class.isAssignableFrom(interceptorClass))) {
-                        Logger.error(String.format("Interceptor %s for db %s is not a sub-class of org.hibernate.Interceptor", interceptorClassName, dbName));
-                    } else {
-                        final org.hibernate.Interceptor interceptor = (Interceptor)(interceptorClass.newInstance());
-                        Logger.info(String.format("Interceptor %s successfully loaded for db %s", interceptorClassName, dbName));
-                        cfg.setInterceptor(interceptor);
-                    }
-
-                } catch (ClassNotFoundException e) {
-                    Logger.error(e, String.format("Unable to load Hibernate Interceptor %s for db %s : ClassNotFound.", interceptorClassName, dbName));
-                } catch (Throwable e) {
-                    Logger.error(e, String.format("Error instantiating Hibernate Interceptor %s for db %s", interceptorClassName, dbName));
-                }
-
+                Logger.info(String.format("Loading Hibernate interceptor %s for db %s...", play.db.jpa.HibernateInterceptor.class.getCanonicalName(), dbName));
+                cfg.setInterceptor(new play.db.jpa.HibernateInterceptor());
             } else {
-                Logger.info(String.format("Hibernate interceptor disabled for db %s...", dbName));
+                Logger.info(String.format("play.db.jpa.HibernateInterceptor disabled for db %s...", dbName));
             }
 
             if (Logger.isTraceEnabled()) {
