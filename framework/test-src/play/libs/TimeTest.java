@@ -37,7 +37,7 @@ public class TimeTest {
 
     @Test
     public void parseGood5() {
-        int duration = Time.parseDuration("120m");
+        int duration = Time.parseDuration("120min");
         assertEquals(duration, 7200);
     }
 
