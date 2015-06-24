@@ -68,10 +68,9 @@ def autotest(app, args):
         args.remove('--functional')
         add_options.append('-DrunFunctionalTests')
             
-    if args.count('--functional'):
-        args.remove('--functional')
-        add_options.append('-DrunFunctionalTests')
-
+    if args.count('--selenium'):
+        args.remove('--selenium')
+        add_options.append('-DrunSeleniumTests')
             
     # Run app
     test_result = os.path.join(app.path, 'test-result')
