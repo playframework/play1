@@ -1,5 +1,6 @@
 package play.libs;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import play.Logger;
 import play.exceptions.PlayException;
 import play.libs.WS.HttpResponse;
@@ -19,6 +21,8 @@ import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
+
+import javax.xml.parsers.DocumentBuilder;
 
 public class OpenID {
 
@@ -85,7 +89,7 @@ public class OpenID {
                 Document xrds = null;
 
                 if (response.getContentType().contains("application/xrds+xml")) {
-                    xrds = response.getXml();
+                    xrds = getXml(html);
                 } else if (response.getHeader("X-XRDS-Location") != null) {
                     xrds = WS.url(response.getHeader("X-XRDS-Location")).get().getXml();
                 } else {
@@ -324,6 +328,16 @@ public class OpenID {
             server = extractHref(openidServer.group());
         }
         return server;
+    }
+
+    private static Document getXml(String response) {
+        try {
+            InputSource source = new InputSource(new StringReader(response));
+            DocumentBuilder builder = XML.newDocumentBuilder();
+            return builder.parse(source);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ~~~~ Result class
