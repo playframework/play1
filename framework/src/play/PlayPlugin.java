@@ -13,6 +13,7 @@ import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.RootParamNode;
 import play.db.Model;
+import play.libs.F;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
@@ -387,12 +388,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         return Collections.emptyList();
     }
 
-    /** 
+  /**
      * Class that define a filter. A filter is a class that wrap a certain behavior around an action.
      * You can access your Request and Response object within the filter. See the JPA plugin for an example.
      * The JPA plugin wraps a transaction around an action. The filter applies a transaction to the current Action.
      */
-    public abstract class Filter<T> {
+    public static abstract class Filter<T>
+    {
         String name;
 
         public Filter(String name) {
@@ -401,11 +403,70 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         
         public abstract T withinFilter(play.libs.F.Function0<T> fct) throws Throwable;
 
+        /**
+         * Surround innerFilter with this.  (innerFilter after this)
+         * @param innerFilter filter to be wrapped.
+         * @return a new Filter object.  newFilter.withinFilter(x) is outerFilter.withinFilter(innerFilter.withinFilter(x))
+         */
+        public Filter<T> decorate(final Filter<T> innerFilter) {
+          final Filter<T> outerFilter = this;
+          return new Filter<T>(this.name) {
+            @Override
+            public T withinFilter(F.Function0<T> fct) throws Throwable {
+              return compose(outerFilter.asFunction(), innerFilter.asFunction()).apply(fct);
+            }
+          };
+        }
+
+        /**
+         * Compose two second order functions whose input is a zero param function that returns type T...
+         * @param outer     Function that will wrap inner -- ("outer after inner")
+         * @param inner     Function to be wrapped by outer function -- ("outer after inner")
+         * @return          A function that computes outer(inner(x)) on application.
+         */
+        private static<T> Function1<F.Function0<T>, T> compose(final Function1<F.Function0<T>, T> outer, final Function1<F.Function0<T>, T> inner) {
+
+          return
+              new Function1<F.Function0<T>, T>() {
+                  @Override
+                  public T apply(final F.Function0<T> arg) throws Throwable {
+                      return outer.apply(new F.Function0<T>() {
+                          @Override
+                          public T apply() throws Throwable {
+                              return inner.apply(arg);
+                          }
+                      });
+                  }
+              };
+        }
+
+
+        private final Function1<play.libs.F.Function0<T>, T> _asFunction = new Function1<F.Function0<T>, T>() {
+          @Override
+          public T apply(F.Function0<T> arg) throws Throwable {
+            return withinFilter(arg);
+          }
+        };
+
+        public Function1<play.libs.F.Function0<T>, T> asFunction() {
+          return _asFunction;
+        }
+
         public String getName() {
             return name;
         }
+
+        //I don't want to add any additional dependencies to the project or use JDK 8 features
+        //so I'm just rolling my own 1 arg function interface... there must be a better way to do this...
+        public static interface Function1<I, O> {
+          public O apply(I arg) throws Throwable;
+        }
     }
-    
+
+    public final boolean hasFilter() {
+        return this.getFilter() != null;
+    }
+
     /**
      * Return the filter implementation for this plugin. 
      */ 

@@ -265,11 +265,11 @@ public class Invoker {
             InvocationContext.current.remove();
         }
 
-        private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
-          for( PlayPlugin plugin :  Play.pluginCollection.getEnabledPlugins() ) {
-               if (plugin.getFilter() != null)
-                plugin.getFilter().withinFilter(fct);
-           }
+        private void withinFilter(final play.libs.F.Function0<Void> fct) throws Throwable {
+          final F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
+          if (filters.isDefined()) {
+            filters.get().withinFilter(fct);
+          }
         }
 
         /**
