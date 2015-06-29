@@ -8,6 +8,7 @@ import play.classloading.ApplicationClassloader;
 import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
+import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.results.Result;
@@ -79,6 +80,18 @@ public class PluginCollection {
      * Using this cached copy so we don't have to create it all the time
      */
     protected List<PlayPlugin> enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
+
+
+    /**
+     * List of all enabled plugins with filters
+     */
+    protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<PlayPlugin>();
+
+    /**
+     * Readonly copy of enabledPluginsWithFilters - updated each time enabledPluginsWithFilters is updated.
+     * Using this cached copy so we don't have to create it all the time
+     */
+    protected List<PlayPlugin> enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
 
 
     /**
@@ -314,7 +327,13 @@ public class PluginCollection {
             if (enabledPlugins.remove( oldPlugin)) {
                 enabledPlugins.add(newPlugin);
                 Collections.sort( enabledPlugins);
-                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins );
+
+                if (enabledPluginsWithFilters.remove ( oldPlugin ) && newPlugin.hasFilter()) {
+                    enabledPluginsWithFilters.add( newPlugin );
+                    Collections.sort( enabledPluginsWithFilters );
+                    enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy( enabledPluginsWithFilters );
+                }
             }
 
         
@@ -334,6 +353,13 @@ public class PluginCollection {
                     enabledPlugins.add( plugin );
                     Collections.sort( enabledPlugins);
                     enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+
+                    if ( plugin.hasFilter()) {
+                        enabledPluginsWithFilters.add(plugin);
+                        Collections.sort(enabledPluginsWithFilters);
+                        enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
+                    }
+
                     updatePlayPluginsList();
                     Logger.trace("Plugin " + plugin + " enabled");
                     return true;
@@ -377,6 +403,11 @@ public class PluginCollection {
         if (enabledPlugins.remove(plugin)) {
             //plugin was removed
             enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+
+            if (enabledPluginsWithFilters.remove(plugin)) {
+                enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
+            }
+
             updatePlayPluginsList();
             Logger.trace("Plugin " + plugin + " disabled");
             return true;
@@ -409,6 +440,35 @@ public class PluginCollection {
     public List<PlayPlugin> getEnabledPlugins() {
         return enabledPlugins_readOnlyCopy;
     }
+
+    /**
+     * Returns new readonly list of all enabled plugins that define filters.
+     * @return List of plugins
+     */
+    public List<PlayPlugin> getEnabledPluginsWithFilters() {
+        return enabledPluginsWithFilters_readOnlyCopy;
+    }
+
+    @SuppressWarnings("unchecked")
+    public<T> F.Option<PlayPlugin.Filter<T>> composeFilters()
+    {
+      //Copy list of plugins here in case the list changes in the midst of doing composition...
+      //(Is it really necessary to do this?)
+      final List<PlayPlugin> pluginsWithFilters = new ArrayList<PlayPlugin>(this.getEnabledPluginsWithFilters());
+
+      if (pluginsWithFilters.isEmpty()) {
+        return F.Option.None();
+      } else {
+        final Iterator<PlayPlugin> itr = getEnabledPluginsWithFilters().iterator();
+        PlayPlugin.Filter<T> ret = itr.next().getFilter();
+        while (itr.hasNext()) {
+          ret = ret.<T>decorate(itr.next().getFilter());
+        }
+        return F.Option.Some(ret);
+      }
+    }
+
+
     
     /**
      * Returns readonly view of all enabled plugins in reversed order
