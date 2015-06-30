@@ -1,7 +1,6 @@
 package play.data.parsing;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -9,18 +8,7 @@ import java.util.Map;
  */
 public abstract class DataParser {
 
-    // ~~~~~~~~ Repository 
-    public abstract Map<String, String[]> parse(InputStream is);    
-    public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();    
-
-    // These are our injected Parser. Maybe we later want to allow dynamic injection
-    static {
-        parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());
-        parsers.put("multipart/form-data", new ApacheMultipartParser());
-        parsers.put("multipart/mixed", new ApacheMultipartParser());
-        parsers.put("application/xml", new TextParser());
-        parsers.put("application/json", new TextParser());
-    }
+    public abstract Map<String, String[]> parse(InputStream is);
 
     public static void putMapEntry(Map<String, String[]> map, String name, String value) {
         String[] newValues = null;
