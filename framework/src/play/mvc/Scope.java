@@ -14,6 +14,7 @@ import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
 import play.data.parsing.DataParser;
+import play.data.parsing.DataParsers;
 import play.data.parsing.TextParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
@@ -362,8 +363,7 @@ public class Scope {
                 } else {
                     String contentType = request.contentType;
                     if (contentType != null) {
-                        DataParser dataParser = DataParser.parsers
-                                .get(contentType);
+                        DataParser dataParser = DataParsers.forContentType(contentType);
                         if (dataParser != null) {
                             _mergeWith(dataParser.parse(request.body));
                         } else {
