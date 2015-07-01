@@ -368,10 +368,6 @@ public class Scope {
                         DataParser dataParser = DataParsers.forContentType(contentType);
                         if (dataParser != null) {
                             _mergeWith(dataParser.parse(request.body));
-                        } else {
-                            if (contentType.startsWith("text/")) {
-                                _mergeWith(new TextParser().parse(request.body));
-                            }
                         }
                     }
                     try {
