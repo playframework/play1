@@ -196,6 +196,10 @@ public class WSAsync implements WSImpl {
             return prepareAll(httpClient.prepareHead(getUrlWithoutQueryString()));
         }
 
+        public BoundRequestBuilder preparePatch() {
+            return prepareAll(httpClient.preparePatch(getUrlWithoutQueryString()));
+        }
+
         public BoundRequestBuilder preparePost() {
             return prepareAll(httpClient.preparePost(getUrlWithoutQueryString()));
         }
@@ -228,7 +232,24 @@ public class WSAsync implements WSImpl {
             return execute(prepareGet());
         }
 
-
+        /** Execute a PATCH request.*/
+        @Override
+        public HttpResponse patch() {
+            this.type = "PATCH";
+            sign();
+            try {
+                return new HttpAsyncResponse(prepare(preparePatch()).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        /** Execute a PATCH request asynchronously.*/
+        @Override
+        public Promise<HttpResponse> patchAsync() {
+            this.type = "PATCH";
+            sign();
+            return execute(preparePatch());
+        }
         /** Execute a POST request.*/
         @Override
         public HttpResponse post() {
