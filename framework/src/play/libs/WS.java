@@ -417,6 +417,13 @@ public class WS extends PlayPlugin {
             throw new NotImplementedException();
         }
 
+        /** Execute a PATCH request.*/
+        public abstract HttpResponse patch();
+
+        /** Execute a PATCH request asynchronously.*/
+        public Promise<HttpResponse> patchAsync() {
+            throw new NotImplementedException();
+        }
         /** Execute a POST request.*/
         public abstract HttpResponse post();
 

@@ -110,6 +110,16 @@ public class WSUrlFetch implements WSImpl {
             }
         }
 
+        @Override
+        public HttpResponse patch() {
+            try {
+                HttpURLConnection conn = prepare(new URL(getPreparedUrl("PATCH")), "PATCH");
+                return new HttpUrlfetchResponse(conn);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         /** Execute a POST request.*/
         public HttpResponse post() {
             try {
