@@ -9,7 +9,8 @@ transitiveDependencies: false
 require:    &allDependencies
     - antlr 2.7.7
     - c3p0 0.9.5
-    - cglib -> cglib-nodep 3.1
+    - org.ow2.asm -> asm-all 5.0.4
+    - cglib -> cglib 3.1
     - com.google.code.gson -> gson 2.3.1
     - com.jamonapi -> jamon 2.81
     - com.ning -> async-http-client 1.8.16
