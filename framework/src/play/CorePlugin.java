@@ -3,12 +3,13 @@ package play;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import play.Play.Mode;
@@ -25,6 +26,8 @@ import play.libs.Crypto;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+
+import static java.util.Arrays.asList;
 
 /**
  * Plugin used for core tasks
@@ -167,20 +170,26 @@ public class CorePlugin extends PlayPlugin {
         try {
             out.println("Monitors:");
             out.println("~~~~~~~~");
-            Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
+            List<Monitor> monitors = new ArrayList<Monitor>(asList(MonitorFactory.getRootMonitor().getMonitors()));
+            Collections.sort(monitors, new Comparator<Monitor>() {
+                @Override public int compare(Monitor m1, Monitor m2) {
+                    return Double.compare(m2.getTotal(), m1.getTotal());
+                }
+            });
             int lm = 10;
-            for (Object[] row : data) {
-                if (row[0].toString().length() > lm) {
-                    lm = row[0].toString().length();
+            for (Monitor monitor : monitors) {
+                if (monitor.getLabel().length() > lm) {
+                    lm = monitor.getLabel().length();
                 }
             }
-            for (Object[] row : data) {
-                if (((Double) row[1]) > 0) {
-                    out.println(String.format("%-" + (lm) + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+            for (Monitor monitor : monitors) {
+                if (monitor.getHits() > 0) {
+                    out.println(String.format("%-" + lm + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;",
+                        monitor.getLabel(), monitor.getHits(), monitor.getAvg(), monitor.getMin(), monitor.getMax()));
                 }
             }
         } catch (Exception e) {
-            out.println("No monitors found");
+            out.println("No monitors found: " + e);
         }
         return sw.toString();
     }
