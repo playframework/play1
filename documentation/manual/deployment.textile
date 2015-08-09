@@ -190,9 +190,7 @@ bc. %prod.db=${DATABASE_URL}
 For more information, see the "Heroku Dev Center":http://devcenter.heroku.com.
 
 
-h3. <a name="playapps">playapps.net</a>
 
-"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":https://www.playframework.com/modules/playapps.
 
 h3. <a name="upstart">VPS / Custom Server</a>
 
