@@ -39,6 +39,24 @@ You need to package your application as a WAR file. This is easily done with the
 
 bc. play war myapp -o myapp.war
 
+It can be invoke with the following parameters:
+
+* --output, or -o:
+ The path where the WAR directory will be created. The contents of this directory will first be deleted.
+
+* --zip:
+ By default, the script creates an exploded WAR. If you want a zipped archive, specify the --zip option.
+
+* --%fwk_id:
+ Use this ID to run the application (override the default framework ID)
+
+* --deps:
+ Resolve and install dependencies before running the command.
+
+* --exclude:
+ Excludes a list of directories (separator is ':').
+ Example: --exclude .svn:tmp:logs:target
+
 p(note). Please note that your application server must support deployment of exploded WAR files.
 
 You are now ready to deploy your application.
@@ -190,9 +208,7 @@ bc. %prod.db=${DATABASE_URL}
 For more information, see the "Heroku Dev Center":http://devcenter.heroku.com.
 
 
-h3. <a name="playapps">playapps.net</a>
 
-"playapps.net":http://www.playapps.net/ is the Play-specific hosting platform from Zenexity, the creators of Play. For more information, see the "playapps.net module":https://www.playframework.com/modules/playapps.
 
 h3. <a name="upstart">VPS / Custom Server</a>
 
