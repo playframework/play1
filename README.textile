@@ -47,18 +47,17 @@ Please report bugs on "our lighthouse tracker":http://play.lighthouseapp.com/pro
 
 h2. Learn More
 
-- [www.playframework.com](https://www.playframework.com)
-- [Download](https://www.playframework.com/download)
-- [Install](https://www.playframework.com/documentation/1.3.x/install)
-- [Create a new application](https://www.playframework.com/documentation/1.3.x/guide1)
-- [Build from source](https://www.playframework.com/documentation/1.3.x/install#build)
-- [Modules](https://www.playframework.com/modules)
-- [Search or create issues](http://play.lighthouseapp.com/projects/57987-play-framework)
-- [Get help](http://stackoverflow.com/questions/tagged/playframework)
-- [Code of Conduct](https://www.playframework.com/conduct) 
-- [Contribute](https://github.com/playframework/play1/wiki/Contributor-guide) 
-- [Play contributor guidelines](https://www.playframework.com/contributing)
-
+* "www.playframework.com":https://www.playframework.com
+* "Download":https://www.playframework.com/download
+* "Install":https://www.playframework.com/documentation/1.3.x/install
+* "Create a new application":https://www.playframework.com/documentation/1.3.x/guide1
+* "Build from source":https://www.playframework.com/documentation/1.3.x/install#build
+* "Modules":https://www.playframework.com/modules
+* "Search or create issues":http://play.lighthouseapp.com/projects/57987-play-framework
+* "Get help":http://stackoverflow.com/questions/tagged/playframework
+* "Code of Conduct":https://www.playframework.com/conduct
+* "Contribute":https://github.com/playframework/play1/wiki/Contributor-guide
+* "Play contributor guidelines":https://www.playframework.com/contributing
 
 h2. Licence
 
