@@ -408,7 +408,9 @@ public class Router {
         ActionRoute matchingRoute = actionRoutesCache.get(action);
         if (matchingRoute == null) {
             matchingRoute = findActionRoute(action);
-            actionRoutesCache.put(action, matchingRoute);
+            if (matchingRoute != null) {
+                actionRoutesCache.put(action, matchingRoute);
+            }
         }
         return matchingRoute;
     }
