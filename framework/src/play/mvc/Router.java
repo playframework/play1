@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -398,7 +399,18 @@ public class Router {
 
     private static final class ActionRoute {
         private Route route;
-        private Map<String, String> args = new HashMap<String, String>();
+        private Map<String, String> args = new HashMap<String, String>(2);
+    }
+
+    private static final Map<String, ActionRoute> actionRoutesCache = new ConcurrentHashMap<String, Router.ActionRoute>();
+
+    private static ActionRoute getActionRoute(String action) {
+        ActionRoute matchingRoute = actionRoutesCache.get(action);
+        if (matchingRoute == null) {
+            matchingRoute = findActionRoute(action);
+            actionRoutesCache.put(action, matchingRoute);
+        }
+        return matchingRoute;
     }
 
     private static ActionRoute findActionRoute(String action) {
@@ -439,7 +451,7 @@ public class Router {
                 }
             }
         }
-        ActionRoute actionRoute = findActionRoute(action);
+        ActionRoute actionRoute = getActionRoute(action);
         if (actionRoute != null) {
             args.putAll(actionRoute.args);
             Route route = actionRoute.route;
