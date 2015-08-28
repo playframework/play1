@@ -402,20 +402,19 @@ public class Router {
         private Map<String, String> args = new HashMap<String, String>(2);
     }
 
-    private static final Map<String, ActionRoute> actionRoutesCache = new ConcurrentHashMap<String, Router.ActionRoute>();
+    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<String, List<ActionRoute>>();
 
-    private static ActionRoute getActionRoute(String action) {
-        ActionRoute matchingRoute = actionRoutesCache.get(action);
-        if (matchingRoute == null) {
-            matchingRoute = findActionRoute(action);
-            if (matchingRoute != null) {
-                actionRoutesCache.put(action, matchingRoute);
-            }
+    private static List<ActionRoute> getActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = actionRoutesCache.get(action);
+        if (matchingRoutes == null) {
+            matchingRoutes = findActionRoutes(action);
+            actionRoutesCache.put(action, matchingRoutes);
         }
-        return matchingRoute;
+        return matchingRoutes;
     }
 
-    private static ActionRoute findActionRoute(String action) {
+    private static List<ActionRoute> findActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = new ArrayList<ActionRoute>(1);
         for (Router.Route route : routes) {
             if (route.actionPattern != null) {
                 Matcher matcher = route.actionPattern.matcher(action);
@@ -430,11 +429,11 @@ public class Router {
                         }
                         matchingRoute.args.put(group, v.toLowerCase());
                     }
-                    return matchingRoute;
+                    matchingRoutes.add(matchingRoute);
                 }
             }
         }
-        return null;
+        return matchingRoutes;
     }
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
@@ -453,8 +452,8 @@ public class Router {
                 }
             }
         }
-        ActionRoute actionRoute = getActionRoute(action);
-        if (actionRoute != null) {
+        List<ActionRoute> actionRoutes = getActionRoutes(action);
+        for (ActionRoute actionRoute : actionRoutes) {
             args.putAll(actionRoute.args);
             Route route = actionRoute.route;
 
