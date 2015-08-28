@@ -17,7 +17,7 @@ import play.templates.TemplateLoader;
  */
 public class Error extends Result {
 
-    private int status;
+    protected int status;
 
     public Error(String reason) {
         super(reason);
