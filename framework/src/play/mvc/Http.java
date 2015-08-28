@@ -709,9 +709,7 @@ public class Http {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
-                if (maxAge != null) {
-                    cookies.get(name).maxAge = maxAge;
-                }
+                cookies.get(name).maxAge = maxAge;
                 cookies.get(name).secure = secure;
             } else {
                 Cookie cookie = new Cookie();
