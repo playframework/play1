@@ -69,7 +69,7 @@ import play.vfs.VirtualFile;
  * response by making calls on model objects.
  *
  * This is the class that your controllers should extend.
- * 
+ *
  */
 public class Controller implements ControllerSupport {
 
@@ -98,7 +98,7 @@ public class Controller implements ControllerSupport {
      * This session is therefore limited to 4kb.
      *
      * From Wikipedia:
-     * 
+     *
      * Client-side sessions use cookies and cryptographic techniques to maintain
      * state without storing as much data on the server. When presenting a
      * dynamic web page, the server sends the current state data to the client
@@ -190,7 +190,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/plain response
-     * 
+     *
      * @param text
      *            The response content
      */
@@ -200,7 +200,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/html response
-     * 
+     *
      * @param html
      *            The response content
      */
@@ -210,7 +210,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/plain response
-     * 
+     *
      * @param pattern
      *            The response content to be formatted (with String.format)
      * @param args
@@ -222,7 +222,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * 
+     *
      * @param xml
      *            The XML string
      */
@@ -232,7 +232,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * 
+     *
      * @param xml
      *            The DOM document object
      */
@@ -243,7 +243,7 @@ public class Controller implements ControllerSupport {
     /**
      * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to
      * customize the result.
-     * 
+     *
      * @param o
      *            the object to serialize
      */
@@ -253,7 +253,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * 
+     *
      * @param o
      *            the object to serialize
      * @param xstream
@@ -267,7 +267,7 @@ public class Controller implements ControllerSupport {
     /**
      * Return a 200 OK application/binary response. Content is fully loaded in
      * memory, so it should not be used with large data.
-     * 
+     *
      * @param is
      *            The stream to copy
      */
@@ -353,7 +353,7 @@ public class Controller implements ControllerSupport {
      * Return a 200 OK application/binary response with content-disposition
      * attachment. Content is fully loaded in memory, so it should not be used
      * with large data.
-     * 
+     *
      * @param is
      *            The stream to copy
      * @param name
@@ -388,7 +388,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Return a 200 OK application/binary response
-     * 
+     *
      * @param file
      *            The file to copy
      */
@@ -399,7 +399,7 @@ public class Controller implements ControllerSupport {
     /**
      * Return a 200 OK application/binary response with content-disposition
      * attachment
-     * 
+     *
      * @param file
      *            The file to copy
      * @param name
@@ -411,7 +411,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a 200 OK application/json response
-     * 
+     *
      * @param jsonString
      *            The JSON string
      */
@@ -421,7 +421,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a 200 OK application/json response
-     * 
+     *
      * @param o
      *            The Java object to serialize
      */
@@ -431,7 +431,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a 200 OK application/json response
-     * 
+     *
      * @param o
      *            The Java object to serialize
      * @param type
@@ -443,7 +443,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a 200 OK application/json response.
-     * 
+     *
      * @param o
      *            The Java object to serialize
      * @param adapters
@@ -456,7 +456,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a 200 OK application/json response.
-     * 
+     *
      * @param o
      *            The Java object to serialize
      * @param gson
@@ -484,12 +484,12 @@ public class Controller implements ControllerSupport {
      * Send a 400 Bad request
      */
     protected static void badRequest() {
-        throw new BadRequest();
+        throw new BadRequest("Bad request");
     }
 
     /**
      * Send a 401 Unauthorized response
-     * 
+     *
      * @param realm
      *            The realm name
      */
@@ -506,7 +506,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 404 Not Found response
-     * 
+     *
      * @param what
      *            The Not Found resource name
      */
@@ -530,7 +530,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 404 Not Found response if object is null
-     * 
+     *
      * @param o
      *            The object to check
      */
@@ -542,7 +542,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 404 Not Found response if object is null
-     * 
+     *
      * @param o
      *            The object to check
      * @param what
@@ -575,7 +575,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 403 Forbidden response
-     * 
+     *
      * @param reason
      *            The reason
      */
@@ -592,7 +592,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 5xx Error response
-     * 
+     *
      * @param status
      *            The exact status code
      * @param reason
@@ -604,7 +604,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 500 Error response
-     * 
+     *
      * @param reason
      *            The reason
      */
@@ -614,7 +614,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 500 Error response
-     * 
+     *
      * @param reason
      *            The reason
      */
@@ -632,7 +632,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Add a value to the flash scope
-     * 
+     *
      * @param key
      *            The key
      * @param value
@@ -644,7 +644,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 302 redirect response.
-     * 
+     *
      * @param url
      *            The Location to redirect
      */
@@ -654,7 +654,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a 302 redirect response.
-     * 
+     *
      * @param file
      *            The Location to redirect
      */
@@ -677,7 +677,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Send a Redirect response.
-     * 
+     *
      * @param url
      *            The Location to redirect
      * @param permanent
@@ -692,7 +692,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * 302 Redirect to another action
-     * 
+     *
      * @param action
      *            The fully qualified action name (ex: Application.index)
      * @param args
@@ -704,7 +704,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Redirect to another action
-     * 
+     *
      * @param action
      *            The fully qualified action name (ex: Application.index)
      * @param permanent
@@ -792,7 +792,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Render a specific template
-     * 
+     *
      * @param templateName
      *            The template name
      * @param args
@@ -909,7 +909,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Retrieve annotation for the action method
-     * 
+     *
      * @param clazz
      *            The annotation class
      * @return Annotation object or null if not found
@@ -924,7 +924,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Retrieve annotation for the controller class
-     * 
+     *
      * @param clazz
      *            The annotation class
      * @return Annotation object or null if not found
@@ -938,7 +938,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Retrieve annotation for the controller class
-     * 
+     *
      * @param clazz
      *            The annotation class
      * @return Annotation object or null if not found
@@ -956,7 +956,7 @@ public class Controller implements ControllerSupport {
 
     /**
      * Retrieve the controller class
-     * 
+     *
      * @return Annotation object or null if not found
      */
     protected static Class<? extends Controller> getControllerClass() {
