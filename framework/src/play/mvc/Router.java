@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -430,7 +431,7 @@ public class Router {
                 }
             }
         }
-        List<ActionRoute> matchingRoutes = findActionRoutes(action);
+        List<ActionRoute> matchingRoutes = getActionRoutes(action);
         for (ActionRoute actionRoute : matchingRoutes) {
             Route route = actionRoute.route;
             args.putAll(actionRoute.args);
@@ -576,6 +577,17 @@ public class Router {
 
 
         throw new NoRouteFoundException(action, args);
+    }
+
+    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<String, List<ActionRoute>>();
+
+    private static List<ActionRoute> getActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = actionRoutesCache.get(action);
+        if (matchingRoutes == null) {
+            matchingRoutes = findActionRoutes(action);
+            actionRoutesCache.put(action, matchingRoutes);
+        }
+        return matchingRoutes;
     }
 
     private static List<ActionRoute> findActionRoutes(String action) {
