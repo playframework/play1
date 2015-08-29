@@ -54,6 +54,7 @@ public class Router {
      */
     public static void load(String prefix) {
         routes.clear();
+        actionRoutesCache.clear();
         parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
         // Plugins
