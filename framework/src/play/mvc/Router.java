@@ -27,6 +27,7 @@ import play.utils.Default;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 
+import java.util.concurrent.ConcurrentHashMap;
 /**
  * The router matches HTTP requests to action invocations
  */
@@ -435,7 +436,7 @@ public class Router {
                 }
             }
         }
-        List<ActionRoute> matchingRoutes = findActionRoutes(action);
+        List<ActionRoute> matchingRoutes = getActionRoutes(action);
         for (ActionRoute actionRoute : matchingRoutes) {
             Route route = actionRoute.route;
             args.putAll(actionRoute.args);
@@ -579,6 +580,17 @@ public class Router {
         }
 
         throw new NoRouteFoundException(action, args);
+    }
+
+    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<String, List<ActionRoute>>();
+
+    private static List<ActionRoute> getActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = actionRoutesCache.get(action);
+        if (matchingRoutes == null) {
+            matchingRoutes = findActionRoutes(action);
+            actionRoutesCache.put(action, matchingRoutes);
+        }
+        return matchingRoutes;
     }
 
     private static List<ActionRoute> findActionRoutes(String action) {
