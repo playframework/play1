@@ -140,6 +140,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      */
     public void every(int seconds) {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
+        JobsPlugin.scheduledJobs.add(this);
     }
 
     // Customize Invocation
@@ -177,7 +178,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 try {
                     lastException = null;
                     lastRun = System.currentTimeMillis();
-                    monitor = MonitorFactory.start(getClass().getName()+".doJob()");
+                    monitor = MonitorFactory.start(this + ".doJob()");
                     result = doJobWithResult();
                     monitor.stop();
                     monitor = null;
