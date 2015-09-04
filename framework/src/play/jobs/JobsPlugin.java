@@ -108,7 +108,6 @@ public class JobsPlugin extends PlayPlugin {
                 jobs.add(clazz);
             }
         }
-        scheduledJobs = new ArrayList<Job>();
         for (final Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
@@ -191,6 +190,7 @@ public class JobsPlugin extends PlayPlugin {
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
+        scheduledJobs = new ArrayList<Job>();
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {
