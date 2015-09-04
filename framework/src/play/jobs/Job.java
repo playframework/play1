@@ -143,6 +143,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      */
     public void every(int seconds) {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
+        JobsPlugin.scheduledJobs.add(this);
     }
 
     // Customize Invocation
