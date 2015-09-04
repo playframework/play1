@@ -190,7 +190,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 try {
                     lastException = null;
                     lastRun = System.currentTimeMillis();
-                    monitor = MonitorFactory.start(getClass().getName()+".doJob()");
+                    monitor = MonitorFactory.start(this + ".doJob()");
                     
                     // If we have a plugin, get him to execute the job within the filter. 
                     final AtomicBoolean executed = new AtomicBoolean(false);
