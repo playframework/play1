@@ -28,8 +28,8 @@ import play.utils.PThreadFactory;
 
 public class JobsPlugin extends PlayPlugin {
 
-    public static ScheduledThreadPoolExecutor executor = null;
-    public static List<Job> scheduledJobs = null;
+    public static ScheduledThreadPoolExecutor executor;
+    public static List<Job> scheduledJobs;
     private static ThreadLocal<List<Callable<? extends Object>>> afterInvocationActions = new ThreadLocal<List<Callable<? extends Object>>>();
 
     @Override
@@ -54,7 +54,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println("Scheduled jobs (" + scheduledJobs.size() + "):");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~");
             for (Job job : scheduledJobs) {
-                out.print(job.getClass().getName());
+                out.print(job);
                 if (job.getClass().isAnnotationPresent(OnApplicationStart.class)
                         && !(job.getClass().isAnnotationPresent(On.class) || job.getClass().isAnnotationPresent(Every.class))) {
                     OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
