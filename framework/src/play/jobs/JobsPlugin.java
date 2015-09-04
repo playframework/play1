@@ -30,7 +30,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
     public static List<Job> scheduledJobs;
-    private static ThreadLocal<List<Callable<? extends Object>>> afterInvocationActions = new ThreadLocal<List<Callable<? extends Object>>>();
+    private static ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<List<Callable<?>>>();
 
     @Override
     public String getStatus() {
@@ -89,10 +89,9 @@ public class JobsPlugin extends PlayPlugin {
             out.println();
             out.println("Waiting jobs:");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ScheduledFuture[] q = executor.getQueue().toArray(new ScheduledFuture[0]);
+            ScheduledFuture[] q = executor.getQueue().toArray(new ScheduledFuture[executor.getQueue().size()]);
 
-            for (int i = 0; i < q.length; i++) {
-                ScheduledFuture task = q[i];
+            for (ScheduledFuture task : q) {
                 out.println(Java.extractUnderlyingCallable((FutureTask<?>) task) + " will run in " + task.getDelay(TimeUnit.SECONDS)
                         + " seconds");
             }
@@ -116,7 +115,7 @@ public class JobsPlugin extends PlayPlugin {
                 if (!appStartAnnotation.async()) {
                     // run job sync
                     try {
-                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        Job<?> job = (Job<?>) clazz.newInstance();
                         scheduledJobs.add(job);
                         job.run();
                         if (job.wasError) {
@@ -138,7 +137,7 @@ public class JobsPlugin extends PlayPlugin {
                 } else {
                     // run job async
                     try {
-                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        Job<?> job = (Job<?>) clazz.newInstance();
                         scheduledJobs.add(job);
                         // start running job now in the background
                         @SuppressWarnings("unchecked")
@@ -155,7 +154,7 @@ public class JobsPlugin extends PlayPlugin {
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
+                    Job<?> job = (Job<?>) clazz.newInstance();
                     scheduledJobs.add(job);
                     scheduleForCRON(job);
                 } catch (InstantiationException ex) {
@@ -202,7 +201,7 @@ public class JobsPlugin extends PlayPlugin {
             cron = Play.configuration.getProperty(cron);
         }
         cron = Expression.evaluate(cron, cron).toString();
-        if (cron == null || "".equals(cron) || "never".equalsIgnoreCase(cron)) {
+        if (cron == null || cron.isEmpty() || "never".equalsIgnoreCase(cron)) {
             Logger.info("Skipping job %s, cron expression is not defined", job.getClass().getName());
             return;
         }
@@ -240,7 +239,7 @@ public class JobsPlugin extends PlayPlugin {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
                 try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
+                    Job<?> job = (Job<?>) clazz.newInstance();
                     scheduledJobs.add(job);
                     job.run();
                     if (job.wasError) {
@@ -268,20 +267,20 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        afterInvocationActions.set(new LinkedList<Callable<? extends Object>>());
+        afterInvocationActions.set(new LinkedList<Callable<?>>());
     }
 
     @Override
     public void afterInvocation() {
-        List<Callable<? extends Object>> currentActions = afterInvocationActions.get();
+        List<Callable<?>> currentActions = afterInvocationActions.get();
         afterInvocationActions.set(null);
-        for (Callable<? extends Object> callable : currentActions) {
-            JobsPlugin.executor.submit(callable);
+        for (Callable<?> callable : currentActions) {
+            executor.submit(callable);
         }
     }
 
     // default visibility, because we want to use this only from Job.java
-    static void addAfterRequestAction(Callable<? extends Object> c) {
+    static void addAfterRequestAction(Callable<?> c) {
         if (Request.current() == null) {
             throw new IllegalStateException("After request actions can be added only from threads that serve requests!");
         }
