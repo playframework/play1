@@ -115,8 +115,7 @@ public class JobsPlugin extends PlayPlugin {
                 if (!appStartAnnotation.async()) {
                     // run job sync
                     try {
-                        Job<?> job = (Job<?>) clazz.newInstance();
-                        scheduledJobs.add(job);
+                        Job<?> job = findOrCreateJob(clazz);
                         job.run();
                         if (job.wasError) {
                             if (job.lastException != null) {
@@ -137,8 +136,7 @@ public class JobsPlugin extends PlayPlugin {
                 } else {
                     // run job async
                     try {
-                        Job<?> job = (Job<?>) clazz.newInstance();
-                        scheduledJobs.add(job);
+                        Job<?> job = findOrCreateJob(clazz);
                         // start running job now in the background
                         @SuppressWarnings("unchecked")
                         Callable<Job> callable = (Callable<Job>) job;
@@ -154,8 +152,7 @@ public class JobsPlugin extends PlayPlugin {
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
-                    Job<?> job = (Job<?>) clazz.newInstance();
-                    scheduledJobs.add(job);
+                    Job<?> job = findOrCreateJob(clazz);
                     scheduleForCRON(job);
                 } catch (InstantiationException ex) {
                     throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
@@ -166,8 +163,7 @@ public class JobsPlugin extends PlayPlugin {
             // @Every
             if (clazz.isAnnotationPresent(Every.class)) {
                 try {
-                    Job job = (Job) clazz.newInstance();
-                    scheduledJobs.add(job);
+                    Job job = findOrCreateJob(clazz);
                     String value = job.getClass().getAnnotation(Every.class).value();
                     if (value.startsWith("cron.")) {
                         value = Play.configuration.getProperty(value);
@@ -183,6 +179,17 @@ public class JobsPlugin extends PlayPlugin {
                 }
             }
         }
+    }
+
+    private Job<?> findOrCreateJob(Class<?> clazz) throws InstantiationException, IllegalAccessException {
+        for (Job job : scheduledJobs) {
+            if (clazz.equals(job.getClass()))
+                return job;
+        }
+
+        Job<?> job = (Job<?>) clazz.newInstance();
+        scheduledJobs.add(job);
+        return job;
     }
 
     @Override
@@ -239,8 +246,7 @@ public class JobsPlugin extends PlayPlugin {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
                 try {
-                    Job<?> job = (Job<?>) clazz.newInstance();
-                    scheduledJobs.add(job);
+                    Job<?> job = findOrCreateJob(clazz);
                     job.run();
                     if (job.wasError) {
                         if (job.lastException != null) {
