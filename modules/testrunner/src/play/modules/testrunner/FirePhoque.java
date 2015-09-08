@@ -81,20 +81,18 @@ public class FirePhoque {
 
         // Let's tweak WebClient
 
-        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_24");
+        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_31");
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
-        } else if ("FIREFOX_17".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.FIREFOX_17;
+        } else if ("FIREFOX_24".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_24;
         } else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
-        } else if ("INTERNET_EXPLORER_9".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.INTERNET_EXPLORER_9;
         } else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
         } else {
-            browserVersion = BrowserVersion.FIREFOX_24;
+            browserVersion = BrowserVersion.FIREFOX_31;
         }
 
         WebClient firephoque = new WebClient(browserVersion);
@@ -224,6 +222,6 @@ public class FirePhoque {
             }
         }
         firephoque.openWindow(new URL(app + "/@tests/end?result=" + (ok ? "passed" : "failed")), "headless");
-
+        
     }
 }
