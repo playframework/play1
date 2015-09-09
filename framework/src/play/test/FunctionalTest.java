@@ -3,41 +3,41 @@ package play.test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 import java.net.MalformedURLException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 
+import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
+import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.RenderArgs;
 
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.multipart.FilePart;
-import com.ning.http.multipart.MultipartRequestEntity;
-import com.ning.http.multipart.Part;
-import com.ning.http.multipart.StringPart;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.TimeUnit;
-
-import play.Invoker;
-import play.mvc.Controller;
-import play.mvc.Router.ActionDefinition;
+import com.ning.http.client.multipart.FilePart;
+import com.ning.http.client.multipart.MultipartBody;
+import com.ning.http.client.multipart.MultipartUtils;
+import com.ning.http.client.multipart.Part;
+import com.ning.http.client.multipart.StringPart;
 
 /**
  * Application tests support
@@ -187,27 +187,38 @@ public abstract class FunctionalTest extends BaseTest {
 
         for (String key : files.keySet()) {
             Part filePart;
-            try {
-                filePart = new FilePart(key, files.get(key));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            filePart = new FilePart(key, files.get(key));
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), new FluentCaseInsensitiveStringsMap()); 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        MultipartBody requestEntity = null;
+/* ^1 MultipartBody::read is not working (if parts.isEmpty() == true)
+ *          byte[] array = null;
+ **/
+        _ByteArrayOutputStream baos = null;
         try {
-            requestEntity.writeRequest(baos);
+            requestEntity = MultipartUtils.newMultipartBody(parts, new FluentCaseInsensitiveStringsMap());
+            request.headers.putAll(ArrayUtils.toMap(new Object[][] { { "content-type", new Http.Header("content-type", requestEntity.getContentType()) } }));
+            long contentLength = requestEntity.getContentLength();
+            if (contentLength < Integer.MIN_VALUE || contentLength > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException(contentLength + " cannot be cast to int without changing its value.");
+            }
+//            array = new byte[(int) contentLength]; // ^1 
+//            requestEntity.read(ByteBuffer.wrap(array)); // ^1
+            baos = new _ByteArrayOutputStream((int) contentLength);
+            requestEntity.transferTo(0, Channels.newChannel(baos));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if (requestEntity != null)
+                    requestEntity.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        InputStream body = new ByteArrayInputStream(baos.toByteArray());
-        String contentType = requestEntity.getContentType();
-        Http.Header header = new Http.Header();
-        header.name = "content-type";
-        header.values = Arrays.asList(new String[]{contentType});
-        request.headers.put("content-type", header);
+//      InputStream body = new ByteArrayInputStream(array != null ? array : new byte[0]); // ^1
+        InputStream body = new ByteArrayInputStream(baos != null ? baos.getByteArray() : new byte[0]);
         return POST(request, url, MULTIPART_FORM_DATA, body);
     }
 
@@ -514,6 +525,15 @@ public abstract class FunctionalTest extends BaseTest {
             return actionDefinition.url;
         }
 
+    }
+    public static final class _ByteArrayOutputStream extends ByteArrayOutputStream {
+        public _ByteArrayOutputStream(int size) {
+            super(size);
+        }
+
+        public byte[] getByteArray() {
+            return this.buf;
+        }
     }
 
 }
