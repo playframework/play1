@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Run the job using a Cron expression
- * We use the Quartz CRON trigger (http://www.opensymphony.com/quartz/wikidocs/CronTriggers%20Tutorial.html)
+ * We use the Quartz CRON trigger (http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
