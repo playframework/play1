@@ -636,12 +636,6 @@ public class Play {
                 classloader.detectChanges();
             }
             Router.detectChanges(ctxPath);
-            for(VirtualFile conf : confs) {
-                if (conf.lastModified() > startedAt) {
-                    start();
-                    return;
-                }
-            }
             pluginCollection.detectChange();
             if (!Play.started) {
                 throw new RuntimeException("Not started");
