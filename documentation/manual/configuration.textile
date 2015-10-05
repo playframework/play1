@@ -1026,6 +1026,15 @@ A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP r
 
 Default: @127.0.0.1@
 
+h3(#XForwardedOverwriteDomainAndPort). XForwardedOverwriteDomainAndPort
+
+Set to true to restore the request domain and port to original domain and port.
+
+For example:
+
+bc. XForwardedOverwriteDomainAndPort=true
+
+
 h2(#enhancers). Enhancers
 
 h3(#play.propertiesEnhancer.enabled). play.propertiesEnhancer.enabled
