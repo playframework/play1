@@ -1,21 +1,9 @@
 package play.mvc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.commons.lang.StringUtils;
-
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -26,6 +14,14 @@ import play.templates.TemplateLoader;
 import play.utils.Default;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The router matches HTTP requests to action invocations
@@ -53,6 +49,7 @@ public class Router {
      */
     public static void load(String prefix) {
         routes.clear();
+        actionRoutesCache.clear();
         parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
         // Plugins
@@ -435,17 +432,11 @@ public class Router {
                 }
             }
         }
-        for (Route route : routes) {
-            if (route.actionPattern != null) {
-                Matcher matcher = route.actionPattern.matcher(action);
-                if (matcher.matches()) {
-                    for (String group : route.actionArgs) {
-                        String v = matcher.group(group);
-                        if (v == null) {
-                            continue;
-                        }
-                        args.put(group, v.toLowerCase());
-                    }
+        List<ActionRoute> matchingRoutes = getActionRoutes(action);
+        for (ActionRoute actionRoute : matchingRoutes) {
+            Route route = actionRoute.route;
+            args.putAll(actionRoute.args);
+
                     List<String> inPathArgs = new ArrayList<String>(16);
                     boolean allRequiredArgsAreHere = true;
                     // les noms de parametres matchent ils ?
@@ -584,9 +575,48 @@ public class Router {
                         return actionDefinition;
                     }
                 }
+
+
+        throw new NoRouteFoundException(action, args);
+    }
+
+    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<String, List<ActionRoute>>();
+
+    private static List<ActionRoute> getActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = actionRoutesCache.get(action);
+        if (matchingRoutes == null) {
+            matchingRoutes = findActionRoutes(action);
+            actionRoutesCache.put(action, matchingRoutes);
+        }
+        return matchingRoutes;
+    }
+
+    private static List<ActionRoute> findActionRoutes(String action) {
+        List<ActionRoute> matchingRoutes = new ArrayList<ActionRoute>(2);
+        for (Router.Route route : routes) {
+            if (route.actionPattern != null) {
+                Matcher matcher = route.actionPattern.matcher(action);
+                if (matcher.matches()) {
+                    ActionRoute matchingRoute = new ActionRoute();
+                    matchingRoute.route = route;
+
+                    for (String group : route.actionArgs) {
+                        String v = matcher.group(group);
+                        if (v == null) {
+                            continue;
+                        }
+                        matchingRoute.args.put(group, v.toLowerCase());
+                    }
+                    matchingRoutes.add(matchingRoute);
+                }
             }
         }
-        throw new NoRouteFoundException(action, args);
+        return matchingRoutes;
+    }
+
+    private static final class ActionRoute {
+        private Route route;
+        private Map<String, String> args = new HashMap<String, String>(2);
     }
 
     public static class ActionDefinition {
