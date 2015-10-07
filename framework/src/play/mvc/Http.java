@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +19,8 @@ import java.util.regex.Pattern;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
 
+import com.google.gson.Gson;
+
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -28,7 +29,6 @@ import play.libs.F;
 import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
 import play.libs.F.Promise;
-import play.libs.F.EventStream;
 import play.libs.Time;
 import play.utils.HTTP;
 import play.utils.Utils;
@@ -105,6 +105,7 @@ public class Http {
 
         /**
          * First value
+         * 
          * @return The first value
          */
         public String value() {
@@ -123,13 +124,12 @@ public class Http {
     public static class Cookie implements Serializable {
 
         /**
-         * When creating cookie without specifying domain,
-         * this value is used. Can be configured using
-         * the property 'application.defaultCookieDomain'
-         * in application.conf.
+         * When creating cookie without specifying domain, this value is used.
+         * Can be configured using the property
+         * 'application.defaultCookieDomain' in application.conf.
          *
-         * This feature can be used to allow sharing
-         * session/cookies between multiple sub domains.
+         * This feature can be used to allow sharing session/cookies between
+         * multiple sub domains.
          */
         public static String defaultDomain = null;
 
@@ -188,7 +188,8 @@ public class Http {
          * URL path (excluding scheme, host and port), starting with '/'<br/>
          * 
          * <b>Example:</b><br/>
-         * With this full URL <code>http://localhost:9000/path0/path1</code> <br/>
+         * With this full URL <code>http://localhost:9000/path0/path1</code>
+         * <br/>
          * => <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
@@ -209,8 +210,8 @@ public class Http {
          */
         public String contentType;
         /**
-         * This is the encoding used to decode this request.
-         * If encoding-info is not found in request, then Play.defaultWebEncoding is used
+         * This is the encoding used to decode this request. If encoding-info is
+         * not found in request, then Play.defaultWebEncoding is used
          */
         public String encoding = Play.defaultWebEncoding;
         /**
@@ -298,12 +299,12 @@ public class Http {
          */
         public final Scope.Params params = new Scope.Params();
 
-
         /**
-         * Deprecate the default constructor to encourage the use of createRequest() when creating new
-         * requests.
+         * Deprecate the default constructor to encourage the use of
+         * createRequest() when creating new requests.
          *
-         * Cannot hide it with protected because we have to be backward compatible with modules - ie PlayGrizzlyAdapter.java
+         * Cannot hide it with protected because we have to be backward
+         * compatible with modules - ie PlayGrizzlyAdapter.java
          */
         @Deprecated
         public Request() {
@@ -312,26 +313,15 @@ public class Http {
         }
 
         /**
-         * All creation / initing of new requests should use this method.
-         * The purpose of this is to "show" what is needed when creating new Requests.
+         * All creation / initing of new requests should use this method. The
+         * purpose of this is to "show" what is needed when creating new
+         * Requests.
+         * 
          * @return the newly created Request object
          */
-        public static Request createRequest(
-                String _remoteAddress,
-                String _method,
-                String _path,
-                String _querystring,
-                String _contentType,
-                InputStream _body,
-                String _url,
-                String _host,
-                boolean _isLoopback,
-                int _port,
-                String _domain,
-                boolean _secure,
-                Map<String, Http.Header> _headers,
-                Map<String, Http.Cookie> _cookies
-        ) {
+        public static Request createRequest(String _remoteAddress, String _method, String _path, String _querystring, String _contentType,
+                InputStream _body, String _url, String _host, boolean _isLoopback, int _port, String _domain, boolean _secure,
+                Map<String, Http.Header> _headers, Map<String, Http.Cookie> _cookies) {
             Request newRequest = new Request();
 
             newRequest.remoteAddress = _remoteAddress;
@@ -340,14 +330,14 @@ public class Http {
             newRequest.querystring = _querystring;
 
             // must try to extract encoding-info from contentType
-            if( _contentType == null ) {
+            if (_contentType == null) {
                 newRequest.contentType = "text/html".intern();
             } else {
 
-                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( _contentType );
+                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
                 newRequest.contentType = contentTypeEncoding.contentType;
                 // check for encoding-info
-                if( contentTypeEncoding.encoding != null ) {
+                if (contentTypeEncoding.encoding != null) {
                     // encoding-info was found in request
                     newRequest.encoding = contentTypeEncoding.encoding;
                 }
@@ -361,12 +351,12 @@ public class Http {
             newRequest.domain = _domain;
             newRequest.secure = _secure;
 
-            if(_headers == null) {
+            if (_headers == null) {
                 _headers = new HashMap<String, Http.Header>(16);
             }
             newRequest.headers = _headers;
 
-            if(_cookies == null) {
+            if (_cookies == null) {
                 _cookies = new HashMap<String, Http.Cookie>(16);
             }
             newRequest.cookies = _cookies;
@@ -381,35 +371,50 @@ public class Http {
         }
 
         protected void parseXForwarded() {
-
+            String _host = this.host;
             if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
-            	if (!"ALL".equalsIgnoreCase(Play.configuration.getProperty("XForwardedSupport")) && !Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split("[\\s,]+")).contains(remoteAddress)) {
+                if (!"ALL".equalsIgnoreCase(Play.configuration.getProperty("XForwardedSupport"))
+                        && !Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split("[\\s,]+"))
+                                .contains(remoteAddress)) {
                     throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
                 } else {
-                    secure = isRequestSecure();
+                    this.secure = isRequestSecure();
                     if (Play.configuration.containsKey("XForwardedHost")) {
-                        host = (String) Play.configuration.get("XForwardedHost");
-                    } else if (headers.get("x-forwarded-host") != null) {
-                        host = headers.get("x-forwarded-host").value();
+                        this.host = (String) Play.configuration.get("XForwardedHost");
+                    } else if (this.headers.get("x-forwarded-host") != null) {
+                        this.host = this.headers.get("x-forwarded-host").value();
                     }
-                    if (headers.get("x-forwarded-for") != null) {
-                        remoteAddress = headers.get("x-forwarded-for").value();
+                    if (this.headers.get("x-forwarded-for") != null) {
+                        this.remoteAddress = this.headers.get("x-forwarded-for").value();
                     }
                 }
             }
+
+            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "true").toLowerCase().equals("true") && this.host != null
+                    && !this.host.equals(_host)) {
+                if (this.host.contains(":")) {
+                    final String[] hosts = this.host.split(":");
+                    this.port = Integer.parseInt(hosts[1]);
+                    this.domain = hosts[0];
+                } else {
+                    this.port = 80;
+                    this.domain = this.host;
+                }
+            }
         }
-        
+
         private boolean isRequestSecure() {
             Header xForwardedProtoHeader = headers.get("x-forwarded-proto");
             Header xForwardedSslHeader = headers.get("x-forwarded-ssl");
             // Check the less common "front-end-https" header,
-            // used apparently only by "Microsoft Internet Security and Acceleration Server"
+            // used apparently only by "Microsoft Internet Security and
+            // Acceleration Server"
             // and Squid when using Squid as a SSL frontend.
             Header frontEndHttpsHeader = headers.get("front-end-https");
-            return ("https".equals(Play.configuration.get("XForwardedProto")) ||
-                    (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) ||
-                    (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) ||
-                    (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())));
+            return ("https".equals(Play.configuration.get("XForwardedProto"))
+                    || (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value()))
+                    || (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value()))
+                    || (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())));
         }
 
         /**
@@ -424,24 +429,27 @@ public class Http {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
-                //In basic auth, the password can contain a colon as well so split(":") may split the string into
-                //3 parts....username, part1 of password and part2 of password so don't use split here
+                // In basic auth, the password can contain a colon as well so
+                // split(":") may split the string into
+                // 3 parts....username, part1 of password and part2 of password
+                // so don't use split here
                 String decoded = new String(Codec.decodeBASE64(data));
-                //splitting on ONLY first : allows user's password to contain a :
+                // splitting on ONLY first : allows user's password to contain a
+                // :
                 int indexOf = decoded.indexOf(":");
-                if(indexOf < 0)
-                	return;
-                
+                if (indexOf < 0)
+                    return;
+
                 String username = decoded.substring(0, indexOf);
-                String thePasswd = decoded.substring(indexOf+1);
+                String thePasswd = decoded.substring(indexOf + 1);
                 user = username.length() > 0 ? username : null;
                 password = thePasswd.length() > 0 ? thePasswd : null;
             }
         }
 
         /**
-         * Automatically resolve request format from the Accept header
-         * (in this order : html > xml > json > text)
+         * Automatically resolve request format from the Accept header (in this
+         * order : html > xml > json > text)
          */
         public void resolveFormat() {
 
@@ -484,6 +492,7 @@ public class Http {
 
         /**
          * Retrieve the current request
+         * 
          * @return the current request
          */
         public static Request current() {
@@ -492,6 +501,7 @@ public class Http {
 
         /**
          * Useful because we sometime use a lazy request loader
+         * 
          * @return itself
          */
         public Request get() {
@@ -499,8 +509,8 @@ public class Http {
         }
 
         /**
-         * This request was sent by an Ajax framework.
-         * (rely on the X-Requested-With header).
+         * This request was sent by an Ajax framework. (rely on the
+         * X-Requested-With header).
          */
         public boolean isAjax() {
             if (!headers.containsKey("x-requested-with")) {
@@ -511,6 +521,7 @@ public class Http {
 
         /**
          * Get the request base (ex: http://localhost:9000
+         * 
          * @return the request base of the url (protocol, host and port)
          */
         public String getBase() {
@@ -526,20 +537,23 @@ public class Http {
         }
 
         /**
-         * Return the languages requested by the browser, ordered by preference (preferred first).
-         * If no Accept-Language header is present, an empty list is returned.
+         * Return the languages requested by the browser, ordered by preference
+         * (preferred first). If no Accept-Language header is present, an empty
+         * list is returned.
          *
-         * @return Language codes in order of preference, e.g. "en-us,en-gb,en,de".
+         * @return Language codes in order of preference, e.g.
+         *         "en-us,en-gb,en,de".
          */
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
             if (!headers.containsKey("accept-language")) {
-                return Collections.<String>emptyList();
+                return Collections.<String> emptyList();
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
             Collections.sort(languages, new Comparator<String>() {
 
+                @Override
                 public int compare(String lang1, String lang2) {
                     double q1 = 1.0;
                     double q2 = 1.0;
@@ -624,6 +638,7 @@ public class Http {
 
         /**
          * Retrieve the current response
+         * 
          * @return the current response
          */
         public static Response current() {
@@ -632,7 +647,9 @@ public class Http {
 
         /**
          * Get a response header
-         * @param name Header name case-insensitive
+         * 
+         * @param name
+         *            Header name case-insensitive
          * @return the header value as a String
          */
         public String getHeader(String name) {
@@ -648,8 +665,11 @@ public class Http {
 
         /**
          * Set a response header
-         * @param name Header name
-         * @param value Header value
+         * 
+         * @param name
+         *            Header name
+         * @param value
+         *            Header value
          */
         public void setHeader(String name, String value) {
             Header h = new Header();
@@ -667,8 +687,11 @@ public class Http {
 
         /**
          * Set a new cookie
-         * @param name Cookie name
-         * @param value Cookie value
+         * 
+         * @param name
+         *            Cookie name
+         * @param value
+         *            Cookie value
          */
         public void setCookie(String name, String value) {
             setCookie(name, value, null, "/", null, false);
@@ -676,7 +699,9 @@ public class Http {
 
         /**
          * Removes the specified cookie with path /
-         * @param name cookiename
+         * 
+         * @param name
+         *            cookiename
          */
         public void removeCookie(String name) {
             removeCookie(name, "/");
@@ -684,8 +709,11 @@ public class Http {
 
         /**
          * Removes the cookie
-         * @param name cookiename
-         * @param path cookiepath
+         * 
+         * @param name
+         *            cookiename
+         * @param path
+         *            cookiepath
          */
         public void removeCookie(String name, String path) {
             setCookie(name, "", null, path, 0, false);
@@ -693,9 +721,11 @@ public class Http {
 
         /**
          * Set a new cookie that will expire in (current) + duration
+         * 
          * @param name
          * @param value
-         * @param duration Ex: 3d
+         * @param duration
+         *            Ex: 3d
          */
         public void setCookie(String name, String value, String duration) {
             setCookie(name, value, null, "/", Time.parseDuration(duration), false);
@@ -707,7 +737,8 @@ public class Http {
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
             path = Play.ctxPath + path;
-            if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
+            if (cookies.containsKey(name) && cookies.get(name).path.equals(path)
+                    && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 if (maxAge != null) {
                     cookies.get(name).maxAge = maxAge;
@@ -734,7 +765,9 @@ public class Http {
 
         /**
          * Add a cache-control header
-         * @param duration Ex: 3h
+         * 
+         * @param duration
+         *            Ex: 3h
          */
         public void cacheFor(String duration) {
             int maxAge = Time.parseDuration(duration);
@@ -743,7 +776,9 @@ public class Http {
 
         /**
          * Add cache-control headers
-         * @param duration Ex: 3h
+         * 
+         * @param duration
+         *            Ex: 3h
          */
         public void cacheFor(String etag, String duration, long lastModified) {
             int maxAge = Time.parseDuration(duration);
@@ -753,33 +788,53 @@ public class Http {
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
-         * these features and will ignore the headers. Refer to the browsers' documentation to
-         * know what versions support them.
-         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         * Add headers to allow cross-domain requests. Be careful, a lot of
+         * browsers don't support these features and will ignore the headers.
+         * Refer to the browsers' documentation to know what versions support
+         * them.
+         * 
+         * @param allowOrigin
+         *            a comma separated list of domains allowed to perform the
+         *            x-domain call, or "*" for all.
          */
         public void accessControl(String allowOrigin) {
             accessControl(allowOrigin, null, false);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
-         * these features and will ignore the headers. Refer to the browsers' documentation to
-         * know what versions support them.
-         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
-         * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
+         * Add headers to allow cross-domain requests. Be careful, a lot of
+         * browsers don't support these features and will ignore the headers.
+         * Refer to the browsers' documentation to know what versions support
+         * them.
+         * 
+         * @param allowOrigin
+         *            a comma separated list of domains allowed to perform the
+         *            x-domain call, or "*" for all.
+         * @param allowCredentials
+         *            Let the browser send the cookies when doing a x-domain
+         *            request. Only respected by the browser if allowOrigin !=
+         *            "*"
          */
         public void accessControl(String allowOrigin, boolean allowCredentials) {
             accessControl(allowOrigin, null, allowCredentials);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
-         * these features and will ignore the headers. Refer to the browsers' documentation to
-         * know what versions support them.
-         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
-         * @param allowMethods a comma separated list of HTTP methods allowed, or null for all.
-         * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
+         * Add headers to allow cross-domain requests. Be careful, a lot of
+         * browsers don't support these features and will ignore the headers.
+         * Refer to the browsers' documentation to know what versions support
+         * them.
+         * 
+         * @param allowOrigin
+         *            a comma separated list of domains allowed to perform the
+         *            x-domain call, or "*" for all.
+         * @param allowMethods
+         *            a comma separated list of HTTP methods allowed, or null
+         *            for all.
+         * @param allowCredentials
+         *            Let the browser send the cookies when doing a x-domain
+         *            request. Only respected by the browser if allowOrigin !=
+         *            "*"
          */
         public void accessControl(String allowOrigin, String allowMethods, boolean allowCredentials) {
             setHeader("Access-Control-Allow-Origin", allowOrigin);
@@ -788,7 +843,8 @@ public class Http {
             }
             if (allowCredentials == true) {
                 if (allowOrigin.equals("*")) {
-                    Logger.warn("Response.accessControl: When the allowed domain is \"*\", Allow-Credentials is likely to be ignored by the browser.");
+                    Logger.warn(
+                            "Response.accessControl: When the allowed domain is \"*\", Allow-Credentials is likely to be ignored by the browser.");
                 }
                 setHeader("Access-Control-Allow-Credentials", "true");
             }
@@ -805,6 +861,7 @@ public class Http {
         public void reset() {
             out.reset();
         }
+
         // Chunked stream
         public boolean chunked = false;
         final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
@@ -832,15 +889,13 @@ public class Http {
         public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
         final BlockingEventStream<WebSocketEvent> stream;
 
-
         public Inbound(ChannelHandlerContext ctx) {
-        	stream = new BlockingEventStream<WebSocketEvent>(ctx);
-		}
-        
+            stream = new BlockingEventStream<WebSocketEvent>(ctx);
+        }
+
         public static Inbound current() {
             return current.get();
         }
-
 
         public void _received(WebSocketFrame frame) {
             stream.publish(frame);
