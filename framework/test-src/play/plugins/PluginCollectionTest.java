@@ -6,10 +6,7 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 
-import play.CorePlugin;
-import play.Play;
-import play.PlayBuilder;
-import play.PlayPlugin;
+import play.*;
 import play.data.parsing.TempFilePlugin;
 import play.data.validation.ValidationPlugin;
 import play.db.DBPlugin;
@@ -43,6 +40,7 @@ public class PluginCollectionTest {
         //the following plugin-list should match the list in the file 'play.plugins'
         assertThat(pc.getEnabledPlugins()).containsExactly(
                 pc.getPluginInstance(CorePlugin.class),
+                pc.getPluginInstance(ConfigurationChangeWatcherPlugin.class),
                 pc.getPluginInstance(TempFilePlugin.class),
                 pc.getPluginInstance(ValidationPlugin.class),
                 pc.getPluginInstance(DBPlugin.class),
