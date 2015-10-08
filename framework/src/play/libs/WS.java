@@ -527,7 +527,8 @@ public class WS extends PlayPlugin {
     public static abstract class HttpResponse {
 
         private String _encoding = null;
-
+        private String _getString = null;
+        private Map<String, String> _getQueryString = null;
         /**
          * the HTTP status code
          * @return the status code of the http response
@@ -610,7 +611,9 @@ public class WS extends PlayPlugin {
          * @return the body of the http response
          */
         public String getString() {
-            return IO.readContentAsString(getStream(), getEncoding());
+            if (_getString == null)
+                _getString = IO.readContentAsString(getStream(), getEncoding());
+            return _getString;
         }
 
         /**
@@ -629,17 +632,19 @@ public class WS extends PlayPlugin {
          * is not formed as a query string.
          */
         public Map<String, String> getQueryString() {
-            Map<String, String> result = new HashMap<String, String>();
-            String body = getString();
-            for (String entry: body.split("&")) {
-                int pos = entry.indexOf("=");
-                if (pos > -1) {
-                    result.put(entry.substring(0,pos), entry.substring(pos+1));
-                } else {
-                    result.put(entry, "");
+            if (_getQueryString == null) {
+                Map<String, String> result = _getQueryString = new HashMap<String, String>();
+                String body = getString();
+                for (String entry : body.split("&")) {
+                    int pos = entry.indexOf("=");
+                    if (pos > -1) {
+                        result.put(entry.substring(0, pos), entry.substring(pos + 1));
+                    } else {
+                        result.put(entry, "");
+                    }
                 }
             }
-            return result;
+            return _getQueryString;
         }
 
         /**
