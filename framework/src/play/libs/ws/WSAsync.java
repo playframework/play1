@@ -399,6 +399,9 @@ public class WSAsync implements WSImpl {
             PerRequestConfig perRequestConfig = new PerRequestConfig();
             perRequestConfig.setRequestTimeoutInMs(this.timeout * 1000);
             builder.setPerRequestConfig(perRequestConfig);
+            if (this.virtualHost != null) {
+                builder.setVirtualHost(this.virtualHost);
+            }
             return builder;
         }
 
