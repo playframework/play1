@@ -372,6 +372,9 @@ public class WSAsync implements WSImpl {
             }
             builder.setFollowRedirects(this.followRedirects);
             builder.setRequestTimeout(this.timeout * 1000);
+            if (this.virtualHost != null) {
+                builder.setVirtualHost(this.virtualHost);
+            }
             return builder;
         }
 
