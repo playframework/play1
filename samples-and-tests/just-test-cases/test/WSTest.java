@@ -20,31 +20,42 @@ public class WSTest extends UnitTest {
 
     @Test
     public void multiplePosttContentTest() {
-	String url = "http://google.com";
-	HttpResponse response = WS.url(url).post();
-	String resp1 = response.getString();
-	// Stream is consumed, no more content
-	String resp2 = response.getString();
-	assertNotEquals(resp1, resp2);
-	assertEquals("", resp2);
+        String url = "http://google.com";
+        HttpResponse response = WS.url(url).post();
+        String resp1 = response.getString();
+        // Stream is consumed, no more content
+        String resp2 = response.getString();
+        assertNotEquals(resp1, resp2);
+        assertEquals("", resp2);
     }
 
     @Test
     public void multiplePostContentTest2() {
-	String url = "http://google.com";
-	HttpResponse response = WS.url(url).post();
+        String url = "http://google.com";
+        HttpResponse response = WS.url(url).post();
 
-	InputStream is = response.getStream();
-	String resp1 = IO.readContentAsString(is, response.getEncoding());
+        InputStream is = response.getStream();
+        String resp1 = IO.readContentAsString(is, response.getEncoding());
 
-	try {
-	    is.reset();
-	} catch (IOException e) {
-	}
+        try {
+            is.reset();
+        } catch (IOException e) {
+        }
 
-	String resp2 = IO.readContentAsString(is, response.getEncoding());
+        String resp2 = IO.readContentAsString(is, response.getEncoding());
 
-	assertEquals(resp1, resp2);
-	assertNotEquals("", resp2);
+        assertEquals(resp1, resp2);
+        assertNotEquals("", resp2);
+    }
+
+    @Test
+    public void getWithVitualhostTest() {
+        HttpResponse response = WS.url("http://74.125.239.48").withVirtualHost("www.google.com").get();
+        assertNotNull(response);
+        
+        InputStream is = response.getStream();
+        String resp1 = IO.readContentAsString(is, response.getEncoding());
+        assertNotEquals("", resp1);
+        assertTrue(resp1.contains("www.google.com"));
     }
 }
