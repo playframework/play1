@@ -111,6 +111,11 @@ public class FirePhoque {
         
         firephoque.getOptions().setThrowExceptionOnFailingStatusCode(false);
         
+        Integer timeout = Integer.valueOf(System.getProperty("webclientTimeout", "-1"));
+        if(timeout >= 0){
+          firephoque.getOptions().setTimeout(timeout);
+        }
+        
         firephoque.setAlertHandler(new AlertHandler() {
             public void handleAlert(Page page, String message) {
                 try {

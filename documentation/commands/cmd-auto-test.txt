@@ -8,7 +8,7 @@
 ~
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play auto-test [app_path] [--deps] [--unit] [--functional] [--selenium]
+~ play auto-test [app_path] [--deps] [--unit] [--functional] [--selenium] [--timeout=xxx]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -45,3 +45,5 @@
 ~ Run the functional tests.
 ~ --selenium: 
 ~ Run the selenium tests.
+~ --timeout=xxx: 
+~ Specify the timeout for the webclient (the value of the timeout in milliseconds, 0 for an infinite wait)

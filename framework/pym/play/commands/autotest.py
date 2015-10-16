@@ -71,6 +71,19 @@ def autotest(app, args):
     if args.count('--selenium'):
         args.remove('--selenium')
         add_options.append('-DrunSeleniumTests')
+      
+    # Handle timeout parameter
+    weblcient_timeout = -1
+    if app.readConf('webclient.timeout'):
+        weblcient_timeout = app.readConf('webclient.timeout')
+    
+    for arg in args:
+        if arg.startswith('--timeout='):
+            args.remove(arg)
+            weblcient_timeout = arg[10:]
+          
+    if weblcient_timeout >= 0:  
+        add_options.append('-DwebclientTimeout=' + weblcient_timeout)
             
     # Run app
     test_result = os.path.join(app.path, 'test-result')
