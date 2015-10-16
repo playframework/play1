@@ -1,0 +1,28 @@
+h1. Play 1.4.0 -- Release notes
+
+Play 1.4.0 has been released of the 1.4.x maintenance branch.
+
+The changes in this release are listed in the "Play 1.4.0 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/215150-140 on Lighthouse, including 31 resolved tickets. 
+
+h2. What's new in Play 1.4.0
+
+* Compatible Java 7. No longer support for Java 6
+* Upgrade to async-http-client v1.9.31
+* Upgrade to netty 3.10.4
+* Update HtmlUnit to v2.16
+* Add ability to define the timeout in testRunner module
+* Add ability to manually set the VirtualHost of WS 
+* Improve performance of Router.reverse()
+* Allow upload a 0B file
+* add '--server' arg to install command commands python to specify just ONE custom repository for module installation
+
+h2. What's fixed in Play 1.4.0
+
+* Fix redirect to wrong domain and port behind apache
+* Customize JSON rendering by passing the Gson serializer object json render 
+* Getting Static Initialization Deadlock in class DataParser dataparser  
+* Allow zero-length blobs binder 
+* OpenID discovery fails in 1.3.x in some cases openid 
+* Problem to run specific tests selenium testrunner tests 
+* 500.html template redering issue
+* play.libs.image.crop don't close the OutputStream image
