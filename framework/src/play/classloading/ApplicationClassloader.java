@@ -467,10 +467,16 @@ public class ApplicationClassloader extends ClassLoader {
      */
     public Class getClassIgnoreCase(String name) {
         getAllClasses();
-        Class<?> aClass = loadApplicationClass(name);
-        if (aClass != null) {
-            return aClass;
+        try {
+            Class<?> aClass = loadApplicationClass(name);
+            if (aClass != null) {
+                return aClass;
+            }
         }
+        catch (NoClassDefFoundError hfsIsCaseInsensitiveButCasePreserving) {
+            // Failed to load "controllers.security" - now try to load "controllers.Security"
+        }
+        
         for (ApplicationClass c : Play.classes.all()) {
             if (c.name.equalsIgnoreCase(name)) {
                 return Play.usePrecompiled ? c.javaClass : loadApplicationClass(c.name);
