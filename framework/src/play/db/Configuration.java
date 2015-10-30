@@ -77,9 +77,6 @@ public class Configuration {
      }
 
     String generateKey(String key) {
-        if (isDefault())
-            return key;
-        
         Pattern pattern = new Pattern("^(db|jpa|hibernate){1}(\\.?[\\da-zA-Z\\.-_]*)$");
         Matcher m = pattern.matcher(key);
         if (m.matches()) {

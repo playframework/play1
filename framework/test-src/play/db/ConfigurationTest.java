@@ -315,9 +315,9 @@ public class ConfigurationTest {
     @Test
     public void usesDefaultConfigurationPropertyNameForDefaultDatabase() {
         Configuration configuration = new Configuration("default");
-        assertEquals("db", configuration.generateKey("db"));
-        assertEquals("db.driver", configuration.generateKey("db.driver"));
-        assertEquals("db.url", configuration.generateKey("db.url"));
+        assertEquals("db.default", configuration.generateKey("db"));
+        assertEquals("db.default.driver", configuration.generateKey("db.driver"));
+        assertEquals("db.default.url", configuration.generateKey("db.url"));
         assertEquals("another-property", configuration.generateKey("another-property"));
     }
 
@@ -326,7 +326,7 @@ public class ConfigurationTest {
         Configuration configuration = new Configuration("default");
         configuration.put("db.driver", "org.h2.Driver");
         assertEquals("org.h2.Driver", configuration.getProperty("db.driver"));
-        assertEquals("org.h2.Driver", Play.configuration.getProperty("db.driver"));
+        assertEquals("org.h2.Driver", Play.configuration.getProperty("db.default.driver"));
     }
     
     @Test
@@ -351,8 +351,15 @@ public class ConfigurationTest {
         assertEquals("org.h2.Driver", configuration1.getProperty("db.driver"));
         assertEquals("com.mysql.Driver", configuration2.getProperty("db.driver"));
         
-        assertEquals("com.oracle.OracleDriver", Play.configuration.getProperty("db.driver"));
+        assertEquals("com.oracle.OracleDriver", Play.configuration.getProperty("db.default.driver"));
         assertEquals("org.h2.Driver", Play.configuration.getProperty("db.db1.driver"));
         assertEquals("com.mysql.Driver", Play.configuration.getProperty("db.db2.driver"));
+    }
+
+    @Test
+    public void getPropertyFromDefaultConfiguration() {
+        Play.configuration.setProperty("db.default.url", "jdbc:h2:mem:play;MODE=MSSQLServer;LOCK_MODE=0");
+        Configuration configuration = new Configuration("default");
+        assertEquals("jdbc:h2:mem:play;MODE=MSSQLServer;LOCK_MODE=0", configuration.getProperty("db.url"));
     }
 }
