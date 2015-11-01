@@ -151,11 +151,10 @@ public class DBPlugin extends PlayPlugin {
                         ds.setMinPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.minSize", "1")));
                         ds.setInitialPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.initialSize", "1")));
                         ds.setMaxIdleTimeExcessConnections(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleTimeExcessConnections", "0")));
-                        ds.setIdleConnectionTestPeriod(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleConnectionTestPeriod", "10")));
+                        ds.setIdleConnectionTestPeriod(Integer.parseInt(dbConfig.getProperty("db.pool.idleConnectionTestPeriod", "10")));
                         ds.setMaxIdleTime(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleTime", "0")));
                         ds.setTestConnectionOnCheckin(Boolean.parseBoolean(dbConfig.getProperty("db.pool.testConnectionOnCheckin", "true")));
                         ds.setTestConnectionOnCheckout(Boolean.parseBoolean(dbConfig.getProperty("db.pool.testConnectionOnCheckout", "false")));
-                        ds.setDebugUnreturnedConnectionStackTraces(Boolean.parseBoolean(dbConfig.getProperty("db.pool.debugUnreturnedConnectionStackTraces", "false")));
                         ds.setLoginTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.loginTimeout", "0")));
                         ds.setMaxAdministrativeTaskTime(Integer.parseInt(dbConfig.getProperty("db.pool.maxAdministrativeTaskTime", "0")));
                         ds.setMaxConnectionAge(Integer.parseInt(dbConfig.getProperty("db.pool.maxConnectionAge", "0")));
@@ -163,6 +162,7 @@ public class DBPlugin extends PlayPlugin {
                         ds.setMaxStatementsPerConnection(Integer.parseInt(dbConfig.getProperty("db.pool.maxStatementsPerConnection", "0")));
                         ds.setNumHelperThreads(Integer.parseInt(dbConfig.getProperty("db.pool.numHelperThreads", "3")));
                         ds.setUnreturnedConnectionTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.unreturnedConnectionTimeout", "0")));
+                        ds.setDebugUnreturnedConnectionStackTraces(Boolean.parseBoolean(dbConfig.getProperty("db.pool.debugUnreturnedConnectionStackTraces", "false")));
 
                         if (dbConfig.getProperty("db.testquery") != null) {
                             ds.setPreferredTestQuery(dbConfig.getProperty("db.testquery"));
