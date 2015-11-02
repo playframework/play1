@@ -1,22 +1,26 @@
 package play.libs;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
 import play.Logger;
 import play.exceptions.PlayException;
 import play.libs.WS.HttpResponse;
-import play.mvc.Router;
 import play.mvc.Http.Request;
+import play.mvc.Router;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
 
@@ -26,6 +30,7 @@ public class OpenID {
         this.id = id;
         this.returnAction = this.realmAction = Request.current().action;
     }
+
     // ~~~ API
     String id;
     String returnAction;
@@ -85,7 +90,7 @@ public class OpenID {
                 Document xrds = null;
 
                 if (response.getContentType().contains("application/xrds+xml")) {
-                    xrds = response.getXml();
+                    xrds = getXml(html, response.getEncoding());
                 } else if (response.getHeader("X-XRDS-Location") != null) {
                     xrds = WS.url(response.getHeader("X-XRDS-Location")).get().getXml();
                 } else {
@@ -94,11 +99,13 @@ public class OpenID {
 
                 // Ok we have the XRDS file
                 server = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/server']/following-sibling::URI/text()", xrds);
-                claimedId = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::LocalID/text()", xrds);
+                claimedId = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::LocalID/text()",
+                        xrds);
                 if (claimedId == null) {
                     claimedId = "http://specs.openid.net/auth/2.0/identifier_select";
                 } else {
-                    server = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::URI/text()", xrds);
+                    server = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::URI/text()",
+                            xrds);
                 }
 
                 if (server == null) {
@@ -148,16 +155,16 @@ public class OpenID {
             }
             String sregO = "";
             for (String a : sregOptional) {
-               sregO += URLEncoder.encode(a, "UTF-8") + ",";
+                sregO += URLEncoder.encode(a, "UTF-8") + ",";
             }
             if (!StringUtils.isEmpty(sregO)) {
-               url += "&openid.sreg.optional=" + sregO.substring(0, sregO.length() - 1);
+                url += "&openid.sreg.optional=" + sregO.substring(0, sregO.length() - 1);
             }
             String sregR = "";
             for (String a : sregRequired) {
-               sregR +=  URLEncoder.encode(a, "UTF-8") + ",";
+                sregR += URLEncoder.encode(a, "UTF-8") + ",";
             }
-             if (!StringUtils.isEmpty(sregR)) {
+            if (!StringUtils.isEmpty(sregR)) {
                 url += "&openid.sreg.required=" + sregR.substring(0, sregR.length() - 1);
             }
 
@@ -187,7 +194,6 @@ public class OpenID {
                     url += "&openid.ax.if_available=" + r;
                 }
             }
-
 
             if (Logger.isTraceEnabled()) {
                 // Debug
@@ -242,6 +248,7 @@ public class OpenID {
 
     /**
      * Retrieve the verified OpenID
+     * 
      * @return A UserInfo object
      */
     public static UserInfo getVerifiedID() {
@@ -324,6 +331,17 @@ public class OpenID {
             server = extractHref(openidServer.group());
         }
         return server;
+    }
+
+    private static Document getXml(String response, String encoding) {
+        try {
+            InputSource source = new InputSource(new StringReader(response));
+            source.setEncoding(encoding);
+            DocumentBuilder builder = XML.newDocumentBuilder();
+            return builder.parse(source);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // ~~~~ Result class

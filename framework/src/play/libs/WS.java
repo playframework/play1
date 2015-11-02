@@ -12,9 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
+
 import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import play.Logger;
 import play.Play;
@@ -26,27 +30,27 @@ import play.libs.ws.WSUrlFetch;
 import play.mvc.Http;
 import play.mvc.Http.Header;
 import play.utils.HTTP;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 /**
  * Simple HTTP client to make webservices requests.
  * 
  * <p/>
  * Get latest BBC World news as a RSS content
+ *
  * <pre>
- *    HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
- *    Document xmldoc = response.getXml();
- *    // the real pain begins here...
+ * HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
+ * Document xmldoc = response.getXml();
+ * // the real pain begins here...
  * </pre>
  * <p/>
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
+ *
  * <pre>
- *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
- *    if( response.getStatus() == 200 ) {
- *       html = response.getString();
- *    }
+ * HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
+ * if (response.getStatus() == 200) {
+ *     html = response.getString();
+ * }
  * </pre>
  */
 public class WS extends PlayPlugin {
@@ -58,17 +62,16 @@ public class WS extends PlayPlugin {
     }
 
     /**
-     * Singleton configured with default encoding - this one is used
-     * when calling static method on WS.
+     * Singleton configured with default encoding - this one is used when
+     * calling static method on WS.
      */
     private static WSWithEncoding wsWithDefaultEncoding;
 
     /**
-     * Internal class exposing all the methods previously exposed by WS.
-     * This impl has information about encoding.
-     * When calling original static methos on WS, then a singleton of
-     * WSWithEncoding is called - configured with default encoding.
-     * This makes this encoding-enabling backward compatible
+     * Internal class exposing all the methods previously exposed by WS. This
+     * impl has information about encoding. When calling original static methods
+     * on WS, then a singleton of WSWithEncoding is called - configured with
+     * default encoding. This makes this encoding-enabling backward compatible
      */
     public static class WSWithEncoding {
         public final String encoding;
@@ -78,17 +81,21 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Use thos method to get an instance to WS with diferent encoding
-         * @param newEncoding the encoding to use in the communication
+         * Use this method to get an instance to WS with different encoding
+         *
+         * @param newEncoding
+         *            the encoding to use in the communication
          * @return a new instance of WS with specified encoding
          */
-        public WSWithEncoding withEncoding(String newEncoding ) {
-            return new WSWithEncoding( newEncoding );
+        public WSWithEncoding withEncoding(String newEncoding) {
+            return new WSWithEncoding(newEncoding);
         }
 
         /**
          * URL-encode a string to be used as a query string parameter.
-         * @param part string to encode
+         *
+         * @param part
+         *            string to encode
          * @return url-encoded string
          */
         public String encode(String part) {
@@ -100,10 +107,14 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Build a WebService Request with the given URL.
-         * This object support chaining style programming for adding params, file, headers to requests.
-         * @param url of the request
-         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+         * Build a WebService Request with the given URL. This object support
+         * chaining style programming for adding params, file, headers to
+         * requests.
+         *
+         * @param url
+         *            of the request
+         * @return a WSRequest on which you can add params, file headers using a
+         *         chaining style programming.
          */
         public WSRequest url(String url) {
             init();
@@ -111,12 +122,17 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Build a WebService Request with the given URL.
-         * This constructor will format url using params passed in arguments.
-         * This object support chaining style programming for adding params, file, headers to requests.
-         * @param url to format using the given params.
-         * @param params the params passed to format the URL.
-         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+         * Build a WebService Request with the given URL. This constructor will
+         * format url using params passed in arguments. This object support
+         * chaining style programming for adding params, file, headers to
+         * requests.
+         *
+         * @param url
+         *            to format using the given params.
+         * @param params
+         *            the params passed to format the URL.
+         * @return a WSRequest on which you can add params, file headers using a
+         *         chaining style programming.
          */
         public WSRequest url(String url, String... params) {
             Object[] encodedParams = new String[params.length];
@@ -130,13 +146,15 @@ public class WS extends PlayPlugin {
 
     /**
      * Use thos method to get an instance to WS with diferent encoding
-     * @param encoding the encoding to use in the communication
+     *
+     * @param encoding
+     *            the encoding to use in the communication
      * @return a new instance of WS with specified encoding
      */
-    public static WSWithEncoding withEncoding(String encoding ) {
+    public static WSWithEncoding withEncoding(String encoding) {
         return wsWithDefaultEncoding.withEncoding(encoding);
     }
-    
+
     @Override
     public void onApplicationStop() {
         if (wsImpl != null) {
@@ -153,7 +171,8 @@ public class WS extends PlayPlugin {
     }
 
     private synchronized static void init() {
-        if (wsImpl != null) return;
+        if (wsImpl != null)
+            return;
         String implementation = Play.configuration.getProperty("webservice", "async");
         if (implementation.equals("urlfetch")) {
             wsImpl = new WSUrlFetch();
@@ -167,7 +186,7 @@ public class WS extends PlayPlugin {
             wsImpl = new WSAsync();
         } else {
             try {
-                wsImpl = (WSImpl)Play.classloader.loadClass(implementation).newInstance();
+                wsImpl = (WSImpl) Play.classloader.loadClass(implementation).newInstance();
                 if (Logger.isTraceEnabled()) {
                     Logger.trace("Using the class:" + implementation + " for web service");
                 }
@@ -179,31 +198,39 @@ public class WS extends PlayPlugin {
 
     /**
      * URL-encode a string to be used as a query string parameter.
-     * @param part string to encode
+     *
+     * @param part
+     *            string to encode
      * @return url-encoded string
      */
     public static String encode(String part) {
         return wsWithDefaultEncoding.encode(part);
     }
 
-
     /**
-     * Build a WebService Request with the given URL.
-     * This object support chaining style programming for adding params, file, headers to requests.
-     * @param url of the request
-     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+     * Build a WebService Request with the given URL. This object support
+     * chaining style programming for adding params, file, headers to requests.
+     *
+     * @param url
+     *            of the request
+     * @return a WSRequest on which you can add params, file headers using a
+     *         chaining style programming.
      */
     public static WSRequest url(String url) {
         return wsWithDefaultEncoding.url(url);
     }
 
     /**
-     * Build a WebService Request with the given URL.
-     * This constructor will format url using params passed in arguments.
-     * This object support chaining style programming for adding params, file, headers to requests.
-     * @param url to format using the given params.
-     * @param params the params passed to format the URL.
-     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+     * Build a WebService Request with the given URL. This constructor will
+     * format url using params passed in arguments. This object support chaining
+     * style programming for adding params, file, headers to requests.
+     *
+     * @param url
+     *            to format using the given params.
+     * @param params
+     *            the params passed to format the URL.
+     * @return a WSRequest on which you can add params, file headers using a
+     *         chaining style programming.
      */
     public static WSRequest url(String url, String... params) {
         return wsWithDefaultEncoding.url(url, params);
@@ -211,21 +238,36 @@ public class WS extends PlayPlugin {
 
     public interface WSImpl {
         public WSRequest newRequest(String url, String encoding);
+
         public void stop();
     }
 
     public static abstract class WSRequest {
         public String url;
+
+        /**
+         * The virtual host this request will use
+         */
+        public String virtualHost;
         public final String encoding;
         public String username;
         public String password;
         public Scheme scheme;
+
+        /**
+         * The body of this request
+         */
         public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new LinkedHashMap<String, Object>();
         public String mimeType;
+
+        /**
+         * Sets whether redirects (301, 302) should be followed automatically
+         */
         public boolean followRedirects = true;
+
         /**
          * timeout: value in seconds
          */
@@ -249,7 +291,16 @@ public class WS extends PlayPlugin {
         }
 
         /**
+         * Sets the virtual host to use in this request
+         */
+        public WSRequest withVirtualHost(String virtualHost) {
+            this.virtualHost = virtualHost;
+            return this;
+        }
+
+        /**
          * Add a MimeType to the web service request.
+         *
          * @param mimeType
          * @return the WSRequest for chaining.
          */
@@ -259,8 +310,9 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * define client authentication for a server host 
-         * provided credentials will be used during the request
+         * define client authentication for a server host provided credentials
+         * will be used during the request
+         *
          * @param username
          * @param password
          * @return the WSRequest for chaining.
@@ -273,9 +325,9 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * define client authentication for a server host
-         * provided credentials will be used during the request
-         * the basic scheme will be used
+         * define client authentication for a server host provided credentials
+         * will be used during the request the basic scheme will be used
+         *
          * @param username
          * @param password
          * @return the WSRequest for chaining.
@@ -286,6 +338,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Sign the request for do a call to a server protected by oauth
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest oauth(ServiceInfo oauthInfo, String token, String secret) {
@@ -302,6 +355,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Indicate if the WS should continue when hitting a 301 or 302
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest followRedirects(boolean value) {
@@ -310,9 +364,11 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Set the value of the request timeout, i.e. the number of seconds before cutting the
-         * connection - default to 60 seconds
-         * @param timeout the timeout value, e.g. "30s", "1min"
+         * Set the value of the request timeout, i.e. the number of seconds
+         * before cutting the connection - default to 60 seconds
+         *
+         * @param timeout
+         *            the timeout value, e.g. "30s", "1min"
          * @return the WSRequest for chaining
          */
         public WSRequest timeout(String timeout) {
@@ -322,6 +378,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add files to request. This will only work with POST or PUT.
+         *
          * @param files
          * @return the WSRequest for chaining.
          */
@@ -331,7 +388,9 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add fileParams aka File and Name parameter to the request. This will only work with POST or PUT.
+         * Add fileParams aka File and Name parameter to the request. This will
+         * only work with POST or PUT.
+         *
          * @param fileParams
          * @return the WSRequest for chaining.
          */
@@ -342,6 +401,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add the given body to the request.
+         *
          * @param body
          * @return the WSRequest for chaining.
          */
@@ -352,19 +412,25 @@ public class WS extends PlayPlugin {
 
         /**
          * Add a header to the request
-         * @param name header name
-         * @param value header value
+         *
+         * @param name
+         *            header name
+         * @param value
+         *            header value
          * @return the WSRequest for chaining.
          */
         public WSRequest setHeader(String name, String value) {
-            this.headers.put( HTTP.fixCaseForHttpHeader(name), value);
+            this.headers.put(HTTP.fixCaseForHttpHeader(name), value);
             return this;
         }
 
         /**
          * Add a parameter to the request
-         * @param name parameter name
-         * @param value parameter value
+         *
+         * @param name
+         *            parameter name
+         * @param value
+         *            parameter value
          * @return the WSRequest for chaining.
          */
         public WSRequest setParameter(String name, String value) {
@@ -379,6 +445,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Use the provided headers when executing request.
+         *
          * @param headers
          * @return the WSRequest for chaining.
          */
@@ -388,9 +455,11 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add parameters to request.
-         * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
-         * For any other method, those params are appended to the queryString. 
+         * Add parameters to request. If POST or PUT, parameters are passed in
+         * body using x-www-form-urlencoded if alone, or form-data if there is
+         * files too. For any other method, those params are appended to the
+         * queryString.
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest params(Map<String, Object> parameters) {
@@ -399,9 +468,11 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add parameters to request.
-         * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
-         * For any other method, those params are appended to the queryString. 
+         * Add parameters to request. If POST or PUT, parameters are passed in
+         * body using x-www-form-urlencoded if alone, or form-data if there is
+         * files too. For any other method, those params are appended to the
+         * queryString.
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest setParameters(Map<String, String> parameters) {
@@ -427,53 +498,53 @@ public class WS extends PlayPlugin {
         /** Execute a POST request.*/
         public abstract HttpResponse post();
 
-        /** Execute a POST request asynchronously.*/
+        /** Execute a POST request asynchronously. */
         public Promise<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a PUT request.*/
+        /** Execute a PUT request. */
         public abstract HttpResponse put();
 
-        /** Execute a PUT request asynchronously.*/
+        /** Execute a PUT request asynchronously. */
         public Promise<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a DELETE request.*/
+        /** Execute a DELETE request. */
         public abstract HttpResponse delete();
 
-        /** Execute a DELETE request asynchronously.*/
+        /** Execute a DELETE request asynchronously. */
         public Promise<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a OPTIONS request.*/
+        /** Execute a OPTIONS request. */
         public abstract HttpResponse options();
 
-        /** Execute a OPTIONS request asynchronously.*/
+        /** Execute a OPTIONS request asynchronously. */
         public Promise<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a HEAD request.*/
+        /** Execute a HEAD request. */
         public abstract HttpResponse head();
 
-        /** Execute a HEAD request asynchronously.*/
+        /** Execute a HEAD request asynchronously. */
         public Promise<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a TRACE request.*/
+        /** Execute a TRACE request. */
         public abstract HttpResponse trace();
 
-        /** Execute a TRACE request asynchronously.*/
+        /** Execute a TRACE request asynchronously. */
         public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
-        
+
         protected String basicAuthHeader() {
-            return  "Basic " + Codec.encodeBASE64(this.username + ":" + this.password);
+            return "Basic " + Codec.encodeBASE64(this.username + ":" + this.password);
         }
 
         protected String encode(String part) {
@@ -540,12 +611,14 @@ public class WS extends PlayPlugin {
 
         /**
          * the HTTP status code
+         *
          * @return the status code of the http response
          */
         public abstract Integer getStatus();
 
         /**
          * The HTTP status text
+         *
          * @return the status text of the http response
          */
         public abstract String getStatusText();
@@ -559,25 +632,26 @@ public class WS extends PlayPlugin {
 
         /**
          * The http response content type
+         *
          * @return the content type of the http response
          */
         public String getContentType() {
-            return getHeader("content-type") !=null ? getHeader("content-type") : getHeader("Content-Type");
+            return getHeader("content-type") != null ? getHeader("content-type") : getHeader("Content-Type");
         }
 
         public String getEncoding() {
             // Have we already parsed it?
-            if( _encoding != null ) {
+            if (_encoding != null) {
                 return _encoding;
             }
 
             // no! must parse it and remember
             String contentType = getContentType();
-            if( contentType == null ) {
+            if (contentType == null) {
                 _encoding = Play.defaultWebEncoding;
             } else {
-                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( contentType );
-                if( contentTypeEncoding.encoding == null ) {
+                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(contentType);
+                if (contentTypeEncoding.encoding == null) {
                     _encoding = Play.defaultWebEncoding;
                 } else {
                     _encoding = contentTypeEncoding.encoding;
@@ -593,15 +667,18 @@ public class WS extends PlayPlugin {
 
         /**
          * Parse and get the response body as a {@link Document DOM document}
+         *
          * @return a DOM document
          */
         public Document getXml() {
-            return getXml( getEncoding() );
+            return getXml(getEncoding());
         }
 
         /**
          * parse and get the response body as a {@link Document DOM document}
-         * @param encoding xml charset encoding
+         *
+         * @param encoding
+         *            xml charset encoding
          * @return a DOM document
          */
         public Document getXml(String encoding) {
@@ -617,6 +694,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
+         *
          * @return the body of the http response
          */
         public String getString() {
@@ -625,26 +703,28 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * @param encoding string charset encoding
+         *
+         * @param encoding
+         *            string charset encoding
          * @return the body of the http response
          */
         public String getString(String encoding) {
             return IO.readContentAsString(getStream(), encoding);
         }
 
-
         /**
          * Parse the response string as a query string.
+         *
          * @return The parameters as a Map. Return an empty map if the response
-         * is not formed as a query string.
+         *         is not formed as a query string.
          */
         public Map<String, String> getQueryString() {
             Map<String, String> result = new HashMap<String, String>();
             String body = getString();
-            for (String entry: body.split("&")) {
+            for (String entry : body.split("&")) {
                 int pos = entry.indexOf("=");
                 if (pos > -1) {
-                    result.put(entry.substring(0,pos), entry.substring(pos+1));
+                    result.put(entry.substring(0, pos), entry.substring(pos + 1));
                 } else {
                     result.put(entry, "");
                 }
@@ -654,12 +734,14 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response as a stream
+         *
          * @return an inputstream
          */
         public abstract InputStream getStream();
 
         /**
          * get the response body as a {@link com.google.gson.JsonElement}
+         *
          * @return the json response
          */
         public JsonElement getJson() {

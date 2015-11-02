@@ -185,8 +185,7 @@ public class WSAsync implements WSImpl {
                         if (value == null) {
                             requestBuilder.addQueryParam(URLEncoder.encode(name, encoding), null);
                         } else {
-                            requestBuilder.addQueryParam(URLEncoder.encode(name, encoding), URLEncoder.encode(value,
-                                    encoding));
+                            requestBuilder.addQueryParam(URLEncoder.encode(name, encoding), URLEncoder.encode(value, encoding));
                         }
 
                     }
@@ -414,6 +413,10 @@ public class WSAsync implements WSImpl {
                 builder.addHeader(key, headers.get(key));
             }
             builder.setFollowRedirects(this.followRedirects);
+            builder.setRequestTimeout(this.timeout * 1000);
+            if (this.virtualHost != null) {
+                builder.setVirtualHost(this.virtualHost);
+            }
             return builder;
         }
 
@@ -441,7 +444,6 @@ public class WSAsync implements WSImpl {
         }
 
         private void checkFileBody(BoundRequestBuilder builder) {
-            Charset encodingCharset =  Charset.forName(encoding);
             setResolvedContentType(null);
             if (this.fileParams != null) {
                 //could be optimized, we know the size of this array.
@@ -449,26 +451,22 @@ public class WSAsync implements WSImpl {
                     builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
                             this.fileParams[i].file,
                             MimeTypes.getMimeType(this.fileParams[i].file.getName()),
-                            encodingCharset));
+                            Charset.forName(encoding)));
                 }
                 if (this.parameters != null) {
-                    try {
-                        // AHC only supports ascii chars in keys in multipart
-                        for (String key : this.parameters.keySet()) {
-                            Object value = this.parameters.get(key);
-                            if (value instanceof Collection<?> || value.getClass().isArray()) {
-                                Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
-                                for (Object v : values) {
-                                    Part part = new ByteArrayPart(key,  v.toString().getBytes(encoding), "text/plain", encodingCharset);
-                                    builder.addBodyPart( part );
-                                }
-                            } else {
-                                Part part = new ByteArrayPart(key, value.toString().getBytes(encoding), "text/plain", encodingCharset);
+                    // AHC only supports ascii chars in keys in multipart
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v : values) {
+                                Part part = new ByteArrayPart(key, v.toString().getBytes(), "text/plain", Charset.forName(encoding));
                                 builder.addBodyPart( part );
                             }
+                        } else {
+                            Part part = new ByteArrayPart(key, value.toString().getBytes(), "text/plain", Charset.forName(encoding));
+                            builder.addBodyPart( part );
                         }
-                    } catch(UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
                     }
                 }
 

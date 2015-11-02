@@ -6,13 +6,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Future;
 
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import org.w3c.dom.Document;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonSerializer;
+import com.thoughtworks.xstream.XStream;
 
 import play.Invoker.Suspend;
 import play.Logger;
@@ -27,7 +34,12 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSup
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.data.validation.ValidationPlugin;
-import play.exceptions.*;
+import play.exceptions.ContinuationsException;
+import play.exceptions.NoRouteFoundException;
+import play.exceptions.PlayException;
+import play.exceptions.TemplateNotFoundException;
+import play.exceptions.UnexpectedException;
+import play.libs.F;
 import play.libs.Time;
 import play.mvc.Http.Request;
 import play.mvc.Router.ActionDefinition;
@@ -53,99 +65,127 @@ import play.utils.Default;
 import play.utils.Java;
 import play.vfs.VirtualFile;
 
-import com.google.gson.JsonSerializer;
-import com.thoughtworks.xstream.XStream;
-import java.lang.reflect.Type;
-import org.apache.commons.javaflow.Continuation;
-import org.apache.commons.javaflow.bytecode.StackRecorder;
-import play.libs.F;
-
 /**
- * Application controller support: The controller receives input and initiates a response by making calls on model objects.
+ * Application controller support: The controller receives input and initiates a
+ * response by making calls on model objects.
  *
  * This is the class that your controllers should extend.
- * 
+ *
  */
 public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * The current HTTP request: the message sent by the client to the server.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.request - controller.request.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.request -
+     * controller.request.current()
      *
      */
     protected static Http.Request request = null;
     /**
-     * The current HTTP response: The message sent back from the server after a request.
+     * The current HTTP response: The message sent back from the server after a
+     * request.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.response - controller.response.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.response -
+     * controller.response.current()
      *
      */
     protected static Http.Response response = null;
     /**
-     * The current HTTP session. The Play! session is not living on the server side but on the client side.
-     * In fact, it is stored in a signed cookie. This session is therefore limited to 4kb.
+     * The current HTTP session. The Play! session is not living on the server
+     * side but on the client side. In fact, it is stored in a signed cookie.
+     * This session is therefore limited to 4kb.
      *
      * From Wikipedia:
-     * 
-     * Client-side sessions use cookies and cryptographic techniques to maintain state without storing as much data on the server. When presenting a dynamic web page, the server sends the current state data to the client (web browser) in the form of a cookie. The client saves the cookie in memory or on disk. With each successive request, the client sends the cookie back to the server, and the server uses the data to "remember" the state of the application for that specific client and generate an appropriate response.
-     * This mechanism may work well in some contexts; however, data stored on the client is vulnerable to tampering by the user or by software that has access to the client computer. To use client-side sessions where confidentiality and integrity are required, the following must be guaranteed:
-     * Confidentiality: Nothing apart from the server should be able to interpret session data.
-     * Data integrity: Nothing apart from the server should manipulate session data (accidentally or maliciously).
-     * Authenticity: Nothing apart from the server should be able to initiate valid sessions.
-     * To accomplish this, the server needs to encrypt the session data before sending it to the client, and modification of such information by any other party should be prevented via cryptographic means.
-     * Transmitting state back and forth with every request is only practical when the size of the cookie is small. In essence, client-side sessions trade server disk space for the extra bandwidth that each web request will require. Moreover, web browsers limit the number and size of cookies that may be stored by a web site. To improve efficiency and allow for more session data, the server may compress the data before creating the cookie, decompressing it later when the cookie is returned by the client.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.session - controller.session.current()
+     * Client-side sessions use cookies and cryptographic techniques to maintain
+     * state without storing as much data on the server. When presenting a
+     * dynamic web page, the server sends the current state data to the client
+     * (web browser) in the form of a cookie. The client saves the cookie in
+     * memory or on disk. With each successive request, the client sends the
+     * cookie back to the server, and the server uses the data to "remember" the
+     * state of the application for that specific client and generate an
+     * appropriate response. This mechanism may work well in some contexts;
+     * however, data stored on the client is vulnerable to tampering by the user
+     * or by software that has access to the client computer. To use client-side
+     * sessions where confidentiality and integrity are required, the following
+     * must be guaranteed: Confidentiality: Nothing apart from the server should
+     * be able to interpret session data. Data integrity: Nothing apart from the
+     * server should manipulate session data (accidentally or maliciously).
+     * Authenticity: Nothing apart from the server should be able to initiate
+     * valid sessions. To accomplish this, the server needs to encrypt the
+     * session data before sending it to the client, and modification of such
+     * information by any other party should be prevented via cryptographic
+     * means. Transmitting state back and forth with every request is only
+     * practical when the size of the cookie is small. In essence, client-side
+     * sessions trade server disk space for the extra bandwidth that each web
+     * request will require. Moreover, web browsers limit the number and size of
+     * cookies that may be stored by a web site. To improve efficiency and allow
+     * for more session data, the server may compress the data before creating
+     * the cookie, decompressing it later when the cookie is returned by the
+     * client.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.session -
+     * controller.session.current()
      */
     protected static Scope.Session session = null;
     /**
-     * The current flash scope. The flash is a temporary storage mechanism that is a hash map
-     * You can store values associated with keys and later retrieve them.
-     * It has one special property: by default, values stored into the flash during the processing of a request
-     * will be available during the processing of the immediately following request.
-     * Once that second request has been processed, those values are removed automatically from the storage
+     * The current flash scope. The flash is a temporary storage mechanism that
+     * is a hash map You can store values associated with keys and later
+     * retrieve them. It has one special property: by default, values stored
+     * into the flash during the processing of a request will be available
+     * during the processing of the immediately following request. Once that
+     * second request has been processed, those values are removed automatically
+     * from the storage
      *
      * This scope is very useful to display messages after issuing a Redirect.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.flash - controller.flash.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.flash - controller.flash.current()
      */
     protected static Scope.Flash flash = null;
     /**
-     * The current HTTP params. This scope allows you to access the HTTP parameters supplied with the request.
+     * The current HTTP params. This scope allows you to access the HTTP
+     * parameters supplied with the request.
      *
-     * This is useful for example to know which submit button a user pressed on a form.
+     * This is useful for example to know which submit button a user pressed on
+     * a form.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.params - controller.params.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.params - controller.params.current()
      */
     protected static Scope.Params params = null;
     /**
-     * The current renderArgs scope: This is a hash map that is accessible during the rendering phase. It means you can access
-     * variables stored in this scope during the rendering phase (the template phase). 
+     * The current renderArgs scope: This is a hash map that is accessible
+     * during the rendering phase. It means you can access variables stored in
+     * this scope during the rendering phase (the template phase).
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.renderArgs - controller.renderArgs.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.renderArgs -
+     * controller.renderArgs.current()
      */
     protected static Scope.RenderArgs renderArgs = null;
     /**
-     * The current routeArgs scope: This is a hash map that is accessible during the reverse routing phase.
-     * Any variable added to this scope will be used for reverse routing. Useful when you have a param that you want
-     * to add to any route without add it expicitely to every action method.
+     * The current routeArgs scope: This is a hash map that is accessible during
+     * the reverse routing phase. Any variable added to this scope will be used
+     * for reverse routing. Useful when you have a param that you want to add to
+     * any route without add it expicitely to every action method.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.routeArgs - controller.routeArgs.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.routeArgs -
+     * controller.routeArgs.current()
      */
     protected static Scope.RouteArgs routeArgs = null;
     /**
-     * The current Validation object. It allows you to validate objects and to retrieve potential validations errors for those objects.
+     * The current Validation object. It allows you to validate objects and to
+     * retrieve potential validations errors for those objects.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
-     * ie : controller.validation - controller.validation.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local
+     * version is applied. ie : controller.validation -
+     * controller.validation.current()
      */
     protected static Validation validation = null;
 
@@ -156,7 +196,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/plain response
-     * @param text The response content
+     *
+     * @param text
+     *            The response content
      */
     protected static void renderText(Object text) {
         throw new RenderText(text == null ? "" : text.toString());
@@ -164,7 +206,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/html response
-     * @param html The response content
+     *
+     * @param html
+     *            The response content
      */
     protected static void renderHtml(Object html) {
         throw new RenderHtml(html == null ? "" : html.toString());
@@ -172,8 +216,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/plain response
-     * @param pattern The response content to be formatted (with String.format)
-     * @param args Args for String.format
+     *
+     * @param pattern
+     *            The response content to be formatted (with String.format)
+     * @param args
+     *            Args for String.format
      */
     protected static void renderText(CharSequence pattern, Object... args) {
         throw new RenderText(pattern == null ? "" : String.format(pattern.toString(), args));
@@ -181,7 +228,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * @param xml The XML string
+     *
+     * @param xml
+     *            The XML string
      */
     protected static void renderXml(String xml) {
         throw new RenderXml(xml);
@@ -189,15 +238,20 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * @param xml The DOM document object
+     *
+     * @param xml
+     *            The DOM document object
      */
     protected static void renderXml(Document xml) {
         throw new RenderXml(xml);
     }
 
     /**
-     * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to customize the result.
-     * @param o the object to serialize
+     * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to
+     * customize the result.
+     *
+     * @param o
+     *            the object to serialize
      */
     protected static void renderXml(Object o) {
         throw new RenderXml(o);
@@ -205,18 +259,23 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/xml response
-     * @param o the object to serialize
-     * @param xstream the XStream object to use for serialization. See XStream's documentation
-     *      for details about customizing the output.
+     *
+     * @param o
+     *            the object to serialize
+     * @param xstream
+     *            the XStream object to use for serialization. See XStream's
+     *            documentation for details about customizing the output.
      */
     protected static void renderXml(Object o, XStream xstream) {
         throw new RenderXml(o, xstream);
     }
 
     /**
-     * Return a 200 OK application/binary response.
-     * Content is fully loaded in memory, so it should not be used with large data.
-     * @param is The stream to copy
+     * Return a 200 OK application/binary response. Content is fully loaded in
+     * memory, so it should not be used with large data.
+     *
+     * @param is
+     *            The stream to copy
      */
     protected static void renderBinary(InputStream is) {
         throw new RenderBinary(is, null, true);
@@ -225,80 +284,109 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Return a 200 OK application/binary response. Content is streamed.
      *
-     * @param is The stream to copy
-     * @param length Stream's size in bytes.
+     * @param is
+     *            The stream to copy
+     * @param length
+     *            Stream's size in bytes.
      */
     protected static void renderBinary(InputStream is, long length) {
         throw new RenderBinary(is, null, length, true);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
-     * Content is fully loaded in memory, so it should not be used with large data.
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment. Content is fully loaded in memory, so it should not be used
+     * with large data.
      *
-     * @param is The stream to copy
-     * @param name Name of file user is downloading.
+     * @param is
+     *            The stream to copy
+     * @param name
+     *            Name of file user is downloading.
      */
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name, false);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment.
      *
-     * @param is The stream to copy. Content is streamed.
-     * @param name Name of file user is downloading.
-     * @param length Stream's size in bytes.
+     * @param is
+     *            The stream to copy. Content is streamed.
+     * @param name
+     *            Name of file user is downloading.
+     * @param length
+     *            Stream's size in bytes.
      */
     protected static void renderBinary(InputStream is, String name, long length) {
         throw new RenderBinary(is, name, length, false);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
-     * Content is fully loaded in memory, so it should not be used with large data.
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment. Content is fully loaded in memory, so it should not be used
+     * with large data.
      *
-     * @param is The stream to copy
-     * @param name Name of file user is downloading.
-     * @param inline true to set the response Content-Disposition to inline
+     * @param is
+     *            The stream to copy
+     * @param name
+     *            Name of file user is downloading.
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, boolean inline) {
         throw new RenderBinary(is, name, inline);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment.
      *
-     * @param is The stream to copy
-     * @param name The attachment name
-     * @param length Stream's size in bytes.
-     * @param inline true to set the response Content-Disposition to inline
+     * @param is
+     *            The stream to copy
+     * @param name
+     *            The attachment name
+     * @param length
+     *            Stream's size in bytes.
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, long length, boolean inline) {
         throw new RenderBinary(is, name, length, inline);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
-     * Content is fully loaded in memory, so it should not be used with large data.
-     * 
-     * @param is The stream to copy
-     * @param name The attachment name
-     * @param contentType The content type of the attachment
-     * @param inline true to set the response Content-Disposition to inline
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment. Content is fully loaded in memory, so it should not be used
+     * with large data.
+     *
+     * @param is
+     *            The stream to copy
+     * @param name
+     *            The attachment name
+     * @param contentType
+     *            The content type of the attachment
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, String contentType, boolean inline) {
         throw new RenderBinary(is, name, contentType, inline);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment.
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment.
      *
-     * @param is The stream to copy
-     * @param name The attachment name
-     * @param length Content's byte size.
-     * @param contentType The content type of the attachment
-     * @param inline true to set the response Content-Disposition to inline
+     * @param is
+     *            The stream to copy
+     * @param name
+     *            The attachment name
+     * @param length
+     *            Content's byte size.
+     * @param contentType
+     *            The content type of the attachment
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, long length, String contentType, boolean inline) {
         throw new RenderBinary(is, name, length, contentType, inline);
@@ -306,16 +394,22 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK application/binary response
-     * @param file The file to copy
+     *
+     * @param file
+     *            The file to copy
      */
     protected static void renderBinary(File file) {
         throw new RenderBinary(file);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
-     * @param file The file to copy
-     * @param name The attachment name
+     * Return a 200 OK application/binary response with content-disposition
+     * attachment
+     *
+     * @param file
+     *            The file to copy
+     * @param name
+     *            The attachment name
      */
     protected static void renderBinary(File file, String name) {
         throw new RenderBinary(file, name);
@@ -323,7 +417,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render a 200 OK application/json response
-     * @param jsonString The JSON string
+     *
+     * @param jsonString
+     *            The JSON string
      */
     protected static void renderJSON(String jsonString) {
         throw new RenderJson(jsonString);
@@ -331,7 +427,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render a 200 OK application/json response
-     * @param o The Java object to serialize
+     *
+     * @param o
+     *            The Java object to serialize
      */
     protected static void renderJSON(Object o) {
         throw new RenderJson(o);
@@ -339,8 +437,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render a 200 OK application/json response
-     * @param o The Java object to serialize
-     * @param type The Type informations for complex generic types
+     *
+     * @param o
+     *            The Java object to serialize
+     * @param type
+     *            The Type informations for complex generic types
      */
     protected static void renderJSON(Object o, Type type) {
         throw new RenderJson(o, type);
@@ -348,11 +449,27 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render a 200 OK application/json response.
-     * @param o The Java object to serialize
-     * @param adapters A set of GSON serializers/deserializers/instance creator to use
+     *
+     * @param o
+     *            The Java object to serialize
+     * @param adapters
+     *            A set of GSON serializers/deserializers/instance creator to
+     *            use
      */
     protected static void renderJSON(Object o, JsonSerializer<?>... adapters) {
         throw new RenderJson(o, adapters);
+    }
+
+    /**
+     * Render a 200 OK application/json response.
+     *
+     * @param o
+     *            The Java object to serialize
+     * @param gson
+     *            The GSON serializer object use
+     */
+    protected static void renderJSON(Object o, Gson gson) {
+        throw new RenderJson(o, gson);
     }
 
     /**
@@ -373,12 +490,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * Send a 400 Bad request
      */
     protected static void badRequest() {
-        throw new BadRequest();
+        throw new BadRequest("Bad request");
     }
 
     /**
      * Send a 401 Unauthorized response
-     * @param realm The realm name
+     *
+     * @param realm
+     *            The realm name
      */
     protected static void unauthorized(String realm) {
         throw new Unauthorized(realm);
@@ -393,7 +512,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 404 Not Found response
-     * @param what The Not Found resource name
+     *
+     * @param what
+     *            The Not Found resource name
      */
     protected static void notFound(String what) {
         throw new NotFound(what);
@@ -415,7 +536,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 404 Not Found response if object is null
-     * @param o The object to check
+     *
+     * @param o
+     *            The object to check
      */
     protected static void notFoundIfNull(Object o) {
         if (o == null) {
@@ -425,8 +548,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 404 Not Found response if object is null
-     * @param o The object to check
-     * @param what The Not Found resource name
+     *
+     * @param o
+     *            The object to check
+     * @param what
+     *            The Not Found resource name
      */
     protected static void notFoundIfNull(Object o, String what) {
         if (o == null) {
@@ -447,14 +573,17 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @see play.templates.FastTags#_authenticityToken
      */
     protected static void checkAuthenticity() {
-        if(Scope.Params.current().get("authenticityToken") == null || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
+        if (Scope.Params.current().get("authenticityToken") == null
+                || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
             forbidden("Bad authenticity token");
         }
     }
 
     /**
      * Send a 403 Forbidden response
-     * @param reason The reason
+     *
+     * @param reason
+     *            The reason
      */
     protected static void forbidden(String reason) {
         throw new Forbidden(reason);
@@ -469,8 +598,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 5xx Error response
-     * @param status The exact status code
-     * @param reason The reason
+     *
+     * @param status
+     *            The exact status code
+     * @param reason
+     *            The reason
      */
     protected static void error(int status, String reason) {
         throw new Error(status, reason);
@@ -478,7 +610,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 500 Error response
-     * @param reason The reason
+     *
+     * @param reason
+     *            The reason
      */
     protected static void error(String reason) {
         throw new Error(reason);
@@ -486,7 +620,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 500 Error response
-     * @param reason The reason
+     *
+     * @param reason
+     *            The reason
      */
     protected static void error(Exception reason) {
         Logger.error(reason, "error()");
@@ -502,8 +638,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Add a value to the flash scope
-     * @param key The key
-     * @param value The value
+     *
+     * @param key
+     *            The key
+     * @param value
+     *            The value
      */
     protected static void flash(String key, Object value) {
         Scope.Flash.current().put(key, value);
@@ -511,7 +650,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 302 redirect response.
-     * @param url The Location to redirect
+     *
+     * @param url
+     *            The Location to redirect
      */
     protected static void redirect(String url) {
         redirect(url, false);
@@ -519,7 +660,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 302 redirect response.
-     * @param file The Location to redirect
+     *
+     * @param file
+     *            The Location to redirect
      */
     protected static void redirectToStatic(String file) {
         try {
@@ -540,8 +683,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a Redirect response.
-     * @param url The Location to redirect
-     * @param permanent true -> 301, false -> 302
+     *
+     * @param url
+     *            The Location to redirect
+     * @param permanent
+     *            true -> 301, false -> 302
      */
     protected static void redirect(String url, boolean permanent) {
         if (url.indexOf("/") == -1) { // fix Java !
@@ -552,8 +698,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * 302 Redirect to another action
-     * @param action The fully qualified action name (ex: Application.index)
-     * @param args Method arguments
+     *
+     * @param action
+     *            The fully qualified action name (ex: Application.index)
+     * @param args
+     *            Method arguments
      */
     public static void redirect(String action, Object... args) {
         redirect(action, false, args);
@@ -561,20 +710,28 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Redirect to another action
-     * @param action The fully qualified action name (ex: Application.index)
-     * @param permanent true -> 301, false -> 302
-     * @param args Method arguments
+     *
+     * @param action
+     *            The fully qualified action name (ex: Application.index)
+     * @param permanent
+     *            true -> 301, false -> 302
+     * @param args
+     *            Method arguments
      */
     protected static void redirect(String action, boolean permanent, Object... args) {
         try {
             Map<String, Object> newArgs = new HashMap<String, Object>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
-            String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
+            String[] names = (String[]) actionMethod.getDeclaringClass()
+                    .getDeclaredField(
+                            "$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes()))
+                    .get(null);
             for (int i = 0; i < names.length && i < args.length; i++) {
                 Annotation[] annotations = actionMethod.getParameterAnnotations()[i];
                 boolean isDefault = false;
                 try {
-                    Method defaultMethod = actionMethod.getDeclaringClass().getDeclaredMethod(actionMethod.getName() + "$default$" + (i + 1));
+                    Method defaultMethod = actionMethod.getDeclaringClass()
+                            .getDeclaredMethod(actionMethod.getName() + "$default$" + (i + 1));
                     // Patch for scala defaults
                     if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
                         Object instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
@@ -614,7 +771,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             } catch (NoRouteFoundException e) {
                 StackTraceElement element = PlayException.getInterestingStackTraceElement(e);
                 if (element != null) {
-                    throw new NoRouteFoundException(action, newArgs, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+                    throw new NoRouteFoundException(action, newArgs, Play.classes.getApplicationClass(element.getClassName()),
+                            element.getLineNumber());
                 } else {
                     throw e;
                 }
@@ -641,8 +799,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render a specific template
-     * @param templateName The template name
-     * @param args The template data
+     *
+     * @param templateName
+     *            The template name
+     * @param args
+     *            The template data
      */
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
@@ -659,10 +820,12 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Render a specific template.
      *
-     * @param templateName The template name.
-     * @param args The template data.
+     * @param templateName
+     *            The template name.
+     * @param args
+     *            The template data.
      */
-    protected static void renderTemplate(String templateName, Map<String,Object> args) {
+    protected static void renderTemplate(String templateName, Map<String, Object> args) {
         // Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         templateBinding.data.putAll(args);
@@ -690,18 +853,21 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Render the template corresponding to the action's package-class-method name (@see <code>template()</code>).
+     * Render the template corresponding to the action's package-class-method
+     * name (@see <code>template()</code>).
      *
-     * @param args The template data.
+     * @param args
+     *            The template data.
      */
-    protected static void renderTemplate(Map<String,Object> args) {
+    protected static void renderTemplate(Map<String, Object> args) {
         renderTemplate(template(), args);
     }
 
     /**
      * Render the corresponding template (@see <code>template()</code>).
      *
-     * @param args The template data
+     * @param args
+     *            The template data
      */
     protected static void render(Object... args) {
         String templateName = null;
@@ -714,8 +880,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Work out the default template to load for the invoked action.
-     * E.g. "controllers.Pages.index" returns "views/Pages/index.html".
+     * Work out the default template to load for the invoked action. E.g.
+     * "controllers.Pages.index" returns "views/Pages/index.html".
      */
     protected static String template() {
         final Request theRequest = Request.current();
@@ -732,8 +898,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Work out the default template to load for the action.
-     * E.g. "controllers.Pages.index" returns "views/Pages/index.html".
+     * Work out the default template to load for the action. E.g.
+     * "controllers.Pages.index" returns "views/Pages/index.html".
      */
     protected static String template(String templateName) {
         final Request theRequest = Request.current();
@@ -750,7 +916,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Retrieve annotation for the action method
-     * @param clazz The annotation class
+     *
+     * @param clazz
+     *            The annotation class
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
@@ -763,7 +931,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Retrieve annotation for the controller class
-     * @param clazz The annotation class
+     *
+     * @param clazz
+     *            The annotation class
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerAnnotation(Class<T> clazz) {
@@ -775,7 +945,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Retrieve annotation for the controller class
-     * @param clazz The annotation class
+     *
+     * @param clazz
+     *            The annotation class
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
@@ -791,6 +963,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Retrieve the controller class
+     *
      * @return Annotation object or null if not found
      */
     protected static Class<? extends Controller> getControllerClass() {
@@ -870,10 +1043,12 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Suspend the current request for a specified amount of time.
      *
-     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
-     * be called again as if there was a new HTTP request.
+     * <p>
+     * <b>Important:</b> The method will not resume on the line after you call
+     * this. The method will be called again as if there was a new HTTP request.
      *
-     * @param timeout Period of time to wait, e.g. "1h" means 1 hour.
+     * @param timeout
+     *            Period of time to wait, e.g. "1h" means 1 hour.
      */
     @Deprecated
     protected static void suspend(String timeout) {
@@ -881,12 +1056,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Suspend the current request for a specified amount of time (in milliseconds).
+     * Suspend the current request for a specified amount of time (in
+     * milliseconds).
      *
-     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
-     * be called again as if there was a new HTTP request.
+     * <p>
+     * <b>Important:</b> The method will not resume on the line after you call
+     * this. The method will be called again as if there was a new HTTP request.
      *
-     * @param millis Number of milliseconds to wait until trying again.
+     * @param millis
+     *            Number of milliseconds to wait until trying again.
      */
     @Deprecated
     protected static void suspend(int millis) {
@@ -897,8 +1075,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Suspend this request and wait for the task completion
      *
-     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
-     * be called again as if there was a new HTTP request.
+     * <p>
+     * <b>Important:</b> The method will not resume on the line after you call
+     * this. The method will be called again as if there was a new HTTP request.
      *
      * @param task
      */
@@ -928,20 +1107,24 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * If isRestoring == null, the method will try to resolve it.
      *
-     * important: when using isRestoring == null you have to KNOW that continuation suspend
-     * is going to happen and that this method is called twice for this single
-     * continuation suspend operation for this specific request.
+     * important: when using isRestoring == null you have to KNOW that
+     * continuation suspend is going to happen and that this method is called
+     * twice for this single continuation suspend operation for this specific
+     * request.
      *
-     * @param isRestoring true if restoring, false if storing, and null if you don't know
+     * @param isRestoring
+     *            true if restoring, false if storing, and null if you don't
+     *            know
      */
     private static void storeOrRestoreDataStateForContinuations(Boolean isRestoring) {
 
-        if (isRestoring==null) {
-            // Sometimes, due to how continuations suspends/restarts the code, we do not
+        if (isRestoring == null) {
+            // Sometimes, due to how continuations suspends/restarts the code,
+            // we do not
             // know when calling this method if we're suspending or restoring.
 
             final String continuationStateKey = "__storeOrRestoreDataStateForContinuations_started";
-            if ( Http.Request.current().args.remove(continuationStateKey)!=null ) {
+            if (Http.Request.current().args.remove(continuationStateKey) != null) {
                 isRestoring = true;
             } else {
                 Http.Request.current().args.put(continuationStateKey, true);
@@ -950,18 +1133,20 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
 
         if (isRestoring) {
-            //we are restoring after suspend
+            // we are restoring after suspend
 
             // localVariablesState
-            Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
+            Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args
+                    .remove(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
             LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.setLocalVariablesStateAfterAwait(localVariablesState);
 
             // renderArgs
             Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
-            Scope.RenderArgs.current.set( renderArgs);
+            Scope.RenderArgs.current.set(renderArgs);
 
             // Params
-            // We know that the params are partially reprocessed during awake(Before now), but here we restore the correct values as
+            // We know that the params are partially reprocessed during
+            // awake(Before now), but here we restore the correct values as
             // they where when we performed the await();
             Map params = (Map) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
             Scope.Params.current().all().clear();
@@ -970,25 +1155,27 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             // Validations
             Validation validation = (Validation) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
             Validation.current.set(validation);
-            ValidationPlugin.keys.set( (Map<Object, String>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS) );
+            ValidationPlugin.keys
+                    .set((Map<Object, String>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS));
 
         } else {
             // we are storing before suspend
 
             // localVariablesState
-            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES, LocalVariablesNamesTracer.getLocalVariablesStateBeforeAwait());
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES,
+                    LocalVariablesNamesTracer.getLocalVariablesStateBeforeAwait());
 
             // renderArgs
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
 
-             // Params
-             // Store the actual params values so we can restore the exact same state when awaking.
-             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
+            // Params
+            // Store the actual params values so we can restore the exact same
+            // state when awaking.
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
 
             // Validations
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS, Validation.current());
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONPLUGIN_KEYS, ValidationPlugin.keys.get());
-
 
         }
     }
@@ -1003,33 +1190,34 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
 
-        if(future != null) {
+        if (future != null) {
             Request.current().args.put(ActionInvoker.F, future);
-        } else if(Request.current().args.containsKey(ActionInvoker.F)) {
-            // Since the continuation will restart in this code that isn't intstrumented by javaflow,
+        } else if (Request.current().args.containsKey(ActionInvoker.F)) {
+            // Since the continuation will restart in this code that isn't
+            // intstrumented by javaflow,
             // we need to reset the state manually.
             StackRecorder.get().isCapturing = false;
             StackRecorder.get().isRestoring = false;
             StackRecorder.get().value = null;
-            future = (Future<T>)Request.current().args.get(ActionInvoker.F);
+            future = (Future<T>) Request.current().args.get(ActionInvoker.F);
 
             // Now reset the Controller invocation context
             ControllerInstrumentation.stopActionCall();
-            storeOrRestoreDataStateForContinuations( true );
+            storeOrRestoreDataStateForContinuations(true);
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
 
-        if(future.isDone()) {
+        if (future.isDone()) {
             try {
                 return future.get();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new UnexpectedException(e);
             }
         } else {
             Request.current().isNew = false;
             verifyContinuationsEnhancement();
-            storeOrRestoreDataStateForContinuations( false );
+            storeOrRestoreDataStateForContinuations(false);
             Continuation.suspend(future);
             return null;
         }
@@ -1037,35 +1225,39 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Verifies that all application-code is properly enhanched.
-     * "application code" is the code on the callstack after leaving actionInvoke into the app, and before reentering Controller.await
+     * "application code" is the code on the callstack after leaving
+     * actionInvoke into the app, and before reentering Controller.await
      */
     private static void verifyContinuationsEnhancement() {
         // only check in dev mode..
         if (Play.mode == Play.Mode.PROD) {
             return;
         }
-        
+
         try {
             throw new Exception();
         } catch (Exception e) {
             boolean haveSeenFirstApplicationClass = false;
-            for (StackTraceElement ste : e.getStackTrace() ) {
+            for (StackTraceElement ste : e.getStackTrace()) {
                 String className = ste.getClassName();
 
                 if (!haveSeenFirstApplicationClass) {
                     haveSeenFirstApplicationClass = Play.classes.getApplicationClass(className) != null;
-                    // when haveSeenFirstApplicationClass is set to true, we are entering the user application code..
+                    // when haveSeenFirstApplicationClass is set to true, we are
+                    // entering the user application code..
                 }
 
                 if (haveSeenFirstApplicationClass) {
                     if (className.startsWith("sun.") || className.startsWith("play.")) {
                         // we're back into the play framework code...
-                        return ; // done checking
+                        return; // done checking
                     } else {
                         // is this class enhanched?
                         boolean enhanced = ContinuationEnhancer.isEnhanced(className);
                         if (!enhanced) {
-                            throw new ContinuationsException("Cannot use await/continuations when not all application classes on the callstack are properly enhanced. The following class is not enhanced: " + className);
+                            throw new ContinuationsException(
+                                    "Cannot use await/continuations when not all application classes on the callstack are properly enhanced. The following class is not enhanced: "
+                                            + className);
                         }
                     }
                 }
@@ -1090,9 +1282,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * @todo - this "Usage" example below doesn't make sense.
      *
-     * Usage:
+     *       Usage:
      *
-     * <code>
+     *       <code>
      * ActionDefinition action = reverse(); {
      *     Application.anyAction(anyParam, "toto");
      * }
@@ -1106,21 +1298,24 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Register a custoer template name resolver. That letter allows to override the way templates are resolved.
+     * Register a custoer template name resolver. That letter allows to override
+     * the way templates are resolved.
      */
     public static void registerTemplateNameResolver(ITemplateNameResolver templateNameResolver) {
-        if (null != Controller.templateNameResolver) Logger.warn("Existing tempate name resolver will be overriden!");
+        if (null != Controller.templateNameResolver)
+            Logger.warn("Existing tempate name resolver will be overriden!");
         Controller.templateNameResolver = templateNameResolver;
     }
 
     /**
-     * This allow people that implements their own template engine to override the way template are resolved.
+     * This allow people that implements their own template engine to override
+     * the way template are resolved.
      */
     public static interface ITemplateNameResolver {
         /**
          * Return the template path given a template name.
          */
         public String resolveTemplateName(String templateName);
-    }   
+    }
 
 }

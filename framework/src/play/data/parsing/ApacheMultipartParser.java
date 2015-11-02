@@ -29,6 +29,20 @@ import static org.apache.commons.io.FileUtils.readFileToByteArray;
  */
 public class ApacheMultipartParser extends DataParser {
 
+    private static void putMapEntry(Map<String, String[]> map, String name, String value) {
+        String[] newValues;
+        String[] oldValues = map.get(name);
+        if (oldValues == null) {
+            newValues = new String[1];
+            newValues[0] = value;
+        } else {
+            newValues = new String[oldValues.length + 1];
+            System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
+            newValues[oldValues.length] = value;
+        }
+        map.put(name, newValues);
+    }
+
     /*
      * Copyright 2001-2004 The Apache Software Foundation
      *
@@ -425,17 +439,6 @@ public class ApacheMultipartParser extends DataParser {
         // ------------------------------------------------------ Protected methods
 
         /**
-         * Removes the file contents from the temporary storage.
-         */
-        protected void finalize() {
-            File outputFile = dfos.getFile();
-
-            if (outputFile != null && outputFile.exists()) {
-                outputFile.delete();
-            }
-        }
-
-        /**
          * Creates and returns a {@link java.io.File File} representing a uniquely
          * named temporary file in the configured repository path. The lifetime of
          * the file is tied to the lifetime of the <code>FileItem</code> instance;
@@ -512,37 +515,42 @@ public class ApacheMultipartParser extends DataParser {
                 FileItemStream item = iter.next();
                 FileItem fileItem = new AutoFileItem(item);
                 try {
-                    Streams.copy(item.openStream(), fileItem.getOutputStream(), true);
-                } catch (FileUploadIOException e) {
-                    throw (FileUploadException) e.getCause();
-                } catch (IOException e) {
-                    throw new IOFileUploadException("Processing of " + MULTIPART_FORM_DATA + " request failed. " + e.getMessage(), e);
-                }
-                if (fileItem.isFormField()) {
-                    // must resolve encoding
-                    String _encoding = Request.current().encoding; // this is our default
-                    String _contentType = fileItem.getContentType();
-                    if( _contentType != null ) {
-                        HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
-                        if( contentTypeEncoding.encoding != null ) {
-                            _encoding = contentTypeEncoding.encoding;
-                        }
-                    }
-
-                    putMapEntry(result, fileItem.getFieldName(), fileItem.getString( _encoding ));
-                } else {
-                    @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-                    if (uploads == null) {
-                        uploads = new ArrayList<Upload>();
-                        Request.current().args.put("__UPLOADS", uploads);
-                    }
                     try {
-                        uploads.add(new FileUpload(fileItem));
-                    } catch (Exception e) {
-                        // GAE does not support it, we try in memory
-                        uploads.add(new MemoryUpload(fileItem));
+                        Streams.copy(item.openStream(), fileItem.getOutputStream(), true);
+                    } catch (FileUploadIOException e) {
+                        throw (FileUploadException) e.getCause();
+                    } catch (IOException e) {
+                        throw new IOFileUploadException("Processing of " + MULTIPART_FORM_DATA + " request failed. " + e.getMessage(), e);
                     }
-                    putMapEntry(result, fileItem.getFieldName(), fileItem.getFieldName());
+                    if (fileItem.isFormField()) {
+                        // must resolve encoding
+                        String _encoding = Request.current().encoding; // this is our default
+                        String _contentType = fileItem.getContentType();
+                        if( _contentType != null ) {
+                            HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
+                            if( contentTypeEncoding.encoding != null ) {
+                                _encoding = contentTypeEncoding.encoding;
+                            }
+                        }
+
+                        putMapEntry(result, fileItem.getFieldName(), fileItem.getString( _encoding ));
+                    } else {
+                        @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
+                        if (uploads == null) {
+                            uploads = new ArrayList<Upload>();
+                            Request.current().args.put("__UPLOADS", uploads);
+                        }
+                        try {
+                            uploads.add(new FileUpload(fileItem));
+                        } catch (Exception e) {
+                            // GAE does not support it, we try in memory
+                            uploads.add(new MemoryUpload(fileItem));
+                        }
+                        putMapEntry(result, fileItem.getFieldName(), fileItem.getFieldName());
+                    }
+                }
+                finally {
+                    fileItem.delete();
                 }
             }
         } catch (FileUploadIOException e) {

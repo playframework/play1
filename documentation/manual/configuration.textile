@@ -428,17 +428,26 @@ h3(#headlessBrowser). headlessBrowser
 
 Specifies the web browser compatibility mode for the HtmlUnit headless web browser used when running @play auto-test@.
 
-bc. headlessBrowser=INTERNET_EXPLORER_7
+bc. headlessBrowser=FIREFOX_31
 
 Values:
 
-* @FIREFOX_3@
-* @FIREFOX_3_6@
-* @INTERNET_EXPLORER_6@
-* @INTERNET_EXPLORER_7@
+* @CHROME@
+* @FIREFOX_24@
 * @INTERNET_EXPLORER_8@
+* @INTERNET_EXPLORER_11@
 
-Default: @INTERNET_EXPLORER_8@
+Default: @FIREFOX_31@
+
+h3(#webclient.timeout). webclient.timeout
+
+Specifies the timeout of the WebConnection. Set to zero for an infinite wait.
+
+Note: The timeout is used twice. The first is for making the socket connection, the second is for data retrieval. If the time is critical you must allow for twice the time specified here.
+
+bc. webclient.timeout=60
+
+This value can be set directly in the command @play auto-test@ by adding @--timeout=60@
 
 
 h2(#hibernate). Hibernate
@@ -1025,6 +1034,15 @@ h3(#XForwardedSupport). XForwardedSupport
 A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server. Alternatively you can use 'ALL' if you do not want to restrict local addresses. **Note**: only use 'ALL' if you are very sure that if it safe to do so (e.g. you have a proper firewall in place that blocks public requests). A valid use-case would be when using Play! behind a Amazon ELB loadbalancer, which internal IP's tend to change over time.      
 
 Default: @127.0.0.1@
+
+h3(#XForwardedOverwriteDomainAndPort). XForwardedOverwriteDomainAndPort
+
+Set to true to restore the request domain and port to original domain and port.
+
+For example:
+
+bc. XForwardedOverwriteDomainAndPort=true
+
 
 h2(#enhancers). Enhancers
 
