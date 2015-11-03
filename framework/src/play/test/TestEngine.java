@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +20,7 @@ import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+import org.junit.experimental.categories.Category;
 import play.Logger;
 import play.Play;
 import play.mvc.Http.Request;
@@ -30,6 +33,40 @@ import play.vfs.VirtualFile;
  * Run application tests
  */
 public class TestEngine {
+
+    private static final Set<String> includedGroups;
+    private static final Set<String> excludedGroups;
+
+    static {
+        includedGroups = split(System.getProperty("test.includedGroups"));
+        excludedGroups = split(System.getProperty("test.excludedGroups"));
+    }
+
+    private static Set<String> split(String value) {
+        if (value != null) {
+            Set<String> values = new HashSet<String>();
+            Collections.addAll(values, value.split(","));
+            return values;
+        } else {
+            return Collections.EMPTY_SET;
+        }
+    }
+
+    private static boolean includeTest(Class<?> clazz) {
+        if (includedGroups.isEmpty() && excludedGroups.isEmpty()) {
+            return true;
+        }
+        Category category = clazz.getAnnotation(Category.class);
+        Set<String> categories = Collections.EMPTY_SET;
+        if (category != null ) {
+            categories = new HashSet<String>();
+            for (Class<?> cat : category.value()) {
+                categories.add(cat.getSimpleName());
+            }
+        }
+        return Collections.disjoint(excludedGroups, categories)
+            && (includedGroups.isEmpty() || !Collections.disjoint(includedGroups, categories));
+    }
 
     private final static class ClassNameComparator implements Comparator<Class> {
         public int compare(Class aClass, Class bClass) {
@@ -47,7 +84,9 @@ public class TestEngine {
         classes.addAll(pluginClasses);
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             Class c = it.next();
-            if (Modifier.isAbstract(c.getModifiers())) {
+            if (!includeTest(c)) {
+                it.remove();
+            } else if (Modifier.isAbstract(c.getModifiers())) {
                 it.remove();
             } else {
                 if (FunctionalTest.class.isAssignableFrom(c)) {
@@ -64,7 +103,10 @@ public class TestEngine {
         Collection<Class> pluginClasses = Play.pluginCollection.getFunctionalTests();
         classes.addAll(pluginClasses);
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
-            if (Modifier.isAbstract(it.next().getModifiers())) {
+            Class c = it.next();
+            if (!includeTest(c)) {
+                it.remove();
+            } else if (Modifier.isAbstract(c.getModifiers())) {
                 it.remove();
             }
         }
