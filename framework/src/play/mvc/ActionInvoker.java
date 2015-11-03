@@ -3,13 +3,11 @@ package play.mvc;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
@@ -447,31 +445,36 @@ public class ActionInvoker {
     }
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
-        if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return invoke(method, null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
-        } else if (Modifier.isStatic(method.getModifiers())) {
-            Object[] args = getActionMethodArgs(method, null);
-            args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
-            return invoke(method, null, args);
-        } else {
-            Object instance = null;
-            try {
-                instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-            } catch (Exception e) {
-                Annotation[] annotations = method.getDeclaredAnnotations();
-                String annotation = Utils.getSimpleNames(annotations);
-                if (!StringUtils.isEmpty(annotation)) {
-                    throw new UnexpectedException("Method public static void " + method.getName() + "() annotated with " + annotation + " in class " + method.getDeclaringClass().getName() + " is not static.");
-                }
-                // TODO: Find a better error report
-                throw new ActionNotFoundException(Http.Request.current().action, e);
-            }
-            return invoke(method, instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
+        boolean isStatic = Modifier.isStatic(method.getModifiers());
+        String declaringClassName = method.getDeclaringClass().getName();
+        boolean isProbablyScala = declaringClassName.contains("$");
+
+        Http.Request request = Http.Request.current();
+
+        if (!isStatic && request.controllerInstance == null) {
+            request.controllerInstance = request.controllerClass.newInstance();
         }
+
+        Object[] args = forceArgs != null ? forceArgs : getActionMethodArgs(method, request.controllerInstance);
+
+        if (isProbablyScala) {
+            try {
+                Object scalaInstance = request.controllerClass.getDeclaredField("MODULE$").get(null);
+                if (declaringClassName.endsWith("$class")) {
+                    args[0] = scalaInstance; // Scala trait method
+                } else {
+                    request.controllerInstance = (Controller) scalaInstance; // Scala object method
+                }
+            } catch (NoSuchFieldException e) {
+                // not Scala
+            }
+        }
+
+        return invoke(method, request.controllerInstance, args);
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        if(isActionMethod(method)) {
+        if (isActionMethod(method)) {
             return invokeWithContinuation(method, instance, realArgs);
         } else {
             return method.invoke(instance, realArgs);

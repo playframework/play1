@@ -30,25 +30,37 @@ import play.mvc.Controller;
  
 public class Clients extends Controller {
  
-    public static void show(Long id) {
+    public void show(Long id) {
         Client client = Client.findById(id);
         render(client);
     }
  
-    public static void delete(Long id) {
+    public void delete(Long id) {
         Client client = Client.findById(id);
         client.delete();
     }
  
 }
 
-Each public, static method in a Controller is called an action. The signature for an action method is always:
+Each public method in a Controller is called an action. In case an action method is not static, a new instance of the controller class is created for each request, and all controller methods are invoked on the same instance. This works only if the controller has a zero-argument constructor (or no constructors at all).
 
-bc. public static void action_name(params...);
+The signature for an action method is:
+
+bc. public void action_name(params...);
 
 You can define parameters in the action method signature. These parameters will be automatically resolved by the framework from the corresponding HTTP parameters.
 
 Usually, an action method doesn’t include a return statement. The method exit is done by the invocation of a **result** method. In this example, @render(…)@ is a result method that executes and displays a template.
+
+h2. Static or non-static?
+
+In the past, all controller methods had to be static. However, non-static methods have many advantages in Java:
+
+* They can be overridden in subclasses.
+* They are easier to mock/unit-test.
+* They allow storing of request-scoped state in controller fields, if needed.
+
+Having that said, both static and non-static controller methods are supported.
 
 h2. <a name="params">Retrieving HTTP parameters</a>
 
@@ -70,14 +82,14 @@ The @params@ object is available to any Controller class (it is defined in the @
 
 For example:
 
-bc. public static void show() {
+bc. public void show() {
     String id = params.get("id");
     String[] names = params.getAll("names");
 }
 
 You can also ask Play to do the type conversion for you:
 
-bc. public static void show() {
+bc. public void show() {
     Long id = params.get("id", Long.class);
 }
 
@@ -93,19 +105,19 @@ bc. /clients?id=1451
 
 An action method can retrieve the @id@ parameter value by declaring an @id@ parameter in its signature:
 
-bc. public static void show(String id) {
+bc. public void show(String id) {
     System.out.println(id); 
 }
 
 You can use other Java types than String. In this case the framework will try to cast the parameter value to the correct Java type:
 
-bc. public static void show(Long id) {
+bc. public void show(Long id) {
     System.out.println(id);  
 }
 
 If the parameter is multivalued, you can declare an Array argument:
 
-bc. public static void show(Long[] id) {
+bc. public void show(Long[] id) {
     for(String anId : id) {
         System.out.println(anid); 
     }
@@ -113,7 +125,7 @@ bc. public static void show(Long[] id) {
 
 or even a collection type:
 
-bc. public static void show(List<Long> id) {
+bc. public void show(List<Long> id) {
     for(String anId : id) {
         System.out.println(anid); 
     }
@@ -155,14 +167,14 @@ For example:
 
 bc. archives?from=21/12/1980
 
-bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
+bc. public void articlesSince(@As("dd/MM/yyyy") Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
 }
 
 You can of course refine the date format according to the language. For example:
 
-bc.  public static void articlesSince(@As(lang={"fr,de","*"}, 
+bc.  public void articlesSince(@As(lang={"fr,de","*"},
         value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
@@ -181,7 +193,7 @@ h3. <a name="file">File</a>
 
 File upload is easy with Play. Use a @multipart/form-data@ encoded request to post files to the server, and then use the @java.io.File@ type to retrieve the file object:
 
-bc. public static void create(String comment, File attachment) {
+bc. public void create(String comment, File attachment) {
     String s3Key = S3.post(attachment);
     Document doc = new Document(comment, s3Key);
     doc.save();
@@ -203,25 +215,25 @@ h3. <a name="array">Arrays or collections of supported types</a>
 
 All supported types can be retrieved as an Array or a collection of objects:
 
-bc. public static void show(Long[] id) {
+bc. public void show(Long[] id) {
     …
 }
 
 or:
 
-bc. public static void show(List<Long> id) {
+bc. public void show(List<Long> id) {
     …
 }
 
 or:
 
-bc. public static void show(Set<Long> id) {
+bc. public void show(Set<Long> id) {
     …
 }
 
 Play also handles the special case of binding a Map<String, String> like this:
 
-bc. public static void show(Map<String, String> client) {
+bc. public void show(Map<String, String> client) {
     …
 }
 
@@ -236,7 +248,7 @@ h3. <a name="pojo">POJO object binding</a>
 
 Play also automatically binds any of your model classes using the same simple naming convention rules.
 
-bc. public static void create(Client client ) {
+bc. public void create(Client client ) {
     client.save();
     show(client);
 }
@@ -267,7 +279,7 @@ You can automatically bind a JPA object using the HTTP to Java binding.
 
 You can provide the @user.id@ field yourself in the HTTP parameters. When Play finds the @id@ field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
 
-bc. public static void save(User user) {
+bc. public void save(User user) {
     user.save(); // ok with 1.0.1
 }
 
@@ -286,13 +298,13 @@ h3. <a name="as">@play.data.binding.As</a>
 
 The first thing is the new <code>@play.data.binding.As</code> annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the @DateBinder@:
 
-bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
+bc. public void update(@As("dd/MM/yyyy") Date updatedAt) {
     …
 }
 
 The <code>@As</code> annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
 
-bc. public static void update(
+bc. public void update(
         @As(
             lang={"fr,de","en","*"},
             value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
@@ -304,7 +316,7 @@ bc. public static void update(
 
 The <code>@As</code> annotation can work with all binders that support it, including your own binder. For example, using the @ListBinder@:
 
-bc. public static void update(@As(",") List<String> items) {
+bc. public void update(@As(",") List<String> items) {
     …
 }
 
@@ -320,7 +332,7 @@ bc. public class User extends Model {
     public String name;
 }
  
-public static void editProfile(@As("profile") User user) {
+public void editProfile(@As("profile") User user) {
     …
 }
 
@@ -350,7 +362,7 @@ bc. public class MyCustomStringBinder implements TypeBinder<String>, TypeUnbinde
 
 You can use it in any action, like:
 
-bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) 
+bc. public void anyAction(@As(binder=MyCustomStringBinder.class)
 String name) {
     …
 }
@@ -381,7 +393,7 @@ An action method has to generate an HTTP response. The easiest way to do this is
 
 For example:
 
-bc. public static void show(Long id) {
+bc. public void show(Long id) {
     Client client = Client.findById(id);
     render(client);
     System.out.println("This message will never be displayed !");
@@ -395,14 +407,14 @@ The @renderText(…)@ method emits a simple Result event which writes some text 
 
 Example:
 
-bc. public static void countUnreadMessages() {
+bc. public void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderText(unreadMessages);
 }
 
 You can format the text message using the Java standard formatting syntax:
 
-bc. public static void countUnreadMessages() {
+bc. public void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderText("There are %s unread messages", unreadMessages);
 }
@@ -415,14 +427,14 @@ You can specify your own JSON string, or you can pass in an @Object@, which will
 
 Example:
 
-bc. public static void countUnreadMessages() {
+bc. public void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderJSON("{\"messages\": " + unreadMessages +"}");
 }
 
 Alternatively, if you had a more complex object structure, you may wish to build the JSON using the @GsonBuilder@.
 
-bc. public static void getUnreadMessages() {
+bc. public void getUnreadMessages() {
     List<Message> unreadMessages = MessagesBox.unreadMessages();
     renderJSON(unreadMessages);
 }
@@ -437,14 +449,14 @@ Here you can specify your own XML string, pass a @org.w3c.dom.Document@ object, 
 
 Example:
 
-bc. public static void countUnreadMessages() {
+bc. public void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderXml("<unreadmessages>"+unreadMessages+"</unreadmessages>");
 }
 
 Alternatively, you can use a @org.w3c.dom.Document@ object.
 
-bc. public static void getUnreadMessages() {
+bc. public void getUnreadMessages() {
     Document unreadMessages = MessagesBox.unreadMessagesXML();
     renderXml(unreadMessages);
 }
@@ -453,10 +465,10 @@ h3. <a name="binary">Return binary content</a>
 
 To serve binary data, such as a "file stored on the server":jpa#file, use the @renderBinary@ method. For example, if you have a @User@ model with a @play.db.jpa.Blob photo@ property, add a controller method to load the model object and render the image with the stored MIME type:
 
-bc. public static void userPhoto(long id) { 
-   final User user = User.findById(id); 
+bc. public void userPhoto(long id) {
+   User user = User.findById(id);
    response.setContentTypeIfNotSet(user.photo.type());
-   java.io.InputStream binaryData = user.photo.get();
+   InputStream binaryData = user.photo.get();
    renderBinary(binaryData);
 } 
 
@@ -473,7 +485,7 @@ If the generated content is complex, you should use a template to generate the r
 
 bc. public class Clients extends Controller {
  
-    public static void index() {
+    public void index() {
         render();    
     }
 }
@@ -490,7 +502,7 @@ Often the template needs data. You can add these data to the template scope usin
 
 bc. public class Clients extends Controller {
  
-    public static void show(Long id) {
+    public void show(Long id) {
         Client client = Client.findById(id);
         renderArgs.put("client", client);
         render();    
@@ -507,7 +519,7 @@ h4. A simpler way to add data to the template scope
 
 You can pass data directly to the template using @render(…)@ method arguments:
 
-bc. public static void show(Long id) {
+bc. public void show(Long id) {
     Client client = Client.findById(id);
     render(client);    
 }
@@ -516,7 +528,7 @@ In this case, the variables accessible by the template have the same name as the
 
 You can pass more than one variable:
 
-bc. public static void show(Long id) {
+bc. public void show(Long id) {
     Client client = Client.findById(id);
     render(id, client);    
 }
@@ -532,7 +544,7 @@ If you don’t want to use the default template, you can specify your own templa
 
 Example:
 
-bc. public static void show(Long id) {
+bc. public void show(Long id) {
     Client client = Client.findById(id);
     renderTemplate("Clients/showClient.html", id, client);    
 }
@@ -541,7 +553,7 @@ h3. <a name="redirect">Redirect to another URL</a>
 
 The @redirect(…)@ method emits a Redirect event that in turn generates an HTTP Redirect response.
 
-bc. public static void index() {
+bc. public void index() {
     redirect("http://www.zenexity.fr");
 }
 
@@ -556,12 +568,12 @@ For example:
 
 bc. public class Clients extends Controller {
  
-    public static void show(Long id) {
+    public void show(Long id) {
         Client client = Client.findById(id);
         render(client);
     }
  
-    public static void create(String name) {
+    public void create(String name) {
         Client client = new Client(name);
         client.save();
         show(client.id);
@@ -606,7 +618,7 @@ h2. <a name="interceptions">Interceptions</a>
 
 A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It’s a useful way to define treatments that are common to all actions: verifying that a user is authenticated, loading request-scope information…
 
-These methods have to be @static@ but not @public@. You have to annotate these methods with a valid interception marker.
+These methods should not be @public@, but same as action methods, they can be either @static@ or non-static. You have to annotate these methods with a valid interception marker.
 
 h3. <a name="before">@Before</a>
 
@@ -617,11 +629,11 @@ So, to create a security check:
 bc. public class Admin extends Controller {
  
     @Before
-    static void checkAuthentification() {
+    void checkAuthentification() {
         if(session.get("user") == null) login();
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         render(users);
     }
@@ -633,11 +645,11 @@ If you don’t want the @Before method to intercept all action calls, you can sp
 bc. public class Admin extends Controller {
  
     @Before(unless="login")
-    static void checkAuthentification() {
+    void checkAuthentification() {
         if(session.get("user") == null) login();
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         render(users);
     }
@@ -650,7 +662,7 @@ Or if you want the @Before method to intercept a list of action calls, you can s
 bc. public class Admin extends Controller {
  
     @Before(only={"login","logout"})
-    static void doSomething() {  
+    void doSomething() {
         …  
     }
     …
@@ -665,11 +677,11 @@ Methods annotated with the <code>@After</code> annotation are executed after eac
 bc. public class Admin extends Controller {
  
     @After
-    static void log() {
+    void log() {
         Logger.info("Action executed ...");
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         render(users);
     }
@@ -684,11 +696,11 @@ Methods annotated with <code>@Catch</code> are called if another action method t
 bc. public class Admin extends Controller {
 	
     @Catch(IllegalStateException.class)
-    public static void logIllegalState(Throwable throwable) {
+    public void logIllegalState(Throwable throwable) {
         Logger.error("Illegal state %s…", throwable);
     }
     
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         if (users.size() == 0) {
             throw new IllegalStateException("Invalid database - 0 users");
@@ -702,17 +714,17 @@ As with normal Java exception handling, you can catch a super-class to catch mor
 bc. public class Admin extends Controller {
  
     @Catch(value = Throwable.class, priority = 1)
-    public static void logThrowable(Throwable throwable) {
+    public void logThrowable(Throwable throwable) {
         // Custom error logging…
         Logger.error("EXCEPTION %s", throwable);
     }
  
     @Catch(value = IllegalStateException.class, priority = 2)
-    public static void logIllegalState(Throwable throwable) {
+    public void logIllegalState(Throwable throwable) {
         Logger.error("Illegal state %s…", throwable);
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         if(users.size() == 0) {
             throw new IllegalStateException("Invalid database - 0 users");
@@ -730,11 +742,11 @@ Methods annotated with the <code>@Finally</code> annotation are always executed 
 bc. public class Admin extends Controller {
  
     @Finally
-    static void log() {
+    void log() {
         Logger.info("Response contains : " + response.out);
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         render(users);
     }
@@ -746,7 +758,7 @@ If the method annotated with @Finally takes one argument of type Throwable, The 
 bc. public class Admin extends Controller {
  
     @Finally
-    static void log(Throwable e) {
+    void log(Throwable e) {
         if( e == null ){
             Logger.info("action call was successful");
         } else{
@@ -754,7 +766,7 @@ bc. public class Admin extends Controller {
         }
     }
  
-    public static void index() {
+    public void index() {
         List<User> users = User.findAll();
         render(users);
     }
@@ -775,7 +787,7 @@ Example:
 bc. public class Secure extends Controller {
     
     @Before
-    static void checkAuthenticated() {
+    void checkAuthenticated() {
         if(!session.containsKey("user")) {
             unAuthorized();
         }
@@ -800,7 +812,7 @@ Of course, cookies are signed with a secret key so the client can’t modify the
 
 Example:
 
-bc. public static void index() {
+bc. public void index() {
     List messages = Cache.get(session.getId() + "-messages", List.class);
     if(messages == null) {
         // Cache miss
