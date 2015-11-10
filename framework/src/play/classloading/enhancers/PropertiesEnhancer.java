@@ -15,6 +15,7 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.NotFoundException;
+import javassist.bytecode.AccessFlag;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import play.Logger;
@@ -27,10 +28,13 @@ import play.exceptions.UnexpectedException;
  */
 public class PropertiesEnhancer extends Enhancer {
 
+    private static final boolean usePropertiesEnhancer =
+            Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
+
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
-        if(!Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"))) return;
+        if(!usePropertiesEnhancer) return;
 
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
@@ -85,6 +89,7 @@ public class PropertiesEnhancer extends Enhancer {
                         // Getter creation
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
+                        getMethod.setModifiers(getMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(getMethod);
                         createAnnotation(getAnnotations(getMethod), PlayPropertyAccessor.class);
                     }
@@ -98,6 +103,7 @@ public class PropertiesEnhancer extends Enhancer {
                         } catch (NotFoundException noSetter) {
                             // Setter creation
                             CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
+                            setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
                             ctClass.addMethod(setMethod);
                             createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                         }
@@ -194,9 +200,7 @@ public class PropertiesEnhancer extends Enhancer {
             return false;
         }
         return Modifier.isPublic(ctField.getModifiers())
-                && !Modifier.isStatic(ctField.getModifiers())
-                // protected classes will be considered public by this call
-                && Modifier.isPublic(ctField.getDeclaringClass().getModifiers());
+                && !Modifier.isStatic(ctField.getModifiers());
     }
 
     /**
@@ -224,7 +228,7 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
-                return o.getClass().getField(property).get(o);
+                throw e;
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
