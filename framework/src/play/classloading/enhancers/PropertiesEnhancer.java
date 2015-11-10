@@ -27,10 +27,13 @@ import play.exceptions.UnexpectedException;
  */
 public class PropertiesEnhancer extends Enhancer {
 
+    private static final boolean usePropertiesEnhancer =
+            Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
+
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
-        if(!Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"))) return;
+        if(!usePropertiesEnhancer) return;
 
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
