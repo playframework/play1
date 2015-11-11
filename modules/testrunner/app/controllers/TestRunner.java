@@ -26,7 +26,13 @@ public class TestRunner extends Controller {
         render(unitTests, functionalTests, seleniumTests);
     }
 
-    public static void list(Boolean runUnitTests, Boolean runFunctionalTests, Boolean runSeleniumTests) {
+    public static void list() {
+        list(true, true, true);
+    }
+
+    // Has to be marked as private for 1.2.7.x so that the list method without arguments works without causing a
+    // redirect loop
+    private static void list(Boolean runUnitTests, Boolean runFunctionalTests, Boolean runSeleniumTests) {
         StringWriter list = new StringWriter();
         PrintWriter p = new PrintWriter(list);
         p.println("---");
