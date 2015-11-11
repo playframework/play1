@@ -26,26 +26,50 @@ public class TestRunner extends Controller {
         render(unitTests, functionalTests, seleniumTests);
     }
 
-    public static void list() {
+    public static void list(Boolean runUnitTests, Boolean runFunctionalTests, Boolean runSeleniumTests) {
         StringWriter list = new StringWriter();
         PrintWriter p = new PrintWriter(list);
         p.println("---");
         p.println(Play.getFile("test-result").getAbsolutePath());
         p.println(Router.reverse(Play.modules.get("_testrunner").child("/public/test-runner/selenium/TestRunner.html")));
-        for(Class c : TestEngine.allUnitTests()) {
-            p.println(c.getName() + ".class");
+        
+        List<Class> unitTests = null;
+        List<Class> functionalTests =  null;
+        List<String> seleniumTests = null;
+        // Check configuration of test
+        // method parameters have priority on configuration param
+        if (runUnitTests == null || runUnitTests) {
+            unitTests = TestEngine.allUnitTests();
         }
-        for(Class c : TestEngine.allFunctionalTests()) {
-            p.println(c.getName() + ".class");
+        if (runFunctionalTests == null || runFunctionalTests) {
+            functionalTests = TestEngine.allFunctionalTests();
         }
-        for(String c : TestEngine.allSeleniumTests()) {
-            p.println(c);
+        if (runSeleniumTests == null || runSeleniumTests) {
+            seleniumTests = TestEngine.allSeleniumTests();
+        }
+        
+        if(unitTests != null){
+            for(Class c : unitTests) {
+                p.println(c.getName() + ".class");
+            }
+        }
+        if(functionalTests != null){
+            for(Class c : functionalTests) {
+                p.println(c.getName() + ".class");
+            }
+        }
+        if(seleniumTests != null){
+            for(String c : seleniumTests) {
+                p.println(c);
+            }
         }
         renderText(list);
     }
 
     public static void run(String test) throws Exception {
+          
         if (test.equals("init")) {
+           
             File testResults = Play.getFile("test-result");
             if (!testResults.exists()) {
                 testResults.mkdir();
@@ -55,14 +79,20 @@ public class TestRunner extends Controller {
                     Logger.warn("Cannot delete %s ...", tr.getAbsolutePath());
                 }
             }
+
+          
             renderText("done");
         }
         if (test.equals("end")) {
+
             File testResults = Play.getFile("test-result/result." + params.get("result"));
+          
             IO.writeContent(params.get("result"), testResults);
             renderText("done");
         }
         if (test.endsWith(".class")) {
+           
+            
             Play.getFile("test-result").mkdir();
             final String testname = test.substring(0, test.length() - 6);
             final TestEngine.TestResults results = await(new Job<TestEngine.TestResults>() {
@@ -71,6 +101,8 @@ public class TestRunner extends Controller {
                     return TestEngine.run(testname);
                 }
             }.now());
+           
+            
             response.status = results.passed ? 200 : 500;
             Template resultTemplate = TemplateLoader.load("TestRunner/results.html");
             Map<String, Object> options = new HashMap<String, Object>();
@@ -97,6 +129,7 @@ public class TestRunner extends Controller {
             render("TestRunner/selenium-suite.html", test);
         }
         if (test.endsWith(".test.html")) {
+
             File testFile = Play.getFile("test/" + test);
             if (!testFile.exists()) {
                 for(VirtualFile root : Play.roots) {
@@ -133,6 +166,7 @@ public class TestRunner extends Controller {
             response.status = 404;
             renderText("No test result");
         }
+       
     }
 
     public static void saveResult(String test, String result) throws Exception {

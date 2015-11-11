@@ -1,5 +1,5 @@
 /*
-* Copyright 2004 ThoughtWorks, Inc
+* Copyright 2011 Software Freedom Conservancy
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -187,7 +187,11 @@ objectExtend(CommandHandlerFactory.prototype, {
         // Leaves the message unchanged.
         // Used to create assertNot, verifyNot, and waitForNot commands.
         return function(target, value) {
-            var result = predicateBlock(target, value);
+            try {
+                var result = predicateBlock(target, value);
+            } catch (e) {
+                var result = new PredicateResult(false, e);
+            }
             result.isTrue = !result.isTrue;
             return result;
         };
@@ -332,7 +336,14 @@ AccessorHandler.prototype.execute = function(seleniumApi, command) {
 };
 
 function AccessorResult(result) {
+  if (result.terminationCondition) {
+    var self = this;
+    this.terminationCondition = function() {
+      return result.terminationCondition.call(self);
+    };
+  } else {
     this.result = result;
+  }
 }
 
 /**
@@ -364,14 +375,15 @@ AssertHandler.prototype.execute = function(seleniumApi, command) {
 function AssertResult() {
     this.passed = true;
 }
+
 AssertResult.prototype.setFailed = function(message) {
     this.passed = null;
     this.failed = true;
     this.failureMessage = message;
-}
+};
 
 function SeleniumCommand(command, target, value, isBreakpoint) {
-    this.command = command;
+    this.command = command.trim();
     this.target = target;
     this.value = value;
     this.isBreakpoint = isBreakpoint;

@@ -1,5 +1,5 @@
 /*
-* Copyright 2004 ThoughtWorks, Inc
+* Copyright 2011 Software Freedom Conservancy
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -49,30 +49,37 @@ objectExtend(HtmlTestRunner.prototype, {
         if (logLevel) {
             LOG.setLogLevelThreshold(logLevel);
         }
+
+        var self = this;
         if (selenium == null) {
-            var appWindow = this._getApplicationWindow();
+            var appWindow = self._getApplicationWindow();
             try { appWindow.location; }
             catch (e) { 
                 // when reloading, we may be pointing at an old window (Perm Denied)
                 setTimeout(fnBind(function() {
-                    this.loadSuiteFrame();
+                    self.loadSuiteFrame();
                 }, this), 50);
                 return;
             }
-            selenium = Selenium.createForWindow(appWindow);
-            this._registerCommandHandlers();
+
+            // TODO(simon): This gets things working on Firefox 4, but's not an ideal solution
+            window.setTimeout(function() {
+              selenium = Selenium.createForWindow(appWindow);
+              self._registerCommandHandlers();
+              self.loadSuiteFrame();
+            }, 250);
+            return;
         }
-        this.controlPanel.setHighlightOption();
-        var testSuiteName = this.controlPanel.getTestSuiteName();
-        var self = this;
+        self.controlPanel.setHighlightOption();
+        var testSuiteName = self.controlPanel.getTestSuiteName();
         if (testSuiteName) {
             suiteFrame.load(testSuiteName, function() {setTimeout(fnBind(self._onloadTestSuite, self), 50)} );
             selenium.browserbot.baseUrl = absolutify(testSuiteName, window.location.href);
         }
         // DGF or should we use the old default?
         // selenium.browserbot.baseUrl = window.location.href;
-        if (this.controlPanel.getBaseUrl()) {
-            selenium.browserbot.baseUrl = this.controlPanel.getBaseUrl();
+        if (self.controlPanel.getBaseUrl()) {
+            selenium.browserbot.baseUrl = self.controlPanel.getBaseUrl();
         }
     },
 
@@ -123,6 +130,9 @@ objectExtend(HtmlTestRunner.prototype, {
     },
 
     startTestSuite: function() {
+        storedVars = new Object();
+        storedVars.nbsp = String.fromCharCode(160);
+        storedVars.space = ' ';
         this.controlPanel.reset();
         this.metrics.resetMetrics();
         this.getTestSuite().reset();
@@ -143,9 +153,6 @@ objectExtend(HtmlTestRunner.prototype, {
         testFrame.scrollToTop();
         //todo: move testFailed and storedVars to TestCase
         this.testFailed = false;
-        storedVars = new Object();
-        storedVars.nbsp = String.fromCharCode(160);
-        storedVars.space = ' ';
         this.currentTest = new HtmlRunnerTestLoop(testFrame.getCurrentTestCase(), this.metrics, this.commandFactory);
         currentTest = this.currentTest;
         this.currentTest.start();
@@ -433,7 +440,7 @@ var AbstractResultAwareRow = classCreate();
 objectExtend(AbstractResultAwareRow.prototype, {
 
     initialize: function(trElement) {
-        this.trElement = trElement;
+        this.trElement = core.firefox.unwrap(trElement);
     },
 
     setStatus: function(status) {
@@ -543,7 +550,7 @@ objectExtend(HtmlTestSuiteRow.prototype, {
         this.trElement = trElement;
         this.testFrame = testFrame;
         this.htmlTestSuite = htmlTestSuite;
-        this.link = trElement.getElementsByTagName("a")[0];
+        this.link = core.firefox.unwrap(trElement.getElementsByTagName("a")[0]);
         this.link.onclick = fnBindAsEventListener(this._onClick, this);
     },
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 ThoughtWorks, Inc
+ * Copyright 2011 Software Freedom Conservancy
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 var Logger = function() {
     this.logWindow = null;
-}
+};
+
 Logger.prototype = {
 
     logLevels: {
@@ -33,7 +34,7 @@ Logger.prototype = {
 
     setLogLevelThreshold: function(logLevel) {
         this.threshold = logLevel;
-        var logWindow = this.getLogWindow()
+        var logWindow = this.getLogWindow();
         if (logWindow && logWindow.setThresholdLevel) {
             logWindow.setThresholdLevel(logLevel);
         }
@@ -80,6 +81,16 @@ Logger.prototype = {
         }
         this.logHook(logLevel, message);
         var logWindow = this.getLogWindow();
+
+        try {
+          if (Components && Components.classes["@mozilla.org/consoleservice;1"]) {
+            var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+              .getService(Components.interfaces["nsIConsoleService"]);
+
+            consoleService.logStringMessage(logLevel + "("+(new Date().getTime())+"): " + message);
+          }
+        } catch (ignored) {}
+
         if (logWindow) {
             if (logWindow.append) {
                 if (logWindow.disabled) {
@@ -145,4 +156,4 @@ var LogMessage = function(type, msg) {
     this.type = type;
     this.msg = msg;
     this.timestamp = (new Date().getTime());
-}
+};
