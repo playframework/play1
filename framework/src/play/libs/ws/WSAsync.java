@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
+import org.w3c.dom.Document;
 import org.apache.commons.lang.NotImplementedException;
 
 import com.ning.http.client.AsyncCompletionHandler;
@@ -600,6 +601,8 @@ public class WSAsync implements WSImpl {
 
         private Response response;
 
+        private boolean consumed;
+
         /**
          * you shouldnt have to create an HttpResponse yourself
          * 
@@ -651,6 +654,7 @@ public class WSAsync implements WSImpl {
          */
         @Override
         public InputStream getStream() {
+            checkConsumed();
             try {
                 return response.getResponseBodyAsStream();
             } catch (IllegalStateException e) {
@@ -662,6 +666,43 @@ public class WSAsync implements WSImpl {
                 throw new RuntimeException(e);
             }
         }
+
+        @Override
+        public Document getXml(String encoding) {
+            try {
+                checkConsumed();
+                return super.getXml(encoding);
+            } finally {
+                consumed = true;
+            }
+        }
+
+        @Override
+        public String getString() {
+            try {
+                checkConsumed();
+                return super.getString();
+            } finally {
+                consumed = true;
+            }
+        }
+
+        @Override
+        public String getString(String encoding) {
+            try {
+                checkConsumed();
+                return super.getString(encoding);
+            } finally {
+                consumed = true;
+            }
+        }
+
+        private void checkConsumed() {
+            if (consumed) {
+                throw new IllegalStateException("Stream already consumed");
+            }
+        }
+
 
     }
 
