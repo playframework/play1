@@ -49,7 +49,6 @@ public class Crypto {
      * @param message The message to sign
      * @param key The key to use
      * @return The signed message (in hexadecimal)
-     * @throws java.lang.Exception
      */
     public static String sign(String message, byte[] key) {
 

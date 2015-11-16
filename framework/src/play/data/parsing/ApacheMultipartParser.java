@@ -301,11 +301,11 @@ public class ApacheMultipartParser extends DataParser {
          * is not concerned with whether or not the item is stored in memory, or on
          * disk in a temporary location. They just want to write the uploaded item
          * to a file.
-         * <p/>
+         * <p>
          * This implementation first attempts to rename the uploaded item to the
          * specified destination file, if the item was originally written to disk.
          * Otherwise, the data will be copied to the specified file.
-         * <p/>
+         * <p>
          * This method is only guaranteed to work <em>once</em>, the first time it
          * is invoked for a particular item. This is because, in the event that the
          * method renames a temporary file, that file will no longer be available

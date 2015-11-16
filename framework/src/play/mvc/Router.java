@@ -215,7 +215,7 @@ public class Router {
 
     /**
      * In PROD mode and if the routes are already loaded, this does nothing.
-     * <p/>
+     * <p>
      * <p>
      * In DEV mode, this checks each routes file's "last modified" time to see
      * if the routes need updated.

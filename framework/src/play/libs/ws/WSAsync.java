@@ -48,7 +48,7 @@ import play.mvc.Http.Header;
 /**
  * Simple HTTP client to make webservices requests.
  * 
- * <p/>
+ * <p>
  * Get latest BBC World news as a RSS content
  * 
  * <pre>
@@ -56,12 +56,12 @@ import play.mvc.Http.Header;
  * Document xmldoc = response.getXml();
  * // the real pain begins here...
  * </pre>
- * <p/>
+ * <p>
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * 
  * <pre>
- * HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
+ * HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&amp;pstart=1&amp;b=<em>%s</em>", "Google killed me", "30").get();
  * if (response.getStatus() == 200) {
  *     html = response.getString();
  * }

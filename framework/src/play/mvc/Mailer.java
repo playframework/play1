@@ -170,7 +170,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     /**
-     * Can be of the form xxx <m@m.com>
+     * Can be of the form xxx &lt;m@m.com&gt;
      *
      * @param from
      */
@@ -335,7 +335,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     /**
-     * Can be of the form xxx <m@m.com>
+     * Can be of the form xxx &lt;m@m.com&gt;
      *
      * @param replyTo
      */

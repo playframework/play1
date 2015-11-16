@@ -30,7 +30,7 @@ public class GenericModel extends JPABase {
     /**
      * This method is deprecated. Use this instead:
      *
-     *  public static <T extends JPABase> T create(ParamNode rootParamNode, String name, Class<?> type, Annotation[] annotations)
+     *  public static &lt;T extends JPABase&gt; T create(ParamNode rootParamNode, String name, Class&lt;?&gt; type, Annotation[] annotations)
      */
     @Deprecated
     public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
@@ -52,7 +52,7 @@ public class GenericModel extends JPABase {
     /**
      * This method is deprecated. Use this instead:
      *
-     *  public static <T extends JPABase> T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations)
+     *  public static &lt;T extends JPABase&gt; T edit(ParamNode rootParamNode, String name, Object o, Annotation[] annotations)
      *
      * @see GenericModel#edit(ParamNode, String, Object, Annotation[])
      * 
@@ -191,7 +191,7 @@ public class GenericModel extends JPABase {
     /**
      * This method is deprecated. Use this instead:
      *
-     *  public <T extends GenericModel> T edit(ParamNode rootParamNode, String name)
+     *  public &lt;T extends GenericModel&gt; T edit(ParamNode rootParamNode, String name)
      */
     @Deprecated
     public <T extends GenericModel> T edit(String name, Map<String, String[]> params) {
