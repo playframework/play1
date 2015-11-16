@@ -26,7 +26,7 @@ public class Redirect extends Result {
 	 * @param url
 	 *            The URL to redirect to as a {@link String}
 	 * @param parameters
-	 *            Parameters to be included at the end of the URL as a HTTP GET. This is a map whose entries are written out as key1=value1&key2=value2 etc..
+	 *            Parameters to be included at the end of the URL as a HTTP GET. This is a map whose entries are written out as key1=value1&amp;key2=value2 etc..
 	 */
 	public Redirect(String url, Map<String, String> parameters) {
 		StringBuffer urlSb = new StringBuffer(url);

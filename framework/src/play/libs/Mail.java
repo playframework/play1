@@ -65,7 +65,7 @@ public class Mail {
      * Through this method you can substitute the current MailSystem. This is
      * especially helpful for testing purposes like using mock libraries.
      *
-     * @author Andreas Simon <a.simon@quagilis.de>
+     * @author Andreas Simon &lt;a.simon@quagilis.de&gt;
      * @see    MailSystem
      */
     public static void useMailSystem(MailSystem mailSystem) {
@@ -253,7 +253,7 @@ public class Mail {
      * Just kept for compatibility reasons, use test double substitution mechanism instead.
      *
      * @see    Mail#useMailSystem(MailSystem)
-     * @author Andreas Simon <a.simon@quagilis.de>
+     * @author Andreas Simon &lt;a.simon@quagilis.de&gt;
      */
     public static LegacyMockMailSystem Mock = new LegacyMockMailSystem();
 }

@@ -681,7 +681,7 @@ public class Controller implements ControllerSupport {
      * @param url
      *            The Location to redirect
      * @param permanent
-     *            true -> 301, false -> 302
+     *            true -&gt; 301, false -&gt; 302
      */
     protected static void redirect(String url, boolean permanent) {
         if (url.indexOf("/") == -1) { // fix Java !
@@ -708,7 +708,7 @@ public class Controller implements ControllerSupport {
      * @param action
      *            The fully qualified action name (ex: Application.index)
      * @param permanent
-     *            true -> 301, false -> 302
+     *            true -&gt; 301, false -&gt; 302
      * @param args
      *            Method arguments
      */
