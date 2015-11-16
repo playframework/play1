@@ -131,7 +131,7 @@ public class Files {
     /**
      * Replace all characters that are invalid in file names on Windows or Unix operating systems
      * with {@link Files#ILLEGAL_FILENAME_CHARS_REPLACE} character.
-     * <p/>
+     * <p>
      * This method makes sure your file name can successfully be used to write new file to disk.
      * Invalid characters are listed in {@link Files#ILLEGAL_FILENAME_CHARS} array.
      *
@@ -145,7 +145,7 @@ public class Files {
     /**
      * Replace all characters that are invalid in file names on Windows or Unix operating systems
      * with passed in character.
-     * <p/>
+     * <p>
      * This method makes sure your file name can successfully be used to write new file to disk.
      * Invalid characters are listed in {@link Files#ILLEGAL_FILENAME_CHARS} array.
      *

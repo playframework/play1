@@ -42,14 +42,14 @@ import javax.net.ssl.*;
 /**
  * Simple HTTP client to make webservices requests.
  * 
- * <p/>
+ * <p>
  * Get latest BBC World news as a RSS content
  * <pre>
  *    HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
  *    Document xmldoc = response.getXml();
  *    // the real pain begins here...
  * </pre>
- * <p/>
+ * <p>
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>

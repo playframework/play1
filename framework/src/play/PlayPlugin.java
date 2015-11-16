@@ -358,10 +358,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Implement to add some classes that should be considered unit tests but do not extend
      * {@link org.junit.Assert} to tests that can be executed by test runner (will be visible in test UI).
-     * <p/>
+     * <p>
      * <strong>Note:</strong>You probably will also need to override {@link PlayPlugin#runTest(java.lang.Class)} method
      * to handle unsupported tests execution properly.
-     * <p/>
+     * <p>
      * Keep in mind that this method can only add tests to currently loaded ones.
      * You cannot disable tests this way. You should also make sure you do not duplicate already loaded tests.
      * 
@@ -374,10 +374,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Implement to add some classes that should be considered functional tests but do not extend
      * {@link play.test.FunctionalTest} to tests that can be executed by test runner (will be visible in test UI).
-     * <p/>
+     * <p>
      * <strong>Note:</strong>You probably will also need to override {@link PlayPlugin#runTest(java.lang.Class)} method
      * to handle unsupported tests execution properly.
-     * <p/>
+     * <p>
      * Keep in mind that this method can only add tests to currently loaded ones.
      * You cannot disable tests this way. You should also make sure you do not duplicate already loaded tests.
      *

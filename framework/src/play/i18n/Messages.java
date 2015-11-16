@@ -18,7 +18,7 @@ import play.data.binding.Binder;
  * hello=Bonjour, %s !
  * </pre>
  * <code>
- * Messages.get( "hello", "World"); // => "Bonjour, World !"
+ * Messages.get( "hello", "World"); // =&gt; "Bonjour, World !"
  * </code>
  * 
  */
