@@ -401,16 +401,17 @@ h3(#headlessBrowser). headlessBrowser
 
 Specifies the web browser compatibility mode for the HtmlUnit headless web browser used when running @play auto-test@.
 
-bc. headlessBrowser=FIREFOX_31
+bc. headlessBrowser=FIREFOX_38
 
 Values:
 
 * @CHROME@
-* @FIREFOX_24@
+* @FIREFOX_31@
 * @INTERNET_EXPLORER_8@
 * @INTERNET_EXPLORER_11@
+* @EDGE@
 
-Default: @FIREFOX_31@
+Default: @FIREFOX_38@
 
 h3(#webclient.timeout). webclient.timeout
 
