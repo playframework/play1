@@ -31,6 +31,7 @@ import com.ning.http.client.multipart.StringPart;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.libs.F;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -375,7 +376,23 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Response makeRequest(final Request request) {
-        Response response = newResponse();
+        final Response response = newResponse();
+        response.onWriteChunk(new F.Action<Object>() {
+            public void invoke(Object chunk) {
+                byte[] bytes;
+                try {
+                    if ( chunk instanceof byte[]) {
+                        bytes = (byte[])chunk;
+                    } else {
+                        String message = chunk == null ? "" : chunk.toString();
+                        bytes = message.getBytes(response.encoding);
+                    }
+                    response.out.write(bytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         makeRequest(request, response);
 
         if (response.status == 302) { // redirect

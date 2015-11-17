@@ -1,6 +1,7 @@
 package play.classloading;
 
 import org.apache.commons.io.IOUtils;
+
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -24,6 +25,7 @@ import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -33,7 +35,11 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
  */
 public class ApplicationClassloader extends ClassLoader {
 
-
+    /**
+     * Internal cache for looking up loaded classes, avoids scanning multiple times for same class. Used only in precompiled mode.
+     */
+    private final ConcurrentHashMap<String, Class> classLookupCache = new ConcurrentHashMap<String, Class>();
+    
     private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
 
     /**
@@ -468,11 +474,19 @@ public class ApplicationClassloader extends ClassLoader {
      * @return a class
      */
     public Class getClassIgnoreCase(String name) {
+        if (Play.usePrecompiled) {
+            Class result = classLookupCache.get(name);
+            if(result!=null){
+                return result;
+            }
+        }
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
             if (c.name.equalsIgnoreCase(name) || c.name.replace("$", ".").equalsIgnoreCase(name)) {
                 if (Play.usePrecompiled) {
-                    return c.javaClass;
+                    Class result = c.javaClass;
+                    classLookupCache.put(name, result);
+                    return result;
                 }
                 return loadApplicationClass(c.name);
             }
