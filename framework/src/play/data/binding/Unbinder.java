@@ -11,7 +11,7 @@ import play.Play;
 import play.libs.I18N;
 
 /**
- * Try to unbind an object to a Map<String,String>
+ * Try to unbind an object to a Map&lt;String,String&gt;
  */
 public class Unbinder {
 

@@ -29,7 +29,7 @@ import play.utils.ImmediateFuture;
  *
  * @see    Mail#Mock
  * @see    Mail#useMailSystem(MailSystem)
- * @author Andreas Simon <a.simon@quagilis.de>
+ * @author Andreas Simon &lt;a.simon@quagilis.de&gt;
  */
 public class LegacyMockMailSystem implements MailSystem {
 

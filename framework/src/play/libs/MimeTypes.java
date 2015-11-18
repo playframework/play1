@@ -32,7 +32,7 @@ public class MimeTypes {
     }
 
     /**
-     * return the mimetype from a file name.<br/>
+     * return the mimetype from a file name.<br>
      * @param filename the file name
      * @param defaultMimeType the default mime type to return when no matching mimetype is found
      * @return the mimetype
@@ -54,7 +54,7 @@ public class MimeTypes {
     }
 
     /**
-     * return the content-type from a file name. If none is found returning application/octet-stream<br/>
+     * return the content-type from a file name. If none is found returning application/octet-stream<br>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
      * @param filename the file name
      * @return the content-type deduced from the file extension.
@@ -64,7 +64,7 @@ public class MimeTypes {
     }
 
     /**
-     * return the content-type from a file name.<br/>
+     * return the content-type from a file name.<br>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
      * @param filename the file name
      * @param defaultContentType the default content-type to return when no matching content-type is found

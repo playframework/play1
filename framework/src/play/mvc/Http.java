@@ -185,12 +185,12 @@ public class Http {
          */
         public String querystring;
         /**
-         * URL path (excluding scheme, host and port), starting with '/'<br/>
+         * URL path (excluding scheme, host and port), starting with '/'<br>
          * 
-         * <b>Example:</b><br/>
+         * <b>Example:</b><br>
          * With this full URL <code>http://localhost:9000/path0/path1</code>
-         * <br/>
-         * => <b>url</b> will be <code>/path0/path1</code>
+         * <br>
+         * =&gt; <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
         /**
@@ -449,7 +449,7 @@ public class Http {
 
         /**
          * Automatically resolve request format from the Accept header (in this
-         * order : html > xml > json > text)
+         * order : html &gt; xml &gt; json &gt; text)
          */
         public void resolveFormat() {
 

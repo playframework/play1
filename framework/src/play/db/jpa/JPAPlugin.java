@@ -316,7 +316,6 @@ public class JPAPlugin extends PlayPlugin {
      * initialize the JPA context and starts a JPA transaction
      *
      * @param readonly true for a readonly transaction
-     * @param autoCommit true to automatically commit the DB transaction after each JPA statement
      * @deprecated see JPA startTx() method
      */
     @Deprecated
