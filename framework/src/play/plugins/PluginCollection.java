@@ -677,6 +677,12 @@ public class PluginCollection {
         }
     }
 
+    public void onActionInvocationFinally(){
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            plugin.onActionInvocationFinally();
+        }
+    }
+
     public void routeRequest(Http.Request request) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.routeRequest(request);

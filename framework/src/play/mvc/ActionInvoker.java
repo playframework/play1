@@ -1,18 +1,15 @@
 package play.mvc;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import org.apache.commons.lang.StringUtils;
+import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
+import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
@@ -29,19 +26,23 @@ import play.i18n.Lang;
 import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
+import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Future;
-import org.apache.commons.javaflow.Continuation;
-import org.apache.commons.javaflow.bytecode.StackRecorder;
-import play.Invoker.Suspend;
-import play.classloading.enhancers.ControllersEnhancer;
-import play.mvc.results.NotFound;
 
 /**
  * Invoke an action after an HTTP request.
@@ -255,6 +256,8 @@ public class ActionInvoker {
             handleFinallies(request, e);
             throw new UnexpectedException(e);
         } finally {
+            Play.pluginCollection.onActionInvocationFinally();
+
             if (monitor != null) {
                 monitor.stop();
             }
