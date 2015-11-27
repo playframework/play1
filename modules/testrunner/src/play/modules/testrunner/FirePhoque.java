@@ -30,8 +30,8 @@ public class FirePhoque {
 
     public static void main(String[] args) throws Exception {
 
-        Logger logger = Logger.getLogger(DefaultCssErrorHandler.class.getName());
-        logger.setLevel(Level.OFF);
+        Logger.getLogger(DefaultCssErrorHandler.class.getName()).setLevel(Level.OFF);
+        Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
 
         String app = System.getProperty("application.url", "http://localhost:9000");
 
@@ -81,18 +81,20 @@ public class FirePhoque {
 
         // Let's tweak WebClient
 
-        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_31");
+        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_38");
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
-        } else if ("FIREFOX_24".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.FIREFOX_24;
+        } else if ("FIREFOX_31".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_31;
         } else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
         } else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
+        } else if ("EDGE".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.EDGE;
         } else {
-            browserVersion = BrowserVersion.FIREFOX_31;
+            browserVersion = BrowserVersion.FIREFOX_38;
         }
 
         WebClient firephoque = new WebClient(browserVersion);
@@ -228,5 +230,6 @@ public class FirePhoque {
         }
         firephoque.openWindow(new URL(app + "/@tests/end?result=" + (ok ? "passed" : "failed")), "headless");
         
+        firephoque.close();
     }
 }
