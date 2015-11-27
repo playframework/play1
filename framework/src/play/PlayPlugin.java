@@ -1,15 +1,6 @@
 package play;
 
-import java.lang.annotation.Annotation;
 import com.google.gson.JsonObject;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.RootParamNode;
 import play.db.Model;
@@ -22,6 +13,11 @@ import play.templates.Template;
 import play.test.BaseTest;
 import play.test.TestEngine.TestResults;
 import play.vfs.VirtualFile;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * A framework plugin
@@ -251,6 +247,12 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called at the end of the action invocation.
      */
     public void afterActionInvocation() {
+    }
+
+    /**
+     * Called at the end of the action invocation (either in case of success or any failure).
+     */
+    public void onActionInvocationFinally() {
     }
 
     /**
