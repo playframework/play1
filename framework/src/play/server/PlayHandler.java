@@ -157,6 +157,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             // Plain old HttpRequest
             try {
+                // Reset request object and response object for the current
+                // thread.
+                Http.Request.current.set(new Http.Request());
+
                 final Response response = new Response();
                 Http.Response.current.set(response);
 
