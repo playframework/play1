@@ -1,43 +1,29 @@
 package play.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.net.MalformedURLException;
-
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import com.ning.http.client.multipart.FilePart;
+import com.ning.http.client.multipart.Part;
+import com.ning.http.client.multipart.StringPart;
+import com.ning.http.client.providers.jdk.MultipartRequestEntity;
 import org.junit.Before;
-
+import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
+import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.RenderArgs;
 
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.multipart.FilePart;
-import com.ning.http.multipart.MultipartRequestEntity;
-import com.ning.http.multipart.Part;
-import com.ning.http.multipart.StringPart;
-
+import java.io.*;
+import java.net.MalformedURLException;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
-
-import play.Invoker;
-import play.mvc.Controller;
-import play.mvc.Router.ActionDefinition;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
 
 /**
  * Application tests support
@@ -50,7 +36,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
 
     private static Map<String, Object> renderArgs = new HashMap<String, Object>();
-    
+
     @Before
     public void clearCookies(){
         savedCookies = null;
@@ -87,7 +73,7 @@ public abstract class FunctionalTest extends BaseTest {
         }
         return response;
     }
-    
+
     /**
      * sends a GET request to the application under tests.
      * @param request
@@ -187,15 +173,11 @@ public abstract class FunctionalTest extends BaseTest {
 
         for (String key : files.keySet()) {
             Part filePart;
-            try {
-                filePart = new FilePart(key, files.get(key));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            filePart = new FilePart(key, files.get(key));
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), new FluentCaseInsensitiveStringsMap()); 
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts, new FluentCaseInsensitiveStringsMap());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             requestEntity.writeRequest(baos);
@@ -280,7 +262,7 @@ public abstract class FunctionalTest extends BaseTest {
             public void execute() throws Exception {
             	renderArgs.clear();
                 ActionInvoker.invoke(request, response);
-                
+
                 if(RenderArgs.current().data != null) {
                 	renderArgs.putAll(RenderArgs.current().data);
                 }
@@ -479,7 +461,7 @@ public abstract class FunctionalTest extends BaseTest {
             throw new RuntimeException(ex);
         }
     }
-    
+
     public static Object renderArgs(String name) {
     	return renderArgs.get(name);
     }

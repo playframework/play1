@@ -122,6 +122,17 @@ public class WSUrlFetch implements WSImpl {
 
         /** Execute a POST request. */
         @Override
+        public HttpResponse patch() {
+            try {
+                HttpURLConnection conn = prepare(new URL(getPreparedUrl("PATCH")), "PATCH");
+                return new HttpUrlfetchResponse(conn);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a POST request.*/
+        @Override
         public HttpResponse post() {
             try {
                 HttpURLConnection conn = prepare(new URL(getPreparedUrl("POST")), "POST");
@@ -294,7 +305,7 @@ public class WSUrlFetch implements WSImpl {
 
         /**
          * you shouldn't have to create an HttpResponse yourself
-         * 
+         *
          * @param connection
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
@@ -321,7 +332,7 @@ public class WSUrlFetch implements WSImpl {
 
         /**
          * the HTTP status code
-         * 
+         *
          * @return the status code of the http response
          */
         @Override
@@ -331,7 +342,7 @@ public class WSUrlFetch implements WSImpl {
 
         /**
          * the HTTP status text
-         * 
+         *
          * @return the status text of the http response
          */
         @Override
@@ -355,7 +366,7 @@ public class WSUrlFetch implements WSImpl {
 
         /**
          * get the response body as a string
-         * 
+         *
          * @return the body of the http response
          */
         @Override
@@ -365,7 +376,7 @@ public class WSUrlFetch implements WSImpl {
 
         /**
          * get the response as a stream
-         * 
+         *
          * @return an inputstream
          */
         @Override

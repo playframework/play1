@@ -36,7 +36,7 @@ import play.utils.HTTP;
  * 
  * <p>
  * Get latest BBC World news as a RSS content
- * 
+ *
  * <pre>
  * HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
  * Document xmldoc = response.getXml();
@@ -45,7 +45,7 @@ import play.utils.HTTP;
  * <p>
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
- * 
+ *
  * <pre>
  * HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&amp;pstart=1&amp;b=<em>%s</em>", "Google killed me", "30").get();
  * if (response.getStatus() == 200) {
@@ -82,7 +82,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Use this method to get an instance to WS with different encoding
-         * 
+         *
          * @param newEncoding
          *            the encoding to use in the communication
          * @return a new instance of WS with specified encoding
@@ -93,7 +93,7 @@ public class WS extends PlayPlugin {
 
         /**
          * URL-encode a string to be used as a query string parameter.
-         * 
+         *
          * @param part
          *            string to encode
          * @return url-encoded string
@@ -110,7 +110,7 @@ public class WS extends PlayPlugin {
          * Build a WebService Request with the given URL. This object support
          * chaining style programming for adding params, file, headers to
          * requests.
-         * 
+         *
          * @param url
          *            of the request
          * @return a WSRequest on which you can add params, file headers using a
@@ -126,7 +126,7 @@ public class WS extends PlayPlugin {
          * format url using params passed in arguments. This object support
          * chaining style programming for adding params, file, headers to
          * requests.
-         * 
+         *
          * @param url
          *            to format using the given params.
          * @param params
@@ -146,7 +146,7 @@ public class WS extends PlayPlugin {
 
     /**
      * Use thos method to get an instance to WS with diferent encoding
-     * 
+     *
      * @param encoding
      *            the encoding to use in the communication
      * @return a new instance of WS with specified encoding
@@ -198,7 +198,7 @@ public class WS extends PlayPlugin {
 
     /**
      * URL-encode a string to be used as a query string parameter.
-     * 
+     *
      * @param part
      *            string to encode
      * @return url-encoded string
@@ -210,7 +210,7 @@ public class WS extends PlayPlugin {
     /**
      * Build a WebService Request with the given URL. This object support
      * chaining style programming for adding params, file, headers to requests.
-     * 
+     *
      * @param url
      *            of the request
      * @return a WSRequest on which you can add params, file headers using a
@@ -224,7 +224,7 @@ public class WS extends PlayPlugin {
      * Build a WebService Request with the given URL. This constructor will
      * format url using params passed in arguments. This object support chaining
      * style programming for adding params, file, headers to requests.
-     * 
+     *
      * @param url
      *            to format using the given params.
      * @param params
@@ -300,7 +300,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add a MimeType to the web service request.
-         * 
+         *
          * @param mimeType
          * @return the WSRequest for chaining.
          */
@@ -312,7 +312,7 @@ public class WS extends PlayPlugin {
         /**
          * define client authentication for a server host provided credentials
          * will be used during the request
-         * 
+         *
          * @param username
          * @param password
          * @return the WSRequest for chaining.
@@ -327,7 +327,7 @@ public class WS extends PlayPlugin {
         /**
          * define client authentication for a server host provided credentials
          * will be used during the request the basic scheme will be used
-         * 
+         *
          * @param username
          * @param password
          * @return the WSRequest for chaining.
@@ -338,7 +338,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Sign the request for do a call to a server protected by oauth
-         * 
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest oauth(ServiceInfo oauthInfo, String token, String secret) {
@@ -355,7 +355,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Indicate if the WS should continue when hitting a 301 or 302
-         * 
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest followRedirects(boolean value) {
@@ -366,7 +366,7 @@ public class WS extends PlayPlugin {
         /**
          * Set the value of the request timeout, i.e. the number of seconds
          * before cutting the connection - default to 60 seconds
-         * 
+         *
          * @param timeout
          *            the timeout value, e.g. "30s", "1min"
          * @return the WSRequest for chaining
@@ -378,7 +378,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add files to request. This will only work with POST or PUT.
-         * 
+         *
          * @param files
          * @return the WSRequest for chaining.
          */
@@ -390,7 +390,7 @@ public class WS extends PlayPlugin {
         /**
          * Add fileParams aka File and Name parameter to the request. This will
          * only work with POST or PUT.
-         * 
+         *
          * @param fileParams
          * @return the WSRequest for chaining.
          */
@@ -401,7 +401,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add the given body to the request.
-         * 
+         *
          * @param body
          * @return the WSRequest for chaining.
          */
@@ -412,7 +412,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add a header to the request
-         * 
+         *
          * @param name
          *            header name
          * @param value
@@ -426,7 +426,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Add a parameter to the request
-         * 
+         *
          * @param name
          *            parameter name
          * @param value
@@ -445,7 +445,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Use the provided headers when executing request.
-         * 
+         *
          * @param headers
          * @return the WSRequest for chaining.
          */
@@ -459,7 +459,7 @@ public class WS extends PlayPlugin {
          * body using x-www-form-urlencoded if alone, or form-data if there is
          * files too. For any other method, those params are appended to the
          * queryString.
-         * 
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest params(Map<String, Object> parameters) {
@@ -472,7 +472,7 @@ public class WS extends PlayPlugin {
          * body using x-www-form-urlencoded if alone, or form-data if there is
          * files too. For any other method, those params are appended to the
          * queryString.
-         * 
+         *
          * @return the WSRequest for chaining.
          */
         public WSRequest setParameters(Map<String, String> parameters) {
@@ -488,7 +488,14 @@ public class WS extends PlayPlugin {
             throw new NotImplementedException();
         }
 
-        /** Execute a POST request. */
+        /** Execute a PATCH request.*/
+        public abstract HttpResponse patch();
+
+        /** Execute a PATCH request asynchronously.*/
+        public Promise<HttpResponse> patchAsync() {
+            throw new NotImplementedException();
+        }
+        /** Execute a POST request.*/
         public abstract HttpResponse post();
 
         /** Execute a POST request asynchronously. */
@@ -604,14 +611,14 @@ public class WS extends PlayPlugin {
 
         /**
          * the HTTP status code
-         * 
+         *
          * @return the status code of the http response
          */
         public abstract Integer getStatus();
 
         /**
          * The HTTP status text
-         * 
+         *
          * @return the status text of the http response
          */
         public abstract String getStatusText();
@@ -625,7 +632,7 @@ public class WS extends PlayPlugin {
 
         /**
          * The http response content type
-         * 
+         *
          * @return the content type of the http response
          */
         public String getContentType() {
@@ -660,7 +667,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Parse and get the response body as a {@link Document DOM document}
-         * 
+         *
          * @return a DOM document
          */
         public Document getXml() {
@@ -669,7 +676,7 @@ public class WS extends PlayPlugin {
 
         /**
          * parse and get the response body as a {@link Document DOM document}
-         * 
+         *
          * @param encoding
          *            xml charset encoding
          * @return a DOM document
@@ -687,7 +694,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * 
+         *
          * @return the body of the http response
          */
         public String getString() {
@@ -696,7 +703,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * 
+         *
          * @param encoding
          *            string charset encoding
          * @return the body of the http response
@@ -707,7 +714,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Parse the response string as a query string.
-         * 
+         *
          * @return The parameters as a Map. Return an empty map if the response
          *         is not formed as a query string.
          */
@@ -727,14 +734,14 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response as a stream
-         * 
+         *
          * @return an inputstream
          */
         public abstract InputStream getStream();
 
         /**
          * get the response body as a {@link com.google.gson.JsonElement}
-         * 
+         *
          * @return the json response
          */
         public JsonElement getJson() {
