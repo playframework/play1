@@ -1,5 +1,11 @@
 package play;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Properties;
 
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -8,47 +14,39 @@ import play.mvc.Http.Response;
 import play.mvc.Scope.RenderArgs;
 import play.vfs.VirtualFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Properties;
-
 /**
  * Builder-pattern-builder for Play-class..
  *
- * It's kind of odd since Play only uses statics,
- * But it basically inits the needed properties for Play-object to work in unittests
+ * It's kind of odd since Play only uses statics, But it basically inits the
+ * needed properties for Play-object to work in unittests
  */
 public class PlayBuilder {
 
     public Properties configuration = new Properties();
 
-    public PlayBuilder withConfiguration(Properties config){
+    public PlayBuilder withConfiguration(Properties config) {
         this.configuration = config;
         return this;
     }
 
+    @SuppressWarnings({ "deprecation" })
+    public void build() {
 
-    @SuppressWarnings({"deprecation"})
-    public void build(){
-        
         Play.version = "localbuild";
         Play.configuration = configuration;
         Play.classes = new ApplicationClasses();
         Play.javaPath = new ArrayList<VirtualFile>();
         Play.applicationPath = new File(".");
         Play.classloader = new ApplicationClassloader();
-        Play.plugins = Collections.unmodifiableList( new ArrayList<PlayPlugin>());
+        Play.plugins = Collections.unmodifiableList(new ArrayList<PlayPlugin>());
+        Play.guessFrameworkPath();
 
     }
-    
-    public void initMvcObject(){
+
+    public void initMvcObject() {
         if (Request.current() == null) {
-            Request request = Request
-                    .createRequest(null, "GET", "/", "", null, null, null,
-                            null, false, 80, "localhost", false, null, null);
+            Request request = Request.createRequest(null, "GET", "/", "", null, null, null, null, false, 80, "localhost", false, null,
+                    null);
             request.body = new ByteArrayInputStream(new byte[0]);
             Request.current.set(request);
         }
