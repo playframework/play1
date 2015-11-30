@@ -1,9 +1,6 @@
 package play.db;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.junit.*;
 
@@ -13,32 +10,33 @@ import static org.junit.Assert.assertNull;
 
 public class ConfigurationTest {
 
-    @Test
-    public void dbNameResolverTest() {
+    @Before
+    public void setUp() {
         Play.configuration = new Properties();
-        Play.configuration.put("db", "mysql:user:pwd@database_name");
-        Set<String> dbNames = Configuration.getDbNames();
-        assertEquals(1, dbNames.size());
-        Iterator<String> it = dbNames.iterator();
-        assertEquals("default", it.next());
-
-        Play.configuration.put("db.test", "mysql:user:pwd@database_name2");
-        dbNames = Configuration.getDbNames();
-        assertEquals(2, dbNames.size());
-        it = dbNames.iterator();
-        assertEquals("default", it.next());
-        assertEquals("test", it.next());
-        
-        Configuration configuration = new Configuration("default");
-        assertEquals("mysql:user:pwd@database_name", configuration.getProperty("db"));
-        
-        configuration = new Configuration("test");
-        assertEquals("mysql:user:pwd@database_name2", configuration.getProperty("db"));
     }
 
     @Test
-    public void dbNameResolverMultiDbURLTest1() {
-        Play.configuration = new Properties();
+    public void dbNameResolver_singleDatabase() {
+        Play.configuration.put("db", "mysql:user:pwd@database_name");
+        Set<String> dbNames = Configuration.getDbNames();
+        assertEquals(1, dbNames.size());
+        assertEquals("default", dbNames.iterator().next());
+    }
+    
+    @Test
+    public void dbNameResolver_multipleDatabases() {
+        Play.configuration.put("db", "mysql:user:pwd@database_name");
+        Play.configuration.put("db.test", "mysql:user:pwd@database_name2");
+        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
+        assertEquals(2, dbNames.size());
+        assertEquals("default", dbNames.get(0));
+        assertEquals("test", dbNames.get(1));
+        assertEquals("mysql:user:pwd@database_name", new Configuration("default").getProperty("db"));
+        assertEquals("mysql:user:pwd@database_name2", new Configuration("test").getProperty("db"));
+    }
+
+    @Test
+    public void dbNameResolverMultiDbURL_singleDatabase() {
         Play.configuration.put("db.url", "jdbc:postgresql://localhost/database_name");
         Play.configuration.put("db.driver", "org.postgresql.Driver");
         Play.configuration.put("db.user", "user");
@@ -46,30 +44,36 @@ public class ConfigurationTest {
 
         Set<String> dbNames = Configuration.getDbNames();
         assertEquals(1, dbNames.size());
-        Iterator<String> it = dbNames.iterator();
-        assertEquals("default", it.next());
+        assertEquals("default", dbNames.iterator().next());
+    }
 
+    @Test
+    public void dbNameResolverMultiDbURL_multipleDatabases() {
+        Play.configuration.put("db.url", "jdbc:postgresql://localhost/database_name");
+        Play.configuration.put("db.driver", "org.postgresql.Driver");
+        Play.configuration.put("db.user", "user");
+        Play.configuration.put("db.pass", "pass");
         Play.configuration.put("db.test.url", "jdbc:postgresql://localhost/database_name2");
         Play.configuration.put("db.test.driver", "org.postgresql.Driver");
         Play.configuration.put("db.test.user", "user2");
         Play.configuration.put("db.test.pass", "pass2");
-        dbNames = Configuration.getDbNames();
+        
+        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
         assertEquals(2, dbNames.size());
-        it = dbNames.iterator();
-        assertEquals("default", it.next());
-        assertEquals("test", it.next());
+        assertEquals("default", dbNames.get(0));
+        assertEquals("test", dbNames.get(1));
         
-        Configuration configuration = new Configuration("default");
-        assertEquals("jdbc:postgresql://localhost/database_name", configuration.getProperty("db.url"));
-        assertEquals("org.postgresql.Driver", configuration.getProperty("db.driver"));
-        assertEquals("user", configuration.getProperty("db.user"));
-        assertEquals("pass", configuration.getProperty("db.pass"));
-        
-        configuration = new Configuration("test");
-        assertEquals("jdbc:postgresql://localhost/database_name2", configuration.getProperty("db.url"));
-        assertEquals("org.postgresql.Driver", configuration.getProperty("db.driver"));
-        assertEquals("user2", configuration.getProperty("db.user"));
-        assertEquals("pass2", configuration.getProperty("db.pass"));
+        Configuration configuration1 = new Configuration("default");
+        assertEquals("jdbc:postgresql://localhost/database_name", configuration1.getProperty("db.url"));
+        assertEquals("org.postgresql.Driver", configuration1.getProperty("db.driver"));
+        assertEquals("user", configuration1.getProperty("db.user"));
+        assertEquals("pass", configuration1.getProperty("db.pass"));
+
+        Configuration configuration2 = new Configuration("test");
+        assertEquals("jdbc:postgresql://localhost/database_name2", configuration2.getProperty("db.url"));
+        assertEquals("org.postgresql.Driver", configuration2.getProperty("db.driver"));
+        assertEquals("user2", configuration2.getProperty("db.user"));
+        assertEquals("pass2", configuration2.getProperty("db.pass"));
     }
 
     @Test
@@ -86,8 +90,7 @@ public class ConfigurationTest {
 
         Set<String> dbNames = Configuration.getDbNames();
         assertEquals(1, dbNames.size());
-        Iterator<String> it = dbNames.iterator();
-        assertEquals("default", it.next());
+        assertEquals("default", dbNames.iterator().next());
         
         Configuration configuration = new Configuration("default");
         assertEquals("jdbc:mysql://127.0.0.1/testPlay", configuration.getProperty("db.url"));
@@ -116,8 +119,7 @@ public class ConfigurationTest {
         Play.configuration.put("db", "mysql:user:pwd@database_name");
         Set<String> dbNames = Configuration.getDbNames();
         assertEquals(1, dbNames.size());
-        Iterator<String> it = dbNames.iterator();
-        assertEquals("default", it.next());
+        assertEquals("default", dbNames.iterator().next());
     }
 
     @Test
@@ -239,8 +241,6 @@ public class ConfigurationTest {
     
     @Test
     public void getPropertiesForDefaultTest() {
-        Play.configuration = new Properties();
-
         Play.configuration.put("db.url", "jdbc:mysql://127.0.0.1/testPlay");
         Play.configuration.put("db.driver", "com.mysql.jdbc.Driver");
         Play.configuration.put("db.user", "root");
@@ -273,8 +273,6 @@ public class ConfigurationTest {
     
     @Test
     public void getPropertiesForDBTest() {
-        Play.configuration = new Properties();
-
         Play.configuration.put("db.test.url", "jdbc:mysql://127.0.0.1/testPlay");
         Play.configuration.put("db.test.driver", "com.mysql.jdbc.Driver");
         Play.configuration.put("db.test.user", "root");
@@ -303,5 +301,65 @@ public class ConfigurationTest {
         assertEquals("postUpdate", properties.get("hibernate.ejb.event.post-update"));
         
         assertEquals(Play.configuration.size(), properties.size());
+    }
+
+    @Test
+    public void generatesConfigurationPropertyNameBasedOnDatabaseName() {
+        Configuration configuration = new Configuration("another");
+        assertEquals("db.another", configuration.generateKey("db"));
+        assertEquals("db.another.driver", configuration.generateKey("db.driver"));
+        assertEquals("db.another.url", configuration.generateKey("db.url"));
+        assertEquals("another-property", configuration.generateKey("another-property"));
+    }
+
+    @Test
+    public void usesDefaultConfigurationPropertyNameForDefaultDatabase() {
+        Configuration configuration = new Configuration("default");
+        assertEquals("db.default", configuration.generateKey("db"));
+        assertEquals("db.default.driver", configuration.generateKey("db.driver"));
+        assertEquals("db.default.url", configuration.generateKey("db.url"));
+        assertEquals("another-property", configuration.generateKey("another-property"));
+    }
+
+    @Test
+    public void putPropertyToDefaultConfiguration() {
+        Configuration configuration = new Configuration("default");
+        configuration.put("db.driver", "org.h2.Driver");
+        assertEquals("org.h2.Driver", configuration.getProperty("db.driver"));
+        assertEquals("org.h2.Driver", Play.configuration.getProperty("db.default.driver"));
+    }
+    
+    @Test
+    public void putPropertyToCustomConfiguration() {
+        Configuration configuration = new Configuration("custom");
+        
+        configuration.put("db.driver", "com.oracle.OracleDriver");
+        assertEquals("com.oracle.OracleDriver", configuration.getProperty("db.driver"));
+    }
+
+    @Test
+    public void putPropertyToMultipleCustomConfigurations() {
+        Configuration configuration = new Configuration("default");
+        Configuration configuration1 = new Configuration("db1");
+        Configuration configuration2 = new Configuration("db2");
+        
+        configuration.put("db.driver", "com.oracle.OracleDriver");
+        configuration1.put("db.driver", "org.h2.Driver");
+        configuration2.put("db.driver", "com.mysql.Driver");
+        
+        assertEquals("com.oracle.OracleDriver", configuration.getProperty("db.driver"));
+        assertEquals("org.h2.Driver", configuration1.getProperty("db.driver"));
+        assertEquals("com.mysql.Driver", configuration2.getProperty("db.driver"));
+        
+        assertEquals("com.oracle.OracleDriver", Play.configuration.getProperty("db.default.driver"));
+        assertEquals("org.h2.Driver", Play.configuration.getProperty("db.db1.driver"));
+        assertEquals("com.mysql.Driver", Play.configuration.getProperty("db.db2.driver"));
+    }
+
+    @Test
+    public void getPropertyFromDefaultConfiguration() {
+        Play.configuration.setProperty("db.default.url", "jdbc:h2:mem:play;MODE=MSSQLServer;LOCK_MODE=0");
+        Configuration configuration = new Configuration("default");
+        assertEquals("jdbc:h2:mem:play;MODE=MSSQLServer;LOCK_MODE=0", configuration.getProperty("db.url"));
     }
 }

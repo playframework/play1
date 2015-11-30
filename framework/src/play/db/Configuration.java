@@ -2,8 +2,6 @@ package play.db;
 
 import java.util.*;
 
-import javax.sql.DataSource;
-
 import play.*;
 import jregex.Matcher;
 import jregex.Pattern;
@@ -51,18 +49,13 @@ public class Configuration {
      
      
      public String getProperty(String key, String defaultString) {
-         if(key != null){
-             String newKey = key;
-             Pattern pattern = new jregex.Pattern("^(db|jpa|hibernate){1}(\\.)*(.)*$");
-             Matcher m = pattern.matcher(key);
-             if(m.matches() && m.groupCount() > 1){
-                 newKey = m.group(1) + "." + this.configName + key.substring(m.group(1).length());
-             }
+         if (key != null) {
+             String newKey = generateKey(key);
              Object value = Play.configuration.get(newKey);
-             if(value == null && this.isDefault()){
+             if (value == null && this.isDefault()){
                  value = Play.configuration.get(key);
              }
-             if(value != null){
+             if (value != null){
                  return value.toString();
              }
          }
@@ -77,19 +70,21 @@ public class Configuration {
       * @return the previous value of the specified key in this hashtable, or null if it did not have one
       */
      public Object put(String key, String value) {
-         if(key != null){
-             String newKey = key;
-             Pattern pattern = new jregex.Pattern("^([db|jpa|hibernate]{1})(\\.[\\da-zA-Z.-_]*)$");
-             Matcher m = pattern.matcher(key);
-             if(m.matches()){
-                 newKey = m.group(0) + "." + this.configName;
-             }
-             
-             return Play.configuration.put(newKey, value);
+         if (key != null) {
+             return Play.configuration.put(generateKey(key), value);
          }
          return null;
      }
-     
+
+    String generateKey(String key) {
+        Pattern pattern = new Pattern("^(db|jpa|hibernate){1}(\\.?[\\da-zA-Z\\.-_]*)$");
+        Matcher m = pattern.matcher(key);
+        if (m.matches()) {
+            return m.group(1) + "." + this.configName + m.group(2);
+        }
+        return key;
+    }
+
 
     public Map<String, String> getProperties() {
         Map<String, String> properties = new HashMap<String, String>();
