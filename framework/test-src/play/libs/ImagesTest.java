@@ -11,6 +11,9 @@ import javax.imageio.ImageIO;
 
 import org.junit.Test;
 
+import play.Play;
+import play.PlayBuilder;
+
 /**
  * @author Alexandre Chatiron
  */
@@ -18,7 +21,8 @@ public class ImagesTest {
 
     @Test
     public void testImagesResizeGif() {
-        File folder = new File("framework/test-src/play/libs");
+        new PlayBuilder().build();
+        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
 
         File source = new File(folder, "angel.gif");
         File result = new File(folder, "angel_testResult.gif");
@@ -41,7 +45,8 @@ public class ImagesTest {
 
     @Test
     public void testImagesResizePng() {
-        File folder = new File("framework/test-src/play/libs");
+        new PlayBuilder().build();
+        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
 
         File source = new File(folder, "fond1.png");
         File result = new File(source.getParent(), "fond1_testResult.png");
@@ -64,7 +69,8 @@ public class ImagesTest {
 
     @Test
     public void testImagesResizePngTransparent() {
-        File folder = new File("framework/test-src/play/libs");
+        new PlayBuilder().build();
+        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
 
         File source = new File(folder, "fond2.png");
         File result = new File(source.getParent(), "fond2_testResult.png");
@@ -87,7 +93,8 @@ public class ImagesTest {
 
     @Test
     public void testImagesResizeJpg() {
-        File folder = new File("framework/test-src/play/libs");
+        new PlayBuilder().build();
+        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
 
         File source = new File(folder, "winie.jpg");
         File result = new File(source.getParent(), "winie_testResult.jpg");
