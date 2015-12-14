@@ -1,0 +1,19 @@
+h1. Play 1.4.1 -- Release notes
+
+Play 1.4.1 has been released of the 1.4.x maintenance branch.
+
+The changes in this release are listed in the "Play 1.4.1 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/216577-141 on Lighthouse, including 31 resolved tickets. 
+
+h2. What's new in Play 1.4.1
+
+* Add PATCH support
+* Update to htmlUnit v 2.19
+* Add ability to define enabled ssl protocols
+* Make DB properties configurable 
+
+h2. What's fixed in Play 1.4.1
+
+* Fix vulnerabilty : Reset current request to avoid 3rd-party to acquire session information for another in-progress request
+* Fix putting property to customer DB configuration
+* Add method Plugin.onActionInvocationFinally()
+* Fix javadoc tools errors
