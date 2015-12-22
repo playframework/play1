@@ -572,6 +572,9 @@ public class Router {
                         actionDefinition.action = action;
                         actionDefinition.args = argsbackup;
                         actionDefinition.host = host;
+                if (Boolean.parseBoolean(Play.configuration.getProperty("application.forceSecureReverseRoutes", "false"))) {
+                    actionDefinition.secure();
+                }
                         return actionDefinition;
                     }
                 }
