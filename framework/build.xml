@@ -85,7 +85,11 @@
                author="false"
                version="true"
                use="true"
-               windowtitle="Play! API">
+               windowtitle="Play! API"
+               encoding="UTF-8"
+               docencoding="UTF-8"
+               charset="UTF-8"
+               >
             <classpath refid="project.classpath"/>
             <doctitle><![CDATA[<h1>Play! ${version}</h1>]]></doctitle>
             <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> &amp; <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
