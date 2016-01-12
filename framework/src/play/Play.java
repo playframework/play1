@@ -245,7 +245,7 @@ public class Play {
             mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
         } catch (IllegalArgumentException e) {
             Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
-            fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
 	
         // Force the Production mode if forceProd or precompile is activate
@@ -378,7 +378,7 @@ public class Play {
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read "+filename);
-                fatalServerErrorOccurred();
+                return fatalServerError();
             }
         }
         confs.add(conf);
@@ -593,8 +593,7 @@ public class Play {
                 return true;
             }
             Logger.error("Precompiled classes are missing!!");
-            fatalServerErrorOccurred();
-            return false;
+            return fatalServerError();
         }
         try {
             Logger.info("Precompiling ...");
@@ -617,8 +616,7 @@ public class Play {
             return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
-            fatalServerErrorOccurred();
-            return false;
+            return fatalServerError();
         }
     }
 
@@ -842,11 +840,18 @@ public class Play {
 
     /**
      * Call this method when there has been a fatal error that Play cannot recover from
+     * @deprecated use {@link #fatalServerError()} instead.
      */
+    @Deprecated
     public static void fatalServerErrorOccurred() {
+        fatalServerError();
+    }
+
+    public static <T> T fatalServerError() {
         if (standalonePlayServer) {
             // Just quit the process
             System.exit(-1);
+            return null;
         } else {
             // Cannot quit the process while running inside an applicationServer
             String msg = "A fatal server error occurred";
