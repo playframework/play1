@@ -420,7 +420,12 @@ public abstract class Binder {
                 }
             }
 
-            Collection l = (Collection) clazz.newInstance();
+            Collection l;
+            if (clazz.equals(EnumSet.class)) {
+                l = EnumSet.noneOf(componentClass);
+            } else {
+                l = (Collection) clazz.newInstance();
+            }
             boolean hasMissing = false;
             for (int i = 0; i < values.length; i++) {
                 try {

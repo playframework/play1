@@ -260,6 +260,21 @@ public class BinderTest {
         assertThat(binded).isEqualTo(original);
     }
 
+    @Test
+    public void test_enum_set_binding() {
+        Data5 data = new Data5();
+        data.s = "test";
+        data.testEnumSet = EnumSet.of(Data5.TestEnum.A, Data5.TestEnum.B, Data5.TestEnum.C);
+
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("data.testEnumSet", new String[]{"A", "B", "C"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+
+        Data5 binded = (Data5) Binder.bind(rootParamNode, "data", Data5.class, Data5.class, noAnnotations);
+        assertThat(binded.testEnumSet).isEqualTo(data.testEnumSet);
+    }
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
