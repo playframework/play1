@@ -82,9 +82,14 @@ public class ApplicationCompiler {
         final private String fileName;
         final private char[] typeName;
         final private char[][] packageName;
+        final private String javaSource;
 
         CompilationUnit(String pClazzName) {
+            this(pClazzName,null);
+        }
+        CompilationUnit(String pClazzName, String javaSource) {
             clazzName = pClazzName;
+            this.javaSource = javaSource;
             if (pClazzName.contains("$")) {
                 pClazzName = pClazzName.substring(0, pClazzName.indexOf("$"));
             }
@@ -107,7 +112,7 @@ public class ApplicationCompiler {
         }
 
         public char[] getContents() {
-            return applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
+            return javaSource != null ? javaSource.toCharArray() : applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
         public char[] getMainTypeName() {
@@ -125,15 +130,18 @@ public class ApplicationCompiler {
         }
     }
 
+    public void compile(String[] classNames) {
+        compile(classNames,null,null);
+    }
     /**
      * Please compile this className
      */
     @SuppressWarnings("deprecation")
-    public void compile(String[] classNames) {
+    public void compile(String[] classNames, String javaSource,final ApplicationClass preInitializedClass) {
 
         ICompilationUnit[] compilationUnits = new CompilationUnit[classNames.length];
         for (int i = 0; i < classNames.length; i++) {
-            compilationUnits[i] = new CompilationUnit(classNames[i]);
+            compilationUnits[i] = javaSource == null ? new CompilationUnit(classNames[i]) : new CompilationUnit(classNames[i], javaSource);
         }
         IErrorHandlingPolicy policy = DefaultErrorHandlingPolicies.exitOnFirstError();
         IProblemFactory problemFactory = new DefaultProblemFactory(Locale.ENGLISH);
@@ -273,7 +281,12 @@ public class ApplicationCompiler {
                         Logger.trace("Compiled %s", clazzName);
                     }
 
-                    applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
+                    String name = clazzName.toString();
+                    if (preInitializedClass != null && preInitializedClass.name.equals(name)) {
+                        preInitializedClass.compiled(clazzFile.getBytes());
+                    } else {
+                        applicationClasses.getApplicationClass(name).compiled(clazzFile.getBytes());
+                    }
                 }
             }
         };

@@ -1,14 +1,5 @@
 package play.classloading;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.classloading.enhancers.Enhancer;
-import play.exceptions.UnexpectedException;
-import play.vfs.VirtualFile;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +8,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javassist.ClassPool;
+import javassist.CtClass;
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.classloading.enhancers.Enhancer;
+import play.exceptions.UnexpectedException;
+import play.vfs.VirtualFile;
 
 /**
  * Application classes container.
@@ -46,13 +46,14 @@ public class ApplicationClasses {
      */
     public ApplicationClass getApplicationClass(String name) {
         VirtualFile javaFile = getJava(name);
+        ApplicationClass applicationClass = null;
         if(javaFile != null){
             if (!classes.containsKey(name)) {
                 classes.put(name, new ApplicationClass(name));
             }
-            return classes.get(name);
+            applicationClass = classes.get(name);
         }
-        return null;
+        return applicationClass;
     }
 
     /**
@@ -138,6 +139,10 @@ public class ApplicationClasses {
      */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
+    }
+
+    public ApplicationClass get(String name) {
+        return classes.get(name);
     }
 
     /**
@@ -285,13 +290,20 @@ public class ApplicationClasses {
          * @return the bytes that comprise the class file
          */
         public byte[] compile() {
+            return compile(false);
+        }
+        public byte[] compile(boolean notKnown) {
             long start = System.currentTimeMillis();
-            Play.classes.compiler.compile(new String[]{this.name});
+            if (notKnown) {
+                Play.classes.compiler.compile(new String[]{this.name},this.javaSource,this);
+            } else {
+                Play.classes.compiler.compile(new String[]{this.name});
+            }
 
             if (Logger.isTraceEnabled()) {
                 Logger.trace("%sms to compile class %s", System.currentTimeMillis() - start, name);
             }
-
+            
             return this.javaByteCode;
         }
 
