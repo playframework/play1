@@ -193,14 +193,19 @@ public class SQLSplitter implements Iterable<CharSequence> {
 				while ( i < sql.length() ) {
 					if ( sql.charAt(i) == ';' ) {
 						++i;
-						CharSequence ret = sql.subSequence(prev, i);
-						prev = i;
-						return ret;
+						// check "double semicolon" -> used to escape a semicolon and avoid splitting
+						if ((i < sql.length() && sql.charAt(i) == ';')) {
+							++i;
+						} else {
+							CharSequence ret = sql.subSequence(prev, i).toString().replace(";;", ";");
+							prev = i;
+							return ret;
+						}
 					}
 					i = nextChar(sql, i);
 				}
 				if ( prev != i ) {
-					CharSequence ret = sql.subSequence(prev, i);
+					CharSequence ret = sql.subSequence(prev, i).toString().replace(";;", ";");
 					prev = i;
 					return ret;
 				}

@@ -88,6 +88,12 @@ public class SQLSplitterTest {
 		assertEquals(3, SQLSplitter.consumeParentheses("(()", 0));
 	}
 
+	@Test
+	public void verifyDoubleSemicolonHandling() {
+		assertEquals(2, SQLSplitter.splitSQL("a;\nb;;\nc;").size());
+		assertEquals(3, SQLSplitter.splitSQL("a;\nb;\nc;").size());
+	}
+
 	String readFile(final String filename) throws Exception {
 		final File src = new File(getClass().getResource(filename).toURI());
 		final byte [] srcbytes = new byte[(int)src.length()];
