@@ -2,6 +2,7 @@ package play.db.jpa;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Level;
+import org.hibernate.Interceptor;
 import org.hibernate.ejb.Ejb3Configuration;
 
 import play.Logger;
@@ -198,8 +199,18 @@ public class JPAPlugin extends PlayPlugin {
             } catch (Exception e) {
                 Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
-            
-            cfg.setInterceptor(new HibernateInterceptor());
+
+            //play.db.jpa.HibernateInterceptor is a Hibernate interceptor that modifies Hibernate's behavior to support
+            //Play's .willBeSaved property on Entities (among other things).
+            //Here we allow the user to disable this interceptor.  The user can set up their own interceptor using
+            //hibernate.ejb.interceptor.session_scoped if desired.
+            if (!dbConfig.getProperty("hibernate.interceptor.disabled", "false").toLowerCase().trim().equals("true"))
+            {
+                Logger.info(String.format("Loading Hibernate interceptor %s for db %s...", play.db.jpa.HibernateInterceptor.class.getCanonicalName(), dbName));
+                cfg.setInterceptor(new play.db.jpa.HibernateInterceptor());
+            } else {
+                Logger.info(String.format("play.db.jpa.HibernateInterceptor disabled for db %s...", dbName));
+            }
 
             if (Logger.isTraceEnabled()) {
                 Logger.trace("Initializing JPA for %s...", dbName);
