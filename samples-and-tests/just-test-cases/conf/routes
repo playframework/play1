@@ -65,6 +65,7 @@ GET         /xsstest                         security.XssAttempts.testUrlParam
 *           /async/{controller}/{action}    async.{controller}.{action}
 *           /sample/{controller}/{action}      sample.{controller}.{action}
 *           /tagDemos/{controller}/{action}    tagDemos.{controller}.{action}
+*           /security/{controller}/{action}    security.{controller}.{action}
 *           /{controller}/{action}           {controller}.{action}
 
 # Data binding
@@ -80,3 +81,6 @@ GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLa
 
 
 GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
+
+# module
+*         /               module:secure
