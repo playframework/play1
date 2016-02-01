@@ -102,25 +102,28 @@ public class ApplicationCompiler {
             }
         }
 
+        @Override
         public char[] getFileName() {
             return fileName.toCharArray();
         }
 
+        @Override
         public char[] getContents() {
             return applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
+        @Override
         public char[] getMainTypeName() {
             return typeName;
         }
 
+        @Override
         public char[][] getPackageName() {
             return packageName;
         }
 
         @Override
         public boolean ignoreOptionalProblems() {
-            // TODO Auto-generated method stub
             return false;
         }
     }
