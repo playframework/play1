@@ -53,7 +53,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 if (localVariableAttribute != null && localVariableAttribute.tableLength() >= ctConstructor.getParameterTypes().length) {
                     for (int i = 0; i < ctConstructor.getParameterTypes().length + 1; i++) {
                         String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
-                        if (!name.equals("this")) {
+                        if (!"this".equals(name)) {
                             parameters.add(name);
                         }
                     }
@@ -305,7 +305,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     /**
      * Mark class that need local variables tracking
      */
-    public static interface LocalVariablesSupport {
+    public interface LocalVariablesSupport {
     }
 
     /**
@@ -346,17 +346,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static Integer computeMethodHash(String[] parameters) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (String param : parameters) {
                 buffer.append(param);
             }
-            Integer hash = buffer.toString().hashCode();
-            if (hash < 0) {
-                return -hash;
-            }
-            return hash;
+            return Math.abs(buffer.toString().hashCode());
         }
-        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
+        static final ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
         public static void checkEmpty() {
             if (localVariables.get() != null && localVariables.get().size() != 0) {
@@ -462,7 +458,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             localVariables.set( state );
         }
     }
-    private final static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
+    private static final Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
 
     /**
      * Useful instructions

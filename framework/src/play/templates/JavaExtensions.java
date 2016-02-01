@@ -80,7 +80,7 @@ public class JavaExtensions {
 
     public static String capitalizeWords(String source) {
         char prevc = ' '; // first char of source is capitalized
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < source.length(); i++) {
             char c = source.charAt(i);
             if (c != ' ' && prevc == ' ') {
@@ -128,9 +128,9 @@ public class JavaExtensions {
     }
 
     public static RawData asAttr(Map attributes) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (Object key : attributes.keySet()) {
-            buf.append(key + "=\"" + attributes.get(key) + "\" ");
+            buf.append(key).append("=\"").append(attributes.get(key)).append("\" ");
         }
         return new RawData(buf);
     }
@@ -409,7 +409,7 @@ public class JavaExtensions {
         if (items == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Iterator ite = items.iterator();
         int i = 0;
         while (ite.hasNext()) {

@@ -39,7 +39,7 @@ public class LegacyMockMailSystem implements MailSystem {
     @Override
     public Future<Boolean> sendMessage(Email email) {
         try {
-            final StringBuffer content = new StringBuffer();
+            StringBuilder content = new StringBuilder();
             Properties props = new Properties();
             props.put("mail.smtp.host", "myfakesmtpserver.com");
 
@@ -56,21 +56,21 @@ public class LegacyMockMailSystem implements MailSystem {
             content.append("From Mock Mailer\n\tNew email received by");
 
 
-            content.append("\n\tFrom: " + email.getFromAddress().getAddress());
-            content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
+            content.append("\n\tFrom: ").append(email.getFromAddress().getAddress());
+            content.append("\n\tReplyTo: ").append(email.getReplyToAddresses().get(0).getAddress());
 
             addAddresses(content, "To",  email.getToAddresses());
             addAddresses(content, "Cc",  email.getCcAddresses());
             addAddresses(content, "Bcc", email.getBccAddresses());
 
-            content.append("\n\tSubject: " + email.getSubject());
-            content.append("\n\t" + body);
+            content.append("\n\tSubject: ").append(email.getSubject());
+            content.append("\n\t").append(body);
 
             content.append("\n");
             Logger.info(content.toString());
 
             for (Object add : email.getToAddresses()) {
-                content.append(", " + add.toString());
+                content.append(", ").append(add.toString());
                 emails.put(((InternetAddress) add).getAddress(), content.toString());
             }
 
@@ -117,18 +117,17 @@ public class LegacyMockMailSystem implements MailSystem {
     }
 
 
-    private static void addAddresses(final StringBuffer content,
-            String header, List<?> ccAddresses) {
+    private static void addAddresses(StringBuilder content, String header, List<?> ccAddresses) {
         if (ccAddresses != null && !ccAddresses.isEmpty()) {
-            content.append("\n\t" + header + ": ");
+            content.append("\n\t").append(header).append(": ");
             for (Object add : ccAddresses) {
-                content.append(add.toString() + ", ");
+                content.append(add.toString()).append(", ");
             }
             removeTheLastComma(content);
         }
     }
 
-    private static void removeTheLastComma(final StringBuffer content) {
+    private static void removeTheLastComma(StringBuilder content) {
         content.delete(content.length() - 2, content.length());
     }
 

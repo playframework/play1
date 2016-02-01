@@ -64,7 +64,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
         //In case of an update make sure that we won't read the current record from database.
         final boolean isUpdate = (keyValue != null);
         final String entityName = model.getClass().getName();
-        final StringBuffer jpql = new StringBuffer("SELECT COUNT(o) FROM ");
+        final StringBuilder jpql = new StringBuilder("SELECT COUNT(o) FROM ");
         jpql.append(entityName).append(" AS o where ");
         final Object[] values = new Object[isUpdate ? propertyNames.length + 1 :
                 propertyNames.length];
