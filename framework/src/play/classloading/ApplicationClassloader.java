@@ -10,7 +10,6 @@ import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -213,9 +212,7 @@ public class ApplicationClassloader extends ClassLoader {
             return null;
         }
         try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            IOUtils.copyLarge(is, os);
-            return os.toByteArray();
+            return IOUtils.toByteArray(is);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
