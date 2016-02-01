@@ -394,7 +394,7 @@ public class Http {
                 }
             }
 
-            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "true").toLowerCase().equals("true") && this.host != null
+            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").toLowerCase().equals("true") && this.host != null
                     && !this.host.equals(_host)) {
                 if (this.host.contains(":")) {
                     final String[] hosts = this.host.split(":");
