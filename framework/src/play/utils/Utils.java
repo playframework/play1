@@ -31,7 +31,7 @@ public class Utils {
         if (!iter.hasNext()) {
             return "";
         }
-        StringBuffer toReturn = new StringBuffer(String.valueOf(iter.next()));
+        StringBuilder toReturn = new StringBuilder(String.valueOf(iter.next()));
         while (iter.hasNext()) {
             toReturn.append(separator + String.valueOf(iter.next()));
         }
@@ -55,7 +55,7 @@ public class Utils {
         if (!iter.hasNext()) {
             return "";
         }
-        StringBuffer toReturn = new StringBuffer("@" + iter.next().annotationType().getSimpleName());
+        StringBuilder toReturn = new StringBuilder("@" + iter.next().annotationType().getSimpleName());
         while (iter.hasNext()) {
             toReturn.append(", @" + iter.next().annotationType().getSimpleName());
         }

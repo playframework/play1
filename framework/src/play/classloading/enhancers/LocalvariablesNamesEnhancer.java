@@ -346,7 +346,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static Integer computeMethodHash(String[] parameters) {
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for (String param : parameters) {
                 buffer.append(param);
             }
