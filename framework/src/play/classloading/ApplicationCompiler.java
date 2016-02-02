@@ -102,25 +102,28 @@ public class ApplicationCompiler {
             }
         }
 
+        @Override
         public char[] getFileName() {
             return fileName.toCharArray();
         }
 
+        @Override
         public char[] getContents() {
             return applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
+        @Override
         public char[] getMainTypeName() {
             return typeName;
         }
 
+        @Override
         public char[][] getPackageName() {
             return packageName;
         }
 
         @Override
         public boolean ignoreOptionalProblems() {
-            // TODO Auto-generated method stub
             return false;
         }
     }
@@ -144,7 +147,7 @@ public class ApplicationCompiler {
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
             public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
-                final StringBuffer result = new StringBuffer();
+                final StringBuilder result = new StringBuilder();
                 for (int i = 0; i < compoundTypeName.length; i++) {
                     if (i != 0) {
                         result.append('.');
@@ -155,7 +158,7 @@ public class ApplicationCompiler {
             }
 
             public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
-                final StringBuffer result = new StringBuffer();
+                final StringBuilder result = new StringBuilder();
                 for (int i = 0; i < packageName.length; i++) {
                     result.append(packageName[i]);
                     result.append('.');
@@ -208,20 +211,23 @@ public class ApplicationCompiler {
 
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
-                StringBuilder sb = new StringBuilder();
-                if (parentPackageName != null) {
+                String name;
+                if (parentPackageName == null) {
+                    name = new String(packageName);
+                }
+                else {
+                    StringBuilder sb = new StringBuilder();
                     for (char[] p : parentPackageName) {
-                        sb.append(new String(p));
-                        sb.append(".");
+                        sb.append(new String(p)).append('.');
                     }
+                    sb.append(new String(packageName));
+                    name = sb.toString();
                 }
-                sb.append(new String(packageName));
-                String name = sb.toString();
                 if (packagesCache.containsKey(name)) {
-                    return packagesCache.get(name).booleanValue();
+                    return packagesCache.get(name);
                 }
-                // Check if thera a .java or .class for this ressource
-                if (Play.classloader.getClassDefinition(name) != null) {
+                // Check if there are .java or .class for this resource
+                if (Play.classloader.getResource(name.replace('.', '/') + ".class") != null) {
                     packagesCache.put(name, false);
                     return false;
                 }
@@ -261,7 +267,7 @@ public class ApplicationCompiler {
                 for (int i = 0; i < clazzFiles.length; i++) {
                     final ClassFile clazzFile = clazzFiles[i];
                     final char[][] compoundName = clazzFile.getCompoundName();
-                    final StringBuffer clazzName = new StringBuffer();
+                    final StringBuilder clazzName = new StringBuilder();
                     for (int j = 0; j < compoundName.length; j++) {
                         if (j != 0) {
                             clazzName.append('.');

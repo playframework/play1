@@ -643,7 +643,7 @@ public class Play {
         } catch (PlayException e) {
             throw e;
         } catch (Exception e) {
-            // We have to do a clean refresh
+            Logger.info("We have to do a clean refresh, caused by: %s", e);
             start();
         }
     }

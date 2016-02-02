@@ -31,9 +31,9 @@ public class Utils {
         if (!iter.hasNext()) {
             return "";
         }
-        StringBuffer toReturn = new StringBuffer(String.valueOf(iter.next()));
+        StringBuilder toReturn = new StringBuilder(String.valueOf(iter.next()));
         while (iter.hasNext()) {
-            toReturn.append(separator + String.valueOf(iter.next()));
+            toReturn.append(separator).append(String.valueOf(iter.next()));
         }
         return toReturn.toString();
     }
@@ -55,9 +55,9 @@ public class Utils {
         if (!iter.hasNext()) {
             return "";
         }
-        StringBuffer toReturn = new StringBuffer("@" + iter.next().annotationType().getSimpleName());
+        StringBuilder toReturn = new StringBuilder("@" + iter.next().annotationType().getSimpleName());
         while (iter.hasNext()) {
-            toReturn.append(", @" + iter.next().annotationType().getSimpleName());
+            toReturn.append(", @").append(iter.next().annotationType().getSimpleName());
         }
         return toReturn.toString();
     }
@@ -83,7 +83,7 @@ public class Utils {
     public static class Maps {
 
         public static void mergeValueInMap(Map<String, String[]> map, String name, String value) {
-            String[] newValues = null;
+            String[] newValues;
             String[] oldValues = map.get(name);
             if (oldValues == null) {
                 newValues = new String[1];
@@ -118,7 +118,7 @@ public class Utils {
             }
         }
     }
-    private static ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<SimpleDateFormat>();
+    private static final ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<SimpleDateFormat>();
 
     public static SimpleDateFormat getHttpDateFormatter() {
         if (httpFormatter.get() == null) {
@@ -196,11 +196,11 @@ public class Utils {
             }
             throw new ParseException("Date format not understood", 0);
         }
-        static ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<AlternativeDateFormat>();
+        private static final ThreadLocal<AlternativeDateFormat> dateFormat = new ThreadLocal<AlternativeDateFormat>();
 
         public static AlternativeDateFormat getDefaultFormatter() {
-            if (dateformat.get() == null) {
-                dateformat.set(new AlternativeDateFormat(Locale.US,
+            if (dateFormat.get() == null) {
+                dateFormat.set(new AlternativeDateFormat(Locale.US,
                         "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
                         "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
                         "yyyy-MM-dd HH:mm:ss",
@@ -215,7 +215,7 @@ public class Utils {
                         "ddMMyyyy HHmmss",
                 "ddMMyyyy"));
             }
-            return dateformat.get();
+            return dateFormat.get();
         }
     }
 

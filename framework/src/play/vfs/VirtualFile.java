@@ -63,18 +63,18 @@ public class VirtualFile {
 
         }
         Collections.reverse(path);
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(prefix);
         for (String p : path) {
-            builder.append("/" + p);
+            builder.append('/').append(p);
         }
-        return prefix + builder.toString();
+        return builder.toString();
     }
 
     String isRoot(File f) {
         for (VirtualFile vf : Play.roots) {
             if (vf.realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
                 String modulePathName = vf.getName();
-                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-")) : modulePathName;
+                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf('-')) : modulePathName;
                 return "{module:" + moduleName + "}";
             }
         }
@@ -85,8 +85,10 @@ public class VirtualFile {
         List<VirtualFile> res = new ArrayList<VirtualFile>();
         if (exists()) {
             File[] children = realFile.listFiles();
-            for (int i = 0; i < children.length; i++) {
-                res.add(new VirtualFile(children[i]));
+            if (children != null) {
+                for (File child : children) {
+                    res.add(new VirtualFile(child));
+                }
             }
         }
         return res;
@@ -236,13 +238,13 @@ public class VirtualFile {
         if(matcher.matches()) {
             String path = matcher.group(3);
             String module = matcher.group(2);
-            if(module == null || module.equals("?") || module.equals("")) {
+            if(module == null || "?".equals(module) || module.isEmpty()) {
                 return new VirtualFile(Play.applicationPath).child(path);
             } else {
-                if(module.equals("play")) {
+                if ("play".equals(module)) {
                     return new VirtualFile(Play.frameworkPath).child(path);
                 }
-                if(module.startsWith("module:")){
+                if (module.startsWith("module:")){
                     module = module.substring("module:".length());
                     for(Entry<String, VirtualFile> entry : Play.modules.entrySet()) {
                         if(entry.getKey().equals(module))
@@ -268,9 +270,6 @@ public class VirtualFile {
         } catch (IOException e) {
         }
         // Name case match
-        if (fileName != null && canonicalName != null && fileName.endsWith(canonicalName)) {
-            return true;
-        }
-        return false;
+        return fileName != null && canonicalName != null && fileName.endsWith(canonicalName);
     }
 }

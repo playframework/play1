@@ -1,13 +1,13 @@
 package play.cache;
 
-import java.io.NotSerializableException;
-import java.io.Serializable;
-import java.util.Map;
-
 import play.Logger;
 import play.Play;
 import play.exceptions.CacheException;
 import play.libs.Time;
+
+import java.io.NotSerializableException;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * The Cache. Mainly an interface to memcached or EhCache.
@@ -205,7 +205,9 @@ public abstract class Cache {
      * Clear all data from cache.
      */
     public static void clear() {
-        cacheImpl.clear();
+        if (cacheImpl != null) {
+            cacheImpl.clear();
+        }
     }
 
     /**
