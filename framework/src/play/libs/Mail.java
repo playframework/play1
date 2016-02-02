@@ -197,7 +197,7 @@ public class Mail {
                 }
             });
         } else {
-            final StringBuffer result = new StringBuffer();
+            final StringBuilder result = new StringBuilder();
             try {
                 msg.setSentDate(new Date());
                 msg.send();
