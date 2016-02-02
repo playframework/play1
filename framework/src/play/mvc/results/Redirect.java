@@ -29,7 +29,7 @@ public class Redirect extends Result {
 	 *            Parameters to be included at the end of the URL as a HTTP GET. This is a map whose entries are written out as key1=value1&amp;key2=value2 etc..
 	 */
 	public Redirect(String url, Map<String, String> parameters) {
-		StringBuffer urlSb = new StringBuffer(url);
+		StringBuilder urlSb = new StringBuilder(url);
 		char prepend = '?';
 
 		if (parameters != null && parameters.size() > 0) {
