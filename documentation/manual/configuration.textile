@@ -1156,6 +1156,7 @@ For example:
 
 bc. XForwardedOverwriteDomainAndPort=true
 
+Default: @false@
 
 h2(#enhancers). Enhancers
 
