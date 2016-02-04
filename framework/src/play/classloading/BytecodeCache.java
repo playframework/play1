@@ -122,7 +122,7 @@ public class BytecodeCache {
      */
     static String hash(String text) {
         try {
-            StringBuffer plugins = new StringBuffer();
+            StringBuilder plugins = new StringBuilder();
             for(PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
                 plugins.append(plugin.getClass().getName());
             }

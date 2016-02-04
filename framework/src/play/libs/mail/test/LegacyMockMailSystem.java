@@ -39,7 +39,7 @@ public class LegacyMockMailSystem implements MailSystem {
     @Override
     public Future<Boolean> sendMessage(Email email) {
         try {
-            final StringBuffer content = new StringBuffer();
+            final StringBuilder content = new StringBuilder();
             Properties props = new Properties();
             props.put("mail.smtp.host", "myfakesmtpserver.com");
 
@@ -117,7 +117,7 @@ public class LegacyMockMailSystem implements MailSystem {
     }
 
 
-    private static void addAddresses(final StringBuffer content,
+    private static void addAddresses(final StringBuilder content,
             String header, List<?> ccAddresses) {
         if (ccAddresses != null && !ccAddresses.isEmpty()) {
             content.append("\n\t" + header + ": ");
@@ -128,7 +128,7 @@ public class LegacyMockMailSystem implements MailSystem {
         }
     }
 
-    private static void removeTheLastComma(final StringBuffer content) {
+    private static void removeTheLastComma(final StringBuilder content) {
         content.delete(content.length() - 2, content.length());
     }
 

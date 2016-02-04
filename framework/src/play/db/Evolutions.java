@@ -600,9 +600,9 @@ public class Evolutions extends PlayPlugin {
                     }
                     
                     String sql = IO.readContentAsString(evolution);
-                    StringBuffer sql_up = new StringBuffer();
-                    StringBuffer sql_down = new StringBuffer();
-                    StringBuffer current = new StringBuffer();
+                    StringBuilder sql_up = new StringBuilder();
+                    StringBuilder sql_down = new StringBuilder();
+                    StringBuilder current = new StringBuilder();
                     for (String line : sql.split("\r?\n")) {
                         if (line.trim().matches("^#.*[!]Ups")) {
                             current = sql_up;
