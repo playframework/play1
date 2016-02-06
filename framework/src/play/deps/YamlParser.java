@@ -49,12 +49,14 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         }
     }
 
+    @Override
     public boolean accept(Resource rsrc) {
         return rsrc.exists() && rsrc.getName().endsWith(".yml");
     }
-    
-    
-    
+
+
+
+    @Override
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
         try {
             InputStream srcStream =  rsrc.openStream();
@@ -267,8 +269,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         }
     }
 
+    @Override
     public void toIvyFile(InputStream in, Resource rsrc, File file, ModuleDescriptor md) throws ParseException, IOException {
-        ((DefaultModuleDescriptor)md).toIvyFile(file);
+        md.toIvyFile(file);
     }
 
     @SuppressWarnings("unchecked")
@@ -294,13 +297,13 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return o;
     }
 
-    public static Set<String> getOrderedModuleList(File file) throws FileNotFoundException, ParseException, IOException {
+    public static Set<String> getOrderedModuleList(File file) throws ParseException, IOException {
         Set<String> modules = new LinkedHashSet<String>();
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
         return getOrderedModuleList(modules, file);
     }
         
-   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws FileNotFoundException, ParseException, IOException {
+   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws ParseException, IOException {
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
         }

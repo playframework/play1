@@ -31,6 +31,7 @@ public class NotFound extends Result {
         super(method + " " + path);
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = Http.StatusCode.NOT_FOUND;
         String format = request.format;

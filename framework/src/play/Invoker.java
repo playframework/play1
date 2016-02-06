@@ -275,6 +275,7 @@ public class Invoker {
         /**
          * It's time to execute.
          */
+        @Override
         public void run() {
             if (waitInQueue != null) {
                 waitInQueue.stop();
@@ -285,6 +286,7 @@ public class Invoker {
                     before();
                     final AtomicBoolean executed = new AtomicBoolean(false);
                     this.withinFilter(new play.libs.F.Function0<Void>() {
+                        @Override
                         public Void apply() throws Throwable {
                             executed.set(true);
                             execute();
@@ -398,6 +400,7 @@ public class Invoker {
             if (task instanceof Promise) {
                 Promise<V> smartFuture = (Promise<V>) task;
                 smartFuture.onRedeem(new F.Action<F.Promise<V>>() {
+                    @Override
                     public void invoke(Promise<V> result) {
                         executor.submit(invocation);
                     }

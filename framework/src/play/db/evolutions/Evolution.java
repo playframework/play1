@@ -22,8 +22,9 @@ public class Evolution implements Comparable<Evolution> {
 	this.applyUp = applyUp;
     }
 
+    @Override
     public int compareTo(Evolution o) {
-	return this.revision - o.revision;
+        return this.revision - o.revision;
     }
 
     @Override

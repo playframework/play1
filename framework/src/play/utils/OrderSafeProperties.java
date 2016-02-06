@@ -99,14 +99,17 @@ public class OrderSafeProperties extends java.util.Properties {
             this.value = value;
         }
 
+        @Override
         public Object getKey() {
             return key;
         }
 
+        @Override
         public Object getValue() {
             return value;
         }
 
+        @Override
         public Object setValue(Object o) {
             throw new IllegalStateException("not implemented");
         }

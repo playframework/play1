@@ -16,6 +16,7 @@ public class RenderText extends Result {
         this.text = text.toString();
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/plain; charset=" + Http.Response.current().encoding);

@@ -89,6 +89,7 @@ public class JdbcResultFactories {
             this.columnIndex = 1;
         }
 
+        @Override
         public void init(ResultSet result) throws SQLException {
             if (field != null) {
                 ResultSetMetaData meta = result.getMetaData();
@@ -104,6 +105,7 @@ public class JdbcResultFactories {
         }
 
         @SuppressWarnings("unchecked")
+        @Override
         public T create(ResultSet result) throws SQLException {
             Object value = result.getObject(columnIndex);
             if (value instanceof BigDecimal) value = new Long(((BigDecimal)value).longValue());
@@ -123,6 +125,7 @@ public class JdbcResultFactories {
             this.fields = fields;
         }
 
+        @Override
         public void init(ResultSet result) throws SQLException {
             if (fields == null) {
                 fields = new ArrayList<String>();
@@ -135,6 +138,7 @@ public class JdbcResultFactories {
             }
         }
 
+        @Override
         public T create(ResultSet result) throws SQLException {
             try {
                 T obj = objectClass.newInstance();

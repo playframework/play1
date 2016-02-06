@@ -771,6 +771,7 @@ public class MultipartStream {
          * @throws IOException An I/O error occurs.
          * @return Number of bytes in the buffer.
          */
+        @Override
         public int available() throws IOException {
             if (pos == -1) {
                 return tail - head - pad;
@@ -787,6 +788,7 @@ public class MultipartStream {
          *   integer, or -1 for EOF.
          * @throws IOException An I/O error occurred.
          */
+        @Override
         public int read() throws IOException {
             if (closed) {
                 throw new FileItemStream.ItemSkippedException();
@@ -813,6 +815,7 @@ public class MultipartStream {
          *   or -1 for EOF.
          * @throws IOException An I/O error occurred.
          */
+        @Override
         public int read(byte[] b, int off, int len) throws IOException {
             if (closed) {
                 throw new FileItemStream.ItemSkippedException();
@@ -838,6 +841,7 @@ public class MultipartStream {
          * Closes the input stream.
          * @throws IOException An I/O error occurred.
          */
+        @Override
         public void close() throws IOException {
             if (closed) {
                 return;
@@ -862,6 +866,7 @@ public class MultipartStream {
          *   skipped.
          * @throws IOException An I/O error occurred.
          */
+        @Override
         public long skip(long bytes) throws IOException {
             if (closed) {
                 throw new FileItemStream.ItemSkippedException();
@@ -912,6 +917,7 @@ public class MultipartStream {
          * Returns, whether the stream is closed.
          * @return True, if the stream is closed, otherwise false.
          */
+        @Override
         public boolean isClosed() {
             return closed;
         }

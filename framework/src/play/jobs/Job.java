@@ -113,6 +113,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     private Callable<V> getJobCallingCallable(final Promise<V> smartFuture) {
       return new Callable<V>() {
+        @Override
         public V call() throws Exception {
           try {
             V result = Job.this.call();
@@ -180,6 +181,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         return null;
     }
 
+    @Override
     public V call() {
         Monitor monitor = null;
         try {
@@ -195,6 +197,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                     // If we have a plugin, get him to execute the job within the filter. 
                     final AtomicBoolean executed = new AtomicBoolean(false);
                     result = this.withinFilter(new play.libs.F.Function0<V>() {
+                        @Override
                         public V apply() throws Throwable {
                             executed.set(true);
                             return doJobWithResult();

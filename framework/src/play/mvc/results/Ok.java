@@ -14,6 +14,7 @@ public class Ok extends Result {
         super("OK");
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = Http.StatusCode.OK;
     }
