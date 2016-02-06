@@ -19,6 +19,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+
 /**
  * A framework plugin
  */
@@ -276,11 +279,11 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     public List<ApplicationClass> onClassesChange(List<ApplicationClass> modified) {
-        return new ArrayList<ApplicationClass>();
+        return emptyList();
     }
 
     public List<String> addTemplateExtensions() {
-        return new ArrayList<String>();
+        return emptyList();
     }
 
     /**
@@ -289,7 +292,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @return a Map from extensions (without dot) to mimetypes
      */
     public Map<String, String> addMimeTypes() {
-        return new HashMap<String, String>();
+        return emptyMap();
     }
 
     /**
@@ -332,7 +335,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         }
 
         // index is equal in both plugins.
-        // Sort on classtype to get consistent order
+        // Sort on class type to get consistent order
         res = this.getClass().getName().compareTo(o.getClass().getName());
         if (res != 0) {
             // classnames where different
@@ -370,7 +373,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @return list of plugin supported unit test classes (empty list in default implementation)
      */
     public Collection<Class> getUnitTests() {
-        return Collections.emptyList();
+        return emptyList();
     }
 
     /**
@@ -386,6 +389,6 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @return list of plugin supported functional test classes (empty list in default implementation)
      */
     public Collection<Class> getFunctionalTests() {
-        return Collections.emptyList();
+        return emptyList();
     }
 }
