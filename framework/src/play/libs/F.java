@@ -36,14 +36,17 @@ public class F {
         protected final CountDownLatch taskLock = new CountDownLatch(1);
         protected boolean cancelled = false;
 
+        @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             return false;
         }
 
+        @Override
         public boolean isCancelled() {
             return false;
         }
 
+        @Override
         public boolean isDone() {
             return invoked;
         }
@@ -52,6 +55,7 @@ public class F {
             return result;
         }
 
+        @Override
         public V get() throws InterruptedException, ExecutionException {
             taskLock.await();
             if (exception != null) {
@@ -61,6 +65,7 @@ public class F {
             return result;
         }
 
+        @Override
         public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             if(!taskLock.await(timeout, unit)) {
               throw new TimeoutException(String.format("Promise didn't redeem in %s %s", timeout, unit));
@@ -77,6 +82,7 @@ public class F {
         protected V result = null;
         protected Throwable exception = null;
 
+        @Override
         public void invoke(V result) {
             invokeWithResultOrException(result, null);
         }
@@ -168,6 +174,7 @@ public class F {
             };
             final F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
 
+                @Override
                 public void invoke(Promise<T> completed) {
                     waitAllLock.countDown();
                     if (waitAllLock.getCount() == 0) {
@@ -193,6 +200,7 @@ public class F {
             final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB});
             t.onRedeem(new F.Action<Promise<List<Object>>>() {
 
+                @Override
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
                     if(values != null) {
@@ -211,6 +219,7 @@ public class F {
             final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC});
             t.onRedeem(new F.Action<Promise<List<Object>>>() {
 
+                @Override
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
                     if(values != null) {
@@ -229,6 +238,7 @@ public class F {
             final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD});
             t.onRedeem(new F.Action<Promise<List<Object>>>() {
 
+                @Override
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
                     if(values != null) {
@@ -247,6 +257,7 @@ public class F {
             final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD, tE});
             t.onRedeem(new F.Action<Promise<List<Object>>>() {
 
+                @Override
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
                     if(values != null) {
@@ -266,6 +277,7 @@ public class F {
                 final int index = i + 1;
                 ((Promise<Object>) futures[i]).onRedeem(new F.Action<Promise<Object>>() {
 
+                    @Override
                     public void invoke(Promise<Object> completed) {
                         result.invoke(new F.Tuple(index, completed));
                     }
@@ -280,6 +292,7 @@ public class F {
 
             t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
 
+                @Override
                 public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
                     F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
                     switch (value._1) {
@@ -303,6 +316,7 @@ public class F {
 
             t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
 
+                @Override
                 public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
                     F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
                     switch (value._1) {
@@ -329,6 +343,7 @@ public class F {
 
             t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
 
+                @Override
                 public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
                     F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
                     switch (value._1) {
@@ -358,6 +373,7 @@ public class F {
 
             t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
 
+                @Override
                 public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
                     F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
                     switch (value._1) {
@@ -390,6 +406,7 @@ public class F {
 
             final F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
 
+                @Override
                 public void invoke(Promise<T> completed) {
                     synchronized (this) {
                         if (result.isDone()) {
@@ -788,6 +805,7 @@ public class F {
             throw new IllegalStateException("No value");
         }
 
+        @Override
         public Iterator<T> iterator() {
             return Collections.<T>emptyList().iterator();
         }
@@ -817,6 +835,7 @@ public class F {
             return value;
         }
 
+        @Override
         public Iterator<T> iterator() {
             return Collections.singletonList(value).iterator();
         }

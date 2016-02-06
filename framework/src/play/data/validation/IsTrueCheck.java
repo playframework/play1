@@ -14,6 +14,7 @@ public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
         setMessage(isTrue.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         if (value == null) {
             return false;

@@ -16,6 +16,7 @@ public class EmailCheck extends AbstractAnnotationCheck<Email> {
         setMessage(email.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         value = Validation.willBeValidated(value);
         if (value == null || value.toString().length() == 0) {

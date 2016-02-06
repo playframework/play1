@@ -32,7 +32,8 @@ public class Blob implements BinaryField, UserType {
         this.UUID = UUID;
         this.type = type;
     }
-    
+
+    @Override
     public InputStream get() {
         if(exists()) {
             try {
@@ -43,21 +44,25 @@ public class Blob implements BinaryField, UserType {
         }
         return null;
     }
-    
+
+    @Override
     public void set(InputStream is, String type) {
         this.UUID = Codec.UUID();
         this.type = type;
         IO.write(is, getFile());
     }
 
+    @Override
     public long length() {
         return getFile().length();
     }
 
+    @Override
     public String type() {
         return type;
     }
 
+    @Override
     public boolean exists() {
         return UUID != null && getFile().exists();
     }
@@ -75,10 +80,12 @@ public class Blob implements BinaryField, UserType {
 
     //
 
+    @Override
     public int[] sqlTypes() {
         return new int[] {Types.VARCHAR};
     }
 
+    @Override
     public Class returnedClass() {
         return Blob.class;
     }
@@ -87,6 +94,7 @@ public class Blob implements BinaryField, UserType {
       return a == b || (a != null && a.equals(b));
     }
 
+    @Override
     public boolean equals(Object o, Object o1) throws HibernateException {
         if(o instanceof Blob && o1 instanceof Blob) {
             return equal(((Blob)o).UUID, ((Blob)o1).UUID) &&
@@ -95,10 +103,12 @@ public class Blob implements BinaryField, UserType {
         return equal(o, o1);
     }
 
+    @Override
     public int hashCode(Object o) throws HibernateException {
         return o.hashCode();
     }
 
+    @Override
     public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor sessionImplementor, Object o) throws HibernateException, SQLException {
        String val = (String) StringType.INSTANCE.nullSafeGet(resultSet, names[0], sessionImplementor, o);
         if(val == null || val.length() == 0 || !val.contains("|")) {
@@ -107,6 +117,7 @@ public class Blob implements BinaryField, UserType {
         return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
     }
 
+    @Override
     public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor sessionImplementor) throws HibernateException, SQLException {
          if(o != null) {
             ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
@@ -115,6 +126,7 @@ public class Blob implements BinaryField, UserType {
         }
     }
 
+    @Override
     public Object deepCopy(Object o) throws HibernateException {
         if(o == null) {
             return null;
@@ -122,18 +134,22 @@ public class Blob implements BinaryField, UserType {
         return new Blob(((Blob)o).UUID, ((Blob)o).type);
     }
 
+    @Override
     public boolean isMutable() {
         return true;
     }
 
+    @Override
     public Serializable disassemble(Object o) throws HibernateException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public Object assemble(Serializable srlzbl, Object o) throws HibernateException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public Object replace(Object o, Object o1, Object o2) throws HibernateException {
         throw new UnsupportedOperationException("Not supported yet.");
     }

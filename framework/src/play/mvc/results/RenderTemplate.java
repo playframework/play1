@@ -24,6 +24,7 @@ public class RenderTemplate extends Result {
         this.content = template.render(args);
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             final String contentType = MimeTypes.getContentType(name, "text/plain");

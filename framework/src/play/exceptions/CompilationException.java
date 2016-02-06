@@ -44,6 +44,7 @@ public class CompilationException extends PlayException implements SourceAttachm
         return problem;
     }
 
+    @Override
     public List<String> getSource() {
         String sourceCode = source.contentAsString();
         if(start != -1 && end != -1) {

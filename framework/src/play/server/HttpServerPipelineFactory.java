@@ -16,6 +16,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
     protected static Map<String, Class> classes = new HashMap<String, Class>();
 
+    @Override
     public ChannelPipeline getPipeline() throws Exception {
 
         ChannelPipeline pipeline = pipeline();

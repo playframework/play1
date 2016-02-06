@@ -17,6 +17,7 @@ public class PlayConflictManager extends AbstractConflictManager {
 
     public LatestConflictManager deleguate = new LatestConflictManager(new LatestRevisionStrategy());
 
+    @Override
     public Collection resolveConflicts(IvyNode in, Collection conflicts) {
 
         // No conflict

@@ -19,6 +19,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
         setMessage(annotation.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null || value.toString().length() == 0) {

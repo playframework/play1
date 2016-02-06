@@ -17,6 +17,7 @@ import play.libs.I18N;
  */
 public class CalendarBinder implements TypeBinder<Calendar> {
 
+    @Override
     public Calendar bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
         if (value == null || value.trim().length() == 0) {
             return null;

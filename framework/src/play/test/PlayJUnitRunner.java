@@ -81,6 +81,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
 
         INVOKE_THE_TEST_IN_PLAY_CONTEXT {
 
+            @Override
             public Statement apply(final Statement base, FrameworkMethod method, Object target) {
 
                 return new Statement() {
@@ -118,6 +119,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
         },
         JUST_RUN_THE_TEST {
 
+            @Override
             public Statement apply(final Statement base, FrameworkMethod method, Object target) {
                 return new Statement() {
 
