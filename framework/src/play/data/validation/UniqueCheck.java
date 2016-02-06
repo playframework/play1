@@ -82,11 +82,11 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             if (i > 0) {
                 jpql.append(" And ");
             }
-            jpql.append("o.").append(propertyNames[i]).append(" = ?" + String.valueOf(index++) + " ");
+            jpql.append("o.").append(propertyNames[i]).append(" = ?").append(String.valueOf(index++)).append(" ");
         }
         if (isUpdate) {
             values[propertyNames.length] = keyValue;
-            jpql.append(" and o.").append(keyProperty).append(" <>  ?" + String.valueOf(index++) + " ");
+            jpql.append(" and o.").append(keyProperty).append(" <>  ?").append(String.valueOf(index++)).append(" ");
         }
         return JPQL.instance.count(entityName, jpql.toString(), values) == 0L;
     }
