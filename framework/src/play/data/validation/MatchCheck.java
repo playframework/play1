@@ -19,6 +19,7 @@ public class MatchCheck extends AbstractAnnotationCheck<Match> {
         pattern = Pattern.compile(match.value());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null || value.toString().length() == 0) {

@@ -60,7 +60,8 @@ public class DependenciesManager {
     HumanReadyLogger logger;
     
     final FileFilter dirsToTrim = new FileFilter() {
-    
+
+        @Override
         public boolean accept(File file) {
             return file.isDirectory() && isDirToTrim(file.getName());
         }

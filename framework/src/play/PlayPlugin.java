@@ -324,7 +324,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onApplicationReady() {
     }
 
-    // ~~~~~
+    @Override
     public int compareTo(PlayPlugin o) {
         int res = index < o.index ? -1 : (index == o.index ? 0 : 1);
         if (res != 0) {

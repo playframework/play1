@@ -15,6 +15,7 @@ public class RenderHtml extends Result {
         this.text = text.toString();
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/html");

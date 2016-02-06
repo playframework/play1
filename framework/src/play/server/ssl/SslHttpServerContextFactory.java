@@ -91,7 +91,7 @@ public class SslHttpServerContextFactory {
                 keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file",
                                                                                                "conf/host.key"))),
                                                     new PasswordFinder() {
-                    public char[] getPassword() {
+                    @Override public char[] getPassword() {
                         return p.getProperty("certificate.password", "secret").toCharArray();
                     }
                 });
@@ -115,30 +115,37 @@ public class SslHttpServerContextFactory {
             }
         }
 
+        @Override
         public String chooseEngineServerAlias(String s, Principal[] principals, SSLEngine sslEngine) {
             return "";
         }
 
+        @Override
         public String[] getClientAliases(String s, Principal[] principals) {
             return new String[]{""};
         }
 
+        @Override
         public String chooseClientAlias(String[] strings, Principal[] principals, Socket socket) {
             return "";
         }
 
+        @Override
         public String[] getServerAliases(String s, Principal[] principals) {
             return new String[]{""};
         }
 
+        @Override
         public String chooseServerAlias(String s, Principal[] principals, Socket socket) {
             return "";
         }
 
+        @Override
         public X509Certificate[] getCertificateChain(String s) {
             return chain;
         }
 
+        @Override
         public PrivateKey getPrivateKey(String s) {
             return key;
         }

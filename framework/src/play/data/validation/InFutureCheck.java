@@ -33,6 +33,7 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
         }
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {

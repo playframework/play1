@@ -33,30 +33,37 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         return is;
     }
 
+    @Override
     public ChannelBuffer unwrap() {
         throw new RuntimeException();
     }
 
+    @Override
     public ChannelBufferFactory factory() {
         throw new RuntimeException();
     }
 
+    @Override
     public ByteOrder order() {
         throw new RuntimeException();
     }
 
+    @Override
     public boolean isDirect() {
         return true;
     }
 
+    @Override
     public boolean hasArray() {
         return false;
     }
 
+    @Override
     public byte[] array() {
         throw new RuntimeException();
     }
 
+    @Override
     public int arrayOffset() {
         throw new RuntimeException();
     }
@@ -70,14 +77,17 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         throw new RuntimeException();
     }
 
+    @Override
     public void setBytes(int index, ChannelBuffer src, int srcIndex, int length) {
         throw new RuntimeException();
     }
 
+    @Override
     public void setBytes(int index, byte[] src, int srcIndex, int length) {
         throw new RuntimeException();
     }
 
+    @Override
     public void setBytes(int index, ByteBuffer src) {
         throw new RuntimeException();
     }
@@ -86,34 +96,40 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         throw new RuntimeException();
     }
 
+    @Override
     public void setMedium(int index, int value) {
         throw new RuntimeException();
     }
 
+    @Override
     public void setInt(int index, int value) {
         throw new RuntimeException();
     }
 
+    @Override
     public void setLong(int index, long value) {
         throw new RuntimeException();
     }
 
+    @Override
     public int setBytes(int index, InputStream in, int length)
             throws IOException {
         throw new RuntimeException();
     }
 
+    @Override
     public int setBytes(int index, ScatteringByteChannel in, int length)
             throws IOException {
         throw new RuntimeException();
 
     }
 
+    @Override
     public int readerIndex() {
         return 0;
     }
 
-
+    @Override
     public int getBytes(int index, GatheringByteChannel out, int length)
             throws IOException {
         byte[] b = new byte[length];
@@ -122,10 +138,12 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         return out.write(bb);
     }
 
+    @Override
     public void setByte(int i, int i1) {
         throw new RuntimeException();
     }
 
+    @Override
     public void getBytes(int index, OutputStream out, int length)
             throws IOException {
         byte[] b = new byte[length];
@@ -133,6 +151,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         out.write(b, index, length);
     }
 
+    @Override
     public void getBytes(int index, byte[] dst, int dstIndex, int length) {
         try {
             byte[] b = new byte[length];
@@ -143,6 +162,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         }
     }
 
+    @Override
     public void getBytes(int index, ChannelBuffer dst, int dstIndex, int length) {
         try {
             byte[] b = new byte[length];
@@ -153,6 +173,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         }
     }
 
+    @Override
     public void getBytes(int index, ByteBuffer dst) {
         try {
             byte[] b = new byte[is.available() - index];
@@ -163,41 +184,50 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         }
     }
 
+    @Override
     public ChannelBuffer duplicate() {
         throw new RuntimeException();
     }
 
+    @Override
     public ChannelBuffer copy(int index, int length) {
         throw new RuntimeException();
     }
 
+    @Override
     public ChannelBuffer slice(int index, int length) {
         throw new RuntimeException();
     }
 
+    @Override
     public byte getByte(int index) {
         throw new RuntimeException();
     }
 
+    @Override
     public short getShort(int index) {
         throw new RuntimeException();
     }
 
+    @Override
     public int getUnsignedMedium(int index) {
         throw new RuntimeException();
 
     }
 
+    @Override
     public int getInt(int index) {
         throw new RuntimeException();
 
     }
 
+    @Override
     public long getLong(int index) {
         throw new RuntimeException();
 
     }
 
+    @Override
     public ByteBuffer toByteBuffer(int index, int length) {
         throw new RuntimeException();
     }
@@ -207,6 +237,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         throw new RuntimeException();
     }
 
+    @Override
     public int capacity() {
         try {
             return is.available();
@@ -216,6 +247,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
 
     }
 
+    @Override
     public ChannelBuffer readBytes(int length) {
 //          ChannelBuffer buf = ChannelBuffers.buffer(length);
 //          getBytes(0, buf);
@@ -223,23 +255,28 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         throw new RuntimeException();
     }
 
+    @Override
     public ChannelBuffer readSlice(int length) {
         throw new RuntimeException();
     }
 
+    @Override
     public void readBytes(byte[] dst, int dstIndex, int length) {
         checkReadableBytes(length);
         getBytes(0, dst, dstIndex, length);
     }
 
+    @Override
     public void readBytes(byte[] dst) {
         readBytes(dst, 0, dst.length);
     }
 
+    @Override
     public void readBytes(ChannelBuffer dst) {
         readBytes(dst, dst.writableBytes());
     }
 
+    @Override
     public void readBytes(ChannelBuffer dst, int length) {
         if (length > dst.writableBytes()) {
             throw new IndexOutOfBoundsException();
@@ -248,27 +285,32 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         dst.writerIndex(dst.writerIndex() + length);
     }
 
+    @Override
     public void readBytes(ChannelBuffer dst, int dstIndex, int length) {
         getBytes(0, dst, dstIndex, length);
     }
 
+    @Override
     public void readBytes(ByteBuffer dst) {
         int length = dst.remaining();
         checkReadableBytes(length);
         getBytes(0, dst);
     }
 
+    @Override
     public int readBytes(GatheringByteChannel out, int length)
             throws IOException {
         checkReadableBytes(length);
         return getBytes(0, out, length);
     }
 
+    @Override
     public void readBytes(OutputStream out, int length) throws IOException {
         checkReadableBytes(length);
         getBytes(0, out, length);
     }
 
+    @Override
     public void setShort(int a, int b) {
         throw new RuntimeException();
     }

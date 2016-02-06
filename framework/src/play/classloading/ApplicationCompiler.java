@@ -96,18 +96,22 @@ public class ApplicationCompiler {
             }
         }
 
+        @Override
         public char[] getFileName() {
             return fileName.toCharArray();
         }
 
+        @Override
         public char[] getContents() {
             return applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
+        @Override
         public char[] getMainTypeName() {
             return typeName;
         }
 
+        @Override
         public char[][] getPackageName() {
             return packageName;
         }
@@ -137,6 +141,7 @@ public class ApplicationCompiler {
          */
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
+            @Override
             public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
                 final StringBuilder result = new StringBuilder(compoundTypeName.length * 7);
                 for (int i = 0; i < compoundTypeName.length; i++) {
@@ -148,6 +153,7 @@ public class ApplicationCompiler {
                 return findType(result.toString());
             }
 
+            @Override
             public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
                 final StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
                 for (int i = 0; i < packageName.length; i++) {
@@ -200,6 +206,7 @@ public class ApplicationCompiler {
                 }
             }
 
+            @Override
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
                 String name;
@@ -232,6 +239,7 @@ public class ApplicationCompiler {
                 return true;
             }
 
+            @Override
             public void cleanup() {
             }
         };
@@ -241,6 +249,7 @@ public class ApplicationCompiler {
          */
         ICompilerRequestor compilerRequestor = new ICompilerRequestor() {
 
+            @Override
             public void acceptResult(CompilationResult result) {
                 // If error
                 if (result.hasErrors()) {

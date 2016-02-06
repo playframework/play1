@@ -1,9 +1,29 @@
 package play.db.jpa;
 
-import org.hibernate.Session;
-import org.hibernate.collection.spi.PersistentCollection;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.EntityManager;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PersistenceException;
+
 import org.hibernate.collection.internal.PersistentMap;
-import org.hibernate.engine.spi.*;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.engine.spi.CollectionEntry;
+import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.internal.SessionImpl;
@@ -15,24 +35,16 @@ import org.hibernate.type.Type;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
-import javax.persistence.*;
-
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.SQLException;
-import java.util.*;
-
 /**
  * A super class for JPA entities
  */
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
-    
+
     private transient JPAConfig _jpaConfig = null;
 
     public JPAContext getJPAContext() {
-        if (_jpaConfig==null) {
+        if (_jpaConfig == null) {
             _jpaConfig = getJPAConfig(getClass());
         }
         return _jpaConfig.getJPAContext();
@@ -42,9 +54,10 @@ public class JPABase implements Serializable, play.db.Model {
      * Returns the correct JPAConfig used to manage this entity-class
      */
     public static JPAConfig getJPAConfig(Class clazz) {
-        return JPA.getJPAConfig( Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz));
+        return JPA.getJPAConfig(Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz));
     }
 
+    @Override
     public void _save() {
         if (!em().contains(this)) {
             em().persist(this);
@@ -73,6 +86,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public void _delete() {
         try {
             avoidCascadeSaveLoops.set(new HashSet<JPABase>());
@@ -105,6 +119,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public Object _key() {
         return Model.Manager.factoryFor(this.getClass()).keyValue(this);
     }
@@ -208,7 +223,7 @@ public class JPABase implements Serializable, play.db.Model {
                 Type ct = cp.getElementType();
                 if (ct instanceof EntityType) {
                     EntityEntry entry = pc.getEntry(base);
-                    String entityName =  entry.getEntityName();
+                    String entityName = entry.getEntityName();
                     entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
                     if (ce.getSnapshot() != null) {
                         Collection orphans = ce.getOrphans(entityName, persistentCollection);
@@ -250,7 +265,8 @@ public class JPABase implements Serializable, play.db.Model {
     }
 
     /**
-     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same <strong>{@link #_key key} and class</strong>
+     * JPASupport instances a and b are equals if either <strong>a == b</strong>
+     * or a and b have same <strong>{@link #_key key} and class</strong>
      *
      * @param other
      * @return true if equality condition above is verified
@@ -275,7 +291,6 @@ public class JPABase implements Serializable, play.db.Model {
             }
             return false;
         }
-
 
         if (!this.getClass().isAssignableFrom(other.getClass())) {
             return false;

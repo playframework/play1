@@ -100,74 +100,93 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
 
     }
 
-    // ~~~~~~
+    @Override
     public void log(String string, int i) {
         niceLog(string, i);
     }
 
+    @Override
     public void rawlog(String string, int i) {
         niceLog(string, i);
     }
 
+    @Override
     public void debug(String string) {
     }
 
+    @Override
     public void verbose(String string) {
     }
 
+    @Override
     public void deprecated(String string) {
     }
 
+    @Override
     public void info(String string) {
         niceLog(string, Message.MSG_INFO);
     }
 
+    @Override
     public void rawinfo(String string) {
         niceLog(string, Message.MSG_INFO);
     }
 
+    @Override
     public void warn(String string) {
         niceLog(string, Message.MSG_WARN);
     }
 
+    @Override
     public void error(String string) {
         niceLog(string, Message.MSG_ERR);
     }
 
+    @Override
     public List getProblems() {
         return null;
     }
 
+    @Override
     public List getWarns() {
         return null;
     }
 
+    @Override
     public List getErrors() {
         return null;
     }
 
+    @Override
     public void clearProblems() {
     }
 
+    @Override
     public void sumupProblems() {
     }
 
+    @Override
     public void progress() {
     }
 
+    @Override
     public void endProgress() {
     }
 
+    @Override
     public void endProgress(String string) {
     }
 
+    @Override
     public boolean isShowProgress() {
         return false;
     }
 
+    @Override
     public void setShowProgress(boolean bln) {
     }
 
+    @Override
     public void transferProgress(TransferEvent te) {
         //System.out.println(te.getResource().getContentLength());
         if (downloading != null) {

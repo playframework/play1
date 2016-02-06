@@ -21,6 +21,7 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
         setMessage(range.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {

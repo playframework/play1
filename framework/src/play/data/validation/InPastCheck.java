@@ -32,6 +32,7 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
         }
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {

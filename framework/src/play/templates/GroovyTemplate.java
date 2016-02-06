@@ -82,6 +82,7 @@ public class GroovyTemplate extends BaseTemplate {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     void directLoad(byte[] code) throws Exception {
         TClassLoader tClassLoader = new TClassLoader();
         String[] lines = new String(code, "utf-8").split("\n");
@@ -110,6 +111,7 @@ public class GroovyTemplate extends BaseTemplate {
     protected void onCompileEnd(){  
     }
 
+    @Override
     public void compile() {
         if (compiledTemplate == null) {
             try {
@@ -130,6 +132,7 @@ public class GroovyTemplate extends BaseTemplate {
                 LinkedList<GroovyClassOperation> output = new LinkedList<GroovyClassOperation>();
                 phases[Phases.OUTPUT] = output;
                 output.add(new GroovyClassOperation() {
+                    @Override
                     public void call(GroovyClass gclass) {
                         groovyClassesForThisTemplate.add(gclass);
                     }
@@ -314,6 +317,7 @@ public class GroovyTemplate extends BaseTemplate {
         return null;
     }
 
+    @Override
     protected Throwable cleanStackTrace(Throwable e) {
         List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
         for (StackTraceElement se : e.getStackTrace()) {

@@ -287,10 +287,12 @@ public class ApplicationClassloader extends ClassLoader {
         final Iterator<URL> it = urls.iterator();
         return new Enumeration<URL>() {
 
+            @Override
             public boolean hasMoreElements() {
                 return it.hasNext();
             }
 
+            @Override
             public URL nextElement() {
                 return it.next();
             }
@@ -432,6 +434,7 @@ public class ApplicationClassloader extends ClassLoader {
 
                 Collections.sort(allClasses, new Comparator<Class>() {
 
+                    @Override
                     public int compare(Class o1, Class o2) {
                         return o1.getName().compareTo(o2.getName());
                     }

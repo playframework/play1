@@ -446,6 +446,7 @@ public abstract class Binder {
 
             // must get all indexes and sort them so we add items in correct order.
             Set<String> indexes = new TreeSet<String>(new Comparator<String>() {
+                @Override
                 public int compare(String arg0, String arg1) {
                     try {
                         return Integer.parseInt(arg0) - Integer.parseInt(arg1);

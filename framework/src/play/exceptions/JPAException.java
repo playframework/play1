@@ -41,6 +41,7 @@ public class JPAException extends PlayException implements SourceAttachment {
         return 1;
     }
 
+    @Override
     public List<String> getSource() {
         List<String> sql = new ArrayList<String>();
         if(getCause() != null && getCause() instanceof GenericJDBCException) {

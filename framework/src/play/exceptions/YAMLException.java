@@ -29,14 +29,17 @@ public class YAMLException extends PlayException implements SourceAttachment {
         return "Cannot parse the <strong>" + yaml.relativePath() + "</strong> file: " + e.getProblem();
     }
 
+    @Override
     public Integer getLineNumber() {
         return e.getProblemMark().getLine() + 1;
     }
 
+    @Override
     public List<String> getSource() {
         return Arrays.asList(yaml.contentAsString().split("\n"));
     }
 
+    @Override
     public String getSourceFile() {
         return yaml.relativePath();
     }

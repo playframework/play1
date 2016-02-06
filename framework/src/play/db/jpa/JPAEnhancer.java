@@ -10,6 +10,7 @@ import play.classloading.enhancers.Enhancer;
  */
 public class JPAEnhancer extends Enhancer {
 
+    @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
 

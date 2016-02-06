@@ -15,7 +15,8 @@ public class RedirectToStatic extends Result {
     public RedirectToStatic(String file) {
         this.file = file;
     }
-    
+
+    @Override
     public void apply(Request request, Response response) {
         try {
             response.status = Http.StatusCode.FOUND;
