@@ -205,7 +205,9 @@ public abstract class Cache {
      * Clear all data from cache.
      */
     public static void clear() {
-        cacheImpl.clear();
+        if (cacheImpl != null) {
+            cacheImpl.clear();
+        }
     }
 
     /**
