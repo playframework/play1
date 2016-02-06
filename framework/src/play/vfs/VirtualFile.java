@@ -63,11 +63,11 @@ public class VirtualFile {
 
         }
         Collections.reverse(path);
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(prefix);
         for (String p : path) {
-            builder.append("/" + p);
+            builder.append('/').append(p);
         }
-        return prefix + builder.toString();
+        return builder.toString();
     }
 
     String isRoot(File f) {
@@ -85,8 +85,10 @@ public class VirtualFile {
         List<VirtualFile> res = new ArrayList<VirtualFile>();
         if (exists()) {
             File[] children = realFile.listFiles();
-            for (int i = 0; i < children.length; i++) {
-                res.add(new VirtualFile(children[i]));
+            if (children != null) {
+                for (File aChildren : children) {
+                    res.add(new VirtualFile(aChildren));
+                }
             }
         }
         return res;
@@ -94,10 +96,7 @@ public class VirtualFile {
 
     public boolean exists() {
         try {
-            if (realFile != null) {
-                return realFile.exists();
-            }
-            return false;
+            return realFile != null && realFile.exists();
         } catch (AccessControlException e) {
             return false;
         }

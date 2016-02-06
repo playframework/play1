@@ -119,7 +119,7 @@ public class JavaExtensions {
     public static RawData asAttr(Map attributes) {
         StringBuilder buf = new StringBuilder();
         for (Object key : attributes.keySet()) {
-            buf.append(key + "=\"" + attributes.get(key) + "\" ");
+            buf.append(key).append("=\"").append(attributes.get(key)).append("\" ");
         }
         return new RawData(buf);
     }
