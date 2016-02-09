@@ -1,6 +1,5 @@
 package play.test;
 
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
@@ -419,7 +418,7 @@ public class Fixtures {
     static Map<String, String[]> serialize(Map<?, ?> entityProperties, String prefix) {
 
         if (entityProperties == null) {
-            return MapUtils.EMPTY_MAP;
+            return Collections.EMPTY_MAP;
         }
 
         final Map<String, String[]> serialized = new HashMap<String, String[]>();
