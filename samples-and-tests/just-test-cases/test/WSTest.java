@@ -50,7 +50,7 @@ public class WSTest extends UnitTest {
 
     @Test
     public void getWithVitualhostTest() {
-        HttpResponse response = WS.url("http://74.125.239.48").withVirtualHost("www.google.com").get();
+        HttpResponse response = WS.url("http://74.125.204.100").withVirtualHost("www.google.com").get();
         assertNotNull(response);
         
         InputStream is = response.getStream();
