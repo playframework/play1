@@ -19,6 +19,7 @@ public class NotModified extends Result {
         this.etag = etag;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = Http.StatusCode.NOT_MODIFIED;
         if (etag != null) {

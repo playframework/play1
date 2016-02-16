@@ -181,14 +181,17 @@ public class SQLSplitter implements Iterable<CharSequence> {
 		this.sql = sql;
 	}
 
+	@Override
 	public Iterator<CharSequence> iterator() {
 		return new Iterator<CharSequence>() {
 			int i = 0, prev = 0;
 
+			@Override
 			public boolean hasNext() {
 				return prev < sql.length();
 			}
 
+			@Override
 			public CharSequence next() {
 				while ( i < sql.length() ) {
 					if ( sql.charAt(i) == ';' ) {
@@ -212,6 +215,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 				throw new NoSuchElementException();
 			}
 
+			@Override
 			public void remove() { throw new UnsupportedOperationException(); }
 		};
 	}

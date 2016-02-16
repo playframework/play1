@@ -28,7 +28,7 @@ import java.util.*;
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
 
-   
+    @Override
     public void _save() {
         String dbName = JPA.getDBName(this.getClass());
         if (!em(dbName).contains(this)) {
@@ -58,6 +58,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public void _delete() {
         String dbName = JPA.getDBName(this.getClass());
          
@@ -92,6 +93,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public Object _key() {
         return Model.Manager.factoryFor(this.getClass()).keyValue(this);
     }

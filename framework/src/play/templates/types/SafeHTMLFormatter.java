@@ -7,6 +7,7 @@ import play.utils.HTML;
 
 public class SafeHTMLFormatter implements SafeFormatter {
 
+    @Override
     public String format(Template template, Object value) {
         if (value != null) {
             if (TagContext.hasParentTag("verbatim")) {

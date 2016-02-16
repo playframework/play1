@@ -65,6 +65,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     private static boolean routerInitializedWithContext = false;
 
+    @Override
     public void contextInitialized(ServletContextEvent e) {
         Play.standalonePlayServer = false;
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -91,6 +92,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Thread.currentThread().setContextClassLoader(oldClassLoader);
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent e) {
         Play.stop();
     }

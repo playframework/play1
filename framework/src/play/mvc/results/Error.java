@@ -29,6 +29,7 @@ public class Error extends Result {
         this.status = status;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = status;
         String format = request.format;

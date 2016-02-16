@@ -28,14 +28,17 @@ public abstract class TemplateException extends PlayException implements SourceA
         return template;
     }
 
+    @Override
     public Integer getLineNumber() {
         return lineNumber;
     }
 
+    @Override
     public List<String> getSource() {
         return Arrays.asList(template.source.split("\n"));
     }
 
+    @Override
     public String getSourceFile() {
         return template.name;
     }

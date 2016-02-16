@@ -32,6 +32,7 @@ public class RenderXml extends Result {
         this(o, new XStream());
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/xml");

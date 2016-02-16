@@ -7,6 +7,7 @@ import play.templates.Template;
 
 public class SafeXMLFormatter implements SafeFormatter {
 
+    @Override
     public String format(Template template, Object value) {
         if (value != null) {
             if (TagContext.hasParentTag("verbatim")) {

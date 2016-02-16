@@ -35,6 +35,7 @@ public class SslPlayHandler extends PlayHandler {
 
     private static final class SslListener implements ChannelFutureListener {
 
+        @Override
         public void operationComplete(ChannelFuture future) throws Exception {
             if (!future.isSuccess()) {
                 Logger.debug(future.getCause(), "Invalid certificate");

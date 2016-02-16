@@ -183,6 +183,7 @@ public class Mail {
         if (asynchronousSend) {
             return executor.submit(new Callable<Boolean>() {
 
+                @Override
                 public Boolean call() {
                     try {
                         msg.setSentDate(new Date());
@@ -206,23 +207,27 @@ public class Mail {
                 result.append("oops");
             }
             return new Future<Boolean>() {
-
+                @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
                     return false;
                 }
 
+                @Override
                 public boolean isCancelled() {
                     return false;
                 }
 
+                @Override
                 public boolean isDone() {
                     return true;
                 }
 
+                @Override
                 public Boolean get() {
                     return result.length() == 0;
                 }
 
+                @Override
                 public Boolean get(long timeout, TimeUnit unit) {
                     return result.length() == 0;
                 }

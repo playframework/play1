@@ -14,6 +14,7 @@ import play.mvc.Scope.Params;
 public class BinaryBinder implements TypeBinder<Model.BinaryField> {
 
     @SuppressWarnings("unchecked")
+    @Override
     public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
         if (value == null || value.trim().length() == 0) {
             return null;

@@ -12,6 +12,7 @@ public class Status extends Result {
         this.code = code;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = code;
     }

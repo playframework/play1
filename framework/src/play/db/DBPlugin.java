@@ -408,26 +408,32 @@ public class DBPlugin extends PlayPlugin {
             this.driver = d;
         }
 
+        @Override
         public boolean acceptsURL(String u) throws SQLException {
             return this.driver.acceptsURL(u);
         }
 
+        @Override
         public Connection connect(String u, Properties p) throws SQLException {
             return this.driver.connect(u, p);
         }
 
+        @Override
         public int getMajorVersion() {
             return this.driver.getMajorVersion();
         }
 
+        @Override
         public int getMinorVersion() {
             return this.driver.getMinorVersion();
         }
 
+        @Override
         public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
             return this.driver.getPropertyInfo(u, p);
         }
 
+        @Override
         public boolean jdbcCompliant() {
             return this.driver.jdbcCompliant();
         }
@@ -435,6 +441,7 @@ public class DBPlugin extends PlayPlugin {
         // Method not annotated with @Override since getParentLogger() is a new method
         // in the CommonDataSource interface starting with JDK7 and this annotation
         // would cause compilation errors with JDK6.
+        @Override
         public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
             try {
                 return (java.util.logging.Logger) Driver.class.getDeclaredMethod("getParentLogger").invoke(this.driver);
@@ -457,6 +464,7 @@ public class DBPlugin extends PlayPlugin {
             isolationLevels.put("SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE);
         }
 
+        @Override
         public void onAcquire(Connection c, String parentDataSourceIdentityToken) {
             Integer isolation = getIsolationLevel();
             if (isolation != null) {
@@ -469,8 +477,13 @@ public class DBPlugin extends PlayPlugin {
             }
         }
 
+        @Override
         public void onDestroy(Connection c, String parentDataSourceIdentityToken) {}
+
+        @Override
         public void onCheckOut(Connection c, String parentDataSourceIdentityToken) {}
+
+        @Override
         public void onCheckIn(Connection c, String parentDataSourceIdentityToken) {}
 
         /**
