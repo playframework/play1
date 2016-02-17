@@ -141,17 +141,20 @@ public class Blob implements BinaryField, UserType {
 
     @Override
     public Serializable disassemble(Object o) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (o == null) return null;
+        return (Serializable) ((Blob)o).UUID + "|" + ((Blob)o).type;
     }
 
     @Override
-    public Object assemble(Serializable srlzbl, Object o) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Object assemble(Serializable cached, Object owner) throws HibernateException {
+        if (cached == null) return null;
+        String val = (String) cached;
+        return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
     }
 
     @Override
-    public Object replace(Object o, Object o1, Object o2) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Object replace(Object original, Object target, Object owner) throws HibernateException {
+        return original;
     }
 
     //
