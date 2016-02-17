@@ -673,7 +673,7 @@ public class WS extends PlayPlugin {
 
         /**
          * parse and get the response body as a {@link Document DOM document}
-         * 
+         *
          * @param encoding
          *            xml charset encoding
          * @return a DOM document
@@ -691,7 +691,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * 
+         *
          * @return the body of the http response
          */
         public String getString() {
@@ -700,7 +700,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * 
+         *
          * @param encoding
          *            string charset encoding
          * @return the body of the http response
@@ -711,7 +711,7 @@ public class WS extends PlayPlugin {
 
         /**
          * Parse the response string as a query string.
-         * 
+         *
          * @return The parameters as a Map. Return an empty map if the response
          *         is not formed as a query string.
          */
