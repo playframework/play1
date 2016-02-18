@@ -33,6 +33,13 @@ public class Blob implements BinaryField, UserType {
         this.type = type;
     }
 
+    private Blob(String coded) {
+        if (coded != null && coded.length() > 0 && coded.contains("|")) {
+            this.UUID = coded.split("[|]")[0];
+            this.type = coded.split("[|]")[1];
+        }
+    }
+
     @Override
     public InputStream get() {
         if(exists()) {
@@ -111,19 +118,20 @@ public class Blob implements BinaryField, UserType {
     @Override
     public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor sessionImplementor, Object o) throws HibernateException, SQLException {
        String val = (String) StringType.INSTANCE.nullSafeGet(resultSet, names[0], sessionImplementor, o);
-        if(val == null || val.length() == 0 || !val.contains("|")) {
-            return new Blob();
-        }
-        return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
+        return new Blob(val);
     }
 
     @Override
     public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor sessionImplementor) throws HibernateException, SQLException {
          if(o != null) {
-            ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
+            ps.setString(i, encode((Blob) o));
         } else {
             ps.setNull(i, Types.VARCHAR);
         }
+    }
+
+    private String encode(Blob o) {
+        return o.UUID != null ? o.UUID + "|" + o.type : null;
     }
 
     @Override
@@ -142,14 +150,13 @@ public class Blob implements BinaryField, UserType {
     @Override
     public Serializable disassemble(Object o) throws HibernateException {
         if (o == null) return null;
-        return (Serializable) ((Blob)o).UUID + "|" + ((Blob)o).type;
+        return encode((Blob) o);
     }
 
     @Override
     public Object assemble(Serializable cached, Object owner) throws HibernateException {
         if (cached == null) return null;
-        String val = (String) cached;
-        return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
+        return new Blob((String) cached);
     }
 
     @Override
