@@ -166,7 +166,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             try { // #1198
                 ctClass.getDeclaredField(sigField);
             } catch (NotFoundException nfe) {
-                CtField signature = CtField.make("public static String[] " + sigField + " = " + iv.toString(), ctClass);
+                CtField signature = CtField.make("public static String[] " + sigField + " = " + iv, ctClass);
                 ctClass.addField(signature);
             }
 
