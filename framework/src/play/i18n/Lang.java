@@ -17,7 +17,7 @@ import play.mvc.Scope;
  */
 public class Lang {
 
-    public static ThreadLocal<String> current = new ThreadLocal<String>();
+    static final ThreadLocal<String> current = new ThreadLocal<String>();
 
     /**
      * Retrieve the current language or null
@@ -194,14 +194,14 @@ public class Lang {
     }
 
      public static Locale getLocale(String localeStr) {
-        if(localeStr == null) {
+        if (localeStr == null) {
             return null;            
         }
         Locale langMatch = null;
         String lang = localeStr;
         int splitPos = lang.indexOf("_");
         if (splitPos > 0) {
-        	lang = lang.substring(0, splitPos);
+            lang = lang.substring(0, splitPos);
         }
         for (Locale locale : Locale.getAvailableLocales()) {
             if (locale.toString().equalsIgnoreCase(localeStr)) {
