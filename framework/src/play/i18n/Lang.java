@@ -7,10 +7,7 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Language support
@@ -19,6 +16,8 @@ public class Lang {
 
     static final ThreadLocal<String> current = new ThreadLocal<String>();
 
+    private static Map<String, Locale> cache = new HashMap<String, Locale>();
+    
     /**
      * Retrieve the current language or null
      *
@@ -199,19 +198,32 @@ public class Lang {
         if (localeStr == null) {
             return null;
         }
-        Locale langMatch = null;
+
+        Locale result = cache.get(localeStr);
+        
+        if (result == null) {
+            result = findLocale(localeStr);
+            cache.put(localeStr, result);
+        }
+        
+        return result;
+    }
+
+    private static Locale findLocale(String localeStr) {
         String lang = localeStr;
         int splitPos = lang.indexOf("_");
         if (splitPos > 0) {
             lang = lang.substring(0, splitPos);
         }
+
+        Locale result = null;
         for (Locale locale : Locale.getAvailableLocales()) {
             if (locale.toString().equalsIgnoreCase(localeStr)) {
                 return locale;
             } else if (locale.getLanguage().equalsIgnoreCase(lang)) {
-                langMatch = locale;
+                result = locale;
             }
         }
-        return langMatch;
+        return result;
     }
 }
