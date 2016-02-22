@@ -42,6 +42,16 @@ public class TestHttpResponse extends HttpResponse {
     }
 
     @Override
+    public String getString() {
+        return queryContent;
+    }
+
+    @Override
+    public String getString(String encoding) {
+        return queryContent;
+    }
+
+    @Override
     public InputStream getStream() {
         try {
             return new ByteArrayInputStream(this.queryContent.getBytes("UTF-8"));
