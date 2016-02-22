@@ -30,7 +30,7 @@ var i18n = function(code) {
         }
     }
     // Decode encoded %% to single %
-    message = message.replace("\0%\0", "%");
+    message = message.replace(/\0%\0/g, "%");
     // Imbricated messages
     var imbricated = message.match(/&\{.*?\}/g);
     if (imbricated) {

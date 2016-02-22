@@ -6,3 +6,6 @@ optimisticLocking.modelHasChanged=The object was changed. Your version is %2$s t
 @include.login=./_messages/default/login
 
 @include.other=./_messages/default/other
+
+script.tag.demos.i18n.one.percent.sign=One percent sign: %s %%
+script.tag.demos.i18n.two.percent.sign=Two percent sign: %s %% to %s %%
