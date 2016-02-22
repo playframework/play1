@@ -672,11 +672,8 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * parse and get the response body as a {@link Document DOM document}.
-         * <p>
-         *     This method uses {@link #getStream()} so it can be called only once
-         * </p>
-         * 
+         * parse and get the response body as a {@link Document DOM document}
+         *
          * @param encoding
          *            xml charset encoding
          * @return a DOM document
@@ -692,10 +689,29 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /**
+         * get the response body as a string
+         *
+         * @return the body of the http response
+         */
+        public String getString() {
+            return IO.readContentAsString(getStream(), getEncoding());
+        }
+
+        /**
+         * get the response body as a string
+         *
+         * @param encoding
+         *            string charset encoding
+         * @return the body of the http response
+         */
+        public String getString(String encoding) {
+            return IO.readContentAsString(getStream(), encoding);
+        }
 
         /**
          * Parse the response string as a query string.
-         * 
+         *
          * @return The parameters as a Map. Return an empty map if the response
          *         is not formed as a query string.
          */
@@ -714,26 +730,7 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * get the response body as a string
-         *
-         * @return the body of the http response
-         */
-        public abstract String getString();
-        /**
-         * get the response body as a string
-         *
-         * @param encoding
-         *            string charset encoding
-         * @return the body of the http response
-         */
-        public abstract String getString(String encoding);
-
-        /**
          * get the response as a stream
-         * <p>
-         *     this method can only be called onced because async implementation does not allow it to be called
-         *     multiple times
-         * </p>
          * 
          * @return an inputstream
          */

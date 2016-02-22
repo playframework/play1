@@ -338,15 +338,6 @@ public class WSUrlFetch implements WSImpl {
             return body;
         }
 
-        @Override
-        public String getString(String encoding) {
-            try {
-                return new String(body.getBytes(), encoding);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         /**
          * get the response as a stream
          * 

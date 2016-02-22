@@ -611,24 +611,6 @@ public class WSAsync implements WSImpl {
             return result;
         }
 
-        @Override
-        public String getString() {
-            try {
-                return response.getResponseBody();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public String getString(String encoding) {
-            try {
-                return response.getResponseBody(encoding);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         /**
          * get the response as a stream
          * @return an inputstream
@@ -643,8 +625,6 @@ public class WSAsync implements WSImpl {
                 throw new RuntimeException(e);
             }
         }
-
-
 
     }
 
