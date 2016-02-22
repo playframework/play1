@@ -45,7 +45,7 @@ require:    &allDependencies
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.4.0
     - org.bouncycastle -> bcprov-jdk15 1.45
-    - org.codehaus.groovy -> groovy-all 2.4.5
+    - org.codehaus.groovy -> groovy-all 2.4.6
     - org.eclipse.jdt.core 3.10.0.v20140604-1726
     - org.hibernate -> hibernate-core 4.2.19.Final
     - org.hibernate -> hibernate-commons-annotations 4.0.2.Final
