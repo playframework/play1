@@ -1,0 +1,17 @@
+#{extends 'main.html' /}
+#{set 'moreScripts'}
+#{get 'moreScripts'/} 
+ #{script 'jquery.js' /}
+ #{i18n keys:['script.*'] /}
+<script type="text/javascript" charset="utf-8">   
+     var text = i18n('script.tag.demos.i18n.one.percent.sign', 1);  
+     $('li').text(text); 
+     text = i18n('script.tag.demos.i18n.two.percent.sign', 1, 2); 
+     $('li:nth-child(2)').text(text); 
+</script>
+#{/set}
+<h1>i18n demo</h1>
+<ul>
+<li></li>
+<li></li>
+</ul>
