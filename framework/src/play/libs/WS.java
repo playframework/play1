@@ -2,6 +2,7 @@ package play.libs;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Arrays;
@@ -676,7 +677,7 @@ public class WS extends PlayPlugin {
          */
         public Document getXml(String encoding) {
             try {
-                InputSource source = new InputSource(getStream());
+                InputSource source = new InputSource(new StringReader(getString()));
                 source.setEncoding(encoding);
                 DocumentBuilder builder = XML.newDocumentBuilder();
                 return builder.parse(source);
@@ -690,9 +691,7 @@ public class WS extends PlayPlugin {
          * 
          * @return the body of the http response
          */
-        public String getString() {
-            return IO.readContentAsString(getStream(), getEncoding());
-        }
+        public abstract String getString();
 
         /**
          * get the response body as a string
@@ -701,9 +700,7 @@ public class WS extends PlayPlugin {
          *            string charset encoding
          * @return the body of the http response
          */
-        public String getString(String encoding) {
-            return IO.readContentAsString(getStream(), encoding);
-        }
+        public abstract String getString(String encoding);
 
         /**
          * Parse the response string as a query string.
@@ -727,6 +724,10 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response as a stream
+         * <p>
+         * + this method can only be called onced because async implementation
+         * does not allow it to be called + multiple times +
+         * </p>
          * 
          * @return an inputstream
          */
