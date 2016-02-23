@@ -1,10 +1,5 @@
 package play.i18n;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-
 import play.Logger;
 import play.Play;
 import play.mvc.Http;
@@ -12,15 +7,20 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope;
 
+import java.util.*;
+
 /**
  * Language support
  */
 public class Lang {
 
-    public static ThreadLocal<String> current = new ThreadLocal<String>();
+    static final ThreadLocal<String> current = new ThreadLocal<String>();
 
+    private static Map<String, Locale> cache = new HashMap<String, Locale>();
+    
     /**
      * Retrieve the current language or null
+     *
      * @return The current language (fr, ja, it ...) or null
      */
     public static String get() {
@@ -28,9 +28,9 @@ public class Lang {
         if (locale == null) {
             // don't have current locale for this request - must try to resolve it
             Http.Request currentRequest = Http.Request.current();
-            if (currentRequest!=null) {
+            if (currentRequest != null) {
                 // we have a current request - lets try to resolve language from it
-                resolvefrom( currentRequest );
+                resolvefrom(currentRequest);
             } else {
                 // don't have current request - just use default
                 setDefaultLocale();
@@ -42,9 +42,9 @@ public class Lang {
     }
 
 
-
     /**
      * Force the current language
+     *
      * @param locale (fr, ja, it ...)
      * @return false if the language is not supported by the application
      */
@@ -68,18 +68,19 @@ public class Lang {
 
 
     /**
-     * Change language for next requests 
+     * Change language for next requests
+     *
      * @param locale (e.g. "fr", "ja", "it", "en_ca", "fr_be", ...)
      */
     public static void change(String locale) {
         String closestLocale = findClosestMatch(Collections.singleton(locale));
-        if ( closestLocale == null ) {
+        if (closestLocale == null) {
             // Give up
-            return ;
+            return;
         }
-        if ( set(closestLocale) ) {
+        if (set(closestLocale)) {
             Response response = Response.current();
-            if ( response != null ) {
+            if (response != null) {
                 // We have a current response in scope - set the language-cookie to store the selected language for the next requests
                 response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, null, "/", null, Scope.COOKIE_SECURE);
             }
@@ -100,22 +101,22 @@ public class Lang {
     private static String findClosestMatch(Collection<String> desiredLocales) {
         ArrayList<String> cleanLocales = new ArrayList<String>(desiredLocales.size());
         //look for an exact match
-        for (String a: desiredLocales) {
+        for (String a : desiredLocales) {
             a = a.replace("-", "_");
             cleanLocales.add(a);
-            for (String locale: Play.langs) {
+            for (String locale : Play.langs) {
                 if (locale.equalsIgnoreCase(a)) {
                     return locale;
                 }
             }
         }
         // Exact match not found, try language-only match.
-        for (String a: cleanLocales) {
+        for (String a : cleanLocales) {
             int splitPos = a.indexOf("_");
             if (splitPos > 0) {
                 a = a.substring(0, splitPos);
             }
-            for (String locale: Play.langs) {
+            for (String locale : Play.langs) {
                 String langOnlyLocale;
                 int localeSplitPos = locale.indexOf("_");
                 if (localeSplitPos > 0) {
@@ -140,14 +141,15 @@ public class Lang {
      * <li>if <b>Accept-Language</b> header is set, use it only if the Play! application allows it.<br/>supported language may be defined in application configuration, eg : <em>play.langs=fr,en,de)</em></li>
      * <li>otherwise, server's locale language is assumed
      * </ol>
-     * @param request
+     *
+     * @param request current request
      */
     private static void resolvefrom(Request request) {
         // Check a cookie
         String cn = Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG");
         if (request.cookies.containsKey(cn)) {
             String localeFromCookie = request.cookies.get(cn).value;
-            if (localeFromCookie != null && localeFromCookie.trim().length()>0) {
+            if (localeFromCookie != null && localeFromCookie.trim().length() > 0) {
                 if (set(localeFromCookie)) {
                     // we're using locale from cookie
                     return;
@@ -159,7 +161,7 @@ public class Lang {
 
         }
         String closestLocaleMatch = findClosestMatch(request.acceptLanguage());
-        if ( closestLocaleMatch != null ) {
+        if (closestLocaleMatch != null) {
             set(closestLocaleMatch);
         } else {
             // Did not find anything - use default
@@ -177,7 +179,6 @@ public class Lang {
     }
 
     /**
-     *
      * @return the default locale if the Locale cannot be found otherwise the locale
      * associated to the current Lang.
      */
@@ -193,24 +194,36 @@ public class Lang {
         return Locale.getDefault();
     }
 
-     public static Locale getLocale(String localeStr) {
-        if(localeStr == null) {
-            return null;            
+    public static Locale getLocale(String localeStr) {
+        if (localeStr == null) {
+            return null;
         }
-        Locale langMatch = null;
+
+        Locale result = cache.get(localeStr);
+        
+        if (result == null) {
+            result = findLocale(localeStr);
+            cache.put(localeStr, result);
+        }
+        
+        return result;
+    }
+
+    private static Locale findLocale(String localeStr) {
         String lang = localeStr;
         int splitPos = lang.indexOf("_");
         if (splitPos > 0) {
-        	lang = lang.substring(0, splitPos);
+            lang = lang.substring(0, splitPos);
         }
+
+        Locale result = null;
         for (Locale locale : Locale.getAvailableLocales()) {
             if (locale.toString().equalsIgnoreCase(localeStr)) {
                 return locale;
             } else if (locale.getLanguage().equalsIgnoreCase(lang)) {
-                langMatch = locale;
+                result = locale;
             }
         }
-        return langMatch;
+        return result;
     }
-
 }
