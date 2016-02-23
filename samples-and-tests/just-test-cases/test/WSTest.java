@@ -19,12 +19,22 @@ import java.lang.reflect.Field;
 public class WSTest extends UnitTest {
 
     @Test
-    public void multiplePosttContentTest() {
+    public void multipleGetStringOk() {
         String url = "http://google.com";
         HttpResponse response = WS.url(url).post();
         String resp1 = response.getString();
-        // Stream is consumed, no more content
+        // getString no more use getStream
         String resp2 = response.getString();
+        assertEquals(resp1, resp2);
+    }
+
+    @Test
+    public void multipleGetStreamKo() {
+        String url = "http://google.com";
+        HttpResponse response = WS.url(url).post();
+        String resp1 = IO.readContentAsString(response.getStream(), response.getEncoding());
+        // Stream is consumed, no more content
+        String resp2 = IO.readContentAsString(response.getStream(), response.getEncoding());
         assertNotEquals(resp1, resp2);
         assertEquals("", resp2);
     }
