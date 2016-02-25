@@ -15,6 +15,11 @@ after_failure:
     cat ./samples-and-tests/jobboard/test-result/*.failed.html
     cat ./samples-and-tests/yabe/test-result/*.failed.html
 notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6da3b55e59cded84b8bd
+    on_success: always
+    on_failure: always
   email:
     on_success: change
     on_failure: always
