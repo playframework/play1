@@ -54,6 +54,7 @@ require:    &allDependencies
     - org.hibernate -> jboss-transaction-api_1.1_spec 1.0.1.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.hibernate -> hibernate-c3p0 4.2.19.Final
+    - org.hibernate -> hibernate-ehcache 4.2.19.Final
     - com.mchange -> mchange-commons-java 0.2.9
     - org.javassist -> javassist 3.19.0-GA
     - org.jboss.netty -> netty 3.9.8.Final
