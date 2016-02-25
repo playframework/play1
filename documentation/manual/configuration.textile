@@ -29,6 +29,15 @@ bc. application.defaultCookieDomain=.example.com
 Default: a cookie is only valid for a specific domain.
 
 
+h3(#application.forceSecureReverseRoutes). application.forceSecureReverseRoutes
+
+Forces all reverse routes and controller action redirection to be secure (https). This is useful for SSL-enabled apps to prevent insecure (http) url generation when redirecting to another action from inside your controllers, or when using the <code>@{..}</code> template syntax. For example:
+
+bc. application.forceSecureReverseRoutes=true
+
+Default: @false@
+
+
 h3(#application.lang.cookie). application.lang.cookie
 
 The name of the cookie that is used to store the current language, set by @play.i18n.Lang.change(String locale)@, which you can change if you want separate language settings for separate Play applications. For example:
