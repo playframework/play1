@@ -60,8 +60,8 @@ require:    &allDependencies
     - org.javassist -> javassist 3.20.0-GA
     - org.jboss.netty -> netty 3.10.4.Final
     - org.postgresql -> postgresql 9.0
-    - org.slf4j -> slf4j-api 1.7.10
-    - org.slf4j -> slf4j-log4j12 1.7.10
+    - org.slf4j -> slf4j-api 1.7.16
+    - org.slf4j -> slf4j-log4j12 1.7.16
     - org.yaml -> snakeyaml 1.15
     - spy -> spymemcached 2.11.7
     - com.thoughtworks.xstream -> xstream 1.4.7
