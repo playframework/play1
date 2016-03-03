@@ -619,7 +619,7 @@ public class WSAsync implements WSImpl {
         @Override
         public String getString() {
             try {
-                return response.getResponseBody();
+                return response.getResponseBody(this.getEncoding());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
