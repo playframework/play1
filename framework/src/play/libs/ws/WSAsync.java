@@ -1,40 +1,19 @@
 package play.libs.ws;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLContext;
-
-import org.apache.commons.lang.NotImplementedException;
-
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.*;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
-import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
-import com.ning.http.client.Response;
 import com.ning.http.client.multipart.ByteArrayPart;
 import com.ning.http.client.multipart.FilePart;
 import com.ning.http.client.multipart.Part;
-
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
+import org.apache.commons.lang.NotImplementedException;
 import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
@@ -44,6 +23,16 @@ import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
+
+import javax.net.ssl.SSLContext;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -669,7 +658,7 @@ public class WSAsync implements WSImpl {
         @Override
         public String getString() {
             try {
-                return response.getResponseBody();
+                return response.getResponseBody(getEncoding());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
