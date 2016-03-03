@@ -1,23 +1,5 @@
 package play.plugins;
 
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.classloading.ApplicationClasses;
-import play.classloading.ApplicationClassloader;
-import play.data.binding.RootParamNode;
-import play.db.Model;
-import play.exceptions.UnexpectedException;
-import play.libs.F;
-import play.mvc.Http;
-import play.mvc.Router;
-import play.mvc.results.Result;
-import play.templates.BaseTemplate;
-import play.templates.Template;
-import play.test.BaseTest;
-import play.test.TestEngine;
-import play.vfs.VirtualFile;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
@@ -39,23 +21,40 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
+import play.data.binding.RootParamNode;
+import play.db.Model;
+import play.exceptions.UnexpectedException;
+import play.libs.F;
+import play.mvc.Http;
+import play.mvc.Router;
+import play.mvc.results.Result;
+import play.templates.BaseTemplate;
+import play.templates.Template;
+import play.test.BaseTest;
+import play.test.TestEngine;
+import play.vfs.VirtualFile;
 
 /**
  * Class handling all plugins used by Play.
  *
  * Loading/reloading/enabling/disabling is handled here.
  *
- * This class also exposes many PlayPlugin-methods which
- * when called, the method is executed on all enabled plugins.
+ * This class also exposes many PlayPlugin-methods which when called, the method
+ * is executed on all enabled plugins.
  *
- * Since all the enabled-plugins-iteration is done here,
- * the code elsewhere is cleaner.
+ * Since all the enabled-plugins-iteration is done here, the code elsewhere is
+ * cleaner.
  */
 public class PluginCollection {
 
     /**
-     * Property holding the name of the play.plugins-resource-name.
-     * Can be modified in unittest to supply modifies plugin-list
+     * Property holding the name of the play.plugins-resource-name. Can be
+     * modified in unittest to supply modifies plugin-list
      */
     protected String play_plugins_resourceName = "play.plugins";
 
@@ -76,11 +75,11 @@ public class PluginCollection {
     protected List<PlayPlugin> enabledPlugins = new ArrayList<PlayPlugin>();
 
     /**
-     * Readonly copy of enabledPlugins - updated each time enabledPlugins is updated.
-     * Using this cached copy so we don't have to create it all the time
+     * Readonly copy of enabledPlugins - updated each time enabledPlugins is
+     * updated. Using this cached copy so we don't have to create it all the
+     * time
      */
     protected List<PlayPlugin> enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
-
 
     /**
      * List of all enabled plugins with filters
@@ -88,21 +87,21 @@ public class PluginCollection {
     protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<PlayPlugin>();
 
     /**
-     * Readonly copy of enabledPluginsWithFilters - updated each time enabledPluginsWithFilters is updated.
-     * Using this cached copy so we don't have to create it all the time
+     * Readonly copy of enabledPluginsWithFilters - updated each time
+     * enabledPluginsWithFilters is updated. Using this cached copy so we don't
+     * have to create it all the time
      */
     protected List<PlayPlugin> enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
 
-
     /**
      * Using readonly list to crash if someone tries to modify the copy.
+     * 
      * @param list
      * @return Read only list of plugins
      */
-    protected List<PlayPlugin> createReadonlyCopy( List<PlayPlugin> list ){
-        return Collections.unmodifiableList( new ArrayList<PlayPlugin>( list ));
+    protected List<PlayPlugin> createReadonlyCopy(List<PlayPlugin> list) {
+        return Collections.unmodifiableList(new ArrayList<PlayPlugin>(list));
     }
-
 
     private static class LoadingPluginInfo implements Comparable<LoadingPluginInfo> {
         public final String name;
@@ -117,11 +116,7 @@ public class PluginCollection {
 
         @Override
         public String toString() {
-            return "LoadingPluginInfo{" +
-                    "name='" + name + '\'' +
-                    ", index=" + index +
-                    ", url=" + url +
-                    '}';
+            return "LoadingPluginInfo{" + "name='" + name + '\'' + ", index=" + index + ", url=" + url + '}';
         }
 
         @Override
@@ -136,26 +131,31 @@ public class PluginCollection {
             return name.compareTo(o.name);
         }
 
-      @Override
-      public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
-        LoadingPluginInfo that = (LoadingPluginInfo) o;
+            LoadingPluginInfo that = (LoadingPluginInfo) o;
 
-        if (index != that.index) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+            if (index != that.index)
+                return false;
+            if (name != null ? !name.equals(that.name) : that.name != null)
+                return false;
 
-        return true;
-      }
+            return true;
+        }
 
-      @Override
-      public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + index;
-        return result;
-      }
+        @Override
+        public int hashCode() {
+            int result = name != null ? name.hashCode() : 0;
+            result = 31 * result + index;
+            return result;
+        }
     }
+
     /**
      * Enable found plugins
      */
@@ -167,18 +167,23 @@ public class PluginCollection {
             urls = Play.classloader.getResources(play_plugins_resourceName);
         } catch (Exception e) {
             Logger.error("Error loading play.plugins", e);
-            return ;
+            return;
         }
 
-        // First we build one big SortedSet of all plugins to load (sorted based on index)
+        // First we build one big SortedSet of all plugins to load (sorted based
+        // on index)
         // This must be done to make sure the enhancing is happening
         // when loading plugins using other classes that must be enhanced.
-        // Data structure is a SortedSet instead of a List to avoid including the same class+index twice --
+        // Data structure is a SortedSet instead of a List to avoid including
+        // the same class+index twice --
         // this happened in the past under a range of circumstances, including:
-        //  1. Class path on NTFS or other case insensitive file system includes play.plugins directory 2x
-        //       (C:/myproject/conf;c:/myproject/conf)
-        //  2. https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
-        // I can see loading the same plugin with different indexes, but I can't think of a reasonable use case for
+        // 1. Class path on NTFS or other case insensitive file system includes
+        // play.plugins directory 2x
+        // (C:/myproject/conf;c:/myproject/conf)
+        // 2.
+        // https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
+        // I can see loading the same plugin with different indexes, but I can't
+        // think of a reasonable use case for
         // loading the same plugin multiple times at the same priority.
         SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<LoadingPluginInfo>();
         while (urls != null && urls.hasMoreElements()) {
@@ -196,16 +201,15 @@ public class PluginCollection {
                     pluginsToLoad.add(info);
                 }
             } catch (Exception e) {
-                Logger.error("Error interpreting %s", url );
+                Logger.error("Error interpreting %s", url);
             }
 
         }
 
-
         for (LoadingPluginInfo info : pluginsToLoad) {
             Logger.trace("Loading plugin %s", info.name);
             try {
-                PlayPlugin plugin = (PlayPlugin)Play.classloader.loadClass(info.name).newInstance();
+                PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(info.name).newInstance();
                 plugin.index = info.index;
                 if (addPlugin(plugin)) {
                     Logger.trace("Plugin %s loaded", plugin);
@@ -216,11 +220,13 @@ public class PluginCollection {
                 Logger.error(ex, "Error loading plugin %s", info.toString());
             }
         }
-        // Mow we must call onLoad for all plugins - and we must detect if a plugin
-        // disables another plugin the old way, by removing it from Play.plugins.
+        // Mow we must call onLoad for all plugins - and we must detect if a
+        // plugin
+        // disables another plugin the old way, by removing it from
+        // Play.plugins.
         for (PlayPlugin plugin : getEnabledPlugins()) {
 
-            //is this plugin still enabled?
+            // is this plugin still enabled?
             if (isEnabled(plugin)) {
                 initializePlugin(plugin);
             }
@@ -234,8 +240,8 @@ public class PluginCollection {
     /**
      * Reloads all loaded plugins that is application-supplied.
      */
-    public void reloadApplicationPlugins() throws Exception{
-       
+    public void reloadApplicationPlugins() throws Exception {
+
         Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
         for (PlayPlugin plugin : getAllPlugins()) {
 
@@ -243,14 +249,16 @@ public class PluginCollection {
             if (isLoadedByApplicationClassloader(plugin)) {
                 // This plugin is application-supplied - Must reload it
                 String pluginClassName = plugin.getClass().getName();
-                Class pluginClazz = Play.classloader.loadClass( pluginClassName);
+                Class pluginClazz = Play.classloader.loadClass(pluginClassName);
 
                 // First look for constructors the old way
                 Constructor<?>[] constructors = pluginClazz.getConstructors();
 
-                if( constructors.length == 0){
+                if (constructors.length == 0) {
                     // No constructors in plugin
-                    // using getDeclaredConstructors() instead of getConstructors() to make it work for plugins without constructor
+                    // using getDeclaredConstructors() instead of
+                    // getConstructors() to make it work for plugins without
+                    // constructor
                     constructors = pluginClazz.getDeclaredConstructors();
                 }
 
@@ -264,7 +272,7 @@ public class PluginCollection {
 
         // Now we must call onLoad for all reloaded plugins
         for (PlayPlugin plugin : reloadedPlugins) {
-            initializePlugin( plugin );
+            initializePlugin(plugin);
         }
 
         updatePlayPluginsList();
@@ -275,13 +283,14 @@ public class PluginCollection {
         return plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class);
     }
 
-
     /**
-     * Calls plugin.onLoad but detects if plugin removes other plugins from Play.plugins-list to detect
-     * if plugins disables a plugin the old hacked way..
+     * Calls plugin.onLoad but detects if plugin removes other plugins from
+     * Play.plugins-list to detect if plugins disables a plugin the old hacked
+     * way..
+     * 
      * @param plugin
      */
-    @SuppressWarnings({"deprecation"})
+    @SuppressWarnings({ "deprecation" })
     protected void initializePlugin(PlayPlugin plugin) {
         Logger.trace("Initializing plugin " + plugin);
         // We're ready to call onLoad for this plugin.
@@ -292,23 +301,24 @@ public class PluginCollection {
         // Check for missing/removed plugins
         for (PlayPlugin enabledPlugin : getEnabledPlugins()) {
             if (!Play.plugins.contains(enabledPlugin)) {
-                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
+                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin
+                        + "' the old way - should use Play.disablePlugin()");
                 // This enabled plugin was disabled.
                 // must disable it in pluginCollection
-                disablePlugin( enabledPlugin);
+                disablePlugin(enabledPlugin);
             }
         }
     }
 
-
     /**
      * Adds one plugin and enables it
+     * 
      * @param plugin
      * @return true if plugin was new and was added
      */
     protected synchronized boolean addPlugin(PlayPlugin plugin) {
         if (!allPlugins.contains(plugin)) {
-            allPlugins.add( plugin );
+            allPlugins.add(plugin);
             Collections.sort(allPlugins);
             allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
             enablePlugin(plugin);
@@ -318,25 +328,24 @@ public class PluginCollection {
     }
 
     protected synchronized void replacePlugin(PlayPlugin oldPlugin, PlayPlugin newPlugin) {
-            if (allPlugins.remove(oldPlugin)) {
-                allPlugins.add( newPlugin);
-                Collections.sort( allPlugins);
-                allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);
+        if (allPlugins.remove(oldPlugin)) {
+            allPlugins.add(newPlugin);
+            Collections.sort(allPlugins);
+            allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
+        }
+
+        if (enabledPlugins.remove(oldPlugin)) {
+            enabledPlugins.add(newPlugin);
+            Collections.sort(enabledPlugins);
+            enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
+
+            if (enabledPluginsWithFilters.remove(oldPlugin) && newPlugin.hasFilter()) {
+                enabledPluginsWithFilters.add(newPlugin);
+                Collections.sort(enabledPluginsWithFilters);
+                enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
             }
+        }
 
-            if (enabledPlugins.remove( oldPlugin)) {
-                enabledPlugins.add(newPlugin);
-                Collections.sort( enabledPlugins);
-                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins );
-
-                if (enabledPluginsWithFilters.remove ( oldPlugin ) && newPlugin.hasFilter()) {
-                    enabledPluginsWithFilters.add( newPlugin );
-                    Collections.sort( enabledPluginsWithFilters );
-                    enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy( enabledPluginsWithFilters );
-                }
-            }
-
-        
     }
 
     /**
@@ -346,40 +355,41 @@ public class PluginCollection {
      * @return true if plugin exists and was enabled now
      */
     public synchronized boolean enablePlugin(PlayPlugin plugin) {
-            if (allPlugins.contains(plugin)) {
-                //the plugin exists
-                if (!enabledPlugins.contains(plugin)) {
-                    //plugin not currently enabled
-                    enabledPlugins.add( plugin );
-                    Collections.sort( enabledPlugins);
-                    enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+        if (allPlugins.contains(plugin)) {
+            // the plugin exists
+            if (!enabledPlugins.contains(plugin)) {
+                // plugin not currently enabled
+                enabledPlugins.add(plugin);
+                Collections.sort(enabledPlugins);
+                enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
 
-                    if ( plugin.hasFilter()) {
-                        enabledPluginsWithFilters.add(plugin);
-                        Collections.sort(enabledPluginsWithFilters);
-                        enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
-                    }
-
-                    updatePlayPluginsList();
-                    Logger.trace("Plugin " + plugin + " enabled");
-                    return true;
+                if (plugin.hasFilter()) {
+                    enabledPluginsWithFilters.add(plugin);
+                    Collections.sort(enabledPluginsWithFilters);
+                    enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
                 }
+
+                updatePlayPluginsList();
+                Logger.trace("Plugin " + plugin + " enabled");
+                return true;
             }
-        
+        }
+
         return false;
     }
 
     /**
      * enable plugin of specified type
+     * 
      * @return true if plugin was enabled
      */
     public boolean enablePlugin(Class<? extends PlayPlugin> pluginClazz) {
         return enablePlugin(getPluginInstance(pluginClazz));
     }
 
-
     /**
      * Returns the first instance of a loaded plugin of specified type
+     * 
      * @param pluginClazz
      * @return PlayPlugin
      */
@@ -392,17 +402,17 @@ public class PluginCollection {
         return null;
     }
 
-
     /**
      * disable plugin
+     * 
      * @param plugin
      * @return true if plugin was enabled and now is disabled
      */
-    public synchronized boolean disablePlugin(PlayPlugin plugin ){
-        //try to disable it?
+    public synchronized boolean disablePlugin(PlayPlugin plugin) {
+        // try to disable it?
         if (enabledPlugins.remove(plugin)) {
-            //plugin was removed
-            enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+            // plugin was removed
+            enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
 
             if (enabledPluginsWithFilters.remove(plugin)) {
                 enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
@@ -417,24 +427,24 @@ public class PluginCollection {
 
     /**
      * disable plugin of specified type
+     * 
      * @return true if plugin was enabled and now is disabled
      */
     public boolean disablePlugin(Class<? extends PlayPlugin> pluginClazz) {
-        return disablePlugin(getPluginInstance( pluginClazz));
+        return disablePlugin(getPluginInstance(pluginClazz));
     }
-
-
 
     /**
      * Must update Play.plugins-list to be backward compatible
      */
-    @SuppressWarnings({"deprecation"})
+    @SuppressWarnings({ "deprecation" })
     public void updatePlayPluginsList() {
         Play.plugins = Collections.unmodifiableList(getEnabledPlugins());
     }
 
     /**
      * Returns new readonly list of all enabled plugins
+     * 
      * @return List of plugins
      */
     public List<PlayPlugin> getEnabledPlugins() {
@@ -443,6 +453,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all enabled plugins that define filters.
+     * 
      * @return List of plugins
      */
     public List<PlayPlugin> getEnabledPluginsWithFilters() {
@@ -450,69 +461,70 @@ public class PluginCollection {
     }
 
     @SuppressWarnings("unchecked")
-    public<T> F.Option<PlayPlugin.Filter<T>> composeFilters()
-    {
-      //Copy list of plugins here in case the list changes in the midst of doing composition...
-      //(Is it really necessary to do this?)
-      final List<PlayPlugin> pluginsWithFilters = new ArrayList<PlayPlugin>(this.getEnabledPluginsWithFilters());
+    public <T> F.Option<PlayPlugin.Filter<T>> composeFilters() {
+        // Copy list of plugins here in case the list changes in the midst of
+        // doing composition...
+        // (Is it really necessary to do this?)
+        final List<PlayPlugin> pluginsWithFilters = new ArrayList<PlayPlugin>(this.getEnabledPluginsWithFilters());
 
-      if (pluginsWithFilters.isEmpty()) {
-        return F.Option.None();
-      } else {
-        final Iterator<PlayPlugin> itr = getEnabledPluginsWithFilters().iterator();
-        PlayPlugin.Filter<T> ret = itr.next().getFilter();
-        while (itr.hasNext()) {
-          ret = ret.<T>decorate(itr.next().getFilter());
+        if (pluginsWithFilters.isEmpty()) {
+            return F.Option.None();
+        } else {
+            final Iterator<PlayPlugin> itr = pluginsWithFilters.iterator();
+            PlayPlugin.Filter<T> ret = itr.next().getFilter();
+            while (itr.hasNext()) {
+                ret = ret.<T> decorate(itr.next().getFilter());
+            }
+            return F.Option.Some(ret);
         }
-        return F.Option.Some(ret);
-      }
     }
 
-
-    
     /**
      * Returns readonly view of all enabled plugins in reversed order
+     * 
      * @return Collection of plugins
      */
     public Collection<PlayPlugin> getReversedEnabledPlugins() {
         return new AbstractCollection<PlayPlugin>() {
-			
-		    @Override public Iterator<PlayPlugin> iterator() {
-		    	final ListIterator<PlayPlugin> enabledPluginsListIt = enabledPlugins.listIterator(size() - 1);
-		        return new Iterator<PlayPlugin>() {
 
-					@Override
-					public boolean hasNext() {
-						return enabledPluginsListIt.hasPrevious();
-					}
+            @Override
+            public Iterator<PlayPlugin> iterator() {
+                final ListIterator<PlayPlugin> enabledPluginsListIt = enabledPlugins.listIterator(size() - 1);
+                return new Iterator<PlayPlugin>() {
 
-					@Override
-					public PlayPlugin next() {
-						return enabledPluginsListIt.previous();
-					}
+                    @Override
+                    public boolean hasNext() {
+                        return enabledPluginsListIt.hasPrevious();
+                    }
 
-					@Override
-					public void remove() {
-						enabledPluginsListIt.remove();
-					}};
-		      }
+                    @Override
+                    public PlayPlugin next() {
+                        return enabledPluginsListIt.previous();
+                    }
 
-		      @Override public int size() {
-		        return enabledPlugins.size();
-		      }			
-			
-			
-		};
+                    @Override
+                    public void remove() {
+                        enabledPluginsListIt.remove();
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return enabledPlugins.size();
+            }
+
+        };
     }
 
     /**
      * Returns new readonly list of all plugins
+     * 
      * @return List of plugins
      */
     public List<PlayPlugin> getAllPlugins() {
         return allPlugins_readOnlyCopy;
     }
-
 
     /**
      *
@@ -548,18 +560,18 @@ public class PluginCollection {
     }
 
     public void beforeInvocation() {
-        for( PlayPlugin plugin : getEnabledPlugins()) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.beforeInvocation();
         }
     }
 
-    public void afterInvocation(){
+    public void afterInvocation() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterInvocation();
         }
     }
 
-    public void onInvocationSuccess(){
+    public void onInvocationSuccess() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onInvocationSuccess();
         }
@@ -570,59 +582,58 @@ public class PluginCollection {
             try {
                 plugin.onInvocationException(e);
             } catch (Throwable ex) {
-                //nop
+                // nop
             }
         }
     }
 
-    public void beforeDetectingChanges(){
+    public void beforeDetectingChanges() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.beforeDetectingChanges();
         }
     }
 
-    public void detectChange(){
+    public void detectChange() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.detectChange();
         }
     }
 
-    public void onApplicationReady(){
+    public void onApplicationReady() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onApplicationReady();
         }
     }
 
-    public void onConfigurationRead(){
+    public void onConfigurationRead() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onConfigurationRead();
         }
     }
 
-    public void onApplicationStart(){
+    public void onApplicationStart() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onApplicationStart();
         }
     }
 
-    public void afterApplicationStart(){
+    public void afterApplicationStart() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterApplicationStart();
         }
     }
 
-    public void onApplicationStop(){
+    public void onApplicationStop() {
         for (PlayPlugin plugin : getReversedEnabledPlugins()) {
             try {
-              plugin.onApplicationStop();
-            }
-            catch (Throwable t) {
-              if (t.getMessage() == null)
-                Logger.error(t, "Error while stopping %s", plugin);
-              else if (Logger.isDebugEnabled())
-                Logger.debug(t, "Error while stopping %s", plugin);
-              else
-                Logger.info("Error while stopping %s: %s", plugin, t.toString());
+                plugin.onApplicationStop();
+            } catch (Throwable t) {
+                if (t.getMessage() == null)
+                    Logger.error(t, "Error while stopping %s", plugin);
+                else if (Logger.isDebugEnabled())
+                    Logger.debug(t, "Error while stopping %s", plugin);
+                else
+                    Logger.info("Error while stopping %s: %s", plugin, t.toString());
             }
         }
     }
@@ -648,7 +659,7 @@ public class PluginCollection {
     }
 
     @Deprecated
-    public List<ApplicationClasses.ApplicationClass> onClassesChange(List<ApplicationClasses.ApplicationClass> modified){
+    public List<ApplicationClasses.ApplicationClass> onClassesChange(List<ApplicationClasses.ApplicationClass> modified) {
         List<ApplicationClasses.ApplicationClass> modifiedWithDependencies = new ArrayList<ApplicationClasses.ApplicationClass>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             modifiedWithDependencies.addAll(plugin.onClassesChange(modified));
@@ -663,7 +674,7 @@ public class PluginCollection {
         }
     }
 
-    public Object bind(RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations){
+    public Object bind(RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Object result = plugin.bind(rootParamNode, name, clazz, type, annotations);
             if (result != null) {
@@ -706,7 +717,7 @@ public class PluginCollection {
     public Model.Factory modelFactory(Class<? extends Model> modelClass) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Model.Factory factory = plugin.modelFactory(modelClass);
-            if(factory != null) {
+            if (factory != null) {
                 return factory;
             }
         }
@@ -716,7 +727,7 @@ public class PluginCollection {
     public String getMessage(String locale, Object key, Object... args) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             String message = plugin.getMessage(locale, key, args);
-            if(message != null) {
+            if (message != null) {
                 return message;
             }
         }
@@ -735,13 +746,13 @@ public class PluginCollection {
         }
     }
 
-    public void afterActionInvocation(){
+    public void afterActionInvocation() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterActionInvocation();
         }
     }
 
-    public void onActionInvocationFinally(){
+    public void onActionInvocationFinally() {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.onActionInvocationFinally();
         }
@@ -774,7 +785,6 @@ public class PluginCollection {
         return false;
     }
 
-
     public boolean serveStatic(VirtualFile file, Http.Request request, Http.Response response) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             if (plugin.serveStatic(file, request, response)) {
@@ -795,7 +805,7 @@ public class PluginCollection {
     public String overrideTemplateSource(BaseTemplate template, String source) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             String newSource = plugin.overrideTemplateSource(template, source);
-            if(newSource != null) {
+            if (newSource != null) {
                 source = newSource;
             }
         }
@@ -805,7 +815,7 @@ public class PluginCollection {
     public Template loadTemplate(VirtualFile file) {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Template pluginProvided = plugin.loadTemplate(file);
-            if(pluginProvided != null) {
+            if (pluginProvided != null) {
                 return pluginProvided;
             }
         }
@@ -832,23 +842,23 @@ public class PluginCollection {
         Set<Class> allPluginTests = new HashSet<Class>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Collection<Class> unitTests = plugin.getUnitTests();
-            if(unitTests != null) {
+            if (unitTests != null) {
                 allPluginTests.addAll(unitTests);
             }
         }
-        
+
         return allPluginTests;
     }
-    
+
     public Collection<Class> getFunctionalTests() {
         Set<Class> allPluginTests = new HashSet<Class>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Collection<Class> funcTests = plugin.getFunctionalTests();
-            if(funcTests != null) {
+            if (funcTests != null) {
                 allPluginTests.addAll(funcTests);
             }
         }
-        
+
         return allPluginTests;
     }
 }
