@@ -356,12 +356,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             } catch (Exception e) {
                 // Use fastTag if exists
                 List<Class> fastClasses = new ArrayList<Class>();
-                try {
-                    fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
-                } catch (Exception xe) {
-                    //
-                }
+                fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
                 fastClasses.add(0, FastTags.class);
+                
                 Method m = null;
                 String tName = tag.name;
                 String tSpace = "";
