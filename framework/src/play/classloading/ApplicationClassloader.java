@@ -12,7 +12,6 @@ import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +26,8 @@ import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
@@ -204,7 +205,7 @@ public class ApplicationClassloader extends ClassLoader {
     /**
      * Search for the byte code of the given class.
      */
-    protected byte[] getClassDefinition(String name) {
+    byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
         InputStream is = this.getResourceAsStream(name);
         if (is == null) {
@@ -379,9 +380,9 @@ public class ApplicationClassloader extends ClassLoader {
     /**
      * Used to track change of the application sources path
      */
-    int pathHash = 0;
+    private int pathHash = 0;
 
-    int computePathHash() {
+    private int computePathHash() {
         return classStateHashCreator.computePathHash(Play.javaPath);
     }
 
@@ -391,7 +392,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     public List<Class> getAllClasses() {
         if (allClasses == null) {
-            allClasses = new ArrayList<Class>();
+            List<Class> result = new ArrayList<Class>();
 
             if (Play.usePrecompiled) {
 
@@ -403,7 +404,7 @@ public class ApplicationClassloader extends ClassLoader {
                     Class clazz = loadApplicationClass(applicationClass.name);
                     applicationClass.javaClass = clazz;
                     applicationClass.compiled = true;
-                    allClasses.add(clazz);
+                    result.add(clazz);
                 }
 
             } else {
@@ -416,10 +417,9 @@ public class ApplicationClassloader extends ClassLoader {
                         all.addAll(getAllClasses(virtualFile));
                     }
                     List<String> classNames = new ArrayList<String>();
-                    for (int i = 0; i < all.size(); i++) {
-                        ApplicationClass applicationClass = all.get(i);
+                    for (ApplicationClass applicationClass : all) {
                         if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
-                            classNames.add(all.get(i).name);
+                            classNames.add(applicationClass.name);
                         }
                     }
 
@@ -430,11 +430,11 @@ public class ApplicationClassloader extends ClassLoader {
                 for (ApplicationClass applicationClass : Play.classes.all()) {
                     Class clazz = loadApplicationClass(applicationClass.name);
                     if (clazz != null) {
-                        allClasses.add(clazz);
+                        result.add(clazz);
                     }
                 }
 
-                Collections.sort(allClasses, new Comparator<Class>() {
+                Collections.sort(result, new Comparator<Class>() {
 
                     @Override
                     public int compare(Class o1, Class o2) {
@@ -442,18 +442,22 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 });
             }
-            allClassesByNormalizedName = new HashMap<String, ApplicationClass>(allClasses.size());
+
+            Map<String, ApplicationClass> byNormalizedName = new HashMap<String, ApplicationClass>(result.size());
             for (ApplicationClass clazz : Play.classes.all()) {
-                allClassesByNormalizedName.put(clazz.name.toLowerCase(), clazz);
+                byNormalizedName.put(clazz.name.toLowerCase(), clazz);
                 if (clazz.name.contains("$")) {
-                    allClassesByNormalizedName.put(StringUtils.replace(clazz.name.toLowerCase(), "$", "."), clazz);
+                    byNormalizedName.put(StringUtils.replace(clazz.name.toLowerCase(), "$", "."), clazz);
                 }
             }
+
+            allClassesByNormalizedName = unmodifiableMap(byNormalizedName);
+            allClasses = unmodifiableList(result);
         }
         return allClasses;
     }
-    List<Class> allClasses = null;
-    Map<String, ApplicationClass> allClassesByNormalizedName = null;
+    private List<Class> allClasses;
+    private Map<String, ApplicationClass> allClassesByNormalizedName;
 
     /**
      * Retrieve all application classes assignable to this class.
@@ -474,13 +478,13 @@ public class ApplicationClassloader extends ClassLoader {
                 results.add(c.javaClass);
             }
             // cache assignable classes
-            assignableClassesByName.put(clazz.getName(), results);
+            assignableClassesByName.put(clazz.getName(), unmodifiableList(results));
         }
         return results;
     }
 
     // assignable classes cache
-    Map<String, List<Class>> assignableClassesByName = new HashMap<String, List<Class>>(100);
+    private Map<String, List<Class>> assignableClassesByName = new HashMap<String, List<Class>>(100);
 
     /**
      * Find a class in a case insensitive way
@@ -531,11 +535,11 @@ public class ApplicationClassloader extends ClassLoader {
         return res;
     }
 
-    List<ApplicationClass> getAllClasses(VirtualFile path) {
+    private List<ApplicationClass> getAllClasses(VirtualFile path) {
         return getAllClasses(path, "");
     }
 
-    List<ApplicationClass> getAllClasses(VirtualFile path, String basePackage) {
+    private List<ApplicationClass> getAllClasses(VirtualFile path, String basePackage) {
         if (basePackage.length() > 0 && !basePackage.endsWith(".")) {
             basePackage += ".";
         }
@@ -546,7 +550,7 @@ public class ApplicationClassloader extends ClassLoader {
         return res;
     }
 
-    void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
+    private void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java") && !current.getName().startsWith(".")) {
                 String classname = packageName + current.getName().substring(0, current.getName().length() - 5);
@@ -559,7 +563,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
-    void scanPrecompiled(List<ApplicationClass> classes, String packageName, VirtualFile current) {
+    private void scanPrecompiled(List<ApplicationClass> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".class") && !current.getName().startsWith(".")) {
                 String classname = packageName.substring(5) + current.getName().substring(0, current.getName().length() - 6);
