@@ -247,6 +247,12 @@
     <!-- Launch all *Test.java -->
 
     <target name="test" depends="clean,jar,build-test-modules" description="run tests suite">
+        <condition property="pythonExecutable" value="${basedir}/../python/python.exe">
+            <and><os family="windows"/></and>
+        </condition>
+        <condition property="pythonExecutable" value="python">
+            <and><os family="unix"/></and>
+        </condition>
         <condition property="playExtension" value=".bat">
             <and><os family="windows"/></and>
         </condition>
@@ -260,11 +266,11 @@
         
         <echo message="Testing development lifecycle (wait ...)" />
 
-        <exec executable="python" failonerror="true">
+        <exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
         </exec>
 
-        <exec executable="python" failonerror="true">
+        <exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/test_jvm_version_flag.py" />
         </exec>
 
