@@ -8,8 +8,8 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.7
-    - c3p0 0.9.5
-    - org.ow2.asm -> asm-all 5.0.4
+    - com.mchange -> c3p0 0.9.5.2
+    - org.ow2.asm -> asm-all 5.1
     - cglib -> cglib 3.2.1
     - com.google.code.gson -> gson 2.6.2
     - com.jamonapi -> jamon 2.81
@@ -17,18 +17,18 @@ require:    &allDependencies
     - commons-beanutils 1.9.2 
     - commons-codec 1.10
     - commons-collections 3.2.2
-    - commons-email 1.4
+    - org.apache.commons -> commons-email 1.4
     - commons-fileupload 1.3.1
     - commons-io 2.4
-    - commons-javaflow 1590792
+    - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
     - commons-lang 2.6
     - commons-logging 1.2
     - dom4j 1.6.1
-    - com.h2database -> h2 1.4.185
+    - com.h2database -> h2 1.4.191
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.7
     - javax.inject 1.0
-    - javax.validation -> validation-api 1.0.0.GA
+    - javax.validation -> validation-api 1.1.0.Final
     - jaxen 1.1.6
     - joda-time 2.9.2
     - org.hamcrest -> hamcrest-core 1.3
@@ -37,13 +37,13 @@ require:    &allDependencies
     - log4j 1.2.17
     - net.sf.ehcache -> ehcache-core 2.6.11
     - net.sf.ezmorph -> ezmorph 1.0.6
-    - net.sf.jsr107cache -> jsr107cache 1.0
+    - net.sf.jsr107cache -> jsr107cache 1.1
     - net.sf.oval -> oval 1.85
-    - mysql -> mysql-connector-java 5.1.35
+    - mysql -> mysql-connector-java 5.1.38
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.4.0
-    - org.bouncycastle -> bcprov-jdk15 1.45
+    - org.bouncycastle -> bcprov-jdk15 1.46
     - org.codehaus.groovy -> groovy-all 2.4.6
     - org.eclipse.jdt.core 3.10.0.v20140604-1726
     - org.hibernate -> hibernate-core 4.2.19.Final
@@ -55,14 +55,14 @@ require:    &allDependencies
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.1.Final
     - org.hibernate -> hibernate-c3p0 4.2.19.Final
     - org.hibernate -> hibernate-ehcache 4.2.19.Final
-    - com.mchange -> mchange-commons-java 0.2.9
-    - org.javassist -> javassist 3.20.0-GA
-    - org.jboss.netty -> netty 3.10.4.Final
+    - com.mchange -> mchange-commons-java 0.2.11
+    - org.javassist -> javassist 3.20.0-GA3.10.4.Final3.10.4.Final
+    - io.netty -> netty 3.10.4.Final
     - org.postgresql -> postgresql 9.0
-    - org.slf4j -> slf4j-api 1.7.16
-    - org.slf4j -> slf4j-log4j12 1.7.16
+    - org.slf4j -> slf4j-api 1.7.18
+    - org.slf4j -> slf4j-log4j12 1.7.18
     - org.yaml -> snakeyaml 1.17
-    - spy -> spymemcached 2.12.0
+    - net.spy -> spymemcached 2.12.0
     - com.thoughtworks.xstream -> xstream 1.4.8
     - xmlpull 1.1.3.1
 
