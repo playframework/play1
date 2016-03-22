@@ -48,9 +48,9 @@ public class TestEngine {
     public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
     public static List<Class> allUnitTests() {
-        List<Class> classes = Play.classloader.getAssignableClasses(Assert.class);
-        Collection<Class> pluginClasses = Play.pluginCollection.getUnitTests();
-        classes.addAll(pluginClasses);
+        List<Class> classes = new ArrayList<Class>();
+        classes.addAll(Play.classloader.getAssignableClasses(Assert.class));
+        classes.addAll(Play.pluginCollection.getUnitTests());
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             Class c = it.next();
             if (Modifier.isAbstract(c.getModifiers())) {
@@ -66,9 +66,10 @@ public class TestEngine {
     }
 
     public static List<Class> allFunctionalTests() {
-        List<Class> classes = Play.classloader.getAssignableClasses(FunctionalTest.class);
-        Collection<Class> pluginClasses = Play.pluginCollection.getFunctionalTests();
-        classes.addAll(pluginClasses);
+        List<Class> classes = new ArrayList<Class>();
+        classes.addAll(Play.classloader.getAssignableClasses(FunctionalTest.class));
+        classes.addAll(Play.pluginCollection.getFunctionalTests());
+        
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             if (Modifier.isAbstract(it.next().getModifiers())) {
                 it.remove();
