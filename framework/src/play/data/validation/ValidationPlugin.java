@@ -1,5 +1,18 @@
 package play.data.validation;
 
+import net.sf.oval.ConstraintViolation;
+import net.sf.oval.context.MethodParameterContext;
+import net.sf.oval.guard.Guard;
+import play.PlayPlugin;
+import play.exceptions.ActionNotFoundException;
+import play.exceptions.UnexpectedException;
+import play.mvc.ActionInvoker;
+import play.mvc.Http;
+import play.mvc.Http.Cookie;
+import play.mvc.Scope;
+import play.mvc.results.Result;
+import play.utils.Java;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -11,18 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.sf.oval.ConstraintViolation;
-import net.sf.oval.context.MethodParameterContext;
-import net.sf.oval.guard.Guard;
-import play.PlayPlugin;
-import play.exceptions.ActionNotFoundException;
-import play.exceptions.UnexpectedException;
-import play.utils.Java;
-import play.mvc.ActionInvoker;
-import play.mvc.Http;
-import play.mvc.Http.Cookie;
-import play.mvc.Scope;
-import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
 
@@ -137,7 +138,7 @@ public class ValidationPlugin extends PlayPlugin {
                 String errorsData = URLDecoder.decode(cookie.value, "utf-8");
                 Matcher matcher = errorsParser.matcher(errorsData);
                 while (matcher.find()) {
-                    String[] g2 = matcher.group(2).split("\u0001");
+                    String[] g2 = matcher.group(2).split("\u0001", -1);
                     String message = g2[0];
                     String[] args = new String[g2.length - 1];
                     System.arraycopy(g2, 1, args, 0, args.length);
