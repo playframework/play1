@@ -366,6 +366,9 @@ public class WSAsync implements WSImpl {
             for (String key: this.headers.keySet()) {
                 builder.addHeader(key, headers.get(key));
             }
+            if (this.virtualHost != null) {
+                builder.setVirtualHost(this.virtualHost);
+            }
             builder.setFollowRedirects(this.followRedirects);
             PerRequestConfig perRequestConfig = new PerRequestConfig();
             perRequestConfig.setRequestTimeoutInMs(this.timeout * 1000);
