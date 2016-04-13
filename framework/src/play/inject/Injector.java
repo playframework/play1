@@ -2,6 +2,7 @@ package play.inject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import play.Play;
@@ -15,12 +16,12 @@ public class Injector {
      * For now, inject beans in controllers
      */
     public static void inject(BeanSource source) {
-        List<Class> classes = Play.classloader.getAssignableClasses(ControllerSupport.class);
+        List<Class> classes = new ArrayList<Class>(Play.classloader.getAssignableClasses(ControllerSupport.class));
         classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
         classes.addAll(Play.classloader.getAssignableClasses(Job.class));
-        for(Class<?> clazz : classes) {
-            for(Field field : clazz.getDeclaredFields()) {
-                if(Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {
+        for (Class<?> clazz : classes) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {
                     Class<?> type = field.getType();
                     field.setAccessible(true);
                     try {
