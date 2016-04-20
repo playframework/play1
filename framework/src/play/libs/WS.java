@@ -263,6 +263,7 @@ public class WS extends PlayPlugin {
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new LinkedHashMap<String, Object>();
+        public String virtualHost;
         public String mimeType;
 
         /**
@@ -304,6 +305,11 @@ public class WS extends PlayPlugin {
          */
         public WSRequest mimeType(String mimeType) {
             this.mimeType = mimeType;
+            return this;
+        }
+        
+        public WSRequest virtualHost(String virtualHost) {
+            this.virtualHost = virtualHost;
             return this;
         }
 
