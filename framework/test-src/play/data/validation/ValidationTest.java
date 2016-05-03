@@ -1,8 +1,13 @@
 package play.data.validation;
 
 import org.junit.Test;
-
+import play.Play;
+import play.i18n.Messages;
 import play.i18n.MessagesBuilder;
+import play.mvc.Http;
+
+import java.util.Properties;
+
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
@@ -185,5 +190,23 @@ public class ValidationTest {
         // Check the first error
         assertThat( Validation.error(field).message).isEqualTo(errorMsg2);
         assertEquals(2, Validation.current().errors.size());    
+    }
+
+    @Test
+    public void restoreEmptyVariable() {
+        Messages.defaults = new Properties();
+        Messages.defaults.setProperty("validation.error.missingName", "%s is invalid, given: '%s'");
+        Validation.current.set(new Validation());
+        Http.Response.current.set(new Http.Response());
+        Http.Request.current.set(new Http.Request());
+        Play.configuration = new Properties();
+        Validation.addError("user.name", "validation.error.missingName", "");
+        Validation.keep();
+        ValidationPlugin.save();
+
+        Http.Request.current().cookies = Http.Response.current().cookies;
+
+        Validation restored = ValidationPlugin.restore();
+        assertEquals("user.name is invalid, given: ''", restored.errors.get(0).message());
     }
 }
