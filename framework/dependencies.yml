@@ -56,7 +56,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-c3p0 4.2.19.Final
     - org.hibernate -> hibernate-ehcache 4.2.19.Final
     - com.mchange -> mchange-commons-java 0.2.11
-    - org.javassist -> javassist 3.20.0-GA3.10.4.Final3.10.4.Final
+    - org.javassist -> javassist 3.20.0-GA
     - io.netty -> netty 3.10.4.Final
     - org.postgresql -> postgresql 9.0
     - org.slf4j -> slf4j-api 1.7.18
@@ -64,7 +64,7 @@ require:    &allDependencies
     - org.yaml -> snakeyaml 1.17
     - net.spy -> spymemcached 2.12.0
     - com.thoughtworks.xstream -> xstream 1.4.8
-    - xmlpull 1.1.3.1
+    - xmlpull 1.1.3.4d_b4_min
 
 # Default repositories, used for all projects
 repositories:
