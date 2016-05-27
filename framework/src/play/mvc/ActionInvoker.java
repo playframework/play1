@@ -1,23 +1,9 @@
 package play.mvc;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.Future;
-
-import org.apache.commons.javaflow.Continuation;
-import org.apache.commons.javaflow.bytecode.StackRecorder;
-
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
@@ -43,6 +29,18 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Future;
 
 /**
  * Invoke an action after an HTTP request.
@@ -283,6 +281,27 @@ public class ActionInvoker {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Find the first public method of a controller class
+     * @param name The method name
+     * @param clazz The class
+     * @return The method or null
+     */
+    public static Method findActionMethod(String name, Class clazz) {
+        while (!clazz.getName().equals("java.lang.Object")) {
+            for (Method m : clazz.getDeclaredMethods()) {
+                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
+                    // Check that it is not an interceptor
+                    if (isActionMethod(m)) {
+                        return m;
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
     }
 
     private static void handleBefores(Http.Request request) throws Exception {
@@ -594,8 +613,8 @@ public class ActionInvoker {
                             new Exception("class " + controller + " does not extend play.mvc.Controller"));
                 }
             }
-            actionMethod = Java.findActionMethod(action, controllerClass);
-            if (actionMethod == null) {
+            actionMethod = findActionMethod(action, controllerClass);
+            if (actionMethod == null || !isActionMethod(actionMethod)) {
                 throw new ActionNotFoundException(fullAction,
                         new Exception("No method public static void " + action + "() was found in class " + controller));
             }
