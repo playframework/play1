@@ -1,15 +1,13 @@
 package play.mvc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.*;
-
+import org.junit.Test;
 import play.PlayBuilder;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Scope.Params;
+import play.mvc.Scope.Session;
+
+import static org.junit.Assert.*;
 
 
 public class ScopeTest {
@@ -122,5 +120,33 @@ public class ScopeTest {
         assertFalse(params._contains("param1.object.param2.3"));
         
         assertEquals(2, params.all().size());
+    }
+
+    @Test
+    public void sessionPutWithNullObject() throws Exception {
+        Session session = new Session();
+        session.put("hello", (Object)null);
+        assertNull(session.get("hello"));
+    }
+
+    @Test
+    public void sessionPutWithObject() throws Exception {
+        Session session = new Session();
+        session.put("hello", 123);
+        assertEquals("123", session.get("hello"));
+    }
+
+    @Test
+    public void sessionPutWithNullString() throws Exception {
+        Session session = new Session();
+        session.put("hello", (String)null);
+        assertNull(session.get("hello"));
+    }
+
+    @Test
+    public void sessionPutWithString() throws Exception {
+        Session session = new Session();
+        session.put("hello", "world");
+        assertEquals("world", session.get("hello"));
     }
 }
