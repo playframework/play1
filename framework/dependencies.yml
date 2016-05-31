@@ -14,7 +14,7 @@ require:    &allDependencies
     - cglib -> cglib 3.2.2
     - com.google.code.gson -> gson 2.6.2
     - com.jamonapi -> jamon 2.81
-    - com.ning -> async-http-client 1.9.31
+    - com.ning -> async-http-client 1.9.38
     - commons-beanutils 1.9.2 
     - commons-codec 1.10
     - commons-collections 3.2.2
