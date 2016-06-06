@@ -1,9 +1,23 @@
 package play.mvc;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Future;
+
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
@@ -29,18 +43,6 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.Future;
 
 /**
  * Invoke an action after an HTTP request.
@@ -285,8 +287,11 @@ public class ActionInvoker {
 
     /**
      * Find the first public method of a controller class
-     * @param name The method name
-     * @param clazz The class
+     * 
+     * @param name
+     *            The method name
+     * @param clazz
+     *            The class
      * @return The method or null
      */
     public static Method findActionMethod(String name, Class clazz) {
@@ -614,7 +619,7 @@ public class ActionInvoker {
                 }
             }
             actionMethod = findActionMethod(action, controllerClass);
-            if (actionMethod == null || !isActionMethod(actionMethod)) {
+            if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction,
                         new Exception("No method public static void " + action + "() was found in class " + controller));
             }
