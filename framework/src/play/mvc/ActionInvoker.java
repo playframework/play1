@@ -284,6 +284,30 @@ public class ActionInvoker {
         return true;
     }
 
+    /**
+     * Find the first public method of a controller class
+     * 
+     * @param name
+     *            The method name
+     * @param clazz
+     *            The class
+     * @return The method or null
+     */
+    public static Method findActionMethod(String name, Class clazz) {
+        while (!clazz.getName().equals("java.lang.Object")) {
+            for (Method m : clazz.getDeclaredMethods()) {
+                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
+                    // Check that it is not an interceptor
+                    if (isActionMethod(m)) {
+                        return m;
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return null;
+    }
+
     private static void handleBefores(Http.Request request) throws Exception {
         List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
         ControllerInstrumentation.stopActionCall();
@@ -593,7 +617,7 @@ public class ActionInvoker {
                             new Exception("class " + controller + " does not extend play.mvc.Controller"));
                 }
             }
-            actionMethod = Java.findActionMethod(action, controllerClass);
+            actionMethod = findActionMethod(action, controllerClass);
             if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction,
                         new Exception("No method public static void " + action + "() was found in class " + controller));
