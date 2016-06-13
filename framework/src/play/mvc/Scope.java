@@ -1,13 +1,5 @@
 package play.mvc;
 
-import java.lang.annotation.Annotation;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
@@ -15,13 +7,16 @@ import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
 import play.data.parsing.DataParser;
 import play.data.parsing.DataParsers;
-import play.data.parsing.TextParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.Crypto;
 import play.libs.Time;
 import play.utils.Utils;
+
+import java.lang.annotation.Annotation;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * All application Scopes
@@ -278,8 +273,9 @@ public class Scope {
             change();
             if (value == null) {
                 put(key, (String) null);
+            } else {
+                put(key, value.toString());
             }
-            put(key, value + "");
         }
 
         public String get(String key) {
