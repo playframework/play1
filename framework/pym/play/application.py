@@ -223,7 +223,7 @@ class PlayApplication(object):
             s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
-            if self.play_env["disable_random_jpda"]:
+            if "disable_random_jpda" in self.play_env and self.play_env["disable_random_jpda"]:
                 print 'JPDA port %s is already used, and command line option "-f" was specified. Cannot start server\n' % self.jpda_port
                 sys.exit(-1)
             else:
