@@ -107,7 +107,7 @@ public class Evolutions extends PlayPlugin {
                         System.out.println("");
                         System.out.println(e.getEvolutionScript());
                         System.out.println("");
-                        System.out.println("~ The following error occured:");
+                        System.out.println("~ The following error occurred:");
                         System.out.println("");
                         System.out.println(e.getError());
                         System.out.println("");

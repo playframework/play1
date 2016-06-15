@@ -209,7 +209,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called if an exception occured during the invocation.
+     * Called if an exception occurred during the invocation.
      * @param e The catched exception.
      */
     public void onInvocationException(Throwable e) {
@@ -217,7 +217,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called at the end of the invocation.
-     * (even if an exception occured).
+     * (even if an exception occurred).
      * Time to close request specific things.
      */
     public void invocationFinally() {

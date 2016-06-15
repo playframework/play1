@@ -21,6 +21,6 @@ public class MailException extends PlayExceptionWithJavaSource {
 
     @Override
     public String getErrorDescription() {
-        return String.format("A mail error occured : <strong>%s</strong>", getMessage());
+        return String.format("A mail error occurred : <strong>%s</strong>", getMessage());
     }
 }

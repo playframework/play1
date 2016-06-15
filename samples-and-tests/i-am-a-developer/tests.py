@@ -406,7 +406,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Cannot get property \'name\' on null object'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
+            self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assert_(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assert_(waitFor(self.play, '...'))
@@ -426,7 +426,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Cannot get property \'name\' on null object'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
+            self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assert_(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assert_(waitFor(self.play, '...'))
@@ -458,7 +458,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
+            self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
@@ -477,7 +477,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
+            self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
@@ -668,8 +668,8 @@ def waitForWithFail(process, pattern, failPattern):
 	sys.stdout.flush()
         line = process.stdout.readline().strip()
 	sys.stdout.flush()
-        #print timeoutOccured
-        if timeoutOccured:
+        #print timeoutOccurred
+        if timeoutOccurred:
             return False
         if line == '@KILLED':
             return False
@@ -681,13 +681,13 @@ def waitForWithFail(process, pattern, failPattern):
             timer.cancel()
             return True
 
-timeoutOccured = False
+timeoutOccurred = False
 
 def timeout(process):
-    global timeoutOccured 
+    global timeoutOccurred 
     print '@@@@ TIMEOUT !'
     killPlay()
-    timeoutOccured = True
+    timeoutOccurred = True
 
 def killPlay():
     try:
