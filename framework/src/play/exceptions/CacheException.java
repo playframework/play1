@@ -1,8 +1,5 @@
 package play.exceptions;
 
-/**
- * Cache related exception
- */
 public class CacheException extends PlayExceptionWithJavaSource {
     
     public CacheException(String message, Throwable cause) {

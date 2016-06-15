@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.exception.GenericJDBCException;
 
-/**
- * JPA exception
- */
 public class JPAException extends PlayException implements SourceAttachment {
 
     public JPAException(String message) {
@@ -44,7 +41,7 @@ public class JPAException extends PlayException implements SourceAttachment {
     @Override
     public List<String> getSource() {
         List<String> sql = new ArrayList<String>();
-        if(getCause() != null && getCause() instanceof GenericJDBCException) {
+        if (getCause() != null && getCause() instanceof GenericJDBCException) {
             sql.add(((GenericJDBCException)getCause()).getSQL());
         }
         return sql;

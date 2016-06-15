@@ -13,7 +13,7 @@ public class TemplateCompilationException extends TemplateException {
 
     @Override
     public String getErrorTitle() {
-        return String.format("Template compilation error");
+        return "Template compilation error";
     }
 
     @Override
