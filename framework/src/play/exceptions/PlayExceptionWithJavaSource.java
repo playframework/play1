@@ -12,9 +12,6 @@ public abstract class PlayExceptionWithJavaSource extends PlayException implemen
     ApplicationClass applicationClass;
     Integer line;
 
-    protected PlayExceptionWithJavaSource() {
-    }
-
     protected PlayExceptionWithJavaSource(String message) {
         super(message);
     }
