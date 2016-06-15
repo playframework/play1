@@ -231,7 +231,7 @@ public class ActionInvoker {
                     throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
                             ex.getTargetException());
                 }
-                throw new JavaExecutionException(Http.Request.current().action, ex);
+                throw new JavaExecutionException(ex);
             }
 
         } catch (Result result) {
@@ -444,7 +444,7 @@ public class ActionInvoker {
                 throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
                         ex.getTargetException());
             }
-            throw new JavaExecutionException(Http.Request.current().action, ex);
+            throw new JavaExecutionException(ex);
         } catch (Exception e) {
             throw new UnexpectedException("Exception while doing @Finally", e);
         }

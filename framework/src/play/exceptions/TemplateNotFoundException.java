@@ -6,9 +6,6 @@ import java.util.List;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.templates.Template;
 
-/**
- * A template is missing (tag, ...)
- */
 public class TemplateNotFoundException extends PlayException implements SourceAttachment {
 
     private String path;
@@ -53,7 +50,7 @@ public class TemplateNotFoundException extends PlayException implements SourceAt
 
     @Override
     public String getErrorTitle() {
-        return String.format("Template not found");
+        return "Template not found";
     }
 
     @Override

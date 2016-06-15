@@ -1,9 +1,6 @@
 
 package play.exceptions;
 
-/**
- * Database error
- */
 public class DatabaseException extends PlayExceptionWithJavaSource {
     
     public DatabaseException(String message) {
