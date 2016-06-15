@@ -13,7 +13,7 @@ public class ContinuationsException extends PlayException {
 
     @Override
     public String getErrorDescription() {
-        return String.format("A await/Continuations error occured : <strong>%s</strong>", getMessage());
+        return String.format("A await/Continuations error occurred : <strong>%s</strong>", getMessage());
     }
 
 }
