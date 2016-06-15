@@ -23,7 +23,8 @@ public class JPAException extends PlayException implements SourceAttachment {
     public String getErrorDescription() {
         if(getCause() != null && getCause() instanceof GenericJDBCException) {
             String SQL = ((GenericJDBCException)getCause()).getSQL();
-            return String.format("A JPA error occurred (%s): <strong>%s</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete, in case of ...", getMessage(), getCause() == null ? "" : getCause().getMessage(), SQL);
+            return String.format("A JPA error occurred (%s): <strong>%s</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete. SQL: (%s)", 
+                    getMessage(), getCause() == null ? "" : getCause().getMessage(), SQL);
         }
         return String.format("A JPA error occurred (%s): <strong>%s</strong>", getMessage(), getCause() == null ? "" : getCause().getMessage());
     }
