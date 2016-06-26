@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import re
 import zipfile
@@ -318,8 +319,10 @@ def build(app, args, env):
         print "~"
         print "~ Building..."
         print "~"
-        os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
+        status = subprocess.call('ant -f %s -Dplay.path=%s' % (build_file, ftb), shell=True)
         print "~"
+        if status:
+            sys.exit(status)
 
     mv = '%s-%s' % (name, version)
     print("~ Packaging %s ... " % mv)
