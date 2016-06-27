@@ -69,12 +69,9 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
-    /**
-     * You know ...
-     */
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        // Loook up our cache
+        // Look up our cache
         Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
@@ -94,7 +91,6 @@ public class ApplicationClassloader extends ClassLoader {
         return super.loadClass(name, resolve);
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~
     public Class<?> loadApplicationClass(String name) {
 
         if (ApplicationClass.isClass(name)) {
@@ -224,9 +220,6 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
-    /**
-     * You know ...
-     */
     @Override
     public InputStream getResourceAsStream(String name) {
         for (VirtualFile vf : Play.javaPath) {
@@ -250,9 +243,6 @@ public class ApplicationClassloader extends ClassLoader {
         return super.getResourceAsStream(name);
     }
 
-    /**
-     * You know ...
-     */
     @Override
     public URL getResource(String name) {
         for (VirtualFile vf : Play.javaPath) {
@@ -268,9 +258,6 @@ public class ApplicationClassloader extends ClassLoader {
         return super.getResource(name);
     }
 
-    /**
-     * You know ...
-     */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
         List<URL> urls = new ArrayList<URL>();
@@ -381,6 +368,7 @@ public class ApplicationClassloader extends ClassLoader {
             throw new RuntimeException("Path has changed");
         }
     }
+    
     /**
      * Used to track change of the application sources path
      */
@@ -460,6 +448,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return allClasses;
     }
+    
     private List<Class> allClasses;
     private Map<String, ApplicationClass> allClassesByNormalizedName;
 
@@ -488,7 +477,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     // assignable classes cache
-    private Map<String, List<Class>> assignableClassesByName = new HashMap<String, List<Class>>(100);
+    private final Map<String, List<Class>> assignableClassesByName = new HashMap<String, List<Class>>(100);
 
     /**
      * Find a class in a case insensitive way
@@ -529,16 +518,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
-
-    // ~~~ Intern
-    List<ApplicationClass> getAllClasses(String basePackage) {
-        List<ApplicationClass> res = new ArrayList<ApplicationClass>();
-        for (VirtualFile virtualFile : Play.javaPath) {
-            res.addAll(getAllClasses(virtualFile, basePackage));
-        }
-        return res;
-    }
-
+    
     private List<ApplicationClass> getAllClasses(VirtualFile path) {
         return getAllClasses(path, "");
     }
@@ -584,5 +564,4 @@ public class ApplicationClassloader extends ClassLoader {
     public String toString() {
         return "(play) " + (allClasses == null ? "" : allClasses.toString());
     }
-
 }
