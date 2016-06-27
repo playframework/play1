@@ -59,6 +59,8 @@ samples-and-tests/jobboard/test-result
 samples-and-tests/jobboard/attachments
 samples-and-tests/just-test-cases/tmp
 samples-and-tests/just-test-cases/test-result
+samples-and-tests/just-test-cases/lib
+samples-and-tests/just-test-cases/modules
 samples-and-tests/chat/tmp
 samples-and-tests/chat/logs
 .git
