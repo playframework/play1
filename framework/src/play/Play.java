@@ -17,6 +17,7 @@ import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.deps.DependenciesManager;
 import play.exceptions.PlayException;
+import play.exceptions.RestartNeededException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.mvc.Http;
@@ -639,12 +640,22 @@ public class Play {
             Router.detectChanges(ctxPath);
             pluginCollection.detectChange();
             if (!Play.started) {
-                throw new RuntimeException("Not started");
+                throw new RestartNeededException("Not started");
             }
         } catch (PlayException e) {
             throw e;
+        } catch (RestartNeededException e) {
+            if (started) {
+                if (e.getCause() != null && e.getCause() != e) {
+                    Logger.info("Restart: " + e.getMessage() + ", caused by: " + e.getCause());
+                }
+                else {
+                    Logger.info("Restart: " + e.getMessage());
+                }
+            }
+            start();
         } catch (Exception e) {
-            // We have to do a clean refresh
+            Logger.error(e, "Restart: " + e.getMessage());
             start();
         }
     }

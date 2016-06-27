@@ -8,6 +8,7 @@ import play.Play;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.hash.ClassStateHashCreator;
+import play.exceptions.RestartNeededException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.vfs.VirtualFile;
@@ -296,7 +297,7 @@ public class ApplicationClassloader extends ClassLoader {
     /**
      * Detect Java changes
      */
-    public void detectChanges() {
+    public void detectChanges() throws RestartNeededException {
         // Now check for file modification
         List<ApplicationClass> modifieds = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : Play.classes.all()) {
@@ -307,7 +308,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         Set<ApplicationClass> modifiedWithDependencies = new HashSet<ApplicationClass>();
         modifiedWithDependencies.addAll(modifieds);
-        if (modifieds.size() > 0) {
+        if (!modifieds.isEmpty()) {
             modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
@@ -327,21 +328,22 @@ public class ApplicationClassloader extends ClassLoader {
                 currentState = new ApplicationClassloaderState();//show others that we have changed..
             }
         }
-        if (newDefinitions.size() > 0) {
+        
+        if (!newDefinitions.isEmpty()) {
             Cache.clear();
             if (HotswapAgent.enabled) {
                 try {
                     HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
                 } catch (Throwable e) {
-                    throw new RuntimeException("Need reload");
+                    throw new RestartNeededException(newDefinitions.size() + " classes changed", e);
                 }
             } else {
-                throw new RuntimeException("Need reload");
+                throw new RestartNeededException(newDefinitions.size() + " classes changed (and HotSwap is not enabled)");
             }
         }
         // Check signature (variable name & annotations aware !)
         if (dirtySig) {
-            throw new RuntimeException("Signature change !");
+            throw new RestartNeededException("Signature change !");
         }
 
         // Now check if there is new classes or removed classes
@@ -365,7 +367,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
             }
-            throw new RuntimeException("Path has changed");
+            throw new RestartNeededException("Path has changed");
         }
     }
     
