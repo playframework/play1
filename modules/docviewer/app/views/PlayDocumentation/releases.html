@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <title>Play manual - ${title}</title>
+        <link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="${_response_encoding}">
+        <link rel="stylesheet" href="@{'/public/playmanual/wiki.css'}" type="text/css" media="screen" charset="${_response_encoding}">
+        <script type="text/javascript" src="@{'/public/playmanual/jquery-1.6.min.js'}"></script>
+        <script type="text/javascript" src="@{'/public/playmanual/navigation.js'}"></script>
+    </head>
+    <body>
+        <div class="wrapper">
+
+            <div id="docSidebar">
+
+                <div id="logo">
+                    <img src="@{'/public/playmanual/logo.png'}">                
+                    <h2 id="version">Play ${play.version}</h2>
+                </div>
+
+                <h2>Browse ${module ? '('+module.capitalizeWords()+')' : ''}</h2>
+                <ul>
+                    #{if module}
+                         <li id="gotoc"><a href="/@documentation">Documentation home</a></li>
+                    #{/if}
+                    <li id="gotoc"><a href="home">${module ?  module.capitalizeWords() + ' — ' : ''}Table of contents</a></li>
+                </ul>
+                
+                #{if modules}
+                    <h2>Installed modules</h2>
+                    <ul>
+                        #{list modules, as:'module'}
+                            <li>
+                                <a href="modules/${module}/home">${module.capitalizeWords()}</a>
+                                #{if apis.contains(module)}
+                                    — <a href="/@api/-${module}/index.html">Browse API</a>
+                                #{/if}
+                            </li>
+                        #{/list}
+                    </ul>
+                #{/if}
+
+                <h2>Contents</h2>
+                <div id="toc"></div>
+
+                #{ifnot module}
+                <h2>Languages</h2>
+                <div id="lang">
+
+                <ul>
+                    #{list items:langMenuList, as:"langMenu"}
+                        %{
+                            currentUrl = new ArrayList()
+                            currentUrl.addAll(Arrays.asList(request.url.split("/")))
+                            if(currentUrl.size()>=4){
+                                currentUrl.set(2,langMenu.key)
+                            }else{
+                                currentUrl.add(2, langMenu.key)
+                            }
+                            urlWithLocale = currentUrl.join("/")
+                        }%
+                        #{if docLang!=null && docLang.equalsIgnoreCase(langMenu.key)}
+                            <li><b>${langMenu.value}</b></li>
+                        #{/if}
+                        #{elseif docLang==null && langMenu.key.equals("en")}
+                            <li><a href="${urlWithLocale}"><b>${langMenu.value}</b></a></li>
+                        #{/elseif}
+                        #{else}
+                            <li><a href="${urlWithLocale}">${langMenu.value}</a></li>
+                        #{/else}
+                    #{/list}
+                </ul>
+                </div>
+                #{/ifnot}
+
+                <h2>Search</h2>
+                <p>Get help with google</p>
+                <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="28" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
+
+            </div>
+
+            <div id="pageContent">
+
+                <div class="wikistyle">${html.raw()}</div>
+
+            </div>
+
+        </div>
+    </body>
+</html>
