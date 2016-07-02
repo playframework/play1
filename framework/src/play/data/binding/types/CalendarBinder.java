@@ -18,24 +18,20 @@ import play.libs.I18N;
 public class CalendarBinder implements TypeBinder<Calendar> {
 
     @Override
-    public Calendar bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+    public Calendar bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws ParseException {
         if (value == null || value.trim().length() == 0) {
             return null;
         }
         Calendar cal = Calendar.getInstance(Lang.getLocale());
-        try {
-            Date date = AnnotationHelper.getDateAs(annotations, value);
-            if (date != null) {
-                cal.setTime(date);
-            } else {
-                SimpleDateFormat sdf = new SimpleDateFormat(I18N.getDateFormat());
-                sdf.setLenient(false);
-                cal.setTime(sdf.parse(value));
-            }
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Cannot convert [" + value + "] to a Calendar: " + e.toString());
-        }
 
+        Date date = AnnotationHelper.getDateAs(annotations, value);
+        if (date != null) {
+            cal.setTime(date);
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat(I18N.getDateFormat());
+            sdf.setLenient(false);
+            cal.setTime(sdf.parse(value));
+        }
         return cal;
     }
 }
