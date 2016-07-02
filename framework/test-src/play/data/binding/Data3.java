@@ -23,10 +23,10 @@ class Data3 {
     public static class TestGenericTypeBinder implements TypeBinder<GenericType<?>> {
 
         @Override
-        public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+        public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
             ParameterizedType pt = (ParameterizedType) genericType;
             if (!Long.class.equals(pt.getActualTypeArguments()[0])) {
-                throw new IllegalArgumentException("Wrong generic type passed. Does not match class declatarion.");
+                throw new IllegalArgumentException("Wrong generic type passed. Does not match class declaration.");
             }
 
             Long longValue = Long.valueOf(value);

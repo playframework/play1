@@ -19,9 +19,9 @@ public @interface As {
     Class<? extends TypeBinder<?>> binder() default DEFAULT.class;
     Class<? extends TypeUnbinder<?>> unbinder() default DEFAULT.class;
 
-    public static final class DEFAULT implements TypeBinder<Object>, TypeUnbinder<Object> {
+    final class DEFAULT implements TypeBinder<Object>, TypeUnbinder<Object> {
         @Override
-        public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+        public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
             throw new UnsupportedOperationException("Not supported.");
         }
 
