@@ -2,6 +2,7 @@ package play.data.binding.types;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 
 import org.joda.time.DateTime;
 
@@ -15,7 +16,7 @@ public class DateTimeBinder implements TypeBinder<DateTime> {
     private static DateBinder dateBinder = new DateBinder();
 
     @Override
-    public DateTime bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+    public DateTime bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws ParseException {
         if (value == null || value.trim().length() == 0) {
             return null;
         }
