@@ -20,7 +20,8 @@ public interface TypeBinder<T> {
      * @param genericType  The generic type associated with the object you want to bound the value to
      * @return  the 'bound' object for example a date object if the value was '12/12/2002'
      * @throws ParseException if parameter has invalid format (e.g. date)
+     * @throws Exception deprecated! Will be removed in Play 1.5
      */
-    Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws ParseException;
+    Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception;
 
 }

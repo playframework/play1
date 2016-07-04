@@ -546,7 +546,7 @@ public abstract class Binder {
      * @return The binding object
      * @throws ParseException
      */
-    public static Object directBind(String value, Class<?> clazz) throws ParseException {
+    public static Object directBind(String value, Class<?> clazz) throws Exception {
         return directBind(null, value, clazz, null);
     }
 
@@ -558,7 +558,7 @@ public abstract class Binder {
      * @return The binding object
      * @throws ParseException
      */
-    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws ParseException {
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         return directBind(name, annotations, value, clazz, null);
     }
 
@@ -570,7 +570,7 @@ public abstract class Binder {
      * @return The binding object
      * @throws ParseException
      */
-    public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws ParseException {
+    public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         return directBind(null, annotations, value, clazz, type);
     }
 
@@ -584,7 +584,7 @@ public abstract class Binder {
      * @param type
      * @return The binding object
      */
-    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws ParseException {
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         // calls the direct binding and returns null if no value could be resolved..
         Object r = internalDirectBind(name, annotations, value, clazz, type);
         if ( r == DIRECTBINDING_NO_RESULT) {
@@ -596,7 +596,7 @@ public abstract class Binder {
 
     // If internalDirectBind was not able to bind it, it returns a special variable instance: DIRECTBIND_MISSING
     // Needs this because sometimes we need to know if no value was returned..
-    private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws ParseException {
+    private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (annotations != null) {
