@@ -35,7 +35,7 @@ require:    &allDependencies
     - net.sf.ehcache -> ehcache-core 2.4.3
     - net.sf.ezmorph -> ezmorph 1.0.3
     - net.sf.jsr107cache -> jsr107cache 1.0
-    - net.sf.oval -> oval 1.50
+    - net.sf.oval -> oval 1.85
     - mysql -> mysql-connector-java 5.1.20
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
