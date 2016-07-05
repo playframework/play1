@@ -1,16 +1,18 @@
 package play.utils;
 
-import net.sf.oval.internal.util.LinkedSet;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import java.beans.Encoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Custom impl of java.util.properties that preserves the key-order from the file
@@ -84,7 +86,7 @@ public class OrderSafeProperties extends java.util.Properties {
 
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        Set<Map.Entry<Object, Object>> entrySet = new LinkedSet<Map.Entry<Object, Object>>(keys.size());
+        Set<Map.Entry<Object, Object>> entrySet = new LinkedHashSet<Map.Entry<Object, Object>>(keys.size());
         for (Object key : keys) {
             entrySet.add(new Entry(key, get(key)));
         }
