@@ -23,7 +23,7 @@ public class ByteArrayArrayBinder implements TypeBinder<byte[][]> {
         }
         Request req = Request.current();
         if (req != null && req.args != null) {
-            List<byte[]> byteList = new ArrayList<byte[]>();
+            List<byte[]> byteList = new ArrayList<>();
             List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
             if(uploads != null){
                 for (Upload upload : uploads) {

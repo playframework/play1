@@ -57,7 +57,7 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("reference", new SimpleDateFormat(I18N.getDateFormat()).format(reference));
         return messageVariables;
     }

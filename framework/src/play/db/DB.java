@@ -33,7 +33,7 @@ public class DB {
      * The loaded datasource.
      * @see ExtendedDatasource
      */
-    protected static final Map<String, ExtendedDatasource> datasources = new ConcurrentHashMap<String, ExtendedDatasource>();
+    protected static final Map<String, ExtendedDatasource> datasources = new ConcurrentHashMap<>();
 
     public static class ExtendedDatasource {
 
@@ -83,7 +83,7 @@ public class DB {
 
     public final static String DEFAULT = "default";
 
-    static ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<Map<String, Connection>>();
+    static ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<>();
 
     public static DataSource getDataSource(String name) {
         if (datasources.get(name) != null) {
@@ -119,7 +119,7 @@ public class DB {
     private static void registerLocalConnection(String name, Connection connection) {
         Map<String, Connection> map = localConnection.get();
         if (map == null) {
-            map = new HashMap<String, Connection>();
+            map = new HashMap<>();
         }
         map.put(name, connection);
         localConnection.set(map);
@@ -131,7 +131,7 @@ public class DB {
     public static void closeAll() {
         Map<String, Connection> map = localConnection.get();
         if (map != null) {
-            Set<String> keySet = new HashSet<String>(map.keySet());
+            Set<String> keySet = new HashSet<>(map.keySet());
             for (String name : keySet) {
                 close(name);
             }
@@ -311,7 +311,7 @@ public class DB {
      * Destroy all datasources
      */
     public static void destroyAll() {
-        Set<String> keySet = new HashSet<String>(datasources.keySet());
+        Set<String> keySet = new HashSet<>(datasources.keySet());
         for (String name : keySet) {
             destroy(name);
         }

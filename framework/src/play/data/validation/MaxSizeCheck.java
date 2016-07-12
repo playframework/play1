@@ -30,7 +30,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("maxSize", Integer.toString(maxSize));
         return messageVariables;
     }

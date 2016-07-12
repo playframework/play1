@@ -720,7 +720,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void redirect(String action, boolean permanent, Object... args) {
         try {
-            Map<String, Object> newArgs = new HashMap<String, Object>(args.length);
+            Map<String, Object> newArgs = new HashMap<>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass()
                     .getDeclaredField(
@@ -807,7 +807,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
-        Map<String, Object> templateBinding = new HashMap<String, Object>(16);
+        Map<String, Object> templateBinding = new HashMap<>(16);
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -975,7 +975,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     @Deprecated
     protected static void parent(Object... args) {
-        Map<String, Object> map = new HashMap<String, Object>(16);
+        Map<String, Object> map = new HashMap<>(16);
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -1018,7 +1018,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String, String> mapss = new HashMap<String, String>(map.size());
+            Map<String, String> mapss = new HashMap<>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 Object value = entry.getValue();
                 mapss.put(entry.getKey(), value == null ? null : value.toString());
@@ -1277,7 +1277,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Don't use this directly if you don't know why
      */
-    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<ActionDefinition>();
+    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<>();
 
     /**
      * @todo - this "Usage" example below doesn't make sense.

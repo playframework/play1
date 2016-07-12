@@ -297,8 +297,8 @@ public abstract class CRUD extends Controller {
 
 
         public List<ObjectField> getFields() {
-            List<ObjectField> fields = new ArrayList<ObjectField>();
-            List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
+            List<ObjectField> fields = new ArrayList<>();
+            List<ObjectField> hiddenFields = new ArrayList<>();
             for (Model.Property f : factory.listProperties()) {
                 ObjectField of = new ObjectField(f);
                 if (of.type != null) {

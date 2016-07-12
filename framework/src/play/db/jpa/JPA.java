@@ -23,10 +23,10 @@ import play.libs.F;
  */
 public class JPA {
 
-    protected static Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<String,EntityManagerFactory>();
+    protected static Map<String,EntityManagerFactory> emfs = new ConcurrentHashMap<>();
     public static final ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>() {
       @Override protected Map<String, JPAContext> initialValue() {
-        return new ConcurrentHashMap<String, JPAContext>();
+        return new ConcurrentHashMap<>();
       }
     };
     public static String DEFAULT = "default";

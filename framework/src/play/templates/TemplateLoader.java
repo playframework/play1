@@ -18,7 +18,7 @@ import play.exceptions.TemplateNotFoundException;
  */
 public class TemplateLoader {
 
-    protected static Map<String, BaseTemplate> templates = new HashMap<String, BaseTemplate>();
+    protected static Map<String, BaseTemplate> templates = new HashMap<>();
     /**
      * See getUniqueNumberForTemplateFile() for more info
      */
@@ -207,7 +207,7 @@ public class TemplateLoader {
      * @return A list of executable templates
      */
     public static List<Template> getAllTemplate() {
-        List<Template> res = new ArrayList<Template>();
+        List<Template> res = new ArrayList<>();
         for (VirtualFile virtualFile : Play.templatesPath) {
             scan(res, virtualFile);
         }

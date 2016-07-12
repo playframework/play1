@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  */
 public class ApplicationCompiler {
 
-    Map<String, Boolean> packagesCache = new HashMap<String, Boolean>();
+    Map<String, Boolean> packagesCache = new HashMap<>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
 
@@ -36,7 +36,7 @@ public class ApplicationCompiler {
      */
     public ApplicationCompiler(ApplicationClasses applicationClasses) {
         this.applicationClasses = applicationClasses;
-        this.settings = new HashMap<String, String>();
+        this.settings = new HashMap<>();
         this.settings.put(CompilerOptions.OPTION_ReportMissingSerialVersion, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
         this.settings.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);

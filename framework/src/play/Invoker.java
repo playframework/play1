@@ -89,7 +89,7 @@ public class Invoker {
      */
     public static class InvocationContext {
 
-        public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
+        public static ThreadLocal<InvocationContext> current = new ThreadLocal<>();
         private final List<Annotation> annotations;
         private final String invocationType;
 
@@ -99,7 +99,7 @@ public class Invoker {
 
         public InvocationContext(String invocationType) {
             this.invocationType = invocationType;
-            this.annotations = new ArrayList<Annotation>();
+            this.annotations = new ArrayList<>();
         }
 
         public InvocationContext(String invocationType, List<Annotation> annotations) {
@@ -114,7 +114,7 @@ public class Invoker {
 
         public InvocationContext(String invocationType, Annotation[]... annotations) {
             this.invocationType = invocationType;
-            this.annotations = new ArrayList<Annotation>();
+            this.annotations = new ArrayList<>();
             for (Annotation[] some : annotations) {
                 this.annotations.addAll(Arrays.asList(some));
             }
@@ -391,7 +391,7 @@ public class Invoker {
         Map<Future<?>, Invocation> queue;
 
         public WaitForTasksCompletion() {
-            queue = new ConcurrentHashMap<Future<?>, Invocation>();
+            queue = new ConcurrentHashMap<>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
         }
@@ -422,7 +422,7 @@ public class Invoker {
             while (true) {
                 try {
                     if (!queue.isEmpty()) {
-                        for (Future<?> task : new HashSet<Future<?>>(queue.keySet())) {
+                        for (Future<?> task : new HashSet<>(queue.keySet())) {
                             if (task.isDone()) {
                                 executor.submit(queue.get(task));
                                 queue.remove(task);

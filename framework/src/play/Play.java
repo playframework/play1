@@ -102,7 +102,7 @@ public class Play {
     /**
      * All paths to search for files
      */
-    public static List<VirtualFile> roots = new ArrayList<VirtualFile>(16);
+    public static List<VirtualFile> roots = new ArrayList<>(16);
     /**
      * All paths to search for Java files
      */
@@ -122,7 +122,7 @@ public class Play {
     /**
      * The loaded configuration files
      */
-    public static Set<VirtualFile> confs = new HashSet<VirtualFile>(1);
+    public static Set<VirtualFile> confs = new HashSet<>(1);
     /**
      * The app configuration (already resolved from the framework id)
      */
@@ -134,7 +134,7 @@ public class Play {
     /**
      * The list of supported locales
      */
-    public static List<String> langs = new ArrayList<String>(16);
+    public static List<String> langs = new ArrayList<>(16);
     /**
      * The very secret key
      */
@@ -154,7 +154,7 @@ public class Play {
     /**
      * Modules
      */
-    public static Map<String, VirtualFile> modules = new HashMap<String, VirtualFile>(16);
+    public static Map<String, VirtualFile> modules = new HashMap<>(16);
     /**
      * Framework version
      */
@@ -263,23 +263,23 @@ public class Play {
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
-        javaPath = new CopyOnWriteArrayList<VirtualFile>();
+        javaPath = new CopyOnWriteArrayList<>();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
         if (appRoot.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
-            templatesPath = new ArrayList<VirtualFile>(2);
+            templatesPath = new ArrayList<>(2);
             templatesPath.add(appRoot.child("app/views"));
         } else {
-            templatesPath = new ArrayList<VirtualFile>(1);
+            templatesPath = new ArrayList<>(1);
         }
 
         // Main route file
         routes = appRoot.child("conf/routes");
 
         // Plugin route files
-        modulesRoutes = new HashMap<String, VirtualFile>(16);
+        modulesRoutes = new HashMap<>(16);
 
         // Load modules
         loadModules(appRoot);
@@ -349,7 +349,7 @@ public class Play {
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
     public static void readConfiguration() {
-        confs = new HashSet<VirtualFile>();
+        confs = new HashSet<>();
         configuration = readOneConfigurationFile("application.conf");
         extractHttpPort();
         // Plugins
@@ -433,7 +433,7 @@ public class Play {
             propsFromFile.setProperty(key.toString(), newValue.toString());
         }
         // Include
-        Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
+        Map<Object, Object> toInclude = new HashMap<>(16);
         for (Object key : propsFromFile.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {
@@ -497,9 +497,9 @@ public class Play {
             Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
             // Locales
-            langs = new ArrayList<String>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
+            langs = new ArrayList<>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
             if (langs.size() == 1 && langs.get(0).trim().length() == 0) {
-                langs = new ArrayList<String>(16);
+                langs = new ArrayList<>(16);
             }
 
             // Clean templates
@@ -735,7 +735,7 @@ public class Play {
 		System.setProperty("application.path", applicationPath.getAbsolutePath());
 
 		File localModules = Play.getFile("modules");
-		Set<String> modules = new LinkedHashSet<String>();
+		Set<String> modules = new LinkedHashSet<>();
 		if (localModules != null && localModules.exists() && localModules.isDirectory()) {
 			try {
 			    File userHome  = new File(System.getProperty("user.home"));

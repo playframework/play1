@@ -31,8 +31,8 @@ public class JdbcResultFactories {
             || objectClass == Long.class
             || objectClass == Float.class
             || objectClass == Double.class
-                ? new PrimitiveFactory<T>(objectClass, fields)
-                : new ClassFactory<T>(objectClass, fields);
+                ? new PrimitiveFactory<>(objectClass, fields)
+                : new ClassFactory<>(objectClass, fields);
     }
 
 
@@ -42,11 +42,11 @@ public class JdbcResultFactories {
     }
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass, int columnIndex) {
-        return new PrimitiveFactory<T>(objectClass, columnIndex);
+        return new PrimitiveFactory<>(objectClass, columnIndex);
     }
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass, String field) {
-        return new PrimitiveFactory<T>(objectClass, field);
+        return new PrimitiveFactory<>(objectClass, field);
     }
 
 
@@ -60,7 +60,7 @@ public class JdbcResultFactories {
     }
 
     public static <T> JdbcResultFactory<T> buildClass(Class<T> objectClass, List<String> fields) {
-        return new ClassFactory<T>(objectClass, fields);
+        return new ClassFactory<>(objectClass, fields);
     }
 
 
@@ -128,7 +128,7 @@ public class JdbcResultFactories {
         @Override
         public void init(ResultSet result) throws SQLException {
             if (fields == null) {
-                fields = new ArrayList<String>();
+                fields = new ArrayList<>();
                 ResultSetMetaData meta = result.getMetaData();
                 int count = meta.getColumnCount();
                 for (int i = 1; i <= count; i++) {

@@ -110,7 +110,7 @@ public class Utils {
             }
         }
     }
-    private static ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<SimpleDateFormat>();
+    private static ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<>();
 
     public static SimpleDateFormat getHttpDateFormatter() {
         if (httpFormatter.get() == null) {
@@ -121,7 +121,7 @@ public class Utils {
     }
 
     public static Map<String, String[]> filterMap(Map<String, String[]> map, String prefix) {
-        Map<String, String[]> newMap = new HashMap<String, String[]>();
+        Map<String, String[]> newMap = new HashMap<>();
         for (String key : map.keySet()) {
             if (!key.startsWith(prefix + ".")) {
                 newMap.put(key, map.get(key));
@@ -135,7 +135,7 @@ public class Utils {
     }
 
     public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
-        Map<String, String> filteredMap = new LinkedHashMap<String, String>();
+        Map<String, String> filteredMap = new LinkedHashMap<>();
         prefix += ".";
         for(Map.Entry<String, String[]> e: params.entrySet()){
             if(e.getKey().startsWith(prefix)) {
@@ -163,7 +163,7 @@ public class Utils {
     public static class AlternativeDateFormat {
 
         Locale locale;
-        List<SimpleDateFormat> formats = new ArrayList<SimpleDateFormat>();
+        List<SimpleDateFormat> formats = new ArrayList<>();
 
         public AlternativeDateFormat(Locale locale, String... alternativeFormats) {
             super();
@@ -188,7 +188,7 @@ public class Utils {
             }
             throw new ParseException("Date format not understood", 0);
         }
-        static ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<AlternativeDateFormat>();
+        static ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<>();
 
         public static AlternativeDateFormat getDefaultFormatter() {
             if (dateformat.get() == null) {

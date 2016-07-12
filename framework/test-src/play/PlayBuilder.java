@@ -35,7 +35,7 @@ public class PlayBuilder {
         Play.version = "localbuild";
         Play.configuration = configuration;
         Play.classes = new ApplicationClasses();
-        Play.javaPath = new ArrayList<VirtualFile>();
+        Play.javaPath = new ArrayList<>();
         Play.applicationPath = new File(".");
         Play.classloader = new ApplicationClassloader();
         Play.plugins = Collections.unmodifiableList(new ArrayList<PlayPlugin>());

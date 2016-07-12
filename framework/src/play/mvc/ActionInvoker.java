@@ -646,7 +646,7 @@ public class ActionInvoker {
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
             Class<?> type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap<String, String[]>();
+            Map<String, String[]> params = new HashMap<>();
 
             // In case of simple params, we don't want to parse the body.
             if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {

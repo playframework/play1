@@ -21,7 +21,7 @@ public class Configuration {
     
 
      public static Set<String> getDbNames() {
-         TreeSet<String> dbNames = new TreeSet<String>();
+         TreeSet<String> dbNames = new TreeSet<>();
          // search for case db= or db.url= as at least one of these property is required
          final String DB_CONFIG_PATTERN = "^db\\.([^\\.]*)$|^db\\.([^\\.]*)\\.url$";
          Pattern pattern = new jregex.Pattern(DB_CONFIG_PATTERN);
@@ -40,7 +40,7 @@ public class Configuration {
                  dbNames.add("default");
              }  
          }
-         return new TreeSet<String>(dbNames);
+         return new TreeSet<>(dbNames);
      }
      
      public String getProperty(String key) {
@@ -87,7 +87,7 @@ public class Configuration {
 
 
     public Map<String, String> getProperties() {
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> properties = new HashMap<>();
         Properties props = Play.configuration;
         
         for (Object key : Collections.list(props.keys())) {

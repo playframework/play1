@@ -356,7 +356,7 @@ public class WSUrlFetch implements WSImpl {
 
         @Override
         public List<Header> getHeaders() {
-            List<Header> result = new ArrayList<Header>();
+            List<Header> result = new ArrayList<>();
             for (String key : headersMap.keySet()) {
                 result.add(new Header(key, headersMap.get(key)));
             }

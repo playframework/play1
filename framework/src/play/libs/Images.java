@@ -238,7 +238,7 @@ public class Images {
         public BackgroundProducer background = new TransparentBackgroundProducer();
         public GimpyRenderer gimpy = new RippleGimpyRenderer();
         public Color textColor = Color.BLACK;
-        public List<Font> fonts = new ArrayList<Font>(2);
+        public List<Font> fonts = new ArrayList<>(2);
         public int w, h;
         public Color noise = null;
 

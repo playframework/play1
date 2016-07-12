@@ -100,7 +100,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<Set<JPABase>>();
+    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
@@ -114,7 +114,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
         // Cascade save
         try {
-            Set<Field> fields = new HashSet<Field>();
+            Set<Field> fields = new HashSet<>();
             Class clazz = this.getClass();
             while (!clazz.equals(JPABase.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());

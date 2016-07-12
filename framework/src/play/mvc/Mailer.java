@@ -42,7 +42,7 @@ import play.libs.F.T4;
  */
 public class Mailer implements LocalVariablesSupport {
 
-    protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
+    protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<>();
 
     /**
      * Set subject of mail, optionally providing formatting arguments
@@ -69,7 +69,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         List recipientsList = (List<String>) map.get("recipients");
         if (recipientsList == null) {
-            recipientsList = new ArrayList<String>();
+            recipientsList = new ArrayList<>();
             map.put("recipients", recipientsList);
         }
         recipientsList.addAll(Arrays.asList(recipients));
@@ -84,7 +84,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         List bccsList = (List<String>) map.get("bccs");
         if (bccsList == null) {
-            bccsList = new ArrayList<String>();
+            bccsList = new ArrayList<>();
             map.put("bccs", bccsList);
         }
         bccsList.addAll(Arrays.asList(bccs));
@@ -99,7 +99,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         List ccsList = (List<String>) map.get("ccs");
         if (ccsList == null) {
-            ccsList = new ArrayList<String>();
+            ccsList = new ArrayList<>();
             map.put("ccs", ccsList);
         }
         ccsList.addAll(Arrays.asList(ccs));
@@ -114,7 +114,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         List<EmailAttachment> attachmentsList = (List<EmailAttachment>) map.get("attachments");
         if (attachmentsList == null) {
-            attachmentsList = new ArrayList<EmailAttachment>();
+            attachmentsList = new ArrayList<>();
             map.put("attachments", attachmentsList);
         }
         attachmentsList.addAll(Arrays.asList(attachments));
@@ -129,7 +129,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         List<T4<DataSource, String, String, String>> datasourceList = (List<T4<DataSource, String, String, String>>) map.get("datasources");
         if (datasourceList == null) {
-            datasourceList = new ArrayList<T4<DataSource, String, String, String>>();
+            datasourceList = new ArrayList<>();
             map.put("datasources", datasourceList);
         }
         datasourceList.add(F.T4(dataSource, name, description, disposition));
@@ -150,7 +150,7 @@ public class Mailer implements LocalVariablesSupport {
 		
 		Map<String, InlineImage> inlineEmbeds = (Map<String, InlineImage>) map.get("inlineEmbeds");
 		if (inlineEmbeds == null) {
-			inlineEmbeds = new HashMap<String, InlineImage>();
+			inlineEmbeds = new HashMap<>();
 			map.put("inlineEmbeds", inlineEmbeds);
 		}
 		
@@ -365,7 +365,7 @@ public class Mailer implements LocalVariablesSupport {
         }
         HashMap<String, String> headers = (HashMap<String, String>) map.get("headers");
         if (headers == null) {
-            headers = new HashMap<String, String>();
+            headers = new HashMap<>();
         }
         headers.put(key, value);
         map.put("headers", headers);
@@ -404,8 +404,8 @@ public class Mailer implements LocalVariablesSupport {
                 templateName = args[0].toString();
             }
 
-            final Map<String, Object> templateHtmlBinding = new HashMap<String, Object>();
-            final Map<String, Object> templateTextBinding = new HashMap<String, Object>();
+            final Map<String, Object> templateHtmlBinding = new HashMap<>();
+            final Map<String, Object> templateTextBinding = new HashMap<>();
             for (Object o : args) {
                 List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
                 for (String name : names) {

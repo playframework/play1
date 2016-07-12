@@ -50,7 +50,7 @@ public class HTTP {
     private static final Map<String, String> lower2UppercaseHttpHeaders = initLower2UppercaseHttpHeaders();
 
     private static Map<String, String> initLower2UppercaseHttpHeaders() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
 
         String path = "/play/utils/http_headers.properties";
         InputStream in = HTTP.class.getResourceAsStream(path);

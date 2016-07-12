@@ -170,7 +170,7 @@ public class CorePlugin extends PlayPlugin {
         try {
             out.println("Monitors:");
             out.println("~~~~~~~~");
-            List<Monitor> monitors = new ArrayList<Monitor>(asList(MonitorFactory.getRootMonitor().getMonitors()));
+            List<Monitor> monitors = new ArrayList<>(asList(MonitorFactory.getRootMonitor().getMonitors()));
             Collections.sort(monitors, new Comparator<Monitor>() {
                 @Override public int compare(Monitor m1, Monitor m2) {
                     return Double.compare(m2.getTotal(), m1.getTotal());

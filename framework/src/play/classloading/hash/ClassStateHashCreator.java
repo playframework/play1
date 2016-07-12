@@ -40,7 +40,7 @@ public class ClassStateHashCreator {
         }
     }
 
-    private final Map<File, FileWithClassDefs> classDefsInFileCache = new HashMap<File, FileWithClassDefs>();
+    private final Map<File, FileWithClassDefs> classDefsInFileCache = new HashMap<>();
 
     public synchronized int computePathHash(List<VirtualFile> paths) {
         StringBuilder buf = new StringBuilder();

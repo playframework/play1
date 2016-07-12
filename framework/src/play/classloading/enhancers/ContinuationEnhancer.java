@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ContinuationEnhancer extends Enhancer {
 
-    static final List<String> continuationMethods = new ArrayList<String>();
+    static final List<String> continuationMethods = new ArrayList<>();
 
     static {
         continuationMethods.add("play.mvc.Controller.await(java.lang.String)");

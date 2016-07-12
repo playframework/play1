@@ -11,9 +11,9 @@ import java.util.Map;
 
 class Data3 {
     public String a;
-    public Map<String, String> map = new HashMap<String, String>();
+    public Map<String, String> map = new HashMap<>();
     @As(binder = TestGenericTypeBinder.class)
-    public List<GenericType<Long>> genericTypeList = new ArrayList<GenericType<Long>>();
+    public List<GenericType<Long>> genericTypeList = new ArrayList<>();
 
 
     public static class GenericType<T> {
@@ -30,7 +30,7 @@ class Data3 {
             }
 
             Long longValue = Long.valueOf(value);
-            GenericType<Long> gt = new GenericType<Long>();
+            GenericType<Long> gt = new GenericType<>();
             gt.value = longValue;
             return gt;
         }

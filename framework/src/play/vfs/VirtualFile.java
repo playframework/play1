@@ -38,7 +38,7 @@ public class VirtualFile {
     }
 
     public String relativePath() {
-        List<String> path = new ArrayList<String>();
+        List<String> path = new ArrayList<>();
         File f = realFile;
         String prefix = "{?}";
         while (true) {
@@ -82,7 +82,7 @@ public class VirtualFile {
     }
 
     public List<VirtualFile> list() {
-        List<VirtualFile> res = new ArrayList<VirtualFile>();
+        List<VirtualFile> res = new ArrayList<>();
         if (exists()) {
             File[] children = realFile.listFiles();
             if (children != null) {

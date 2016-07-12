@@ -120,7 +120,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     /**
      * The Pipeline is given for a PlayHandler
      */
-    public Map<String, ChannelHandler> pipelines = new HashMap<String, ChannelHandler>();
+    public Map<String, ChannelHandler> pipelines = new HashMap<>();
 
     private WebSocketServerHandshaker handshaker;
 
@@ -209,7 +209,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
+    private static final Map<String, RenderStatic> staticPathsCache = new HashMap<>();
 
     public class NettyInvocation extends Invoker.Invocation {
 
@@ -674,12 +674,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected static Map<String, Http.Header> getHeaders(HttpRequest nettyRequest) {
-        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        Map<String, Http.Header> headers = new HashMap<>(16);
 
         for (String key : nettyRequest.headers().names()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
-            hd.values = new ArrayList<String>();
+            hd.values = new ArrayList<>();
             for (String next : nettyRequest.headers().getAll(key)) {
                 hd.values.add(next);
             }
@@ -690,7 +690,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected static Map<String, Http.Cookie> getCookies(HttpRequest nettyRequest) {
-        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        Map<String, Http.Cookie> cookies = new HashMap<>(16);
         String value = nettyRequest.headers().get(COOKIE);
         if (value != null) {
             Set<Cookie> cookieSet = ServerCookieDecoder.STRICT.decode(value);
@@ -760,7 +760,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     protected static Map<String, Object> getBindingForErrors(Exception e, boolean isError) {
 
-        Map<String, Object> binding = new HashMap<String, Object>();
+        Map<String, Object> binding = new HashMap<>();
         if (!isError) {
             binding.put("result", e);
         } else {
@@ -1016,7 +1016,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
         private boolean closed = false;
-        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<byte[]>();
+        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
 
         @Override
         public boolean hasNextChunk() throws Exception {
@@ -1102,7 +1102,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     // ~~~~~~~~~~~ Websocket
-    final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<ChannelHandlerContext, Http.Inbound>();
+    final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<>();
 
     private void websocketFrameReceived(final ChannelHandlerContext ctx, WebSocketFrame webSocketFrame) {
         Http.Inbound inbound = channels.get(ctx);
@@ -1222,7 +1222,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             @Override
             public synchronized void close() {
-                closeTask = new Promise<Void>();
+                closeTask = new Promise<>();
                 closeTask.onRedeem(new Action<Promise<Void>>() {
 
                     @Override

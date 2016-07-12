@@ -532,7 +532,7 @@ public class Logger {
             Throwable toClean = e;
             for (int i = 0; i < 5; i++) {
                 // Clean stack trace
-                List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
+                List<StackTraceElement> cleanTrace = new ArrayList<>();
                 for (StackTraceElement se : toClean.getStackTrace()) {
                     if (se.getClassName().startsWith("play.server.PlayHandler$NettyInvocation")) {
                         cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));

@@ -11,7 +11,7 @@ import play.i18n.Lang;
  */
 public class I18N {
 
-    static final Map<String, String> symbols = new HashMap<String, String>();
+    static final Map<String, String> symbols = new HashMap<>();
 
     static {
         symbols.put("ALL", "Lek");

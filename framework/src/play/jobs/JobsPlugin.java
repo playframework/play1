@@ -30,7 +30,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
     public static List<Job> scheduledJobs;
-    private static ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<List<Callable<?>>>();
+    private static ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
     public String getStatus() {
@@ -101,7 +101,7 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void afterApplicationStart() {
-        List<Class<?>> jobs = new ArrayList<Class<?>>();
+        List<Class<?>> jobs = new ArrayList<>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (Job.class.isAssignableFrom(clazz)) {
                 jobs.add(clazz);
@@ -183,7 +183,7 @@ public class JobsPlugin extends PlayPlugin {
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
-        scheduledJobs = new ArrayList<Job>();
+        scheduledJobs = new ArrayList<>();
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {

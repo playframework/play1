@@ -45,7 +45,7 @@ public class BeanWrapperTest {
 
         new PlayBuilder().build();
         ValidationBuilder.build();
-        Map<String, String[]> m = new HashMap<String, String[]>();
+        Map<String, String[]> m = new HashMap<>();
         m.put("b.a", new String[]{"a1"});
         m.put("b.b", new String[]{"b1"});
         m.put("b.i", new String[]{"2"});

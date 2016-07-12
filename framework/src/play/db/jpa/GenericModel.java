@@ -74,11 +74,11 @@ public class GenericModel extends JPABase {
         ParamNode paramNode = StringUtils.isEmpty(name) ? rootParamNode : rootParamNode.getChild(name, true);
         // #1195 - Needs to keep track of whick keys we remove so that we can restore it before
         // returning from this method.
-        List<ParamNode.RemovedNode> removedNodesList = new ArrayList<ParamNode.RemovedNode>();
+        List<ParamNode.RemovedNode> removedNodesList = new ArrayList<>();
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             // Start with relations
-            Set<Field> fields = new HashSet<Field>();
+            Set<Field> fields = new HashSet<>();
             Class<?> clazz = o.getClass();
             while (!clazz.equals(Object.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());

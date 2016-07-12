@@ -61,7 +61,7 @@ public class PluginCollection {
     /**
      * List that holds all loaded plugins, enabled or disabled
      */
-    protected List<PlayPlugin> allPlugins = new ArrayList<PlayPlugin>();
+    protected List<PlayPlugin> allPlugins = new ArrayList<>();
 
     /**
      * Readonly copy of allPlugins - updated each time allPlugins is updated.
@@ -72,7 +72,7 @@ public class PluginCollection {
     /**
      * List of all enabled plugins
      */
-    protected List<PlayPlugin> enabledPlugins = new ArrayList<PlayPlugin>();
+    protected List<PlayPlugin> enabledPlugins = new ArrayList<>();
 
     /**
      * Readonly copy of enabledPlugins - updated each time enabledPlugins is
@@ -84,7 +84,7 @@ public class PluginCollection {
     /**
      * List of all enabled plugins with filters
      */
-    protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<PlayPlugin>();
+    protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<>();
 
     /**
      * Readonly copy of enabledPluginsWithFilters - updated each time
@@ -100,7 +100,7 @@ public class PluginCollection {
      * @return Read only list of plugins
      */
     protected List<PlayPlugin> createReadonlyCopy(List<PlayPlugin> list) {
-        return Collections.unmodifiableList(new ArrayList<PlayPlugin>(list));
+        return Collections.unmodifiableList(new ArrayList<>(list));
     }
 
     private static class LoadingPluginInfo implements Comparable<LoadingPluginInfo> {
@@ -185,7 +185,7 @@ public class PluginCollection {
         // I can see loading the same plugin with different indexes, but I can't
         // think of a reasonable use case for
         // loading the same plugin multiple times at the same priority.
-        SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<LoadingPluginInfo>();
+        SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<>();
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             Logger.trace("Found one plugins descriptor, %s", url);
@@ -242,7 +242,7 @@ public class PluginCollection {
      */
     public void reloadApplicationPlugins() throws Exception {
 
-        Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
+        Set<PlayPlugin> reloadedPlugins = new HashSet<>();
         for (PlayPlugin plugin : getAllPlugins()) {
 
             // Is this plugin an application-supplied-plugin?
@@ -296,7 +296,7 @@ public class PluginCollection {
         // We're ready to call onLoad for this plugin.
         // must create a unique Play.plugins-list for this onLoad-method-call so
         // we can detect if some plugins are removed/disabled
-        Play.plugins = new ArrayList<PlayPlugin>(getEnabledPlugins());
+        Play.plugins = new ArrayList<>(getEnabledPlugins());
         plugin.onLoad();
         // Check for missing/removed plugins
         for (PlayPlugin enabledPlugin : getEnabledPlugins()) {
@@ -465,7 +465,7 @@ public class PluginCollection {
         // Copy list of plugins here in case the list changes in the midst of
         // doing composition...
         // (Is it really necessary to do this?)
-        final List<PlayPlugin> pluginsWithFilters = new ArrayList<PlayPlugin>(this.getEnabledPluginsWithFilters());
+        final List<PlayPlugin> pluginsWithFilters = new ArrayList<>(this.getEnabledPluginsWithFilters());
 
         if (pluginsWithFilters.isEmpty()) {
             return F.Option.None();
@@ -660,7 +660,7 @@ public class PluginCollection {
 
     @Deprecated
     public List<ApplicationClasses.ApplicationClass> onClassesChange(List<ApplicationClasses.ApplicationClass> modified) {
-        List<ApplicationClasses.ApplicationClass> modifiedWithDependencies = new ArrayList<ApplicationClasses.ApplicationClass>();
+        List<ApplicationClasses.ApplicationClass> modifiedWithDependencies = new ArrayList<>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             modifiedWithDependencies.addAll(plugin.onClassesChange(modified));
         }
@@ -795,7 +795,7 @@ public class PluginCollection {
     }
 
     public List<String> addTemplateExtensions() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             list.addAll(plugin.addTemplateExtensions());
         }
@@ -839,7 +839,7 @@ public class PluginCollection {
     }
 
     public Collection<Class> getUnitTests() {
-        Set<Class> allPluginTests = new HashSet<Class>();
+        Set<Class> allPluginTests = new HashSet<>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Collection<Class> unitTests = plugin.getUnitTests();
             if (unitTests != null) {
@@ -851,7 +851,7 @@ public class PluginCollection {
     }
 
     public Collection<Class> getFunctionalTests() {
-        Set<Class> allPluginTests = new HashSet<Class>();
+        Set<Class> allPluginTests = new HashSet<>();
         for (PlayPlugin plugin : getEnabledPlugins()) {
             Collection<Class> funcTests = plugin.getFunctionalTests();
             if (funcTests != null) {

@@ -50,7 +50,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored
                                                           // between calls
 
-    private static Map<String, Object> renderArgs = new HashMap<String, Object>();
+    private static Map<String, Object> renderArgs = new HashMap<>();
 
     @Before
     public void clearCookies() {
@@ -194,7 +194,7 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
-        List<Part> parts = new ArrayList<Part>();
+        List<Part> parts = new ArrayList<>();
 
         for (String key : parameters.keySet()) {
             final StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
@@ -354,7 +354,7 @@ public abstract class FunctionalTest extends BaseTest {
                 throw new TimeoutException("Request did not complete in time");
             }
             if (savedCookies == null) {
-                savedCookies = new HashMap<String, Http.Cookie>();
+                savedCookies = new HashMap<>();
             }
             for (Map.Entry<String, Http.Cookie> e : response.cookies.entrySet()) {
                 // If Max-Age is unset, browsers discard on exit; if

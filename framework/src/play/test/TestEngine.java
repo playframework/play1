@@ -43,7 +43,7 @@ public class TestEngine {
     public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
     public static List<Class> allUnitTests() {
-        List<Class> classes = new ArrayList<Class>();
+        List<Class> classes = new ArrayList<>();
         classes.addAll(Play.classloader.getAssignableClasses(Assert.class));
         classes.addAll(Play.pluginCollection.getUnitTests());
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
@@ -61,7 +61,7 @@ public class TestEngine {
     }
 
     public static List<Class> allFunctionalTests() {
-        List<Class> classes = new ArrayList<Class>();
+        List<Class> classes = new ArrayList<>();
         classes.addAll(Play.classloader.getAssignableClasses(FunctionalTest.class));
         classes.addAll(Play.pluginCollection.getFunctionalTests());
         
@@ -83,7 +83,7 @@ public class TestEngine {
     }
 
     public static List<String> allSeleniumTests() {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         seleniumTests("test", results);
         for (VirtualFile root : Play.roots) {
             seleniumTests(root.relativePath() + "/test", results);
@@ -252,7 +252,7 @@ public class TestEngine {
 
     public static class TestResults {
 
-        public List<TestResult> results = new ArrayList<TestResult>();
+        public List<TestResult> results = new ArrayList<>();
         public boolean passed = true;
         public int success = 0;
         public int errors = 0;

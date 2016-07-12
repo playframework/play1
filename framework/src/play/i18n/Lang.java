@@ -14,9 +14,9 @@ import java.util.*;
  */
 public class Lang {
 
-    static final ThreadLocal<String> current = new ThreadLocal<String>();
+    static final ThreadLocal<String> current = new ThreadLocal<>();
 
-    private static Map<String, Locale> cache = new HashMap<String, Locale>();
+    private static Map<String, Locale> cache = new HashMap<>();
     
     /**
      * Retrieve the current language or null
@@ -99,7 +99,7 @@ public class Lang {
      * @return the closest matching locale. If no closest match for a language/country is found, null is returned
      */
     private static String findClosestMatch(Collection<String> desiredLocales) {
-        ArrayList<String> cleanLocales = new ArrayList<String>(desiredLocales.size());
+        ArrayList<String> cleanLocales = new ArrayList<>(desiredLocales.size());
         //look for an exact match
         for (String a : desiredLocales) {
             a = a.replace("-", "_");

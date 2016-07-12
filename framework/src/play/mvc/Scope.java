@@ -34,8 +34,8 @@ public class Scope {
      */
     public static class Flash {
 
-        Map<String, String> data = new HashMap<String, String>();
-        Map<String, String> out = new HashMap<String, String>();
+        Map<String, String> data = new HashMap<>();
+        Map<String, String> out = new HashMap<>();
 
         public static Flash restore() {
             try {
@@ -68,7 +68,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
-        public static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        public static ThreadLocal<Flash> current = new ThreadLocal<>();
 
         public static Flash current() {
             return current.get();
@@ -197,9 +197,9 @@ public class Scope {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
-        Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
+        Map<String, String> data = new HashMap<>(); // ThreadLocal access
         boolean changed = false;
-        public static ThreadLocal<Session> current = new ThreadLocal<Session>();
+        public static ThreadLocal<Session> current = new ThreadLocal<>();
 
         public static Session current() {
             return current.get();
@@ -327,13 +327,13 @@ public class Scope {
     public static class Params {
         // ThreadLocal access
 
-        public static ThreadLocal<Params> current = new ThreadLocal<Params>();
+        public static ThreadLocal<Params> current = new ThreadLocal<>();
 
         public static Params current() {
             return current.get();
         }
         boolean requestIsParsed;
-        public Map<String, String[]> data = new LinkedHashMap<String, String[]>();
+        public Map<String, String[]> data = new LinkedHashMap<>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
@@ -460,7 +460,7 @@ public class Scope {
 
         public Map<String, String[]> sub(String prefix) {
             checkAndParse();
-            Map<String, String[]> result = new LinkedHashMap<String, String[]>();
+            Map<String, String[]> result = new LinkedHashMap<>();
             for (String key : data.keySet()) {
                 if (key.startsWith(prefix + ".")) {
                     result.put(key.substring(prefix.length() + 1), data.get(key));
@@ -471,7 +471,7 @@ public class Scope {
 
         public Map<String, String> allSimple() {
             checkAndParse();
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new HashMap<>();
             for (String key : data.keySet()) {
                 result.put(key, data.get(key)[0]);
             }
@@ -559,8 +559,8 @@ public class Scope {
      */
     public static class RenderArgs {
 
-        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
-        public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();
+        public Map<String, Object> data = new HashMap<>();        // ThreadLocal access
+        public static ThreadLocal<RenderArgs> current = new ThreadLocal<>();
 
         public static RenderArgs current() {
             return current.get();
@@ -590,8 +590,8 @@ public class Scope {
      */
     public static class RouteArgs {
 
-        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
-        public static ThreadLocal<RouteArgs> current = new ThreadLocal<RouteArgs>();
+        public Map<String, Object> data = new HashMap<>();        // ThreadLocal access
+        public static ThreadLocal<RouteArgs> current = new ThreadLocal<>();
 
         public static RouteArgs current() {
             return current.get();

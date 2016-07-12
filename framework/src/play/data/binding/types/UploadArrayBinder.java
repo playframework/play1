@@ -24,7 +24,7 @@ public class UploadArrayBinder implements TypeBinder<Model.BinaryField[]> {
         }
         Request req = Request.current();
         if (req != null && req.args != null) {
-            List<Upload> uploadArray = new ArrayList<Upload>();
+            List<Upload> uploadArray = new ArrayList<>();
             List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
             if(uploads != null){
                 for (Upload upload : uploads) {

@@ -169,7 +169,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 	 * Splits the SQL "properly" based on semicolons. Respecting quotes and comments.
 	 */
 	public static ArrayList<CharSequence> splitSQL(final CharSequence sql) {
-		final ArrayList<CharSequence> ret = new ArrayList<CharSequence>();
+		final ArrayList<CharSequence> ret = new ArrayList<>();
 		for ( CharSequence c : new SQLSplitter(sql) )
 			ret.add(c);
 		return ret;

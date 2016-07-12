@@ -9,9 +9,9 @@ import java.util.Map;
 // This way we don't have to do it twice.
 public class CachedBoundActionMethodArgs {
 
-    private static ThreadLocal<CachedBoundActionMethodArgs> current = new ThreadLocal<CachedBoundActionMethodArgs>();
+    private static ThreadLocal<CachedBoundActionMethodArgs> current = new ThreadLocal<>();
 
-    private Map<Method, Object[]> preBoundActionMethodArgs = new HashMap<Method, Object[]>(1);
+    private Map<Method, Object[]> preBoundActionMethodArgs = new HashMap<>(1);
 
     public static void init() {
         current.set( new CachedBoundActionMethodArgs());

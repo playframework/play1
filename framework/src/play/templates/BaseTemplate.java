@@ -22,8 +22,8 @@ import play.libs.IO;
 public abstract class BaseTemplate extends Template {
 
     public String compiledSource;
-    public Map<Integer, Integer> linesMatrix = new HashMap<Integer, Integer>();
-    public Set<Integer> doBodyLines = new HashSet<Integer>();
+    public Map<Integer, Integer> linesMatrix = new HashMap<>();
+    public Set<Integer> doBodyLines = new HashSet<>();
     public Class compiledTemplate;
     public String compiledTemplateName;
     public Long timestamp = System.currentTimeMillis();
@@ -94,9 +94,9 @@ public abstract class BaseTemplate extends Template {
     }
 
     protected abstract Throwable cleanStackTrace(Throwable e);
-    public static ThreadLocal<BaseTemplate> layout = new ThreadLocal<BaseTemplate>();
-    public static ThreadLocal<Map<Object, Object>> layoutData = new ThreadLocal<Map<Object, Object>>();
-    public static ThreadLocal<BaseTemplate> currentTemplate = new ThreadLocal<BaseTemplate>();
+    public static ThreadLocal<BaseTemplate> layout = new ThreadLocal<>();
+    public static ThreadLocal<Map<Object, Object>> layoutData = new ThreadLocal<>();
+    public static ThreadLocal<BaseTemplate> currentTemplate = new ThreadLocal<>();
 
     public static class RawData {
 

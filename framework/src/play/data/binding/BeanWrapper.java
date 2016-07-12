@@ -21,7 +21,7 @@ public class BeanWrapper {
     /** 
      * a cache for our properties and setters
      */
-    private Map<String, Property> wrappers = new HashMap<String, Property>();
+    private Map<String, Property> wrappers = new HashMap<>();
 
     public BeanWrapper(Class<?> forClass) {
         if (Logger.isTraceEnabled()) {

@@ -266,7 +266,7 @@ public class Java {
      * @return A list of method object
      */
     public static List<Method> findAllAnnotatedMethods(List<Class> classes, Class<? extends Annotation> annotationType) {
-        List<Method> methods = new ArrayList<Method>();
+        List<Method> methods = new ArrayList<>();
         for (Class clazz : classes) {
             methods.addAll(findAllAnnotatedMethods(clazz, annotationType));
         }
@@ -284,7 +284,7 @@ public class Java {
     }
 
     /** cache */
-    private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
+    private static Map<Field, FieldWrapper> wrappers = new HashMap<>();
 
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {
@@ -462,8 +462,8 @@ class JavaWithCaching {
     // cache follows..
 
     private final Object classAndAnnotationsLock = new Object();
-    private final Map<ClassAndAnnotation, List<Method>> classAndAnnotation2Methods = new HashMap<ClassAndAnnotation, List<Method>>();
-    private final Map<Class<?>, List<Method>> class2AllMethodsWithAnnotations = new HashMap<Class<?>, List<Method>>();
+    private final Map<ClassAndAnnotation, List<Method>> classAndAnnotation2Methods = new HashMap<>();
+    private final Map<Class<?>, List<Method>> class2AllMethodsWithAnnotations = new HashMap<>();
 
     /**
      * Find all annotated method from a class
@@ -474,7 +474,7 @@ class JavaWithCaching {
     public List<Method> findAllAnnotatedMethods(Class<?> clazz, final Class<? extends Annotation> annotationType) {
 
         if( clazz == null ) {
-            return new ArrayList<Method>(0);
+            return new ArrayList<>(0);
         }
 
         synchronized( classAndAnnotationsLock ) {
@@ -489,7 +489,7 @@ class JavaWithCaching {
                 return methods;
             }
             // have to resolve it.
-            methods = new ArrayList<Method>();
+            methods = new ArrayList<>();
 
             // get list of all annotated methods on this class..
             for( Method method : findAllAnnotatedMethods( clazz)) {
@@ -543,7 +543,7 @@ class JavaWithCaching {
                 return methods;
             }
             //have to resolve it..
-            methods = new ArrayList<Method>();
+            methods = new ArrayList<>();
             // Clazz can be null if we are looking at an interface / annotation
             while (clazz != null && !clazz.equals(Object.class)) {
                 for (Method method : clazz.getDeclaredMethods()) {

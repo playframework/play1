@@ -27,7 +27,7 @@ public class ConfigurationTest {
     public void dbNameResolver_multipleDatabases() {
         Play.configuration.put("db", "mysql:user:pwd@database_name");
         Play.configuration.put("db.test", "mysql:user:pwd@database_name2");
-        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
+        List<String> dbNames = new ArrayList<>(Configuration.getDbNames());
         assertEquals(2, dbNames.size());
         assertEquals("default", dbNames.get(0));
         assertEquals("test", dbNames.get(1));
@@ -58,7 +58,7 @@ public class ConfigurationTest {
         Play.configuration.put("db.test.user", "user2");
         Play.configuration.put("db.test.pass", "pass2");
         
-        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
+        List<String> dbNames = new ArrayList<>(Configuration.getDbNames());
         assertEquals(2, dbNames.size());
         assertEquals("default", dbNames.get(0));
         assertEquals("test", dbNames.get(1));

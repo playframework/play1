@@ -18,7 +18,7 @@ public class HttpRequestTest {
 
         String encoded = Codec.encodeBASE64("username:pass:wordwithcolon");
         Http.Header header = new Http.Header("authorization", "Basic "+encoded);
-        Map<String, Http.Header> headers = new HashMap<String, Http.Header>();
+        Map<String, Http.Header> headers = new HashMap<>();
 		headers.put("authorization", header);
         
 		//This used to throw an exception if there was a colon in the password

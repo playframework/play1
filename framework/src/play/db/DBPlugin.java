@@ -35,9 +35,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.ConnectionCustomizer;
 
 import play.db.DB.ExtendedDatasource;
-/**
- * The DB plugin
- */
+
 public class DBPlugin extends PlayPlugin {
 
     public static String url = "";
@@ -49,7 +47,7 @@ public class DBPlugin extends PlayPlugin {
             response.status = Http.StatusCode.FOUND;
             String serverOptions[] = new String[] { };
 
-            // For H2 embeded database, we'll also start the Web console
+            // For H2 embedded database, we'll also start the Web console
             if (h2Server != null) {
                 h2Server.stop();
             }
@@ -120,7 +118,7 @@ public class DBPlugin extends PlayPlugin {
                             Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
                             DriverManager.registerDriver(new ProxyDriver(d));
                         } catch (Exception e) {
-                            throw new Exception("Database [" + dbName + "] Driver not found (" + driver + ")");
+                            throw new Exception("Database [" + dbName + "] Driver not found (" + driver + ")", e);
                         }
 
                         // Try the connection
@@ -307,7 +305,7 @@ public class DBPlugin extends PlayPlugin {
                 String host = m.group("host");
                 String parameters = m.group("parameters");
         		
-                Map<String, String> paramMap = new HashMap<String, String>();
+                Map<String, String> paramMap = new HashMap<>();
                 paramMap.put("useUnicode", "yes");
                 paramMap.put("characterEncoding", "UTF-8");
                 paramMap.put("connectionCollation", "utf8_general_ci");
@@ -456,7 +454,7 @@ public class DBPlugin extends PlayPlugin {
         public static Map<String, Integer> isolationLevels;
 
         static {
-            isolationLevels = new HashMap<String, Integer>();
+            isolationLevels = new HashMap<>();
             isolationLevels.put("NONE", Connection.TRANSACTION_NONE);
             isolationLevels.put("READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED);
             isolationLevels.put("READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED);

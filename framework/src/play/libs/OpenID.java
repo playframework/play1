@@ -35,10 +35,10 @@ public class OpenID {
     String id;
     String returnAction;
     String realmAction;
-    List<String> sregRequired = new ArrayList<String>();
-    List<String> sregOptional = new ArrayList<String>();
-    Map<String, String> axRequired = new HashMap<String, String>();
-    Map<String, String> axOptional = new HashMap<String, String>();
+    List<String> sregRequired = new ArrayList<>();
+    List<String> sregOptional = new ArrayList<>();
+    Map<String, String> axRequired = new HashMap<>();
+    Map<String, String> axOptional = new HashMap<>();
 
     public OpenID returnTo(String action) {
         this.returnAction = action;
@@ -352,7 +352,7 @@ public class OpenID {
         /**
          * Extensions values
          */
-        public Map<String, String> extensions = new HashMap<String, String>();
+        public Map<String, String> extensions = new HashMap<>();
 
         @Override
         public String toString() {

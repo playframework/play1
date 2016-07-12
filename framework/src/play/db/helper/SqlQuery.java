@@ -8,7 +8,7 @@ public abstract class SqlQuery {
     protected List<Object> params;
 
     protected SqlQuery() {
-        params = new ArrayList<Object>();
+        params = new ArrayList<>();
     }
 
     public SqlQuery param(Object obj) { params.add(obj); return this; }

@@ -52,7 +52,7 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
     // Allows people to clear the cache, so Fixture is not stateful
-    public static Map<String, Object> idCache = new HashMap<String, Object>();
+    public static Map<String, Object> idCache = new HashMap<>();
 
     public static void executeSQL(String sqlScript) {
         for(CharSequence sql : new SQLSplitter(sqlScript)) {
@@ -104,7 +104,7 @@ public class Fixtures {
      */
     @SuppressWarnings("unchecked")
     public static void deleteAllModels() {
-        List<Class<? extends Model>> classes = new ArrayList<Class<? extends Model>>();
+        List<Class<? extends Model>> classes = new ArrayList<>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
 		   if( c.javaClass.isAnnotationPresent(Entity.class) ) {
 		       classes.add((Class<? extends Model>)c.javaClass);
@@ -131,7 +131,7 @@ public class Fixtures {
     public static void deleteDatabase() {
         try {
             idCache.clear();
-            List<String> names = new ArrayList<String>();
+            List<String> names = new ArrayList<>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
                 String name = rs.getString("TABLE_NAME");
@@ -421,7 +421,7 @@ public class Fixtures {
             return Collections.EMPTY_MAP;
         }
 
-        final Map<String, String[]> serialized = new HashMap<String, String[]>();
+        final Map<String, String[]> serialized = new HashMap<>();
 
         for (Object key : entityProperties.keySet()) {
 
@@ -464,8 +464,8 @@ public class Fixtures {
     static Map<String, String[]> resolveDependencies(Class<Model> type, Map<String, String[]> yml) {
 
         // Contains all the fields (object properties) we should look up
-        final Set<Field> fields = new HashSet<Field>();
-        final Map<String, String[]> resolvedYml = new HashMap<String, String[]>();
+        final Set<Field> fields = new HashSet<>();
+        final Map<String, String[]> resolvedYml = new HashMap<>();
         resolvedYml.putAll(yml);
 
         // Look up the super classes
@@ -569,7 +569,7 @@ public class Fixtures {
 
         if (DBPlugin.url.startsWith("jdbc:sqlserver:")) {
             try {
-                List<String> names = new ArrayList<String>();
+                List<String> names = new ArrayList<>();
                 Connection connection = DB.getConnection();
 
                 ResultSet rs = connection.getMetaData().getTables(null, null, null, new String[]{"TABLE"});
@@ -636,7 +636,7 @@ public class Fixtures {
             try {
                 connect = DB.getConnection();
                 // We must first drop all foreign keys
-                ArrayList<String> checkFKCommands=new ArrayList<String>();
+                ArrayList<String> checkFKCommands= new ArrayList<>();
                 exec=connect.createStatement();
                 ResultSet rs=exec.executeQuery("SELECT 'ALTER TABLE ' + TABLE_SCHEMA + '.[' + TABLE_NAME +'] WITH CHECK CHECK CONSTRAINT [' + CONSTRAINT_NAME + ']' FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'");
                 while (rs.next())

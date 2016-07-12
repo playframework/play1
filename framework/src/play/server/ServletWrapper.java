@@ -313,13 +313,13 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     protected static Map<String, Http.Header> getHeaders(HttpServletRequest httpServletRequest) {
-        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        Map<String, Http.Header> headers = new HashMap<>(16);
 
         Enumeration headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
             hd.name = (String) headersNames.nextElement();
-            hd.values = new ArrayList<String>();
+            hd.values = new ArrayList<>();
             Enumeration enumValues = httpServletRequest.getHeaders(hd.name);
             while (enumValues.hasMoreElements()) {
                 String value = (String) enumValues.nextElement();
@@ -332,7 +332,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     protected static Map<String, Http.Cookie> getCookies(HttpServletRequest httpServletRequest) {
-        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        Map<String, Http.Cookie> cookies = new HashMap<>(16);
         javax.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
         if (cookiesViaServlet != null) {
             for (javax.servlet.http.Cookie cookie : cookiesViaServlet) {
@@ -354,7 +354,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
         servletResponse.setStatus(404);
         servletResponse.setContentType("text/html");
-        Map<String, Object> binding = new HashMap<String, Object>();
+        Map<String, Object> binding = new HashMap<>();
         binding.put("result", e);
         binding.put("session", Scope.Session.current());
         binding.put("request", Http.Request.current());
@@ -386,7 +386,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     public void serve500(Exception e, HttpServletRequest request, HttpServletResponse response) {
         try {
-            Map<String, Object> binding = new HashMap<String, Object>();
+            Map<String, Object> binding = new HashMap<>();
             if (!(e instanceof PlayException)) {
                 e = new play.exceptions.UnexpectedException(e);
             }

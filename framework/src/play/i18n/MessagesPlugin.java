@@ -23,7 +23,7 @@ public class MessagesPlugin extends PlayPlugin {
 
     static Long lastLoading = 0L;
 
-    private static List<String> includeMessageFilenames = new ArrayList<String>();
+    private static List<String> includeMessageFilenames = new ArrayList<>();
 
     @Override
     public void onApplicationStart() {
@@ -85,7 +85,7 @@ public class MessagesPlugin extends PlayPlugin {
             propsFromFile = IO.readUtf8Properties(inStream);
 
             // Include
-            Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
+            Map<Object, Object> toInclude = new HashMap<>(16);
             for (Object key : propsFromFile.keySet()) {
                 if (key.toString().startsWith("@include.")) {
                     try {

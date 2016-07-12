@@ -32,7 +32,7 @@ public class Post extends Model {
     public Set<Tag> tags;
     
     public Post(User author, String title, String content) { 
-        this.comments = new ArrayList<Comment>();
+        this.comments = new ArrayList<>();
         this.tags = new TreeSet();  
         this.author = author;
         this.title = title;

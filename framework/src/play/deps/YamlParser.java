@@ -114,7 +114,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
             boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
             
-            List<String> confs = new ArrayList<String>();
+            List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {
                 if (data.get("configurations") instanceof List) {
                     boolean allExcludes = true;
@@ -298,7 +298,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     }
 
     public static Set<String> getOrderedModuleList(File file) throws ParseException, IOException {
-        Set<String> modules = new LinkedHashSet<String>();
+        Set<String> modules = new LinkedHashSet<>();
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
         return getOrderedModuleList(modules, file);
     }

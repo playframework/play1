@@ -103,7 +103,7 @@ public class DependenciesManager {
 
     public void sync(List<File> installed) {
 
-        List<File> notSync = new ArrayList<File>();
+        List<File> notSync = new ArrayList<>();
 
         File[] paths = new File[]{
             new File(application, "lib"),
@@ -163,7 +163,7 @@ public class DependenciesManager {
     public Set<String> retrieveModules() throws Exception {
     	File ivyModule = new File(application, "conf/dependencies.yml");
         if(ivyModule == null || !ivyModule.exists()) {
-            return new LinkedHashSet<String>();
+            return new LinkedHashSet<>();
         }
     	return YamlParser.getOrderedModuleList(ivyModule);
     }
@@ -171,9 +171,9 @@ public class DependenciesManager {
     public List<File> retrieve(ResolveReport report) throws Exception {
 	    	
         // Track missing artifacts
-        List<ArtifactDownloadReport> missing = new ArrayList<ArtifactDownloadReport>();
+        List<ArtifactDownloadReport> missing = new ArrayList<>();
 
-        List<ArtifactDownloadReport> artifacts = new ArrayList<ArtifactDownloadReport>();
+        List<ArtifactDownloadReport> artifacts = new ArrayList<>();
         for (Iterator iter = report.getDependencies().iterator(); iter.hasNext();) {
             IvyNode node = (IvyNode) iter.next();
             if (node.isLoaded() && !node.isCompletelyEvicted()) {
@@ -218,7 +218,7 @@ public class DependenciesManager {
             }
         }
 
-        List<File> installed = new ArrayList<File>();
+        List<File> installed = new ArrayList<>();
 
         // Install
         if (artifacts.isEmpty()) {

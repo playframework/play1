@@ -84,7 +84,7 @@ public class EhCacheImpl implements CacheImpl {
 
     @Override
     public Map<String, Object> get(String[] keys) {
-        Map<String, Object> result = new HashMap<String, Object>(keys.length);
+        Map<String, Object> result = new HashMap<>(keys.length);
         for (String key : keys) {
             result.put(key, get(key));
         }
