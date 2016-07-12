@@ -44,7 +44,7 @@ public class MinCheck extends AbstractAnnotationCheck<Min> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("min", Double.toString(min));
         return messageVariables;
     }

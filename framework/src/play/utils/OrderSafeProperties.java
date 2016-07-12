@@ -17,7 +17,7 @@ import java.util.*;
 public class OrderSafeProperties extends java.util.Properties {
 
     // set used to preserve key order
-    private final LinkedHashSet<Object> keys = new LinkedHashSet<Object>();
+    private final LinkedHashSet<Object> keys = new LinkedHashSet<>();
 
     @Override
     public void load(InputStream inputStream) throws IOException {
@@ -82,7 +82,7 @@ public class OrderSafeProperties extends java.util.Properties {
 
     @Override
     public Set<Map.Entry<Object, Object>> entrySet() {
-        Set<Map.Entry<Object, Object>> entrySet = new LinkedHashSet<Map.Entry<Object, Object>>(keys.size());
+        Set<Map.Entry<Object, Object>> entrySet = new LinkedHashSet<>(keys.size());
         for (Object key : keys) {
             entrySet.add(new Entry(key, get(key)));
         }

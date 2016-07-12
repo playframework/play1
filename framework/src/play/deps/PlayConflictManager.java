@@ -53,7 +53,7 @@ public class PlayConflictManager extends AbstractConflictManager {
          * Choose the artifact version provided in $PLAY/framework/lib
          * Evict other versions
          */
-        List<IvyNode> result = new ArrayList<IvyNode>();
+        List<IvyNode> result = new ArrayList<>();
         for (Iterator iter = conflicts.iterator(); iter.hasNext();) {
             IvyNode node = (IvyNode) iter.next();
             ModuleRevisionId modRev = node.getResolvedId();

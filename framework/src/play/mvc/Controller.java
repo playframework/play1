@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.Future;
@@ -714,7 +715,7 @@ public class Controller implements ControllerSupport {
      */
     protected static void redirect(String action, boolean permanent, Object... args) {
         try {
-            Map<String, Object> newArgs = new HashMap<String, Object>(args.length);
+            Map<String, Object> newArgs = new HashMap<>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass()
                     .getDeclaredField("$" + actionMethod.getName() + LVEnhancer.computeMethodHash(actionMethod.getParameterTypes()))
@@ -800,7 +801,7 @@ public class Controller implements ControllerSupport {
      */
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
-        Map<String, Object> templateBinding = new HashMap<String, Object>(16);
+        Map<String, Object> templateBinding = new HashMap<>(16);
         String[] names = LVEnhancerRuntime.getParamNames().varargs;
         if (args != null && args.length > 0 && names == null)
             throw new UnexpectedException("no varargs names while args.length > 0 !");
@@ -968,7 +969,7 @@ public class Controller implements ControllerSupport {
      */
     @Deprecated
     protected static void parent(Object... args) {
-        Map<String, Object> map = new HashMap<String, Object>(16);
+        Map<String, Object> map = new HashMap<>(16);
         String[] names = LVEnhancerRuntime.getParamNames().mergeParamsAndVarargs();
         for (int i = 0; i < names.length; i++)
             map.put(names[i], args[i]);
@@ -1008,7 +1009,7 @@ public class Controller implements ControllerSupport {
             if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String, String> mapss = new HashMap<String, String>(map.size());
+            Map<String, String> mapss = new HashMap<>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 Object value = entry.getValue();
                 mapss.put(entry.getKey(), value == null ? null : value.toString());
@@ -1269,7 +1270,7 @@ public class Controller implements ControllerSupport {
     /**
      * Don't use this directly if you don't know why
      */
-    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<ActionDefinition>();
+    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<>();
 
     /**
      * @todo - this "Usage" example below doesn't make sense.

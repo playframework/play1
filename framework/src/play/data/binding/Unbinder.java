@@ -174,7 +174,7 @@ public class Unbinder {
                 field.setAccessible(true);
 
                 // first we try with annotations resolved from property
-                List<Annotation> allAnnotations = new ArrayList<Annotation>();
+                List<Annotation> allAnnotations = new ArrayList<>();
                 if (annotations != null && annotations.length > 0) {
                     allAnnotations.addAll(Arrays.asList(annotations));
                 }

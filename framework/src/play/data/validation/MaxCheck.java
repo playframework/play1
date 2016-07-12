@@ -44,7 +44,7 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("max", Double.toString(max));
         return messageVariables;
     }

@@ -29,7 +29,7 @@ public class Messages {
 
     static public Properties defaults;
 
-    static public Map<String, Properties> locales = new HashMap<String, Properties>();
+    static public Map<String, Properties> locales = new HashMap<>();
 
     static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
@@ -56,7 +56,7 @@ public class Messages {
         Properties result = new Properties();
         Properties all = all(locale);
         // Expand the set for wildcards
-        Set<String> wildcards = new HashSet<String>();
+        Set<String> wildcards = new HashSet<>();
         for (String key: keys) {
             if (key.endsWith("*")) wildcards.add(key);
         }

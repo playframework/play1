@@ -30,13 +30,13 @@ public class ApplicationClasses {
     /**
      * Cache of all compiled classes
      */
-    Map<String, ApplicationClass> classes = new HashMap<String, ApplicationClass>();
+    Map<String, ApplicationClass> classes = new HashMap<>();
 
     /**
      * Clear the classes cache
      */
     public void clear() {
-        classes = new HashMap<String, ApplicationClass>();
+        classes = new HashMap<>();
     }
 
     /**
@@ -60,9 +60,9 @@ public class ApplicationClasses {
      * @return A list of application classes.
      */
     public List<ApplicationClass> getAssignableClasses(Class<?> clazz) {
-        List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+        List<ApplicationClass> results = new ArrayList<>();
         if (clazz != null) {
-            for (ApplicationClass applicationClass : new ArrayList<ApplicationClass>(classes.values())) {
+            for (ApplicationClass applicationClass : new ArrayList<>(classes.values())) {
                 if (!applicationClass.isClass()) {
                     continue;
                 }
@@ -88,7 +88,7 @@ public class ApplicationClasses {
      * @return A list of application classes.
      */
     public List<ApplicationClass> getAnnotatedClasses(Class<? extends Annotation> clazz) {
-        List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+        List<ApplicationClass> results = new ArrayList<>();
         for (ApplicationClass applicationClass : classes.values()) {
             if (!applicationClass.isClass()) {
                 continue;
@@ -110,7 +110,7 @@ public class ApplicationClasses {
      * @return All loaded classes
      */
     public List<ApplicationClass> all() {
-        return new ArrayList<ApplicationClass>(classes.values());
+        return new ArrayList<>(classes.values());
     }
 
     /**

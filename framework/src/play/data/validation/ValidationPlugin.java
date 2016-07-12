@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 public class ValidationPlugin extends PlayPlugin {
 
-    public static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
+    public static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<>();
 
     private boolean isAwakingFromAwait() {
         Http.Request request = Http.Request.current();
@@ -71,7 +71,7 @@ public class ValidationPlugin extends PlayPlugin {
                 return;
             }
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
-            ArrayList<Error> errors = new ArrayList<Error>();
+            ArrayList<Error> errors = new ArrayList<>();
             String[] paramNames = Java.parameterNames(actionMethod);
             for (ConstraintViolation violation : violations) {
                 errors.add(new Error(
@@ -112,7 +112,7 @@ public class ValidationPlugin extends PlayPlugin {
     static class Validator extends Guard {
 
         public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
-            List<ConstraintViolation> violations = new ArrayList<ConstraintViolation>();
+            List<ConstraintViolation> violations = new ArrayList<>();
             Object instance = null;
             // Patch for scala defaults
             if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {

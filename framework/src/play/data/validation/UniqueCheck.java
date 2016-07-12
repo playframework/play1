@@ -31,7 +31,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new TreeMap<String, String>();
+        Map<String, String> messageVariables = new TreeMap<>();
         messageVariables.put("2-properties", uniqueKeyContext);
         return messageVariables;
     }

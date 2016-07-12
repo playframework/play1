@@ -30,7 +30,7 @@ public class MatchCheck extends AbstractAnnotationCheck<Match> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("pattern", pattern.toString());
         return messageVariables;
     }

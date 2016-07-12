@@ -63,7 +63,7 @@ public class SettingsParser {
                 if (data.get("repositories") instanceof List) {
 
                     List repositories = (List) data.get("repositories");
-                    List<Map<String, String>> modules = new ArrayList<Map<String, String>>();
+                    List<Map<String, String>> modules = new ArrayList<>();
                     for (Object dep: repositories) {
                         if (dep instanceof Map) {
                             settings.addResolver(parseRepository((Map) dep, modules));
@@ -215,7 +215,7 @@ public class SettingsParser {
                         }
                     }
                 }
-                Map<String, String> attributes = new HashMap<String, String>();
+                Map<String, String> attributes = new HashMap<>();
                 attributes.put("organisation", organisation);
                 if (module != null) {
                     attributes.put("module", module);

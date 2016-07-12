@@ -30,7 +30,7 @@ public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("minSize", Integer.toString(minSize));
         return messageVariables;
     }

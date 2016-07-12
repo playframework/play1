@@ -248,7 +248,7 @@ public class Router {
     /**
      * All the loaded routes.
      */
-    public static List<Route> routes = new CopyOnWriteArrayList<Route>();
+    public static List<Route> routes = new CopyOnWriteArrayList<>();
 
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
@@ -330,7 +330,7 @@ public class Router {
                 return args;
             }
         }
-        return new HashMap<String, String>(16);
+        return new HashMap<>(16);
     }
 
     public static ActionDefinition reverse(String action) {
@@ -428,7 +428,7 @@ public class Router {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
-        Map<String, Object> argsbackup = new HashMap<String, Object>(args);
+        Map<String, Object> argsbackup = new HashMap<>(args);
         // Add routeArgs
         if (Scope.RouteArgs.current() != null) {
             for (String key : Scope.RouteArgs.current().data.keySet()) {
@@ -442,7 +442,7 @@ public class Router {
             Route route = actionRoute.route;
             args.putAll(actionRoute.args);
 
-            List<String> inPathArgs = new ArrayList<String>(16);
+            List<String> inPathArgs = new ArrayList<>(16);
             boolean allRequiredArgsAreHere = true;
             // les noms de parametres matchent ils ?
             for (Route.Arg arg : route.args) {
@@ -586,7 +586,7 @@ public class Router {
         throw new NoRouteFoundException(action, args);
     }
 
-    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<String, List<ActionRoute>>();
+    private static final Map<String, List<ActionRoute>> actionRoutesCache = new ConcurrentHashMap<>();
 
     private static List<ActionRoute> getActionRoutes(String action) {
         List<ActionRoute> matchingRoutes = actionRoutesCache.get(action);
@@ -598,7 +598,7 @@ public class Router {
     }
 
     private static List<ActionRoute> findActionRoutes(String action) {
-        List<ActionRoute> matchingRoutes = new ArrayList<ActionRoute>(2);
+        List<ActionRoute> matchingRoutes = new ArrayList<>(2);
         for (Router.Route route : routes) {
             if (route.actionPattern != null) {
                 Matcher matcher = route.actionPattern.matcher(action);
@@ -622,7 +622,7 @@ public class Router {
 
     private static final class ActionRoute {
         private Route route;
-        private Map<String, String> args = new HashMap<String, String>(2);
+        private Map<String, String> args = new HashMap<>(2);
     }
 
     public static class ActionDefinition {
@@ -724,14 +724,14 @@ public class Router {
          */
         public String action;
         Pattern actionPattern;
-        List<String> actionArgs = new ArrayList<String>(3);
+        List<String> actionArgs = new ArrayList<>(3);
         String staticDir;
         boolean staticFile;
         Pattern pattern;
         Pattern hostPattern;
-        List<Arg> args = new ArrayList<Arg>(3);
-        Map<String, String> staticArgs = new HashMap<String, String>(3);
-        List<String> formats = new ArrayList<String>(1);
+        List<Arg> args = new ArrayList<>(3);
+        Map<String, String> staticArgs = new HashMap<>(3);
+        List<String> formats = new ArrayList<>(1);
         String host;
         Arg hostArg = null;
         public int routesFileLine;
@@ -946,7 +946,7 @@ public class Router {
                         }
                         throw new NotFound(resource);
                     } else {
-                        Map<String, String> localArgs = new HashMap<String, String>();
+                        Map<String, String> localArgs = new HashMap<>();
                         for (Arg arg : args) {
                             // FIXME: Careful with the arguments that are not
                             // matching as they are part of the hostname

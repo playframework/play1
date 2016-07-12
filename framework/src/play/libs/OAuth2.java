@@ -62,7 +62,7 @@ public class OAuth2 {
 	 *            An additional parameter value
 	 */
 	public void retrieveVerificationCode(String callbackURL, String parameterName, String parameterValue) {
-		Map<String, String> parameters = new HashMap<String, String>();
+		Map<String, String> parameters = new HashMap<>();
 		parameters.put(parameterName, parameterValue);
 		retrieveVerificationCode(callbackURL, parameters);
 	}
@@ -87,7 +87,7 @@ public class OAuth2 {
 
     public Response retrieveAccessToken(String callbackURL) {
         String accessCode = Params.current().get("code");
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("client_id", clientid);
         params.put("client_secret", secret);
         params.put("redirect_uri", callbackURL);

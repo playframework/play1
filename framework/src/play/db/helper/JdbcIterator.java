@@ -17,7 +17,7 @@ public class JdbcIterator<T> implements Iterator<T>, Iterable<T>, Closeable {
 
     public static <U> JdbcIterator<U> execute(SqlQuery query, JdbcResultFactory<U> factory) {
         try {
-            return new JdbcIterator<U>(JdbcHelper.execute(query), factory);
+            return new JdbcIterator<>(JdbcHelper.execute(query), factory);
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }

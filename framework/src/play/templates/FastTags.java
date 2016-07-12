@@ -179,7 +179,7 @@ public class FastTags {
      *            template line number where the tag is defined
      */
     public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        Map<String, Object> field = new HashMap<String, Object>();
+        Map<String, Object> field = new HashMap<>();
         String _arg = args.get("arg").toString();
         field.put("name", _arg);
         field.put("id", _arg.replace('.', '_'));
@@ -408,7 +408,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.internalRender(newArgs);
@@ -435,7 +435,7 @@ public class FastTags {
             }
             args.remove("arg");
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
             newArgs.put("out", out);

@@ -16,7 +16,7 @@ public class Injector {
      * For now, inject beans in controllers
      */
     public static void inject(BeanSource source) {
-        List<Class> classes = new ArrayList<Class>(Play.classloader.getAssignableClasses(ControllerSupport.class));
+        List<Class> classes = new ArrayList<>(Play.classloader.getAssignableClasses(ControllerSupport.class));
         classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
         classes.addAll(Play.classloader.getAssignableClasses(Job.class));
         for (Class<?> clazz : classes) {

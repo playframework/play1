@@ -47,7 +47,7 @@ public class UrlEncodedParser extends DataParser {
         // Encoding is either retrieved from contentType or it is the default encoding
         final String encoding = Http.Request.current().encoding;
         try {
-            Map<String, String[]> params = new LinkedHashMap<String, String[]>();
+            Map<String, String[]> params = new LinkedHashMap<>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -58,7 +58,7 @@ public class UrlEncodedParser extends DataParser {
             String data = new String(os.toByteArray(), encoding);
             if (data.length() == 0) {
                 //data is empty - can skip the rest
-                return new HashMap<String, String[]>(0);
+                return new HashMap<>(0);
             }
 
             // data is o the form:
@@ -118,7 +118,7 @@ public class UrlEncodedParser extends DataParser {
             }
 
             // We're ready to decode the params
-            Map<String, String[]> decodedParams = new LinkedHashMap<String, String[]>(params.size());
+            Map<String, String[]> decodedParams = new LinkedHashMap<>(params.size());
             URLCodec codec = new URLCodec();
             for (Map.Entry<String, String[]> e : params.entrySet()) {
                 String key = e.getKey();

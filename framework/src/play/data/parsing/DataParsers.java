@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataParsers {
-    private static final Map<String, DataParser> parsers = new HashMap<String, DataParser>();
+    private static final Map<String, DataParser> parsers = new HashMap<>();
 
     // These are our injected Parser. Maybe we later want to allow dynamic injection
     static {

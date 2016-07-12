@@ -102,10 +102,11 @@ public class PlayConfigurationLoadTask {
         if (!srcFile.exists()) {
             throw new BuildException("No application configuration found! " + srcFile.getAbsolutePath());
         }
+        BufferedReader reader = null;
         try {
-            properties = new HashMap<String,String>();
-            Map<String,String> idSpecific = new HashMap<String,String>();
-            BufferedReader reader = new BufferedReader(new FileReader(srcFile));
+            properties = new HashMap<>();
+            Map<String,String> idSpecific = new HashMap<>();
+            reader = new BufferedReader(new FileReader(srcFile));
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -131,6 +132,14 @@ public class PlayConfigurationLoadTask {
             return properties;
         } catch (IOException e) {
             throw new BuildException("Failed to load configuration file: " + srcFile.getAbsolutePath(), e);
+        } finally{
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                throw new BuildException("Failed to close configuration file: " + srcFile.getAbsolutePath(), e);
+            }
         }
     }
 
@@ -139,7 +148,7 @@ public class PlayConfigurationLoadTask {
      * and new style, with dependencies starting at 1.2 (load everything from the modules/ dir)
      */
     private Set<File> modules() {
-        Set<File> modules = new HashSet<File>();
+        Set<File> modules = new HashSet<>();
 
         // Old-skool
         for (Map.Entry<String,String> entry: properties().entrySet()) {

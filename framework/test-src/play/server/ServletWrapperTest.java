@@ -62,7 +62,7 @@ public class ServletWrapperTest {
 	}
 
 	private HashMap<String, String> createHeaderMap() {
-		HashMap<String, String> headers = new HashMap<String, String>();
+		HashMap<String, String> headers = new HashMap<>();
 		headers.put(ServletWrapper.IF_MODIFIED_SINCE, browserLastModified);
 		headers.put(ServletWrapper.IF_NONE_MATCH, browserEtag);
 		return headers;

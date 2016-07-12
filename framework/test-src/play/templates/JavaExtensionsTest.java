@@ -140,7 +140,7 @@ public class JavaExtensionsTest {
 
     @Test
     public void testPluralizeCollection() {
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         assertEquals("s", JavaExtensions.pluralize(testCollection));
         testCollection.add("1");
         assertEquals("", JavaExtensions.pluralize(testCollection));
@@ -159,7 +159,7 @@ public class JavaExtensionsTest {
     @Test
     public void testPluralizeCollectionString() {
         String plural = "n";
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         assertEquals(plural, JavaExtensions.pluralize(testCollection, plural));
         testCollection.add("1");
         assertEquals("", JavaExtensions.pluralize(testCollection, plural));
@@ -179,7 +179,7 @@ public class JavaExtensionsTest {
     @Test
     public void testPluralizeCollectionStringArray() {
         String[] forms = {"Test", "Tests"};
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         assertEquals(forms[1], JavaExtensions.pluralize(testCollection, forms));
         testCollection.add("1");
         assertEquals(forms[0], JavaExtensions.pluralize(testCollection, forms));
@@ -211,7 +211,7 @@ public class JavaExtensionsTest {
         assertEquals(yes, JavaExtensions.yesno(Long.valueOf(1), yesNo));
         assertEquals(yes, JavaExtensions.yesno(Long.valueOf(-1), yesNo));
         //Collection
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         assertEquals(no, JavaExtensions.yesno(testCollection, yesNo));
         testCollection.add("1");
         assertEquals(yes, JavaExtensions.yesno(testCollection, yesNo));
@@ -222,7 +222,7 @@ public class JavaExtensionsTest {
 
     @Test 
     public void testLast()  {
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         testCollection.add("1");
         testCollection.add("2");
         assertEquals("2", JavaExtensions.last(testCollection));
@@ -230,7 +230,7 @@ public class JavaExtensionsTest {
 
     @Test 
     public void testJoin()  {
-        List <String> testCollection = new ArrayList <String>();
+        List <String> testCollection = new ArrayList<>();
         testCollection.add("1");
         testCollection.add("2");
         

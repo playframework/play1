@@ -13,9 +13,9 @@ import org.apache.ivy.util.MessageLogger;
 
 public class HumanReadyLogger implements MessageLogger, TransferListener {
 
-    Set<String> notFound = new HashSet<String>();
-    Set<String> dynamics = new HashSet<String>();
-    Set<String> evicteds = new HashSet<String>();
+    Set<String> notFound = new HashSet<>();
+    Set<String> dynamics = new HashSet<>();
+    Set<String> evicteds = new HashSet<>();
     Pattern dep = Pattern.compile("found ([^#]+)#([^;]+);([^\\s]+) in (.*)");
     Pattern depNotFound = Pattern.compile("module not found: ([^#]+)#([^;]+);([^\\s]+)");
     Pattern dynamic = Pattern.compile("\\[(.*)\\] ([^#]+)#([^;]+);([^\\s]+)");

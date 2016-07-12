@@ -25,7 +25,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo("hello world: Morten");
 
@@ -49,7 +49,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo("hello world"+longString+": Morten");
 
@@ -87,7 +87,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo(longString+": Morten");
     }

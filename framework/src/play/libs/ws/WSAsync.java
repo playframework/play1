@@ -429,7 +429,7 @@ public class WSAsync implements WSImpl {
 
         private Promise<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                final Promise<HttpResponse> smartFuture = new Promise<HttpResponse>();
+                final Promise<HttpResponse> smartFuture = new Promise<>();
                 prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
@@ -642,7 +642,7 @@ public class WSAsync implements WSImpl {
         @Override
         public List<Header> getHeaders() {
             Map<String, List<String>> hdrs = response.getHeaders();
-            List<Header> result = new ArrayList<Header>();
+            List<Header> result = new ArrayList<>();
             for (String key : hdrs.keySet()) {
                 result.add(new Header(key, hdrs.get(key)));
             }

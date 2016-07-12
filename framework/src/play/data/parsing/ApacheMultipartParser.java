@@ -523,7 +523,7 @@ public class ApacheMultipartParser extends DataParser {
 
     @Override
     public Map<String, String[]> parse(InputStream body) {
-        Map<String, String[]> result = new HashMap<String, String[]>();
+        Map<String, String[]> result = new HashMap<>();
         try {
             FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), Request.current().encoding);
             while (iter.hasNext()) {
@@ -552,7 +552,7 @@ public class ApacheMultipartParser extends DataParser {
                     } else {
                         @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
                         if (uploads == null) {
-                            uploads = new ArrayList<Upload>();
+                            uploads = new ArrayList<>();
                             Request.current().args.put("__UPLOADS", uploads);
                         }
                         try {
@@ -724,7 +724,7 @@ public class ApacheMultipartParser extends DataParser {
      */
     private Map /* String, String */ parseHeaders(String headerPart) {
         final int len = headerPart.length();
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         int start = 0;
         for (; ;) {
             int end = parseEndOfLine(headerPart, start);

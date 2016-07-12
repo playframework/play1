@@ -27,7 +27,7 @@ public abstract class Binder {
     private final static Object DIRECTBINDING_NO_RESULT = new Object();
     public final static Object NO_BINDING = new Object();
 
-    static final Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
+    static final Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<>();
 
     // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
@@ -380,7 +380,7 @@ public abstract class Binder {
             valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
         }
 
-        Map<Object, Object> r = new HashMap<Object, Object>();
+        Map<Object, Object> r = new HashMap<>();
 
         for (ParamNode child : paramNode.getAllChildren()) {
             try {
@@ -480,7 +480,7 @@ public abstract class Binder {
             List l = (List) r;
 
             // must get all indexes and sort them so we add items in correct order.
-            Set<String> indexes = new TreeSet<String>(new Comparator<String>() {
+            Set<String> indexes = new TreeSet<>(new Comparator<String>() {
                 @Override
                 public int compare(String arg0, String arg1) {
                     try {

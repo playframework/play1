@@ -65,7 +65,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public Promise<V> now() {
-        final Promise<V> smartFuture = new Promise<V>();
+        final Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.submit(getJobCallingCallable(smartFuture));
         return smartFuture;
     }
@@ -88,7 +88,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             return now();
         }
 
-        final Promise<V> smartFuture = new Promise<V>();
+        final Promise<V> smartFuture = new Promise<>();
         Callable<V> callable = getJobCallingCallable(smartFuture);
         JobsPlugin.addAfterRequestAction(callable);
         return smartFuture;
@@ -109,7 +109,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public Promise<V> in(int seconds) {
-        final Promise<V> smartFuture = new Promise<V>();
+        final Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.schedule(getJobCallingCallable(smartFuture), seconds, TimeUnit.SECONDS);
         return smartFuture;
     }

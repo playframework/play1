@@ -9,10 +9,10 @@ import java.util.Stack;
  */
 public class TagContext {
     
-    static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<Stack<TagContext>>();
+    static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<>();
     
     public String tagName;
-    public Map<String, Object> data = new HashMap<String, Object>();
+    public Map<String, Object> data = new HashMap<>();
 
     public TagContext(String tagName) {
         this.tagName = tagName;

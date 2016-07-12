@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public class GroovyTemplateCompiler extends TemplateCompiler {
 
-    public static List<String> extensionsClassnames = new ArrayList<String>();
+    protected List<String> extensionsClassnames = new ArrayList<>();
 
     // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
     // Have to split it if it is really that big
@@ -62,8 +62,8 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
      */
     protected String checkScalaComptability(String source){  
         // Static access
-        List<String> names = new ArrayList<String>();
-        Map<String, String> originalNames = new HashMap<String, String>();
+        List<String> names = new ArrayList<>();
+        Map<String, String> originalNames = new HashMap<>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (clazz.getName().endsWith("$")) {
                 String name = clazz.getName().substring(0, clazz.getName().length() - 1).replace('$', '.') + '$';
@@ -356,7 +356,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 print("play.templates.TagContext.exitTag();");
             } catch (Exception e) {
                 // Use fastTag if exists
-                List<Class> fastClasses = new ArrayList<Class>();
+                List<Class> fastClasses = new ArrayList<>();
                 fastClasses.add(FastTags.class);
                 fastClasses.addAll(Play.classloader.getAssignableClasses(FastTags.class));
                 

@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ParamNode {
     private final String name;
-    private final Map<String, ParamNode> _children = new HashMap<String, ParamNode>(8);
+    private final Map<String, ParamNode> _children = new HashMap<>(8);
     private String[] values = null;
     private String originalKey;
 

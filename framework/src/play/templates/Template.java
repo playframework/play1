@@ -23,7 +23,7 @@ public abstract class Template {
         //
         // Since the original args is not poluted it can be used as input
         // to another rendering operation later
-        return internalRender( new HashMap<String, Object>(args) );
+        return internalRender(new HashMap<>(args) );
     }
 
 

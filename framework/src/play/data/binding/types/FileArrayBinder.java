@@ -24,7 +24,7 @@ public class FileArrayBinder implements TypeBinder<File[]> {
         }
         Request req = Request.current();
         if (req != null && req.args != null) {
-            List<File> fileArray = new ArrayList<File>();
+            List<File> fileArray = new ArrayList<>();
             List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
             if (uploads != null) {
                 for (Upload upload : uploads) {

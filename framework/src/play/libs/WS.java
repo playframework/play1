@@ -261,8 +261,8 @@ public class WS extends PlayPlugin {
          */
         public Object body;
         public FileParam[] fileParams;
-        public Map<String, String> headers = new HashMap<String, String>();
-        public Map<String, Object> parameters = new LinkedHashMap<String, Object>();
+        public Map<String, String> headers = new HashMap<>();
+        public Map<String, Object> parameters = new LinkedHashMap<>();
         public String mimeType;
 
         /**
@@ -713,7 +713,7 @@ public class WS extends PlayPlugin {
          *         is not formed as a query string.
          */
         public Map<String, String> getQueryString() {
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new HashMap<>();
             String body = getString();
             for (String entry : body.split("&")) {
                 int pos = entry.indexOf("=");

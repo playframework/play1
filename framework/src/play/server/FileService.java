@@ -201,7 +201,7 @@ public class FileService  {
             try {
                 String headerValue = request.headers().get("range").trim().substring("bytes=".length());
                 String[] rangesValues = headerValue.split(",");
-                ArrayList<long[]> ranges = new ArrayList<long[]>(rangesValues.length);
+                ArrayList<long[]> ranges = new ArrayList<>(rangesValues.length);
                 for(int i = 0; i < rangesValues.length; i++) {
                     String rangeValue = rangesValues[i];
                     long start, end;
@@ -257,7 +257,7 @@ public class FileService  {
                     return new Long(t1[0]).compareTo(t2[0]);
                 }
             });
-            ArrayList<long[]> result = new ArrayList<long[]>();
+            ArrayList<long[]> result = new ArrayList<>();
             result.add(sortedChunks[0]);
             for (int i = 1; i < sortedChunks.length; i++) {
                 long[] c1 = sortedChunks[i];
