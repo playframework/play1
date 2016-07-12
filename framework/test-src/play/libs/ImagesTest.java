@@ -1,118 +1,89 @@
 package play.libs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.After;
+import org.junit.Test;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
-import javax.imageio.ImageIO;
-
-import org.junit.Test;
-
-import play.Play;
-import play.PlayBuilder;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexandre Chatiron
  */
 public class ImagesTest {
 
-    @Test
-    public void testImagesResizeGif() {
-        new PlayBuilder().build();
-        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
+    File result;
 
-        File source = new File(folder, "angel.gif");
-        File result = new File(folder, "angel_testResult.gif");
+    @Test
+    public void testImagesResizeGif() throws IOException, URISyntaxException {
+        File source = find("angel.gif");
+        result = File.createTempFile("play", "angel.gif");
 
         Images.resize(source, result, 48, 48);
-        try {
-            BufferedImage buffSrc = ImageIO.read(source);
-            BufferedImage buffDest = ImageIO.read(result);
+        BufferedImage buffSrc = ImageIO.read(source);
+        BufferedImage buffDest = ImageIO.read(result);
 
-            assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
-            assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
-            assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
-            assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
-        } catch (IOException e) {
-            fail("cannot compare the 2 images");
-        } finally {
-            result.delete();
-        }
+        assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
+        assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
+        assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
+        assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
     }
 
     @Test
-    public void testImagesResizePng() {
-        new PlayBuilder().build();
-        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
-
-        File source = new File(folder, "fond1.png");
-        File result = new File(source.getParent(), "fond1_testResult.png");
+    public void testImagesResizePng() throws IOException, URISyntaxException {
+        File source = find("fond1.png");
+        result = File.createTempFile("play", "fond1.png");
 
         Images.resize(source, result, 278, 519);
-        try {
-            BufferedImage buffSrc = ImageIO.read(source);
-            BufferedImage buffDest = ImageIO.read(result);
+        BufferedImage buffSrc = ImageIO.read(source);
+        BufferedImage buffDest = ImageIO.read(result);
 
-            assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
-            assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
-            assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
-            assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
-        } catch (IOException e) {
-            fail("cannot compare the 2 images");
-        } finally {
-            result.delete();
-        }
+        assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
+        assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
+        assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
+        assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
     }
 
     @Test
-    public void testImagesResizePngTransparent() {
-        new PlayBuilder().build();
-        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
-
-        File source = new File(folder, "fond2.png");
-        File result = new File(source.getParent(), "fond2_testResult.png");
+    public void testImagesResizePngTransparent() throws IOException, URISyntaxException {
+        File source = find("fond2.png");
+        result = File.createTempFile("play", "fond2.png");
 
         Images.resize(source, result, 278, 519);
-        try {
-            BufferedImage buffSrc = ImageIO.read(source);
-            BufferedImage buffDest = ImageIO.read(result);
+        BufferedImage buffSrc = ImageIO.read(source);
+        BufferedImage buffDest = ImageIO.read(result);
 
-            assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
-            assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
-            assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
-            assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
-        } catch (IOException e) {
-            fail("cannot compare the 2 images");
-        } finally {
-            result.delete();
-        }
+        assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
+        assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
+        assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
+        assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
     }
 
     @Test
-    public void testImagesResizeJpg() {
-        new PlayBuilder().build();
-        File folder = new File(Play.frameworkPath, "/framework/test-src/play/libs");
-
-        File source = new File(folder, "winie.jpg");
-        File result = new File(source.getParent(), "winie_testResult.jpg");
+    public void testImagesResizeJpg() throws IOException, URISyntaxException {
+        File source = find("winie.jpg");
+        result = File.createTempFile("play", "winie.jpg");
 
         Images.resize(source, result, 1536, 2048);
-        try {
-            BufferedImage buffSrc = ImageIO.read(source);
-            BufferedImage buffDest = ImageIO.read(result);
+        BufferedImage buffSrc = ImageIO.read(source);
+        BufferedImage buffDest = ImageIO.read(result);
 
-            assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
-            assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
-            assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
-            assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
-        } catch (IOException e) {
-            fail("cannot compare the 2 images");
-        } finally {
-            result.delete();
-        }
+        assertEquals(buffSrc.getColorModel().hasAlpha(), buffDest.getColorModel().hasAlpha());
+        assertEquals(buffSrc.getColorModel().getPixelSize(), buffDest.getColorModel().getPixelSize());
+        assertEquals(buffSrc.getColorModel().getTransferType(), buffDest.getColorModel().getTransferType());
+        assertEquals(buffSrc.getColorModel().getTransparency(), buffDest.getColorModel().getTransparency());
     }
 
+    private File find(String name) throws URISyntaxException {
+        return new File(getClass().getResource(name).toURI());
+    }
+
+    @After
+    public void tearDown() {
+        result.delete();
+    }
 }
