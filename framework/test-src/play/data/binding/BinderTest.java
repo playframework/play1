@@ -277,6 +277,17 @@ public class BinderTest {
         assertThat(binded.testEnumSet).isEqualTo(data.testEnumSet);
     }
 
+    @Test
+    public void test_binding_class_with_private_constructor() {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+        params.put("user.name", new String[]{"john"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+
+        Data6 binded = (Data6) Binder.bind(rootParamNode, "user", Data6.class, Data6.class, noAnnotations);
+        assertThat(binded.name).isEqualTo("john");
+    }
+
     /**
      * Transforms map from Unbinder to Binder
      * @param r map filled by Unbinder
