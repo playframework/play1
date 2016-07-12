@@ -10,10 +10,10 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class BeanWrapperTest {
 
-    public static class Bean {
+    private static class Bean {
         public String a = "a";
         public String b = "b";
-        public int i = 1;
+        int i = 1;
 
         public String getA() {
             return a;

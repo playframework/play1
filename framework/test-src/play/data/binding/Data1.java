@@ -1,6 +1,6 @@
 package play.data.binding;
 
-public class Data1 {
+class Data1 {
 
     public static int myStatic;
 
