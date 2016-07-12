@@ -153,7 +153,7 @@ public class Mail {
                 try {
                     session = Session.getInstance(props, (Authenticator) Play.classloader.loadClass(authenticator).newInstance());
                 } catch (Exception e) {
-                    Logger.error(e, "Cannot instanciate custom SMTP authenticator (%s)", authenticator);
+                    Logger.error(e, "Cannot instantiate custom SMTP authenticator (%s)", authenticator);
                 }
             }
 

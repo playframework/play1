@@ -595,10 +595,10 @@ public abstract class Binder {
         if (annotations != null) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType().equals(As.class)) {
-                    Class<? extends TypeBinder<?>> toInstanciate = ((As) annotation).binder();
-                    if (!(toInstanciate.equals(As.DEFAULT.class))) {
+                    Class<? extends TypeBinder<?>> toInstantiate = ((As) annotation).binder();
+                    if (!(toInstantiate.equals(As.DEFAULT.class))) {
                         // Instantiate the binder
-                        TypeBinder<?> myInstance = createNewInstance(toInstanciate);
+                        TypeBinder<?> myInstance = createNewInstance(toInstantiate);
                         return myInstance.bind(name, annotations, value, clazz, type);
                     }
                 }

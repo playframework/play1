@@ -140,7 +140,7 @@ public class JobsPlugin extends PlayPlugin {
                         Callable<Job> callable = (Callable<Job>) job;
                         executor.submit(callable);
                     } catch (InstantiationException | IllegalAccessException ex) {
-                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                        throw new UnexpectedException("Cannot instantiate Job " + clazz.getName());
                     }
                 }
             }
@@ -151,7 +151,7 @@ public class JobsPlugin extends PlayPlugin {
                     Job<?> job = createJob(clazz);
                     scheduleForCRON(job);
                 } catch (InstantiationException | IllegalAccessException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    throw new UnexpectedException("Cannot instantiate Job " + clazz.getName());
                 }
             }
             // @Every
@@ -167,7 +167,7 @@ public class JobsPlugin extends PlayPlugin {
                         executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                     }
                 } catch (InstantiationException | IllegalAccessException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    throw new UnexpectedException("Cannot instantiate Job " + clazz.getName());
                 }
             }
         }
