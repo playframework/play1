@@ -26,20 +26,4 @@ class Data1 {
 
         return true;
     }
-
-    @Override
-    public int hashCode() {
-        int result = a != null ? a.hashCode() : 0;
-        result = 31 * result + b;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Data1{" +
-                "f='" + f + '\'' +
-                ", a='" + a + '\'' +
-                ", b=" + b +
-                '}';
-    }
 }

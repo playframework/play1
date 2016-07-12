@@ -29,22 +29,4 @@ class Data4 {
 
         return true;
     }
-
-    @Override
-    public int hashCode() {
-        int result = s != null ? s.hashCode() : 0;
-        result = 31 * result + (datas != null ? datas.hashCode() : 0);
-        result = 31 * result + (datasArray != null ? Arrays.hashCode(datasArray) : 0);
-        result = 31 * result + (mapDatas != null ? mapDatas.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Data4{" +
-                "s='" + s + '\'' +
-                ", datas=" + datas +
-                ", datasArray=" + Arrays.toString(datasArray) +
-                '}';
-    }
 }

@@ -29,14 +29,4 @@ class Data2 {
         if (datas != null ? !datas.equals(data2.datas) : data2.datas != null) return false;
         return true;
     }
-
-    @Override
-    public int hashCode() {
-        int result = a != null ? a.hashCode() : 0;
-        result = 31 * result + (b != null ? b.hashCode() : 0);
-        result = 31 * result + c;
-        result = 31 * result + (data1 != null ? data1.hashCode() : 0);
-        result = 31 * result + (datas != null ? datas.hashCode() : 0);
-        return result;
-    }
 }
