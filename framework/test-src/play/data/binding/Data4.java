@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class Data4 {
+class Data4 {
 
     public String s;
     public List<Data1> datas;

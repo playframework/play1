@@ -2,7 +2,7 @@ package play.data.binding;
 
 import java.util.List;
 
-public class Data2 {
+class Data2 {
     public String a;
     public Boolean b;
     public int c;
