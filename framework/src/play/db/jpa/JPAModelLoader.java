@@ -351,7 +351,7 @@ public class JPAModelLoader implements Model.Factory {
                 c = c.getSuperclass();
             }
         } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
         }
         throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
     }
@@ -375,7 +375,7 @@ public class JPAModelLoader implements Model.Factory {
             }
             return f;
         } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
         }
     }
 

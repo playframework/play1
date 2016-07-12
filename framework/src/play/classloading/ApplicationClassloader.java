@@ -126,7 +126,7 @@ public class ApplicationClassloader extends ClassLoader {
                 }
                 return clazz;
             } catch (Exception e) {
-                throw new RuntimeException("Cannot find precompiled class file for " + name);
+                throw new RuntimeException("Cannot find precompiled class file for " + name, e);
             }
         }
 

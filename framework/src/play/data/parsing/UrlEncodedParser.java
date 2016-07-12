@@ -112,7 +112,7 @@ public class UrlEncodedParser extends DataParser {
                     "test".getBytes(providedCharset);
                     charset = providedCharset; // it works..
                 } catch (Exception e) {
-                    Logger.debug("Got invalid _charset_ in form: " + providedCharset);
+                    Logger.debug(e, "Got invalid _charset_ in form: " + providedCharset);
                     // lets just use the default one..
                 }
             }

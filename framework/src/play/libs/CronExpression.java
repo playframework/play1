@@ -1478,15 +1478,13 @@ public class CronExpression implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-        CronExpression copy = null;
         try {
-            copy = new CronExpression(getCronExpression());
+            CronExpression copy = new CronExpression(getCronExpression());
             copy.setTimeZone(getTimeZone());
-        } catch (ParseException ex) { // never happens since the source is
-                                      // valid...
-            throw new IncompatibleClassChangeError("Not Cloneable.");
+            return copy;
+        } catch (ParseException ex) { // never happens since the source is valid
+            throw new RuntimeException("Failed to clone " + this, ex);
         }
-        return copy;
     }
 
     private static class ValueSet {

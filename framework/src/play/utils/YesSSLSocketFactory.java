@@ -1,5 +1,7 @@
 package play.utils;
 
+import play.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -40,6 +42,7 @@ public class YesSSLSocketFactory extends SSLSocketFactory {
             sslcontext.init(null, new TrustManager[]{new YesTrustManager()}, null);
             factory = sslcontext.getSocketFactory();
         } catch (Exception ex) {
+            Logger.error(ex, "Failed to initialize factory");
         }
     }
 

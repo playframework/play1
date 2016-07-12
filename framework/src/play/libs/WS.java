@@ -192,7 +192,7 @@ public class WS extends PlayPlugin {
                     Logger.trace("Using the class:" + implementation + " for web service");
                 }
             } catch (Exception e) {
-                throw new RuntimeException("Unable to load the class: " + implementation + " for web service");
+                throw new RuntimeException("Unable to load the class: " + implementation + " for web service", e);
             }
         }
     }

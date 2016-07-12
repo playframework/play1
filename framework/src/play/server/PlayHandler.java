@@ -128,7 +128,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         try {
             SHA_1 = MessageDigest.getInstance("SHA1");
         } catch (NoSuchAlgorithmException e) {
-            throw new InternalError("SHA-1 not supported on this platform");
+            throw new IllegalStateException("SHA-1 not supported on this platform", e);
         }
     }
 
@@ -935,7 +935,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 ChannelFuture future = ctx.getChannel().write(errorResponse);
                 future.addListener(ChannelFutureListener.CLOSE);
             } catch (Exception ex) {
-                Logger.error(ez, "serveStatic for request %s", request.method + " " + request.url);
+                Logger.error(ex, "serveStatic for request %s", request.method + " " + request.url);
             }
         }
         if (Logger.isTraceEnabled()) {

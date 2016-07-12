@@ -157,7 +157,7 @@ public class JPAPlugin extends PlayPlugin {
                       Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
                     }         
                 } catch (Exception e) {
-                    Logger.warn("JPA -> Entity not found: %s", entity);
+                    Logger.warn(e, "JPA -> Entity not found: %s", entity);
                 }
             }
             

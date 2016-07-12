@@ -44,7 +44,7 @@ public abstract class BaseTemplate extends Template {
             byte[] code = IO.readContent(file);
             directLoad(code);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot load precompiled template " + name);
+            throw new RuntimeException("Cannot load precompiled template " + name, e);
         }
     }
 

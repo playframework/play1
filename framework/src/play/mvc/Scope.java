@@ -424,7 +424,8 @@ public class Scope {
                 checkAndParse();
                 // TODO: This is used by the test, but this is not the most convenient.
                 return (T) Binder.bind(getRootParamNode(), key, type, type, null);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
+                Logger.error(e, "Failed to get %s of type %s", key, type);
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
@@ -435,6 +436,7 @@ public class Scope {
             try {
                 return (T) Binder.directBind(annotations, get(key), type, null);
             } catch (Exception e) {
+                Logger.error(e, "Failed to get %s of type %s", key, type);
                 Validation.addError(key, "validation.invalid");
                 return null;
             }

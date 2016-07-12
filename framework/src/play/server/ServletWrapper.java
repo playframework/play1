@@ -364,7 +364,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         try {
             binding.put("errors", Validation.errors());
         } catch (Exception ex) {
-            //
+            Logger.error(ex, "Failed to bind errors");
         }
         String format = Request.current().format;
         servletResponse.setStatus(404);
@@ -405,7 +405,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     }
                 }
             } catch (Exception exx) {
-                // humm ?
+                Logger.error(exx, "Failed to flush cookies");
             }
             binding.put("exception", e);
             binding.put("session", Scope.Session.current());
@@ -416,7 +416,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             try {
                 binding.put("errors", Validation.errors());
             } catch (Exception ex) {
-                //
+                Logger.error(ex, "Failed to bind errors");
             }
             response.setStatus(500);
             String format = "html";

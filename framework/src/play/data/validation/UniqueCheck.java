@@ -103,7 +103,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             }
         } catch (Exception e) {
             throw new UnexpectedException("Error while determining the field " +
-                    fieldName + " for an object of type " + clazz);
+                    fieldName + " for an object of type " + clazz, e);
         }
         throw new UnexpectedException("Cannot get the field " +  fieldName +
                 " for an object of type " + clazz);
