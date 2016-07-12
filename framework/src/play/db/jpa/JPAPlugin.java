@@ -207,7 +207,7 @@ public class JPAPlugin extends PlayPlugin {
                     try {
                         cfg.addAnnotatedClass(Play.classloader.loadClass(entity));
                     } catch (Exception e) {
-                        Logger.warn("JPA -> Entity not found: %s", entity);
+                    Logger.warn(e, "JPA -> Entity not found: %s", entity);
                     }
                 }
 

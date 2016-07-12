@@ -232,7 +232,7 @@ public class OpenID {
             }
             openID = new URI(openID).toString();
         } catch (Exception e) {
-            throw new RuntimeException(openID + " is not a valid URL");
+            throw new RuntimeException(openID + " is not a valid URL", e);
         }
         return openID;
     }

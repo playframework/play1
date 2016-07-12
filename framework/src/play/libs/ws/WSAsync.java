@@ -83,7 +83,7 @@ public class WSAsync implements WSImpl {
             try {
                 proxyPortInt = Integer.parseInt(proxyPort);
             } catch (NumberFormatException e) {
-                Logger.error(
+                Logger.error(e, 
                         "Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.",
                         proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");

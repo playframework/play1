@@ -183,7 +183,7 @@ public class PluginCollection {
                     pluginsToLoad.add(info);
                 }
             } catch (Exception e) {
-                Logger.error("Error interpreting %s", url );
+                Logger.error(e, "Error interpreting %s", url);
             }
 
         }
@@ -507,7 +507,7 @@ public class PluginCollection {
             try {
                 plugin.onInvocationException(e);
             } catch (Throwable ex) {
-                //nop
+                Logger.error(ex, "Failed to handle invocation exception by plugin %s", plugin.getClass().getName());
             }
         }
     }

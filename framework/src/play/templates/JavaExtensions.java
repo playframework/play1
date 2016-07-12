@@ -41,7 +41,7 @@ public class JavaExtensions {
         try {
             return (new XmlSlurper()).parseText(xml);
         } catch (Exception e) {
-            throw new RuntimeException("invalid XML");
+            throw new RuntimeException("invalid XML", e);
         }
     }
 

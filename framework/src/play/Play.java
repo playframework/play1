@@ -235,7 +235,7 @@ public class Play {
                     tmpDir.mkdirs();
                 } catch (Throwable e) {
                     tmpDir = null;
-                    Logger.warn("No tmp folder will be used (cannot create the tmp dir)");
+                    Logger.warn("No tmp folder will be used (cannot create the tmp dir), caused by: %s", e);
                 }
             }
         }
@@ -438,7 +438,7 @@ public class Play {
                     String filenameToInclude = propsFromFile.getProperty(key.toString());
                     toInclude.putAll( readOneConfigurationFile(filenameToInclude) );
                 } catch (Exception ex) {
-                    Logger.warn("Missing include: %s", key);
+                    Logger.warn(ex, "Missing include: %s", key);
                 }
             }
         }
@@ -674,7 +674,7 @@ public class Play {
                     try {
                         Class.forName(line);
                     } catch (Exception e) {
-                        Logger.warn("! Cannot init static: " + line);
+                        Logger.warn(e, "! Cannot init static: " + line);
                     }
                 }
             } catch (Exception ex) {

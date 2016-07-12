@@ -420,7 +420,7 @@ public class MultipartStream {
                         "Unexpected characters follow a boundary");
             }
         } catch (IOException e) {
-            throw new MalformedStreamException("Stream ended unexpectedly");
+            throw new MalformedStreamException("Stream ended unexpectedly", e);
         }
         return nextChunk;
     }
@@ -481,7 +481,7 @@ public class MultipartStream {
             try {
                 b[0] = readByte();
             } catch (IOException e) {
-                throw new MalformedStreamException("Stream ended unexpectedly");
+                throw new MalformedStreamException("Stream ended unexpectedly", e);
             }
             size++;
             if (b[0] == HEADER_SEPARATOR[i]) {
@@ -688,6 +688,10 @@ public class MultipartStream {
          */
         public MalformedStreamException(String message) {
             super(message);
+        }
+
+        public MalformedStreamException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 

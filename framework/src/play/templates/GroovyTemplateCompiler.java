@@ -1,6 +1,7 @@
 package play.templates;
 
 import groovy.lang.Closure;
+import play.Logger;
 import play.Play;
 import play.exceptions.TemplateCompilationException;
 import play.templates.GroovyInlineTags.CALL;
@@ -37,7 +38,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 extensionsClassnames.add(extensionsClass.getName());
             }
         } catch (Throwable e) {
-            //
+            Logger.error(e, "Failed to compile template %s", template.getName());
         }
         return super.compile(template);
     }
@@ -304,7 +305,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             skipLineBreak = true;
             return;
         } catch (Exception e) {
-            // do nothing here
+            Logger.error(e, "Failed to start tag %s in template %s", tag.name, template.getName());
         }
         if (!tag.name.equals("doBody") && hasBody) {
             print("body" + tagIndex + " = {");
