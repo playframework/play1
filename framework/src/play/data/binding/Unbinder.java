@@ -118,19 +118,17 @@ public class Unbinder {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType().equals(As.class)) {
                         // Check the unbinder param first
-                        Class<? extends TypeUnbinder<?>> toInstanciate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
+                        Class<? extends TypeUnbinder<?>> toInstantiate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
                                 .unbinder();
-                        if (!(toInstanciate.equals(As.DEFAULT.class))) {
-                            // Instantiate the binder
-                            TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstanciate.newInstance();
+                        if (!(toInstantiate.equals(As.DEFAULT.class))) {
+                            TypeUnbinder<?> myInstance = toInstantiate.newInstance();
                             isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                         }else{
                             // unbinder is default, test if binder handle the unbinder too
-                            Class<? extends TypeBinder<?>> toInstanciateBinder = (Class<? extends TypeBinder<?>>) ((As) annotation)
-                                    .binder();
-                            if (!(toInstanciateBinder.equals(As.DEFAULT.class))
-                                    && TypeUnbinder.class.isAssignableFrom(toInstanciateBinder)) {
-                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstanciateBinder.newInstance();
+                            Class<? extends TypeBinder<?>> toInstantiateBinder = ((As) annotation).binder();
+                            if (!(toInstantiateBinder.equals(As.DEFAULT.class))
+                                    && TypeUnbinder.class.isAssignableFrom(toInstantiateBinder)) {
+                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstantiateBinder.newInstance();
                                 isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                             }    
                         }             
