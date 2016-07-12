@@ -12,10 +12,7 @@ import play.exceptions.UnexpectedException;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
@@ -302,12 +299,20 @@ public abstract class Binder {
 
     private static <T> T createNewInstance(Class<T> clazz) {
         try {
-            return clazz.newInstance();
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
         } catch (InstantiationException e) {
             Logger.warn("Failed to create instance of %s: %s", clazz.getName(), e);
             throw new UnexpectedException(e);
         } catch (IllegalAccessException e) {
             Logger.warn("Failed to create instance of %s: %s", clazz.getName(), e);
+            throw new UnexpectedException(e);
+        } catch (NoSuchMethodException e) {
+            Logger.error("Failed to create instance of %s: %s", clazz.getName(), e);
+            throw new UnexpectedException(e);
+        } catch (InvocationTargetException e) {
+            Logger.error("Failed to create instance of %s: %s", clazz.getName(), e);
             throw new UnexpectedException(e);
         }
     }
