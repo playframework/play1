@@ -213,9 +213,7 @@ public class ActionInvoker {
 
                 throw new NoResult();
 
-            } catch (IllegalAccessException ex) {
-                throw ex;
-            } catch (IllegalArgumentException ex) {
+            } catch (IllegalAccessException | IllegalArgumentException ex) {
                 throw ex;
             } catch (InvocationTargetException ex) {
                 // It's a Result ? (expected)

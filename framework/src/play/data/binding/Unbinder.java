@@ -141,10 +141,6 @@ public class Unbinder {
             if (!isExtendedTypeBinder) {
                 unBind(result, src, srcClazz, name, annotations);
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
         } catch (Exception e) {
             throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
         }
@@ -193,11 +189,9 @@ public class Unbinder {
 
                 try {
                     internalUnbind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | IllegalAccessException e) {
                     throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
-                }finally{
+                } finally{
                     field.setAccessible(oldAcc);
                 }
             }

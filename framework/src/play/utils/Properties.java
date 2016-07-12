@@ -112,9 +112,7 @@ public class Properties extends HashMap<String, String> {
             return Class.forName(s).newInstance();
         } catch (ClassNotFoundException nfe) {
             throw new IllegalArgumentException(s + ": invalid class name for key " + key, nfe);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
         }
     }

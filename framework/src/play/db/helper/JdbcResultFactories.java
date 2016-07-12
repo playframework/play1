@@ -148,11 +148,7 @@ public class JdbcResultFactories {
                     objectClass.getDeclaredField(field).set(obj, value);
                 }
                 return obj;
-            } catch (InstantiationException ex) {
-                throw new RuntimeException(ex);
-            } catch (NoSuchFieldException ex) {
-                throw new RuntimeException(ex);
-            } catch (IllegalAccessException ex) {
+            } catch (InstantiationException | NoSuchFieldException | IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             }
         }
