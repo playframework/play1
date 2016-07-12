@@ -380,6 +380,9 @@
                 <include name="**/*.yml"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.plugins"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.png"/>
+                <include name="**/*.jpg"/>
             </fileset>
         </copy>
     </target>
