@@ -569,13 +569,7 @@ public class ApacheMultipartParser extends DataParser {
                     fileItem.delete();
                 }
             }
-        } catch (FileUploadIOException e) {
-            Logger.debug(e, "error");
-            throw new IllegalStateException("Error when handling upload", e);
-        } catch (IOException e) {
-            Logger.debug(e, "error");
-            throw new IllegalStateException("Error when handling upload", e);
-        } catch (FileUploadException e) {
+        } catch (IOException | FileUploadException e) {
             Logger.debug(e, "error");
             throw new IllegalStateException("Error when handling upload", e);
         } catch (Exception e) {

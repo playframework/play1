@@ -123,9 +123,7 @@ public class JobsPlugin extends PlayPlugin {
                             }
                             throw new RuntimeException("@OnApplicationStart Job has failed");
                         }
-                    } catch (InstantiationException e) {
-                        throw new UnexpectedException("Job could not be instantiated", e);
-                    } catch (IllegalAccessException e) {
+                    } catch (InstantiationException | IllegalAccessException e) {
                         throw new UnexpectedException("Job could not be instantiated", e);
                     } catch (Throwable ex) {
                         if (ex instanceof PlayException) {
@@ -141,9 +139,7 @@ public class JobsPlugin extends PlayPlugin {
                         @SuppressWarnings("unchecked")
                         Callable<Job> callable = (Callable<Job>) job;
                         executor.submit(callable);
-                    } catch (InstantiationException ex) {
-                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                    } catch (IllegalAccessException ex) {
+                    } catch (InstantiationException | IllegalAccessException ex) {
                         throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                     }
                 }
@@ -154,9 +150,7 @@ public class JobsPlugin extends PlayPlugin {
                 try {
                     Job<?> job = createJob(clazz);
                     scheduleForCRON(job);
-                } catch (InstantiationException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                 }
             }
@@ -172,9 +166,7 @@ public class JobsPlugin extends PlayPlugin {
                     if (!"never".equalsIgnoreCase(value)) {
                         executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                     }
-                } catch (InstantiationException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                 }
             }
@@ -249,9 +241,7 @@ public class JobsPlugin extends PlayPlugin {
                         }
                         throw new RuntimeException("@OnApplicationStop Job has failed");
                     }
-                } catch (InstantiationException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException e) {
                     throw new UnexpectedException("Job could not be instantiated", e);
                 } catch (Throwable ex) {
                     if (ex instanceof PlayException) {

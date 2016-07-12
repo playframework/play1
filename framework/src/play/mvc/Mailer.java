@@ -586,9 +586,7 @@ public class Mailer implements LocalVariablesSupport {
         try {
             Future<Boolean> result = send(args);
             return result.get();
-        } catch (InterruptedException e) {
-            Logger.error(e, "Error while waiting Mail.send result");
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             Logger.error(e, "Error while waiting Mail.send result");
         }
         return false;

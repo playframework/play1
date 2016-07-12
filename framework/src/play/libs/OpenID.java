@@ -201,9 +201,7 @@ public class OpenID {
             }
 
             throw new Redirect(url);
-        } catch (Redirect e) {
-            throw e;
-        } catch (PlayException e) {
+        } catch (Redirect | PlayException e) {
             throw e;
         } catch (Exception e) {
             return false;

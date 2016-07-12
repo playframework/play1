@@ -203,10 +203,7 @@ public abstract class Binder {
             }
 
             return null; // give up
-        } catch (NumberFormatException e) {
-            logBindingNormalFailure(paramNode, e);
-            addValidationError(paramNode);
-        } catch (ParseException e) {
+        } catch (NumberFormatException | ParseException e) {
             logBindingNormalFailure(paramNode, e);
             addValidationError(paramNode);
         } catch (Exception e) {
@@ -302,16 +299,10 @@ public abstract class Binder {
             Constructor<T> constructor = clazz.getDeclaredConstructor();
             constructor.setAccessible(true);
             return constructor.newInstance();
-        } catch (InstantiationException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             Logger.warn("Failed to create instance of %s: %s", clazz.getName(), e);
             throw new UnexpectedException(e);
-        } catch (IllegalAccessException e) {
-            Logger.warn("Failed to create instance of %s: %s", clazz.getName(), e);
-            throw new UnexpectedException(e);
-        } catch (NoSuchMethodException e) {
-            Logger.error("Failed to create instance of %s: %s", clazz.getName(), e);
-            throw new UnexpectedException(e);
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | InvocationTargetException e) {
             Logger.error("Failed to create instance of %s: %s", clazz.getName(), e);
             throw new UnexpectedException(e);
         }
@@ -406,10 +397,7 @@ public abstract class Binder {
                     valueObject = null;
                 }
                 r.put(keyObject, valueObject);
-            } catch (ParseException e) {
-                // Just ignore the exception and continue on the next item
-                logBindingNormalFailure(paramNode, e);
-            } catch (NumberFormatException e) {
+            } catch (ParseException | NumberFormatException e) {
                 // Just ignore the exception and continue on the next item
                 logBindingNormalFailure(paramNode, e);
             } catch (Exception e) {
