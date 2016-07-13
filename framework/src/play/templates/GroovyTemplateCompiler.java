@@ -305,7 +305,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             skipLineBreak = true;
             return;
         } catch (Exception e) {
-            Logger.error(e, "Failed to start tag %s in template %s", tag.name, template.getName());
+            Logger.debug(e, "Failed to start tag %s in template %s", tag.name, template.getName());
         }
         if (!tag.name.equals("doBody") && hasBody) {
             print("body" + tagIndex + " = {");
