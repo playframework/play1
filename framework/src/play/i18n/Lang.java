@@ -30,7 +30,7 @@ public class Lang {
             Http.Request currentRequest = Http.Request.current();
             if (currentRequest != null) {
                 // we have a current request - lets try to resolve language from it
-                resolvefrom(currentRequest);
+                resolveFrom(currentRequest);
             } else {
                 // don't have current request - just use default
                 setDefaultLocale();
@@ -144,7 +144,7 @@ public class Lang {
      *
      * @param request current request
      */
-    private static void resolvefrom(Request request) {
+    private static void resolveFrom(Request request) {
         // Check a cookie
         String cn = Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG");
         if (request.cookies.containsKey(cn)) {

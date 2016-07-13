@@ -65,7 +65,7 @@ public class ValidationTest {
         
         Validation.clear();
         
-        // Test clear empty the lsit
+        // Test clear empty the list
         assertEquals(0, Validation.errors().size());
         assertEquals(0, Validation.errors(field).size());
         assertEquals(0, Validation.errors(field2).size());

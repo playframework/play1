@@ -192,7 +192,7 @@ public class Invoker {
         }
 
         /**
-         * Init the call (especially usefull in DEV mode to detect changes)
+         * Init the call (especially useful in DEV mode to detect changes)
          */
         public boolean init() {
             Thread.currentThread().setContextClassLoader(Play.classloader);

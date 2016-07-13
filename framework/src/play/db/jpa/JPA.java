@@ -240,7 +240,7 @@ public class JPA {
     public static <T> T withTransaction(String dbName, boolean readOnly, F.Function0<T> block) throws Throwable {
         if (isEnabled()) {
             boolean closeEm = true;
-            // For each existing persisence unit
+            // For each existing persistence unit
            
             try {
                 // we are starting a transaction for all known persistent unit

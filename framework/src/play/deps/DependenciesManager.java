@@ -379,7 +379,7 @@ public class DependenciesManager {
         ivySettings.setDefaultUseOrigin(true);
         PlayConflictManager conflictManager = new PlayConflictManager();
         ivySettings.addConflictManager("playConflicts", conflictManager);
-        ivySettings.addConflictManager("defaultConflicts", conflictManager.deleguate);
+        ivySettings.addConflictManager("defaultConflicts", conflictManager.delegate);
         ivySettings.setDefaultConflictManager(conflictManager);
 
         Ivy ivy = Ivy.newInstance(ivySettings);

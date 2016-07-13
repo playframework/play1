@@ -429,7 +429,7 @@ public class ActionInvoker {
                         // parameter
                         invokeControllerMethod(aFinally, new Object[] { caughtException });
                     } else {
-                        // invoce @Finally-method the regular way without
+                        // invoke @Finally-method the regular way without
                         // caughtException
                         invokeControllerMethod(aFinally, null);
                     }

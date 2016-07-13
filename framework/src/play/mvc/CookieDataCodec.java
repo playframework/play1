@@ -38,9 +38,9 @@ public class CookieDataCodec {
 
         String[] keyValues = data.split("&");
         for (String keyValue : keyValues) {
-            String[] splitted = keyValue.split("=", 2);
-            if (splitted.length == 2) {
-                map.put(URLDecoder.decode(splitted[0], "utf-8"), URLDecoder.decode(splitted[1], "utf-8"));
+            String[] split = keyValue.split("=", 2);
+            if (split.length == 2) {
+                map.put(URLDecoder.decode(split[0], "utf-8"), URLDecoder.decode(split[1], "utf-8"));
             }
         }
     }

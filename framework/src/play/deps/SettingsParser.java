@@ -210,7 +210,7 @@ public class SettingsParser {
                             if (m.matches()) {
                                 organisation = m.group(1);
                             } else {
-                                throw new Oops("Unknown depedency format -> " + o);
+                                throw new Oops("Unknown dependency format -> " + o);
                             }
                         }
                     }

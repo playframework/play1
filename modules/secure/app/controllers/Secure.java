@@ -13,7 +13,7 @@ public class Secure extends Controller {
 
     @Before(unless={"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
-        // Authent
+        // Authentication
         if(!session.contains("username")) {
             flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
             login();

@@ -259,7 +259,7 @@ public class Http {
          */
         public static ThreadLocal<Request> current = new ThreadLocal<>();
         /**
-         * The really invoker Java methid
+         * The really invoker Java method
          */
         public transient Method invokedMethod;
         /**
@@ -317,7 +317,7 @@ public class Http {
         }
 
         /**
-         * All creation / initing of new requests should use this method. The
+         * All creation / initiating of new requests should use this method. The
          * purpose of this is to "show" what is needed when creating new
          * Requests.
          * 
@@ -551,7 +551,7 @@ public class Http {
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
             if (!headers.containsKey("accept-language")) {
-                return Collections.<String> emptyList();
+                return Collections.emptyList();
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
@@ -705,7 +705,7 @@ public class Http {
          * Removes the specified cookie with path /
          * 
          * @param name
-         *            cookiename
+         *            cookie name
          */
         public void removeCookie(String name) {
             removeCookie(name, "/");
@@ -715,9 +715,9 @@ public class Http {
          * Removes the cookie
          * 
          * @param name
-         *            cookiename
+         *            cookie name
          * @param path
-         *            cookiepath
+         *            cookie path
          */
         public void removeCookie(String name, String path) {
             setCookie(name, "", null, path, 0, false);

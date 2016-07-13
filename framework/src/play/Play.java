@@ -249,10 +249,10 @@ public class Play {
             Logger.error("Illegal mode '%s', use either prod or dev", configuration.getProperty("application.mode"));
             fatalServerErrorOccurred();
         }
-	
+        
         // Force the Production mode if forceProd or precompile is activate
         // Set to the Prod mode must be done before loadModules call
-        // as some modules (e.g. DocViewver) is only available in DEV
+        // as some modules (e.g. DocViewer) is only available in DEV
         if (usePrecompiled || forceProd || System.getProperty("precompile") != null) {
             mode = Mode.PROD;
         }
@@ -346,7 +346,7 @@ public class Play {
     }
 
     /**
-     * Read application.conf and resolve overriden key using the play id mechanism.
+     * Read application.conf and resolve overridden key using the play id mechanism.
      */
     public static void readConfiguration() {
         confs = new HashSet<>();

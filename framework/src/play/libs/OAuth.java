@@ -13,7 +13,7 @@ import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 
 /**
- * Library to access ressources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
+ * Library to access resources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
  *
  */
 public class OAuth {
@@ -29,7 +29,7 @@ public class OAuth {
 
     /**
      * Create an OAuth object for the service described in info
-     * @param info must contain all informations related to the service
+     * @param info must contain all information related to the service
      * @return the OAuth object
      */
     public static OAuth service(ServiceInfo info) {

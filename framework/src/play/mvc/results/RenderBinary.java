@@ -33,7 +33,7 @@ public class RenderBinary extends Result {
     /**
      * send a binary stream as the response
      * @param is the stream to read from
-     * @param name the name to use as Content-Diposition attachement filename
+     * @param name the name to use as Content-Disposition attachment filename
      */
     public RenderBinary(InputStream is, String name) {
         this(is, name, false);
@@ -46,7 +46,7 @@ public class RenderBinary extends Result {
     /**
      * send a binary stream as the response
      * @param is the stream to read from
-     * @param name the name to use as Content-Diposition attachement filename
+     * @param name the name to use as Content-Disposition attachment filename
      * @param inline true to set the response Content-Disposition to inline
      */
     public RenderBinary(InputStream is, String name, boolean inline) {
@@ -56,7 +56,7 @@ public class RenderBinary extends Result {
     /**
      * send a binary stream as the response
      * @param is the stream to read from
-     * @param name the name to use as Content-Diposition attachement filename
+     * @param name the name to use as Content-Disposition attachment filename
      * @param inline true to set the response Content-Disposition to inline
      */
     public RenderBinary(InputStream is, String name, String contentType, boolean inline) {

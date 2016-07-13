@@ -586,7 +586,7 @@ public class F {
         //the socket reads completely(ie. stop reading from socket when queue is full) as in normal NIO operations if you stop reading
         //from the socket, the local nic buffer fills up, then the remote nic buffer fills(the client's nic), and so the client is informed
         //he can't write anymore just yet (or he blocks if he is synchronous).
-        //Then when someone pulls from the queue, the token would be set to enabled allowing to read from nic buffer again and it all propogates
+        //Then when someone pulls from the queue, the token would be set to enabled allowing to read from nic buffer again and it all propagates
         //This is normal flow control with NIO but since it is not done properly, this at least fixes the issue where websocket break down and
         //skip packets.  They no longer skip packets anymore.
         public void publish(T event) {

@@ -71,14 +71,14 @@ public class MailTest {
 	@Test
 	public void buildValidMessages() throws EmailException {
 		Mail.buildMessage(
-			emailWitoutRecipients().addTo("to@playframework.com"));
+			emailWithoutRecipients().addTo("to@playframework.com"));
 		Mail.buildMessage(
-			emailWitoutRecipients().addCc("cc@playframework.com"));
+			emailWithoutRecipients().addCc("cc@playframework.com"));
 		Mail.buildMessage(
-			emailWitoutRecipients().addBcc("bcc@playframework.com"));
+			emailWithoutRecipients().addBcc("bcc@playframework.com"));
 	}
 
-	protected Email emailWitoutRecipients() throws EmailException {
+	private Email emailWithoutRecipients() throws EmailException {
 		return
 			new SimpleEmail()
 				.setFrom("from@playframework.com")

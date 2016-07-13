@@ -121,7 +121,7 @@ public class Logger {
     }
 
     /**
-     * Utility method that translayte log4j levels to java.util.logging levels.
+     * Utility method that translate log4j levels to java.util.logging levels.
      */
     static java.util.logging.Level toJuliLevel(String level) {
         java.util.logging.Level juliLevel = java.util.logging.Level.INFO;
@@ -655,7 +655,7 @@ public class Logger {
      * @return the className of the class actually logging the message
      */
     static String getCallerClassName(final int level) {
-        CallInfo ci = getCallerInformations(level);
+        CallInfo ci = getCallerInformation(level);
         return ci.className;
     }
 
@@ -664,7 +664,7 @@ public class Logger {
      * @param level method stack depth
      * @return who called the logger
      */
-    static CallInfo getCallerInformations(int level) {
+    static CallInfo getCallerInformation(int level) {
         StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
         StackTraceElement caller = callStack[level];
         return new CallInfo(caller.getClassName(), caller.getMethodName());

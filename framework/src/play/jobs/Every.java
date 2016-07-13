@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Run a job at specified intervale
+ * Run a job at specified interval
  * Example, @Every("1h")
  */
 @Retention(RetentionPolicy.RUNTIME)

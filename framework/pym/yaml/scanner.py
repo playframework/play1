@@ -568,7 +568,7 @@ class Scanner(object):
         else:
             
             # Block context needs additional checks.
-            # (Do we really need them? They will be catched by the parser
+            # (Do we really need them? They will be caught by the parser
             # anyway.)
             if not self.flow_level:
 

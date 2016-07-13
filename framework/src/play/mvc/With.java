@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Deleguate interceptors.
+ * Delegate interceptors.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

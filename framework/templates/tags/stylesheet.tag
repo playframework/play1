@@ -3,7 +3,7 @@
  *    src   (required) filename without the leading path (default:"/public/stylesheets")
  *    id    (optional) an id attribute for the generated link tag
  *    media (optional) media : screen, print, aural, projection ...
- *    title (optional) title atttribute (or description)
+ *    title (optional) title attribute (or description)
  *    path  (optional) : sets the path defaults to "/public/stylesheets"
  *    ${stylesheet src:'default.css' media:'screen,print' /}
 }*

@@ -4,9 +4,9 @@ To create high-performance systems, sometimes you need to cache data. Play has a
 
 If you don’t configure Memcached, Play will use a standalone cache that stores data in the JVM heap. Caching data in the JVM application breaks the ‘share nothing’ assumption made by Play: you can’t run your application on several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
-It is important to understand that the cache contract is clear: when you put data in a cache, you can’t expect that data to remain there forever. In fact you shouldn’t. A cache is fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
+It is important to understand that the cache contract is clear: when you put data in a cache, you can’t expect that data to remain there forever. In fact you shouldn't. A cache is fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
 
-So the best way to use the cache is to repopulate it when it doesn’t have what you expect:
+So the best way to use the cache is to repopulate it when it doesn't have what you expect:
 
 bc. public static void allProducts() {
     List<Product> products = Cache.get("products", List.class);
@@ -23,7 +23,7 @@ For example, the "GAE module":https://www.playframework.com/modules/gae configur
 
 h2. <a name="cacheFor">The cacheFor annotation</a>
 
-The @cacheFor@ annotation provides an easy way to cache the ouput (HTML, JSON, etc) of an action.
+The @cacheFor@ annotation provides an easy way to cache the output (HTML, JSON, etc) of an action.
 
 bc.  import play.cache.*;
 public class Application extends Controller {

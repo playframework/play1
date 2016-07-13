@@ -15,7 +15,7 @@ import org.apache.ivy.plugins.latest.LatestRevisionStrategy;
 
 public class PlayConflictManager extends AbstractConflictManager {
 
-    public LatestConflictManager deleguate = new LatestConflictManager(new LatestRevisionStrategy());
+    public LatestConflictManager delegate = new LatestConflictManager(new LatestRevisionStrategy());
 
     @Override
     public Collection resolveConflicts(IvyNode in, Collection conflicts) {
@@ -46,7 +46,7 @@ public class PlayConflictManager extends AbstractConflictManager {
         }
 
         if(!foundBuiltInDependency) {
-            return deleguate.resolveConflicts(in, conflicts);
+            return delegate.resolveConflicts(in, conflicts);
         }
 
         /**
