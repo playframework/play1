@@ -25,7 +25,7 @@ import org.apache.commons.fileupload.util.Streams;
  *   multipart-body := preamble 1*encapsulation close-delimiter epilogue<br>
  *   encapsulation := delimiter body CRLF<br>
  *   delimiter := "--" boundary CRLF<br>
- *   close-delimiter := "--" boudary "--"<br>
+ *   close-delimiter := "--" boundary "--"<br>
  *   preamble := &lt;ignore&gt;<br>
  *   epilogue := &lt;ignore&gt;<br>
  *   body := header-part CRLF body-part<br>
@@ -36,7 +36,7 @@ import org.apache.commons.fileupload.util.Streams;
  *   body-data := &lt;arbitrary data&gt;<br>
  * </code>
  *
- * <p>Note that body-data can contain another mulipart entity.  There
+ * <p>Note that body-data can contain another multipart entity.  There
  * is limited support for single pass processing of such nested
  * streams.  The nested stream is <strong>required</strong> to have a
  * boundary token of the same length as the parent stream (see {@link
@@ -215,7 +215,7 @@ public class MultipartStream {
      */
     private int head;
     /**
-     * The index of last valid characer in the buffer + 1.
+     * The index of last valid character in the buffer + 1.
      * <br>
      * 0 <= tail <= bufSize
      */
@@ -286,7 +286,7 @@ public class MultipartStream {
         this.buffer = new byte[bufSize];
         this.notifier = pNotifier;
 
-        // We prepend CR/LF to the boundary to chop trailng CR/LF from
+        // We prepend CR/LF to the boundary to chop trailing CR/LF from
         // body-data tokens.
         this.boundary = new byte[boundary.length + BOUNDARY_PREFIX.length];
         this.boundaryLength = boundary.length + BOUNDARY_PREFIX.length;
@@ -389,7 +389,7 @@ public class MultipartStream {
      * @return <code>true</code> if there are more encapsulations in
      *         this stream; <code>false</code> otherwise.
      *
-     * @throws MalformedStreamException if the stream ends unexpecetedly or
+     * @throws MalformedStreamException if the stream ends unexpectedly or
      *                                  fails to follow required syntax.
      */
     public boolean readBoundary()
@@ -467,7 +467,7 @@ public class MultipartStream {
      *
      * @return The <code>header-part</code> of the current encapsulation.
      *
-     * @throws MalformedStreamException if the stream ends unexpecetedly.
+     * @throws MalformedStreamException if the stream ends unexpectedly.
      */
     public String readHeaders()
             throws MalformedStreamException {
@@ -570,7 +570,7 @@ public class MultipartStream {
      */
     public boolean skipPreamble()
             throws IOException {
-        // First delimiter may be not preceeded with a CRLF.
+        // First delimiter may be not preceded with a CRLF.
         System.arraycopy(boundary, 2, boundary, 0, boundary.length - 2);
         boundaryLength = boundary.length - 2;
         try {

@@ -382,7 +382,7 @@ public class Evolutions extends PlayPlugin {
         }
 
         if (containsDown) {
-            sql.insert(0, "# !!! WARNING! This script contains DOWNS evolutions that are likely destructives\n\n");
+            sql.insert(0, "# !!! WARNING! This script contains DOWNS evolutions that are likely destructive\n\n");
         }
 
         return sql.toString().trim();

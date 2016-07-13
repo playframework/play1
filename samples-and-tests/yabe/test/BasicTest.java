@@ -117,7 +117,7 @@ public class BasicTest extends UnitTest {
         // Delete the post
         bobPost.delete();
 
-        // Chech the all comments have been deleted
+        // Check the all comments have been deleted
         assertEquals(1, User.count());
         assertEquals(0, Post.count());
         assertEquals(0, Comment.count());

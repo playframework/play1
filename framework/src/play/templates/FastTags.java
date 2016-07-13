@@ -450,7 +450,7 @@ public class FastTags {
             String src = (args.containsKey("arg") && args.get("arg") != null) ? args.get("arg").toString() : args.get("src").toString();
             if (src != null) {
                 String name = (args.containsKey("name")) ? args.get("name").toString() : null;
-                out.print("<img src=\"" + Mailer.getEmbedddedSrc(src, name) + "\" " + serialize(args, "src", "name") + "/>");
+                out.print("<img src=\"" + Mailer.getEmbeddedSrc(src, name) + "\" " + serialize(args, "src", "name") + "/>");
             }
         } else {
             throw new TemplateExecutionException(template.template, fromLine, "Specify a file name", new TagInternalException(

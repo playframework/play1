@@ -13,7 +13,7 @@ import play.libs.WS.HttpResponse;
 import com.google.gson.JsonObject;
 
 /**
- * Library to access ressources protected by OAuth 2.0. For OAuth 1.0a, see play.libs.OAuth.
+ * Library to access resources protected by OAuth 2.0. For OAuth 1.0a, see play.libs.OAuth.
  * See the facebook-oauth2 example for usage.
  *
  */

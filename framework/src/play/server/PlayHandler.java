@@ -187,7 +187,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {
 
-                    // Deleguate to Play framework
+                    // Delegate to Play framework
                     Invoker.invoke(new NettyInvocation(request, response, ctx, nettyRequest, messageEvent));
 
                 }
@@ -1151,7 +1151,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 }
             }
         } finally {
-            // Remove fake aggregator in case handshake was not a sucess, it is
+            // Remove fake aggregator in case handshake was not a success, it is
             // still lying around
             try {
                 ctx.getPipeline().remove("fake-aggregator");

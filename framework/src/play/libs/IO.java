@@ -172,7 +172,7 @@ public class IO {
     }
 
     /**
-     * Write binay data to a file
+     * Write binary data to a file
      * @param data The binary data to write
      * @param file The file to write
      */

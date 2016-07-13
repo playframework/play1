@@ -139,7 +139,7 @@ public class PropertiesEnhancer extends Enhancer {
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     try {
 
-                        // Check access to porperty ?
+                        // Check access to property ?
                         if (isProperty(fieldAccess.getField())) {
 
                             // TODO : Check if it is a application class field (fieldAccess.getClassName())

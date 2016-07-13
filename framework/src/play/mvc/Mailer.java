@@ -45,7 +45,7 @@ public class Mailer {
 
     /**
      * Set subject of mail, optionally providing formatting arguments
-     * @param subject plain String or formatted string - interpreted as formatted string only if aguments are provided
+     * @param subject plain String or formatted string - interpreted as formatted string only if arguments are provided
      * @param args optional arguments for formatting subject
      */
     public static void setSubject(String subject, Object... args) {
@@ -255,7 +255,12 @@ public class Mailer {
         }
     }
     
+    @Deprecated
     public static String getEmbedddedSrc(String urlString, String name) {
+        return getEmbeddedSrc(urlString, name);
+    }
+    
+    public static String getEmbeddedSrc(String urlString, String name) {
         HashMap<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");

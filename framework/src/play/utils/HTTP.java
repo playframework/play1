@@ -69,7 +69,7 @@ public class HTTP {
     }
 
     /**
-     * Use this method to make sure you have the correct caseing of a http header name.
+     * Use this method to make sure you have the correct casing of a http header name.
      * eg: fixes 'content-type' to 'Content-Type'
      */
     public static String fixCaseForHttpHeader( String headerName) {

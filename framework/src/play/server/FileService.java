@@ -145,7 +145,7 @@ public class FileService  {
                 }
                 long length = 0;
                 for(ByteRange range: byteRanges) {
-                    length += range.computeTotalLengh();
+                    length += range.computeTotalLength();
                 }
                 nettyResponse.headers().set("Content-length", length);
             }
@@ -290,7 +290,7 @@ public class FileService  {
                 return end - start + 1 - servedRange;
             }
             
-            public long computeTotalLengh() {
+            public long computeTotalLength() {
                 return length() + header.length;
             }
             

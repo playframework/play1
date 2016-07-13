@@ -172,7 +172,7 @@ public class Controller implements ControllerSupport {
      * The current routeArgs scope: This is a hash map that is accessible during
      * the reverse routing phase. Any variable added to this scope will be used
      * for reverse routing. Useful when you have a param that you want to add to
-     * any route without add it expicitely to every action method.
+     * any route without add it explicitly to every action method.
      *
      * Note: The ControllersEnhancer makes sure that an appropriate thread local
      * version is applied. ie : controller.routeArgs -
@@ -436,7 +436,7 @@ public class Controller implements ControllerSupport {
      * @param o
      *            The Java object to serialize
      * @param type
-     *            The Type informations for complex generic types
+     *            The Type information for complex generic types
      */
     protected static void renderJSON(Object o, Type type) {
         throw new RenderJson(o, type);
@@ -556,7 +556,7 @@ public class Controller implements ControllerSupport {
     }
 
     /**
-     * Send a 404 Not Found reponse
+     * Send a 404 Not Found response
      */
     protected static void notFound() {
         throw new NotFound("");
@@ -888,7 +888,7 @@ public class Controller implements ControllerSupport {
             }
             templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
-        return templateName;
+        return null == templateNameResolver ? templateName : templateNameResolver.resolveTemplateName(templateName);
     }
 
     /**
@@ -1187,7 +1187,7 @@ public class Controller implements ControllerSupport {
             Request.current().args.put(ActionInvoker.F, future);
         } else if (Request.current().args.containsKey(ActionInvoker.F)) {
             // Since the continuation will restart in this code that isn't
-            // intstrumented by javaflow,
+            // instrumented by javaflow,
             // we need to reset the state manually.
             StackRecorder.get().isCapturing = false;
             StackRecorder.get().isRestoring = false;
@@ -1217,7 +1217,7 @@ public class Controller implements ControllerSupport {
     }
 
     /**
-     * Verifies that all application-code is properly enhanched.
+     * Verifies that all application-code is properly enhanced.
      * "application code" is the code on the callstack after leaving
      * actionInvoke into the app, and before reentering Controller.await
      */
@@ -1245,7 +1245,7 @@ public class Controller implements ControllerSupport {
                         // we're back into the play framework code...
                         return; // done checking
                     } else {
-                        // is this class enhanched?
+                        // is this class enhanced?
                         boolean enhanced = ContinuationEnhancer.isEnhanced(className);
                         if (!enhanced) {
                             throw new ContinuationsException(
@@ -1289,4 +1289,26 @@ public class Controller implements ControllerSupport {
         _currentReverse.set(actionDefinition);
         return actionDefinition;
     }
+
+    /**
+     * Register a customer template name resolver. That letter allows to override
+     * the way templates are resolved.
+     */
+    public static void registerTemplateNameResolver(ITemplateNameResolver templateNameResolver) {
+        if (null != Controller.templateNameResolver)
+            Logger.warn("Existing template name resolver will be overridden!");
+        Controller.templateNameResolver = templateNameResolver;
+    }
+
+    /**
+     * This allow people that implements their own template engine to override
+     * the way template are resolved.
+     */
+    public static interface ITemplateNameResolver {
+        /**
+         * Return the template path given a template name.
+         */
+        public String resolveTemplateName(String templateName);
+    }
+
 }

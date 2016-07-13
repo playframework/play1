@@ -347,7 +347,7 @@ bc. #{crud.form}
     #{/crud.custom}
 #{/crud.form}
 
-This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of JavaScript:
+This is a little hack and we could do better here, but we have now a simpler tags selector using a little bit of JavaScript:
 
 !images/guide7-6!
 

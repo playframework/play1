@@ -97,7 +97,7 @@ public class TemplateLoader {
 
     /**
      * Load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
+     * @param key A unique identifier for the template, used for retrieving a cached template
      * @param source The template source
      * @return A Template
      */
@@ -124,7 +124,7 @@ public class TemplateLoader {
     /**
      * Clean the cache for that key
      * Then load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
+     * @param key A unique identifier for the template, used for retrieving a cached template
      * @param source The template source
      * @return A Template
      */

@@ -85,7 +85,7 @@ public class HTML {
         public HtmlCharacterEntityReferences() {
             Properties entityReferences = new Properties();
 
-            // Load refeence definition file.
+            // Load reference definition file.
             InputStream is = HtmlCharacterEntityReferences.class.getResourceAsStream(PROPERTIES_FILE);
             if (is == null) {
                 throw new IllegalStateException(
@@ -102,7 +102,7 @@ public class HTML {
                         "Failed to parse reference definition file [HtmlCharacterEntityReferences.properties]: " + ex.getMessage());
             }
 
-            // Parse reference definition properites.
+            // Parse reference definition propertes.
             Enumeration<?> keys = entityReferences.propertyNames();
             while (keys.hasMoreElements()) {
                 String key = (String) keys.nextElement();

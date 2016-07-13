@@ -3,13 +3,13 @@ package play.db.jpa;
 import javax.persistence.Query;
 
 /**
- * Use play.db.jpa.GenericModel insteads
+ * Use play.db.jpa.GenericModel instead
  */
 @Deprecated
 public class JPASupport extends GenericModel {
 
     /**
-     * Use play.db.jpa.GenericModel.JPAQuery insteads
+     * Use play.db.jpa.GenericModel.JPAQuery instead
      */
     @Deprecated
     public static class JPAQuery extends GenericModel.JPAQuery {

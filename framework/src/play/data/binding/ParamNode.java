@@ -15,7 +15,7 @@ public class ParamNode {
     private String originalKey;
 
     // splits a string on one-ore-more instances of .[]
-    // this works so that all the following strings (param naming syntaxes)
+    // this works so that all the following strings (param naming syntax)
     // is resolved into the same structural hierarchy:
     // a.b.c=12
     // a[b].c=12
