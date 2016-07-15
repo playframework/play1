@@ -83,8 +83,7 @@ public class Files {
     public static void unzip(File from, File to) {
         try {
             String outDir = to.getCanonicalPath();
-            ZipFile zipFile = new ZipFile(from);
-            try {
+            try (ZipFile zipFile = new ZipFile(from)) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
@@ -100,9 +99,6 @@ public class Files {
                     copyInputStreamToFile(zipFile.getInputStream(entry), f);
                 }
             }
-            finally {
-               zipFile.close();
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -110,18 +106,10 @@ public class Files {
 
     public static void zip(File directory, File zipFile) {
         try {
-            FileOutputStream os = new FileOutputStream(zipFile);
-            try {
-                ZipOutputStream zos = new ZipOutputStream(os);
-                try {
+            try (FileOutputStream os = new FileOutputStream(zipFile)) {
+                try (ZipOutputStream zos = new ZipOutputStream(os)) {
                     zipDirectory(directory, directory, zos);
                 }
-                finally {
-                    zos.close();
-                }
-            }
-            finally {
-                os.close();
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
@@ -181,15 +169,11 @@ public class Files {
             if (item.isDirectory()) {
                 zipDirectory(root, item, zos);
             } else {
-                FileInputStream fis = new FileInputStream(item);
-                try {
+                try (FileInputStream fis = new FileInputStream(item)) {
                     String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
                     ZipEntry anEntry = new ZipEntry(path);
                     zos.putNextEntry(anEntry);
                     IOUtils.copyLarge(fis, zos);
-                }
-                finally {
-                    fis.close();
                 }
             }
         }

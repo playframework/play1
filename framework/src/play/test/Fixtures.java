@@ -56,7 +56,7 @@ public class Fixtures {
 
     public static void executeSQL(String sqlScript) {
         for(CharSequence sql : new SQLSplitter(sqlScript)) {
-            final String s = sql.toString().trim();
+            String s = sql.toString().trim();
             if(s.length() > 0) {
                 DB.execute(s);
             }
@@ -225,15 +225,15 @@ public class Fixtures {
 
 
                         // Those are the properties that were parsed from the YML file
-                        final Map<?, ?> entityValues =  objects.get(key);
+                        Map<?, ?> entityValues =  objects.get(key);
 
                         // Prefix is object, why is that?
-                        final Map<String, String[]> fields = serialize(entityValues, "object");
+                        Map<String, String[]> fields = serialize(entityValues, "object");
 
 
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
-                        final Map<String, String[]> resolvedFields = resolveDependencies(cType, fields);
+                        Map<String, String[]> resolvedFields = resolveDependencies(cType, fields);
 
                         RootParamNode rootParamNode = ParamNode.convert(resolvedFields);
                         // This is kind of hacky. This basically says that if we have an embedded class we should ignore it.
@@ -421,7 +421,7 @@ public class Fixtures {
             return Collections.EMPTY_MAP;
         }
 
-        final Map<String, String[]> serialized = new HashMap<>();
+        Map<String, String[]> serialized = new HashMap<>();
 
         for (Object key : entityProperties.keySet()) {
 
@@ -464,8 +464,8 @@ public class Fixtures {
     static Map<String, String[]> resolveDependencies(Class<Model> type, Map<String, String[]> yml) {
 
         // Contains all the fields (object properties) we should look up
-        final Set<Field> fields = new HashSet<>();
-        final Map<String, String[]> resolvedYml = new HashMap<>();
+        Set<Field> fields = new HashSet<>();
+        Map<String, String[]> resolvedYml = new HashMap<>();
         resolvedYml.putAll(yml);
 
         // Look up the super classes
@@ -480,17 +480,17 @@ public class Fixtures {
         // @Embedded are not managed by the JPA plugin
         // This is not the nicest way of doing things.
          //modelFields =  Model.Manager.factoryFor(type).listProperties();
-        final List<Model.Property> modelFields =  new JPAModelLoader(type).listProperties();
+        List<Model.Property> modelFields =  new JPAModelLoader(type).listProperties();
 
         for (Model.Property field : modelFields) {
             // If we have a relation, get the matching object
             if (field.isRelation) {
                 // These are the Ids that were set in the yml file (i.e person(nicolas)-> nicolas is the id)
-                final String[] ids = resolvedYml.get("object." + field.name);
+                String[] ids = resolvedYml.get("object." + field.name);
                 if (ids != null) {
-                    final String[] resolvedIds = new String[ids.length];
+                    String[] resolvedIds = new String[ids.length];
                     for (int i = 0; i < ids.length; i++) {
-                        final String id = field.relationType.getName() + "-" + ids[i];
+                        String id = field.relationType.getName() + "-" + ids[i];
                         if (!idCache.containsKey(id)) {
                             throw new RuntimeException("No previous reference found for object of type " + field.name + " with key " + ids[i]);
                         }
@@ -503,7 +503,7 @@ public class Fixtures {
                         resolvedYml.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), resolvedIds);
                     } else {
                         // Might be an embedded object
-                        final String id = field.relationType.getName() + "-" + ids[0];
+                        String id = field.relationType.getName() + "-" + ids[0];
                         Object o = idCache.get(id);
                         // This can be a composite key
                         if (o.getClass().isArray()) {
@@ -579,14 +579,11 @@ public class Fixtures {
                 }
 
                     // Then we disable all foreign keys
-                Statement exec = connection.createStatement();
-                try {
-                    for (String tableName : names)
+                try (Statement exec = connection.createStatement()) {
+                    for (String tableName : names) {
                         exec.addBatch("ALTER TABLE " + tableName + " NOCHECK CONSTRAINT ALL");
+                    }
                     exec.executeBatch();
-                }
-                finally {
-                    exec.close();
                 }
 
                 return;

@@ -298,8 +298,8 @@ public class GroovyTemplate extends BaseTemplate {
             String layoutR = layout.get().internalRender(layoutArgs);
 
             // Must replace '____%LAYOUT%____' inside the string layoutR with the content from writer..
-            final String whatToFind = "____%LAYOUT%____";
-            final int pos = layoutR.indexOf(whatToFind);
+            String whatToFind = "____%LAYOUT%____";
+            int pos = layoutR.indexOf(whatToFind);
             if (pos >=0) {
                 // prepending and appending directly to writer/buffer to prevent us
                 // from having to duplicate the string.

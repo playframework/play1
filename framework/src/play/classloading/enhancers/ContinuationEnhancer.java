@@ -60,12 +60,8 @@ public class ContinuationEnhancer extends Enhancer {
         // we add the interface EnhancedForContinuations to the class
         CtClass enhancedForContinuationsInterface;
         try {
-            InputStream in = getClass().getClassLoader().getResourceAsStream("play/classloading/enhancers/EnhancedForContinuations.class");
-            try {
+            try (InputStream in = getClass().getClassLoader().getResourceAsStream("play/classloading/enhancers/EnhancedForContinuations.class")) {
                 enhancedForContinuationsInterface = classPool.makeClass(in);
-            }
-            finally {
-                in.close();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

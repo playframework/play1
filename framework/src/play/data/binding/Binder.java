@@ -91,14 +91,14 @@ public abstract class Binder {
     }
 
     public static Object bind(RootParamNode parentParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations, MethodAndParamInfo methodAndParamInfo) {
-        final ParamNode paramNode = parentParamNode.getChild(name, true);
+        ParamNode paramNode = parentParamNode.getChild(name, true);
 
         Object result = null;
         if (paramNode == null) {
             result = MISSING;
         }
 
-        final BindingAnnotations bindingAnnotations = new BindingAnnotations(annotations);
+        BindingAnnotations bindingAnnotations = new BindingAnnotations(annotations);
 
         if (bindingAnnotations.checkNoBinding()) {
             return NO_BINDING;
@@ -240,7 +240,7 @@ public abstract class Binder {
                 for (Annotation annotation : bindingAnnotations.annotations) {
                     if (annotation.annotationType().equals(As.class)) {
                         As as = ((As) annotation);
-                        final String separator = as.value()[0];
+                        String separator = as.value()[0];
                         values = values[0].split(separator);
                     }
                 }

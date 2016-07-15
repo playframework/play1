@@ -21,7 +21,7 @@ public class SigEnhancer extends Enhancer {
             return;
         }
 
-        final CtClass ctClass = makeClass(applicationClass);
+        CtClass ctClass = makeClass(applicationClass);
         if (isScalaObject(ctClass)) {
             return;
         }

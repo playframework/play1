@@ -91,14 +91,10 @@ public class BytecodeCache {
                 return;
             }
             File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
-            FileOutputStream fos = new FileOutputStream(f);
-            try {
+            try (FileOutputStream fos = new FileOutputStream(f)) {
                 fos.write(hash(source).getBytes("utf-8"));
                 fos.write(0);
                 fos.write(byteCode);
-            }
-            finally {
-                fos.close();
             }
 
             // emit bytecode to standard class layout as well

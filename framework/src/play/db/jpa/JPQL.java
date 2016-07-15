@@ -41,11 +41,11 @@ public class JPQL {
                 createCountQuery(dbName, entity, entity, query, params)), params).getSingleResult().toString());
     }
 
-    public List findAll(String entity) {
+    public <T extends JPABase> List<T> findAll(String entity) {
         return findAll(JPA.DEFAULT, entity);
     }
 
-     public List findAll(String dbName, String entity) {
+     public <T extends JPABase> List<T> findAll(String dbName, String entity) {
         return em(dbName).createQuery("select e from " + entity + " e").getResultList();
     }
 
@@ -57,11 +57,11 @@ public class JPQL {
         return (JPABase) em(dbName).find(Play.classloader.loadClass(entity), id);
     }
 
-    public List findBy(String entity, String query, Object[] params) {
+    public <T extends JPABase> List<T> findBy(String entity, String query, Object[] params) {
        return findBy(JPA.DEFAULT, entity, query, params);
     }
 
-    public List findBy(String dbName, String entity, String query, Object[] params) {
+    public <T extends JPABase> List<T> findBy(String dbName, String entity, String query, Object[] params) {
         Query q = em(dbName).createQuery(
                 createFindByQuery(dbName, entity, entity, query, params));
         return bindParameters(q, params).getResultList();

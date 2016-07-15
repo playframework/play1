@@ -465,12 +465,12 @@ public class PluginCollection {
         // Copy list of plugins here in case the list changes in the midst of
         // doing composition...
         // (Is it really necessary to do this?)
-        final List<PlayPlugin> pluginsWithFilters = new ArrayList<>(this.getEnabledPluginsWithFilters());
+        List<PlayPlugin> pluginsWithFilters = new ArrayList<>(this.getEnabledPluginsWithFilters());
 
         if (pluginsWithFilters.isEmpty()) {
             return F.Option.None();
         } else {
-            final Iterator<PlayPlugin> itr = pluginsWithFilters.iterator();
+            Iterator<PlayPlugin> itr = pluginsWithFilters.iterator();
             PlayPlugin.Filter<T> ret = itr.next().getFilter();
             while (itr.hasNext()) {
                 ret = ret.<T> decorate(itr.next().getFilter());

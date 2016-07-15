@@ -65,7 +65,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public Promise<V> now() {
-        final Promise<V> smartFuture = new Promise<>();
+        Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.submit(getJobCallingCallable(smartFuture));
         return smartFuture;
     }
@@ -87,7 +87,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
       return now();
     }
 
-    final Promise<V> smartFuture = new Promise<>();
+    Promise<V> smartFuture = new Promise<>();
     Callable<V> callable = getJobCallingCallable(smartFuture);
     JobsPlugin.addAfterRequestAction(callable);
     return smartFuture;
@@ -106,7 +106,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public Promise<V> in(int seconds) {
-        final Promise<V> smartFuture = new Promise<>();
+        Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.schedule(getJobCallingCallable(smartFuture), seconds, TimeUnit.SECONDS);
         return smartFuture;
     }
@@ -177,8 +177,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
 
 
-  private V withinFilter(final play.libs.F.Function0<V> fct) throws Throwable {
-    final F.Option<PlayPlugin.Filter<V>> filters = Play.pluginCollection.composeFilters();
+  private V withinFilter(play.libs.F.Function0<V> fct) throws Throwable {
+    F.Option<PlayPlugin.Filter<V>> filters = Play.pluginCollection.composeFilters();
     if (!filters.isDefined()) {
       return null;
     } else {

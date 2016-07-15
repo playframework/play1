@@ -471,7 +471,7 @@ class JavaWithCaching {
      * @param annotationType The annotation class
      * @return A list of method object
      */
-    public List<Method> findAllAnnotatedMethods(Class<?> clazz, final Class<? extends Annotation> annotationType) {
+    public List<Method> findAllAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
 
         if( clazz == null ) {
             return new ArrayList<>(0);

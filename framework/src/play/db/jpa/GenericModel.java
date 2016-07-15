@@ -92,7 +92,7 @@ public class GenericModel extends JPABase {
                 // First try the field 
                 Annotation[] fieldAnnotations = field.getAnnotations();
                 // and check with the profiles annotations
-                final BindingAnnotations bindingAnnotations = new BindingAnnotations(fieldAnnotations, new BindingAnnotations(annotations).getProfiles());
+                BindingAnnotations bindingAnnotations = new BindingAnnotations(fieldAnnotations, new BindingAnnotations(annotations).getProfiles());
                 if (bindingAnnotations.checkNoBinding()) {
                     continue;
                 }

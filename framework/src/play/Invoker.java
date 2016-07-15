@@ -40,7 +40,7 @@ public class Invoker {
      * @param invocation The code to run
      * @return The future object, to know when the task is completed
      */
-    public static Future<?> invoke(final Invocation invocation) {
+    public static Future<?> invoke(Invocation invocation) {
         Monitor monitor = MonitorFactory.getMonitor("Invoker queue size", "elmts.");
         monitor.add(executor.getQueue().size());
         invocation.waitInQueue = MonitorFactory.start("Waiting for execution");
@@ -53,7 +53,7 @@ public class Invoker {
      * @param millis The time to wait before, in milliseconds
      * @return The future object, to know when the task is completed
      */
-    public static Future<?> invoke(final Invocation invocation, long millis) {
+    public static Future<?> invoke(Invocation invocation, long millis) {
         Monitor monitor = MonitorFactory.getMonitor("Invocation queue", "elmts.");
         monitor.add(executor.getQueue().size());
         return executor.schedule(invocation, millis, TimeUnit.MILLISECONDS);
@@ -265,8 +265,8 @@ public class Invoker {
             InvocationContext.current.remove();
         }
 
-        private void withinFilter(final play.libs.F.Function0<Void> fct) throws Throwable {
-          final F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
+        private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
+          F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
           if (filters.isDefined()) {
             filters.get().withinFilter(fct);
           }

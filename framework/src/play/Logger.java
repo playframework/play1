@@ -647,14 +647,14 @@ public class Logger {
      * @return the className of the class actually logging the message
      */
     static String getCallerClassName() {
-        final int level = 5;
+        int level = 5;
         return getCallerClassName(level);
     }
 
     /**
      * @return the className of the class actually logging the message
      */
-    static String getCallerClassName(final int level) {
+    static String getCallerClassName(int level) {
         CallInfo ci = getCallerInformation(level);
         return ci.className;
     }

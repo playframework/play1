@@ -114,7 +114,7 @@ public class EvolutionQuery{
         // Execute script
         if (runScript) {
            for (CharSequence sql : new SQLSplitter((evolution.applyUp ? evolution.sql_up : evolution.sql_down))) {
-                final String s = sql.toString().trim();
+                String s = sql.toString().trim();
                 if (StringUtils.isEmpty(s)) {
                     continue;
                 }              

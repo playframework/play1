@@ -69,8 +69,8 @@ public class BindingAnnotations {
 
     public boolean checkNoBinding() {
 
-        final String[] _profiles = getProfiles();
-        final String[] _noBindingProfiles = getNoBindingProfiles();
+        String[] _profiles = getProfiles();
+        String[] _noBindingProfiles = getNoBindingProfiles();
 
         if (_noBindingProfiles.length>0) {
             for (String l : _noBindingProfiles) {

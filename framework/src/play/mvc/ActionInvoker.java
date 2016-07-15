@@ -109,7 +109,7 @@ public class ActionInvoker {
         try {
 
             resolve(request, response);
-            final Method actionMethod = request.invokedMethod;
+            Method actionMethod = request.invokedMethod;
 
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
@@ -558,7 +558,7 @@ public class ActionInvoker {
         StackRecorder pStackRecorder = new StackRecorder(continuation.stackRecorder);
         Object result = null;
 
-        final StackRecorder old = pStackRecorder.registerThread();
+        StackRecorder old = pStackRecorder.registerThread();
         try {
             pStackRecorder.isRestoring = !pStackRecorder.isEmpty();
 

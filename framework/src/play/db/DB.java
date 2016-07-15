@@ -176,7 +176,7 @@ public class DB {
                 return ((SessionImpl) ((org.hibernate.ejb.EntityManagerImpl) JPA.em(name)).getSession()).connection();
             }
 
-            final Connection localConnection = getLocalConnection(name);
+            Connection localConnection = getLocalConnection(name);
             if (localConnection != null) {
                 return localConnection;
             }

@@ -142,8 +142,8 @@ public class ApplicationCompiler {
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
             @Override
-            public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
-                final StringBuilder result = new StringBuilder(compoundTypeName.length * 7);
+            public NameEnvironmentAnswer findType(char[][] compoundTypeName) {
+                StringBuilder result = new StringBuilder(compoundTypeName.length * 7);
                 for (int i = 0; i < compoundTypeName.length; i++) {
                     if (i != 0) {
                         result.append('.');
@@ -154,8 +154,8 @@ public class ApplicationCompiler {
             }
 
             @Override
-            public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
-                final StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
+            public NameEnvironmentAnswer findType(char[] typeName, char[][] packageName) {
+                StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
                 for (int i = 0; i < packageName.length; i++) {
                     result.append(packageName[i]);
                     result.append('.');
@@ -164,7 +164,7 @@ public class ApplicationCompiler {
                 return findType(result.toString());
             }
 
-            private NameEnvironmentAnswer findType(final String name) {
+            private NameEnvironmentAnswer findType(String name) {
                 try {
 
                     if (name.startsWith("play.") || name.startsWith("java.") || name.startsWith("javax.")) {
@@ -267,9 +267,9 @@ public class ApplicationCompiler {
                 // Something has been compiled
                 ClassFile[] clazzFiles = result.getClassFiles();
                 for (int i = 0; i < clazzFiles.length; i++) {
-                    final ClassFile clazzFile = clazzFiles[i];
-                    final char[][] compoundName = clazzFile.getCompoundName();
-                    final StringBuilder clazzName = new StringBuilder();
+                    ClassFile clazzFile = clazzFiles[i];
+                    char[][] compoundName = clazzFile.getCompoundName();
+                    StringBuilder clazzName = new StringBuilder();
                     for (int j = 0; j < compoundName.length; j++) {
                         if (j != 0) {
                             clazzName.append('.');

@@ -42,7 +42,7 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
             key = superKey + "." + key;
         }
         if(value instanceof Collection) {
-            Collection valueCollection = (Collection)value;
+            Collection<Object> valueCollection = (Collection<Object>) value;
             boolean everythingIsValid = true;
             int index = 0;
             for(Object item : valueCollection) {
@@ -52,11 +52,7 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
                 }
                 index++;
             }
-            if(!everythingIsValid) {
-                return false;
-            } else {
-                return true;
-            }
+            return everythingIsValid;
         } else {
             return validateObject(key, value);
         }
@@ -71,9 +67,9 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
         } else {
             for (ConstraintViolation violation : violations) {
                 if (violation.getContext() instanceof FieldContext) {
-                    final FieldContext ctx = (FieldContext) violation.getContext();
-                    final String fkey = (key == null ? "" : key + ".") + ctx.getField().getName();
-                    final Error error = new Error(
+                    FieldContext ctx = (FieldContext) violation.getContext();
+                    String fkey = (key == null ? "" : key + ".") + ctx.getField().getName();
+                    Error error = new Error(
                             fkey,
                             violation.getMessage(),
                             violation.getMessageVariables() == null ? new String[0]

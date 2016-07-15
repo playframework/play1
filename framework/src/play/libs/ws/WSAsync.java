@@ -85,7 +85,7 @@ public class WSAsync implements WSImpl {
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             if (nonProxyHosts != null) {
-                final String[] strings = nonProxyHosts.split("\\|");
+                String[] strings = nonProxyHosts.split("\\|");
                 for (String uril : strings) {
                     proxy.addNonProxyHost(uril);
                 }

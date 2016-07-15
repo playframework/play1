@@ -107,7 +107,7 @@ public class JobsPlugin extends PlayPlugin {
                 jobs.add(clazz);
             }
         }
-        for (final Class<?> clazz : jobs) {
+        for (Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
                 // check if we're going to run the job sync or async
@@ -229,7 +229,7 @@ public class JobsPlugin extends PlayPlugin {
 
         List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
 
-        for (final Class clazz : jobs) {
+        for (Class clazz : jobs) {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
                 try {

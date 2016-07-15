@@ -26,7 +26,7 @@ public class SslPlayHandler extends PlayHandler {
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         ctx.setAttachment(e.getValue());
         // Get the SslHandler in the current pipeline.
-        final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
+        SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
         sslHandler.setEnableRenegotiation(false);
         // Get notified when SSL handshake is done.
         ChannelFuture handshakeFuture = sslHandler.handshake();

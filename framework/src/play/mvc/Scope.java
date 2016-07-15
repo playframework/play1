@@ -157,8 +157,8 @@ public class Scope {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-				final int duration = Time.parseDuration(COOKIE_EXPIRE) ;
-				final long expiration = (duration * 1000l);
+				int duration = Time.parseDuration(COOKIE_EXPIRE) ;
+				long expiration = (duration * 1000l);
 
                 if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;

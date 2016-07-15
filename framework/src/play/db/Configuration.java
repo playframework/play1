@@ -23,7 +23,7 @@ public class Configuration {
      public static Set<String> getDbNames() {
          TreeSet<String> dbNames = new TreeSet<>();
          // search for case db= or db.url= as at least one of these property is required
-         final String DB_CONFIG_PATTERN = "^db\\.([^\\.]*)$|^db\\.([^\\.]*)\\.url$";
+         String DB_CONFIG_PATTERN = "^db\\.([^\\.]*)$|^db\\.([^\\.]*)\\.url$";
          Pattern pattern = new jregex.Pattern(DB_CONFIG_PATTERN);
          
          // List of properties with 2 words

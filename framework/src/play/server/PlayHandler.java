@@ -137,12 +137,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent messageEvent) throws Exception {
+    public void messageReceived(final ChannelHandlerContext ctx, MessageEvent messageEvent) throws Exception {
         if (Logger.isTraceEnabled()) {
             Logger.trace("messageReceived: begin");
         }
 
-        final Object msg = messageEvent.getMessage();
+        Object msg = messageEvent.getMessage();
 
         // Http request
         if (msg instanceof HttpRequest) {
@@ -426,7 +426,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         byte[] content = null;
 
-        final boolean keepAlive = isKeepAlive(nettyRequest);
+        boolean keepAlive = isKeepAlive(nettyRequest);
         if (nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
             content = new byte[0];
         } else {
@@ -483,7 +483,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         addToResponse(response, nettyResponse);
 
-        final Object obj = response.direct;
+        Object obj = response.direct;
         File file = null;
         ChunkedInput stream = null;
         InputStream is = null;
@@ -496,7 +496,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             stream = (ChunkedInput) obj;
         }
 
-        final boolean keepAlive = isKeepAlive(nettyRequest);
+        boolean keepAlive = isKeepAlive(nettyRequest);
         if (file != null && file.isFile()) {
             try {
                 nettyResponse = addEtag(nettyRequest, nettyResponse, file);
@@ -587,7 +587,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
 
-        final int i = uri.indexOf("?");
+        int i = uri.indexOf("?");
         String querystring = "";
         String path = uri;
         if (i != -1) {
@@ -654,7 +654,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         // Non IPv6 but has port
         else if (host.contains(":")) {
-            final String[] hosts = host.split(":");
+            String[] hosts = host.split(":");
             port = Integer.parseInt(hosts[1]);
             domain = hosts[0];
         } else {
@@ -664,7 +664,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         boolean secure = false;
 
-        final Request request = Request.createRequest(remoteAddress, method, path, querystring, contentType, body, uri, host, isLoopback,
+        Request request = Request.createRequest(remoteAddress, method, path, querystring, contentType, body, uri, host, isLoopback,
                 port, domain, secure, getHeaders(nettyRequest), getCookies(nettyRequest));
 
         if (Logger.isTraceEnabled()) {
@@ -846,7 +846,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Logger.error(e, "Internal Server Error (500) for request %s", request.method + " " + request.url);
                 Logger.error(ex, "Error during the 500 response generation");
                 try {
-                    final String errorHtml = "Internal Error (check logs)";
+                    String errorHtml = "Internal Error (check logs)";
                     byte[] bytes = errorHtml.getBytes(encoding);
                     ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
                     setContentLength(nettyResponse, bytes.length);
@@ -859,7 +859,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         } catch (Throwable exxx) {
             try {
-                final String errorHtml = "Internal Error (check logs)";
+                String errorHtml = "Internal Error (check logs)";
                 byte[] bytes = errorHtml.getBytes(encoding);
                 ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
                 setContentLength(nettyResponse, bytes.length);
@@ -904,8 +904,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 if (raw) {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {
-                    final File localFile = file.getRealFile();
-                    final boolean keepAlive = isKeepAlive(nettyRequest);
+                    File localFile = file.getRealFile();
+                    boolean keepAlive = isKeepAlive(nettyRequest);
                     nettyResponse = addEtag(nettyRequest, nettyResponse, localFile);
 
                     if (nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
@@ -927,7 +927,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.error(ez, "serveStatic for request %s", request.method + " " + request.url);
             try {
                 HttpResponse errorResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                final String errorHtml = "Internal Error (check logs)";
+                String errorHtml = "Internal Error (check logs)";
                 byte[] bytes = errorHtml.getBytes(response.encoding);
                 ChannelBuffer buf = ChannelBuffers.copiedBuffer(bytes);
                 setContentLength(nettyResponse, bytes.length);
@@ -946,7 +946,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static boolean isModified(String etag, long last, HttpRequest nettyRequest) {
 
         if (nettyRequest.headers().contains(IF_NONE_MATCH)) {
-            final String browserEtag = nettyRequest.headers().get(IF_NONE_MATCH);
+            String browserEtag = nettyRequest.headers().get(IF_NONE_MATCH);
             if (browserEtag.equals(etag)) {
                 return false;
             }
@@ -954,7 +954,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         if (nettyRequest.headers().contains(IF_MODIFIED_SINCE)) {
-            final String ifModifiedSince = nettyRequest.headers().get(IF_MODIFIED_SINCE);
+            String ifModifiedSince = nettyRequest.headers().get(IF_MODIFIED_SINCE);
 
             if (!StringUtils.isEmpty(ifModifiedSince)) {
                 try {
@@ -987,7 +987,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         boolean useEtag = Play.configuration.getProperty("http.useETag", "true").equals("true");
         long last = file.lastModified();
-        final String etag = "\"" + last + "-" + file.hashCode() + "\"";
+        String etag = "\"" + last + "-" + file.hashCode() + "\"";
         if (!isModified(etag, last, nettyRequest)) {
             if (nettyRequest.getMethod().equals(HttpMethod.GET)) {
                 httpResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
@@ -1059,7 +1059,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             byteStream.write(Integer.toHexString(bytes.length).getBytes());
-            final byte[] crlf = new byte[] { (byte) '\r', (byte) '\n' };
+            byte[] crlf = new byte[] { (byte) '\r', (byte) '\n' };
             byteStream.write(crlf);
             byteStream.write(bytes);
             byteStream.write(crlf);
@@ -1104,7 +1104,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     // ~~~~~~~~~~~ Websocket
     final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<>();
 
-    private void websocketFrameReceived(final ChannelHandlerContext ctx, WebSocketFrame webSocketFrame) {
+    private void websocketFrameReceived(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame) {
         Http.Inbound inbound = channels.get(ctx);
         // Check for closing frame
         if (webSocketFrame instanceof CloseWebSocketFrame) {
