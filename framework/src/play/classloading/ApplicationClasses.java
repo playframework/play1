@@ -247,15 +247,11 @@ public class ApplicationClasses {
                     // emit bytecode to standard class layout as well
                     File f = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
                     f.getParentFile().mkdirs();
-                    FileOutputStream fos = new FileOutputStream(f);
-                    try {
+                    try (FileOutputStream fos = new FileOutputStream(f)) {
                         fos.write(this.enhancedByteCode);
                     }
-                    finally {
-                        fos.close();
-                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.error(e, "Failed to write precompiled class %s to disk", name);
                 }
             }
             return this.enhancedByteCode;

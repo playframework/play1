@@ -94,9 +94,9 @@ public class SQLSplitterTest {
 		assertEquals(3, SQLSplitter.splitSQL("a;\nb;\nc;").size());
 	}
 
-	String readFile(final String filename) throws Exception {
-		final File src = new File(getClass().getResource(filename).toURI());
-		final byte [] srcbytes = new byte[(int)src.length()];
+	String readFile(String filename) throws Exception {
+		File src = new File(getClass().getResource(filename).toURI());
+		byte [] srcbytes = new byte[(int)src.length()];
 
 		new FileInputStream(src).read(srcbytes);
 		return new String(srcbytes, "UTF-8");

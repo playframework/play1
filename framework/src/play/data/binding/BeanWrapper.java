@@ -99,7 +99,7 @@ public abstract class BeanWrapper {
     abstract boolean isSetter(Method method);
 
     protected Object newBeanInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Constructor constructor = beanClass.getDeclaredConstructor();
+        Constructor<?> constructor = beanClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         return constructor.newInstance();
     }
@@ -262,7 +262,6 @@ public abstract class BeanWrapper {
         public String toString() {
             return type + "." + name;
         }
-
     }
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Annotation[] annotations) throws Exception {

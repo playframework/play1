@@ -13,9 +13,9 @@ public class EhCacheImplTest {
         }
         cache.clear();
 
-        final String key = "EhCacheImplTest_verifyThatTTLSurvivesIncrDecr";
+        String key = "EhCacheImplTest_verifyThatTTLSurvivesIncrDecr";
 
-        final int expiration = 1;
+        int expiration = 1;
 
         cache.add(key, 1, expiration);
         Thread.sleep(100);

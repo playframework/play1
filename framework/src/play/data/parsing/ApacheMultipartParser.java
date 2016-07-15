@@ -199,7 +199,7 @@ public class ApacheMultipartParser extends DataParser {
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
             // Parameter parser can handle null input
-            Map params = parser.parse(getContentType(), ';');
+            Map<String, String> params = parser.parse(getContentType(), ';');
             return (String) params.get("charset");
         }
 
@@ -276,7 +276,7 @@ public class ApacheMultipartParser extends DataParser {
          *                                      encoding is not available.
          */
         @Override
-        public String getString(final String charset)
+        public String getString(String charset)
                 throws UnsupportedEncodingException {
             return new String(get(), charset);
         }
@@ -632,7 +632,7 @@ public class ApacheMultipartParser extends DataParser {
         ParameterParser parser = new ParameterParser();
         parser.setLowerCaseNames(true);
         // Parameter parser can handle null input
-        Map params = parser.parse(contentType, ';');
+        Map<String, String> params = parser.parse(contentType, ';');
         String boundaryStr = (String) params.get("boundary");
 
         if (boundaryStr == null) {
@@ -654,7 +654,7 @@ public class ApacheMultipartParser extends DataParser {
      * @param headers A <code>Map</code> containing the HTTP request headers.
      * @return The file name for the current <code>encapsulation</code>.
      */
-    private String getFileName(Map /* String, String */ headers) {
+    private String getFileName(Map<String, String> headers) {
         String fileName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
         if (cd != null) {
@@ -663,9 +663,9 @@ public class ApacheMultipartParser extends DataParser {
                 ParameterParser parser = new ParameterParser();
                 parser.setLowerCaseNames(true);
                 // Parameter parser can handle null input
-                Map params = parser.parse(cd, ';');
+                Map<String, String> params = parser.parse(cd, ';');
                 if (params.containsKey("filename")) {
-                    fileName = (String) params.get("filename");
+                    fileName = params.get("filename");
                     if (fileName != null) {
                         fileName = fileName.trim();
                         // IE7 returning fullpath name (#300920)
@@ -692,7 +692,7 @@ public class ApacheMultipartParser extends DataParser {
      * @param headers A <code>Map</code> containing the HTTP request headers.
      * @return The field name for the current <code>encapsulation</code>.
      */
-    private String getFieldName(Map /* String, String */ headers) {
+    private String getFieldName(Map<String, String> headers) {
         String fieldName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
         if (cd != null && (cd.toLowerCase().startsWith(FORM_DATA) ||
@@ -701,8 +701,8 @@ public class ApacheMultipartParser extends DataParser {
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
             // Parameter parser can handle null input
-            Map params = parser.parse(cd, ';');
-            fieldName = (String) params.get("name");
+            Map<String, String> params = parser.parse(cd, ';');
+            fieldName = params.get("name");
             if (fieldName != null) {
                 fieldName = fieldName.trim();
             }
@@ -722,8 +722,8 @@ public class ApacheMultipartParser extends DataParser {
      *                   <code>encapsulation</code>.
      * @return A <code>Map</code> containing the parsed HTTP request headers.
      */
-    private Map /* String, String */ parseHeaders(String headerPart) {
-        final int len = headerPart.length();
+    private Map<String, String> parseHeaders(String headerPart) {
+        int len = headerPart.length();
         Map<String, String> headers = new HashMap<>();
         int start = 0;
         for (; ;) {
@@ -783,7 +783,7 @@ public class ApacheMultipartParser extends DataParser {
      * @param header  Map where to store the current header.
      */
     private void parseHeaderLine(Map<String, String> headers, String header) {
-        final int colonOffset = header.indexOf(':');
+        int colonOffset = header.indexOf(':');
         if (colonOffset == -1) {
             // This header line is malformed, skip it.
             return;
@@ -808,8 +808,8 @@ public class ApacheMultipartParser extends DataParser {
      * @return The value of specified header, or a comma-separated list if there
      *         were multiple headers of that name.
      */
-    private final String getHeader(Map /* String, String */ headers, String name) {
-        return (String) headers.get(name.toLowerCase());
+    private String getHeader(Map<String, String> headers, String name) {
+        return headers.get(name.toLowerCase());
     }
 
     /**
@@ -1055,7 +1055,7 @@ public class ApacheMultipartParser extends DataParser {
                     currentFieldName = null;
                     continue;
                 }
-                Map headers = parseHeaders(multi.readHeaders());
+                Map<String, String> headers = parseHeaders(multi.readHeaders());
                 if (currentFieldName == null) {
                     // We're parsing the outer multipart
                     String fieldName = getFieldName(headers);

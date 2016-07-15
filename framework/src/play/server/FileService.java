@@ -29,7 +29,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 public class FileService  {
 
     public static void serve(File localFile, HttpRequest nettyRequest, HttpResponse nettyResponse, ChannelHandlerContext ctx, Request request, Response response, Channel channel) throws FileNotFoundException {
-        final RandomAccessFile raf = new RandomAccessFile(localFile, "r");
+        RandomAccessFile raf = new RandomAccessFile(localFile, "r");
         try {
             long fileLength = raf.length();
             

@@ -197,7 +197,7 @@ public abstract class FunctionalTest extends BaseTest {
         List<Part> parts = new ArrayList<>();
 
         for (String key : parameters.keySet()) {
-            final StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
+            StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
             parts.add(stringPart);
         }
 
@@ -329,7 +329,7 @@ public abstract class FunctionalTest extends BaseTest {
             }
 
             @Override
-            public void onException(final Throwable e) {
+            public void onException(Throwable e) {
                 try {
                     super.onException(e);
                 } finally {
@@ -374,7 +374,7 @@ public abstract class FunctionalTest extends BaseTest {
         }
     }
 
-    public static Response makeRequest(final Request request) {
+    public static Response makeRequest(Request request) {
         Response response = newResponse();
         makeRequest(request, response);
 

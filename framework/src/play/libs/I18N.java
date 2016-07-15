@@ -161,11 +161,11 @@ public class I18N {
     }
 
     public static String getDateFormat() {
-        final String localizedDateFormat = Play.configuration.getProperty("date.format." + Lang.get());
+        String localizedDateFormat = Play.configuration.getProperty("date.format." + Lang.get());
         if (!StringUtils.isEmpty(localizedDateFormat)) {
             return localizedDateFormat;
         }
-        final String globalDateFormat = Play.configuration.getProperty("date.format");
+        String globalDateFormat = Play.configuration.getProperty("date.format");
         if (!StringUtils.isEmpty(globalDateFormat)) {
             return globalDateFormat;
         }

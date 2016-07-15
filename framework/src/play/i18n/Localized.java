@@ -30,7 +30,7 @@ public class Localized<T> {
 
     @SuppressWarnings("unchecked")
     public Set<T> values() {
-        return new HashSet(values.values());
+        return new HashSet<>(values.values());
     }
 
     public Set<String> lang() {

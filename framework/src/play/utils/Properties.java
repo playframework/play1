@@ -29,8 +29,7 @@ public class Properties extends HashMap<String, String> {
         if (is == null) {
             throw new NullPointerException("Can't read from null stream");
         }
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding));
-        try {
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding))) {
             while (true) {
                 String tmp = rd.readLine();
                 if (tmp == null) {
@@ -53,9 +52,6 @@ public class Properties extends HashMap<String, String> {
                     put(kv[0], "");
                 }
             }
-        }
-        finally {
-            rd.close();
         }
     }
 

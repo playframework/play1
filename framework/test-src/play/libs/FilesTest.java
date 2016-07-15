@@ -13,7 +13,7 @@ public class FilesTest {
     public void testSanitizeFileName() throws Exception {
         //File names to test are on odd indexes and expected results are on even indexes, ex:
         //test_file_name, expected_file_name
-        final String[] FILE_NAMES = {
+        String[] FILE_NAMES = {
                 null, null,
                 "", "",
                 "a", "a",

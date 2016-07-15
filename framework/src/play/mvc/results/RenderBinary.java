@@ -140,7 +140,7 @@ public class RenderBinary extends Result {
                         String contentDisposition = "%s; filename=\"%s\"";
                         response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, name));
                     } else {
-                        final String encoding = getEncoding();
+                        String encoding = getEncoding();
                         String contentDisposition = "%1$s; filename*="+encoding+"''%2$s; filename=\"%2$s\"";
                         response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, encoder.encode(name, encoding)));
                     }

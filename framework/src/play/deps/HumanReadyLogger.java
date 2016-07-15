@@ -143,17 +143,17 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
     }
 
     @Override
-    public List getProblems() {
+    public List<String> getProblems() {
         return null;
     }
 
     @Override
-    public List getWarns() {
+    public List<String> getWarns() {
         return null;
     }
 
     @Override
-    public List getErrors() {
+    public List<String> getErrors() {
         return null;
     }
 

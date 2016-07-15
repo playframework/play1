@@ -60,7 +60,7 @@ public abstract class SqlQuery {
         }
 
         public Concat append(Object obj) {
-            final String text;
+            String text;
             if (obj != null) {
                 String objStr = obj.toString();
                 if (objStr.length() > 0) text = objStr;

@@ -32,7 +32,7 @@ public class Time {
             return 30 * DAY;
         }
 
-        final Matcher matcher = p.matcher(duration);
+        Matcher matcher = p.matcher(duration);
         int seconds = 0;
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Invalid duration pattern : " + duration);

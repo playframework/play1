@@ -29,7 +29,7 @@ public class UrlEncodedParser extends DataParser {
     
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
-            final String encoding = Http.Request.current().encoding;
+            String encoding = Http.Request.current().encoding;
             return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes( encoding )));
         } catch (UnsupportedEncodingException ex) {
             throw new UnexpectedException(ex);
@@ -45,7 +45,7 @@ public class UrlEncodedParser extends DataParser {
     @Override
     public Map<String, String[]> parse(InputStream is) {
         // Encoding is either retrieved from contentType or it is the default encoding
-        final String encoding = Http.Request.current().encoding;
+        String encoding = Http.Request.current().encoding;
         try {
             Map<String, String[]> params = new LinkedHashMap<>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();

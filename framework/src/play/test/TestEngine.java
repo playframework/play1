@@ -175,12 +175,12 @@ public class TestEngine {
     }
 
     @SuppressWarnings("unchecked")
-    public static TestResults run(final String name) {
-        final TestResults testResults = new TestResults();
+    public static TestResults run(String name) {
+        TestResults testResults = new TestResults();
 
         try {
             // Load test class
-            final Class testClass = Play.classloader.loadClass(name);
+            Class testClass = Play.classloader.loadClass(name);
                  
             initTest(testClass);
             

@@ -72,7 +72,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        final String playId = System.getProperty("play.id", e.getServletContext().getInitParameter("play.id"));
+        String playId = System.getProperty("play.id", e.getServletContext().getInitParameter("play.id"));
         if (StringUtils.isEmpty(playId)) {
             throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
         }
@@ -290,7 +290,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         boolean isLoopback = host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
 
-        final Request request = Request.createRequest(
+        Request request = Request.createRequest(
                 remoteAddress,
                 method,
                 path,
@@ -316,14 +316,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     protected static Map<String, Http.Header> getHeaders(HttpServletRequest httpServletRequest) {
         Map<String, Http.Header> headers = new HashMap<>(16);
 
-        Enumeration headersNames = httpServletRequest.getHeaderNames();
+        Enumeration<String> headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
-            hd.name = (String) headersNames.nextElement();
+            hd.name = headersNames.nextElement();
             hd.values = new ArrayList<>();
-            Enumeration enumValues = httpServletRequest.getHeaders(hd.name);
+            Enumeration<String> enumValues = httpServletRequest.getHeaders(hd.name);
             while (enumValues.hasMoreElements()) {
-                String value = (String) enumValues.nextElement();
+                String value = enumValues.nextElement();
                 hd.values.add(value);
             }
             headers.put(hd.name.toLowerCase(), hd);

@@ -355,7 +355,7 @@ public class Play {
      }
 
     private static void extractHttpPort() {
-        final String javaCommand = System.getProperty("sun.java.command", "");
+        String javaCommand = System.getProperty("sun.java.command", "");
         jregex.Matcher m = new jregex.Pattern(".* --http.port=({port}\\d+)").matcher(javaCommand);
         if (m.matches()) {
             configuration.setProperty("http.port", m.group("port"));
@@ -705,8 +705,8 @@ public class Play {
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                     } else {
-                        final String modulePathName = modulePath.getName();
-                        final String moduleName = modulePathName.contains("-") ?
+                        String modulePathName = modulePath.getName();
+                        String moduleName = modulePathName.contains("-") ?
                                 modulePathName.substring(0, modulePathName.lastIndexOf("-")) :
                                 modulePathName;
                         addModule(appRoot, moduleName, modulePath);

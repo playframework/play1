@@ -19,12 +19,12 @@ public class ValidationTest {
 
         Validation.current.set(new Validation());
 
-        final String field = "f1";
+        String field = "f1";
 
         assertThat(Validation.error(field)).isNull();
         assertThat(Validation.errors(field)).isEmpty();
 
-        final String errorMsg = "My errorMessage";
+        String errorMsg = "My errorMessage";
 
         Validation.addError(field, errorMsg);
 
@@ -45,10 +45,10 @@ public class ValidationTest {
 
         Validation.current.set(new Validation());
 
-        final String field = "f1";
-        final String field2 = "f1.element";
+        String field = "f1";
+        String field2 = "f1.element";
 
-        final String errorMsg = "My errorMessage";
+        String errorMsg = "My errorMessage";
         
         Validation.addError(field, errorMsg);  
         Validation.addError(field, errorMsg); 
@@ -70,7 +70,7 @@ public class ValidationTest {
         assertEquals(0, Validation.errors(field).size());
         assertEquals(0, Validation.errors(field2).size());
         
-        final String errorMsgWithParam = "My errorMessage: %2$s";
+        String errorMsgWithParam = "My errorMessage: %2$s";
         
         Validation.addError(field, errorMsgWithParam, "param1");  
         Validation.addError(field, errorMsgWithParam,"param2"); 
@@ -91,11 +91,11 @@ public class ValidationTest {
 
         Validation.current.set(new Validation());
 
-        final String field = "f1";
-        final String field2 = "f1.element";
+        String field = "f1";
+        String field2 = "f1.element";
 
-        final String errorMsg = "My errorMessage";
-        final String errorMsg2 = "My errorMessage2";
+        String errorMsg = "My errorMessage";
+        String errorMsg2 = "My errorMessage2";
         Validation.addError(field, errorMsg); 
         Validation.addError(field, errorMsg2); 
         
@@ -133,11 +133,11 @@ public class ValidationTest {
 
         Validation.current.set(new Validation());
 
-        final String field = "f1";
-        final String field2 = "f1.element";
+        String field = "f1";
+        String field2 = "f1.element";
 
-        final String errorMsg = "My errorMessage";
-        final String errorMsg2 = "My errorMessage2";
+        String errorMsg = "My errorMessage";
+        String errorMsg2 = "My errorMessage2";
         Validation.addError(field, errorMsg); 
         Validation.addError(field, errorMsg2); 
         
@@ -179,10 +179,10 @@ public class ValidationTest {
 
         Validation.current.set(new Validation());
 
-        final String field = "f1";
+        String field = "f1";
 
-        final String errorMsg = "My errorMessage";
-        final String errorMsg2 = "My errorMessage2";
+        String errorMsg = "My errorMessage";
+        String errorMsg2 = "My errorMessage2";
         Validation.addError(field, errorMsg); 
         Validation.insertError(0, field, errorMsg2); 
         

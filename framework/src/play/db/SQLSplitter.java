@@ -12,7 +12,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 	 *
 	 * @return The index that skips past the quote starting at start. If the quote does not start at that point, it simply returns start.
 	 */
-	static int consumeQuote(final CharSequence s, final int start) {
+	static int consumeQuote(CharSequence s, int start) {
 		if ( start >= s.length() ) return start;
 		char ender;
 		switch ( s.charAt(start) ) {
@@ -79,7 +79,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 	/**
 	 * Returns the index of the next line from a start location.
 	 */
-	static int consumeTillNextLine(final CharSequence s, int start) {
+	static int consumeTillNextLine(CharSequence s, int start) {
 		while ( start < s.length() && !isNewLine(s.charAt(start)) )
 			++start;
 		while ( start < s.length() && isNewLine(s.charAt(start)) )
@@ -87,7 +87,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 		return start;
 	}
 
-	static boolean isNext(final CharSequence s, final int start, final char c) {
+	static boolean isNext(CharSequence s, int start, char c) {
 		if ( start + 1 < s.length() )
 			return s.charAt(start + 1) == c;
 		return false;
@@ -101,7 +101,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 	 *
 	 * @return The index that skips past the comment starting at start. If the comment does not start at that point, it simply returns start.
 	 */
-	static int consumeComment(final CharSequence s, int start) {
+	static int consumeComment(CharSequence s, int start) {
 		if ( start >= s.length() ) return start;
 		switch ( s.charAt(start) ) {
 			case '-':
@@ -137,7 +137,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 		}
 	}
 
-	static int consumeParentheses(final CharSequence s, int start) {
+	static int consumeParentheses(CharSequence s, int start) {
 		if ( start >= s.length() ) return start;
 		switch ( s.charAt(start) ) {
 			case '(':
@@ -154,11 +154,11 @@ public class SQLSplitter implements Iterable<CharSequence> {
 		return start;
 	}
 
-	static int nextChar(final CharSequence sql, final int start) {
+	static int nextChar(CharSequence sql, int start) {
 		int i = consumeParentheses(sql, consumeComment(sql, consumeQuote(sql, start)));
 		if ( i == start ) return Math.min(start + 1, sql.length());
 		do {
-			final int j = consumeParentheses(sql, consumeComment(sql, consumeQuote(sql, i)));
+			int j = consumeParentheses(sql, consumeComment(sql, consumeQuote(sql, i)));
 			if ( j == i )
 				return i;
 			i = j;
@@ -168,8 +168,8 @@ public class SQLSplitter implements Iterable<CharSequence> {
 	/**
 	 * Splits the SQL "properly" based on semicolons. Respecting quotes and comments.
 	 */
-	public static ArrayList<CharSequence> splitSQL(final CharSequence sql) {
-		final ArrayList<CharSequence> ret = new ArrayList<>();
+	public static ArrayList<CharSequence> splitSQL(CharSequence sql) {
+		ArrayList<CharSequence> ret = new ArrayList<>();
 		for ( CharSequence c : new SQLSplitter(sql) )
 			ret.add(c);
 		return ret;
@@ -177,7 +177,7 @@ public class SQLSplitter implements Iterable<CharSequence> {
 
 	final CharSequence sql;
 	
-	public SQLSplitter(final CharSequence sql) {
+	public SQLSplitter(CharSequence sql) {
 		this.sql = sql;
 	}
 

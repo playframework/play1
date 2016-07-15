@@ -35,8 +35,8 @@ public class FlashPolicyHandler extends FrameDecoder {
             return null;
         }
 
-        final int magic1 = buffer.getUnsignedByte(buffer.readerIndex());
-        final int magic2 = buffer.getUnsignedByte(buffer.readerIndex() + 1);
+        int magic1 = buffer.getUnsignedByte(buffer.readerIndex());
+        int magic2 = buffer.getUnsignedByte(buffer.readerIndex() + 1);
         boolean isFlashPolicyRequest = (magic1 == '<' && magic2 == 'p');
 
         if (isFlashPolicyRequest) {

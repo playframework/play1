@@ -75,7 +75,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     }
 
     @Override
-    public void run(final RunNotifier notifier) {
+    public void run(RunNotifier notifier) {
 	initTest();
 	jUnit4.run(notifier);
     }

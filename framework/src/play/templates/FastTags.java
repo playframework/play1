@@ -84,12 +84,12 @@ public class FastTags {
     }
 
     public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        final Object arg = args.get("arg");
+        Object arg = args.get("arg");
         if (!(arg instanceof ActionDefinition)) {
             throw new TemplateExecutionException(template.template, fromLine,
                     "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
         }
-        final ActionDefinition action = (ActionDefinition) arg;
+        ActionDefinition action = (ActionDefinition) arg;
         out.print("{");
         if (action.args.isEmpty()) {
             out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");

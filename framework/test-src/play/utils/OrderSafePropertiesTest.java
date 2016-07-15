@@ -96,11 +96,11 @@ public class OrderSafePropertiesTest {
         assertThat(p.getProperty("_check_8")).isEqualTo("х");// Unicode Character 'CYRILLIC SMALL LETTER HA' (U+0445)
 
         // test from Lyubomir Ivanov
-        final String cyrillic_bulgarian_caps  = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯ";
-        final String cyrillic_bulgarian_small = "абвгдежзийклмнопрстуфхцчшщъьюя";
-        final String cyrillic_bulgarian_old   = "ѣѢѫѪѭѬ";
-        final String cyrillic_russian         = "ЭЫэы";
-        final String cyrillic_serbian         = "ЉЊЂЋЏљњђћџ";
+        String cyrillic_bulgarian_caps  = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЮЯ";
+        String cyrillic_bulgarian_small = "абвгдежзийклмнопрстуфхцчшщъьюя";
+        String cyrillic_bulgarian_old   = "ѣѢѫѪѭѬ";
+        String cyrillic_russian         = "ЭЫэы";
+        String cyrillic_serbian         = "ЉЊЂЋЏљњђћџ";
         assertThat(p.getProperty("_cyrillic_bulgarian_caps")).isEqualTo(cyrillic_bulgarian_caps);
         assertThat(p.getProperty("_cyrillic_bulgarian_small")).isEqualTo(cyrillic_bulgarian_small);
         assertThat(p.getProperty("_cyrillic_bulgarian_old")).isEqualTo(cyrillic_bulgarian_old);

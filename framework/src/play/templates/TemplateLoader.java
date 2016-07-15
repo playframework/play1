@@ -64,8 +64,8 @@ public class TemplateLoader {
         }
 
         // Use default engine
-        final String fileRelativePath = file.relativePath();
-        final String key = getUniqueNumberForTemplateFile(fileRelativePath);
+        String fileRelativePath = file.relativePath();
+        String key = getUniqueNumberForTemplateFile(fileRelativePath);
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
                 BaseTemplate template = new GroovyTemplate(fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");

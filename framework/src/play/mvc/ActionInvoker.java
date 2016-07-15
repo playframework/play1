@@ -559,7 +559,7 @@ public class ActionInvoker {
         StackRecorder pStackRecorder = new StackRecorder(continuation.stackRecorder);
         Object result = null;
 
-        final StackRecorder old = pStackRecorder.registerThread();
+        StackRecorder old = pStackRecorder.registerThread();
         try {
             pStackRecorder.isRestoring = !pStackRecorder.isEmpty();
 

@@ -63,11 +63,11 @@ public class Unbinder {
 
     private static void unbindMap(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         if(src == null){
-            directUnbind( result, src,  srcClazz,  name, annotations);
+            directUnbind( result, null,  srcClazz,  name, annotations);
         } else {
-            Map<?,?> map = (Map) src;
+            Map<?,?> map = (Map<?,?>) src;
 
-            for (Map.Entry entry : map.entrySet()) {
+            for (Map.Entry<?,?> entry : map.entrySet()) {
                 Object key = entry.getKey();
                 if (!isDirect(key.getClass())) {
                     throw new UnsupportedOperationException("Unbind won't work with indirect map keys yet");

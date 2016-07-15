@@ -878,8 +878,8 @@ public class Controller implements ControllerSupport {
      * "controllers.Pages.index" returns "views/Pages/index.html".
      */
     protected static String template() {
-        final Request theRequest = Request.current();
-        final String format = theRequest.format;
+        Request theRequest = Request.current();
+        String format = theRequest.format;
         String templateName = theRequest.action.replace(".", "/") + "." + (format == null ? "html" : format);
         if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
@@ -896,8 +896,8 @@ public class Controller implements ControllerSupport {
      * "controllers.Pages.index" returns "views/Pages/index.html".
      */
     protected static String template(String templateName) {
-        final Request theRequest = Request.current();
-        final String format = theRequest.format;
+        Request theRequest = Request.current();
+        String format = theRequest.format;
         if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if (!templateName.contains(".")) {
@@ -1114,7 +1114,7 @@ public class Controller implements ControllerSupport {
             // we do not
             // know when calling this method if we're suspending or restoring.
 
-            final String continuationStateKey = "__storeOrRestoreDataStateForContinuations_started";
+            String continuationStateKey = "__storeOrRestoreDataStateForContinuations_started";
             if (Http.Request.current().args.remove(continuationStateKey) != null) {
                 isRestoring = true;
             } else {
@@ -1140,7 +1140,7 @@ public class Controller implements ControllerSupport {
             // We know that the params are partially reprocessed during
             // awake(Before now), but here we restore the correct values as
             // they where when we performed the await();
-            Map params = (Map) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
+            Map<String, String[]> params = (Map<String, String[]>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
             Scope.Params.current().all().clear();
             Scope.Params.current().all().putAll(params);
 
@@ -1164,7 +1164,7 @@ public class Controller implements ControllerSupport {
             // Params
             // Store the actual params values so we can restore the exact same
             // state when awaking.
-            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap(Scope.Params.current().data));
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_PARAMS, new HashMap<>(Scope.Params.current().data));
 
             // Validations
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS, Validation.current());
@@ -1304,11 +1304,11 @@ public class Controller implements ControllerSupport {
      * This allow people that implements their own template engine to override
      * the way template are resolved.
      */
-    public static interface ITemplateNameResolver {
+    public interface ITemplateNameResolver {
         /**
          * Return the template path given a template name.
          */
-        public String resolveTemplateName(String templateName);
+        String resolveTemplateName(String templateName);
     }
 
 }

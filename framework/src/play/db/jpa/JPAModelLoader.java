@@ -315,11 +315,11 @@ public class JPAModelLoader implements Model.Factory {
             }
 
             // Is it a composite key? If yes we need to return the matching PK
-            final Field[] fields = keyFields();
-            final Object[] values = new Object[fields.length];
+            Field[] fields = keyFields();
+            Object[] values = new Object[fields.length];
             int i = 0;
             for (Field f : fields) {
-                final Object o = f.get(m);
+                Object o = f.get(m);
                 if (o != null) {
                     values[i++] = o;
                 }
@@ -380,7 +380,7 @@ public class JPAModelLoader implements Model.Factory {
                 }
                 c = c.getSuperclass();
             }
-            final Field[] f = fields.toArray(new Field[fields.size()]);
+            Field[] f = fields.toArray(new Field[fields.size()]);
             if (f.length == 0) {
                 throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
             }

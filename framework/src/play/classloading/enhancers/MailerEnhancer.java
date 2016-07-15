@@ -25,7 +25,7 @@ public class MailerEnhancer extends Enhancer {
             return;
         }
 
-        for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
+        for (CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
             if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers())) {
                 try {

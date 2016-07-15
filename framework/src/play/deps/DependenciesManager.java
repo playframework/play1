@@ -174,8 +174,7 @@ public class DependenciesManager {
         List<ArtifactDownloadReport> missing = new ArrayList<>();
 
         List<ArtifactDownloadReport> artifacts = new ArrayList<>();
-        for (Iterator iter = report.getDependencies().iterator(); iter.hasNext();) {
-            IvyNode node = (IvyNode) iter.next();
+        for (IvyNode node : ((List<IvyNode>) report.getDependencies())) {
             if (node.isLoaded() && !node.isCompletelyEvicted()) {
                 ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
                 for (ArtifactDownloadReport artifact : adr) {
@@ -189,7 +188,7 @@ public class DependenciesManager {
                             if(isPlayModule(artifact)){
                                 String mName = artifact.getLocalFile().getName();
                                 if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
-                            	mName = mName.substring(0, mName.length() - 4); 
+                                    mName = mName.substring(0, mName.length() - 4); 
                                 }
                             }
                         }
