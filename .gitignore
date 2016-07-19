@@ -12,7 +12,15 @@ framework/classes
 framework/test-classes
 framework/tests-results
 framework/out
+framework/.idea
 framework/play.jar
+.DS_Store
+nbproject/genfiles.properties
+nbproject/jdk.xml
+nbproject/nbjdk.properties
+nbproject/nbjdk.xml
+nbproject/private
+framework/tests-results
 framework/src/version
 framework/src/play/version
 framework/tests/test-application/db
@@ -30,6 +38,7 @@ eclipse
 .settings
 .classpath
 .project
+samples-and-tests/java8Support/lib/
 *.iml
 *.ipr
 *.iws
