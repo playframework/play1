@@ -63,6 +63,22 @@ public class Mailer implements LocalVariablesSupport {
 
     @SuppressWarnings("unchecked")
     public static void addRecipient(String... recipients) {
+        List<String> recipientsParam = Arrays.asList(recipients);
+        addRecipients(recipientsParam);
+    }
+
+    /**
+     * @Deprecated use method {{@link #addRecipient(String...)}}
+     */
+    public static void addRecipient(Object... recipients) {
+        List<String> recipientList = new ArrayList<>(recipients.length);
+        for (Object recipient : recipients) {
+            recipientList.add(recipient.toString());
+        }
+        addRecipients(recipientList);
+    }
+
+    private static void addRecipients(List<String> recipientsParam) {
         Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -72,7 +88,7 @@ public class Mailer implements LocalVariablesSupport {
             recipientsList = new ArrayList<>();
             map.put("recipients", recipientsList);
         }
-        recipientsList.addAll(Arrays.asList(recipients));
+        recipientsList.addAll(recipientsParam);
         infos.set(map);
     }
 
@@ -181,6 +197,10 @@ public class Mailer implements LocalVariablesSupport {
         }
         map.put("from", from);
         infos.set(map);
+    }
+    
+    public static void setFrom(InternetAddress from) {
+        setFrom(from.toString());
     }
     
     private static class InlineImage {
@@ -347,6 +367,10 @@ public class Mailer implements LocalVariablesSupport {
         }
         map.put("replyTo", replyTo);
         infos.set(map);
+    }
+    
+    public static void setReplyTo(InternetAddress replyTo) {
+        setReplyTo(replyTo.toString());
     }
 
     public static void setCharset(String bodyCharset) {
