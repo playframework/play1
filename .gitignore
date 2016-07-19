@@ -63,6 +63,7 @@ samples-and-tests/just-test-cases/lib
 samples-and-tests/just-test-cases/modules
 samples-and-tests/chat/tmp
 samples-and-tests/chat/logs
+samples-and-tests/java8Support/lib/
 .git
 modules/spring/lib/play-spring.jar
 modules/search/bin
