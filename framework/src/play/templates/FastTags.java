@@ -33,9 +33,6 @@ import play.templates.BaseTemplate.RawData;
 import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.utils.HTML;
 
-/**
- * Fast tags implementation
- */
 public class FastTags {
 
     public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {

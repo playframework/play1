@@ -40,9 +40,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
-/**
- * A template
- */
 public class GroovyTemplate extends BaseTemplate {
 
     static final Map<String, SafeFormatter> safeFormatters = new HashMap<>();
@@ -97,10 +94,6 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
     
-    /**
-     * Define the Compiler configuration
-     * @return the compiler Configuration
-     */
     protected CompilerConfiguration setUpCompilerConfiguration(){
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();        
         compilerConfiguration.setSourceEncoding("utf-8"); // ouf
