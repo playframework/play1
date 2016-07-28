@@ -16,9 +16,6 @@ import play.exceptions.TemplateExecutionException.DoBodyException;
 import play.libs.Codec;
 import play.libs.IO;
 
-/**
- * A template
- */
 public abstract class BaseTemplate extends Template {
 
     public String compiledSource;

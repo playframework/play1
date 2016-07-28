@@ -13,9 +13,6 @@ import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
 
-/**
- * Load templates
- */
 public class TemplateLoader {
 
     protected static Map<String, BaseTemplate> templates = new HashMap<>();
