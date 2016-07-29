@@ -19,7 +19,7 @@ import play.exceptions.UnexpectedException;
 
 public class Validation {
 
-    public static ThreadLocal<Validation> current = new ThreadLocal<>();
+    public static final ThreadLocal<Validation> current = new ThreadLocal<>();
     List<Error> errors = new ArrayList<>();
     boolean keep = false;
 

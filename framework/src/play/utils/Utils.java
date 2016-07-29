@@ -110,7 +110,7 @@ public class Utils {
             }
         }
     }
-    private static ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<>();
 
     public static SimpleDateFormat getHttpDateFormatter() {
         if (httpFormatter.get() == null) {
@@ -188,7 +188,7 @@ public class Utils {
             }
             throw new ParseException("Date format not understood", 0);
         }
-        static ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<>();
+        static final ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<>();
 
         public static AlternativeDateFormat getDefaultFormatter() {
             if (dateformat.get() == null) {

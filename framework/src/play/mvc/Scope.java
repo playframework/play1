@@ -68,7 +68,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
-        public static ThreadLocal<Flash> current = new ThreadLocal<>();
+        public static final ThreadLocal<Flash> current = new ThreadLocal<>();
 
         public static Flash current() {
             return current.get();
@@ -199,7 +199,7 @@ public class Scope {
         }
         Map<String, String> data = new HashMap<>(); // ThreadLocal access
         boolean changed = false;
-        public static ThreadLocal<Session> current = new ThreadLocal<>();
+        public static final ThreadLocal<Session> current = new ThreadLocal<>();
 
         public static Session current() {
             return current.get();
@@ -327,7 +327,7 @@ public class Scope {
     public static class Params {
         // ThreadLocal access
 
-        public static ThreadLocal<Params> current = new ThreadLocal<>();
+        public static final ThreadLocal<Params> current = new ThreadLocal<>();
 
         public static Params current() {
             return current.get();
@@ -560,7 +560,7 @@ public class Scope {
     public static class RenderArgs {
 
         public Map<String, Object> data = new HashMap<>();        // ThreadLocal access
-        public static ThreadLocal<RenderArgs> current = new ThreadLocal<>();
+        public static final ThreadLocal<RenderArgs> current = new ThreadLocal<>();
 
         public static RenderArgs current() {
             return current.get();
@@ -591,7 +591,7 @@ public class Scope {
     public static class RouteArgs {
 
         public Map<String, Object> data = new HashMap<>();        // ThreadLocal access
-        public static ThreadLocal<RouteArgs> current = new ThreadLocal<>();
+        public static final ThreadLocal<RouteArgs> current = new ThreadLocal<>();
 
         public static RouteArgs current() {
             return current.get();

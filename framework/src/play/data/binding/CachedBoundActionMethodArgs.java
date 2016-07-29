@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 // ActionInvoker.getActionMethodArgs() is called twice when using validation
-// so we use this threadlocal cache to store the binding-result pr method pr request.
+// so we use this ThreadLocal cache to store the binding-result pr method pr request.
 // This way we don't have to do it twice.
 public class CachedBoundActionMethodArgs {
 
-    private static ThreadLocal<CachedBoundActionMethodArgs> current = new ThreadLocal<>();
+    private static final ThreadLocal<CachedBoundActionMethodArgs> current = new ThreadLocal<>();
 
     private Map<Method, Object[]> preBoundActionMethodArgs = new HashMap<>(1);
 

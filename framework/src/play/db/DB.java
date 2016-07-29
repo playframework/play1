@@ -83,7 +83,7 @@ public class DB {
 
     public final static String DEFAULT = "default";
 
-    static ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<>();
+    static final ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<>();
 
     public static DataSource getDataSource(String name) {
         if (datasources.get(name) != null) {
