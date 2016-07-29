@@ -86,7 +86,7 @@ public class HibernateInterceptor extends EmptyInterceptor {
         return super.onCollectionRemove(collection, key);
     }
 
-    protected ThreadLocal<Object> entities = new ThreadLocal<>();
+    protected final ThreadLocal<Object> entities = new ThreadLocal<>();
 
     @Override
     public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {

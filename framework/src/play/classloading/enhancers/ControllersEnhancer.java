@@ -24,7 +24,7 @@ import play.exceptions.UnexpectedException;
  */
 public class ControllersEnhancer extends Enhancer {
 
-    public static ThreadLocal<Stack<String>> currentAction = new ThreadLocal<>();
+    public static final ThreadLocal<Stack<String>> currentAction = new ThreadLocal<>();
 
     @Override
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
@@ -194,7 +194,7 @@ public class ControllersEnhancer extends Enhancer {
         public static void stopActionCall() {
             allow.set(false);
         }
-        static ThreadLocal<Boolean> allow = new ThreadLocal<>();
+        static final ThreadLocal<Boolean> allow = new ThreadLocal<>();
     }
 
     @Retention(RetentionPolicy.RUNTIME)

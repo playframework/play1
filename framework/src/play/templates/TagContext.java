@@ -9,7 +9,7 @@ import java.util.Stack;
  */
 public class TagContext {
     
-    static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<>();
+    private static final ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<>();
     
     public String tagName;
     public Map<String, Object> data = new HashMap<>();
@@ -61,12 +61,12 @@ public class TagContext {
     }
 
     public static TagContext parent(String... names) {
-        for(int i=currentStack.get().size()-2; i>=0; i--) {
-        	for(String name : names) {
-	            if(name.equals(currentStack.get().get(i).tagName)) {
-	                return currentStack.get().get(i);
-	            }
-        	}
+        for (int i = currentStack.get().size() - 2; i >= 0; i--) {
+            for (String name : names) {
+                if (name.equals(currentStack.get().get(i).tagName)) {
+                    return currentStack.get().get(i);
+                }
+            }
         }
         return null;
     }

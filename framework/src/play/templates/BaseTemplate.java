@@ -91,11 +91,11 @@ public abstract class BaseTemplate extends Template {
     }
 
     protected abstract Throwable cleanStackTrace(Throwable e);
-    public static ThreadLocal<BaseTemplate> layout = new ThreadLocal<>();
-    public static ThreadLocal<Map<Object, Object>> layoutData = new ThreadLocal<>();
-    public static ThreadLocal<BaseTemplate> currentTemplate = new ThreadLocal<>();
+    public static final ThreadLocal<BaseTemplate> layout = new ThreadLocal<>();
+    public static final ThreadLocal<Map<Object, Object>> layoutData = new ThreadLocal<>();
+    public static final ThreadLocal<BaseTemplate> currentTemplate = new ThreadLocal<>();
 
-    public static class RawData {
+    public static final class RawData {
 
         public String data;
 

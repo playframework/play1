@@ -257,7 +257,7 @@ public class Http {
         /**
          * Bind to thread
          */
-        public static ThreadLocal<Request> current = new ThreadLocal<>();
+        public static final ThreadLocal<Request> current = new ThreadLocal<>();
         /**
          * The really invoker Java method
          */
@@ -638,7 +638,7 @@ public class Http {
         /**
          * Bind to thread
          */
-        public static ThreadLocal<Response> current = new ThreadLocal<>();
+        public static final ThreadLocal<Response> current = new ThreadLocal<>();
 
         /**
          * Retrieve the current response
@@ -888,7 +888,7 @@ public class Http {
      */
     public abstract static class Inbound {
 
-        public final static ThreadLocal<Inbound> current = new ThreadLocal<>();
+        public static final ThreadLocal<Inbound> current = new ThreadLocal<>();
         final BlockingEventStream<WebSocketEvent> stream;
 
         public Inbound(ChannelHandlerContext ctx) {
@@ -922,7 +922,7 @@ public class Http {
      */
     public static abstract class Outbound {
 
-        public static ThreadLocal<Outbound> current = new ThreadLocal<>();
+        public static final ThreadLocal<Outbound> current = new ThreadLocal<>();
 
         public static Outbound current() {
             return current.get();

@@ -30,7 +30,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
     public static List<Job> scheduledJobs;
-    private static ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
+    private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
     public String getStatus() {

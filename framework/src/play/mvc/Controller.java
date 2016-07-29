@@ -1234,7 +1234,7 @@ public class Controller implements ControllerSupport {
     /**
      * Don't use this directly if you don't know why
      */
-    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<>();
+    public static final ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<>();
 
     /**
      * @todo - this "Usage" example below doesn't make sense.

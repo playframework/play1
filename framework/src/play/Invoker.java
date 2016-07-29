@@ -94,7 +94,7 @@ public class Invoker {
      */
     public static class InvocationContext {
 
-        public static ThreadLocal<InvocationContext> current = new ThreadLocal<>();
+        public static final ThreadLocal<InvocationContext> current = new ThreadLocal<>();
         private final List<Annotation> annotations;
         private final String invocationType;
 

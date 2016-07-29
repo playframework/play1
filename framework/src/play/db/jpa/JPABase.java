@@ -126,7 +126,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
+    static transient final ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
