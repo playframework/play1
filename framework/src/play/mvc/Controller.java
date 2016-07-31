@@ -1150,9 +1150,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             // they where when we performed the await();
             Map<String, String[]> params = (Map<String, String[]>) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_PARAMS);
             Scope.Params.current().all().clear();
-			if (params != null) {
-            	Scope.Params.current().all().putAll(params);
-			}
+            if (params != null) {
+                Scope.Params.current().all().putAll(params);
+            }
             // Validations
             Validation validation = (Validation) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_VALIDATIONS);
             Validation.current.set(validation);
