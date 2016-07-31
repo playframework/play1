@@ -373,8 +373,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                     }
                     try {
                         m = c.getDeclaredMethod("_" + tName, Map.class, Closure.class, PrintWriter.class, GroovyTemplate.ExecutableTemplate.class, int.class);
+                        break;
                     } catch (NoSuchMethodException ex) {
-                        continue;
+                        // continue looking for this method in other *FastTags implementations
                     }
                 }
                 if (m != null) {
