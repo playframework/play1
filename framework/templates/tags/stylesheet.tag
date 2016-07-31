@@ -17,6 +17,6 @@
     try {
         _abs = play.mvc.Router.reverseWithCheck(_src, play.Play.getVirtualFile(_src), false);
     } catch (Exception ex) {
-        throw new play.exceptions.TagInternalException("File not found: " + _src);
+        throw new play.exceptions.TagInternalException("File not found: " + _src, ex);
     }}%
 <link rel="stylesheet" type="text/css"#{if _id} id="${_id}"#{/if}#{if _title} title="${_title}"#{/if} href="${_abs}"#{if _media} media="${_media}"#{/if} charset="${_response_encoding}" ></link>
