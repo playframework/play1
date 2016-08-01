@@ -10,6 +10,7 @@ import play.data.validation.Validation;
 import play.db.Model;
 import play.exceptions.BinderException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Lang;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -18,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 
@@ -546,6 +548,26 @@ public abstract class Binder {
         }
     }
 
+    /**
+     * This method is called when binding numbers, it normalizes the dot notation according to the locale
+     *
+     * @param value the string number value
+     * @return a normalized string
+     */
+    static String normalizeNumberSeparators(String value) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
+        String numberGroupingChar = "" + symbols.getGroupingSeparator();
+        String decimalChar = "" + symbols.getDecimalSeparator();
+
+        if (value.contains(numberGroupingChar)) value = value.replace(numberGroupingChar, "");
+        if (value.contains(decimalChar)) value = value.replace(decimalChar, ".");
+
+        if (value.contains(" ")) value = value.replace(" ", "");
+        if (value.contains(",")) value = value.replace(",", ".");
+
+        return value;
+    }
+
     // If internalDirectBind was not able to bind it, it returns a special variable instance: DIRECTBIND_MISSING
     // Needs this because sometimes we need to know if no value was returned..
     private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
@@ -612,6 +634,8 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? 0 : null;
             }
 
+            value = normalizeNumberSeparators(value);
+
             return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
@@ -620,6 +644,8 @@ public abstract class Binder {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0l : null;
             }
+
+            value = normalizeNumberSeparators(value);
 
             return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
@@ -639,6 +665,8 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? (short) 0 : null;
             }
 
+            value = normalizeNumberSeparators(value);
+
             return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
@@ -648,6 +676,8 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? 0f : null;
             }
 
+            value = normalizeNumberSeparators(value);
+
             return Float.parseFloat(value);
         }
 
@@ -656,6 +686,8 @@ public abstract class Binder {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0d : null;
             }
+
+            value = normalizeNumberSeparators(value);
 
             return Double.parseDouble(value);
         }
