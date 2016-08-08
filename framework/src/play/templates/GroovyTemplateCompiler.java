@@ -95,14 +95,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
         if (!names.isEmpty()) {
 
-            if (names.size() <= 1 || source.indexOf("new ") >= 0) {
+            if (names.size() <= 1 || source.contains("new ")) {
                 for (String cName : names) { // dynamic class binding
                     source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('"
                             + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
                 }
             }
 
-            if (names.size() <= 1 || source.indexOf("instanceof") >= 0) {
+            if (names.size() <= 1 || source.contains("instanceof")) {
                 for (String cName : names) { // dynamic class binding
                     source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('"
                             + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
@@ -110,7 +110,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 }
             }
 
-            if (names.size() <= 1 || source.indexOf(".class") >= 0) {
+            if (names.size() <= 1 || source.contains(".class")) {
                 for (String cName : names) { // dynamic class binding
                     source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class",
                             "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')");
@@ -207,7 +207,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     protected void script() {
         String text = parser.getToken();
-        if (text.indexOf("\n") > -1) {
+        if (text.contains("\n")) {
             String[] lines = parser.getToken().split("\n");
             for (int i = 0; i < lines.length; i++) {
                 print(lines[i]);
@@ -265,8 +265,8 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     protected void startTag() {
         tagIndex++;
         String tagText = parser.getToken().trim().replaceAll("\r", "").replaceAll("\n", " ");
-        String tagName = "";
-        String tagArgs = "";
+        String tagName;
+        String tagArgs;
         boolean hasBody = !parser.checkNext().endsWith("/");
         if (tagText.indexOf(" ") > 0) {
             tagName = tagText.substring(0, tagText.indexOf(" "));
@@ -300,7 +300,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         try {
             Method m = GroovyInlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
             print("play.templates.TagContext.enterTag('" + tag.name + "');");
-            print((String) m.invoke(null, new Object[]{tagIndex, CALL.START}));
+            print((String) m.invoke(null, tagIndex, CALL.START));
             tag.hasBody = false;
             markLine(parser.getLine());
             println();
@@ -354,7 +354,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             // Use inlineTag if exists
             try {
                 Method m = GroovyInlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
-                println((String) m.invoke(null, new Object[]{tagIndex, CALL.END}));
+                println((String) m.invoke(null, tagIndex, CALL.END));
                 print("play.templates.TagContext.exitTag();");
             } catch (Exception e) {
                 // Use fastTag if exists
