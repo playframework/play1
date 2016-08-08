@@ -534,34 +534,21 @@ public abstract class Binder {
     }
 
     /**
-     * @param value
-     * @param clazz
      * @return The binding object
-     * @throws ParseException
      */
     public static Object directBind(String value, Class<?> clazz) throws Exception {
         return directBind(null, value, clazz, null);
     }
 
     /**
-     * @param name
-     * @param annotations
-     * @param value
-     * @param clazz
      * @return The binding object
-     * @throws ParseException
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         return directBind(name, annotations, value, clazz, null);
     }
 
     /**
-     * @param annotations
-     * @param value
-     * @param clazz
-     * @param type
      * @return The binding object
-     * @throws ParseException
      */
     public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         return directBind(null, annotations, value, clazz, type);
@@ -570,11 +557,6 @@ public abstract class Binder {
     /**
      * This method calls the user's defined binders prior to bind simple type
      *
-     * @param name
-     * @param annotations
-     * @param value
-     * @param clazz
-     * @param type
      * @return The binding object
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
