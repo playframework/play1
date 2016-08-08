@@ -48,16 +48,21 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         source = Play.pluginCollection.overrideTemplateSource(template, source);
         
         if(Boolean.parseBoolean(Play.configuration.getProperty("groovy.template.check.scala.comptatibility", "false"))){
-            source = this.checkScalaComptability(source);
+            source = this.checkScalaCompatibility(source);
         }
         
         return source;
     }
-    
+
+    @Deprecated
+    protected String checkScalaComptability(String source){
+        return checkScalaCompatibility(source);
+    }
+
     /**
      * Makes the code scala compatible (for the scala module).
      */
-    protected String checkScalaComptability(String source){  
+    protected String checkScalaCompatibility(String source){  
         // Static access
         List<String> names = new ArrayList<>();
         Map<String, String> originalNames = new HashMap<>();
