@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
+import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
+
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 public class FirePhoque {
@@ -85,16 +87,16 @@ public class FirePhoque {
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
-        } else if ("FIREFOX_31".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.FIREFOX_31;
-        } else if ("INTERNET_EXPLORER_8".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.INTERNET_EXPLORER_8;
-        } else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
+        } else if ("FIREFOX_38".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX_38;  
+        }    else if ("INTERNET_EXPLORER".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.INTERNET_EXPLORER;
+        }    else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
         } else if ("EDGE".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.EDGE;
         } else {
-            browserVersion = BrowserVersion.FIREFOX_38;
+            browserVersion = BrowserVersion.FIREFOX_45;
         }
 
         WebClient firephoque = new WebClient(browserVersion);
@@ -121,9 +123,10 @@ public class FirePhoque {
         firephoque.setAlertHandler(new AlertHandler() {
             public void handleAlert(Page page, String message) {
                 try {
-                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    ScriptableObject window = page.getEnclosingWindow().getScriptableObject();
                     String script = "parent.selenium.browserbot.recordedAlerts.push('" + message.replace("'", "\\'")+ "');";
-                    window.execScript(script,  "JavaScript");
+                    Object result = ScriptRuntime.evalSpecial(Context.getCurrentContext(), window, window, new Object[] {script}, null, 0);
+
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
@@ -132,7 +135,7 @@ public class FirePhoque {
         firephoque.setConfirmHandler(new ConfirmHandler() {
             public boolean handleConfirm(Page page, String message) {
                 try {
-                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    ScriptableObject window = page.getEnclosingWindow().getScriptableObject();
                     String script = "parent.selenium.browserbot.recordedConfirmations.push('" + message.replace("'", "\\'")+ "');" +
                             "var result = parent.selenium.browserbot.nextConfirmResult;" +
                             "parent.selenium.browserbot.nextConfirmResult = true;" +
@@ -151,7 +154,7 @@ public class FirePhoque {
         firephoque.setPromptHandler(new PromptHandler() {
             public String handlePrompt(Page page, String message) {
                 try {
-                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    ScriptableObject window = page.getEnclosingWindow().getScriptableObject();
                     String script = "parent.selenium.browserbot.recordedPrompts.push('" + message.replace("'", "\\'")+ "');" +
                             "var result = !parent.selenium.browserbot.nextConfirmResult ? null : parent.selenium.browserbot.nextPromptResult;" +
                             "parent.selenium.browserbot.nextConfirmResult = true;" +
