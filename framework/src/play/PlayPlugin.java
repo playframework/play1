@@ -6,6 +6,7 @@ import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import play.templates.BaseTemplate;
@@ -390,5 +391,17 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public Collection<Class> getFunctionalTests() {
         return emptyList();
+    }
+
+    /**
+     * Called on reverse routing in {@link play.mvc.Router}.
+     * Allows to override selection behavior of matching routes for reverse routing.
+     * By default first matching route will be selected for reverse routing.
+     *
+     * @param matchingRoutes
+     * @return list of ActionRoute objects which will be further matched against Router rules for reverse routing.
+     */
+    public List<Router.ActionRoute> selectActionRoutes(List<Router.ActionRoute> matchingRoutes) {
+        return null;
     }
 }

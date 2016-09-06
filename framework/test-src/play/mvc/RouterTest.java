@@ -3,15 +3,21 @@ package play.mvc;
 import com.ning.http.client.RequestBuilder;
 import org.junit.Test;
 
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 import play.Play;
+import play.PlayPlugin;
 import play.mvc.Http.Request;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
+import play.plugins.PluginCollection;
 
-import java.util.Properties;
+import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 public class RouterTest {
 
@@ -137,4 +143,82 @@ public class RouterTest {
         }
         return false;
     }
+
+    @Test
+    public void test_reverse() {
+        Play.configuration = new Properties();
+
+        // add one route
+        Router.addRoute("GET", "/one/url", "action");
+        // add another route
+        Router.addRoute("GET", "/another/url", "action");
+
+        Router.ActionDefinition action = Router.reverse("action", new HashMap<String, Object>());
+        assertEquals("/another/url",action.url);
+    }
+
+    @Test
+    public void test_getActionRoutes(){
+        Play.configuration = new Properties();
+
+        // add one route
+        Router.addRoute("GET", "/one/url", "action");
+        // add another route
+        Router.addRoute("GET", "/another/url", "action");
+
+        Router.Route route = mock(Router.Route.class);
+        route.path="/third/url";
+        route.args=new ArrayList<Router.Route.Arg>();
+        route.method="GET";
+        route.staticArgs=new HashMap<String, String>();
+
+        Router.ActionRoute actionRoute = new Router.ActionRoute();
+        actionRoute.setRoute(route);
+        List<Router.ActionRoute> actionRoutes = Collections.singletonList(actionRoute);
+
+        PluginCollection pluginCollection = mock(PluginCollection.class);
+        //Plugin returns selected action route which will redefine matching routes
+        when(pluginCollection.selectActionRoutes(Matchers.<List<Router.ActionRoute>>any())).thenReturn(actionRoutes);
+        Play.pluginCollection=pluginCollection;
+
+        Router.ActionDefinition action = Router.reverse("action", new HashMap<String, Object>());
+        assertEquals("/third/url",action.url);
+    }
+
+    @Test
+    public void test_selectActionRoutes(){
+        PluginCollection pc = mock(PluginCollection.class);
+        Play.pluginCollection = pc;
+        PlayPlugin onePlayPlugin = mock(PlayPlugin.class);
+        //Single plugin selectActionRoutes not overrided
+        when(onePlayPlugin.selectActionRoutes(Matchers.<List<Router.ActionRoute>>any())).thenCallRealMethod();
+        when(pc.getEnabledPlugins()).thenReturn(Collections.singletonList(onePlayPlugin));
+        when(pc.selectActionRoutes(Matchers.<List<Router.ActionRoute>>any())).thenCallRealMethod();
+
+        Router.ActionRoute actionRouteOne = new Router.ActionRoute();
+        List<Router.ActionRoute> actionRoutesList = Collections.singletonList(actionRouteOne);
+        List<Router.ActionRoute> selectedActionRoutes = Play.pluginCollection.selectActionRoutes(actionRoutesList);
+        assertNull(selectedActionRoutes);
+
+        //Single plugin selectActionRoutes returns same list as got from parameters
+        when(onePlayPlugin.selectActionRoutes(Matchers.<List<Router.ActionRoute>>any())).thenReturn(actionRoutesList);
+        assertEquals(actionRoutesList,Play.pluginCollection.selectActionRoutes(actionRoutesList));
+
+        PlayPlugin anotherPlayPlugin = mock(PlayPlugin.class);
+        Router.ActionRoute actionRouteAnother = new Router.ActionRoute();
+        List<Router.ActionRoute> actionRoutesAnotherList = Collections.singletonList(actionRouteAnother);
+        //Results of first plugin will be passed as parameter to the seccond, forming pipe
+        when(anotherPlayPlugin.selectActionRoutes(actionRoutesList)).thenReturn(actionRoutesAnotherList);
+
+        List<PlayPlugin> enabledPlugins = new ArrayList<PlayPlugin>();
+        enabledPlugins.add(onePlayPlugin);
+        enabledPlugins.add(anotherPlayPlugin);
+        //Two plugins returned by getEnabledPlugins
+        when(pc.getEnabledPlugins()).thenReturn(enabledPlugins);
+        //Check two plugins were called in a pipe
+        assertEquals(actionRoutesAnotherList,Play.pluginCollection.selectActionRoutes(actionRoutesList));
+    }
+
+
+
 }
