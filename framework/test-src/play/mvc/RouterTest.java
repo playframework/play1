@@ -218,7 +218,4 @@ public class RouterTest {
         //Check two plugins were called in a pipe
         assertEquals(actionRoutesAnotherList,Play.pluginCollection.selectActionRoutes(actionRoutesList));
     }
-
-
-
 }
