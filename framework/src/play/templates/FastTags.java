@@ -127,7 +127,16 @@ public class FastTags {
      *            template line number where the tag is defined
      */
     public static void _form(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        ActionDefinition actionDef = (ActionDefinition) args.get("arg");
+        ActionDefinition actionDef = null;
+        Object arg = args.get("arg");
+        if (arg instanceof ActionDefinition) {
+            actionDef = (ActionDefinition) arg;
+        }
+        else if (arg != null) {
+            actionDef = new ActionDefinition();
+            actionDef.url = arg.toString();
+            actionDef.method = "POST";
+        }
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
         }
@@ -151,7 +160,7 @@ public class FastTags {
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\"" + encoding
+        out.println("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\"" + encoding
                 + "\" enctype=\"" + enctype + "\" " + serialize(args, "name", "action", "method", "accept-charset", "enctype")
                 + (name != null ? "name=\"" + name + "\"" : "") + ">");
         if (!("GET".equals(actionDef.method))) {
