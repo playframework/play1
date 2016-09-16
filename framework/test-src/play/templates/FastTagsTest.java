@@ -30,7 +30,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_simple() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
@@ -48,7 +48,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_withName() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
@@ -67,7 +67,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_post() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "POST";
 
@@ -86,7 +86,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_starIsPost() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.star = true;
 
@@ -105,7 +105,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_argMethodOverridesActionDefinitionMethod() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
@@ -125,7 +125,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_customArgs() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
@@ -144,7 +144,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_actionAsActionArg() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
@@ -162,7 +162,7 @@ public class FastTagsTest {
 
     @Test
     public void _form_customEnctype() throws Exception {
-        Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
+        final Router.ActionDefinition actionDefinition = new Router.ActionDefinition();
         actionDefinition.url = "/foo/bar";
         actionDefinition.method = "GET";
 
