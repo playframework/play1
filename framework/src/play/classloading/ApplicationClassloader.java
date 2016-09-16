@@ -2,10 +2,8 @@ package play.classloading;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.hash.ClassStateHashCreator;
 import play.exceptions.RestartNeededException;
@@ -330,7 +328,6 @@ public class ApplicationClassloader extends ClassLoader {
         }
         
         if (!newDefinitions.isEmpty()) {
-            Cache.clear();
             if (HotswapAgent.enabled) {
                 try {
                     HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
