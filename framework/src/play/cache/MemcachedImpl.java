@@ -1,18 +1,5 @@
 package play.cache;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.ConnectionFactory;
 import net.spy.memcached.ConnectionFactoryBuilder;
@@ -23,6 +10,14 @@ import net.spy.memcached.transcoders.SerializingTranscoder;
 import play.Logger;
 import play.Play;
 import play.exceptions.ConfigurationException;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Memcached implementation (using http://code.google.com/p/spymemcached/)
@@ -69,7 +64,9 @@ public class MemcachedImpl implements CacheImpl {
                         }
                     }.readObject();
                 } catch (Exception e) {
-                    Logger.error(e, "Could not deserialize");
+                    if (!Cache.isPlayRecentlyStarted()) {
+                        Logger.error(e, "Could not deserialize");
+                    }
                 }
                 return null;
             }
