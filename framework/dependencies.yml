@@ -11,7 +11,7 @@ require:    &allDependencies
     - bytecodeparser 0.3
     - com.mchange -> c3p0 0.9.5.2
     - org.ow2.asm -> asm-all 5.1
-    - cglib -> cglib 3.2.2
+    - cglib -> cglib 3.2.4
     - com.google.code.gson -> gson 2.6.2
     - com.jamonapi -> jamon 2.81
     - com.ning -> async-http-client 1.9.38
