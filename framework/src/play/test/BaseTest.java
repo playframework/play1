@@ -11,7 +11,7 @@ import play.exceptions.UnexpectedException;
 import javax.persistence.EntityManager;
 
 @RunWith(PlayJUnitRunner.class)
-public class BaseTest extends org.junit.Assert {
+public abstract class BaseTest extends org.junit.Assert {
 
     @Rule
     public PlayJUnitRunner.StartPlay startPlayBeforeTests = PlayJUnitRunner.StartPlay.rule();
