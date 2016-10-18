@@ -8,6 +8,7 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.exceptions.NoRouteFoundException;
+import play.i18n.Lang;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,7 +52,9 @@ public class Router {
     public static void load(String prefix) {
         routes.clear();
         actionRoutesCache.clear();
-        parse(Play.routes, prefix);
+        for (VirtualFile routeFile : Play.routes) {
+            parse(routeFile, prefix);
+        }
         lastLoading = System.currentTimeMillis();
         // Plugins
         Play.pluginCollection.onRoutesLoaded();
@@ -139,6 +143,7 @@ public class Router {
         route.routesFileLine = line;
         route.addFormat(headers);
         route.addParams(params);
+        route.setLocaleBasedOnMultilangualRoutesFile(sourceFile);
         route.compute();
         if (Logger.isTraceEnabled()) {
             Logger.trace("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
@@ -228,14 +233,16 @@ public class Router {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
             return;
         }
-        if (Play.routes.lastModified() > lastLoading) {
-            load(prefix);
-        } else {
-            for (VirtualFile file : Play.modulesRoutes.values()) {
-                if (file.lastModified() > lastLoading) {
-                    load(prefix);
-                    return;
-                }
+        for (VirtualFile route : Play.routes) {
+            if (route.lastModified() > lastLoading) {
+                load(prefix);
+                return;
+            }
+        }
+        for (VirtualFile file : Play.modulesRoutes.values()) {
+            if (file.lastModified() > lastLoading) {
+                load(prefix);
+                return;
             }
         }
     }
@@ -292,6 +299,9 @@ public class Router {
                 }
                 if (request.action.equals("404")) {
                     throw new NotFound(route.path);
+                }
+                if(Play.multilangRouteFiles && StringUtils.isNotEmpty(route.locale) && !route.locale.equals(Lang.get())){
+                    Lang.change(route.locale);
                 }
                 return route;
             }
@@ -591,6 +601,9 @@ public class Router {
             matchingRoutes = findActionRoutes(action);
             actionRoutesCache.put(action, matchingRoutes);
         }
+        if(Play.multilangRouteFiles){
+            prioritizeActionRoutesBasedOnActiveLocale(matchingRoutes);
+        }
         return matchingRoutes;
     }
 
@@ -615,6 +628,24 @@ public class Router {
             }
         }
         return matchingRoutes;
+    }
+
+    private static void prioritizeActionRoutesBasedOnActiveLocale(List<Router.ActionRoute> matchingRoutes) {
+        if(matchingRoutes.size()==0) return;
+        String locale = Lang.get();
+        if(StringUtils.isEmpty(locale)) return;
+        for (int i = 0; i < matchingRoutes.size(); i++) {
+            Router.ActionRoute actionRoute = matchingRoutes.get(i);
+            if(locale.equals(actionRoute.route.locale)){
+                prioritizeMultilangActionRoute(matchingRoutes,i);
+            }
+        }
+    }
+
+    private static <ActionRoute> void prioritizeMultilangActionRoute(List<ActionRoute> t, int position){
+        if(position!=0) {
+            t.add(0, t.remove(position));
+        }
     }
 
     private static final class ActionRoute {
@@ -736,6 +767,7 @@ public class Router {
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
+        String locale;
 
         public void compute() {
             this.host = "";
@@ -979,6 +1011,16 @@ public class Router {
         @Override
         public String toString() {
             return method + " " + path + " -> " + action;
+        }
+
+        private void setLocaleBasedOnMultilangualRoutesFile(String absolutePath){
+            if(StringUtils.isEmpty(absolutePath)){
+                return;
+            }
+            String fileName = Paths.get(absolutePath).getFileName().toString();
+            if(StringUtils.isNotEmpty(fileName) && fileName.matches("routes\\.[A-Za-z]{2}")){
+                this.locale = fileName.split("\\.")[1];
+            }
         }
     }
 }

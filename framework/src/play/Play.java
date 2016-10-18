@@ -114,7 +114,7 @@ public class Play {
     /**
      * Main routes file
      */
-    public static VirtualFile routes;
+    public static List<VirtualFile> routes;
     /**
      * Plugin routes files
      */
@@ -181,6 +181,11 @@ public class Play {
      * as a WAR in an applicationServer
      */
     public static boolean standalonePlayServer = true;
+
+    /**
+     * This flag indicates that app has multiple routes files for different locales
+     */
+    public static boolean multilangRouteFiles = false;
 
     /**
      * Init the framework
@@ -276,7 +281,7 @@ public class Play {
         }
 
         // Main route file
-        routes = appRoot.child("conf/routes");
+        routes = loadRoutesFiles(appRoot);
 
         // Plugin route files
         modulesRoutes = new HashMap<>(16);
@@ -319,6 +324,20 @@ public class Play {
         pluginCollection.onApplicationReady();
 
         Play.initialized = true;
+    }
+
+    private static List<VirtualFile> loadRoutesFiles(VirtualFile appRoot) {
+        List<VirtualFile> routes = new ArrayList<VirtualFile>();
+        for (VirtualFile vf: appRoot.child("conf").list()) {
+            String virtualFileName = vf.getName();
+            if(virtualFileName !=null && virtualFileName.equals("routes")){
+                routes.add(vf);
+            } else if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}")){
+                routes.add(vf);
+                Play.multilangRouteFiles = true;
+            }
+        }
+        return routes;
     }
 
     public static void guessFrameworkPath() {
