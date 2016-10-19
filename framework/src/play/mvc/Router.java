@@ -594,6 +594,10 @@ public class Router {
             matchingRoutes = findActionRoutes(action);
             actionRoutesCache.put(action, matchingRoutes);
         }
+        List<ActionRoute> selectedActionRoutes = Play.pluginCollection.selectActionRoutes(new ArrayList<ActionRoute>(matchingRoutes));
+        if(selectedActionRoutes!=null) {
+            matchingRoutes=selectedActionRoutes;
+        }
         return matchingRoutes;
     }
 
@@ -620,9 +624,25 @@ public class Router {
         return matchingRoutes;
     }
 
-    private static final class ActionRoute {
+    public static final class ActionRoute {
         private Route route;
         private Map<String, String> args = new HashMap<String, String>(2);
+
+        public Route getRoute() {
+            return route;
+        }
+
+        public Map<String, String> getArgs() {
+            return args;
+        }
+
+        public void setRoute(Route route) {
+            this.route = route;
+        }
+
+        public void setArgs(Map<String, String> args) {
+            this.args = args;
+        }
     }
 
     public static class ActionDefinition {

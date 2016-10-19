@@ -788,4 +788,15 @@ public class PluginCollection {
         
         return allPluginTests;
     }
+
+    public List<Router.ActionRoute> selectActionRoutes(List<Router.ActionRoute> matchingRoutes) {
+        List<Router.ActionRoute> selectedMatchingRoutes = null;
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            List<Router.ActionRoute> pluginSelectActionRoutes = plugin.selectActionRoutes(selectedMatchingRoutes==null?matchingRoutes:selectedMatchingRoutes);
+            if(pluginSelectActionRoutes!=null){
+                selectedMatchingRoutes=pluginSelectActionRoutes;
+            }
+        }
+        return selectedMatchingRoutes;
+    }
 }
