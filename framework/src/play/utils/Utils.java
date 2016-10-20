@@ -2,6 +2,7 @@ package play.utils;
 
 import play.Play;
 import play.mvc.Scope;
+import play.vfs.VirtualFile;
 
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
@@ -68,7 +69,10 @@ public class Utils {
 
     public static String open(String file, Integer line) {
         if (Play.configuration.containsKey("play.editor")) {
-            return String.format(Play.configuration.getProperty("play.editor"), Play.getFile(file).getAbsolutePath(), line);
+            VirtualFile vfile = VirtualFile.fromRelativePath(file);
+            if (vfile != null) {
+                return String.format(Play.configuration.getProperty("play.editor"), vfile.getRealFile().getAbsolutePath(), line);
+            }
         }
         return null;
     }
