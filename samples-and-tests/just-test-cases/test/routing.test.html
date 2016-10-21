@@ -43,7 +43,15 @@
     open('/re/api01%2F02/01%2F01')   
     assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01/02 verId=01/01')  
     assertTextPresent('URL: /re/api01%2F02/01%2F01') 
- 
+    
+    open('/re/urlWithArgumentInRoutesNoSpace')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2') 
+    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace') 
+    
+    open('/re/urlWithArgumentInRoutesWithSpace')   
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2')  
+    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace') 
+    
     // [#1685] - show (reverse routing of param with '/' in it)
     open('/re/1%2F2/rev')
     assertTextPresent('OK[revRoute]: 1/2')   

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,7 +28,6 @@ import play.utils.Default;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 
-import java.util.concurrent.ConcurrentHashMap;
 /**
  * The router matches HTTP requests to action invocations
  */
@@ -36,8 +36,7 @@ public class Router {
     static Pattern routePattern = new Pattern(
             "^({method}GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|WS|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
     /**
-     * Pattern used to locate a method override instruction in
-     * request.querystring
+     * Pattern used to locate a method override instruction in request.querystring
      */
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
     /**
@@ -49,8 +48,8 @@ public class Router {
      * Parse the routes file. This is called at startup.
      *
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     public static void load(String prefix) {
         routes.clear();
@@ -62,16 +61,14 @@ public class Router {
     }
 
     /**
-     * This one can be called to add new route. Last added is first in the route
-     * list.
+     * This one can be called to add new route. Last added is first in the route list.
      */
     public static void prependRoute(String method, String path, String action, String headers) {
         prependRoute(method, path, action, null, headers);
     }
 
     /**
-     * This one can be called to add new route. Last added is first in the route
-     * list.
+     * This one can be called to add new route. Last added is first in the route list.
      */
     public static void prependRoute(String method, String path, String action) {
         prependRoute(method, path, action, null, null);
@@ -123,9 +120,8 @@ public class Router {
     }
 
     /**
-     * This is used internally when reading the route file. The order the routes
-     * are added matters and we want the method to append the routes to the
-     * list.
+     * This is used internally when reading the route file. The order the routes are added matters and we want the
+     * method to append the routes to the list.
      */
     public static void appendRoute(String method, String path, String action, String params, String headers, String sourceFile, int line) {
         routes.add(getRoute(method, path, action, params, headers, sourceFile, line));
@@ -159,14 +155,13 @@ public class Router {
     }
 
     /**
-     * Parse a route file. If an action starts with <i>"plugin:name"</i>,
-     * replace that route by the ones declared in the plugin route file denoted
-     * by that <i>name</i>, if found.
+     * Parse a route file. If an action starts with <i>"plugin:name"</i>, replace that route by the ones declared in the
+     * plugin route file denoted by that <i>name</i>, if found.
      *
      * @param routeFile
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
@@ -222,12 +217,11 @@ public class Router {
      * In PROD mode and if the routes are already loaded, this does nothing.
      * <p>
      * <p>
-     * In DEV mode, this checks each routes file's "last modified" time to see
-     * if the routes need updated.
+     * In DEV mode, this checks each routes file's "last modified" time to see if the routes need updated.
      *
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     public static void detectChanges(String prefix) {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
@@ -648,8 +642,7 @@ public class Router {
          */
         public String action;
         /**
-         * @todo - are these the required args in the routing file, or the query
-         *       string in a request?
+         * @todo - are these the required args in the routing file, or the query string in a request?
          */
         public Map<String, Object> args;
 
@@ -849,7 +842,7 @@ public class Router {
             }
             params = params.substring(1, params.length() - 1);
             for (String param : params.split(",")) {
-                Matcher matcher = paramPattern.matcher(param);
+                Matcher matcher = paramPattern.matcher(param.trim());
                 if (matcher.matches()) {
                     staticArgs.put(matcher.group(1), matcher.group(2));
                 } else {
@@ -897,8 +890,7 @@ public class Router {
          * @param method
          *            GET/POST/etc.
          * @param path
-         *            Part after domain and before query-string. Starts with a
-         *            "/".
+         *            Part after domain and before query-string. Starts with a "/".
          * @param accept
          *            Format, e.g. html.
          * @param domain
