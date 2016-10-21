@@ -6,11 +6,15 @@ import play.vfs.VirtualFile;
  * Plugin used for tracking for application.conf changes
  */
 public class ConfigurationChangeWatcherPlugin extends PlayPlugin {
-    protected static long configLastModified;
-    
+    protected static long configLastModified = System.currentTimeMillis();
+
+    @Override
+    public void onApplicationStart() {
+        configLastModified = System.currentTimeMillis();
+    }
+
     @Override
     public void onConfigurationRead() {
-        configLastModified = System.currentTimeMillis();
         if (Play.mode.isProd()) {
             Play.pluginCollection.disablePlugin(this);
         }
