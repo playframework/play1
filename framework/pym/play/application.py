@@ -47,7 +47,7 @@ class PlayApplication(object):
 
     def check(self):
         try:
-            assert (os.path.exists(os.path.join(self.path, 'conf', 'routes')) or len(glob.glob(os.path.join(self.path, 'conf', 'routes.??')))>0)
+            assert (os.path.exists(os.path.join(self.path, 'conf', 'routes')) or len(glob.glob(os.path.join(self.path, 'conf', 'routes.??')))>0 or len(glob.glob(os.path.join(self.path, 'conf', 'routes.??_??')))>0)
             assert os.path.exists(os.path.join(self.path, 'conf', 'application.conf'))
         except AssertionError:
             print "~ Oops. conf/routes or conf/application.conf missing."

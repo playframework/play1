@@ -630,23 +630,23 @@ public class Router {
         return matchingRoutes;
     }
 
-    private static void prioritizeActionRoutesBasedOnActiveLocale(List<Router.ActionRoute> matchingRoutes) {
+  /**
+   * Prioritize action routes based on active locale and Play.langs properties. Active lang has highest priority, then prioritized according to Play.langs order.
+   *
+   * @param matchingRoutes
+   */
+  private static void prioritizeActionRoutesBasedOnActiveLocale(List<Router.ActionRoute> matchingRoutes) {
         if(matchingRoutes.size()==0) return;
-        String locale = Lang.get();
+        final String locale = Lang.get();
         if(StringUtils.isEmpty(locale)) return;
-        for (int i = 0; i < matchingRoutes.size(); i++) {
-            Router.ActionRoute actionRoute = matchingRoutes.get(i);
-            if(locale.equals(actionRoute.route.locale)){
-                prioritizeMultilangActionRoute(matchingRoutes,i);
+        matchingRoutes.sort(new Comparator<ActionRoute>() {
+            @Override
+            public int compare(ActionRoute ar1, ActionRoute ar2) {
+                return locale.equals(ar1.route.locale)?-1:Integer.compare(Play.langs.indexOf(ar1.route.locale),Play.langs.indexOf(ar2.route.locale));
             }
-        }
+        });
     }
 
-    private static <ActionRoute> void prioritizeMultilangActionRoute(List<ActionRoute> t, int position){
-        if(position!=0) {
-            t.add(0, t.remove(position));
-        }
-    }
 
     private static final class ActionRoute {
         private Route route;
@@ -1018,7 +1018,7 @@ public class Router {
                 return;
             }
             String fileName = Paths.get(absolutePath).getFileName().toString();
-            if(StringUtils.isNotEmpty(fileName) && fileName.matches("routes\\.[A-Za-z]{2}")){
+            if(StringUtils.isNotEmpty(fileName) && fileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
                 this.locale = fileName.split("\\.")[1];
             }
         }

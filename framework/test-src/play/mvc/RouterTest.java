@@ -1,16 +1,22 @@
 package play.mvc;
 
 import org.junit.Test;
-
 import play.Play;
+import play.i18n.Lang;
 import play.mvc.Http.Request;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
+import play.vfs.VirtualFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RouterTest {
 
@@ -135,5 +141,133 @@ public class RouterTest {
             return false;
         }
         return false;
+    }
+
+    @Test
+    public void test_loadRoutesFiles() {
+        Play.multilangRouteFiles=false;
+
+        VirtualFile appRoot = mock(VirtualFile.class);
+        List<VirtualFile> routes = new ArrayList<>();
+        VirtualFile routesFile = mock(VirtualFile.class);
+        when(routesFile.getName()).thenReturn("routes");
+        routes.add(routesFile);
+        VirtualFile appConf = mock(VirtualFile.class);
+        when(appConf.getName()).thenReturn("application.conf");
+        routes.add(appConf);
+
+        VirtualFile confFolder = mock(VirtualFile.class);
+        when(confFolder.list()).thenReturn(routes);
+
+        when(appRoot.child("conf")).thenReturn(confFolder);
+
+        assertEquals(1,Play.loadRoutesFiles(appRoot).size());
+        assertEquals(false,Play.multilangRouteFiles);
+
+        routes = new ArrayList<>();
+        VirtualFile routesEnFile = mock(VirtualFile.class);
+        when(routesEnFile.getName()).thenReturn("routes.en");
+        routes.add(routesEnFile);
+        VirtualFile routesRuFile = mock(VirtualFile.class);
+        when(routesRuFile.getName()).thenReturn("routes.RU_ru");
+        routes.add(routesRuFile);
+        routes.add(appConf);
+        when(confFolder.list()).thenReturn(routes);
+
+        assertEquals(2,Play.loadRoutesFiles(appRoot).size());
+        assertEquals(true,Play.multilangRouteFiles);
+
+    }
+
+    @Test
+    public void test_detectNoChanges() {
+        long now = System.currentTimeMillis();
+        Router router = new Router();
+        router.lastLoading = now;
+
+        List<VirtualFile> routes = new ArrayList<>();
+        VirtualFile routesNotModifiedFile = mock(VirtualFile.class);
+        when(routesNotModifiedFile.getName()).thenReturn("routes.en");
+        when(routesNotModifiedFile.lastModified()).thenReturn(now-1000);
+        routes.add(routesNotModifiedFile);
+
+        VirtualFile routesNotModifiedFile1 = mock(VirtualFile.class);
+        when(routesNotModifiedFile1.getName()).thenReturn("routes.ru_RU");
+        when(routesNotModifiedFile1.lastModified()).thenReturn(now);
+        routes.add(routesNotModifiedFile1);
+
+        Play.routes = routes;
+
+        HashMap<String, VirtualFile> modulesRoutes = new HashMap<>();
+        VirtualFile moduleRoute1 = mock(VirtualFile.class);
+        when(moduleRoute1.lastModified()).thenReturn(now-1000);
+        VirtualFile moduleRoute2 = mock(VirtualFile.class);
+        when(moduleRoute2.lastModified()).thenReturn(now);
+        modulesRoutes.put("1",moduleRoute1);
+        modulesRoutes.put("2",moduleRoute2);
+
+        Play.modulesRoutes=modulesRoutes;
+
+        router.detectChanges("");
+    }
+
+    @Test
+    public void test_reverseMultiLangRoutes(){
+        Play.configuration = new Properties();
+        List<String> applicationLangs = new ArrayList<>();
+        applicationLangs.add("ru");
+        applicationLangs.add("fr_FR");
+        applicationLangs.add("en_GB");
+        Play.langs=applicationLangs;
+        Play.multilangRouteFiles=true;
+
+        Router router = new Router();
+        router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
+        router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
+        router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
+        router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
+        router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
+        router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
+
+        Lang.change("ru");
+        Router.ActionDefinition testAction = router.reverse("testAction", new HashMap<String, Object>());
+        assertEquals("/test/deistvie",testAction.url);
+
+        Lang.change("en_GB");
+        testAction = router.reverse("testAction", new HashMap<String, Object>());
+        assertEquals("/test/action",testAction.url);
+
+        Lang.change("fr_FR");
+        testAction = router.reverse("testAction", new HashMap<String, Object>());
+        assertEquals("/test/activite",testAction.url);
+    }
+
+    @Test
+    public void test_routeMultilangActivatesLang(){
+        Play.configuration = new Properties();
+        List<String> applicationLangs = new ArrayList<>();
+        applicationLangs.add("ru");
+        applicationLangs.add("fr_FR");
+        applicationLangs.add("en_GB");
+        Play.langs=applicationLangs;
+        Play.multilangRouteFiles=true;
+
+        Router router = new Router();
+        router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
+        router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
+        router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
+        router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
+        router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
+        router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
+
+        Lang.change("en_GB");
+        assertEquals("en_GB",Lang.get());
+        Http.Request request = mock(Http.Request.class);
+        request.method="GET";
+        request.path="/test/activite";
+        request.format="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+        request.domain="github.com";
+        router.route(request);
+        assertEquals("fr_FR",Lang.get());
     }
 }

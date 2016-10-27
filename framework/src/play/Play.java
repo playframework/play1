@@ -326,13 +326,13 @@ public class Play {
         Play.initialized = true;
     }
 
-    private static List<VirtualFile> loadRoutesFiles(VirtualFile appRoot) {
+    public static List<VirtualFile> loadRoutesFiles(VirtualFile appRoot) {
         List<VirtualFile> routes = new ArrayList<VirtualFile>();
         for (VirtualFile vf: appRoot.child("conf").list()) {
             String virtualFileName = vf.getName();
             if(virtualFileName !=null && virtualFileName.equals("routes")){
                 routes.add(vf);
-            } else if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}")){
+            } else if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
                 routes.add(vf);
                 Play.multilangRouteFiles = true;
             }
