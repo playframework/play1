@@ -642,7 +642,9 @@ public class Router {
         matchingRoutes.sort(new Comparator<ActionRoute>() {
             @Override
             public int compare(ActionRoute ar1, ActionRoute ar2) {
-                return locale.equals(ar1.route.locale)?-1:Integer.compare(Play.langs.indexOf(ar1.route.locale),Play.langs.indexOf(ar2.route.locale));
+                if(locale.equals(ar1.route.locale)) return -1;
+                if(locale.equals(ar2.route.locale)) return 1;
+                return Integer.compare(Play.langs.indexOf(ar1.route.locale), Play.langs.indexOf(ar2.route.locale));
             }
         });
     }

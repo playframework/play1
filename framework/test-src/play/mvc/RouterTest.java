@@ -182,8 +182,8 @@ public class RouterTest {
     @Test
     public void test_detectNoChanges() {
         long now = System.currentTimeMillis();
-        Router router = new Router();
-        router.lastLoading = now;
+
+        Router.lastLoading = now;
 
         List<VirtualFile> routes = new ArrayList<>();
         VirtualFile routesNotModifiedFile = mock(VirtualFile.class);
@@ -208,7 +208,7 @@ public class RouterTest {
 
         Play.modulesRoutes=modulesRoutes;
 
-        router.detectChanges("");
+        Router.detectChanges("");
     }
 
     @Test
@@ -221,25 +221,31 @@ public class RouterTest {
         Play.langs=applicationLangs;
         Play.multilangRouteFiles=true;
 
-        Router router = new Router();
-        router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
-        router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
-        router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
-        router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
-        router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
-        router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
+        Router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
+        Router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
+        Router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
+        Router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
+        Router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
+        Router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
 
         Lang.change("ru");
-        Router.ActionDefinition testAction = router.reverse("testAction", new HashMap<String, Object>());
+        Router.ActionDefinition testAction = Router.reverse("testAction", new HashMap<String, Object>());
         assertEquals("/test/deistvie",testAction.url);
 
         Lang.change("en_GB");
-        testAction = router.reverse("testAction", new HashMap<String, Object>());
+        testAction = Router.reverse("testAction", new HashMap<String, Object>());
         assertEquals("/test/action",testAction.url);
 
         Lang.change("fr_FR");
-        testAction = router.reverse("testAction", new HashMap<String, Object>());
+        testAction = Router.reverse("testAction", new HashMap<String, Object>());
         assertEquals("/test/activite",testAction.url);
+
+        Router.routes.clear();
+        Lang.change("en_GB");
+        Router.appendRoute("GET","/test/do","doAction","","","conf/routes.en_GB",0);
+        Router.appendRoute("GET","/test/delo","doAction","","","conf/routes.ru",1);
+        testAction = Router.reverse("doAction", new HashMap<String, Object>());
+        assertEquals("/test/do",testAction.url);
     }
 
     @Test
@@ -252,13 +258,12 @@ public class RouterTest {
         Play.langs=applicationLangs;
         Play.multilangRouteFiles=true;
 
-        Router router = new Router();
-        router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
-        router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
-        router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
-        router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
-        router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
-        router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
+        Router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
+        Router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
+        Router.appendRoute("GET","/test/activite","testAction","","","conf/routes.fr_FR",2);
+        Router.appendRoute("GET","/test/act","testAnotherAction","","","conf/routes.fr_FR",3);
+        Router.appendRoute("GET","/test/akt","testAnotherAction","","","conf/routes.ru",4);
+        Router.appendRoute("GET","/test/active","testAnotherAction","","","conf/routes.en_GB",5);
 
         Lang.change("en_GB");
         assertEquals("en_GB",Lang.get());
@@ -267,7 +272,7 @@ public class RouterTest {
         request.path="/test/activite";
         request.format="text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
         request.domain="github.com";
-        router.route(request);
+        Router.route(request);
         assertEquals("fr_FR",Lang.get());
     }
 }
