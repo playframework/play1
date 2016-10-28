@@ -1,9 +1,22 @@
 package play.mvc;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.commons.lang.StringUtils;
+
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
-import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -33,8 +46,7 @@ public class Router {
     static Pattern routePattern = new Pattern(
             "^({method}GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|WS|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
     /**
-     * Pattern used to locate a method override instruction in
-     * request.querystring
+     * Pattern used to locate a method override instruction in request.querystring
      */
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
     /**
@@ -46,8 +58,8 @@ public class Router {
      * Parse the routes file. This is called at startup.
      *
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     public static void load(String prefix) {
         routes.clear();
@@ -61,16 +73,14 @@ public class Router {
     }
 
     /**
-     * This one can be called to add new route. Last added is first in the route
-     * list.
+     * This one can be called to add new route. Last added is first in the route list.
      */
     public static void prependRoute(String method, String path, String action, String headers) {
         prependRoute(method, path, action, null, headers);
     }
 
     /**
-     * This one can be called to add new route. Last added is first in the route
-     * list.
+     * This one can be called to add new route. Last added is first in the route list.
      */
     public static void prependRoute(String method, String path, String action) {
         prependRoute(method, path, action, null, null);
@@ -122,9 +132,8 @@ public class Router {
     }
 
     /**
-     * This is used internally when reading the route file. The order the routes
-     * are added matters and we want the method to append the routes to the
-     * list.
+     * This is used internally when reading the route file. The order the routes are added matters and we want the
+     * method to append the routes to the list.
      */
     public static void appendRoute(String method, String path, String action, String params, String headers, String sourceFile, int line) {
         routes.add(getRoute(method, path, action, params, headers, sourceFile, line));
@@ -159,14 +168,13 @@ public class Router {
     }
 
     /**
-     * Parse a route file. If an action starts with <i>"plugin:name"</i>,
-     * replace that route by the ones declared in the plugin route file denoted
-     * by that <i>name</i>, if found.
+     * Parse a route file. If an action starts with <i>"plugin:name"</i>, replace that route by the ones declared in the
+     * plugin route file denoted by that <i>name</i>, if found.
      *
      * @param routeFile
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
@@ -222,12 +230,11 @@ public class Router {
      * In PROD mode and if the routes are already loaded, this does nothing.
      * <p>
      * <p>
-     * In DEV mode, this checks each routes file's "last modified" time to see
-     * if the routes need updated.
+     * In DEV mode, this checks each routes file's "last modified" time to see if the routes need updated.
      *
      * @param prefix
-     *            The prefix that the path of all routes in this route file
-     *            start with. This prefix should not end with a '/' character.
+     *            The prefix that the path of all routes in this route file start with. This prefix should not end with
+     *            a '/' character.
      */
     public static void detectChanges(String prefix) {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
@@ -447,148 +454,146 @@ public class Router {
             Route route = actionRoute.route;
             args.putAll(actionRoute.args);
 
-                    List<String> inPathArgs = new ArrayList<>(16);
-                    boolean allRequiredArgsAreHere = true;
-                    // les noms de parametres matchent ils ?
-                    for (Route.Arg arg : route.args) {
-                        inPathArgs.add(arg.name);
-                        Object value = args.get(arg.name);
-                        if (value == null) {
-                            // This is a hack for reverting on hostname that are
-                            // a regex expression.
-                            // See [#344] for more into. This is not optimal and
-                            // should retough. However,
-                            // it allows us to do things like {(.*}}.domain.com
-                            String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
-                            if (host.equals(arg.name) || host.matches(arg.name)) {
-                                args.remove(arg.name);
-                                route.host = Http.Request.current() == null ? "" : Http.Request.current().domain;
-                                break;
-                            } else {
-                                allRequiredArgsAreHere = false;
-                                break;
-                            }
+            List<String> inPathArgs = new ArrayList<>(16);
+            boolean allRequiredArgsAreHere = true;
+            // les noms de parametres matchent ils ?
+            for (Route.Arg arg : route.args) {
+                inPathArgs.add(arg.name);
+                Object value = args.get(arg.name);
+                if (value == null) {
+                    // This is a hack for reverting on hostname that are
+                    // a regex expression.
+                    // See [#344] for more into. This is not optimal and
+                    // should retough. However,
+                    // it allows us to do things like {(.*}}.domain.com
+                    String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
+                    if (host.equals(arg.name) || host.matches(arg.name)) {
+                        args.remove(arg.name);
+                        route.host = Http.Request.current() == null ? "" : Http.Request.current().domain;
+                        break;
+                    } else {
+                        allRequiredArgsAreHere = false;
+                        break;
+                    }
+                } else {
+                    if (value instanceof List<?>) {
+                        @SuppressWarnings("unchecked")
+                        List<Object> l = (List<Object>) value;
+                        value = l.get(0);
+                    }
+                    if (!value.toString().startsWith(":") && !arg.constraint.matches(Utils.urlEncodePath(value.toString()))) {
+                        allRequiredArgsAreHere = false;
+                        break;
+                    }
+                }
+            }
+            // les parametres codes en dur dans la route matchent-ils ?
+            for (String staticKey : route.staticArgs.keySet()) {
+                if (staticKey.equals("format")) {
+                    if (!(Http.Request.current() == null ? "" : Http.Request.current().format).equals(route.staticArgs.get("format"))) {
+                        allRequiredArgsAreHere = false;
+                        break;
+                    }
+                    continue; // format is a special key
+                }
+                if (!args.containsKey(staticKey) || (args.get(staticKey) == null)
+                        || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
+                    allRequiredArgsAreHere = false;
+                    break;
+                }
+            }
+            if (allRequiredArgsAreHere) {
+                StringBuilder queryString = new StringBuilder();
+                String path = route.path;
+                String host = route.host;
+                if (path.endsWith("/?")) {
+                    path = path.substring(0, path.length() - 2);
+                }
+                for (Map.Entry<String, Object> entry : args.entrySet()) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+                    if (inPathArgs.contains(key) && value != null) {
+                        if (List.class.isAssignableFrom(value.getClass())) {
+                            @SuppressWarnings("unchecked")
+                            List<Object> vals = (List<Object>) value;
+                            path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString()).replace("$", "\\$");
                         } else {
-                            if (value instanceof List<?>) {
-                                @SuppressWarnings("unchecked")
-                                List<Object> l = (List<Object>) value;
-                                value = l.get(0);
+                            try {
+                                path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding)
+                                        .replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+                            } catch (UnsupportedEncodingException e) {
+                                path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}",
+                                        value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
                             }
-                            if (!value.toString().startsWith(":") && !arg.constraint.matches(Utils.urlEncodePath(value.toString()))) {
-                                allRequiredArgsAreHere = false;
-                                break;
+                            try {
+                                host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding)
+                                        .replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+                            } catch (UnsupportedEncodingException e) {
+                                host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}",
+                                        value.toString().replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
+                            }
+                        }
+                    } else if (route.staticArgs.containsKey(key)) {
+                        // Do nothing -> The key is static
+                    } else if (!argsbackup.containsKey(key)) {
+                        // Do nothing -> The key is provided in
+                        // RouteArgs and not used (see #447)
+                    } else if (value != null) {
+                        if (List.class.isAssignableFrom(value.getClass())) {
+                            @SuppressWarnings("unchecked")
+                            List<Object> vals = (List<Object>) value;
+                            for (Object object : vals) {
+                                try {
+                                    queryString.append(URLEncoder.encode(key, encoding));
+                                    queryString.append("=");
+                                    String objStr = object.toString();
+                                    // Special case to handle jsAction
+                                    // tag
+                                    if (objStr.startsWith(":") && objStr.length() > 1) {
+                                        queryString.append(':');
+                                        objStr = objStr.substring(1);
+                                    }
+                                    queryString.append(URLEncoder.encode(objStr + "", encoding));
+                                    queryString.append("&");
+                                } catch (UnsupportedEncodingException ex) {
+                                }
+                            }
+                        } else if (value.getClass().equals(Default.class)) {
+                            // Skip defaults in queryString
+                        } else {
+                            try {
+                                queryString.append(URLEncoder.encode(key, encoding));
+                                queryString.append("=");
+                                String objStr = value.toString();
+                                // Special case to handle jsAction tag
+                                if (objStr.startsWith(":") && objStr.length() > 1) {
+                                    queryString.append(':');
+                                    objStr = objStr.substring(1);
+                                }
+                                queryString.append(URLEncoder.encode(objStr + "", encoding));
+                                queryString.append("&");
+                            } catch (UnsupportedEncodingException ex) {
                             }
                         }
                     }
-                    // les parametres codes en dur dans la route matchent-ils ?
-                    for (String staticKey : route.staticArgs.keySet()) {
-                        if (staticKey.equals("format")) {
-                            if (!(Http.Request.current() == null ? "" : Http.Request.current().format)
-                                    .equals(route.staticArgs.get("format"))) {
-                                allRequiredArgsAreHere = false;
-                                break;
-                            }
-                            continue; // format is a special key
-                        }
-                        if (!args.containsKey(staticKey) || (args.get(staticKey) == null)
-                                || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
-                            allRequiredArgsAreHere = false;
-                            break;
-                        }
-                    }
-                    if (allRequiredArgsAreHere) {
-                        StringBuilder queryString = new StringBuilder();
-                        String path = route.path;
-                        String host = route.host;
-                        if (path.endsWith("/?")) {
-                            path = path.substring(0, path.length() - 2);
-                        }
-                        for (Map.Entry<String, Object> entry : args.entrySet()) {
-                            String key = entry.getKey();
-                            Object value = entry.getValue();
-                            if (inPathArgs.contains(key) && value != null) {
-                                if (List.class.isAssignableFrom(value.getClass())) {
-                                    @SuppressWarnings("unchecked")
-                                    List<Object> vals = (List<Object>) value;
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString()).replace("$", "\\$");
-                                } else {
-                                    try {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding)
-                                                .replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
-                                    } catch (UnsupportedEncodingException e) {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$")
-                                                .replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
-                                    }
-                                    try {
-                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString(), encoding)
-                                                .replace("$", "\\$").replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
-                                    } catch (UnsupportedEncodingException e) {
-                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$")
-                                                .replace("%3A", ":").replace("%40", "@").replace("+", "%20"));
-                                    }
-                                }
-                            } else if (route.staticArgs.containsKey(key)) {
-                                // Do nothing -> The key is static
-                            } else if (!argsbackup.containsKey(key)) {
-                                // Do nothing -> The key is provided in
-                                // RouteArgs and not used (see #447)
-                            } else if (value != null) {
-                                if (List.class.isAssignableFrom(value.getClass())) {
-                                    @SuppressWarnings("unchecked")
-                                    List<Object> vals = (List<Object>) value;
-                                    for (Object object : vals) {
-                                        try {
-                                            queryString.append(URLEncoder.encode(key, encoding));
-                                            queryString.append("=");
-                                            String objStr = object.toString();
-                                            // Special case to handle jsAction
-                                            // tag
-                                            if (objStr.startsWith(":") && objStr.length() > 1) {
-                                                queryString.append(':');
-                                                objStr = objStr.substring(1);
-                                            }
-                                            queryString.append(URLEncoder.encode(objStr + "", encoding));
-                                            queryString.append("&");
-                                        } catch (UnsupportedEncodingException ex) {
-                                        }
-                                    }
-                                } else if (value.getClass().equals(Default.class)) {
-                                    // Skip defaults in queryString
-                                } else {
-                                    try {
-                                        queryString.append(URLEncoder.encode(key, encoding));
-                                        queryString.append("=");
-                                        String objStr = value.toString();
-                                        // Special case to handle jsAction tag
-                                        if (objStr.startsWith(":") && objStr.length() > 1) {
-                                            queryString.append(':');
-                                            objStr = objStr.substring(1);
-                                        }
-                                        queryString.append(URLEncoder.encode(objStr + "", encoding));
-                                        queryString.append("&");
-                                    } catch (UnsupportedEncodingException ex) {
-                                    }
-                                }
-                            }
-                        }
-                        String qs = queryString.toString();
-                        if (qs.endsWith("&")) {
-                            qs = qs.substring(0, qs.length() - 1);
-                        }
-                        ActionDefinition actionDefinition = new ActionDefinition();
-                        actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
-                        actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
-                        actionDefinition.star = "*".equals(route.method);
-                        actionDefinition.action = action;
-                        actionDefinition.args = argsbackup;
-                        actionDefinition.host = host;
+                }
+                String qs = queryString.toString();
+                if (qs.endsWith("&")) {
+                    qs = qs.substring(0, qs.length() - 1);
+                }
+                ActionDefinition actionDefinition = new ActionDefinition();
+                actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
+                actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
+                actionDefinition.star = "*".equals(route.method);
+                actionDefinition.action = action;
+                actionDefinition.args = argsbackup;
+                actionDefinition.host = host;
                 if (Boolean.parseBoolean(Play.configuration.getProperty("application.forceSecureReverseRoutes", "false"))) {
                     actionDefinition.secure();
                 }
-                        return actionDefinition;
-                    }
-                }
-
+                return actionDefinition;
+            }
+        }
 
         throw new NoRouteFoundException(action, args);
     }
@@ -678,8 +683,7 @@ public class Router {
          */
         public String action;
         /**
-         * @todo - are these the required args in the routing file, or the query
-         *       string in a request?
+         * @todo - are these the required args in the routing file, or the query string in a request?
          */
         public Map<String, Object> args;
 
@@ -880,7 +884,7 @@ public class Router {
             }
             params = params.substring(1, params.length() - 1);
             for (String param : params.split(",")) {
-                Matcher matcher = paramPattern.matcher(param);
+                Matcher matcher = paramPattern.matcher(param.trim());
                 if (matcher.matches()) {
                     staticArgs.put(matcher.group(1), matcher.group(2));
                 } else {
@@ -928,8 +932,7 @@ public class Router {
          * @param method
          *            GET/POST/etc.
          * @param path
-         *            Part after domain and before query-string. Starts with a
-         *            "/".
+         *            Part after domain and before query-string. Starts with a "/".
          * @param accept
          *            Format, e.g. html.
          * @param domain
