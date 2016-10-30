@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="play! framework" default="jar" basedir=".">
+<project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
     <property name="baseversion" value="master" />
 
@@ -272,6 +272,8 @@
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
+            <param name="play.user.language" value="-Duser.language=en"/>
+            <param name="play.user.country" value="-Duser.country=US"/>
         </antcall>
 
         <antcall target="play-test">
@@ -312,14 +314,16 @@
     </target>
 
     <target name="play-test">
-	<antcall target="do-deps">
+        <antcall target="do-deps">
             <param name="testAppPath" value="${testAppPath}"/>
-	</antcall>
+        </antcall>
         <echo message="play auto-test ${testAppPath} (wait)" />
         <exec executable="${basedir}/../play${playExtension}" failonerror="true">
-           <arg value="auto-test"/>
-           <arg value="${testAppPath}"/>
-	</exec>
+            <arg value="auto-test"/>
+            <arg value="${testAppPath}"/>
+            <arg value="${play.user.language}" if:set="play.user.language"/>
+            <arg value="${play.user.country}" if:set="play.user.country"/>
+        </exec>
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
             <condition>

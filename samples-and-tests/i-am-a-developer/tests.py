@@ -647,7 +647,7 @@ def bootstrapWorkingDirectory( folder ):
     return working_directory
 
 def callPlay(self, args):
-    play_script = os.path.join(self.working_directory, '../../../play')
+    play_script = os.path.join(self.working_directory, '..', '..', '..', 'play.bat' if os.name=='nt' else 'play')
     process_args = [play_script] + args
     play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE)
     return play_process
