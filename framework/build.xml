@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+<project name="play! framework" default="jar" basedir=".">
 
     <property name="baseversion" value="master" />
 
@@ -314,6 +314,16 @@
     </target>
 
     <target name="play-test">
+        <condition property="play.user.language" value="">
+           <not>  
+              <isset property="play.user.language"/>
+           </not>
+        </condition>
+        <condition property="play.user.country" value="">
+           <not>  
+              <isset property="play.user.country"/>
+           </not>
+        </condition>
         <antcall target="do-deps">
             <param name="testAppPath" value="${testAppPath}"/>
         </antcall>
@@ -321,8 +331,8 @@
         <exec executable="${basedir}/../play${playExtension}" failonerror="true">
             <arg value="auto-test"/>
             <arg value="${testAppPath}"/>
-            <arg value="${play.user.language}" if:set="play.user.language"/>
-            <arg value="${play.user.country}" if:set="play.user.country"/>
+            <arg value="${play.user.language}"/>
+            <arg value="${play.user.country}"/>
         </exec>
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
