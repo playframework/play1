@@ -2,11 +2,16 @@ sudo: required
 language: java
 jdk:
   - openjdk7 
-before_install:
-  - cat /etc/hosts # optionally check the content *before*
-  - sudo hostname "$(hostname | cut -c1-63)"
-  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
-  - cat /etc/hosts # optionally check the content *after*
+#before_install:
+#  - cat /etc/hosts # optionally check the content *before*
+#  - sudo hostname "$(hostname | cut -c1-63)"
+#  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
+#  - sudo mv /tmp/hosts /etc/hosts
+#  - cat /etc/hosts # optionally check the content *after*
+addons:
+  hosts:
+    - myshorthost
+  hostname: myshorthost
 script: ant -buildfile ./framework/build.xml test
 after_failure: 
     cat ./samples-and-tests/just-test-cases/test-result/*.failed.html

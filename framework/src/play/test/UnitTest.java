@@ -1,5 +1,5 @@
 package play.test;
 
-public class UnitTest extends BaseTest {
+public abstract class UnitTest extends BaseTest {
 
 }

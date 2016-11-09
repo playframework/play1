@@ -6,7 +6,7 @@ import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 
 @RunWith(PlayJUnitRunner.class)
-public class BaseTest extends org.junit.Assert {
+public abstract class BaseTest extends org.junit.Assert {
 
     @Rule
     public PlayJUnitRunner.StartPlay startPlayBeforeTests = PlayJUnitRunner.StartPlay.rule();
