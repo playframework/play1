@@ -30,11 +30,16 @@ public class Secure extends Controller {
     }
 
     private static void check(Check check) throws Throwable {
+        boolean skip = false;
         for(String profile : check.value()) {
             boolean hasProfile = (Boolean)Security.invoke("check", profile);
-            if(!hasProfile) {
-                Security.invoke("onCheckFailed", profile);
+            if (hasProfile) {
+                skip = true;
+                break;
             }
+        }
+        if (!skip) {
+        	Security.invoke("onCheckFailed", "");
         }
     }
 
