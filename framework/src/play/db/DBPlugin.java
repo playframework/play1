@@ -286,7 +286,7 @@ public class DBPlugin extends PlayPlugin {
             String datasourceName = dbConfig.getProperty("db", "");
             DataSource ds = DB.getDataSource(dbName);
                      
-            if ((datasourceName.startsWith("java:")) && dbConfig.getProperty("db.url") == null) {
+            if ((datasourceName.startsWith("java:") || datasourceName.startsWith("jndi:")) && dbConfig.getProperty("db.url") == null) {
                 if (ds == null) {
                     return true;
                 }
