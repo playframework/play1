@@ -243,10 +243,10 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
-        boolean isJndiDatasource = false;
         String datasourceName = p.getProperty("db", "");
+        boolean isJndiDatasource = datasourceName.startsWith("java:") || datasourceName.startsWith("jndi:");
              
-        if ((isJndiDatasource || datasourceName.startsWith("java:")) && p.getProperty("db.url") == null) {
+        if (isJndiDatasource && p.getProperty("db.url") == null) {
             if (DB.datasource == null) {
                 return true;
             }
