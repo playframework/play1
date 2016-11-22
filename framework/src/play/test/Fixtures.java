@@ -541,7 +541,7 @@ public class Fixtures {
             DB.execute("begin\n"
                     + "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n"
                     + "and status = 'ENABLED') LOOP\n"
-                    + "execute immediate 'alter table '||i.table_name||' disable constraint '||i.constraint_name||'';\n"
+                    + "execute immediate 'alter table \"'||i.table_name||'\" disable constraint '||i.constraint_name||'';\n"
                     + "end loop;\n"
                     + "end;"
             );
@@ -582,8 +582,10 @@ public class Fixtures {
                     // Then we disable all foreign keys
                 Statement exec = connection.createStatement();
                 try {
-                    for (String tableName : names)
-                        exec.addBatch("ALTER TABLE " + tableName + " NOCHECK CONSTRAINT ALL");
+                    for (String tableName : names) {
+                        if (tableName.startsWith("trace_xe_")) continue;
+                        exec.addBatch("ALTER TABLE \"" + tableName + "\" NOCHECK CONSTRAINT ALL");
+                    }
                     exec.executeBatch();
                 }
                 finally {
@@ -605,7 +607,7 @@ public class Fixtures {
             DB.execute("begin\n"
                     + "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n"
                     + "and status = 'DISABLED') LOOP\n"
-                    + "execute immediate 'alter table '||i.table_name||' enable constraint '||i.constraint_name||'';\n"
+                    + "execute immediate 'alter table \"'||i.table_name||'\" enable constraint '||i.constraint_name||'';\n"
                     + "end loop;\n"
                     + "end;"
             );
