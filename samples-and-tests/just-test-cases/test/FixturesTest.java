@@ -2,10 +2,12 @@ import static org.junit.Assert.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import javax.management.RuntimeErrorException;
 
 import models.Bloc;
+import models.orphans.collections.DefaultModel;
 import models.vendor.Vendor;
 import models.vendor.VenueVendor;
 import models.vendor.tag.AreaTag;
@@ -17,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import play.Logger;
+import play.db.jpa.JPABase;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -116,5 +119,14 @@ public class FixturesTest extends UnitTest {
         assertEquals("nutella", c.name);
     }
 
+    @Test
+    public void checkEmptyCollections() {
+    	Fixtures.load("emptycol.yml");
+    	List<DefaultModel> defaultModels = DefaultModel.findAll();
+    	assertEquals(1,defaultModels.size());
+    	DefaultModel defaultModel = defaultModels.get(0);
+    	// before #1868 you had 3 elements, the preinitialized and two additional from yaml
+    	assertEquals(2, defaultModel.levelOnes.size());
+    }
 
 }
