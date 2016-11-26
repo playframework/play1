@@ -27,16 +27,19 @@ import play.exceptions.UnexpectedException;
  */
 public class PropertiesEnhancer extends Enhancer {
 
+    private boolean enabled = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
+    private boolean generateAccessors = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.generateAccessors", "true"));
+
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
-        if(!Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"))) return;
+        if (!enabled) return;
 
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
             return;
         }
-        if(ctClass.getName().endsWith(".package")) {
+        if (ctClass.getName().endsWith(".package")) {
             return;
         }
 
@@ -56,6 +59,12 @@ public class PropertiesEnhancer extends Enhancer {
         } catch (Exception e) {
             Logger.error(e, "Error in PropertiesEnhancer");
             throw new UnexpectedException("Error in PropertiesEnhancer", e);
+        }
+
+        if (!generateAccessors) {
+            applicationClass.enhancedByteCode = ctClass.toBytecode();
+            ctClass.defrost();
+            return;
         }
 
         if (isScala(applicationClass)) {
