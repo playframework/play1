@@ -37,7 +37,7 @@ public class Server {
 
         if (httpPort == httpsPort) {
             Logger.error("Could not bind on https and http on the same port " + httpPort);
-            Play.fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
 
         InetAddress address = null;
@@ -51,7 +51,7 @@ public class Server {
 
         } catch (Exception e) {
             Logger.error(e, "Could not understand http.address");
-            Play.fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
         try {
             if (p.getProperty("https.address") != null) {
@@ -61,7 +61,7 @@ public class Server {
             }
         } catch (Exception e) {
             Logger.error(e, "Could not understand https.address");
-            Play.fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                 Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
@@ -91,7 +91,7 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpPort, e);
-            Play.fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
 
         bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -122,7 +122,7 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpsPort, e);
-            Play.fatalServerErrorOccurred();
+            throw Play.<Error>fatalServerError();
         }
         if (Play.mode == Mode.DEV || Play.runningInTestMode()) {
            // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
