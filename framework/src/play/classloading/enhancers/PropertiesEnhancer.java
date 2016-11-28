@@ -55,40 +55,36 @@ public class PropertiesEnhancer extends Enhancer {
 
     private void addDefaultConstructor(CtClass ctClass) {
         try {
-            boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
-                if (constructor.getParameterTypes().length == 0) {
-                    hasDefaultConstructor = true;
-                    break;
-                }
-            }
+            boolean hasDefaultConstructor = hasDefaultConstructor(ctClass);
             if (!hasDefaultConstructor && !ctClass.isInterface()) {
                 CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            Logger.error(e, "Error in PropertiesEnhancer");
-            throw new UnexpectedException("Error in PropertiesEnhancer", e);
+            Logger.error(e, "Failed to generate default constructor for " + ctClass.getName());
+            throw new UnexpectedException("Failed to generate default constructor for " + ctClass.getName(), e);
         }
     }
 
     private void addDefaultConstructor2(CtClass ctClass) {
         try {
-            boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
-                if (constructor.getParameterTypes().length == 0) {
-                    hasDefaultConstructor = true;
-                    break;
-                }
-            }
-            if (!hasDefaultConstructor) {
+            if (!hasDefaultConstructor(ctClass)) {
                 CtConstructor defaultConstructor = CtNewConstructor.defaultConstructor(ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            Logger.error(e, "Error in PropertiesEnhancer");
-            throw new UnexpectedException("Error in PropertiesEnhancer", e);
+            Logger.error(e, "Failed to generate default constructor for " + ctClass.getName());
+            throw new UnexpectedException("Failed to generate default constructor for " + ctClass.getName(), e);
         }
+    }
+
+    private boolean hasDefaultConstructor(CtClass ctClass) throws NotFoundException {
+        for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
+            if (constructor.getParameterTypes().length == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void generateAccessors(CtClass ctClass) {
@@ -133,8 +129,9 @@ public class PropertiesEnhancer extends Enhancer {
                 }
 
             } catch (Exception e) {
-                Logger.error(e, "Error in PropertiesEnhancer");
-                throw new UnexpectedException("Error in PropertiesEnhancer", e);
+                String message = "Failed to generate default accessor for " + ctClass.getName() + "." + ctField.getName();
+                Logger.error(e, message);
+                throw new UnexpectedException(message, e);
             }
         }
     }
@@ -184,7 +181,8 @@ public class PropertiesEnhancer extends Enhancer {
                         }
 
                     } catch (Exception e) {
-                        throw new UnexpectedException("Error in PropertiesEnhancer", e);
+                        String message = "Failed to modify access to " + ctClass.getName() + "." + ctMethod.getName();
+                        throw new UnexpectedException(message, e);
                     }
                 }
             });
