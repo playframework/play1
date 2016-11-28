@@ -466,12 +466,14 @@ public class Play {
                     //registers shutdown hook - Now there's a good chance that we can notify
                     //our plugins that we're going down when some calls ctrl+c or just kills our process..
                     shutdownHookEnabled = true;
-                    Runtime.getRuntime().addShutdownHook(new Thread() {
+                    Thread hook = new Thread() {
                         @Override
                         public void run() {
                             Play.stop();
                         }
-                    });
+                    };
+                    hook.setContextClassLoader(ClassLoader.getSystemClassLoader());
+                    Runtime.getRuntime().addShutdownHook(hook);
                 }
             }
 
