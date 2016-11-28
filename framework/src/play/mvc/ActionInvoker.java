@@ -143,25 +143,7 @@ public class ActionInvoker {
                 try {
                     handleBefores(request);
                 } catch (InvocationTargetException ex) {
-
-                    // @Catch
-                    Object[] args = new Object[]{ex.getTargetException()};
-                    List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
-                    ControllerInstrumentation.stopActionCall();
-                    for (Method mCatch : catches) {
-                        Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                        if (exceptions.length == 0) {
-                            exceptions = new Class[]{Exception.class};
-                        }
-                        for (Class exception : exceptions) {
-                            if (exception.isInstance(args[0])) {
-                                mCatch.setAccessible(true);
-                                inferResult(invokeControllerMethod(mCatch, args));
-                                break;
-                            }
-                        }
-                    }
-
+                    invokeControllerCatchMethods(ex);
                     throw ex;
                 }
 
@@ -199,24 +181,7 @@ public class ActionInvoker {
                             }
 
                         } else {
-                            // @Catch
-                            Object[] args = new Object[] { ex.getTargetException() };
-                            List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
-                            ControllerInstrumentation.stopActionCall();
-                            for (Method mCatch : catches) {
-                                Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                                if (exceptions.length == 0) {
-                                    exceptions = new Class[] { Exception.class };
-                                }
-                                for (Class exception : exceptions) {
-                                    if (exception.isInstance(args[0])) {
-                                        mCatch.setAccessible(true);
-                                        inferResult(invokeControllerMethod(mCatch, args));
-                                        break;
-                                    }
-                                }
-                            }
-
+                            invokeControllerCatchMethods(ex);
                             throw ex;
                         }
                     }
@@ -282,6 +247,26 @@ public class ActionInvoker {
 
             if (monitor != null) {
                 monitor.stop();
+            }
+        }
+    }
+
+    private static void invokeControllerCatchMethods(InvocationTargetException ex) throws Exception {
+        // @Catch
+        Object[] args = new Object[]{ex.getTargetException()};
+        List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+        ControllerInstrumentation.stopActionCall();
+        for (Method mCatch : catches) {
+            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+            if (exceptions.length == 0) {
+                exceptions = new Class[]{Exception.class};
+            }
+            for (Class exception : exceptions) {
+                if (exception.isInstance(args[0])) {
+                    mCatch.setAccessible(true);
+                    inferResult(invokeControllerMethod(mCatch, args));
+                    break;
+                }
             }
         }
     }
