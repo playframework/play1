@@ -81,7 +81,7 @@ public class ActionInvoker {
 
         // Find the action method
         try {
-            Method actionMethod = null;
+            Method actionMethod;
             Object[] ca = getActionMethod(request.action);
             actionMethod = (Method) ca[1];
             request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
@@ -287,22 +287,11 @@ public class ActionInvoker {
     }
 
     private static boolean isActionMethod(Method method) {
-        if (method.isAnnotationPresent(Before.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(After.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Finally.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Catch.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Util.class)) {
-            return false;
-        }
-        return true;
+        return !method.isAnnotationPresent(Before.class) &&
+                !method.isAnnotationPresent(After.class) &&
+                !method.isAnnotationPresent(Finally.class) &&
+                !method.isAnnotationPresent(Catch.class) &&
+                !method.isAnnotationPresent(Util.class);
     }
 
     /**
