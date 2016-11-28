@@ -582,6 +582,7 @@ public class Play {
             started = false;
             Cache.stop();
             Router.lastLoading = 0L;
+            Invoker.resetClassloaders();
         }
     }
 

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import play.Play.Mode;
+import play.classloading.ApplicationClassloader;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -81,6 +82,15 @@ public class Invoker {
                 }
                 retry = true;
             }
+        }
+    }
+
+    static void resetClassloaders() {
+        Thread[] executorThreads = new Thread[executor.getPoolSize()];
+        Thread.enumerate(executorThreads);
+        for (Thread thread : executorThreads) {
+            if (thread != null && thread.getContextClassLoader() instanceof ApplicationClassloader)
+                thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
         }
     }
 
