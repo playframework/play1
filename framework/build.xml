@@ -272,6 +272,9 @@
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
+            <param name="play.language" value="true"/>
+            <param name="play.user.language" value="-Duser.language=en"/>
+            <param name="play.user.country" value="-Duser.country=US"/>
         </antcall>
 
         <antcall target="play-test">
@@ -311,15 +314,29 @@
         </exec>
     </target>
 
-    <target name="play-test">
-	<antcall target="do-deps">
-            <param name="testAppPath" value="${testAppPath}"/>
-	</antcall>
-        <echo message="play auto-test ${testAppPath} (wait)" />
+    <target name="play_with_language" if="${play.language}">
         <exec executable="${basedir}/../play${playExtension}" failonerror="true">
-           <arg value="auto-test"/>
-           <arg value="${testAppPath}"/>
-	</exec>
+            <arg value="auto-test"/>
+            <arg value="${testAppPath}"/>
+            <arg value="${play.user.language}"/>
+            <arg value="${play.user.country}"/>
+        </exec>
+    </target>
+    <target name="play_without_language" unless="${play.language}">
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
+            <arg value="auto-test"/>
+            <arg value="${testAppPath}"/>
+        </exec>
+    </target>
+    <target name="exec_play" depends="play_without_language,play_with_language"/>
+    <target name="play-test">
+        <antcall target="do-deps">
+            <param name="testAppPath" value="${testAppPath}"/>
+        </antcall>
+        <echo message="play auto-test ${testAppPath} (wait)" />
+
+        <antcall target="exec_play"/>
+
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
             <condition>

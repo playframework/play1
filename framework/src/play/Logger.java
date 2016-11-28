@@ -2,7 +2,10 @@ package play;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,11 +72,15 @@ public class Logger {
             shutUp.setProperty("log4j.rootLogger", "OFF");
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
-
-            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
-                // The log4j configuration file is located somewhere in the application folder,
-                // so it's probably a custom configuration file
-                configuredManually = true;
+//TODO: remove commented code: the check is not valid because of string comparison
+//            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
+//                // The log4j configuration file is located somewhere in the application folder,
+//                // so it's probably a custom configuration file
+//                configuredManually = true;
+//            }
+            try {
+                if (Paths.get(log4jConf.toURI()).startsWith(Play.applicationPath.toPath())) configuredManually = true;
+            } catch (IllegalArgumentException|FileSystemNotFoundException |SecurityException|URISyntaxException e) {
             }
             if (isXMLConfig) {
                 DOMConfigurator.configure(log4jConf);
