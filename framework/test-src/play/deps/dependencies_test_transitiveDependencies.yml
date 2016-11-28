@@ -1,0 +1,6 @@
+# Application dependencies
+transitiveDependencies: false
+
+require:
+    - play
+    - commons-lang -> commons-lang 2.5

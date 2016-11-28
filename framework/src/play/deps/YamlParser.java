@@ -110,7 +110,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             descriptor.addArtifact("default", new MDArtifact(descriptor, id.getName(), "jar", "zip"));
             descriptor.setLastModified(lastModified);
 
-            boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
+            boolean transitiveDependencies = get(data, "transitiveDependencies", Boolean.class, true);
             
             List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {

@@ -1,27 +1,27 @@
 package play.deps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.ivy.core.module.descriptor.DependencyDescriptor;
+import org.apache.ivy.core.module.descriptor.ModuleDescriptor;
+import org.apache.ivy.plugins.repository.Resource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import play.Play;
 import play.PlayBuilder;
 
-@Ignore
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
+
 public class YamlParserTest {
     
     @BeforeClass
@@ -29,7 +29,8 @@ public class YamlParserTest {
         // Play
         new PlayBuilder().build();
         System.setProperty("play.version", Play.version);
-        
+        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
+
         // We will create a "tmp/modules" directory to simulate the play dependencies
         File moduleDir = new File(Play.applicationPath, "modules");
         moduleDir.mkdirs();
@@ -117,5 +118,32 @@ public class YamlParserTest {
         assertTrue(it.hasNext());
         moduleName = it.next();  
         assertEquals("crud", moduleName);     
+    }
+
+    @Test
+    public void transitiveDependenciesFalseTest() throws IOException, URISyntaxException, ParseException {
+        Resource resource = mock(Resource.class);
+        InputStream inputStream = new FileInputStream(
+                new File(getClass().getResource("/play/deps/dependencies_test_transitiveDependencies.yml").toURI()));
+
+        doReturn(inputStream).when(resource).openStream();
+        doReturn(0L).when(resource).getLastModified();
+
+        YamlParser yamlParser = new YamlParser();
+        ModuleDescriptor moduleDescriptor = yamlParser.parseDescriptor(
+                null /*unused*/,
+                null /*unused*/,
+                resource,
+                false /*unused*/
+        );
+
+        assertNotNull(moduleDescriptor);
+
+        final DependencyDescriptor[] dependencies = moduleDescriptor.getDependencies();
+        assertEquals(2, dependencies.length);
+
+        for (DependencyDescriptor dependencyDescriptor : dependencies) {
+            assertFalse("No dependency should be transitive because we disabled transitive globally.", dependencyDescriptor.isTransitive());
+        }
     }
 }
