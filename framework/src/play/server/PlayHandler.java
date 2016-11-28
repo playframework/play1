@@ -311,14 +311,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         @Override
         public void execute() throws Exception {
-            if (!ctx.getChannel().isConnected()) {
-                try {
-                    ctx.getChannel().close();
-                } catch (Throwable e) {
-                    // Ignore
-                }
-                return;
-            }
+            //if (!ctx.getChannel().isConnected()) {
+            //    try {
+            //        ctx.getChannel().close();
+            //    } catch (Throwable e) {
+            //        // Ignore
+            //    }
+            //    return;
+            //}
 
             // Check the exceeded size before re rendering so we can render the
             // error if the size is exceeded
