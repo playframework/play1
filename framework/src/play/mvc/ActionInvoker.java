@@ -140,8 +140,31 @@ public class ActionInvoker {
             // 3. Invoke the action
             try {
                 // @Before
-                handleBefores(request);
+                try {
+					handleBefores(request);
+				} catch (InvocationTargetException ex) {
+					
+					// @Catch
+					Object[] args = new Object[] { ex.getTargetException() };
+					List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+					ControllerInstrumentation.stopActionCall();
+					for (Method mCatch : catches) {
+						Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+						if (exceptions.length == 0) {
+							exceptions = new Class[] { Exception.class };
+						}
+						for (Class exception : exceptions) {
+							if (exception.isInstance(args[0])) {
+								mCatch.setAccessible(true);
+								inferResult(invokeControllerMethod(mCatch, args));
+								break;
+							}
+						}
+					}
 
+					throw ex;
+				}
+				
                 // Action
 
                 Result actionResult = null;
