@@ -1176,8 +1176,20 @@ h2(#enhancers). Enhancers
 
 h3(#play.propertiesEnhancer.enabled). play.propertiesEnhancer.enabled
 
-Used to disable play enhancing of play class (can be used to switch off getter/setter generation). For example:
+Used to disable play enhancing of play class (can be used to switch off default constructors/getter/setter generation). For example:
 
 bc. play.propertiesEnhancer.enabled=false
+
+Default: @true@
+
+h3(#play.propertiesEnhancer.generateAccessors). play.propertiesEnhancer.generateAccessors
+
+Used to partially disable PropertyEnhancer. Namely, it switches off generating getters/setters and replacing 
+all direct field accesses with getters/setters (which is the slowest part of "play precompile").
+But it leaves generating default constructors.
+
+For example:
+
+bc. play.propertiesEnhancer.generateAccessors=false
 
 Default: @true@
