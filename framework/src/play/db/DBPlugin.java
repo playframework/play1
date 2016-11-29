@@ -161,6 +161,8 @@ public class DBPlugin extends PlayPlugin {
                         ds.setNumHelperThreads(Integer.parseInt(dbConfig.getProperty("db.pool.numHelperThreads", "3")));
                         ds.setUnreturnedConnectionTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.unreturnedConnectionTimeout", "0")));
                         ds.setDebugUnreturnedConnectionStackTraces(Boolean.parseBoolean(dbConfig.getProperty("db.pool.debugUnreturnedConnectionStackTraces", "false")));
+                        ds.setContextClassLoaderSource("library");
+                        ds.setPrivilegeSpawnedThreads(true);
 
                         if (dbConfig.getProperty("db.testquery") != null) {
                             ds.setPreferredTestQuery(dbConfig.getProperty("db.testquery"));
