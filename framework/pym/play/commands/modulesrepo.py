@@ -526,7 +526,7 @@ def load_module_list(custom_server=None):
 
 def load_modules_from(modules_server):
     try:
-        url = '%s/modules' % modules_server
+        url = '%s/modules.json' % modules_server
         req = urllib2.Request(url)
         req.add_header('Accept', 'application/json')
         result = urllib2.urlopen(req)
