@@ -1,5 +1,5 @@
 /*
-* Copyright 2004 ThoughtWorks, Inc
+* Copyright 2011 Software Freedom Conservancy
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ var BrowserBot = function(topLevelApplicationWindow) {
     this.currentWindow = this.topWindow;
     this.currentWindowName = null;
     this.allowNativeXpath = true;
-    this.xpathLibrary = this.defaultXpathLibrary = 'ajaxslt' // change to "javascript-xpath" for the newer, faster engine
-
+    this.xpathEvaluator = new XPathEvaluator('ajaxslt');  // change to "javascript-xpath" for the newer, faster engine
+    
     // We need to know this in advance, in case the frame closes unexpectedly
     this.isSubFrameSelected = false;
 
@@ -56,6 +56,15 @@ var BrowserBot = function(topLevelApplicationWindow) {
     this.nextPromptResult = '';
     this.newPageLoaded = false;
     this.pageLoadError = null;
+
+    this.ignoreResponseCode = false;
+    this.xhr = null;
+    this.abortXhr = false;
+    this.isXhrSent = false;
+    this.isXhrDone = false;
+    this.xhrOpenLocation = null;
+    this.xhrResponseCode = null;
+    this.xhrStatusText = null;
 
     this.shouldHighlightLocatedElement = false;
 
@@ -79,7 +88,7 @@ var BrowserBot = function(topLevelApplicationWindow) {
             } else if (elementOrWindow.contentWindow && elementOrWindow.contentWindow.location && elementOrWindow.contentWindow.location.href) {
                 LOG.debug("Page load location=" + elementOrWindow.contentWindow.location.href);
             } else {
-                LOG.debug("Page load location unknown, current window location=" + this.getCurrentWindow(true).location);
+                LOG.debug("Page load location unknown, current window location=" + self.getCurrentWindow(true).location);
             }
         } catch (e) {
             LOG.error("Caught an exception attempting to log location; this should get noticed soon!");
@@ -91,15 +100,53 @@ var BrowserBot = function(topLevelApplicationWindow) {
     };
 
     this.isNewPageLoaded = function() {
+        var e;
+        
         if (this.pageLoadError) {
-            LOG.error("isNewPageLoaded found an old pageLoadError");
-            var e = this.pageLoadError;
+            LOG.error("isNewPageLoaded found an old pageLoadError: " + this.pageLoadError);
+            if (this.pageLoadError.stack) {
+              LOG.warn("Stack is: " + this.pageLoadError.stack);
+            }
+            e = this.pageLoadError;
             this.pageLoadError = null;
             throw e;
         }
-        return self.newPageLoaded;
-    };
 
+        if (self.ignoreResponseCode) {
+            return self.newPageLoaded;
+        } else {
+            if (self.isXhrSent && self.isXhrDone) {
+                if (!((self.xhrResponseCode >= 200 && self.xhrResponseCode <= 399) || self.xhrResponseCode == 0)) {
+                     // TODO: for IE status like: 12002, 12007, ... provide corresponding statusText messages also.
+                     LOG.error("XHR failed with message " + self.xhrStatusText);
+                     e = "XHR ERROR: URL = " + self.xhrOpenLocation + " Response_Code = " + self.xhrResponseCode + " Error_Message = " + self.xhrStatusText;
+                     self.abortXhr = false;
+                     self.isXhrSent = false;
+                     self.isXhrDone = false;
+                     self.xhrResponseCode = null;
+                     self.xhrStatusText = null;
+                     throw new SeleniumError(e);
+                }
+           }
+          return self.newPageLoaded && (self.isXhrSent ? (self.abortXhr || self.isXhrDone) : true); 
+        }
+    };
+    
+    this.setAllowNativeXPath = function(allow) {
+        this.xpathEvaluator.setAllowNativeXPath(allow);
+    };
+    
+    this.setIgnoreAttributesWithoutValue = function(ignore) {
+        this.xpathEvaluator.setIgnoreAttributesWithoutValue(ignore);
+    };
+    
+    this.setXPathEngine = function(engineName) {
+        this.xpathEvaluator.setCurrentEngine(engineName);
+    };
+    
+    this.getXPathEngine = function() {
+        return this.xpathEvaluator.getCurrentEngine();
+    };
 };
 
 // DGF PageBot exists for backwards compatibility with old user-extensions
@@ -167,13 +214,13 @@ BrowserBot.prototype.relayToRC = function(name) {
         var object = eval(name);
         var s = 'state:' + serializeObject(name, object) + "\n";
         sendToRC(s,"state=true");
-}
+};
 
 BrowserBot.prototype.resetPopups = function() {
     this.recordedAlerts = [];
     this.recordedConfirmations = [];
     this.recordedPrompts = [];
-}
+};
 
 BrowserBot.prototype.getNextAlert = function() {
     var t = this.recordedAlerts.shift();
@@ -215,8 +262,9 @@ BrowserBot.prototype.triggerMouseEvent = function(element, eventType, canBubble,
     var screenY = 0;
 
     canBubble = (typeof(canBubble) == undefined) ? true : canBubble;
+    var evt;
     if (element.fireEvent && element.ownerDocument && element.ownerDocument.createEventObject) { //IE
-        var evt = createEventObject(element, this.controlKeyDown, this.altKeyDown, this.shiftKeyDown, this.metaKeyDown);
+        evt = createEventObject(element, this.controlKeyDown, this.altKeyDown, this.shiftKeyDown, this.metaKeyDown);
         evt.detail = 0;
         evt.button = button ? button : 1; // default will be the left mouse click ( http://www.javascriptkit.com/jsref/event.shtml )
         evt.relatedTarget = null;
@@ -248,17 +296,18 @@ BrowserBot.prototype.triggerMouseEvent = function(element, eventType, canBubble,
         }
     }
     else {
-        var evt = document.createEvent('MouseEvents');
-        if (evt.initMouseEvent)
-        {
+        var doc = goog.dom.getOwnerDocument(element);
+        var view = goog.dom.getWindow(doc);
+
+        evt = doc.createEvent('MouseEvents');
+        if (evt.initMouseEvent) {
             // see http://developer.mozilla.org/en/docs/DOM:event.button and
             // http://developer.mozilla.org/en/docs/DOM:event.initMouseEvent for button ternary logic logic
             //Safari
-            evt.initMouseEvent(eventType, canBubble, true, document.defaultView, 1, screenX, screenY, clientX, clientY,
+            evt.initMouseEvent(eventType, canBubble, true, view, 1, screenX, screenY, clientX, clientY,
                 this.controlKeyDown, this.altKeyDown, this.shiftKeyDown, this.metaKeyDown, button ? button : 0, null);
-        }
-        else {
-            LOG.warn("element doesn't have initMouseEvent; firing an event which should -- but doesn't -- have other mouse-event related attributes here, as well as controlKeyDown, altKeyDown, shiftKeyDown, metaKeyDown");
+        } else {
+          LOG.warn("element doesn't have initMouseEvent; firing an event which should -- but doesn't -- have other mouse-event related attributes here, as well as controlKeyDown, altKeyDown, shiftKeyDown, metaKeyDown");
             evt.initEvent(eventType, canBubble, true);
 
             evt.shiftKey = this.shiftKeyDown;
@@ -272,13 +321,22 @@ BrowserBot.prototype.triggerMouseEvent = function(element, eventType, canBubble,
         }
         element.dispatchEvent(evt);
     }
-}
+};
 
 BrowserBot.prototype._windowClosed = function(win) {
-    var c = win.closed;
-    if (c == null) return true;
-    return c;
+    try {
+        var c = win.closed;
+        if (c == null) return true;
+        return c;
+    } catch (ignored) {
+        // Firefox 15+ may already have marked the win dead. Accessing it
+        // causes an exception to be thrown. That exception tells us the window
+        // is closed.
+        return true;
+    }
 };
+
+BrowserBot.uniqueKey = 1;
 
 BrowserBot.prototype._modifyWindow = function(win) {
     // In proxyInjectionMode, have to suppress LOG calls in _modifyWindow to avoid an infinite loop
@@ -291,11 +349,16 @@ BrowserBot.prototype._modifyWindow = function(win) {
     if (!this.proxyInjectionMode) {
         LOG.debug('modifyWindow ' + this.uniqueId + ":" + win[this.uniqueId]);
     }
+
+    // Assign a unique label for this window. We set this on a known attribute so we can reliably
+    // find it later. This is slightly different from uniqueId.
+    win.seleniumKey = BrowserBot.uniqueKey++;
+
+    this.modifyWindowToRecordPopUpDialogs(win, this);
     
-    if (!win[this.uniqueId] || true) {
-        win[this.uniqueId] = 1;
-        this.modifyWindowToRecordPopUpDialogs(win, this);
-    }
+    //Commenting out for issue 1854
+    //win[this.uniqueId] = 1;
+
     // In proxyInjection mode, we have our own mechanism for detecting page loads
     if (!this.proxyInjectionMode) {
         this.modifySeparateTestWindowToDetectPageLoads(win);
@@ -329,7 +392,12 @@ BrowserBot.prototype.selectWindow = function(target) {
     else if (locatorType == "name") {
         this._selectWindowByName(locatorValue);
     } else if (locatorType == "var") {
-        this._selectWindowByName(locatorValue);
+        var win = this.getCurrentWindow().eval(locatorValue);
+        if (win) {
+            this._selectWindowByName(win.name);
+        } else {
+            throw new SeleniumError("Window not found by var: " + locatorValue);
+        }
     } else {
         throw new SeleniumError("Window locator not recognized: " + locatorType);
     }
@@ -349,7 +417,7 @@ BrowserBot.prototype._selectTopWindow = function() {
     this.currentWindow = this.topWindow;
     this.topFrame = this.topWindow;
     this.isSubFrameSelected = false;
-}
+};
 
 BrowserBot.prototype._selectWindowByWindowId = function(windowId) {
     try {
@@ -365,7 +433,7 @@ BrowserBot.prototype._selectWindowByName = function(target) {
     this.topFrame = this.currentWindow;
     this.currentWindowName = target;
     this.isSubFrameSelected = false;
-}
+};
 
 BrowserBot.prototype._selectWindowByTitle = function(target) {
     var windowName = this.getWindowNameByTitle(target);
@@ -374,7 +442,7 @@ BrowserBot.prototype._selectWindowByTitle = function(target) {
     } else {
         this._selectWindowByName(windowName);
     }
-}
+};
 
 BrowserBot.prototype._selectFirstNonTopWindow = function() {
     var names = this.getNonTopWindowNames();
@@ -384,9 +452,11 @@ BrowserBot.prototype._selectFirstNonTopWindow = function() {
 };
 
 BrowserBot.prototype.selectFrame = function(target) {
+    var frame;
+    
     if (target.indexOf("index=") == 0) {
         target = target.substr(6);
-        var frame = this.getCurrentWindow().frames[target];
+        frame = this.getCurrentWindow().frames[target];
         if (frame == null) {
             throw new SeleniumError("Not found: frames["+target+"]");
         }
@@ -403,7 +473,7 @@ BrowserBot.prototype.selectFrame = function(target) {
         this.currentWindow = this.topFrame;
         this.isSubFrameSelected = false;
     } else {
-        var frame = this.findElement(target);
+        frame = this.findElement(target);
         if (frame == null) {
             throw new SeleniumError("Not found: " + target);
         }
@@ -508,12 +578,82 @@ BrowserBot.prototype.doesThisFrameMatchFrameExpression = function(currentFrameSt
     return false;
 };
 
+BrowserBot.prototype.abortXhrRequest = function() {
+    if (this.ignoreResponseCode) {
+       LOG.debug("XHR response code being ignored. Nothing to abort.");
+    } else {
+        if (this.abortXhr == false && this.isXhrSent && !this.isXhrDone) {
+            LOG.info("abortXhrRequest(): aborting request");
+            this.abortXhr = true;
+            this.xhr.abort();
+        }
+    }
+};
+
+BrowserBot.prototype.onXhrStateChange = function(method) {
+      LOG.info("onXhrStateChange(): xhr.readyState = " + this.xhr.readyState + " method = " + method + " time = " + new Date().getTime());
+      if (this.xhr.readyState == 4) {
+
+          // check if the request got aborted.
+          if (this.abortXhr == true) {
+              this.xhrResponseCode = 0;
+              this.xhrStatusText = "Request Aborted";
+              this.isXhrDone = true;
+              return;
+          }
+
+          try {
+              if (method == "HEAD" && (this.xhr.status == 501 || this.xhr.status == 405)) {
+                 LOG.info("onXhrStateChange(): HEAD ajax returned 501 or 405, retrying with GET");
+                 // handle 501 response code from servers that do not support 'HEAD' method.
+                 // send GET ajax request with range 0-1.
+                 this.xhr = XmlHttp.create();
+                 this.xhr.onreadystatechange = this.onXhrStateChange.bind(this, "GET");
+                 this.xhr.open("GET", this.xhrOpenLocation, true);
+                 this.xhr.setRequestHeader("Range", "bytes:0-1");
+                 this.xhr.send("");
+                 this.isXhrSent = true;
+                 return;
+              }
+              this.xhrResponseCode = this.xhr.status;
+              this.xhrStatusText = this.xhr.statusText;
+          } catch (ex) {
+              LOG.info("encountered exception while reading xhrResponseCode." + ex.message);
+              this.xhrResponseCode = -1;
+    	      this.xhrStatusText = "Request Error";
+          }
+
+          this.isXhrDone = true;
+      }
+};
+
+BrowserBot.prototype.checkedOpen = function(target) {
+    var url = absolutify(target, this.baseUrl);
+    LOG.debug("checkedOpen(): url = " + url);
+    this.isXhrDone = false;
+    this.abortXhr = false;
+    this.xhrResponseCode = null;
+    this.xhrOpenLocation = url;
+    try {
+        this.xhr = XmlHttp.create();
+    } catch (ex) {
+        LOG.error("Your browser doesnt support Xml Http Request");
+        return;
+    }
+    this.xhr.onreadystatechange =  this.onXhrStateChange.bind(this, "HEAD");
+    this.xhr.open("HEAD", url, true);
+    this.xhr.send("");
+    this.isXhrSent = true;
+};
+
 BrowserBot.prototype.openLocation = function(target) {
     // We're moving to a new page - clear the current one
     var win = this.getCurrentWindow();
     LOG.debug("openLocation newPageLoaded = false");
     this.newPageLoaded = false;
-
+    if (!this.ignoreResponseCode) {
+        this.checkedOpen(target);
+    }
     this.setOpenLocation(win, target);
 };
 
@@ -524,10 +664,10 @@ BrowserBot.prototype.openWindow = function(url, windowID) {
     if (browserVersion.isHTA) {
         // in HTA mode, calling .open on the window interprets the url relative to that window
         // we need to absolute-ize the URL to make it consistent
-        var child = this.getCurrentWindow().open(url, windowID);
+        var child = this.getCurrentWindow().open(url, windowID, 'resizable=yes');
         selenium.browserbot.openedWindows[windowID] = child;
     } else {
-        this.getCurrentWindow().open(url, windowID);
+        this.getCurrentWindow().open(url, windowID, 'resizable=yes');
     }
 };
 
@@ -548,7 +688,21 @@ BrowserBot.prototype.setOpenLocation = function(win, loc) {
             }
         } catch (e) {} // DGF don't know why, but this often fails
     } else {
-        win.location.href = loc;
+        try {
+            win.location.href = loc;
+        } catch (err) {
+            //Samit: Fix: SeleniumIDE under Firefox 4 breaks if you try to open chrome URL on (XPCNativeWrapper) unwrapped window objects
+            if (err.name && err.name == "NS_ERROR_FAILURE") {
+                //LOG.debug("wrapping and retrying");
+                try {
+                    XPCNativeWrapper(win).location.href = loc;  //wrap it and try again
+                } catch(e) {
+                    throw err;  //throw the original error, not this one
+                }
+            } else {
+                throw err;  //throw the original error, since we cannot fix it
+            }
+        }
     }
 };
 
@@ -556,10 +710,41 @@ BrowserBot.prototype.getCurrentPage = function() {
     return this;
 };
 
-BrowserBot.prototype.modifyWindowToRecordPopUpDialogs = function(windowToModify, browserBot) {
+
+BrowserBot.prototype.windowNeedsModifying = function(win, uniqueId) {
+    // On anything but Firefox, checking the unique id is enough.
+    // Firefox 4 introduces a race condition which selenium regularly loses.
+
+    try {
+        var appInfo = Components.classes['@mozilla.org/xre/app-info;1'].
+            getService(Components.interfaces.nsIXULAppInfo);
+        var versionChecker = Components.
+            classes['@mozilla.org/xpcom/version-comparator;1'].
+            getService(Components.interfaces.nsIVersionComparator);
+
+        if (versionChecker.compare(appInfo.version, '4.0b1') >= 0) {
+            return win.alert.toString().indexOf("native code") != -1;
+        }
+    } catch (ignored) {}
+    return !win[uniqueId];
+};
+
+
+BrowserBot.prototype.modifyWindowToRecordPopUpDialogs = function(originalWindow, browserBot) {
     var self = this;
 
+    // Apparently, Firefox 4 makes it possible to unwrap an object to find that
+    // there's nothing in it.
+    var windowToModify = core.firefox.unwrap(originalWindow);
+    if (!windowToModify) {
+      windowToModify = originalWindow;
+    }
+
     windowToModify.seleniumAlert = windowToModify.alert;
+
+    if (!self.windowNeedsModifying(windowToModify, browserBot.uniqueId)) {
+        return;
+    }
 
     windowToModify.alert = function(alert) {
         browserBot.recordedAlerts.push(alert);
@@ -679,7 +864,7 @@ BrowserBot.prototype._isHTASubFrame = function(win) {
     if (!browserVersion.isHTA) return false;
     // DGF this is wrong! what if "win" isn't the selected window?
     return this.isSubFrameSelected;
-}
+};
 
 BrowserBot.prototype._getFrameElement = function(win) {
     var frameElement = null;
@@ -715,7 +900,7 @@ BrowserBot.prototype._getFrameElement = function(win) {
         LOG.debug("frameElement.name="+frameElement.name);
     }
     return frameElement;
-}
+};
 
 BrowserBot.prototype._getFrameElementByName = function(name, doc, win) {
     var frames;
@@ -738,7 +923,7 @@ BrowserBot.prototype._getFrameElementByName = function(name, doc, win) {
     // DGF weird; we only call this function when we know the doc contains the frame
     LOG.warn("_getFrameElementByName couldn't find a frame or iframe; checking every element for the name " + name);
     return BrowserBot.prototype.locateElementByName(win.name, win.parent.document);
-}
+};
     
 
 /**
@@ -749,6 +934,8 @@ BrowserBot.prototype._getFrameElementByName = function(name, doc, win) {
 BrowserBot.prototype.pollForLoad = function(loadFunction, windowObject, originalDocument, originalLocation, originalHref, marker) {
     LOG.debug("pollForLoad original (" + marker + "): " + originalHref);
     try {
+        //Samit: Fix: open command sometimes fails if current url is chrome and new is not
+        windowObject = core.firefox.unwrap(windowObject);
         if (this._windowClosed(windowObject)) {
             LOG.debug("pollForLoad WINDOW CLOSED (" + marker + ")");
             delete this.pollingForLoad[marker];
@@ -797,7 +984,7 @@ BrowserBot.prototype.pollForLoad = function(loadFunction, windowObject, original
 BrowserBot.prototype._isSamePage = function(windowObject, originalDocument, originalLocation, originalHref, marker) {
     var currentDocument = windowObject.document;
     var currentLocation = windowObject.location;
-    var currentHref = currentLocation.href
+    var currentHref = currentLocation.href;
 
     var sameDoc = this._isSameDocument(originalDocument, currentDocument);
 
@@ -829,7 +1016,7 @@ BrowserBot.prototype._isSamePage = function(windowObject, originalDocument, orig
     LOG.debug("_isSamePage: sameHref: " + sameHref);
     LOG.debug("_isSamePage: markedLoc: " + markedLoc);
 
-    return sameDoc && sameLoc && sameHref && markedLoc
+    return sameDoc && sameLoc && sameHref && markedLoc;
 };
 
 BrowserBot.prototype._isSameDocument = function(originalDocument, currentDocument) {
@@ -967,7 +1154,7 @@ BrowserBot.prototype.getWindowByName = function(windowName, doNotModify) {
         }
     }
     if (!targetWindow) {
-        throw new SeleniumError("Window does not exist. If this looks like a Selenium bug, make sure to read http://selenium-core.openqa.org/reference.html#openWindow for potential workarounds.");
+        throw new SeleniumError("Window does not exist. If this looks like a Selenium bug, make sure to read http://seleniumhq.org/docs/02_selenium_ide.html#alerts-popups-and-multiple-windows for potential workarounds.");
     }
     if (browserVersion.isHTA) {
         try {
@@ -1033,14 +1220,15 @@ BrowserBot.prototype.getCurrentWindow = function(doNotModify) {
     if (this.proxyInjectionMode) {
         return window;
     }
-    var testWindow = this.currentWindow;
+    var testWindow = core.firefox.unwrap(this.currentWindow);
     if (!doNotModify) {
         this._modifyWindow(testWindow);
         LOG.debug("getCurrentWindow newPageLoaded = false");
         this.newPageLoaded = false;
     }
     testWindow = this._handleClosedSubFrame(testWindow, doNotModify);
-    return testWindow;
+    bot.window_ = testWindow;
+    return core.firefox.unwrap(testWindow);
 };
 
 /**
@@ -1050,11 +1238,6 @@ BrowserBot.prototype.getCurrentWindow = function(doNotModify) {
  */
 BrowserBot.prototype.getUserWindow = function() {
     var userWindow = this.getCurrentWindow(true);
-    
-    if (userWindow.wrappedJSObject) {
-        userWindow = userWindow.wrappedJSObject;
-    }
-    
     return userWindow;
 };
 
@@ -1067,7 +1250,8 @@ BrowserBot.prototype._handleClosedSubFrame = function(testWindow, doNotModify) {
         var missing = true;
         if (testWindow.parent && testWindow.parent.frames && testWindow.parent.frames.length) {
             for (var i = 0; i < testWindow.parent.frames.length; i++) {
-                if (testWindow.parent.frames[i] == testWindow) {
+                var frame = testWindow.parent.frames[i];
+                if (frame == testWindow || frame.seleniumKey == testWindow.seleniumKey) {
                     missing = false;
                     break;
                 }
@@ -1093,11 +1277,11 @@ BrowserBot.prototype.highlight = function (element, force) {
         } catch (e) {} // DGF element highlighting is low-priority and possibly dangerous
     }
     return element;
-}
+};
 
 BrowserBot.prototype.setShouldHighlightElement = function (shouldHighlight) {
     this.shouldHighlightLocatedElement = shouldHighlight;
-}
+};
 
 /*****************************************************************/
 /* BROWSER-SPECIFIC FUNCTIONS ONLY AFTER THIS LINE */
@@ -1143,11 +1327,11 @@ BrowserBot.prototype._registerAllLocatorFunctions = function() {
         }
         return this.locateElementByIdentifier(locator, inDocument, inWindow);
     };
-}
+};
 
 BrowserBot.prototype.getDocument = function() {
-    return this.getCurrentWindow().document;
-}
+    return core.firefox.unwrap(this.getCurrentWindow().document);
+};
 
 BrowserBot.prototype.getTitle = function() {
     var t = this.getDocument().title;
@@ -1155,7 +1339,7 @@ BrowserBot.prototype.getTitle = function() {
         t = t.trim();
     }
     return t;
-}
+};
 
 BrowserBot.prototype.getCookieByName = function(cookieName, doc) {
     if (!doc) doc = this.getDocument();
@@ -1167,11 +1351,11 @@ BrowserBot.prototype.getCookieByName = function(cookieName, doc) {
         var ckNameValue = ckPair.split(/=/);
         var ckName = decodeURIComponent(ckNameValue[0]);
         if (ckName === cookieName) {
-            return decodeURIComponent(ckNameValue[1]);
+            return decodeURIComponent(ckNameValue.slice(1).join("="));
         }
     }
     return null;
-}
+};
 
 BrowserBot.prototype.getAllCookieNames = function(doc) {
     if (!doc) doc = this.getDocument();
@@ -1186,12 +1370,51 @@ BrowserBot.prototype.getAllCookieNames = function(doc) {
         cookieNames.push(ckName);
     }
     return cookieNames;
+};
+
+BrowserBot.prototype.getAllRawCookieNames = function(doc) {
+    if (!doc) doc = this.getDocument();
+    var ck = doc.cookie;
+    if (!ck) return [];
+    var cookieNames = [];
+    var ckPairs = ck.split(/;/);
+    for (var i = 0; i < ckPairs.length; i++) {
+        var ckPair = ckPairs[i].trim();
+        var ckNameValue = ckPair.split(/=/);
+        var ckName = ckNameValue[0];
+        cookieNames.push(ckName);
+    }
+    return cookieNames;
+};
+
+function encodeURIComponentWithASPHack(uri) {
+  var regularEncoding = encodeURIComponent(uri);
+  var aggressiveEncoding = regularEncoding.replace(".", "%2E");
+  aggressiveEncoding = aggressiveEncoding.replace("_", "%5F");
+  return aggressiveEncoding;
 }
 
 BrowserBot.prototype.deleteCookie = function(cookieName, domain, path, doc) {
     if (!doc) doc = this.getDocument();
     var expireDateInMilliseconds = (new Date()).getTime() + (-1 * 1000);
-    var cookie = cookieName + "=deleted; ";
+    
+    // we can't really be sure if we're dealing with encoded or unencoded cookie names
+    var _cookieName;
+    var rawCookieNames = this.getAllRawCookieNames(doc);
+    for (rawCookieNumber in rawCookieNames) {
+      if (rawCookieNames[rawCookieNumber] == cookieName) {
+        _cookieName = cookieName;
+        break;
+      } else if (rawCookieNames[rawCookieNumber] == encodeURIComponent(cookieName)) {
+        _cookieName = encodeURIComponent(cookieName);
+        break;
+      } else if (rawCookieNames[rawCookieNumber] == encodeURIComponentWithASPHack(cookieName)) {
+        _cookieName = encodeURIComponentWithASPHack(cookieName);
+        break;
+      } 
+    }
+
+    var cookie = _cookieName + "=deleted; ";
     if (path) {
         cookie += "path=" + path + "; ";
     }
@@ -1201,13 +1424,13 @@ BrowserBot.prototype.deleteCookie = function(cookieName, domain, path, doc) {
     cookie += "expires=" + new Date(expireDateInMilliseconds).toGMTString();
     LOG.debug("Setting cookie to: " + cookie);
     doc.cookie = cookie;
-}
+};
 
 /** Try to delete cookie, return false if it didn't work */
 BrowserBot.prototype._maybeDeleteCookie = function(cookieName, domain, path, doc) {
     this.deleteCookie(cookieName, domain, path, doc);
     return (!this.getCookieByName(cookieName, doc));
-}
+};
     
 
 BrowserBot.prototype._recursivelyDeleteCookieDomains = function(cookieName, domain, path, doc) {
@@ -1222,7 +1445,7 @@ BrowserBot.prototype._recursivelyDeleteCookieDomains = function(cookieName, doma
         // No more dots; try just not passing in a domain at all
         return this._maybeDeleteCookie(cookieName, null, path, doc);
     }
-}
+};
 
 BrowserBot.prototype._recursivelyDeleteCookie = function(cookieName, domain, path, doc) {
     var slashIndex = path.lastIndexOf("/");
@@ -1235,7 +1458,7 @@ BrowserBot.prototype._recursivelyDeleteCookie = function(cookieName, domain, pat
         if (deleted) return true;
     }
     return this._recursivelyDeleteCookieDomains(cookieName, domain, path, doc);
-}
+};
 
 BrowserBot.prototype.recursivelyDeleteCookie = function(cookieName, domain, path, win) {
     if (!win) win = this.getCurrentWindow();
@@ -1252,7 +1475,7 @@ BrowserBot.prototype.recursivelyDeleteCookie = function(cookieName, domain, path
     deleted = this._recursivelyDeleteCookieDomains(cookieName, "." + domain, null, doc);
     if (deleted) return;
     throw new SeleniumError("Couldn't delete cookie " + cookieName);
-}
+};
 
 /*
  * Finds an element recursively in frames and nested frames
@@ -1288,6 +1511,7 @@ BrowserBot.prototype.findElementOrNull = function(locator, win) {
         win = this.getCurrentWindow();
     }
     var element = this.findElementRecursive(locator.type, locator.string, win.document, win);
+    element = core.firefox.unwrap(element);
 
     if (element != null) {
         return this.browserbot.highlight(element);
@@ -1300,15 +1524,43 @@ BrowserBot.prototype.findElementOrNull = function(locator, win) {
 BrowserBot.prototype.findElement = function(locator, win) {
     var element = this.findElementOrNull(locator, win);
     if (element == null) throw new SeleniumError("Element " + locator + " not found");
-    return element;
-}
+    return core.firefox.unwrap(element);
+};
+
+
+/**
+ * Finds a list of elements using the same mechanism as webdriver.
+ *
+ * @param {string} how The finding mechanism to use.
+ * @param {string} using The selector to use.
+ * @param {Document|Element} root The root of the search path.
+ */
+BrowserBot.prototype.findElementsLikeWebDriver = function(how, using, root) {
+  var by = {};
+  by[how] = using;
+
+  var all = bot.locators.findElements(by, root);
+  var toReturn = '';
+
+  for (var i = 0; i < all.length - 1; i++) {
+    toReturn += bot.inject.cache.addElement(core.firefox.unwrap(all[i])) + ',';
+  }
+  if (all[all.length - 1]) {
+    var last = core.firefox.unwrap(all[all.length - 1]);
+    toReturn += bot.inject.cache.addElement(core.firefox.unwrap(all[all.length - 1]));
+  }
+
+  return toReturn;
+};
 
 /**
  * In non-IE browsers, getElementById() does not search by name.  Instead, we
  * we search separately by id and name.
  */
 BrowserBot.prototype.locateElementByIdentifier = function(identifier, inDocument, inWindow) {
-    return BrowserBot.prototype.locateElementById(identifier, inDocument, inWindow)
+    // HBC - use "this" instead of "BrowserBot.prototype"; otherwise we lose
+    // the non-prototype fields of the object!
+    return this.locateElementById(identifier, inDocument, inWindow)
             || BrowserBot.prototype.locateElementByName(identifier, inDocument, inWindow)
             || null;
 };
@@ -1323,9 +1575,22 @@ BrowserBot.prototype.locateElementById = function(identifier, inDocument, inWind
     }
     else if (browserVersion.isIE || browserVersion.isOpera) {
         // SEL-484
-        var xpath = '/descendant::*[@id=' + identifier.quoteForXPath() + ']';
-        return BrowserBot.prototype
-            .locateElementByXPath(xpath, inDocument, inWindow);
+        var elements = inDocument.getElementsByTagName('*');
+        
+        for (var i = 0, n = elements.length; i < n; ++i) {
+            element = elements[i];
+            
+            if (element.tagName.toLowerCase() == 'form') {
+                if (element.attributes['id'].nodeValue == identifier) {
+                    return element;
+                }
+            }
+            else if (element.getAttribute('id') == identifier) {
+                return element;
+            }
+        }
+        
+        return null;
     }
     else {
         return null;
@@ -1372,44 +1637,97 @@ BrowserBot.prototype.locateElementByDomTraversal = function(domTraversal, docume
 
     return element;
 };
+
 BrowserBot.prototype.locateElementByDomTraversal.prefix = "dom";
+
+
+BrowserBot.prototype.locateElementByStoredReference = function(locator, document, window) {
+  try {
+    return core.locators.findElement("stored=" + locator);
+  } catch (e) {
+    return null;
+  }
+};
+BrowserBot.prototype.locateElementByStoredReference.prefix = "stored";
+
+
+BrowserBot.prototype.locateElementByWebDriver = function(locator, document, window) {
+  try {
+    return core.locators.findElement("webdriver=" + locator);
+  } catch (e) {
+    return null;
+  }
+};
+BrowserBot.prototype.locateElementByWebDriver.prefix = "webdriver";
 
 /**
  * Finds an element identified by the xpath expression. Expressions _must_
  * begin with "//".
  */
 BrowserBot.prototype.locateElementByXPath = function(xpath, inDocument, inWindow) {
-    var results = eval_xpath(xpath, inDocument, {
-        returnOnFirstMatch          : true,
-        ignoreAttributesWithoutValue: this.ignoreAttributesWithoutValue,
-        allowNativeXpath            : this.allowNativeXpath,
-        xpathLibrary                : this.xpathLibrary,
-        namespaceResolver           : this._namespaceResolver
-    });
-    return (results.length > 0) ? results[0] : null;
+    return this.xpathEvaluator.selectSingleNode(inDocument, xpath, null,
+        inDocument.createNSResolver
+          ? inDocument.createNSResolver(inDocument.documentElement)
+          : this._namespaceResolver);
 };
+
+
+/**
+ * Find many elements using xpath.
+ *
+ * @param {string} xpath XPath expression to search for.
+ * @param {=Document} inDocument The document to search in.
+ * @param {=Window} inWindow The window the document is in.
+ */
+BrowserBot.prototype.locateElementsByXPath = function(xpath, inDocument, inWindow) {
+    return this.xpathEvaluator.selectNodes(inDocument, xpath, null,
+        inDocument.createNSResolver
+          ? inDocument.createNSResolver(inDocument.documentElement)
+          : this._namespaceResolver);
+};
+
 
 BrowserBot.prototype._namespaceResolver = function(prefix) {
     if (prefix == 'html' || prefix == 'xhtml' || prefix == 'x') {
         return 'http://www.w3.org/1999/xhtml';
     } else if (prefix == 'mathml') {
         return 'http://www.w3.org/1998/Math/MathML';
+    } else if (prefix == 'svg') {
+        return 'http://www.w3.org/2000/svg';
     } else {
         throw new Error("Unknown namespace: " + prefix + ".");
     }
-}
+};
 
 /**
  * Returns the number of xpath results.
  */
-BrowserBot.prototype.evaluateXPathCount = function(xpath, inDocument) {
-    var results = eval_xpath(xpath, inDocument, {
-        ignoreAttributesWithoutValue: this.ignoreAttributesWithoutValue,
-        allowNativeXpath            : this.allowNativeXpath,
-        xpathLibrary                : this.xpathLibrary,
-        namespaceResolver           : this._namespaceResolver
-    });
-    return results.length;
+BrowserBot.prototype.evaluateXPathCount = function(selector, inDocument) {
+    var locator = parse_locator(selector);
+    var opts = {};
+    opts['namespaceResolver'] =
+        inDocument.createNSResolver
+          ? inDocument.createNSResolver(inDocument.documentElement)
+          : this._namespaceResolver;
+    if (locator.type == 'xpath' || locator.type == 'implicit') {
+    	return eval_xpath(locator.string, inDocument, opts).length;
+    } else {
+        LOG.error("Locator does not use XPath strategy: " + selector);
+        return 0;
+    }
+};
+
+/**
+ * Returns the number of css results.
+ */
+BrowserBot.prototype.evaluateCssCount = function(selector, inDocument) {
+    var locator = parse_locator(selector);
+    if (locator.type == 'css' || locator.type == 'implicit') {
+        return eval_css(locator.string, inDocument).length;
+    } else {
+        LOG.error("Locator does not use CSS strategy: " + selector);
+        return 0;
+    }
 };
 
 /**
@@ -1426,6 +1744,7 @@ BrowserBot.prototype.locateElementByLinkText = function(linkText, inDocument, in
     }
     return null;
 };
+
 BrowserBot.prototype.locateElementByLinkText.prefix = "link";
 
 /**
@@ -1440,28 +1759,15 @@ BrowserBot.prototype.findAttribute = function(locator) {
 
     // Find the element.
     var element = this.findElement(elementLocator);
-
-    // Handle missing "class" attribute in IE.
-    if (browserVersion.isIE && attributeName == "class") {
-        attributeName = "className";
-    }
-
-    // Get the attribute value.
-    var attributeValue = element.getAttribute(attributeName);
-    
-    // IE returns an object for the "style" attribute
-    if (attributeName == 'style' && typeof(attributeValue) != 'string') {
-        attributeValue = attributeValue.cssText;
-    }
-
-    return attributeValue ? attributeValue.toString() : null;
+    var attributeValue = bot.dom.getAttribute(element, attributeName);
+    return goog.isDefAndNotNull(attributeValue) ? attributeValue.toString() : null;
 };
 
 /*
 * Select the specified option and trigger the relevant events of the element.
 */
 BrowserBot.prototype.selectOption = function(element, optionToSelect) {
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
     var changed = false;
     for (var i = 0; i < element.options.length; i++) {
         var option = element.options[i];
@@ -1476,7 +1782,7 @@ BrowserBot.prototype.selectOption = function(element, optionToSelect) {
     }
 
     if (changed) {
-        triggerEvent(element, 'change', true);
+        bot.events.fire(element, bot.events.EventType.CHANGE);
     }
 };
 
@@ -1485,10 +1791,10 @@ BrowserBot.prototype.selectOption = function(element, optionToSelect) {
 */
 BrowserBot.prototype.addSelection = function(element, option) {
     this.checkMultiselect(element);
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
     if (!option.selected) {
         option.selected = true;
-        triggerEvent(element, 'change', true);
+        bot.events.fire(element, bot.events.EventType.CHANGE);
     }
 };
 
@@ -1497,10 +1803,10 @@ BrowserBot.prototype.addSelection = function(element, option) {
 */
 BrowserBot.prototype.removeSelection = function(element, option) {
     this.checkMultiselect(element);
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
     if (option.selected) {
         option.selected = false;
-        triggerEvent(element, 'change', true);
+        bot.events.fire(element, bot.events.EventType.CHANGE);
     }
 };
 
@@ -1513,22 +1819,21 @@ BrowserBot.prototype.checkMultiselect = function(element) {
 };
 
 BrowserBot.prototype.replaceText = function(element, stringValue) {
-    triggerEvent(element, 'focus', false);
-    triggerEvent(element, 'select', true);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
+    bot.events.fire(element, bot.events.EventType.SELECT);
     var maxLengthAttr = element.getAttribute("maxLength");
     var actualValue = stringValue;
-    
-    if (maxLengthAttr != null && maxLengthAttr != -1) {
+    if (maxLengthAttr != null) {
         var maxLength = parseInt(maxLengthAttr);
         if (stringValue.length > maxLength) {
             actualValue = stringValue.substr(0, maxLength);
         }
     }
-    
+
     if (getTagName(element) == "body") {
         if (element.ownerDocument && element.ownerDocument.designMode) {
             var designMode = new String(element.ownerDocument.designMode).toLowerCase();
-            if (designMode = "on") {
+            if (designMode == "on") {
                 // this must be a rich text control!
                 element.innerHTML = actualValue;
             }
@@ -1538,13 +1843,14 @@ BrowserBot.prototype.replaceText = function(element, stringValue) {
     }
     // DGF this used to be skipped in chrome URLs, but no longer.  Is xpcnativewrappers to blame?
     try {
-        triggerEvent(element, 'change', true);
+        bot.events.fire(element, bot.events.EventType.CHANGE);
     } catch (e) {}
 };
 
 BrowserBot.prototype.submit = function(formElement) {
     var actuallySubmit = true;
     this._modifyElementTarget(formElement);
+    
     if (formElement.onsubmit) {
         if (browserVersion.isHTA) {
             // run the code in the correct window so alerts are handled correctly even in HTA mode
@@ -1563,7 +1869,7 @@ BrowserBot.prototype.submit = function(formElement) {
             // pause for up to 2s while this command runs
             var terminationCondition = function () {
                 return !win[marker];
-            }
+            };
             return Selenium.decorateFunctionWithTimeout(terminationCondition, 2000);
         } else {
             actuallySubmit = formElement.onsubmit();
@@ -1577,7 +1883,7 @@ BrowserBot.prototype.submit = function(formElement) {
     } else {
         formElement.submit();
     }
-}
+};
 
 BrowserBot.prototype.clickElement = function(element, clientX, clientY) {
        this._fireEventOnElement("click", element, clientX, clientY);
@@ -1604,7 +1910,7 @@ BrowserBot.prototype._modifyElementTarget = function(element) {
             }
         }
     }
-}
+};
 
 
 BrowserBot.prototype._handleClickingImagesInsideLinks = function(targetWindow, element) {
@@ -1616,7 +1922,7 @@ BrowserBot.prototype._handleClickingImagesInsideLinks = function(targetWindow, e
         }
         itrElement = itrElement.parentNode;
     }
-}
+};
 
 BrowserBot.prototype._getTargetWindow = function(element) {
     var targetWindow = element.ownerDocument.defaultView;
@@ -1624,7 +1930,7 @@ BrowserBot.prototype._getTargetWindow = function(element) {
         targetWindow = this._getFrameFromGlobal(element.target);
     }
     return targetWindow;
-}
+};
 
 BrowserBot.prototype._getFrameFromGlobal = function(target) {
 
@@ -1646,7 +1952,7 @@ BrowserBot.prototype._getFrameFromGlobal = function(target) {
     var win = this.getWindowByName(target);
     if (win) return win;
     return this.getCurrentWindow().open('', target);
-}
+};
 
 
 BrowserBot.prototype.bodyText = function() {
@@ -1696,7 +2002,7 @@ BrowserBot.prototype.getAllLinks = function() {
 
 function isDefined(value) {
     return typeof(value) != undefined;
-}
+};
 
 BrowserBot.prototype.goBack = function() {
     this.getCurrentWindow().history.back();
@@ -1794,10 +2100,10 @@ BrowserBot.prototype.selectElements = function(filterExpr, elements, defaultFilt
 BrowserBot.prototype.locateElementByClass = function(locator, document) {
     return elementFindFirstMatchingChild(document,
             function(element) {
-                return element.className == locator
+                return element.className == locator;
             }
             );
-}
+};
 
 /**
  * Find an element by alt
@@ -1805,10 +2111,10 @@ BrowserBot.prototype.locateElementByClass = function(locator, document) {
 BrowserBot.prototype.locateElementByAlt = function(locator, document) {
     return elementFindFirstMatchingChild(document,
             function(element) {
-                return element.alt == locator
+                return element.alt == locator;
             }
             );
-}
+};
 
 /**
  * Find an element by css selector
@@ -1818,7 +2124,7 @@ BrowserBot.prototype.locateElementByCss = function(locator, document) {
     if (elements.length != 0)
         return elements[0];
     return null;
-}
+};
 
 /**
  * This function is responsible for mapping a UI specifier string to an element
@@ -1850,7 +2156,7 @@ BrowserBot.prototype.locateElementByUIElement = function(locator, inDocument) {
     }
     
     return locatedElement;
-}
+};
 
 BrowserBot.prototype.locateElementByUIElement.prefix = 'ui';
 
@@ -1913,7 +2219,7 @@ KonquerorBrowserBot.prototype.setOpenLocation = function(win, loc) {
     if ("about:blank" != win.location.href) {
         var startLoc = parseUrl(win.location.href);
         startLoc.hash = null;
-        var startUrl = reassembleLocation(startLoc);
+        startUrl = reassembleLocation(startLoc);
     }
     LOG.debug("startUrl="+startUrl);
     LOG.debug("win.location.href="+win.location.href);
@@ -1937,7 +2243,7 @@ KonquerorBrowserBot.prototype._isSameDocument = function(originalDocument, curre
     // originalDocument and currentDocument are different objects
     // while their location are same.
     if (originalDocument) {
-        return originalDocument.location == currentDocument.location
+        return originalDocument.location == currentDocument.location;
     } else {
         return originalDocument === currentDocument;
     }
@@ -1954,7 +2260,7 @@ SafariBrowserBot.prototype.setOpenLocation = KonquerorBrowserBot.prototype.setOp
 
 function OperaBrowserBot(frame) {
     BrowserBot.call(this, frame);
-}
+};
 objectExtend(OperaBrowserBot.prototype, BrowserBot.prototype);
 OperaBrowserBot.prototype.setIFrameLocation = function(iframe, location) {
     if (iframe.src == location) {
@@ -1962,11 +2268,11 @@ OperaBrowserBot.prototype.setIFrameLocation = function(iframe, location) {
     } else {
         iframe.src = location;
     }
-}
+};
 
 function IEBrowserBot(frame) {
     BrowserBot.call(this, frame);
-}
+};
 objectExtend(IEBrowserBot.prototype, BrowserBot.prototype);
 
 IEBrowserBot.prototype._handleClosedSubFrame = function(testWindow, doNotModify) {
@@ -2043,7 +2349,11 @@ IEBrowserBot.prototype.modifySeparateTestWindowToDetectPageLoads = function(wind
     var pageUnloadDetector = function() {
         self.pageUnloading = true;
     };
-    windowObject.attachEvent("onbeforeunload", pageUnloadDetector);
+    if (windowObject.addEventListener) {
+      windowObject.addEventListener('beforeunload', pageUnloadDetector, true);
+    } else {
+      windowObject.attachEvent('onbeforeunload', pageUnloadDetector);
+    }
     BrowserBot.prototype.modifySeparateTestWindowToDetectPageLoads.call(this, windowObject);
 };
 
@@ -2051,9 +2361,10 @@ IEBrowserBot.prototype.pollForLoad = function(loadFunction, windowObject, origin
     LOG.debug("IEBrowserBot.pollForLoad: " + marker);
     if (!this.permDeniedCount[marker]) this.permDeniedCount[marker] = 0;
     BrowserBot.prototype.pollForLoad.call(this, loadFunction, windowObject, originalDocument, originalLocation, originalHref, marker);
+    var self;
     if (this.pageLoadError) {
         if (this.pageUnloading) {
-            var self = this;
+            self = this;
             LOG.debug("pollForLoad UNLOADING (" + marker + "): caught exception while firing events on unloading page: " + this.pageLoadError.message);
             this.reschedulePoller(loadFunction, windowObject, originalDocument, originalLocation, originalHref, marker);
             this.pageLoadError = null;
@@ -2079,7 +2390,7 @@ IEBrowserBot.prototype.pollForLoad = function(loadFunction, windowObject, origin
                 }
             }
 
-            var self = this;
+            self = this;
             LOG.debug("pollForLoad (" + marker + "): " + this.pageLoadError.message + " (" + this.permDeniedCount[marker] + "), waiting to see if it goes away");
             this.reschedulePoller(loadFunction, windowObject, originalDocument, originalLocation, originalHref, marker);
             this.pageLoadError = null;
@@ -2179,7 +2490,7 @@ SafariBrowserBot.prototype.modifyWindowToRecordPopUpDialogs = function(windowToM
 
 MozillaBrowserBot.prototype._fireEventOnElement = function(eventType, element, clientX, clientY) {
     var win = this.getCurrentWindow();
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
 
     // Add an event listener that detects if the default action has been prevented.
     // (This is caused by a javascript onclick handler returning false)
@@ -2217,7 +2528,7 @@ MozillaBrowserBot.prototype._fireEventOnElement = function(eventType, element, c
 
 OperaBrowserBot.prototype._fireEventOnElement = function(eventType, element, clientX, clientY) {
     var win = this.getCurrentWindow();
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
 
     this._modifyElementTarget(element);
 
@@ -2233,7 +2544,7 @@ OperaBrowserBot.prototype._fireEventOnElement = function(eventType, element, cli
 
 KonquerorBrowserBot.prototype._fireEventOnElement = function(eventType, element, clientX, clientY) {
     var win = this.getCurrentWindow();
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
 
     this._modifyElementTarget(element);
 
@@ -2251,7 +2562,7 @@ KonquerorBrowserBot.prototype._fireEventOnElement = function(eventType, element,
 };
 
 SafariBrowserBot.prototype._fireEventOnElement = function(eventType, element, clientX, clientY) {
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
     var wasChecked = element.checked;
 
     this._modifyElementTarget(element);
@@ -2277,7 +2588,7 @@ SafariBrowserBot.prototype.refresh = function() {
         win.location.hash = "";
         var actuallyReload = function() {
             win.location.reload(true);
-        }
+        };
         window.setTimeout(actuallyReload, 1);
     } else {
         win.location.reload(true);
@@ -2286,7 +2597,7 @@ SafariBrowserBot.prototype.refresh = function() {
 
 IEBrowserBot.prototype._fireEventOnElement = function(eventType, element, clientX, clientY) {
     var win = this.getCurrentWindow();
-    triggerEvent(element, 'focus', false);
+    bot.events.fire(element, bot.events.EventType.FOCUS);
 
     var wasChecked = element.checked;
 
@@ -2296,7 +2607,11 @@ IEBrowserBot.prototype._fireEventOnElement = function(eventType, element, client
     var pageUnloadDetector = function() {
         pageUnloading = true;
     };
-    win.attachEvent("onbeforeunload", pageUnloadDetector);
+    if (win.addEventListener) {
+      win.addEventListener('beforeunload', pageUnloadDetector, true);
+    } else {
+      win.attachEvent('onbeforeunload', pageUnloadDetector);
+    }
     this._modifyElementTarget(element);
     if (element[eventType]) {
         element[eventType]();
@@ -2317,7 +2632,7 @@ IEBrowserBot.prototype._fireEventOnElement = function(eventType, element, client
 
         // Onchange event is not triggered automatically in IE.
         if (isDefined(element.checked) && wasChecked != element.checked) {
-            triggerEvent(element, 'change', true);
+            bot.events.fire(element, bot.events.EventType.CHANGE);
         }
 
     }

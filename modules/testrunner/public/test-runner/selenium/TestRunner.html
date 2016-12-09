@@ -8,7 +8,7 @@
         <!-- The copyright notice and other comments have been moved to after the HTA declaration,
 to work-around a bug in IE on Win2K whereby the HTA application doesn't function correctly -->
         <!--
-        Copyright 2004 ThoughtWorks, Inc
+        Copyright 2011 Software Freedom Conservancy
 
          Licensed under the Apache License, Version 2.0 (the "License");
          you may not use this file except in compliance with the License.
@@ -26,10 +26,23 @@ to work-around a bug in IE on Win2K whereby the HTA application doesn't function
 
         <title>Selenium Functional Test Runner</title>
         <link rel="stylesheet" type="text/css" href="selenium.css"/>
+        
+        <!-- Patch Play : hide testSuiteFrame -->
+        <style type="text/css">
+            iframe {
+                border: 0px;
+            }
+            #testSuiteFrame {
+                display: none;
+            }
+        </style>
+        <!-- end hack Play : hide testSuiteFrame -->
+
         <script type="text/javascript" src="scripts/xmlextras.js"></script>
         <script language="JavaScript" type="text/javascript" src="lib/prototype.js"></script>
-        <script language="JavaScript" type="text/javascript" src="lib/cssQuery/cssQuery-p.js"></script>
+        <script language="JavaScript" type="text/javascript" src="lib/sizzle.js"></script>
         <script language="JavaScript" type="text/javascript" src="lib/snapsie.js"></script>
+        <script language="JavaScript" type="text/javascript" src="scripts/atoms.js"></script>
         <script language="JavaScript" type="text/javascript" src="scripts/htmlutils.js"></script>
         <script language="JavaScript" type="text/javascript" src="scripts/ui-element.js"></script>
         <script language="JavaScript" type="text/javascript" src="lib/scriptaculous/scriptaculous.js"></script>
@@ -46,17 +59,8 @@ to work-around a bug in IE on Win2K whereby the HTA application doesn't function
         <script language="JavaScript" type="text/javascript" src="xpath/xmltoken.js"></script>
         <script language="JavaScript" type="text/javascript" src="xpath/dom.js"></script>
         <script language="JavaScript" type="text/javascript" src="xpath/xpath.js"></script>
-        <!--<script language="JavaScript" type="text/javascript" src="xpath/javascript-xpath-0.1.11.js"></script>-->
+        <script language="JavaScript" type="text/javascript" src="xpath/javascript-xpath-0.1.11.js"></script>
         <script language="JavaScript" type="text/javascript" src="scripts/user-extensions.js"></script>
-        <script language="JavaScript" type="text/javascript">
-            function openDomViewer() {
-                var autFrame = document.getElementById('selenium_myiframe');
-                var autFrameDocument = new SeleniumFrame(autFrame).getDocument();
-                this.rootDocument = autFrameDocument;
-                var domViewer = window.open(getDocumentBase(document) + 'domviewer/domviewer.html');
-                return false;
-            }
-        </script>
 </head>
 
 <body onLoad="onSeleniumLoad();">
@@ -66,18 +70,19 @@ to work-around a bug in IE on Win2K whereby the HTA application doesn't function
 <!-- Suite, Test, Control Panel -->
 
 <tr class="selenium">
-<td width="0" height="30%">
-    <iframe name="testSuiteFrame" id="testSuiteFrame" src="./TestPrompt.html" application="yes" frameborder='0'></iframe>
+<!-- Hack Play : hide testSuiteFrame -->
+<td width="0%" height="30%">
+    <iframe name="testSuiteFrame" id="testSuiteFrame" src="./TestPrompt.html" application="yes"></iframe>
 </td>
 <td width="75%" height="30%">
-    <iframe name="testFrame" id="testFrame" application="yes" src="Blank.html" frameborder='0'></iframe>
+    <iframe name="testFrame" id="testFrame" application="yes" src="Blank.html"></iframe>
 </td>
 
 <td width="25%">
     <table class="layout">
         <tr class="selenium">
             <th width="25%" height="1" class="header">
-                <h1><a href="http://selenium.openqa.org" title="The Selenium Project">Selenium</a> TestRunner
+                <h1><a href="http://seleniumhq.org" title="The Selenium Project">Selenium</a> TestRunner
                 </h1>
             </th>
         </tr>
@@ -88,16 +93,16 @@ to work-around a bug in IE on Win2K whereby the HTA application doesn't function
 
                     <div id="imageButtonPanel">
                         <button type="button" id="runSuite" onClick="htmlTestRunner.startTestSuite();"
-                                title="Run All tests" accesskey="a">
+                                title="Run All tests [a]" accesskey="a">
                         </button>
                         <button type="button" id="runSeleniumTest" onClick="htmlTestRunner.runSingleTest();"
-                                title="Run the Selected test" accesskey="r">
+                                title="Run the Selected test [r]" accesskey="r">
                         </button>
                         <button type="button" id="pauseTest" disabled="disabled"
-                                title="Pause/Continue" accesskey="p" class="cssPauseTest">
+                                title="Pause/Continue [p]" accesskey="p" class="cssPauseTest">
                         </button>
                         <button type="button" id="stepTest" disabled="disabled"
-                                title="Step" accesskey="s">
+                                title="Step [s]" accesskey="s">
                         </button>
                     </div>
 
@@ -147,9 +152,6 @@ to work-around a bug in IE on Win2K whereby the HTA application doesn't function
                 <fieldset>
                     <legend>Tools</legend>
 
-                    <button type="button" id="domViewer1" onClick="openDomViewer();">
-                        View DOM
-                    </button>
                     <button type="button" onClick="LOG.show();">
                         Show Log
                     </button>
