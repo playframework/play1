@@ -45,7 +45,9 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         }
 
         engine.setEnableSessionCreation(true);
-
+        //disable SSLv2,SSLv3  --http://googleonlinesecurity.blogspot.com/2014/10/this-poodle-bites-exploiting-ssl-30.html?m=1
+        engine.setEnabledProtocols(new String[]{"TLSv1","TLSv1.1","TLSv1.2"});
+        
         pipeline.addLast("ssl", new SslHandler(engine));
 
         // Get all the pipeline. Give the user the opportunity to add their own
