@@ -6,9 +6,15 @@ import play.exceptions.UnexpectedException;
 import play.utils.OrderSafeProperties;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Properties;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
@@ -232,20 +238,31 @@ public class IO {
 
     // If targetLocation does not exist, it will be created.
     public static void copyDirectory(File source, File target) {
-        if (source.isDirectory()) {
-            if (!target.exists()) {
-                target.mkdir();
-            }
-            for (String child: source.list()) {
-                copyDirectory(new File(source, child), new File(target, child));
-            }
-        } else {
-            try {
-                write(new FileInputStream(source),  new FileOutputStream(target));
-            } catch (IOException e) {
-                throw new UnexpectedException(e);
-            }
+        final Path src = source.toPath();
+        final Path dest = target.toPath();
+        try {
+            Files.walkFileTree(src,
+                    new SimpleFileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                            FileVisitResult preVisitDirectoryResult = super.preVisitDirectory(dir, attrs);
+                            if (FileVisitResult.CONTINUE.equals(preVisitDirectoryResult)) {
+                                Path targetPath = dest.resolve(src.relativize(dir));
+                                if (!Files.exists(targetPath)) Files.createDirectory(targetPath);
+                            }
+                            return preVisitDirectoryResult;
+                        }
+
+                        @Override
+                        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                            FileVisitResult visitFileResult = super.visitFile(file, attrs);
+                            if (FileVisitResult.CONTINUE.equals(visitFileResult))
+                                Files.copy(file, dest.resolve(src.relativize(file)), REPLACE_EXISTING);
+                            return visitFileResult;
+                        }
+                    });
+        } catch (IOException e) {
+            throw new UnexpectedException(e);
         }
     }
-
 }
