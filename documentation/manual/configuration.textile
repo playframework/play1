@@ -266,7 +266,11 @@ To reuse an existing Datasource from your application server:
 
 bc. db=java:/comp/env/jdbc/myDatasource@
 
-If you specify a @Datasource@, the database plugin detects the pattern @db=java:@ and will de-activate the default JDBC system.
+And for application server where Datasource doesn't have @java:@ prefix (Glassfish and its derivative), you could use @jndi:@ instead. The @jndi:@ prefix will be omitted:
+
+bc. db=jndi:jdbc/myDataSource
+
+If you specify a @Datasource@, the database plugin detects the pattern @db=java:@ and @db=jndi:@ and will de-activate the default JDBC system.
 
 Default: none.
 

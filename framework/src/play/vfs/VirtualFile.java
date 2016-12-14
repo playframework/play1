@@ -230,6 +230,9 @@ public class VirtualFile {
     }
 
     public static VirtualFile fromRelativePath(String relativePath) {
+        if (relativePath == null) { // avoid NPE in pattern.matcher(relativePath)
+            return null;
+        }
         Pattern pattern = Pattern.compile("^(\\{(.+?)\\})?(.*)$");
         Matcher matcher = pattern.matcher(relativePath);
 

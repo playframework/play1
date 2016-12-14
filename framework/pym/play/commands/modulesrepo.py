@@ -326,7 +326,7 @@ def build(app, args, env):
         print "~"
         print "~ Building..."
         print "~"
-        status = subprocess.call('ant -f %s -Dplay.path=%s' % (build_file, ftb), shell=True)
+        status = subprocess.call('ant -f "%s" -Dplay.path="%s"' % (build_file, ftb), shell=True)
         print "~"
         if status:
             sys.exit(status)

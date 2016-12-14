@@ -438,7 +438,8 @@ public class DBConfig {
             p.put(propsPrefix + ".pass", "");
         }
 
-        if (p.getProperty(propsPrefix, "").startsWith("java:") && p.getProperty(propsPrefix + ".url") == null) {
+        String datasourceName = p.getProperty(propsPrefix, "");
+        if ((datasourceName.startsWith("java:") || datasourceName.startsWith("jndi:")) && p.getProperty(propsPrefix + ".url") == null) {
             if (datasource == null) {
                 return true;
             }
