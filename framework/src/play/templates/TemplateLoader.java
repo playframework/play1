@@ -1,5 +1,9 @@
 package play.templates;
 
+import java.nio.file.FileSystem;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -214,6 +218,46 @@ public class TemplateLoader {
                 Template template = load(vf);
                 if (template != null) {
                     template.compile();
+                }
+            }
+        }
+
+        String play_compile_templates = Play.configuration.getProperty(
+                "play_compile_templates",
+                System.getProperty(
+                        "play_compile_templates",
+                        System.getenv("PLAY_COMPILE_TEMPLATES")));
+        String play_compile_templates_path_separator = Play.configuration.getProperty(
+                "play_compile_templates_path_separator",
+                System.getProperty(
+                        "play_compile_templates_path_separator",
+                        System.getProperty("path.separator")));
+        if (play_compile_templates != null) {
+            for (String yamlTemplate : play_compile_templates.split(play_compile_templates_path_separator)) {
+                VirtualFile vf = null;
+                for (int retry = 0; ; retry++) {
+                    if (retry == 0) {
+                        try {
+                            vf = VirtualFile.open(Play.applicationPath.toPath().resolve(Paths.get(yamlTemplate)).toFile());
+                        } catch (InvalidPathException invalidPathException) { /*ignored*/}
+                    } else if (retry == 1) {
+                        vf = VirtualFile.fromRelativePath(yamlTemplate);
+                    } else {
+                        vf = null;
+                        break;
+                    }
+                    if (vf != null && vf.exists()) {
+                        Template template = load(vf);
+                        if (template != null) {
+                            template.compile();
+                            break;
+                        }
+                    } else {
+                        vf = null;
+                    }
+                }
+                if (vf == null) {
+                    Logger.warn("A template specified by system environment 'PLAY_YAML_TEMPLATES' does not exist or path is wrong. template: '%s'", yamlTemplate);
                 }
             }
         }
