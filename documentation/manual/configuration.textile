@@ -1057,6 +1057,32 @@ bc. play.pool=10
 Default: @1@ (in @dev@ mode), number of processors + 1 (in @prod@ mode).
 
 
+h3(#play.templates.compile). play.templates.compile
+
+The value is a list of files separated by a property like "@path.separator@":configuration#play.templates.compile.path.separator .
+
+bc. play.templates.compile=/absolue/path/file.ext;conf/relative/path/file.ext;{module:reporting}module/relative/path/file.ext
+
+The path notation of files can use:
+
+* absolute file path
+* relative file path
+* module relative file path.
+
+Default: no default the parameter is optional
+
+
+h3(#play.templates.compile.path.separator). play.templates.compile.path.separator
+
+Override the path separator for separating list elements of @play.templates.compile@":configuration#play.templates.compile .
+This parameter would be usefull when using the path notation for module relative file path on unix systems,
+where the default value would be @:@ . That would separate module prefix notations like @{module:modname}@ on unix.
+
+bc. play.templates.compile.path.separator=;
+
+Default: the system property @path.separator@
+
+
 h3(#play.tmp). play.tmp
 
 Folder used to store temporary files. For example:
@@ -1067,7 +1093,7 @@ Values:
 
 * an absolute path
 * a relative path, relative to the application directory
-* @none@ so that no temporary directory will be used 
+* @none@ so that no temporary directory will be used
 
 Default: @tmp@
 

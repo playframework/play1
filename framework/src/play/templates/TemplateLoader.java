@@ -222,18 +222,18 @@ public class TemplateLoader {
             }
         }
 
-        String play_compile_templates = Play.configuration.getProperty(
-                "play_compile_templates",
+        String play_templates_compile = Play.configuration.getProperty(
+                "play.templates.compile",
                 System.getProperty(
-                        "play_compile_templates",
-                        System.getenv("PLAY_COMPILE_TEMPLATES")));
-        String play_compile_templates_path_separator = Play.configuration.getProperty(
-                "play_compile_templates_path_separator",
+                        "play.templates.compile",
+                        System.getenv("PLAY_TEMPLATES_COMPILE")));
+        String play_templates_compile_path_separator = Play.configuration.getProperty(
+                "play.templates.compile.path.separator",
                 System.getProperty(
-                        "play_compile_templates_path_separator",
+                        "play.templates.compile.path.separator",
                         System.getProperty("path.separator")));
-        if (play_compile_templates != null) {
-            for (String yamlTemplate : play_compile_templates.split(play_compile_templates_path_separator)) {
+        if (play_templates_compile != null) {
+            for (String yamlTemplate : play_templates_compile.split(play_templates_compile_path_separator)) {
                 VirtualFile vf = null;
                 for (int retry = 0; ; retry++) {
                     if (retry == 0) {
