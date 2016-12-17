@@ -291,7 +291,7 @@ public class CorePlugin extends PlayPlugin {
             new SigEnhancer(),
             new ControllersEnhancer(),
             new MailerEnhancer(),
-            new LocalvariablesNamesEnhancer()
+            Play.classes.java8 ? new LocalvariablesNamesEnhancer() : new LocalvariablesNamesEnhancerJava7()
         };
     }
 

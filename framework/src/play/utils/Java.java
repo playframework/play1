@@ -6,7 +6,7 @@ import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
 import play.classloading.ApplicationClassloaderState;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancerJava7;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
@@ -204,13 +204,7 @@ public class Java {
             return names;
         }
         else {
-            // Java 7 and below support via LocalVariablesNamesEnhancer
-            try {
-                return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
-            }
-            catch (Exception e) {
-                throw new UnexpectedException("Cannot read parameter names for " + method, e);
-            }
+            return LocalvariablesNamesEnhancerJava7.parameterNames(method);
         }
     }
 
