@@ -722,10 +722,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         try {
             Map<String, Object> newArgs = new HashMap<>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
-            String[] names = (String[]) actionMethod.getDeclaringClass()
-                    .getDeclaredField(
-                            "$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes()))
-                    .get(null);
+            String[] names = Java.parameterNames(actionMethod);
             for (int i = 0; i < names.length && i < args.length; i++) {
                 Annotation[] annotations = actionMethod.getParameterAnnotations()[i];
                 boolean isDefault = false;
