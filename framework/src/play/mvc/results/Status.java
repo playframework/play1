@@ -5,7 +5,7 @@ import play.mvc.Http.Response;
 
 public class Status extends Result {
 
-    int code;
+    private final int code;
 
     public Status(int code) {
         super(code+"");
@@ -15,5 +15,9 @@ public class Status extends Result {
     @Override
     public void apply(Request request, Response response) {
         response.status = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 }

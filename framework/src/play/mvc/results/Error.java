@@ -17,7 +17,7 @@ import play.templates.TemplateLoader;
  */
 public class Error extends Result {
 
-    protected int status;
+    private final int status;
 
     public Error(String reason) {
         super(reason);
@@ -56,5 +56,9 @@ public class Error extends Result {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    public int getStatus() {
+        return status;
     }
 }

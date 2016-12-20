@@ -22,13 +22,13 @@ public class RenderBinary extends Result {
     private static final String INLINE_DISPOSITION_TYPE = "inline";
     private static final String ATTACHMENT_DISPOSITION_TYPE = "attachment";
 
-    private static URLCodec encoder = new URLCodec();
-    boolean inline = false;
-    long length = 0;
-    File file;
-    InputStream is;
-    String name;
-    String contentType;
+    private static final URLCodec encoder = new URLCodec();
+    private final boolean inline;
+    private long length = 0;
+    private File file;
+    private InputStream is;
+    private final String name;
+    private String contentType;
 
     /**
      * send a binary stream as the response
@@ -182,5 +182,25 @@ public class RenderBinary extends Result {
     private boolean canAsciiEncode(String string) {
         CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
         return asciiEncoder.canEncode(string);
+    }
+
+    public boolean isInline() {
+        return inline;
+    }
+
+    public long getLength() {
+        return length;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }
