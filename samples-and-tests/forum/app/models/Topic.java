@@ -50,7 +50,7 @@ public class Topic extends Model {
     }
 
     public Post getLastPost() {
-        return Post.find("topic = ? order by postedAt desc", this).first();
+        return Post.find("topic = ?1 order by postedAt desc", this).first();
     }
     
 }
