@@ -9,20 +9,23 @@ import play.mvc.Http.Response;
  */
 public class RenderHtml extends Result {
     
-    String text;
+    private final String html;
     
-    public RenderHtml(CharSequence text) {
-        this.text = text.toString();
+    public RenderHtml(CharSequence html) {
+        this.html = html.toString();
     }
 
     @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/html");
-            response.out.write(text.getBytes(getEncoding()));
+            response.out.write(html.getBytes(getEncoding()));
         } catch(Exception e) {
             throw new UnexpectedException(e);
         }
     }
 
+    public String getHtml() {
+        return html;
+    }
 }

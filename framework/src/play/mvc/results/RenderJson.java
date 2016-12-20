@@ -15,7 +15,7 @@ import play.mvc.Http.Response;
  */
 public class RenderJson extends Result {
 
-    String json;
+    private final String json;
 
     public RenderJson(Object o) {
         json = new Gson().toJson(o);
@@ -70,4 +70,7 @@ public class RenderJson extends Result {
         return bestMatch;
     }
 
+    public String getJson() {
+        return json;
+    }
 }
