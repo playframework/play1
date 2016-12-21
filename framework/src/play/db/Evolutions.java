@@ -50,12 +50,7 @@ public class Evolutions extends PlayPlugin {
         Play.id = System.getProperty("play.id");
         Play.guessFrameworkPath();
         Play.readConfiguration();
-        Play.javaPath = new ArrayList<>();
-        Play.classes = new ApplicationClasses();
         Play.classloader = new ApplicationClassloader();
-
-        Play.templatesPath = new ArrayList<>();
-        Play.modulesRoutes = new HashMap<>();
         Play.loadModules(VirtualFile.open(Play.applicationPath));
 
         if (System.getProperty("modules") != null) {

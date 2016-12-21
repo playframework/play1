@@ -104,7 +104,7 @@ public class Play {
     /**
      * All loaded application classes
      */
-    public static ApplicationClasses classes;
+    public static ApplicationClasses classes = new ApplicationClasses();
     
     /**
      * The application classLoader
@@ -119,12 +119,12 @@ public class Play {
     /**
      * All paths to search for Java files
      */
-    public static List<VirtualFile> javaPath;
+    public static List<VirtualFile> javaPath = new CopyOnWriteArrayList<>();
     
     /**
      * All paths to search for templates files
      */
-    public static List<VirtualFile> templatesPath;
+    public static List<VirtualFile> templatesPath = new ArrayList<>(2);
     
     /**
      * Main routes file
@@ -134,7 +134,7 @@ public class Play {
     /**
      * Plugin routes files
      */
-    public static Map<String, VirtualFile> modulesRoutes;
+    public static Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
     
     /**
      * The loaded configuration files
@@ -230,7 +230,7 @@ public class Play {
         // Read the configuration file
         readConfiguration();
 
-        Play.classes = new ApplicationClasses();
+        Play.classes.clear();
 
         // Configure logs
         Logger.init();
@@ -290,24 +290,25 @@ public class Play {
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
+        
+        roots.clear();
         roots.add(appRoot);
-        javaPath = new CopyOnWriteArrayList<>();
+        
+        javaPath.clear();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
+        templatesPath.clear();
         if (appRoot.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
-            templatesPath = new ArrayList<>(2);
             templatesPath.add(appRoot.child("app/views"));
-        } else {
-            templatesPath = new ArrayList<>(1);
         }
 
         // Main route file
         routes = appRoot.child("conf/routes");
 
         // Plugin route files
-        modulesRoutes = new HashMap<>(16);
+        modulesRoutes.clear();
 
         // Load modules
         loadModules(appRoot);
