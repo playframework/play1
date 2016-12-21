@@ -1,23 +1,9 @@
 package play.mvc;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.Future;
-
-import org.apache.commons.javaflow.Continuation;
-import org.apache.commons.javaflow.bytecode.StackRecorder;
-
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
@@ -42,6 +28,18 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Future;
 
 /**
  * Invoke an action after an HTTP request.
@@ -143,7 +141,8 @@ public class ActionInvoker {
                 try {
                     handleBefores(request);
                 } catch (InvocationTargetException ex) {
-                    invokeControllerCatchMethods(ex);
+                    if (!(ex.getTargetException() instanceof Result))
+                        invokeControllerCatchMethods(ex);
                     throw ex;
                 }
 
