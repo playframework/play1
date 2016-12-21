@@ -106,7 +106,6 @@ public class ActionInvoker {
         Monitor monitor = null;
 
         try {
-
             resolve(request, response);
             Method actionMethod = request.invokedMethod;
 
@@ -137,7 +136,6 @@ public class ActionInvoker {
             monitor = MonitorFactory.start(request.action + "()");
 
             // 3. Invoke the action
-            try {
                 // @Before
                 try {
                     handleBefores(request);
@@ -199,23 +197,6 @@ public class ActionInvoker {
                 }
 
                 throw new NoResult();
-
-            } catch (InvocationTargetException ex) {
-                // It's a Result ? (expected)
-                if (ex.getTargetException() instanceof Result) {
-                    throw (Result) ex.getTargetException();
-                }
-                // Re-throw the enclosed exception
-                if (ex.getTargetException() instanceof PlayException) {
-                    throw (PlayException) ex.getTargetException();
-                }
-                StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
-                if (element != null) {
-                    throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
-                            ex.getTargetException());
-                }
-                throw new JavaExecutionException(ex);
-            }
 
         } catch (Result result) {
 
@@ -430,13 +411,8 @@ public class ActionInvoker {
                     }
                 }
             }
-        } catch (InvocationTargetException ex) {
-            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
-            if (element != null) {
-                throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
-                        ex.getTargetException());
-            }
-            throw new JavaExecutionException(ex);
+        } catch (PlayException e) {
+            throw e;
         } catch (Exception e) {
             throw new UnexpectedException("Exception while doing @Finally", e);
         }
@@ -506,11 +482,25 @@ public class ActionInvoker {
         return invoke(method, request.controllerInstance, args);
     }
 
-    static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        if (isActionMethod(method)) {
-            return invokeWithContinuation(method, instance, realArgs);
-        } else {
-            return method.invoke(instance, realArgs);
+    static Object invoke(Method method, Object instance, Object ... realArgs) throws Exception {
+        try {
+            if (isActionMethod(method)) {
+                return invokeWithContinuation(method, instance, realArgs);
+            } else {
+                return method.invoke(instance, realArgs);
+            }
+        } catch (InvocationTargetException ex) {
+            Throwable originalThrowable = ex.getTargetException();
+
+            if (originalThrowable instanceof Result || originalThrowable instanceof PlayException)
+                throw (Exception) originalThrowable;
+
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(originalThrowable);
+            if (element != null) {
+                throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
+                        originalThrowable);
+            }
+            throw new JavaExecutionException(originalThrowable);
         }
     }
 
