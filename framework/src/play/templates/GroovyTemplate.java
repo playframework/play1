@@ -208,11 +208,24 @@ public class GroovyTemplate extends BaseTemplate {
     }
 
     protected Binding setUpBindingVariables(Map<String, Object> args){
-        Binding binding = new Binding(args);
+        Binding binding = new FastBinding(args);
         binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
         return binding;
+    }
+
+    public static class FastBinding extends Binding {
+        private Map variables;
+
+        public FastBinding(Map variables) {
+            super(variables);
+            this.variables = variables;
+        }
+
+        @Override public Object getVariable(String name) {
+            return variables.get(name);
+        }
     }
     
     @Override
@@ -240,7 +253,7 @@ public class GroovyTemplate extends BaseTemplate {
             applyLayouts = true;
             layout.set(null);
             writer = new StringWriter();
-            binding.setProperty("out", new PrintWriter(writer));
+            binding.setVariable("out", new PrintWriter(writer));
             currentTemplate.set(this);
         }
         if (!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
