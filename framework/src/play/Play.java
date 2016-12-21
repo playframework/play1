@@ -78,7 +78,7 @@ public class Play {
     /**
      * The application root
      */
-    public static File applicationPath = null;
+    public static File applicationPath = new File(System.getProperty("application.path", "."));
     /**
      * tmp dir
      */
