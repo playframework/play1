@@ -143,7 +143,7 @@ public class ActionInvoker {
                     handleBefores(request);
                 } catch (InvocationTargetException ex) {
                     if (!(ex.getTargetException() instanceof Result))
-                        invokeControllerCatchMethods(ex);
+                        invokeControllerCatchMethods(ex.getTargetException());
                     throw ex;
                 }
 
@@ -181,7 +181,7 @@ public class ActionInvoker {
                             }
 
                         } else {
-                            invokeControllerCatchMethods(ex);
+                            invokeControllerCatchMethods(ex.getTargetException());
                             throw ex;
                         }
                     }
@@ -249,9 +249,9 @@ public class ActionInvoker {
         }
     }
 
-    private static void invokeControllerCatchMethods(InvocationTargetException ex) throws Exception {
+    private static void invokeControllerCatchMethods(Throwable throwable) throws Exception {
         // @Catch
-        Object[] args = new Object[]{ex.getTargetException()};
+        Object[] args = new Object[] {throwable};
         List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
         ControllerInstrumentation.stopActionCall();
         for (Method mCatch : catches) {
