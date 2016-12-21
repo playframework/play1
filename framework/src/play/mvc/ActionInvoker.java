@@ -7,6 +7,7 @@ import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -157,7 +158,7 @@ public class ActionInvoker {
                     if ("".equals(cacheKey)) {
                         cacheKey = "urlcache:" + request.url + request.querystring;
                     }
-                    actionResult = (Result) play.cache.Cache.get(cacheKey);
+                    actionResult = (Result) Cache.get(cacheKey);
                 }
 
                 if (actionResult == null) {
@@ -168,7 +169,7 @@ public class ActionInvoker {
                         actionResult = result;
                         // Cache it if needed
                         if (cacheKey != null) {
-                            play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
+                            Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                         }
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
@@ -176,7 +177,7 @@ public class ActionInvoker {
                             actionResult = (Result) ex.getTargetException();
                             // Cache it if needed
                             if (cacheKey != null) {
-                                play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
+                                Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                             }
 
                         } else {
