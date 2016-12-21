@@ -170,19 +170,9 @@ public class ActionInvoker {
                         if (cacheKey != null) {
                             Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                         }
-                    } catch (InvocationTargetException ex) {
-                        // It's a Result ? (expected)
-                        if (ex.getTargetException() instanceof Result) {
-                            actionResult = (Result) ex.getTargetException();
-                            // Cache it if needed
-                            if (cacheKey != null) {
-                                Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
-                            }
-
-                        } else {
-                            invokeControllerCatchMethods(ex.getTargetException());
-                            throw ex;
-                        }
+                    } catch (Exception ex) {
+                        invokeControllerCatchMethods(ex);
+                        throw ex;
                     }
                 }
 
