@@ -15,34 +15,46 @@ import play.mvc.Http.Response;
  */
 public class RenderJson extends Result {
 
+    private static final Gson GSON = new Gson();
+    
     private final String json;
+    private final Object response;
 
-    public RenderJson(Object o) {
-        json = new Gson().toJson(o);
+    public RenderJson(Object response) {
+        this.response = response;
+        json = GSON.toJson(response);
     }
 
-    public RenderJson(Object o, Type type) {
-        json = new Gson().toJson(o, type);
+    public RenderJson(Object response, Type type) {
+        this.response = response;
+        json = GSON.toJson(response, type);
     }
 
-    public RenderJson(Object o, JsonSerializer<?>... adapters) {
+    public RenderJson(Object response, JsonSerializer<?>... adapters) {
+        this.response = response;
+        json = gson(adapters).toJson(response);
+    }
+
+    private static Gson gson(JsonSerializer<?>[] adapters) {
         GsonBuilder gson = new GsonBuilder();
         for (Object adapter : adapters) {
             Type t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];
             gson.registerTypeAdapter(t, adapter);
         }
-        json = gson.create().toJson(o);
+        return gson.create();
     }
 
     public RenderJson(String jsonString) {
         json = jsonString;
+        response = null;
     }
 
-    public RenderJson(Object o, Gson gson) {
+    public RenderJson(Object response, Gson gson) {
+        this.response = response;
         if (gson != null) {
-            json = gson.toJson(o);
+            json = gson.toJson(response);
         } else {
-            json = new Gson().toJson(o);
+            json = GSON.toJson(response);
         }
     }
 
@@ -72,5 +84,9 @@ public class RenderJson extends Result {
 
     public String getJson() {
         return json;
+    }
+
+    public Object getResponse() {
+        return response;
     }
 }
