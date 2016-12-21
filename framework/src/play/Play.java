@@ -74,11 +74,11 @@ public class Play {
     /**
      * The application mode
      */
-    public static Mode mode;
+    public static Mode mode = Mode.DEV;
     /**
      * The application root
      */
-    public static File applicationPath = null;
+    public static File applicationPath = new File(System.getProperty("application.path", "."));
     /**
      * tmp dir
      */
@@ -126,7 +126,7 @@ public class Play {
     /**
      * The app configuration (already resolved from the framework id)
      */
-    public static Properties configuration;
+    public static Properties configuration = new Properties();
     /**
      * The last time than the application has started
      */

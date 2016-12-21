@@ -32,9 +32,9 @@ public class Messages {
 
     private static final Object[] NO_ARGS = new Object[] { null };
 
-    static public Properties defaults;
+    public static Properties defaults = new Properties();
 
-    static public Map<String, Properties> locales = new HashMap<>();
+    public static Map<String, Properties> locales = new HashMap<>();
 
     static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
@@ -107,7 +107,7 @@ public class Messages {
         if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
             value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
         }
-        if (value == null && defaults != null) {
+        if (value == null) {
             value = defaults.getProperty(key.toString());
         }
         if (value == null) {
@@ -196,7 +196,7 @@ public class Messages {
             return defaults;
         Properties mergedMessages = new Properties();
         mergedMessages.putAll(defaults);
-        if (locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+        if (locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
             mergedMessages.putAll(locales.get(locale.substring(0, 2)));
         }
         mergedMessages.putAll(locales.get(locale));
