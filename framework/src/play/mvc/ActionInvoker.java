@@ -200,8 +200,6 @@ public class ActionInvoker {
 
                 throw new NoResult();
 
-            } catch (IllegalAccessException | IllegalArgumentException ex) {
-                throw ex;
             } catch (InvocationTargetException ex) {
                 // It's a Result ? (expected)
                 if (ex.getTargetException() instanceof Result) {
