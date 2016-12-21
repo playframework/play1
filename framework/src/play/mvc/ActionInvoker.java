@@ -171,8 +171,8 @@ public class ActionInvoker {
                 if (cacheKey != null) {
                     Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                 }
-            } catch (Throwable e) {
-                invokeControllerCatchMethods(e);
+            } catch (JavaExecutionException e) {
+                invokeControllerCatchMethods(e.getCause());
                 throw e;
             }
 
@@ -198,6 +198,9 @@ public class ActionInvoker {
             // @Finally
             handleFinallies(request, null);
 
+        } catch (JavaExecutionException e) {
+            handleFinallies(request, e.getCause());
+            throw e;
         } catch (PlayException e) {
             handleFinallies(request, e);
             throw e;
