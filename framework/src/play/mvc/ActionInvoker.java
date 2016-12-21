@@ -139,9 +139,10 @@ public class ActionInvoker {
                 // @Before
                 try {
                     handleBefores(request);
-                } catch (InvocationTargetException ex) {
-                    if (!(ex.getTargetException() instanceof Result))
-                        invokeControllerCatchMethods(ex.getTargetException());
+                } catch (Result result) {
+                    throw result;
+                } catch (Exception ex) {
+                    invokeControllerCatchMethods(ex);
                     throw ex;
                 }
 
