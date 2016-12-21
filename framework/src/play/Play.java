@@ -74,7 +74,7 @@ public class Play {
     /**
      * The application mode
      */
-    public static Mode mode;
+    public static Mode mode = Mode.DEV;
     /**
      * The application root
      */
