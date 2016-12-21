@@ -34,9 +34,9 @@ public class Messages {
 
     public static Properties defaults = new Properties();
 
-    public static Map<String, Properties> locales = new HashMap<>();
+    public static final Map<String, Properties> locales = new HashMap<>();
 
-    static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
+    private final static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
     /**
      * Given a message code, translate it using current locale. If there is no
@@ -132,8 +132,8 @@ public class Messages {
         matcher.appendTail(sb);
         return sb.toString();
     }
-
-    static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
+    
+    private static final Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
 
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
