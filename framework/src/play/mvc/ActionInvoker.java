@@ -158,13 +158,6 @@ public class ActionInvoker {
                     ControllerInstrumentation.initActionCall();
                     inferResult(invokeControllerMethod(actionMethod));
                 }
-
-                // @After
-                handleAfters(request);
-
-                monitor.stop();
-                monitor = null;
-
             } catch (Result result) {
                 actionResult = result;
                 // Cache it if needed
@@ -175,6 +168,12 @@ public class ActionInvoker {
                 invokeControllerCatchMethods(e.getCause());
                 throw e;
             }
+
+            // @After
+            handleAfters(request);
+
+            monitor.stop();
+            monitor = null;
 
             // OK, re-throw the original action result
             if (actionResult != null) {
@@ -246,7 +245,7 @@ public class ActionInvoker {
 
     /**
      * Find the first public method of a controller class
-     * 
+     *
      * @param name
      *            The method name
      * @param clazz
@@ -340,7 +339,7 @@ public class ActionInvoker {
      * Checks and calla all methods in controller annotated with @Finally. The
      * caughtException-value is sent as argument to @Finally-method if method
      * has one argument which is Throwable
-     * 
+     *
      * @param request
      * @param caughtException
      *            If @Finally-methods are called after an error, this variable
