@@ -135,21 +135,15 @@ public class ActionInvoker {
             // Monitoring
             monitor = MonitorFactory.start(request.action + "()");
 
+            String cacheKey = null;
+            Result actionResult = null;
+
             // 3. Invoke the action
+            try {
                 // @Before
-                try {
-                    handleBefores(request);
-                } catch (Result result) {
-                    throw result;
-                } catch (Exception ex) {
-                    invokeControllerCatchMethods(ex);
-                    throw ex;
-                }
+                handleBefores(request);
 
                 // Action
-
-                Result actionResult = null;
-                String cacheKey = null;
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
@@ -162,18 +156,7 @@ public class ActionInvoker {
 
                 if (actionResult == null) {
                     ControllerInstrumentation.initActionCall();
-                    try {
-                        inferResult(invokeControllerMethod(actionMethod));
-                    } catch (Result result) {
-                        actionResult = result;
-                        // Cache it if needed
-                        if (cacheKey != null) {
-                            Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
-                        }
-                    } catch (Exception ex) {
-                        invokeControllerCatchMethods(ex);
-                        throw ex;
-                    }
+                    inferResult(invokeControllerMethod(actionMethod));
                 }
 
                 // @After
@@ -182,20 +165,29 @@ public class ActionInvoker {
                 monitor.stop();
                 monitor = null;
 
-                // OK, re-throw the original action result
-                if (actionResult != null) {
-                    throw actionResult;
+            } catch (Result result) {
+                actionResult = result;
+                // Cache it if needed
+                if (cacheKey != null) {
+                    Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                 }
+            } catch (Throwable e) {
+                invokeControllerCatchMethods(e);
+                throw e;
+            }
 
-                throw new NoResult();
+            // OK, re-throw the original action result
+            if (actionResult != null) {
+                throw actionResult;
+            }
+
+            throw new NoResult();
 
         } catch (Result result) {
-
             Play.pluginCollection.onActionInvocationResult(result);
 
             // OK there is a result to apply
             // Save session & flash scope now
-
             Scope.Session.current().save();
             Scope.Flash.current().save();
 
