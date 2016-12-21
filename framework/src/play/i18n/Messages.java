@@ -74,14 +74,14 @@ public class Messages {
         for (String key : wildcards) {
             keys.remove(key);
             String start = key.substring(0, key.length() - 1);
-            for (Object key2 : all.keySet()) {
+            for (String key2 : all.stringPropertyNames()) {
                 if (((String) key2).startsWith(start)) {
                     keys.add((String) key2);
                 }
             }
         }
         // Build the result
-        for (Object key : all.keySet()) {
+        for (String key : all.stringPropertyNames()) {
             if (keys.contains(key)) {
                 result.put(key, all.get(key));
             }
@@ -155,10 +155,10 @@ public class Messages {
             } else {
                 position = Integer.parseInt(matcher.group(2));
             }
-            if (conversion.equals("d") && position <= conversions.length) {
+            if ("d".equals(conversion) && position <= conversions.length) {
                 conversions[position - 1] = Long.class;
             }
-            if (conversion.equals("f") && position <= conversions.length) {
+            if ("f".equals(conversion) && position <= conversions.length) {
                 conversions[position - 1] = Double.class;
             }
         }

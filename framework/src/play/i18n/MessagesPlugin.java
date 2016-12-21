@@ -86,8 +86,8 @@ public class MessagesPlugin extends PlayPlugin {
 
             // Include
             Map<Object, Object> toInclude = new HashMap<>(16);
-            for (Object key : propsFromFile.keySet()) {
-                if (key.toString().startsWith("@include.")) {
+            for (String key : propsFromFile.stringPropertyNames()) {
+                if (key.startsWith("@include.")) {
                     try {
                         String filenameToInclude = propsFromFile.getProperty(key.toString());
                         File fileToInclude = getIncludeFile(file, filenameToInclude);
