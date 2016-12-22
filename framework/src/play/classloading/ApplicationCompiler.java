@@ -72,10 +72,10 @@ public class ApplicationCompiler {
      */
     final class CompilationUnit implements ICompilationUnit {
 
-        final private String clazzName;
-        final private String fileName;
-        final private char[] typeName;
-        final private char[][] packageName;
+        private final String clazzName;
+        private final String fileName;
+        private final char[] typeName;
+        private final char[][] packageName;
 
         CompilationUnit(String pClazzName) {
             clazzName = pClazzName;

@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
-    final static String mes = "validation.minSize";
+    static final String mes = "validation.minSize";
 
     int minSize;
 

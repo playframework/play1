@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
 
-    final static String mes = "validation.ipv4";
+    static final String mes = "validation.ipv4";
 
     @Override
     public void configure(IPv4Address ipv4Address) {

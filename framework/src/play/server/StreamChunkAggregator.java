@@ -16,7 +16,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
 
     private volatile HttpMessage currentMessage;
     private volatile OutputStream out;
-    private final static int maxContentLength = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
+    private static final int maxContentLength = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
     private volatile File file;
 
     /**

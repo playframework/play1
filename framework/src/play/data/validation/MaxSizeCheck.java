@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
-    final static String mes = "validation.maxSize";
+    static final String mes = "validation.maxSize";
 
     int maxSize;
 

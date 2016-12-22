@@ -398,7 +398,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * You can access your Request and Response object within the filter. See the JPA plugin for an example.
      * The JPA plugin wraps a transaction around an action. The filter applies a transaction to the current Action.
      */
-    public static abstract class Filter<T>
+  public abstract static class Filter<T>
     {
         String name;
 

@@ -36,7 +36,7 @@ public class Messages {
 
     public static Map<String, Properties> locales = new HashMap<>();
 
-    private final static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
+    private static final Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
     /**
      * Given a message code, translate it using current locale. If there is no

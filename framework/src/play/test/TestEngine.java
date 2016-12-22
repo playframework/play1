@@ -31,14 +31,14 @@ import play.vfs.VirtualFile;
  */
 public class TestEngine {
 
-    private final static class ClassNameComparator implements Comparator<Class> {
+    private static final class ClassNameComparator implements Comparator<Class> {
         @Override
         public int compare(Class aClass, Class bClass) {
             return aClass.getName().compareTo(bClass.getName());
         }
     }
 
-    private final static ClassNameComparator classNameComparator = new ClassNameComparator();
+    private static final ClassNameComparator classNameComparator = new ClassNameComparator();
 
     public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
