@@ -7,9 +7,14 @@ import play.data.validation.Validation;
 import play.data.validation.ValidationPlugin;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.*;
 
+import static java.math.BigDecimal.TEN;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 
 public class BinderTest {
@@ -311,6 +316,21 @@ public class BinderTest {
         return r2;
     }
 
+    @Test
+    public void applicationCanRegisterAndUnregisterCustomBinders() {
+        Binder.register(BigDecimal.class, new MyBigDecimalBinder());
+        assertNotNull(Binder.supportedTypes.get(BigDecimal.class));
+
+        Binder.unregister(BigDecimal.class);
+        assertNull(Binder.supportedTypes.get(BigDecimal.class));
+    }
+
+    private static class MyBigDecimalBinder implements TypeBinder<BigDecimal> {
+        @Override
+        public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
+            return new BigDecimal(value).add(TEN);
+        }
+    }
 }
 
 
