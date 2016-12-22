@@ -34,7 +34,7 @@ public class Messages {
 
     public static Properties defaults = new Properties();
 
-    public static final Map<String, Properties> locales = new HashMap<>();
+    public static Map<String, Properties> locales = new HashMap<>();
 
     private final static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
