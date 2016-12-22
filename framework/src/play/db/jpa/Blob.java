@@ -172,13 +172,8 @@ public class Blob implements BinaryField, UserType {
 
     public static File getStore() {
         String name = Play.configuration.getProperty("attachments.path", "attachments");
-        File store = null;
-        if(new File(name).isAbsolute()) {
-            store = new File(name);
-        } else {
-            store = Play.getFile(name);
-        }
-        if(!store.exists()) {
+        File store = new File(name).isAbsolute() ? new File(name) : Play.getFile(name);
+        if (!store.exists()) {
             store.mkdirs();
         }
         return store;
