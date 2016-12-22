@@ -499,7 +499,7 @@ public class Evolutions extends PlayPlugin {
         return sql.toString().trim();
     }
 
-    public synchronized static void checkEvolutionsState() {
+    public static synchronized void checkEvolutionsState() {
         // Look over all the DB
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
@@ -507,7 +507,7 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    public synchronized static void checkEvolutionsState(String dbName) {
+    public static synchronized void checkEvolutionsState(String dbName) {
         for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
 
             if (DB.getDataSource(dbName) != null) {
@@ -546,7 +546,7 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    public synchronized static List<Evolution> getEvolutionScript(String dbName, String moduleKey, VirtualFile evolutionsDirectory) {
+    public static synchronized List<Evolution> getEvolutionScript(String dbName, String moduleKey, VirtualFile evolutionsDirectory) {
         Stack<Evolution> app = listApplicationEvolutions(dbName, moduleKey, evolutionsDirectory);
         Stack<Evolution> db = listDatabaseEvolutions(dbName, moduleKey);
         List<Evolution> downs = new ArrayList<>();
@@ -577,8 +577,8 @@ public class Evolutions extends PlayPlugin {
         return script;
     }
 
-    public synchronized static Stack<Evolution> listApplicationEvolutions(String dBName, String moduleKey,
-            VirtualFile evolutionsDirectory) {
+    public static synchronized Stack<Evolution> listApplicationEvolutions(String dBName, String moduleKey,
+                                                                          VirtualFile evolutionsDirectory) {
         Stack<Evolution> evolutions = new Stack<>();
         evolutions.add(new Evolution("", 0, "", "", true));
         if (evolutionsDirectory.exists()) {
@@ -646,7 +646,7 @@ public class Evolutions extends PlayPlugin {
         return true;
     }
 
-    public synchronized static Stack<Evolution> listDatabaseEvolutions(String dbName, String moduleKey) {
+    public static synchronized Stack<Evolution> listDatabaseEvolutions(String dbName, String moduleKey) {
         Stack<Evolution> evolutions = new Stack<>();
         evolutions.add(new Evolution("", 0, "", "", false));
         Connection connection = null;

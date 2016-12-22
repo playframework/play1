@@ -19,7 +19,7 @@ import java.util.TreeMap;
  */
 public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
 
-    final static String mes = "validation.unique";
+    static final String mes = "validation.unique";
     private String uniqueKeyContext = null;
 
     @Override

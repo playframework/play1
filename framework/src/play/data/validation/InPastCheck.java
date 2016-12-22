@@ -15,7 +15,7 @@ import play.libs.I18N;
 @SuppressWarnings("serial")
 public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
-    final static String mes = "validation.past";
+    static final String mes = "validation.past";
     Date reference;
 
     @Override

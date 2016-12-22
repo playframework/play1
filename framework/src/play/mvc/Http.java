@@ -920,7 +920,7 @@ public class Http {
     /**
      * A Websocket Outbound channel
      */
-    public static abstract class Outbound {
+    public abstract static class Outbound {
 
         public static final ThreadLocal<Outbound> current = new ThreadLocal<>();
 
@@ -994,9 +994,9 @@ public class Http {
      */
     public static class WebSocketFrame extends WebSocketEvent {
 
-        final public boolean isBinary;
-        final public String textData;
-        final public byte[] binaryData;
+        public final boolean isBinary;
+        public final String textData;
+        public final byte[] binaryData;
 
         public WebSocketFrame(String data) {
             this.isBinary = false;
