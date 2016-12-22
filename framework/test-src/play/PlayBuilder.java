@@ -34,7 +34,7 @@ public class PlayBuilder {
 
         Play.version = "localbuild";
         Play.configuration = configuration;
-        Play.classes.clear();
+        Play.classes = new ApplicationClasses();
         Play.javaPath.clear();
         Play.applicationPath = new File(".");
         Play.classloader = new ApplicationClassloader();
