@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.ivy.Ivy;
+import org.apache.ivy.core.module.id.ModuleRevisionId;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.IvyNode;
@@ -26,18 +26,38 @@ import play.libs.Files;
 import play.libs.IO;
 
 public class DependenciesManager {
-   
+
     public static void main(String[] args) throws Exception {
+        String applicationPath = System.getProperty("application.path");
+        if (applicationPath == null) {
+            System.out.println("~ ERROR: cannot resolve \"application.path\"");
+            return;
+        }
+        String frameworkPath = System.getProperty("framework.path");
+        if (frameworkPath == null) {
+            System.out.println("~ ERROR: cannot resolve \"framework.path\"");
+            return;
+        }
+        String userHomePath = System.getProperty("user.home");
+        if (userHomePath == null) {
+            System.out.println("~ ERROR: cannot resolve \"user.home\"");
+            return;
+        }
+        String playVersion = System.getProperty("play.version");
+        if (playVersion == null) {
+            System.out.println("~ ERROR: cannot resolve \"play.version\"");
+            return;
+        }
 
         // Paths
-        File application = new File(System.getProperty("application.path"));
-        File framework = new File(System.getProperty("framework.path"));
-        File userHome  = new File(System.getProperty("user.home"));
+        File application = new File(applicationPath);
+        File framework = new File(frameworkPath);
+        File userHome = new File(userHomePath);
 
         DependenciesManager deps = new DependenciesManager(application, framework, userHome);
 
         ResolveReport report = deps.resolve();
-            if(report != null) {
+        if (report != null) {
             deps.report();
             List<File> installed = deps.retrieve(report);
             deps.sync(installed);
@@ -58,18 +78,17 @@ public class DependenciesManager {
     File framework;
     File userHome;
     HumanReadyLogger logger;
-    
+
     final FileFilter dirsToTrim = new FileFilter() {
 
         @Override
         public boolean accept(File file) {
             return file.isDirectory() && isDirToTrim(file.getName());
         }
-        
+
         private boolean isDirToTrim(String fileName) {
-            return "documentation".equals(fileName) || "src".equals(fileName) || 
-                   "tmp".equals(fileName) || fileName.contains("sample") ||
-                   fileName.contains("test");
+            return "documentation".equals(fileName) || "src".equals(fileName) || "tmp".equals(fileName) || fileName.contains("sample")
+                    || fileName.contains("test");
         }
     };
 
@@ -105,10 +124,7 @@ public class DependenciesManager {
 
         List<File> notSync = new ArrayList<>();
 
-        File[] paths = new File[]{
-            new File(application, "lib"),
-            new File(application, "modules")
-        };
+        File[] paths = new File[] { new File(application, "lib"), new File(application, "modules") };
         for (File path : paths) {
             if (path.exists()) {
                 for (File f : path.listFiles()) {
@@ -133,7 +149,8 @@ public class DependenciesManager {
         } else if (!notSync.isEmpty()) {
             System.out.println("~");
             System.out.println("~ *****************************************************************************");
-            System.out.println("~ WARNING: Your lib/ and modules/ directories are not synced with current dependencies (use --sync to automatically delete them)");
+            System.out.println(
+                    "~ WARNING: Your lib/ and modules/ directories are not synced with current dependencies (use --sync to automatically delete them)");
             System.out.println("~");
             for (File f : notSync) {
                 System.out.println("~ \tUnknown: " + f.getAbsolutePath());
@@ -147,7 +164,8 @@ public class DependenciesManager {
             if (!logger.notFound.isEmpty()) {
                 System.out.println("~");
                 System.out.println("~ *****************************************************************************");
-                System.out.println("~ WARNING: These dependencies are missing, your application may not work properly (use --verbose for details),");
+                System.out.println(
+                        "~ WARNING: These dependencies are missing, your application may not work properly (use --verbose for details),");
                 System.out.println("~");
                 for (String d : logger.notFound) {
                     System.out.println("~\t" + d);
@@ -161,17 +179,19 @@ public class DependenciesManager {
 
     // Retrieve the list of modules in the order they were defined in the dependencies.yml.
     public Set<String> retrieveModules() throws Exception {
-    	File ivyModule = new File(application, "conf/dependencies.yml");
-        if(ivyModule == null || !ivyModule.exists()) {
+        File ivyModule = new File(application, "conf/dependencies.yml");
+        if (ivyModule == null || !ivyModule.exists()) {
             return new LinkedHashSet<>();
         }
-    	return YamlParser.getOrderedModuleList(ivyModule);
+        return YamlParser.getOrderedModuleList(ivyModule);
     }
-	
+
     public List<File> retrieve(ResolveReport report) throws Exception {
-	    	
         // Track missing artifacts
         List<ArtifactDownloadReport> missing = new ArrayList<>();
+
+        // Track deps with errors
+        List<IvyNode> problems = new ArrayList<>();
 
         List<ArtifactDownloadReport> artifacts = new ArrayList<>();
         for (IvyNode node : ((List<IvyNode>) report.getDependencies())) {
@@ -183,36 +203,52 @@ public class DependenciesManager {
                     } else {
                         if (isPlayModule(artifact) || !isFrameworkLocal(artifact)) {
                             artifacts.add(artifact);
-                            
+
                             // Save the order of module
-                            if(isPlayModule(artifact)){
+                            if (isPlayModule(artifact)) {
                                 String mName = artifact.getLocalFile().getName();
                                 if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
-                                    mName = mName.substring(0, mName.length() - 4); 
+                                    mName = mName.substring(0, mName.length() - 4);
                                 }
                             }
                         }
                     }
                 }
+            } else if (node.hasProblem() && !node.isCompletelyEvicted()) {
+                problems.add(node);
             }
         }
-        
+
         // Create directory if not exist
         File modulesDir = new File(application, "modules");
-        if(!modulesDir.exists()){
+        if (!modulesDir.exists()) {
             modulesDir.mkdir();
         }
-          
-     
-        if (!missing.isEmpty()) {
+
+        if (!missing.isEmpty() || !problems.isEmpty()) {
             System.out.println("~");
             System.out.println("~ WARNING: Some dependencies could not be downloaded (use --verbose for details),");
             System.out.println("~");
             for (ArtifactDownloadReport d : missing) {
-                String msg = d.getArtifact().getModuleRevisionId().getOrganisation() + "->" + d.getArtifact().getModuleRevisionId().getName() + " " + d.getArtifact().getModuleRevisionId().getRevision() + ": " + d.getDownloadDetails();
-                System.out.println("~\t" + msg);
+                StringBuilder msg = new StringBuilder(d.getArtifact().getModuleRevisionId().getOrganisation()).append(" -> ")
+                        .append(d.getArtifact().getModuleRevisionId().getName()).append(' ')
+                        .append(d.getArtifact().getModuleRevisionId().getRevision()).append(": ").append(d.getDownloadDetails());
+                System.out.println("~\t" + msg.toString());
                 if (logger != null) {
-                    logger.notFound.add(msg);
+                    logger.notFound.add(msg.toString());
+                }
+            }
+            if (!problems.isEmpty()) {
+                for (IvyNode node : problems) {
+                    ModuleRevisionId moduleRevisionId = node.getId();
+
+                    StringBuilder msg = new StringBuilder(moduleRevisionId.getOrganisation()).append("->")
+                            .append(moduleRevisionId.getName()).append(' ').append(moduleRevisionId.getRevision()).append(": ")
+                            .append(node.getProblemMessage());
+                    System.out.println("~\t" + msg.toString());
+                    if (logger != null) {
+                        logger.notFound.add(msg.toString());
+                    }
                 }
             }
         }
@@ -224,7 +260,6 @@ public class DependenciesManager {
             System.out.println("~");
             System.out.println("~ No dependencies to install");
         } else {
-
             System.out.println("~");
             System.out.println("~ Installing resolved dependencies,");
             System.out.println("~");
@@ -238,8 +273,8 @@ public class DependenciesManager {
     }
 
     public File install(ArtifactDownloadReport artifact) throws Exception {
-        Boolean force = System.getProperty("play.forcedeps").equals("true");
-        Boolean trim = System.getProperty("play.trimdeps").equals("true");
+        Boolean force = "true".equalsIgnoreCase(System.getProperty("play.forcedeps"));
+        Boolean trim = "true".equalsIgnoreCase(System.getProperty("play.trimdeps"));
         try {
             File from = artifact.getLocalFile();
 
@@ -281,13 +316,13 @@ public class DependenciesManager {
                     Files.unzip(from, to);
                     System.out.println("~ \tmodules/" + to.getName());
                 }
-                
+
                 if (trim) {
                     for (File dirToTrim : to.listFiles(dirsToTrim)) {
                         Files.deleteDirectory(dirToTrim);
                     }
                 }
-                
+
                 return to;
             }
         } catch (Exception e) {
@@ -298,7 +333,8 @@ public class DependenciesManager {
 
     private boolean isFrameworkLocal(ArtifactDownloadReport artifact) throws Exception {
         String artifactFileName = artifact.getLocalFile().getName();
-        return new File(framework, "framework/lib/" + artifactFileName).exists() || new File(framework, "framework/" + artifactFileName).exists();
+        return new File(framework, "framework/lib/" + artifactFileName).exists()
+                || new File(framework, "framework/" + artifactFileName).exists();
     }
 
     private boolean isPlayModule(ArtifactDownloadReport artifact) throws Exception {
@@ -318,58 +354,55 @@ public class DependenciesManager {
     }
 
     public ResolveReport resolve() throws Exception {
-
         // Module
         ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
         File ivyModule = new File(application, "conf/dependencies.yml");
-        if(!ivyModule.exists()) {
+        if (!ivyModule.exists()) {
             System.out.println("~ !! " + ivyModule.getAbsolutePath() + " does not exist");
-			System.exit(-1);
+            System.exit(-1);
             return null;
         }
 
-
         // Variables
         System.setProperty("play.path", framework.getAbsolutePath());
-        
+
         // Ivy
         Ivy ivy = configure();
 
         // Clear the cache
         boolean clearcache = System.getProperty("clearcache") != null;
-        if(clearcache){
-           System.out.println("~ Clearing cache : " + ivy.getResolutionCacheManager().getResolutionCacheRoot() + ",");
-           System.out.println("~");
-           try{
-      		   FileUtils.deleteDirectory(ivy.getResolutionCacheManager().getResolutionCacheRoot());
-      		   System.out.println("~       Clear");
-           }catch(IOException e){
-        	   System.out.println("~       Could not clear");
-        	   System.out.println("~ ");
-        	   e.printStackTrace();
-             }
+        if (clearcache) {
+            System.out.println("~ Clearing cache : " + ivy.getResolutionCacheManager().getResolutionCacheRoot() + ",");
+            System.out.println("~");
+            try {
+                FileUtils.deleteDirectory(ivy.getResolutionCacheManager().getResolutionCacheRoot());
+                System.out.println("~       Clear");
+            } catch (IOException e) {
+                System.out.println("~       Could not clear");
+                System.out.println("~ ");
+                e.printStackTrace();
+            }
 
-           System.out.println("~");
-         }
-        
+            System.out.println("~");
+        }
 
         System.out.println("~ Resolving dependencies using " + ivyModule.getAbsolutePath() + ",");
         System.out.println("~");
-        
+
         // Resolve
         ResolveEngine resolveEngine = ivy.getResolveEngine();
         ResolveOptions resolveOptions = new ResolveOptions();
-        resolveOptions.setConfs(new String[]{"default"});
-        resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle", "source"}));
+        resolveOptions.setConfs(new String[] { "default" });
+        resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[] { "jar", "bundle", "source" }));
 
         return resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
     }
 
     public Ivy configure() throws Exception {
-
         boolean verbose = System.getProperty("verbose") != null;
         boolean debug = System.getProperty("debug") != null;
         HumanReadyLogger humanReadyLogger = new HumanReadyLogger();
+        this.logger = humanReadyLogger;
 
         IvySettings ivySettings = new IvySettings();
         new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies.yml"));
@@ -384,9 +417,9 @@ public class DependenciesManager {
         Ivy ivy = Ivy.newInstance(ivySettings);
 
         // Default ivy config see: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/807
-        if(userHome != null){
+        if (userHome != null) {
             File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
-            if(ivyDefaultSettings != null && ivyDefaultSettings.exists()) {
+            if (ivyDefaultSettings != null && ivyDefaultSettings.exists()) {
                 ivy.configure(ivyDefaultSettings);
             }
         }
@@ -396,7 +429,6 @@ public class DependenciesManager {
         } else if (verbose) {
             ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_INFO));
         } else {
-            logger = humanReadyLogger;
             ivy.getLoggerEngine().setDefaultLogger(logger);
         }
 
