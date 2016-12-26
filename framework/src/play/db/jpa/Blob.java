@@ -42,7 +42,7 @@ public class Blob implements BinaryField, UserType {
 
     @Override
     public InputStream get() {
-        if(exists()) {
+        if (exists()) {
             try {
                 return new FileInputStream(getFile());
             } catch(Exception e) {
@@ -84,8 +84,6 @@ public class Blob implements BinaryField, UserType {
     public String getUUID()  {
         return UUID;
     }
-
-    //
 
     @Override
     public int[] sqlTypes() {
@@ -164,21 +162,17 @@ public class Blob implements BinaryField, UserType {
         return original;
     }
 
-    //
-
     public static String getUUID(String dbValue) {
        return dbValue.split("[|]")[0];
     }
 
     public static File getStore() {
         String name = Play.configuration.getProperty("attachments.path", "attachments");
-        File store = null;
-        if(new File(name).isAbsolute()) {
-            store = new File(name);
-        } else {
+        File store = new File(name);
+        if (!store.isAbsolute()) {
             store = Play.getFile(name);
         }
-        if(!store.exists()) {
+        if (!store.exists()) {
             store.mkdirs();
         }
         return store;

@@ -50,12 +50,7 @@ public class AnnotationHelper {
                 if (StringUtils.isEmpty(format)) {
                     format = I18N.getDateFormat();
                 }
-                SimpleDateFormat sdf = null;
-                if(locale != null) {
-                    sdf = new SimpleDateFormat(format, locale);
-                } else {
-                    sdf = new SimpleDateFormat(format);      
-                }
+                SimpleDateFormat sdf = locale != null ? new SimpleDateFormat(format, locale) : new SimpleDateFormat(format);      
                 sdf.setLenient(false);
                 return sdf.parse(value);
             }
