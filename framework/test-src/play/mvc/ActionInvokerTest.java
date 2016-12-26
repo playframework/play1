@@ -2,10 +2,18 @@ package play.mvc;
 
 import org.junit.Before;
 import org.junit.Test;
+import play.Play;
+import play.classloading.ApplicationClasses;
+import play.exceptions.JavaExecutionException;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
+import play.mvc.results.Forbidden;
+import play.mvc.results.Result;
 
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class ActionInvokerTest {
     private Object[] noArgs = new Object[0];
@@ -56,6 +64,64 @@ public class ActionInvokerTest {
 
         controllerInstance = (Controller) ActionInvoker.invokeControllerMethod(FullCycleTestController.class.getMethod("after"), noArgs);
         assertSame(controllerInstance, Http.Request.current().controllerInstance);
+    }
+
+    @Test
+    public void invocationUnwrapsPlayException() throws Exception {
+        final UnexpectedException exception = new UnexpectedException("unexpected");
+
+        class AController extends Controller {
+            public void action() {
+                throw exception;
+            }
+        }
+
+        try {
+            ActionInvoker.invoke(AController.class.getMethod("action"), new AController());
+            fail();
+        }
+        catch (PlayException e) {
+            assertEquals(exception, e);
+        }
+    }
+
+    @Test
+    public void invocationUnwrapsResult() throws Exception {
+        final Result result = new Forbidden("unexpected");
+
+        class AController extends Controller {
+            public void action() {
+                throw result;
+            }
+        }
+
+        try {
+            ActionInvoker.invoke(AController.class.getMethod("action"), new AController());
+            fail();
+        }
+        catch (Result e) {
+            assertEquals(result, e);
+        }
+    }
+
+    @Test
+    public void invocationWrapsOtherExceptionsIntoJavaExecutionException() throws Exception {
+        Play.classes = mock(ApplicationClasses.class);
+        final Exception exception = new Exception("any");
+
+        class AController extends Controller {
+            public void action() throws Exception {
+                throw exception;
+            }
+        }
+
+        try {
+            ActionInvoker.invoke(AController.class.getMethod("action"), new AController());
+            fail();
+        }
+        catch (JavaExecutionException e) {
+            assertEquals(exception, e.getCause());
+        }
     }
 
     @Test
