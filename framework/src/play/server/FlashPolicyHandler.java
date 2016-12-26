@@ -9,8 +9,8 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
 public class FlashPolicyHandler extends FrameDecoder {
-	
-	private static final String XML = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
+
+    private static final String XML = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
     private ChannelBuffer policyResponse = ChannelBuffers.copiedBuffer(XML, CharsetUtil.UTF_8);
 
     /**

@@ -218,7 +218,7 @@ public abstract class Cache {
      * @return The element value or null
      */
     @SuppressWarnings("unchecked")
-	public static <T> T get(String key, Class<T> clazz) {
+    public static <T> T get(String key, Class<T> clazz) {
         return (T) cacheImpl.get(key);
     }
 

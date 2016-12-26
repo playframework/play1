@@ -70,7 +70,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
         Object[] values = new Object[isUpdate ? propertyNames.length + 1 :
                 propertyNames.length];
         Class clazz = validatedObject.getClass();
-		int index = 1;
+        int index = 1;
         for (int i = 0; i < propertyNames.length; i++) {
             Field field = getField(clazz, propertyNames[i]);
             field.setAccessible(true);

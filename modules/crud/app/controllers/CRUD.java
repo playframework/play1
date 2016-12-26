@@ -206,7 +206,7 @@ public abstract class CRUD extends Controller {
         public String modelName;
         public String controllerName;
         public String keyName;
-		public Factory factory;
+        public Factory factory;
 
         public ObjectType(Class<? extends Model> modelClass) {
             this.modelName = modelClass.getSimpleName();

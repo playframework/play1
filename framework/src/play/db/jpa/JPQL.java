@@ -250,10 +250,10 @@ public class JPQL {
         StringBuilder jpql = new StringBuilder();
         String subRequest;
         if (findBy.contains("OrderBy"))
-        	subRequest = findBy.split("OrderBy")[0];
+            subRequest = findBy.split("OrderBy")[0];
         else subRequest = findBy;
         String[] parts = subRequest.split("And");
-		int index = 1;
+        int index = 1;
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             if (part.endsWith("NotEqual")) {

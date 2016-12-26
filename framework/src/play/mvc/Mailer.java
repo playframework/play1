@@ -209,7 +209,7 @@ public class Mailer implements LocalVariablesSupport {
         private final DataSource dataSource;
 
         public InlineImage(DataSource dataSource) {
-        	this(null, dataSource);
+            this(null, dataSource);
         }
 
         public InlineImage(String cid, DataSource dataSource) {
