@@ -14,18 +14,18 @@ import java.util.Map;
 public class RenderTemplate extends Result {
 
     private final String name;
-    private final Map<String, Object> args;
     private final String content;
+    private final Map<String, Object> arguments;
     private final long renderTime;
 
-    public RenderTemplate(Template template, Map<String, Object> args) {
-        if (args.containsKey("out")) {
-            throw new RuntimeException("Assertion failed! args shouldn't contain out");
+    public RenderTemplate(Template template, Map<String, Object> arguments) {
+        if (arguments.containsKey("out")) {
+            throw new RuntimeException("Arguments should not contain out");
         }
         this.name = template.name;
-        this.args = args;
+        this.arguments = arguments;
         long start = System.currentTimeMillis();
-        this.content = template.render(args);
+        this.content = template.render(arguments);
         this.renderTime = System.currentTimeMillis() - start;
     }
 
@@ -44,12 +44,12 @@ public class RenderTemplate extends Result {
         return name;
     }
 
-    public Map<String, Object> getArguments() {
-        return args;
-    }
-
     public String getContent() {
         return content;
+    }
+
+    public Map<String, Object> getArguments() {
+        return arguments;
     }
 
     public long getRenderTime() {

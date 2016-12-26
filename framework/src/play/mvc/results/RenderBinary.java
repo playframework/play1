@@ -7,8 +7,7 @@ import play.libs.MimeTypes;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
@@ -24,7 +23,7 @@ public class RenderBinary extends Result {
 
     private static final URLCodec encoder = new URLCodec();
     private final boolean inline;
-    private long length = 0;
+    private long length;
     private File file;
     private InputStream is;
     private final String name;
@@ -82,21 +81,18 @@ public class RenderBinary extends Result {
     }
 
     /**
-     * Send a file as the response. Content-disposion is set to attachment.
+     * Send a file as the response. Content-disposition is set to attachment.
      * 
      * @param file readable file to send back
-     * @param name a name to use as Content-disposion's filename
+     * @param name a name to use as Content-disposition's filename
      */
     public RenderBinary(File file, String name) {
         this(file, name, false);
-        if (file == null) {
-            throw new RuntimeException("file is null");
-        }
     }
 
     /**
      * Send a file as the response. 
-     * Content-disposion is set to attachment, name is taken from file's name
+     * Content-disposition is set to attachment, name is taken from file's name
      * @param file readable file to send back
      */
     public RenderBinary(File file) {
@@ -105,77 +101,89 @@ public class RenderBinary extends Result {
 
     /**
      * Send a file as the response. 
-     * Content-disposion is set to attachment, name is taken from file's name
+     * Content-disposition is set to attachment, name is taken from file's name
      * @param file readable file to send back
      */
     public RenderBinary(File file, String name, boolean inline) {
-        this.file = file;
-        this.name = name;
-        this.inline = inline;
         if (file == null) {
             throw new RuntimeException("file is null");
         }
+        this.file = file;
+        this.name = name;
+        this.inline = inline;
     }
 
     @Override
     public void apply(Request request, Response response) {
+        if (name != null) {
+            setContentTypeIfNotSet(response, MimeTypes.getContentType(name));
+        }
+        if (contentType != null) {
+            response.contentType = contentType;
+        }
         try {
-            if (name != null) {
-                setContentTypeIfNotSet(response, MimeTypes.getContentType(name));
-            }
-            if (contentType != null) {
-                response.contentType = contentType;
-            }
-            String dispositionType;
-            if(inline) {
-                dispositionType = INLINE_DISPOSITION_TYPE;
-            } else {
-                dispositionType = ATTACHMENT_DISPOSITION_TYPE;
-            }
             if (!response.headers.containsKey("Content-Disposition")) {
-                if(name == null) {
-                    response.setHeader("Content-Disposition", dispositionType);
-                } else {
-                    if(canAsciiEncode(name)) {
-                        String contentDisposition = "%s; filename=\"%s\"";
-                        response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, name));
-                    } else {
-                        String encoding = getEncoding();
-                        String contentDisposition = "%1$s; filename*="+encoding+"''%2$s; filename=\"%2$s\"";
-                        response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, encoder.encode(name, encoding)));
-                    }
-                }
+                addContentDispositionHeader(response);
             }
             if (file != null) {
-                if (!file.exists()) {
-                    throw new UnexpectedException("Your file does not exists (" + file + ")");
-                }
-                if (!file.canRead()) {
-                    throw new UnexpectedException("Can't read your file (" + file + ")");
-                }
-                if (!file.isFile()) {
-                    throw new UnexpectedException("Your file is not a real file (" + file + ")");
-                }
-                response.direct = file;
+                renderFile(file, response);
             } else {
-                if (response.getHeader("Content-Length") != null) {
-                    response.direct = is;
-                } else {
-                    if (length != 0) {
-                        response.setHeader("Content-Length", length + "");
-                        response.direct = is;
-                    } else {
-                        try {
-                            IOUtils.copyLarge(is, response.out);
-                        }
-                        finally {
-                            closeQuietly(is);
-                        }
-                    }
-                }
+                renderInputStream(is, length, response);
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
+        }
+    }
+
+    private void addContentDispositionHeader(Response response) throws UnsupportedEncodingException {
+        if (name == null) {
+            response.setHeader("Content-Disposition", dispositionType());
+        }
+        else if (canAsciiEncode(name)) {
+            String contentDisposition = "%s; filename=\"%s\"";
+            response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType(), name));
+        }
+        else {
+            String encoding = getEncoding();
+            String contentDisposition = "%1$s; filename*=" + encoding + "''%2$s; filename=\"%2$s\"";
+            response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType(), encoder.encode(name, encoding)));
+        }
+    }
+
+    private static void renderFile(File file, Response response) {
+        if (!file.exists()) {
+            throw new UnexpectedException("Your file does not exists (" + file + ")");
+        }
+        if (!file.canRead()) {
+            throw new UnexpectedException("Can't read your file (" + file + ")");
+        }
+        if (!file.isFile()) {
+            throw new UnexpectedException("Your file is not a real file (" + file + ")");
+        }
+        response.direct = file;
+    }
+
+    private static void renderInputStream(InputStream is, long length, Response response) throws IOException {
+        if (response.getHeader("Content-Length") != null) {
+            response.direct = is;
+        } else if (length != 0) {
+            response.setHeader("Content-Length", String.valueOf(length));
+            response.direct = is;
+        } else {
+            copyInputStreamAndClose(is, response.out);
+        }
+    }
+
+    private String dispositionType() {
+        return inline ? INLINE_DISPOSITION_TYPE : ATTACHMENT_DISPOSITION_TYPE;
+    }
+
+    private static void copyInputStreamAndClose(InputStream is, OutputStream out) throws IOException {
+        try {
+            IOUtils.copyLarge(is, out);
+        }
+        finally {
+            closeQuietly(is);
         }
     }
 

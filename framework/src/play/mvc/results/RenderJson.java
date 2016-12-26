@@ -69,8 +69,15 @@ public class RenderJson extends Result {
         }
     }
 
-    //
-    static Method getMethod(Class clazz, String methodName) {
+    public String getJson() {
+        return json;
+    }
+
+    public Object getResponse() {
+        return response;
+    }
+
+    private static Method getMethod(Class clazz, String methodName) {
         Method bestMatch = null;
         for (Method m : clazz.getDeclaredMethods()) {
             if (m.getName().equals(methodName) && !m.isBridge()) {
@@ -80,13 +87,5 @@ public class RenderJson extends Result {
             }
         }
         return bestMatch;
-    }
-
-    public String getJson() {
-        return json;
-    }
-
-    public Object getResponse() {
-        return response;
     }
 }
