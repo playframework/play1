@@ -1,7 +1,6 @@
 package play.mvc.results;
 
 import java.util.Map;
-import play.Logger;
 
 import play.Play;
 import play.exceptions.UnexpectedException;

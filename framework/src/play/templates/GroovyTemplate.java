@@ -16,7 +16,6 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Unbinder;
 import play.exceptions.*;
 import play.exceptions.TemplateExecutionException.DoBodyException;

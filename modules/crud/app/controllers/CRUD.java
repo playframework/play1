@@ -22,7 +22,6 @@ import play.data.validation.Required;
 import play.db.Model;
 import play.db.Model.Factory;
 import play.exceptions.TemplateNotFoundException;
-import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
