@@ -45,6 +45,13 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
                 return false;
             }
         }
+        if (value instanceof Long) {
+            try {
+                return reference.before(new Date((Long) value));
+            } catch (Exception e) {
+                return false;
+            }
+        }
         return false;
     }
 
