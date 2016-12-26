@@ -15,14 +15,16 @@ import play.mvc.Http.Response;
  */
 public class RenderJson extends Result {
 
+    private static final Gson GSON = new Gson();
+    
     private final String json;
 
     public RenderJson(Object o) {
-        json = new Gson().toJson(o);
+        json = GSON.toJson(o);
     }
 
     public RenderJson(Object o, Type type) {
-        json = new Gson().toJson(o, type);
+        json = GSON.toJson(o, type);
     }
 
     public RenderJson(Object o, JsonSerializer<?>... adapters) {
@@ -42,7 +44,7 @@ public class RenderJson extends Result {
         if (gson != null) {
             json = gson.toJson(o);
         } else {
-            json = new Gson().toJson(o);
+            json = GSON.toJson(o);
         }
     }
 
