@@ -15,7 +15,7 @@ import play.mvc.Http.Response;
  */
 public class RenderJson extends Result {
 
-    String json;
+    private final String json;
 
     public RenderJson(Object o) {
         json = new Gson().toJson(o);
@@ -57,8 +57,11 @@ public class RenderJson extends Result {
         }
     }
 
-    //
-    static Method getMethod(Class clazz, String methodName) {
+    public String getJson() {
+        return json;
+    }
+
+    private static Method getMethod(Class clazz, String methodName) {
         Method bestMatch = null;
         for (Method m : clazz.getDeclaredMethods()) {
             if (m.getName().equals(methodName) && !m.isBridge()) {
@@ -69,5 +72,4 @@ public class RenderJson extends Result {
         }
         return bestMatch;
     }
-
 }

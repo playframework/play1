@@ -10,7 +10,7 @@ import play.mvc.Http.Response;
  */
 public class RedirectToStatic extends Result {
 
-    String file;
+    private final String file;
     
     public RedirectToStatic(String file) {
         this.file = file;
@@ -24,5 +24,9 @@ public class RedirectToStatic extends Result {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    public String getFile() {
+        return file;
     }
 }
