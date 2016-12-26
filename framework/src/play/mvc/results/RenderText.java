@@ -10,7 +10,7 @@ import play.mvc.Http.Response;
  */
 public class RenderText extends Result {
     
-    String text;
+    private final String text;
     
     public RenderText(CharSequence text) {
         this.text = text.toString();
@@ -26,4 +26,7 @@ public class RenderText extends Result {
         }
     }
 
+    public String getText() {
+        return text;
+    }
 }

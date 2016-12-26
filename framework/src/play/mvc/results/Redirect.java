@@ -70,4 +70,12 @@ public class Redirect extends Result {
             throw new UnexpectedException(e);
         }
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public int getCode() {
+        return code;
+    }
 }
