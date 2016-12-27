@@ -15,8 +15,8 @@ import play.data.binding.Binder;
 /**
  * I18n Helper
  * <p>
- * translation are defined as properties in /conf/messages.<em>locale</em> files
- * with locale being the i18n country code fr, en, fr_FR
+ * translation are defined as properties in /conf/messages.<em>locale</em> files with locale being the i18n country code
+ * fr, en, fr_FR
  * 
  * <pre>
  * # /conf/messages.fr
@@ -39,8 +39,8 @@ public class Messages {
     private static final Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
     /**
-     * Given a message code, translate it using current locale. If there is no
-     * message in the current locale for the given key, the key is returned.
+     * Given a message code, translate it using current locale. If there is no message in the current locale for the
+     * given key, the key is returned.
      * 
      * @param key
      *            the message code
@@ -58,8 +58,7 @@ public class Messages {
      * @param locale
      *            the locale code, e.g. fr, fr_FR
      * @param keys
-     *            the keys to get messages from. Wildcards can be used at the
-     *            end: {'title', 'login.*'}
+     *            the keys to get messages from. Wildcards can be used at the end: {'title', 'login.*'}
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties find(String locale, Set<String> keys) {
@@ -92,22 +91,23 @@ public class Messages {
     public static String getMessage(String locale, Object key, Object... args) {
         // Check if there is a plugin that handles translation
         String message = Play.pluginCollection.getMessage(locale, key, args);
-
         if (message != null) {
             return message;
         }
 
-        String value = null;
         if (key == null) {
             return "";
         }
-        if (locales.containsKey(locale)) {
-            value = locales.get(locale).getProperty(key.toString());
+        String value = null;
+        if (locales != null) {
+            if (locales.containsKey(locale)) {
+                value = locales.get(locale).getProperty(key.toString());
+            }
+            if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+                value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
+            }
         }
-        if (value == null && locale != null && locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
-            value = locales.get(locale.substring(0, 2)).getProperty(key.toString());
-        }
-        if (value == null) {
+        if (value == null && defaults != null) {
             value = defaults.getProperty(key.toString());
         }
         if (value == null) {
@@ -192,14 +192,17 @@ public class Messages {
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties all(String locale) {
-        if (locale == null || "".equals(locale))
+        if (locale == null || "".equals(locale)) {
             return defaults;
+        }
         Properties mergedMessages = new Properties();
         mergedMessages.putAll(defaults);
-        if (locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
-            mergedMessages.putAll(locales.get(locale.substring(0, 2)));
+        if (locales != null) {
+            if (locale.length() == 5 && locales.containsKey(locale.substring(0, 2))) {
+                mergedMessages.putAll(locales.get(locale.substring(0, 2)));
+            }
+            mergedMessages.putAll(locales.get(locale));
         }
-        mergedMessages.putAll(locales.get(locale));
         return mergedMessages;
     }
 
