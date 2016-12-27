@@ -43,9 +43,25 @@ public abstract class Binder {
         supportedTypes.put(byte[][].class, new ByteArrayArrayBinder());
     }
 
-
+    /**
+     * Add custom binder for any given class
+     * 
+     * E.g. @{code Binder.register(BigDecimal.class, new MyBigDecimalBinder());}
+     * 
+     * NB! Do not forget to UNREGISTER your custom binder when applications is reloaded (most probably in method onApplicationStop()).
+     * Otherwise you will have a memory leak.
+     * 
+     * @see #unregister(java.lang.Class)
+     */
     public static <T> void register(Class<T> clazz, TypeBinder<T> typeBinder) {
         supportedTypes.put(clazz, typeBinder);
+    }
+
+    /**
+     * Remove custom binder that was add with method #register(java.lang.Class, play.data.binding.TypeBinder)
+     */
+    public static <T> void unregister(Class<T> clazz) {
+        supportedTypes.remove(clazz);
     }
 
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
