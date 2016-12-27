@@ -401,12 +401,11 @@ public class DependenciesManager {
     public Ivy configure() throws Exception {
         boolean verbose = System.getProperty("verbose") != null;
         boolean debug = System.getProperty("debug") != null;
-        HumanReadyLogger humanReadyLogger = new HumanReadyLogger();
-        this.logger = humanReadyLogger;
+        this.logger = new HumanReadyLogger();
 
         IvySettings ivySettings = new IvySettings();
-        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies.yml"));
-        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(application, "conf/dependencies.yml"));
+        new SettingsParser(this.logger).parse(ivySettings, new File(framework, "framework/dependencies.yml"));
+        new SettingsParser(this.logger).parse(ivySettings, new File(application, "conf/dependencies.yml"));
         ivySettings.setDefaultResolver("mavenCentral");
         ivySettings.setDefaultUseOrigin(true);
         PlayConflictManager conflictManager = new PlayConflictManager();
@@ -429,7 +428,7 @@ public class DependenciesManager {
         } else if (verbose) {
             ivy.getLoggerEngine().pushLogger(new DefaultMessageLogger(Message.MSG_INFO));
         } else {
-            ivy.getLoggerEngine().setDefaultLogger(logger);
+            ivy.getLoggerEngine().setDefaultLogger(this.logger);
         }
 
         ivy.pushContext();
