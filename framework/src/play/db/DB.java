@@ -81,7 +81,7 @@ public class DB {
     @Deprecated
     public static String destroyMethod = "";
 
-    public final static String DEFAULT = "default";
+    public static final String DEFAULT = "default";
 
     static final ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<>();
 

@@ -177,7 +177,7 @@ public class Invoker {
     /**
      * An Invocation in something to run in a Play! context
      */
-    public static abstract class Invocation implements Runnable {
+    public abstract static class Invocation implements Runnable {
 
         /**
          * If set, monitor the time the invocation waited in the queue
@@ -324,7 +324,7 @@ public class Invoker {
     /**
      * A direct invocation (in the same thread than caller)
      */
-    public static abstract class DirectInvocation extends Invocation {
+    public abstract static class DirectInvocation extends Invocation {
 
         public static final String invocationType = "DirectInvocation";
 

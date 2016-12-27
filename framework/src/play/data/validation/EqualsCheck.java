@@ -19,7 +19,7 @@ import play.mvc.Scope;
 @SuppressWarnings("serial")
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
-    final static String mes = "validation.equals";
+    static final String mes = "validation.equals";
 
     String to;
     String otherKey;

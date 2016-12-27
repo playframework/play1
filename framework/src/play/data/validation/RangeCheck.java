@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class RangeCheck extends AbstractAnnotationCheck<Range> {
 
-    final static String mes = "validation.range";
+    static final String mes = "validation.range";
 
     double min;
     double max;

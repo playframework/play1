@@ -22,9 +22,9 @@ import java.util.*;
  * The binder try to convert String values to Java objects.
  */
 public abstract class Binder {
-    public final static Object MISSING = new Object();
-    private final static Object DIRECTBINDING_NO_RESULT = new Object();
-    public final static Object NO_BINDING = new Object();
+    public static final Object MISSING = new Object();
+    private static final Object DIRECTBINDING_NO_RESULT = new Object();
+    public static final Object NO_BINDING = new Object();
 
     static final Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<>();
 

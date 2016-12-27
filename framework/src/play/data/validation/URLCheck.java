@@ -8,7 +8,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class URLCheck extends AbstractAnnotationCheck<URL> {
 
-    final static String mes = "validation.url";
+    static final String mes = "validation.url";
     static Pattern urlPattern = Pattern.compile("^(http|https|ftp)\\://[a-zA-Z0-9\\-\\.]+\\.[a-z" +
             "A-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\\-\\._\\?\\,\\'/\\\\\\+&amp;%\\$#\\=~\\!])*$");
 

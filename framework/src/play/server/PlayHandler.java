@@ -110,8 +110,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      * versions having publicly known security bugs), so you can disable the
      * header in application.conf: <code>http.exposePlayServer = false</code>
      */
-    private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
-    private final static boolean exposePlayServer;
+    private static final String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
+    private static final boolean exposePlayServer;
 
     private static final String ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private static final Charset ASCII = Charset.forName("ASCII");
@@ -1102,7 +1102,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     // ~~~~~~~~~~~ Websocket
-    final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<>();
+    static final Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<>();
 
     private void websocketFrameReceived(ChannelHandlerContext ctx, WebSocketFrame webSocketFrame) {
         Http.Inbound inbound = channels.get(ctx);

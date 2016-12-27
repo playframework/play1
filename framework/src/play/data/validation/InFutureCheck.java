@@ -15,7 +15,7 @@ import play.libs.I18N;
 @SuppressWarnings("serial")
 public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
-    final static String mes = "validation.future";
+    static final String mes = "validation.future";
 
     Date reference;
 
