@@ -70,15 +70,15 @@ public class Play {
     /**
      * The framework ID
      */
-    public static String id;
+    public static String id = System.getProperty("play.id", "");
     /**
      * The application mode
      */
-    public static Mode mode;
+    public static Mode mode = Mode.DEV;
     /**
      * The application root
      */
-    public static File applicationPath = null;
+    public static File applicationPath = new File(System.getProperty("application.path", "."));
     /**
      * tmp dir
      */
@@ -106,11 +106,11 @@ public class Play {
     /**
      * All paths to search for Java files
      */
-    public static List<VirtualFile> javaPath;
+    public static List<VirtualFile> javaPath = new CopyOnWriteArrayList<>();
     /**
      * All paths to search for templates files
      */
-    public static List<VirtualFile> templatesPath;
+    public static List<VirtualFile> templatesPath = new ArrayList<>(2);
     /**
      * Main routes file
      */
@@ -118,7 +118,7 @@ public class Play {
     /**
      * Plugin routes files
      */
-    public static Map<String, VirtualFile> modulesRoutes;
+    public static Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
     /**
      * The loaded configuration files
      */
@@ -126,7 +126,7 @@ public class Play {
     /**
      * The app configuration (already resolved from the framework id)
      */
-    public static Properties configuration;
+    public static Properties configuration = new Properties();
     /**
      * The last time than the application has started
      */
@@ -262,24 +262,24 @@ public class Play {
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
+        roots.clear();
         roots.add(appRoot);
-        javaPath = new CopyOnWriteArrayList<>();
+        
+        javaPath.clear();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
+        templatesPath.clear();
         if (appRoot.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
-            templatesPath = new ArrayList<>(2);
             templatesPath.add(appRoot.child("app/views"));
-        } else {
-            templatesPath = new ArrayList<>(1);
         }
-
+        
         // Main route file
         routes = appRoot.child("conf/routes");
 
         // Plugin route files
-        modulesRoutes = new HashMap<>(16);
+        modulesRoutes.clear();
 
         // Load modules
         loadModules(appRoot);

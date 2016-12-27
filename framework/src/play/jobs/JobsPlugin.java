@@ -29,7 +29,7 @@ import play.utils.PThreadFactory;
 public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
-    public static List<Job> scheduledJobs;
+    public static List<Job> scheduledJobs = new ArrayList<>();
     private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
@@ -183,7 +183,7 @@ public class JobsPlugin extends PlayPlugin {
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
-        scheduledJobs = new ArrayList<>();
+        scheduledJobs.clear();
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {

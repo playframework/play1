@@ -47,16 +47,11 @@ public class Evolutions extends PlayPlugin {
 
     public static void main(String[] args) throws SQLException {
         /** Start the DB plugin **/
-        Play.id = System.getProperty("play.id");
-        Play.applicationPath = new File(System.getProperty("application.path"));
         Play.guessFrameworkPath();
         Play.readConfiguration();
-        Play.javaPath = new ArrayList<>();
         Play.classes = new ApplicationClasses();
         Play.classloader = new ApplicationClassloader();
 
-        Play.templatesPath = new ArrayList<>();
-        Play.modulesRoutes = new HashMap<>();
         Play.loadModules(VirtualFile.open(Play.applicationPath));
 
         if (System.getProperty("modules") != null) {
