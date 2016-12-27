@@ -510,7 +510,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() > bufferSize) {
-            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(event);
@@ -564,12 +564,12 @@ public class F {
         
 
         public BlockingEventStream(ChannelHandlerContext ctx) {
-        	this(100, ctx);
+            this(100, ctx);
         }
 
         public BlockingEventStream(int maxBufferSize, ChannelHandlerContext ctx) {
-        	this.ctx = ctx;
-        	events = new LinkedBlockingQueue<>(maxBufferSize + 10);
+            this.ctx = ctx;
+            events = new LinkedBlockingQueue<>(maxBufferSize + 10);
         }
 
         public synchronized Promise<T> nextEvent() {
@@ -590,16 +590,16 @@ public class F {
         //This is normal flow control with NIO but since it is not done properly, this at least fixes the issue where websocket break down and
         //skip packets.  They no longer skip packets anymore.
         public void publish(T event) {
-        	try {
-            	//This method blocks if the queue is full(read publish method documentation just above)        		 
-        		if (events.remainingCapacity() == 10) {
-        			Logger.trace("events queue is full! Setting readable to false.");
-        			ctx.getChannel().setReadable(false);
-        		}
-				events.put(event);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
+            try {
+                // This method blocks if the queue is full(read publish method documentation just above)
+                if (events.remainingCapacity() == 10) {
+                    Logger.trace("events queue is full! Setting readable to false.");
+                    ctx.getChannel().setReadable(false);
+                }
+                events.put(event);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             notifyNewEvent();
         }
 
@@ -613,14 +613,14 @@ public class F {
 
         class LazyTask extends Promise<T> {
 
-        	final ChannelHandlerContext ctx;
-        	
+            final ChannelHandlerContext ctx;
+
             public LazyTask(ChannelHandlerContext ctx) {
-            	this.ctx = ctx;
+                this.ctx = ctx;
             }
 
             public LazyTask(T value, ChannelHandlerContext ctx) {
-            	this.ctx = ctx;
+                this.ctx = ctx;
                 invoke(value);
             }
 
@@ -642,8 +642,9 @@ public class F {
                 if (value != null) {
                     events.remove(value);
                     //Don't start back up until we get down to half the total capacity to prevent jittering:
-                    if (events.remainingCapacity() > events.size()) 
-                    	ctx.getChannel().setReadable(true);
+                    if (events.remainingCapacity() > events.size()) {
+                        ctx.getChannel().setReadable(true);
+                    }
                 }
             }
         }
@@ -717,7 +718,7 @@ public class F {
 
         public synchronized void publish(T event) {
             if (events.size() >= archiveSize) {
-            	Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(new IndexedEvent(event));

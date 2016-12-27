@@ -8,11 +8,11 @@ import play.mvc.Http.Response;
 
 public class ContentTypeAssertionTest {
 
-	@Test(expected=AssertionError.class)
-	public void givenContentTypeIsMissing_shouldThrowAssertionError() {
-		Response responseWithoutContentType = new Response();
+    @Test(expected = AssertionError.class)
+    public void givenContentTypeIsMissing_shouldThrowAssertionError() {
+        Response responseWithoutContentType = new Response();
 
-		assertContentType("text/html", responseWithoutContentType);
-	}
+        assertContentType("text/html", responseWithoutContentType);
+    }
 
 }

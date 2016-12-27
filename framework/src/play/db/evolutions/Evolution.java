@@ -12,14 +12,13 @@ public class Evolution implements Comparable<Evolution> {
     
     public String moduleKey;
 
-    public Evolution(String moduleKey, int revision, String sql_up, String sql_down,
-	    boolean applyUp) {
-	this.moduleKey = moduleKey;
-	this.revision = revision;
-	this.sql_down = sql_down;
-	this.sql_up = sql_up;
-	this.hash = Codec.hexSHA1(sql_up + sql_down);
-	this.applyUp = applyUp;
+    public Evolution(String moduleKey, int revision, String sql_up, String sql_down, boolean applyUp) {
+        this.moduleKey = moduleKey;
+        this.revision = revision;
+        this.sql_down = sql_down;
+        this.sql_up = sql_up;
+        this.hash = Codec.hexSHA1(sql_up + sql_down);
+        this.applyUp = applyUp;
     }
 
     @Override
@@ -29,12 +28,11 @@ public class Evolution implements Comparable<Evolution> {
 
     @Override
     public boolean equals(Object obj) {
-	return (obj instanceof Evolution)
-		&& ((Evolution) obj).revision == this.revision;
+        return (obj instanceof Evolution) && ((Evolution) obj).revision == this.revision;
     }
 
     @Override
     public int hashCode() {
-	return revision;
+        return revision;
     }
 }

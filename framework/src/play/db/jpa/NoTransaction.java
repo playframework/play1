@@ -13,11 +13,11 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Target(value={ElementType.METHOD,ElementType.TYPE})
+@Target(value = {ElementType.METHOD, ElementType.TYPE})
 public @interface NoTransaction {
-	/**
-	 * Db name we do not want transaction.
-	 */
-	String value() default "default";
+    /**
+     * Db name we do not want transaction.
+     */
+    String value() default "default";
 }
 

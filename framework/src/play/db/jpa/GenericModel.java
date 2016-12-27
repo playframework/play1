@@ -389,13 +389,13 @@ public class GenericModel extends JPABase {
             return this;
         }
 
-		/** 
-		 * Set a named parameter for this query.
-		 **/
-  		public JPAQuery setParameter(String name, Object param) {
-			query.setParameter(name, param);
-	        return this;
-		}
+        /**
+         * Set a named parameter for this query.
+         **/
+        public JPAQuery setParameter(String name, Object param) {
+            query.setParameter(name, param);
+            return this;
+        }
 
         /**
          * Retrieve all results of the query

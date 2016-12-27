@@ -1,18 +1,17 @@
 package play;
 
+import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.Scope.RenderArgs;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
-
-import play.classloading.ApplicationClasses;
-import play.classloading.ApplicationClassloader;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.mvc.Scope.RenderArgs;
-import play.vfs.VirtualFile;
 
 /**
  * Builder-pattern-builder for Play-class..

@@ -133,11 +133,11 @@ public abstract class Enhancer {
     
     /**
      * Test if a method has the provided annotation
-	 * @param ctMethod the javassist method representation
-	 * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
-	 * @return true if field has the annotation
-	 * @throws java.lang.ClassNotFoundException
-	 */
+     * @param ctMethod the javassist method representation
+     * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
+     * @return true if field has the annotation
+     * @throws java.lang.ClassNotFoundException
+     */
     protected boolean hasAnnotation(CtMethod ctMethod, String annotation) throws ClassNotFoundException {
         for (Object object : ctMethod.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;

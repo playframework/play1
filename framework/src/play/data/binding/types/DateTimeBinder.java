@@ -2,7 +2,6 @@ package play.data.binding.types;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.text.ParseException;
 
 import org.joda.time.DateTime;
 

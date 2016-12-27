@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import jregex.Matcher;
-import org.apache.log4j.Level;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -242,7 +241,7 @@ public class DBPlugin extends PlayPlugin {
             out.println("Jdbc url: " + datasource.getJdbcUrl());
             out.println("Jdbc driver: " + datasource.getDriverClass());
             out.println("Jdbc user: " + datasource.getUser());
-    	    if (Play.mode.isDev()) {
+            if (Play.mode.isDev()) {
               out.println("Jdbc password: " + datasource.getPassword());
             }
             out.println("Min pool size: " + datasource.getMinPoolSize());
@@ -306,7 +305,7 @@ public class DBPlugin extends PlayPlugin {
                 String name = m.group("name");
                 String host = m.group("host");
                 String parameters = m.group("parameters");
-        		
+
                 Map<String, String> paramMap = new HashMap<>();
                 paramMap.put("useUnicode", "yes");
                 paramMap.put("characterEncoding", "UTF-8");
@@ -377,24 +376,24 @@ public class DBPlugin extends PlayPlugin {
     }
     
     private static void addParameters(Map<String, String> paramsMap, String urlQuery) {
-    	if (!StringUtils.isBlank(urlQuery)) {
-	    	String[] params = urlQuery.split("[\\&]");
-	    	for (String param : params) {
-				String[] parts = param.split("[=]");
-				if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
-				    paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
-				}
-			}
-    	}
+        if (!StringUtils.isBlank(urlQuery)) {
+            String[] params = urlQuery.split("[\\&]");
+            for (String param : params) {
+                String[] parts = param.split("[=]");
+                if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
+                    paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
+                }
+            }
+        }
     }
     
     private static String toQueryString(Map<String, String> paramMap) {
-    	StringBuilder builder = new StringBuilder();
-    	for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-    		if (builder.length() > 0) builder.append("&");
-			builder.append(entry.getKey()).append("=").append(entry.getValue() != null ? entry.getValue() : "");
-		}
-    	return builder.toString();
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
+            if (builder.length() > 0) builder.append("&");
+            builder.append(entry.getKey()).append("=").append(entry.getValue() != null ? entry.getValue() : "");
+        }
+        return builder.toString();
     }
 
     /**

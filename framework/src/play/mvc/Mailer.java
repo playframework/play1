@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.*;
@@ -210,7 +209,7 @@ public class Mailer implements LocalVariablesSupport {
         private final DataSource dataSource;
 
         public InlineImage(DataSource dataSource) {
-        	this(null, dataSource);
+            this(null, dataSource);
         }
 
         public InlineImage(String cid, DataSource dataSource) {

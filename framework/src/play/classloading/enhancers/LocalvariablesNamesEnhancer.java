@@ -4,12 +4,9 @@ import javassist.*;
 import javassist.bytecode.*;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.exceptions.UnexpectedException;
 import play.libs.F.T2;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**

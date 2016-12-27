@@ -43,7 +43,6 @@ import play.libs.IO;
 public class YamlParser extends AbstractModuleDescriptorParser {
 
     static class Oops extends Exception {
-
         public Oops(String message) {
             super(message);
         }
@@ -190,11 +189,11 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             }
                         }
                         HashMap extraAttributesMap = null;
-            			if(m.groupCount() == 4 &&  m.group(4) != null && !m.group(4).trim().isEmpty()){
-            			    // dependency has a classifier
-            			    extraAttributesMap = new HashMap();
-            			    extraAttributesMap.put("classifier", m.group(4).trim());
-            			}
+                        if (m.groupCount() == 4 && m.group(4) != null && !m.group(4).trim().isEmpty()) {
+                            // dependency has a classifier
+                            extraAttributesMap = new HashMap();
+                            extraAttributesMap.put("classifier", m.group(4).trim());
+                        }
 
                         ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3), extraAttributesMap);
 

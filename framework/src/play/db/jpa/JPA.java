@@ -1,10 +1,5 @@
 package play.db.jpa;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceUnit;
-
 import play.exceptions.JPAException;
 import play.Play;
 import play.Invoker.*;
