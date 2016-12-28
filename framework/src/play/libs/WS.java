@@ -171,7 +171,7 @@ public class WS extends PlayPlugin {
 
     }
 
-    private synchronized static void init() {
+    private static synchronized void init() {
         if (wsImpl != null)
             return;
         String implementation = Play.configuration.getProperty("webservice", "async");
@@ -243,7 +243,7 @@ public class WS extends PlayPlugin {
         public void stop();
     }
 
-    public static abstract class WSRequest {
+    public abstract static class WSRequest {
         public String url;
 
         /**
@@ -607,7 +607,7 @@ public class WS extends PlayPlugin {
     /**
      * An HTTP response wrapper
      */
-    public static abstract class HttpResponse {
+    public abstract static class HttpResponse {
 
         private String _encoding = null;
 

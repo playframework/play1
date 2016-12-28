@@ -21,7 +21,7 @@ public class Server {
     public static int httpPort;
     public static int httpsPort;
 
-    public final static String PID_FILE = "server.pid";
+    public static final String PID_FILE = "server.pid";
 
     public Server(String[] args) {
 

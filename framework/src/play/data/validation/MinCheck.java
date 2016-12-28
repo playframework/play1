@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class MinCheck extends AbstractAnnotationCheck<Min> {
 
-    final static String mes = "validation.min";
+    static final String mes = "validation.min";
 
     double min;
 

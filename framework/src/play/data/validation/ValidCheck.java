@@ -14,7 +14,7 @@ import play.utils.Java;
 @SuppressWarnings("serial")
 public class ValidCheck extends AbstractAnnotationCheck<Required> {
 
-    final static String mes = "validation.object";
+    static final String mes = "validation.object";
     String key;
 
     @Override

@@ -251,7 +251,7 @@ public class EvolutionQuery{
         }
     }
 
-    private synchronized static boolean isOracleDialectInUse(String dbName) {
+    private static synchronized boolean isOracleDialectInUse(String dbName) {
         boolean isOracle = false;
         Configuration dbConfig = new Configuration(dbName);
         String jpaDialect = JPAPlugin.getDefaultDialect(dbConfig.getProperty("db.driver")); 

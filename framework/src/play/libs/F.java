@@ -434,8 +434,8 @@ public class F {
     public static class Timeout extends Promise<Timeout> {
 
         static Timer timer = new Timer("F.Timeout", true);
-        final public String token;
-        final public long delay;
+        public final String token;
+        public final long delay;
 
         public Timeout(String delay) {
             this(Time.parseDuration(delay) * 1000);
@@ -653,8 +653,8 @@ public class F {
     public static class IndexedEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
-        final public M data;
-        final public Long id;
+        public final M data;
+        public final Long id;
 
         public IndexedEvent(M data) {
             this.data = data;
@@ -775,7 +775,7 @@ public class F {
         void invoke(T result);
     }
 
-    public static abstract class Option<T> implements Iterable<T> {
+    public abstract static class Option<T> implements Iterable<T> {
 
         public abstract boolean isDefined();
 
@@ -849,8 +849,8 @@ public class F {
 
     public static class Either<A, B> {
 
-        final public Option<A> _1;
-        final public Option<B> _2;
+        public final Option<A> _1;
+        public final Option<B> _2;
 
         private Either(Option<A> _1, Option<B> _2) {
             this._1 = _1;
@@ -880,9 +880,9 @@ public class F {
 
     public static class E3<A, B, C> {
 
-        final public Option<A> _1;
-        final public Option<B> _2;
-        final public Option<C> _3;
+        public final Option<A> _1;
+        public final Option<B> _2;
+        public final Option<C> _3;
 
         private E3(Option<A> _1, Option<B> _2, Option<C> _3) {
             this._1 = _1;
@@ -910,10 +910,10 @@ public class F {
 
     public static class E4<A, B, C, D> {
 
-        final public Option<A> _1;
-        final public Option<B> _2;
-        final public Option<C> _3;
-        final public Option<D> _4;
+        public final Option<A> _1;
+        public final Option<B> _2;
+        public final Option<C> _3;
+        public final Option<D> _4;
 
         private E4(Option<A> _1, Option<B> _2, Option<C> _3, Option<D> _4) {
             this._1 = _1;
@@ -946,11 +946,11 @@ public class F {
 
     public static class E5<A, B, C, D, E> {
 
-        final public Option<A> _1;
-        final public Option<B> _2;
-        final public Option<C> _3;
-        final public Option<D> _4;
-        final public Option<E> _5;
+        public final Option<A> _1;
+        public final Option<B> _2;
+        public final Option<C> _3;
+        public final Option<D> _4;
+        public final Option<E> _5;
 
         private E5(Option<A> _1, Option<B> _2, Option<C> _3, Option<D> _4, Option<E> _5) {
             this._1 = _1;
@@ -988,8 +988,8 @@ public class F {
 
     public static class Tuple<A, B> {
 
-        final public A _1;
-        final public B _2;
+        public final A _1;
+        public final B _2;
 
         public Tuple(A _1, B _2) {
             this._1 = _1;
@@ -1019,9 +1019,9 @@ public class F {
 
     public static class T3<A, B, C> {
 
-        final public A _1;
-        final public B _2;
-        final public C _3;
+        public final A _1;
+        public final B _2;
+        public final C _3;
 
         public T3(A _1, B _2, C _3) {
             this._1 = _1;
@@ -1041,10 +1041,10 @@ public class F {
 
     public static class T4<A, B, C, D> {
 
-        final public A _1;
-        final public B _2;
-        final public C _3;
-        final public D _4;
+        public final A _1;
+        public final B _2;
+        public final C _3;
+        public final D _4;
 
         public T4(A _1, B _2, C _3, D _4) {
             this._1 = _1;
@@ -1065,11 +1065,11 @@ public class F {
 
     public static class T5<A, B, C, D, E> {
 
-        final public A _1;
-        final public B _2;
-        final public C _3;
-        final public D _4;
-        final public E _5;
+        public final A _1;
+        public final B _2;
+        public final C _3;
+        public final D _4;
+        public final E _5;
 
         public T5(A _1, B _2, C _3, D _4, E _5) {
             this._1 = _1;
@@ -1089,7 +1089,7 @@ public class F {
         return new T5<>(a, b, c, d, e);
     }
 
-    public static abstract class Matcher<T, R> {
+    public abstract static class Matcher<T, R> {
 
         public abstract Option<R> match(T o);
 

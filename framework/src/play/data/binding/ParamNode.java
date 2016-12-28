@@ -21,7 +21,7 @@ public class ParamNode {
     // a[b].c=12
     // a[b][c]=12
     // a.b[c]=12
-    private final static String keyPartDelimiterRegexpString = "[\\.\\[\\]]+";
+    private static final String keyPartDelimiterRegexpString = "[\\.\\[\\]]+";
 
     public ParamNode(String name) {
         this.name = name;

@@ -344,7 +344,7 @@ public class GroovyTemplate extends BaseTemplate {
     /**
      * Groovy template
      */
-    public static abstract class ExecutableTemplate extends Script {
+    public abstract static class ExecutableTemplate extends Script {
 
         // Leave this field public to allow custom creation of TemplateExecutionException from different pkg
         public GroovyTemplate template;
