@@ -201,6 +201,11 @@ public class Scope {
                     if (COOKIE_EXPIRE != null) {
                         session.put(TS_KEY, (System.currentTimeMillis() + expiration));
                     }
+                } else {
+                    if (COOKIE_EXPIRE != null) {
+                        // New/empty session needs a timstamp, too
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    }
                 }
 
                 return session;
