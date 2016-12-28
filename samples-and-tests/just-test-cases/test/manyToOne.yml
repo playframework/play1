@@ -1,0 +1,11 @@
+# Many to one
+Municipality(ba):
+    name: "Buenos Aires"
+
+Neighborhood(almagro):
+    name: "Almagro"
+    municipality: ba
+
+Neighborhood(chacarita):
+    name: "Chacarita"
+    municipality: ba

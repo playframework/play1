@@ -1,14 +1,11 @@
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import javax.management.RuntimeErrorException;
-
 import models.Bloc;
 import models.vendor.Vendor;
 import models.vendor.tag.AreaTag;
 import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
-import models.Base;
 import models.*;
 
 import org.junit.Before;
@@ -80,4 +77,35 @@ public class FixturesTest extends UnitTest {
 		assertFalse(parent.children.isEmpty());
 	}
 
+    @Test
+    public void manyToMany() {
+        Fixtures.load("manyToMany.yml");
+        Farmer fred = Farmer.find("name = ?", "Fred").first();
+        assertEquals(2, fred.fruits.size());
+
+        Fruit pear = Fruit.find("name = ?", "Pear").first();
+        assertEquals(2, pear.farmers.size());
+    }
+
+    @Test
+    public void oneToMany() {
+        Fixtures.load("oneToMany.yml");
+        Municipality ba = Municipality.find("name = ?", "Buenos Aires").first();
+        assertEquals(2, ba.neighborhoods.size());
+
+        Neighborhood almagro = Neighborhood.find("name = ?", "Almagro").first();
+        assertNotNull(almagro.municipality);
+        assertEquals("Buenos Aires", almagro.municipality.name);
+    }
+
+    @Test
+    public void manyToOne() {
+        Fixtures.load("manyToOne.yml");
+        Municipality ba = Municipality.find("name = ?", "Buenos Aires").first();
+        assertEquals(2, ba.neighborhoods.size());
+
+        Neighborhood almagro = Neighborhood.find("name = ?", "Almagro").first();
+        assertNotNull(almagro.municipality);
+        assertEquals("Buenos Aires", almagro.municipality.name);
+    }
 }

@@ -1,0 +1,29 @@
+# Many to Many
+Fruit(orange):
+    name: "Orange"
+
+Fruit(apple):
+    name: "Apple"
+
+Fruit(pear):
+    name: "Pear"
+
+Farmer(rob):
+    name: "Rob"
+    fruits:
+        - orange
+        - apple
+
+Farmer(fred):
+    name: "Fred"
+    fruits:
+        - apple
+        - pear
+
+Farmer(john):
+    name: "John"
+    fruits:
+        - orange
+        - apple
+        - pear
+
