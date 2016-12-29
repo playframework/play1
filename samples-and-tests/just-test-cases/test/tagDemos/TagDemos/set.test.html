@@ -1,0 +1,9 @@
+#{selenium 'set'}
+	open('@{tagDemos.TagDemos.set()}')   
+  // Test with #get tag    
+  assertTextPresent('Get var with &#35{get 'transactionsData' /}: /sayHello')
+  // Test with Expressions accessor
+  assertTextPresent('Get var with &#36{transactionsData}: /sayHello')
+  // Test in form tag param
+  assertHtmlSource('*<form action="/sayHello" method="post" accept-charset="utf-8" id="creationForm">*')
+#{/selenium}
