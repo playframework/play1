@@ -40,6 +40,9 @@ def execute(**kargs):
     if args.count('--sync'):
         args.remove('--sync')
         add_options.append('-Dsync')
+    if args.count('--nosync'):
+        args.remove('--nosync')
+        add_options.append('-Dnosync')
     if args.count('--debug'):
         args.remove('--debug')
         add_options.append('-Ddebug')

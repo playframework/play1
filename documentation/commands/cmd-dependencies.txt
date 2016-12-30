@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--nosync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -43,6 +43,11 @@
 ~ --sync:
 ~ Keep lib/ and modules/ directory synced.
 ~ Delete unknown dependencies.
+~ Since 1.4.4: This option is activated by default
+~
+~ --nosync:
+~ Keep lib/ and modules/ directory unchanged.
+~ Keep unknown dependencies.
 ~
 ~ --forceCopy:
 ~ Never create files pointing to the original folder, always copy the folder
