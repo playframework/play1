@@ -822,8 +822,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param args
      *            The template data.
      */
-    protected static void renderTemplate(String templateName, Map<String, Object> args) {
-        // Template datas
+    public static void renderTemplate(String templateName, Map<String, Object> args) {
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         templateBinding.data.putAll(args);
         templateBinding.put("session", Scope.Session.current());
@@ -856,7 +855,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param args
      *            The template data.
      */
-    protected static void renderTemplate(Map<String, Object> args) {
+    public static void renderTemplate(Map<String, Object> args) {
         renderTemplate(template(), args);
     }
 
