@@ -195,9 +195,20 @@ public class Java {
      */
     public static String[] parameterNames(Method method) throws Exception {
         try {
-            return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
-        } catch (Exception e) {
-            throw new UnexpectedException("Cannot read parameter names for " + method, e);
+            java.lang.reflect.Parameter[] parameters = method.getParameters();
+            String[] names = new String[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                names[i] = parameters[i].getName();
+            }
+            return names;
+        }
+        catch (NoSuchMethodError noJava8) {
+            try {
+                return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
+            }
+            catch (Exception e) {
+                throw new UnexpectedException("Cannot read parameter names for " + method, e);
+            }
         }
     }
 
