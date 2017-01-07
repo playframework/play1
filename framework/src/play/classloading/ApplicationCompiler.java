@@ -36,7 +36,7 @@ public class ApplicationCompiler {
     Map<String, Boolean> packagesCache = new HashMap<>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
-
+        
     /**
      * Try to guess the magic configuration options
      */
@@ -65,7 +65,9 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_TargetPlatform, javaVersion);
         this.settings.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
         this.settings.put(CompilerOptions.OPTION_Compliance, javaVersion);
+        this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
     }
+    
 
     /**
      * Something to compile
