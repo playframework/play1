@@ -194,7 +194,8 @@ public class Java {
      * Retrieve parameter names of a method
      */
     public static String[] parameterNames(Method method) throws Exception {
-        try {
+        if (Play.classes.java8) {
+            // No import, so Java 7 will not break trying to load this class
             java.lang.reflect.Parameter[] parameters = method.getParameters();
             String[] names = new String[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
@@ -202,7 +203,8 @@ public class Java {
             }
             return names;
         }
-        catch (NoSuchMethodError noJava8) {
+        else {
+            // Java 7 and below support via LocalVariablesNamesEnhancer
             try {
                 return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
             }

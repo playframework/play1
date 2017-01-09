@@ -49,9 +49,7 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_TargetPlatform, javaVersion);
         this.settings.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
         this.settings.put(CompilerOptions.OPTION_Compliance, javaVersion);
-        if (javaVersion.equals(CompilerOptions.VERSION_1_8)) {
-            this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
-        }
+        this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
     }
 
     /**
