@@ -431,6 +431,10 @@ public class Router {
                 }
             }
         }
+
+        Http.Request request = Http.Request.current();
+        String requestFormat = request == null || request.format == null ? "" : request.format;
+
         List<ActionRoute> matchingRoutes = getActionRoutes(action);
         for (ActionRoute actionRoute : matchingRoutes) {
             Route route = actionRoute.route;
@@ -451,7 +455,7 @@ public class Router {
                     String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
                     if (host.equals(arg.name) || host.matches(arg.name)) {
                         args.remove(arg.name);
-                        route.host = Http.Request.current() == null ? "" : Http.Request.current().domain;
+                        route.host = request == null ? "" : request.domain;
                         break;
                     } else {
                         allRequiredArgsAreHere = false;
@@ -472,7 +476,7 @@ public class Router {
             // les parametres codes en dur dans la route matchent-ils ?
             for (String staticKey : route.staticArgs.keySet()) {
                 if (staticKey.equals("format")) {
-                    if (!(Http.Request.current() == null ? "" : Http.Request.current().format).equals(route.staticArgs.get("format"))) {
+                    if (!requestFormat.equals(route.staticArgs.get("format"))) {
                         allRequiredArgsAreHere = false;
                         break;
                     }
