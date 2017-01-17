@@ -561,9 +561,4 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
     }
-
-    @Override
-    public String toString() {
-        return "(play) " + (allClasses == null ? "" : allClasses.toString());
-    }
 }
