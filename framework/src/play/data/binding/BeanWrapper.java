@@ -3,11 +3,13 @@ package play.data.binding;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
 
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
-import play.utils.Utils;
 
 /**
  * Parameters map to POJO binder.
@@ -19,7 +21,7 @@ public class BeanWrapper {
 
     private Class<?> beanClass;
 
-    /** 
+    /**
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap<String, Property>();
@@ -144,6 +146,8 @@ public class BeanWrapper {
 
     public static class Property {
 
+        private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+
         private Annotation[] annotations;
         private Method setter;
         private Field field;
@@ -182,21 +186,65 @@ public class BeanWrapper {
             }
         }
 
+        public String strip(Object instance, String value) {
+            String result = value;
+
+            AttributeStripping stripping = null;
+            if (field == null) {
+                try {
+                    Field f = instance.getClass().getDeclaredField(this.name);
+                    stripping = f.getAnnotation(AttributeStripping.class);
+                } catch (Exception e) {
+                    // we left stripping to null, which is safe
+                }
+            } else {
+                stripping = field.getAnnotation(AttributeStripping.class);
+            }
+
+            if (stripping == null) {
+                stripping = instance.getClass().getAnnotation(AttributeStripping.class);
+            }
+
+            if (stripping != null) {
+                String mod = value;
+                if (stripping.strip() || stripping.squish()) {
+                    mod = StringUtils.strip(mod);
+                }
+
+                if (stripping.squish()) {
+                    mod = WHITESPACE.matcher(mod).replaceAll(" ");
+                }
+
+                if (stripping.nullify()) {
+                    mod = StringUtils.stripToNull(mod);
+                }
+
+                result = mod;
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("Value of attribute '%s' stripped from '%s' to '%s'", name, value, result);
+                }
+            }
+            return result;
+        }
+
         public void setValue(Object instance, Object value) {
+            Object stripped = value; // strip(instance, value);
+
             try {
                 if (setter != null) {
                     if (Logger.isTraceEnabled()) {
-                        Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
+                        Logger.trace("invoke setter %s on %s with value %s", setter, instance, stripped);
                     }
 
-                    setter.invoke(instance, value);
+                    setter.invoke(instance, stripped);
                     return;
                 } else {
                     if (Logger.isTraceEnabled()) {
-                        Logger.trace("field.set(%s, %s)", instance, value);
+                        Logger.trace("field.set(%s, %s)", instance, stripped);
                     }
 
-                    field.set(instance, value);
+                    field.set(instance, stripped);
                 }
 
             } catch (Exception ex) {
@@ -225,8 +273,6 @@ public class BeanWrapper {
         public String toString() {
             return type + "." + name;
         }
-
-
     }
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Annotation[] annotations) throws Exception {

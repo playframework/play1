@@ -1,0 +1,133 @@
+package play.data.binding;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import play.PlayBuilder;
+
+import java.lang.annotation.Annotation;
+import java.util.*;
+
+import static org.fest.assertions.Assertions.assertThat;
+
+
+public class AttrStripTest {
+
+    final Annotation[] noAnnotations = new Annotation[]{};
+
+    @Before
+    public void setup() {
+        new PlayBuilder().build();
+    }
+
+    @Test
+    public void verify_unbinding_and_binding_of_simple_Bean() throws Exception {
+
+        Data1S data1 = new Data1S();
+        data1.a = " aA  aA  ";
+        data1.n = "   ";
+        data1.q = " aA  aA  ";
+        data1.b = 13;
+
+        Map<String, Object> r = new HashMap<String, Object>();
+        Data1.myStatic = 1;
+
+        Unbinder.unBind(r, data1, "data1", noAnnotations);
+        // make sure we only have info about the properties we want..
+        assertThat(r.keySet()).containsOnly("data1.a", "data1.b", "data1.n", "data1.q");
+
+        Map<String, String[]> r2 = fromUnbindMap2BindMap( r);
+
+        Data1.myStatic = 2;
+        RootParamNode root = ParamNode.convert(r2);
+        Object bindResult = Binder.bind(root, "data1", Data1S.class, null, null);
+        assertThat(bindResult).isNotEqualTo(data1);
+
+        data1.a = "aA  aA";
+        data1.n = null;
+        data1.q = "aA aA";
+        assertThat(bindResult).isEqualTo(data1);
+        assertThat(Data1.myStatic).isEqualTo(2);
+    }
+
+    @Test
+    public void verify_unbinding_and_binding_of_nestedBeans() throws Exception {
+
+        Data2S data2 = new Data2S();
+        data2.a = "aaa";
+        data2.b = false;
+        data2.c = 12;
+
+        data2.data1 = new Data1S();
+        data2.data1.a = " aA  aA  ";
+        data2.data1.n = "   ";
+        data2.data1.q = " aA  aA  ";
+        data2.data1.b = 13;
+
+        Map<String, Object> r = new HashMap<String, Object>();
+        Unbinder.unBind(r, data2, "data2", noAnnotations);
+        Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
+        RootParamNode root = ParamNode.convert(r2);
+        Object bindResult = Binder.bind(root, "data2", Data2S.class, null, null);
+        assertThat(bindResult).isNotEqualTo(data2);
+
+        data2.data1.a = "aA  aA";
+        data2.data1.n = null;
+        data2.data1.q = "aA aA";
+        assertThat(bindResult).isEqualTo(data2);
+    }
+
+
+    // @Test
+    public void verifyBindingOfStringMaps() throws Exception {
+        Map<String, String[]> params = new HashMap<String, String[]>();
+
+        Map<String, String> specialCaseMap = new HashMap<String,String>();
+        params.put("specialCaseMap.a", new String[] { "AA" });
+        params.put("specialCaseMap.b", new String[] {"BB"});
+
+        Data3S data3;
+
+        params.put("data3.a", new String[] {"aAaA"});
+        params.put("data3.map[abc]", new String[] { "ABC  " });
+        params.put("data3.map[def]", new String[] {"DEF"});
+
+        RootParamNode rootParamNode = ParamNode.convert(params);
+        specialCaseMap = (Map<String, String>)Binder.bind(rootParamNode, "specialCaseMap", specialCaseMap.getClass(), specialCaseMap.getClass(), noAnnotations);
+
+        assertThat(specialCaseMap.size()).isEqualTo(2);
+        assertThat(specialCaseMap.get("a")).isEqualTo("AA");
+        assertThat(specialCaseMap.get("b")).isEqualTo("BB");
+
+        data3 = (Data3S) Binder.bind(rootParamNode, "data3", Data3S.class, Data3S.class, noAnnotations);
+
+        assertThat(data3.a).isEqualTo("aAaA");
+        assertThat(data3.map.size()).isEqualTo(2);
+        assertThat(data3.map.get("abc")).isEqualTo("ABC");
+        assertThat(data3.map.get("def")).isEqualTo("DEF");
+    }
+
+    /**
+     * Transforms map from Unbinder to Binder
+     * @param r map filled by Unbinder
+     * @return map used as input to Binder
+     */
+    private Map<String, String[]> fromUnbindMap2BindMap(Map<String, Object> r) {
+        Map<String, String[]> r2 = new HashMap<String, String[]>();
+        for (Map.Entry<String, Object> e : r.entrySet()) {
+            String key = e.getKey();
+            Object v = e.getValue();
+            if (v instanceof String) {
+                r2.put(key, new String[]{(String)v});
+            } else if (v instanceof String[]) {
+                r2.put(key, (String[])v);
+            } else {
+                throw new RuntimeException("error");
+            }
+        }
+        return r2;
+    }
+
+}
+
+
