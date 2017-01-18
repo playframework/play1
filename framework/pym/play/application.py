@@ -1,5 +1,6 @@
 import sys
-import os, os.path
+import os
+import os.path
 import re
 import shutil
 import socket
@@ -261,8 +262,12 @@ class PlayApplication(object):
 
         if application_mode == 'prod':
             java_args.append('-server')
-        # JDK 7 compat
-        java_args.append('-XX:-UseSplitVerifier')
+        # JDK 7 compatible
+        #java_args.append('-XX:-UseSplitVerifier')
+
+        # JDK 8 compatible
+        java_args.append('-noverify')
+
         java_policy = self.readConf('java.policy')
         if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)
