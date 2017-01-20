@@ -40,8 +40,11 @@ To install Java, make sure to use either the Sun-JDK or OpenJDK (and not gcj whi
 
 h3. Windows
 
-To install Java, just download and install the latest JDK package. You do not need to install Python separately, because a Python runtime is bundled with the framework.
+To install Java, just download and install the latest JDK package. You do not need to install Python separately, because a Python runtime is bundled with the framework. On Windows the bundled Python runtime is used through the wrapper script @play.bat@ if environment variable @PYTHONHOME@ is not set.
 
+p(note). The current bundled Python runime is based on version 2.6.1 . It is stripped down version with the drawback that it is not manageable with common python tools anymore. *For some play commands like the @status@ (when querying remote servers) the bundled runtime is not secure!*
+
+For security reasons set PYTHONHOME to use a a more current Python 2 runtime with required package ""@pywin32@":https://pypi.python.org/pypi/pywin32 .
 
 h2. <a name="build">Build from the latest sources</a>
 
