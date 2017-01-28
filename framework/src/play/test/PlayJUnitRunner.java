@@ -85,6 +85,12 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     	jUnit4.filter(toFilter);
     	
     }
+    
+    @Override
+    public void filter(Filter toFilter) throws NoTestsRemainException {
+    	jUnit4.filter(toFilter);
+    	
+    }
 
     // *********************
     public enum StartPlay implements MethodRule {
