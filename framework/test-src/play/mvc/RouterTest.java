@@ -1,6 +1,6 @@
 package play.mvc;
 
-import org.junit.Test;
+import org.junit.*;
 import play.Play;
 import play.i18n.Lang;
 import play.mvc.Http.Request;
@@ -19,6 +19,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class RouterTest {
+
+    @org.junit.Before public void initialize() {
+        Router.routes.clear();
+        Play.internationalizedRoutes = null;
+        Play.routes = null;
+        Play.configuration = null;
+    }
 
     @Test
     public void test_getBaseUrl() {
@@ -145,7 +152,9 @@ public class RouterTest {
 
     @Test
     public void test_loadRoutesFiles() {
-        Play.multilangRouteFiles=false;
+
+        Play.internationalizedRoutes = mock(ArrayList.class);
+        when(Play.internationalizedRoutes.size()).thenReturn(3);
 
         VirtualFile appRoot = mock(VirtualFile.class);
         List<VirtualFile> routes = new ArrayList<>();
@@ -155,14 +164,16 @@ public class RouterTest {
         VirtualFile appConf = mock(VirtualFile.class);
         when(appConf.getName()).thenReturn("application.conf");
         routes.add(appConf);
+        VirtualFile multilangRoutes = mock(VirtualFile.class);
+        when(multilangRoutes.getName()).thenReturn("routes.en_GB");
+        routes.add(multilangRoutes);
 
         VirtualFile confFolder = mock(VirtualFile.class);
         when(confFolder.list()).thenReturn(routes);
 
         when(appRoot.child("conf")).thenReturn(confFolder);
 
-        assertEquals(1,Play.loadRoutesFiles(appRoot).size());
-        assertEquals(false,Play.multilangRouteFiles);
+        assertEquals(1,Play.loadMultilanguageRoutesFiles(appRoot).size());
 
         routes = new ArrayList<>();
         VirtualFile routesEnFile = mock(VirtualFile.class);
@@ -174,8 +185,8 @@ public class RouterTest {
         routes.add(appConf);
         when(confFolder.list()).thenReturn(routes);
 
-        assertEquals(2,Play.loadRoutesFiles(appRoot).size());
-        assertEquals(true,Play.multilangRouteFiles);
+        assertEquals(2,Play.loadMultilanguageRoutesFiles(appRoot).size());
+        assertEquals(true,Play.internationalizedRoutes.size()>0);
 
     }
 
@@ -185,18 +196,23 @@ public class RouterTest {
 
         Router.lastLoading = now;
 
-        List<VirtualFile> routes = new ArrayList<>();
         VirtualFile routesNotModifiedFile = mock(VirtualFile.class);
-        when(routesNotModifiedFile.getName()).thenReturn("routes.en");
-        when(routesNotModifiedFile.lastModified()).thenReturn(now-1000);
-        routes.add(routesNotModifiedFile);
+        when(routesNotModifiedFile.getName()).thenReturn("routes");
+        when(routesNotModifiedFile.lastModified()).thenReturn(now-2000);
+        Play.routes = routesNotModifiedFile;
+
+        List<VirtualFile> internationalizedRoutes = new ArrayList<>();
+        VirtualFile routesNotModifiedFile2 = mock(VirtualFile.class);
+        when(routesNotModifiedFile2.getName()).thenReturn("routes.en");
+        when(routesNotModifiedFile2.lastModified()).thenReturn(now-1000);
+        internationalizedRoutes.add(routesNotModifiedFile2);
 
         VirtualFile routesNotModifiedFile1 = mock(VirtualFile.class);
         when(routesNotModifiedFile1.getName()).thenReturn("routes.ru_RU");
         when(routesNotModifiedFile1.lastModified()).thenReturn(now);
-        routes.add(routesNotModifiedFile1);
+        internationalizedRoutes.add(routesNotModifiedFile1);
 
-        Play.routes = routes;
+        Play.internationalizedRoutes = internationalizedRoutes;
 
         HashMap<String, VirtualFile> modulesRoutes = new HashMap<>();
         VirtualFile moduleRoute1 = mock(VirtualFile.class);
@@ -219,7 +235,9 @@ public class RouterTest {
         applicationLangs.add("fr_FR");
         applicationLangs.add("en_GB");
         Play.langs=applicationLangs;
-        Play.multilangRouteFiles=true;
+
+        Play.internationalizedRoutes = mock(ArrayList.class);
+        when(Play.internationalizedRoutes.size()).thenReturn(3);
 
         Router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
         Router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);
@@ -256,7 +274,8 @@ public class RouterTest {
         applicationLangs.add("fr_FR");
         applicationLangs.add("en_GB");
         Play.langs=applicationLangs;
-        Play.multilangRouteFiles=true;
+        Play.internationalizedRoutes = mock(ArrayList.class);
+        when(Play.internationalizedRoutes.size()).thenReturn(3);
 
         Router.appendRoute("GET","/test/action","testAction","","","conf/routes.en_GB",0);
         Router.appendRoute("GET","/test/deistvie","testAction","","","conf/routes.ru",1);

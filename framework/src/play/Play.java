@@ -114,7 +114,13 @@ public class Play {
     /**
      * Main routes file
      */
-    public static List<VirtualFile> routes;
+    public static VirtualFile routes;
+
+    /**
+     * Main routes file
+     */
+    public static List<VirtualFile> internationalizedRoutes;
+
     /**
      * Plugin routes files
      */
@@ -181,11 +187,6 @@ public class Play {
      * as a WAR in an applicationServer
      */
     public static boolean standalonePlayServer = true;
-
-    /**
-     * This flag indicates that app has multiple routes files for different locales
-     */
-    public static boolean multilangRouteFiles = false;
 
     /**
      * Init the framework
@@ -281,7 +282,8 @@ public class Play {
         }
 
         // Main route file
-        routes = loadRoutesFiles(appRoot);
+        routes = appRoot.child("conf/routes");
+        internationalizedRoutes = loadMultilanguageRoutesFiles(appRoot);
 
         // Plugin route files
         modulesRoutes = new HashMap<>(16);
@@ -326,15 +328,12 @@ public class Play {
         Play.initialized = true;
     }
 
-    public static List<VirtualFile> loadRoutesFiles(VirtualFile appRoot) {
+    public static List<VirtualFile> loadMultilanguageRoutesFiles(VirtualFile appRoot) {
         List<VirtualFile> routes = new ArrayList<VirtualFile>();
         for (VirtualFile vf: appRoot.child("conf").list()) {
             String virtualFileName = vf.getName();
-            if(virtualFileName !=null && virtualFileName.equals("routes")){
+            if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
                 routes.add(vf);
-            } else if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
-                routes.add(vf);
-                Play.multilangRouteFiles = true;
             }
         }
         return routes;

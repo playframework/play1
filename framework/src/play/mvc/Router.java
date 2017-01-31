@@ -3,6 +3,7 @@ package play.mvc;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
@@ -51,7 +52,8 @@ public class Router {
     public static void load(String prefix) {
         routes.clear();
         actionRoutesCache.clear();
-        for (VirtualFile routeFile : Play.routes) {
+        parse(Play.routes, prefix);
+        for (VirtualFile routeFile : Play.internationalizedRoutes) {
             parse(routeFile, prefix);
         }
         lastLoading = System.currentTimeMillis();
@@ -227,14 +229,18 @@ public class Router {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
             return;
         }
-        for (VirtualFile route : Play.routes) {
-            if (route.lastModified() > lastLoading) {
-                load(prefix);
-                return;
+        if (Play.routes.lastModified() > lastLoading) {
+            load(prefix);
+        } else {
+            for (VirtualFile file : Play.modulesRoutes.values()) {
+                if (file.lastModified() > lastLoading) {
+                    load(prefix);
+                    return;
+                }
             }
         }
-        for (VirtualFile file : Play.modulesRoutes.values()) {
-            if (file.lastModified() > lastLoading) {
+        for (VirtualFile route : Play.internationalizedRoutes) {
+            if (route.lastModified() > lastLoading) {
                 load(prefix);
                 return;
             }
@@ -294,7 +300,7 @@ public class Router {
                 if (request.action.equals("404")) {
                     throw new NotFound(route.path);
                 }
-                if(Play.multilangRouteFiles && StringUtils.isNotEmpty(route.locale) && !route.locale.equals(Lang.get())){
+                if(CollectionUtils.isNotEmpty(Play.internationalizedRoutes) && StringUtils.isNotEmpty(route.locale) && !route.locale.equals(Lang.get())){
                     Lang.change(route.locale);
                 }
                 return route;
@@ -593,8 +599,8 @@ public class Router {
             matchingRoutes = findActionRoutes(action);
             actionRoutesCache.put(action, matchingRoutes);
         }
-        if(Play.multilangRouteFiles){
-            prioritizeActionRoutesBasedOnActiveLocale(matchingRoutes);
+        if(CollectionUtils.isNotEmpty(Play.internationalizedRoutes)){
+            matchingRoutes = prioritizeActionRoutesBasedOnActiveLocale(matchingRoutes);
         }
         return matchingRoutes;
     }
@@ -627,11 +633,12 @@ public class Router {
    *
    * @param matchingRoutes
    */
-  private static void prioritizeActionRoutesBasedOnActiveLocale(List<Router.ActionRoute> matchingRoutes) {
-        if(matchingRoutes.size()==0) return;
-        final String locale = Lang.get();
-        if(StringUtils.isEmpty(locale)) return;
-        matchingRoutes.sort(new Comparator<ActionRoute>() {
+  private static List<ActionRoute> prioritizeActionRoutesBasedOnActiveLocale(List<ActionRoute> matchingRoutes) {
+      if(matchingRoutes.size()==0) return matchingRoutes;
+      final String locale = Lang.get();
+      if(StringUtils.isEmpty(locale)) return matchingRoutes;
+      List<Router.ActionRoute> sortedMatchingRoutes = new ArrayList<>(matchingRoutes);
+      sortedMatchingRoutes.sort(new Comparator<ActionRoute>() {
             @Override
             public int compare(ActionRoute ar1, ActionRoute ar2) {
                 if(locale.equals(ar1.route.locale)) return -1;
@@ -639,6 +646,7 @@ public class Router {
                 return Integer.compare(Play.langs.indexOf(ar1.route.locale), Play.langs.indexOf(ar2.route.locale));
             }
         });
+      return sortedMatchingRoutes;
     }
 
 
