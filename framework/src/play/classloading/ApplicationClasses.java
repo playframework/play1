@@ -22,8 +22,6 @@ import java.util.Map;
  * Application classes container.
  */
 public class ApplicationClasses {
-    public boolean java8 = Play.configuration.getProperty("java.source", System.getProperty("java.version")).compareTo("1.8") >= 0;
-
     /**
      * Reference to the eclipse compiler.
      */

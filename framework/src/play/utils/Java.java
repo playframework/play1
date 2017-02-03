@@ -6,7 +6,6 @@ import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
 import play.classloading.ApplicationClassloaderState;
-import play.classloading.enhancers.LocalvariablesNamesEnhancerJava7;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
@@ -18,6 +17,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.FutureTask;
 
@@ -194,18 +194,12 @@ public class Java {
      * Retrieve parameter names of a method
      */
     public static String[] parameterNames(Method method) throws Exception {
-        if (Play.classes.java8) {
-            // No import, so Java 7 will not break trying to load this class
-            java.lang.reflect.Parameter[] parameters = method.getParameters();
-            String[] names = new String[parameters.length];
-            for (int i = 0; i < parameters.length; i++) {
-                names[i] = parameters[i].getName();
-            }
-            return names;
+        Parameter[] parameters = method.getParameters();
+        String[] names = new String[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            names[i] = parameters[i].getName();
         }
-        else {
-            return LocalvariablesNamesEnhancerJava7.parameterNames(method);
-        }
+        return names;
     }
 
     public static String rawMethodSignature(Method method) {
