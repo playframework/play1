@@ -1,6 +1,6 @@
 h1. Documentation
 
-Welcome to the *Play framework 1.4.3* documentation. Check the "version 1.4.3. release notes":releases/release1.4.x/releasenotes-1.4.3.
+Welcome to the *Play framework 1.5.x* documentation. Check the "version 1.5.x. release notes":releases/release1.5.x/releasenotes-1.5.x.
 
 h2. <a name="started">Getting started</a>
 

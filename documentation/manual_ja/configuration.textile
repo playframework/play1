@@ -517,11 +517,11 @@ h3(#java.source). java.source
 
 Java ソースレベルです。これは @java.version@ システムプロパティをオーバーライドします。設定例:
 
-bc. java.source=1.6
+bc. java.source=1.8
 
-Values:  @1.5@, @1.6@, @1.7@ (experimental).
+Values:  @1.7@ (No longer supported since 1.5.0), @1.8@.
 
-デフォルト: @1.5@
+デフォルト: @1.8@
 
 
 h2(#jpa). JPA
