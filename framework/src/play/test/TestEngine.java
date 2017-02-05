@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import play.Logger;
@@ -166,6 +167,7 @@ public class TestEngine {
 
             JUnitCore junit = new JUnitCore();
             junit.addListener(new Listener(testClass.getName(), testResults));
+            junit.addListener(new LoggingListener(testClass.getName()));
             junit.run(testClass);
 
         } catch (ClassNotFoundException e) {
@@ -227,6 +229,38 @@ public class TestEngine {
         public void testFinished(Description description) throws Exception {
             current.time = System.currentTimeMillis() - current.time;
             results.add(current);
+        }
+    }
+
+    static class LoggingListener extends RunListener {
+
+        private final String className;
+        private long timestamp;
+
+        LoggingListener(String className) {
+            this.className = className;
+        }
+
+        @Override
+        public void testRunStarted(Description description) throws Exception {
+            Logger.info("Test run started: %s", className);
+        }
+
+        @Override
+        public void testStarted(Description description) throws Exception {
+            timestamp = System.currentTimeMillis();
+            Logger.info("Test started: %s", description.getDisplayName());
+        }
+
+        @Override
+        public void testFinished(Description description) throws Exception {
+            final long duration = System.currentTimeMillis() - timestamp;
+            Logger.info("Test finished: %s in %d ms", description.getDisplayName(), duration);
+        }
+
+        @Override
+        public void testRunFinished(Result result) throws Exception {
+            Logger.info("Test run finished: %s in %d seconds", className, result.getRunTime() / 1000);
         }
     }
 
