@@ -464,7 +464,11 @@ public class ActionInvoker {
             }
         }
 
-        return invoke(method, request.controllerInstance, args);
+        Object methodClassInstance = isStatic ? null :
+            (method.getDeclaringClass().equals(request.controllerClass)) ? request.controllerInstance :
+                method.getDeclaringClass().newInstance();
+
+        return invoke(method, methodClassInstance, args);
     }
 
     static Object invoke(Method method, Object instance, Object ... realArgs) throws Exception {
