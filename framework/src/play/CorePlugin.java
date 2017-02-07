@@ -1,27 +1,39 @@
 package play;
 
+import static java.util.Arrays.asList;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
-import org.apache.commons.lang.StringUtils;
+
 import play.Play.Mode;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.*;
+import play.classloading.enhancers.ContinuationEnhancer;
+import play.classloading.enhancers.ControllersEnhancer;
+import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.MailerEnhancer;
+import play.classloading.enhancers.PropertiesEnhancer;
+import play.classloading.enhancers.SigEnhancer;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static java.util.Arrays.asList;
 
 /**
  * Plugin used for core tasks
@@ -64,11 +76,11 @@ public class CorePlugin extends PlayPlugin {
     }
 
     /**
-     * Intercept /@status and check that the Authorization header is valid. 
-     * Then ask each plugin for a status dump and send it over the HTTP response.
+     * Intercept /@status and check that the Authorization header is valid. Then ask each plugin for a status dump and
+     * send it over the HTTP response.
      *
-     * You can ask the /@status using the authorization header and putting your status secret key in it.
-     * Prior to that you would be required to start play with  a -DstatusKey=yourkey
+     * You can ask the /@status using the authorization header and putting your status secret key in it. Prior to that
+     * you would be required to start play with a -DstatusKey=yourkey
      */
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
@@ -81,14 +93,15 @@ public class CorePlugin extends PlayPlugin {
             }
         }
         if (request.path.equals("/@status") || request.path.equals("/@status.json")) {
-            if(!Play.started) {
+            if (!Play.started) {
                 response.print("Application is not started");
                 response.status = 503;
                 return true;
             }
             response.contentType = request.path.contains(".json") ? "application/json" : "text/plain";
             Header authorization = request.headers.get("authorization");
-            if (authorization != null && (Crypto.sign("@status").equals(authorization.value()) || System.getProperty("statusKey", Play.secretKey).equals(authorization.value()))) {
+            if (authorization != null && (Crypto.sign("@status").equals(authorization.value())
+                    || System.getProperty("statusKey", Play.secretKey).equals(authorization.value()))) {
                 response.print(computeApplicationStatus(request.path.contains(".json")));
                 response.status = 200;
                 return true;
@@ -132,7 +145,8 @@ public class CorePlugin extends PlayPlugin {
         out.println("~~~~~~~~~~~~");
         out.println("Path: " + Play.applicationPath);
         out.println("Name: " + Play.configuration.getProperty("application.name", "(not set)"));
-        out.println("Started at: " + (Play.started ? new SimpleDateFormat("MM/dd/yyyy HH:mm").format(new Date(Play.startedAt)) : "Not yet started"));
+        out.println("Started at: "
+                + (Play.started ? new SimpleDateFormat("MM/dd/yyyy HH:mm").format(new Date(Play.startedAt)) : "Not yet started"));
         out.println();
         out.println("Loaded modules:");
         out.println("~~~~~~~~~~~~~~");
@@ -143,7 +157,8 @@ public class CorePlugin extends PlayPlugin {
         out.println("Loaded plugins:");
         out.println("~~~~~~~~~~~~~~");
         for (PlayPlugin plugin : Play.pluginCollection.getAllPlugins()) {
-            out.println(plugin.index + ":" + plugin.getClass().getName() + " [" + (Play.pluginCollection.isEnabled(plugin) ? "enabled" : "disabled") + "]");
+            out.println(plugin.index + ":" + plugin.getClass().getName() + " ["
+                    + (Play.pluginCollection.isEnabled(plugin) ? "enabled" : "disabled") + "]");
         }
         out.println();
         out.println("Threads:");
@@ -166,7 +181,8 @@ public class CorePlugin extends PlayPlugin {
             out.println("~~~~~~~~");
             List<Monitor> monitors = new ArrayList<>(asList(MonitorFactory.getRootMonitor().getMonitors()));
             Collections.sort(monitors, new Comparator<Monitor>() {
-                @Override public int compare(Monitor m1, Monitor m2) {
+                @Override
+                public int compare(Monitor m1, Monitor m2) {
                     return Double.compare(m2.getTotal(), m1.getTotal());
                 }
             });
@@ -178,8 +194,8 @@ public class CorePlugin extends PlayPlugin {
             }
             for (Monitor monitor : monitors) {
                 if (monitor.getHits() > 0) {
-                    out.println(String.format("%-" + lm + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;",
-                        monitor.getLabel(), monitor.getHits(), monitor.getAvg(), monitor.getMin(), monitor.getMax()));
+                    out.println(String.format("%-" + lm + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", monitor.getLabel(),
+                            monitor.getHits(), monitor.getAvg(), monitor.getMin(), monitor.getMax()));
                 }
             }
         } catch (Exception e) {
@@ -285,14 +301,8 @@ public class CorePlugin extends PlayPlugin {
     }
 
     protected Enhancer[] defaultEnhancers() {
-        return new Enhancer[] {
-            new PropertiesEnhancer(),
-            new ContinuationEnhancer(),
-            new SigEnhancer(),
-            new ControllersEnhancer(),
-            new MailerEnhancer(),
-            new LocalvariablesNamesEnhancer()
-        };
+        return new Enhancer[] { new PropertiesEnhancer(), new ContinuationEnhancer(), new SigEnhancer(), new ControllersEnhancer(),
+                new MailerEnhancer(), new LocalvariablesNamesEnhancer() };
     }
 
     @Override
@@ -302,7 +312,8 @@ public class CorePlugin extends PlayPlugin {
                 long start = System.currentTimeMillis();
                 enhancer.enhanceThisClass(applicationClass);
                 if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getClass().getSimpleName(), applicationClass.name);
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getClass().getSimpleName(),
+                            applicationClass.name);
                 }
             } catch (Exception e) {
                 throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
