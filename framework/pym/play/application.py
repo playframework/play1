@@ -281,11 +281,11 @@ class PlayApplication(object):
         else:
             javaVersion = getJavaVersion() 
         print "~ using java version \"%s\"" % javaVersion
-        if javaVersion.startswith("1.7"):
-            # JDK 7 compat
-            java_args.append('-XX:-UseSplitVerifier')
-        elif javaVersion.startswith("1.8"):
-            java_args.append('-noverify')
+        
+        if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
+            print "~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion
+            
+        java_args.append('-noverify')
 
         java_policy = self.readConf('java.policy')
         if java_policy != '':
