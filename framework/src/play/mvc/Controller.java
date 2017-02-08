@@ -69,10 +69,9 @@ import play.vfs.VirtualFile;
  * Application controller support: The controller receives input and initiates a
  * response by making calls on model objects.
  *
- * This is the class that your controllers should extend.
- *
+ * This is the class that your controllers should extend in most cases.
  */
-public class Controller implements ControllerSupport, LocalVariablesSupport {
+public class Controller implements PlayController, ControllerSupport, LocalVariablesSupport {
 
     /**
      * The current HTTP request: the message sent by the client to the server.
@@ -963,8 +962,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * @return Annotation object or null if not found
      */
+    @SuppressWarnings("unchecked")
     protected static Class<? extends Controller> getControllerClass() {
-        return Http.Request.current().controllerClass;
+        return (Class<? extends Controller>) Http.Request.current().controllerClass;
     }
 
     /**
