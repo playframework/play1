@@ -176,6 +176,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         if(depName.matches("play\\s+->\\s+secure") || depName.equals("secure")) {
                             depName = "play -> secure " + System.getProperty("play.version");
                         }
+                        if(depName.matches("play\\s+->\\s+docviewer") || depName.equals("docviewer")) {
+                            depName = "play -> docviewer " + System.getProperty("play.version");
+                        }
 
                         // Pattern compile to match [organisation name] - > [artifact] [revision] [classifier]
                         Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);

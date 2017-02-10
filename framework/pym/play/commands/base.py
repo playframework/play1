@@ -97,7 +97,6 @@ def new(app, args, env, cmdloader=None):
     print "~"
 
     # Configure modules 
-    runDepsAfter = False
     for m in md:
         # Check dependencies.yml of the module
         depsYaml = os.path.join(env["basedir"], 'modules/%s/conf/dependencies.yml' % m)
@@ -106,12 +105,10 @@ def new(app, args, env, cmdloader=None):
             try:
                 moduleDefinition = re.search(r'self:\s*(.*)\s*', deps).group(1)
                 replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'- play\n', '- play\n    - %s\n' % moduleDefinition )
-                runDepsAfter = True
             except Exception:
                 pass
                 
-    if runDepsAfter:
-        cmdloader.commands['dependencies'].execute(command='dependencies', app=app, args=['--sync'], env=env, cmdloader=cmdloader)
+    cmdloader.commands['dependencies'].execute(command='dependencies', app=app, args=['--sync'], env=env, cmdloader=cmdloader)
 
     print "~ OK, the application is created."
     print "~ Start it with : play run %s" % sys.argv[2]

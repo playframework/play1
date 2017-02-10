@@ -778,10 +778,6 @@ public class Play {
         if (Play.runingInTestMode()) {
             addModule(appRoot, "_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
-
-        if (Play.mode == Mode.DEV) {
-            addModule(appRoot, "_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
-        }
     }
 
     /**
