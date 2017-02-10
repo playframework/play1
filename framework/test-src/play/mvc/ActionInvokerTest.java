@@ -3,29 +3,38 @@ package play.mvc;
 import org.junit.Before;
 import org.junit.Test;
 import play.Play;
+import play.PlayBuilder;
 import play.classloading.ApplicationClasses;
+import play.data.binding.CachedBoundActionMethodArgs;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.mvc.results.Forbidden;
 import play.mvc.results.Result;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static play.mvc.ActionInvokerTest.TestInterceptor.aftersCounter;
+import static play.mvc.ActionInvokerTest.TestInterceptor.beforesCounter;
 
 public class ActionInvokerTest {
     private Object[] noArgs = new Object[0];
 
-//    @org.junit.Before
-//    public void playBuilderBefore() {
-//        new PlayBuilder().build();
-//    }
-
     @Before
     public void setUp() throws Exception {
+        new PlayBuilder().build();
         Http.Request.current.set(new Http.Request());
+        CachedBoundActionMethodArgs.init();
+        beforesCounter = 0;
+        aftersCounter = 0;
+    }
+
+    @org.junit.After
+    public void tearDown() {
+        CachedBoundActionMethodArgs.clear();
     }
 
     @Test
@@ -38,6 +47,22 @@ public class ActionInvokerTest {
     public void invokeNonStaticJavaMethod() throws Exception {
         Http.Request.current().controllerClass = TestController.class;
         assertEquals("non-static", ActionInvoker.invokeControllerMethod(TestController.class.getMethod("nonStaticJavaMethod"), noArgs));
+    }
+
+    @Test
+    public void invokeNonStaticJavaMethodWithNonStaticWith() throws Exception {
+        Http.Request request = Http.Request.current();
+        request.controllerClass = TestControllerWithWith.class;
+        executeMethod("handleBefores", Http.Request.class, request);
+        executeMethod("handleAfters", Http.Request.class, request);
+        assertEquals(1, beforesCounter);
+        assertEquals(1, aftersCounter);
+    }
+
+    private void executeMethod(String methodName, Class parameterClass, Object parameterValue) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method method = ActionInvoker.class.getDeclaredMethod(methodName, parameterClass);
+        method.setAccessible(true);
+        method.invoke(null, parameterValue);
     }
 
     @Test
@@ -190,7 +215,7 @@ public class ActionInvokerTest {
             return "static-with-" + that;
         }
     }
-
+    
     private static class ActionClass {
 
         private static String privateMethod() {
@@ -228,6 +253,22 @@ public class ActionInvokerTest {
     }
 
     private static class ActionClassChild extends ActionClass {
+    }
 
+    @With(TestInterceptor.class)
+    public static class TestControllerWithWith extends Controller {
+        public String nonStaticJavaMethod() {
+            return "non-static";
+        }
+    }
+    
+    public static class TestInterceptor extends Controller {
+        static int beforesCounter, aftersCounter;
+        
+        @play.mvc.Before
+        public void beforeMethod() {beforesCounter++;}
+
+        @After
+        public void afterMethod() {aftersCounter++;}
     }
 }
