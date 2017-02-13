@@ -150,19 +150,26 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
-        File root = new File(System.getProperty("application.path", "."));
-        if (System.getProperty("precompiled", "false").equals("true")) {
-            Play.usePrecompiled = true;
+        try {
+            File root = new File(System.getProperty("application.path", "."));
+            if (System.getProperty("precompiled", "false").equals("true")) {
+                Play.usePrecompiled = true;
+            }
+            if (System.getProperty("writepid", "false").equals("true")) {
+                writePID(root);
+            }
+
+            Play.init(root, System.getProperty("play.id", ""));
+
+            if (System.getProperty("precompile") == null) {
+                new Server(args);
+            } else {
+                Logger.info("Done.");
+            }
         }
-        if (System.getProperty("writepid", "false").equals("true")) {
-            writePID(root);
-        }
-        Play.init(root, System.getProperty("play.id", ""));
-        if (System.getProperty("precompile") == null) {
-            new Server(args);
-        } else {
-            Logger.info("Done.");
+        catch (Throwable e) {
+            Logger.fatal(e, "Failed to start");
+            System.exit(1);
         }
     }
-
 }
