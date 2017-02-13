@@ -46,7 +46,13 @@ public class ActionInvokerTest {
     @Test
     public void invokeNonStaticJavaMethod() throws Exception {
         Http.Request.current().controllerClass = TestController.class;
-        assertEquals("non-static", ActionInvoker.invokeControllerMethod(TestController.class.getMethod("nonStaticJavaMethod"), noArgs));
+        assertEquals("non-static-parent", ActionInvoker.invokeControllerMethod(TestController.class.getMethod("nonStaticJavaMethod"), noArgs));
+    }
+
+    @Test
+    public void invokeNonStaticJavaMethodInChildController() throws Exception {
+        Http.Request.current().controllerClass = TestChildController.class;
+        assertEquals("non-static-child", ActionInvoker.invokeControllerMethod(TestChildController.class.getMethod("nonStaticJavaMethod"), noArgs));
     }
 
     @Test
@@ -54,6 +60,7 @@ public class ActionInvokerTest {
         Http.Request request = Http.Request.current();
         request.controllerClass = TestControllerWithWith.class;
         executeMethod("handleBefores", Http.Request.class, request);
+        assertEquals("non-static", ActionInvoker.invokeControllerMethod(TestControllerWithWith.class.getMethod("nonStaticJavaMethod")));
         executeMethod("handleAfters", Http.Request.class, request);
         assertEquals(1, beforesCounter);
         assertEquals(1, aftersCounter);
@@ -180,7 +187,18 @@ public class ActionInvokerTest {
         }
 
         public String nonStaticJavaMethod() {
-            return "non-static";
+            return "non-static-" + getPrefix();
+        }
+
+        protected String getPrefix() {
+            return "parent";
+        }
+    }
+
+    public static class TestChildController extends TestController {
+        @Override
+        protected String getPrefix() {
+            return "child";
         }
     }
 
