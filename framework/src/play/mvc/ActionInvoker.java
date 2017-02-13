@@ -465,7 +465,7 @@ public class ActionInvoker {
         }
 
         Object methodClassInstance = isStatic ? null :
-            (method.getDeclaringClass().equals(request.controllerClass)) ? request.controllerInstance :
+            (method.getDeclaringClass().isAssignableFrom(request.controllerClass)) ? request.controllerInstance :
                 method.getDeclaringClass().newInstance();
 
         return invoke(method, methodClassInstance, args);
