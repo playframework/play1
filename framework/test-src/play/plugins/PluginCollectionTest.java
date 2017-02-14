@@ -67,8 +67,8 @@ public class PluginCollectionTest {
 
         pc.loadPlugins();
 
-        PlayPlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
-        PlayPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
+        CorePlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
+        TestPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
 
         assertThat(pc.getAllPlugins()).containsExactly(
                 corePlugin_first_instance,
@@ -91,8 +91,8 @@ public class PluginCollectionTest {
 
         pc.loadPlugins();
 
-        PlayPlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
-        PlayPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
+        CorePlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
+        TestPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
 
         //the following plugin-list should match the list in the file 'play.plugins'
         assertThat(pc.getEnabledPlugins()).containsExactly(
@@ -104,7 +104,7 @@ public class PluginCollectionTest {
 
         pc.reloadApplicationPlugins();
 
-        PlayPlugin testPlugin_second_instance = pc.getPluginInstance(TestPlugin.class);
+        TestPlugin testPlugin_second_instance = pc.getPluginInstance(TestPlugin.class);
 
         assertThat(pc.getPluginInstance(CorePlugin.class)).isEqualTo( corePlugin_first_instance);
         assertThat(testPlugin_second_instance).isNotEqualTo( testPlugin_first_instance);

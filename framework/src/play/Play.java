@@ -677,8 +677,8 @@ public class Play {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T plugin(Class<T> clazz) {
-        return (T) pluginCollection.getPluginInstance((Class<? extends PlayPlugin>) clazz);
+    public static <T extends PlayPlugin> T plugin(Class<T> clazz) {
+        return pluginCollection.getPluginInstance(clazz);
     }
 
     /**
