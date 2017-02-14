@@ -218,7 +218,7 @@ public class ActionInvoker {
     private static void invokeControllerCatchMethods(Throwable throwable) throws Exception {
         // @Catch
         Object[] args = new Object[] {throwable};
-        List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+        List<Method> catches = Java.findAllAnnotatedMethods(getControllerClass(), Catch.class);
         ControllerInstrumentation.stopActionCall();
         for (Method mCatch : catches) {
             Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
@@ -268,7 +268,7 @@ public class ActionInvoker {
     }
 
     private static void handleBefores(Http.Request request) throws Exception {
-        List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
+        List<Method> befores = Java.findAllAnnotatedMethods(getControllerClass(), Before.class);
         ControllerInstrumentation.stopActionCall();
         for (Method before : befores) {
             String[] unless = before.getAnnotation(Before.class).unless();
@@ -302,7 +302,7 @@ public class ActionInvoker {
     }
 
     private static void handleAfters(Http.Request request) throws Exception {
-        List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+        List<Method> afters = Java.findAllAnnotatedMethods(getControllerClass(), After.class);
         ControllerInstrumentation.stopActionCall();
         for (Method after : afters) {
             String[] unless = after.getAnnotation(After.class).unless();
@@ -348,13 +348,13 @@ public class ActionInvoker {
      */
     static void handleFinallies(Http.Request request, Throwable caughtException) throws PlayException {
 
-        if (Controller.getControllerClass() == null) {
+        if (getControllerClass() == null) {
             // skip it
             return;
         }
 
         try {
-            List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+            List<Method> allFinally = Java.findAllAnnotatedMethods(Request.current().controllerClass, Finally.class);
             ControllerInstrumentation.stopActionCall();
             for (Method aFinally : allFinally) {
                 String[] unless = aFinally.getAnnotation(Finally.class).unless();
@@ -455,9 +455,7 @@ public class ActionInvoker {
                 if (declaringClassName.endsWith("$class")) {
                     args[0] = scalaInstance; // Scala trait method
                 } else {
-                    request.controllerInstance = (Controller) scalaInstance; // Scala
-                                                                             // object
-                                                                             // method
+                    request.controllerInstance = (PlayController) scalaInstance; // Scala object method
                 }
             } catch (NoSuchFieldException e) {
                 // not Scala
@@ -504,11 +502,11 @@ public class ActionInvoker {
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case
-        if (Http.Request.current().args.containsKey(A)) {
+        if (Request.current().args.containsKey(A)) {
 
             // Action0
-            instance = Http.Request.current().args.get(A);
-            Future f = (Future) Http.Request.current().args.get(F);
+            instance = Request.current().args.get(A);
+            Future f = (Future) Request.current().args.get(F);
             Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
             Scope.RenderArgs.current.set(renderArgs);
             if (f == null) {
@@ -524,7 +522,7 @@ public class ActionInvoker {
         }
 
         // Continuations case
-        Continuation continuation = (Continuation) Http.Request.current().args.get(C);
+        Continuation continuation = (Continuation) Request.current().args.get(C);
         if (continuation == null) {
             continuation = new Continuation(new StackRecorder((Runnable) null));
         }
@@ -545,7 +543,7 @@ public class ActionInvoker {
                 }
                 Object trigger = pStackRecorder.value;
                 Continuation nextContinuation = new Continuation(pStackRecorder);
-                Http.Request.current().args.put(C, nextContinuation);
+                Request.current().args.put(C, nextContinuation);
 
                 if (trigger instanceof Long) {
                     throw new Suspend((Long) trigger);
@@ -559,7 +557,7 @@ public class ActionInvoker {
 
                 throw new UnexpectedException("Unexpected continuation trigger -> " + trigger);
             } else {
-                Http.Request.current().args.remove(C);
+                Request.current().args.remove(C);
             }
         } finally {
             pStackRecorder.deregisterThread(old);
@@ -581,10 +579,10 @@ public class ActionInvoker {
             if (controllerClass == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("Controller " + controller + " not found"));
             }
-            if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+            if (!PlayController.class.isAssignableFrom(controllerClass)) {
                 // Try the scala way
                 controllerClass = Play.classloader.getClassIgnoreCase(controller + "$");
-                if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+                if (!PlayController.class.isAssignableFrom(controllerClass)) {
                     throw new ActionNotFoundException(fullAction,
                             new Exception("class " + controller + " does not extend play.mvc.Controller"));
                 }
@@ -640,4 +638,7 @@ public class ActionInvoker {
         return rArgs;
     }
 
+    private static Class<? extends PlayController> getControllerClass() {
+        return Http.Request.current().controllerClass;
+    }
 }

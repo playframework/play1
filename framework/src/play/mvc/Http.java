@@ -265,11 +265,11 @@ public class Http {
         /**
          * The invoked controller class
          */
-        public transient Class<? extends Controller> controllerClass;
+        public transient Class<? extends PlayController> controllerClass;
         /**
          * The instance of invoked controller in case it uses non-static action methods.
          */
-        public transient Controller controllerInstance;
+        public transient PlayController controllerInstance;
         /**
          * Free space to store your request specific data
          */
