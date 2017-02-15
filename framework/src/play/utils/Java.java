@@ -1,19 +1,5 @@
 package play.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.FutureTask;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
@@ -29,6 +15,16 @@ import play.mvc.Before;
 import play.mvc.Finally;
 import play.mvc.With;
 
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.concurrent.FutureTask;
+
+import static java.util.Collections.addAll;
+
 /**
  * Java utils
  */
@@ -36,17 +32,17 @@ public class Java {
 
     protected static JavaWithCaching _javaWithCaching = new JavaWithCaching();
     protected static ApplicationClassloaderState _lastKnownApplicationClassloaderState = Play.classloader.currentState;
-    protected static Object _javaWithCachingLock = new Object();
+    private static final Object _javaWithCachingLock = new Object();
 
     protected static JavaWithCaching getJavaWithCaching() {
         synchronized( _javaWithCachingLock ) {
             // has the state of the ApplicationClassloader changed?
-            ApplicationClassloaderState currentApplicationClasloaderState = Play.classloader.currentState;
-            if( !currentApplicationClasloaderState.equals( _lastKnownApplicationClassloaderState )) {
+            ApplicationClassloaderState currentApplicationClassloaderState = Play.classloader.currentState;
+            if( !currentApplicationClassloaderState.equals( _lastKnownApplicationClassloaderState )) {
                 // it has changed.
                 // we must drop our current _javaWithCaching and create a new one...
                 // and start the caching over again.
-                _lastKnownApplicationClassloaderState = currentApplicationClasloaderState;
+                _lastKnownApplicationClassloaderState = currentApplicationClassloaderState;
                 _javaWithCaching = new JavaWithCaching();
 
             }
@@ -108,7 +104,7 @@ public class Java {
 	  	while (!clazz.getName().equals("java.lang.Object")) {
 		    for (Method m : clazz.getDeclaredMethods()) {
 			    if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
-                    // Check that it is not an intercepter
+                    // Check that it is not an interceptor
                     if (!m.isAnnotationPresent(Before.class) && !m.isAnnotationPresent(After.class) && !m.isAnnotationPresent(Finally.class)) {
                         return m;
                     }
@@ -220,11 +216,11 @@ public class Java {
     /**
      * Retrieve parameter names of a method
      */
-    public static String[] parameterNames(Method method) throws Exception {
+    public static String[] parameterNames(Method method) {
         try {
             return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
         } catch (Exception e) {
-            throw new UnexpectedException("Cannot read parameter names for " + method);
+            throw new UnexpectedException("Cannot read parameter names for " + method, e);
         }
     }
 
@@ -303,14 +299,14 @@ public class Java {
 
     public static void findAllFields(Class clazz, Set<Field> found) {
         Field[] fields = clazz.getDeclaredFields();
-        for (int i = 0; i < fields.length; i++) {
-            found.add(fields[i]);
-        }
+        addAll(found, fields);
+
         Class sClazz = clazz.getSuperclass();
         if (sClazz != null && sClazz != Object.class) {
             findAllFields(sClazz, found);
         }
     }
+
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
@@ -325,19 +321,28 @@ public class Java {
         return wrappers.get(field);
     }
 
-    public static byte[] serialize(Object o) throws Exception {
+    public static byte[] serialize(Object o) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oo = new ObjectOutputStream(baos);
-        oo.writeObject(o);
-        oo.flush();
-        oo.close();
+        try {
+          oo.writeObject(o);
+          oo.flush();
+        }
+        finally {
+          oo.close();
+        }
         return baos.toByteArray();
     }
 
     public static Object deserialize(byte[] b) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        ObjectInputStream oi = new ObjectInputStream(bais);
-        return oi.readObject();
+        try {
+          ObjectInputStream oi = new ObjectInputStream(bais);
+          return oi.readObject();
+        }
+        finally {
+          bais.close();
+        }
     }
 
     /**

@@ -16,7 +16,7 @@ public class CacheException extends PlayException {
 
     public CacheException(String message, Throwable cause) {
         super(message, cause);
-        StackTraceElement element = getInterestingStrackTraceElement(cause);
+        StackTraceElement element = getInterestingStackTraceElement(cause);
         if(element != null) {
             ApplicationClass applicationClass = Play.classes.getApplicationClass(element.getClassName());
             if (applicationClass.javaFile != null)
