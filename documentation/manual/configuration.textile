@@ -1165,6 +1165,21 @@ bc. upload.threshold=20480
 
 Default: @10240@
 
+h3(#upload.maxRequestSize). upload.maxRequestSize
+
+The maximum size permitted for the complete request. A value of -1 indicates no maximum.
+
+bc. upload.maxRequestSize=2048
+
+Default: @-1@
+
+h3(#upload.maxFileSize). upload.maxFileSize
+
+The maximum size permitted for a single uploaded file, as opposed to. A value of -1 indicates no maximum.
+
+bc. upload.maxFileSize=1024
+
+Default: @-1@
 
 h2(#xforwarded). Proxy forwarding
 
