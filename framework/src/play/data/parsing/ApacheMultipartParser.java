@@ -610,14 +610,14 @@ public class ApacheMultipartParser extends DataParser {
     // ----------------------------------------------------------- Data members
     /**
      * The maximum size permitted for the complete request, as opposed to
-     * {@link #fileSizeMax}. A value of -1 indicates no maximum.
+     * {@link #maxFileSize}. A value of -1 indicates no maximum.
      */
-    private long sizeMax = -1;
+    private long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
     /**
      * The maximum size permitted for a single uploaded file, as opposed to
-     * {@link #sizeMax}. A value of -1 indicates no maximum.
+     * {@link #maxRequestSize}. A value of -1 indicates no maximum.
      */
-    private long fileSizeMax = -1;
+    private long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
 
     // ------------------------------------------------------ Protected methods
 
@@ -865,8 +865,8 @@ public class ApacheMultipartParser extends DataParser {
                 contentType = pContentType;
                 formField = pFormField;
                 InputStream istream = multi.newInputStream();
-                if (fileSizeMax != -1) {
-                    istream = new LimitedInputStream(istream, fileSizeMax) {
+                if (maxFileSize != -1) {
+                    istream = new LimitedInputStream(istream, maxFileSize) {
 
                         @Override
                         protected void raiseError(long pSizeMax, long pCount) throws IOException {
@@ -998,10 +998,10 @@ public class ApacheMultipartParser extends DataParser {
                 throw new InvalidContentTypeException("the request doesn't contain a " + MULTIPART_FORM_DATA + " or " + MULTIPART_MIXED + " stream, content type header is " + contentType);
             }
 
-            if (sizeMax >= 0) {
+            if (maxRequestSize >= 0) {
                 // TODO check size
 
-                input = new LimitedInputStream(input, sizeMax) {
+                input = new LimitedInputStream(input, maxRequestSize) {
 
                     @Override
                     protected void raiseError(long pSizeMax, long pCount) throws IOException {
