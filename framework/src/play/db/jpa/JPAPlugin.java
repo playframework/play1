@@ -197,7 +197,7 @@ public class JPAPlugin extends PlayPlugin {
 
                 JPA.emfs.put(dbName, cfg.buildEntityManagerFactory());
             } finally {
-                if (thread != null) thread.setContextClassLoader(contextClassLoader);
+                thread.setContextClassLoader(contextClassLoader);
             }
         }
         JPQL.instance = new JPQL();
