@@ -114,7 +114,7 @@ h2. Using WebSockets
 
 WebSockets are a way to open a two-way communication channel between a browser and your application. On the browser side, you open a socket using a "ws://" url:
 
-bc. new Socket("ws://localhost:9000/helloSocket?name=Guillaume")
+bc. new WebSocket("ws://localhost:9000/helloSocket?name=Guillaume")
 
 On the Play side you declare a WS route:
 
