@@ -1,13 +1,13 @@
 package play.cache;
 
-import java.io.NotSerializableException;
-import java.io.Serializable;
-import java.util.Map;
-
 import play.Logger;
 import play.Play;
 import play.exceptions.CacheException;
 import play.libs.Time;
+
+import java.io.NotSerializableException;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * The Cache. Mainly an interface to memcached or EhCache.
@@ -25,6 +25,8 @@ public abstract class Cache {
      * Sometime we REALLY need to change the implementation :)
      */
     public static CacheImpl forcedCacheImpl;
+
+    private static final int warmupPeriodMs = Integer.valueOf(Play.configuration.getProperty("play.cache.warmupPeriodMs", "60000"));
 
     /**
      * Add an element only if it doesn't exist.
@@ -171,7 +173,12 @@ public abstract class Cache {
      * @return The element value or null
      */
     public static Object get(String key) {
-        return cacheImpl.get(key);
+        try {
+            return cacheImpl.get(key);
+        }
+        catch (RuntimeException e) {
+            return handleDeserializationError(e);
+        }
     }
 
     /**
@@ -180,7 +187,24 @@ public abstract class Cache {
      * @return Map of keys &amp; values
      */
     public static Map<String, Object> get(String... key) {
-        return cacheImpl.get(key);
+        try {
+            return cacheImpl.get(key);
+        }
+        catch (RuntimeException e) {
+            return handleDeserializationError(e);
+        }
+    }
+
+    private static <T> T handleDeserializationError(RuntimeException e) {
+        if (isPlayRecentlyStarted()) {
+            // ignore: this object was cached before play restart.
+            return null;
+        }
+        throw e;
+    }
+
+    static boolean isPlayRecentlyStarted() {
+        return System.currentTimeMillis() - Play.startedAt < warmupPeriodMs;
     }
 
     /**
