@@ -61,14 +61,11 @@ public class Images {
      * @param to
      *            The destination file
      * @param w
-     *            The new width (or -1 to proportionally resize) or the maxWidth
-     *            if keepRatio is true
+     *            The new width (or -1 to proportionally resize) or the maxWidth if keepRatio is true
      * @param h
-     *            The new height (or -1 to proportionally resize) or the
-     *            maxHeight if keepRatio is true
+     *            The new height (or -1 to proportionally resize) or the maxHeight if keepRatio is true
      * @param keepRatio
-     *            : if true, resize will keep the original image ratio and use w
-     *            and h as max dimensions
+     *            if true, resize will keep the original image ratio and use w and h as max dimensions
      */
     public static void resize(File originalImage, File to, int w, int h, boolean keepRatio) {
         try {
@@ -204,6 +201,7 @@ public class Images {
      *            The image file
      * @return The base64 encoded value
      * @throws java.io.IOException
+     *             Thrown if the encoding encounters any problems.
      */
     public static String toBase64(File image) throws IOException {
         return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64," + Codec.encodeBASE64(IO.readContent(image));
@@ -211,6 +209,12 @@ public class Images {
 
     /**
      * Create a captche image
+     * 
+     * @param width
+     *            The width of the captche
+     * @param height
+     *            The height of the captche
+     * @return The given captcha
      */
     public static Captcha captcha(int width, int height) {
         return new Captcha(width, height);
@@ -218,6 +222,8 @@ public class Images {
 
     /**
      * Create a 150x150 captcha image
+     * 
+     * @return The given captcha
      */
     public static Captcha captcha() {
         return captcha(150, 50);
@@ -236,6 +242,8 @@ public class Images {
         public int w, h;
         public Color noise = null;
 
+        ByteArrayInputStream bais = null;
+
         public Captcha(int w, int h) {
             this.w = w;
             this.h = h;
@@ -245,14 +253,19 @@ public class Images {
 
         /**
          * Tell the captche to draw a text and retrieve it
+         * 
+         * @return the given text
          */
         public String getText() {
             return getText(5);
         }
 
         /**
-         * Tell the captche to draw a text using the specified color (ex.
-         * #000000) and retrieve it
+         * Tell the captche to draw a text using the specified color (ex. #000000) and retrieve it
+         * 
+         * @param color
+         *            a <code>String</code> that represents an opaque color as a 24-bit integer
+         * @return The text to draw
          */
         public String getText(String color) {
             this.textColor = Color.decode(color);
@@ -261,20 +274,38 @@ public class Images {
 
         /**
          * Tell the captche to draw a text of the specified size and retrieve it
+         * 
+         * @param length
+         *            the specified size of the text
+         * @return The text to draw
          */
         public String getText(int length) {
             return getText(length, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
         }
 
         /**
-         * Tell the captche to draw a text of the specified size using the
-         * specified color (ex. #000000) and retrieve it
+         * Tell the captche to draw a text of the specified size using the specified color (ex. #000000) and retrieve it
+         * 
+         * @param color
+         *            a <code>String</code> that represents an opaque color as a 24-bit integer
+         * @param length
+         *            the specified size of the text
+         * @return The text to draw
          */
         public String getText(String color, int length) {
             this.textColor = Color.decode(color);
             return getText(length);
         }
 
+        /**
+         * Tell the captche to draw a text of the specified size using specials characters and retrieve it
+         * 
+         * @param length
+         *            the specified size of the text
+         * @param chars
+         *            List of allowed characters
+         * @return The text to draw
+         */
         public String getText(int length, String chars) {
             char[] charsArray = chars.toCharArray();
             Random random = new Random(System.currentTimeMillis());
@@ -286,6 +317,18 @@ public class Images {
             return text;
         }
 
+        /**
+         * Tell the captche to draw a text of the specified size using specials characters and a the specified color
+         * (ex. #000000)and retrieve it
+         * 
+         * @param color
+         *            a <code>String</code> that represents an opaque color as a 24-bit integer
+         * @param length
+         *            the specified size of the text
+         * @param chars
+         *            List of allowed characters
+         * @return The text to draw
+         */
         public String getText(String color, int length, String chars) {
             this.textColor = Color.decode(color);
             return getText(length, chars);
@@ -293,6 +336,8 @@ public class Images {
 
         /**
          * Add noise to the captcha.
+         * 
+         * @return The given captcha
          */
         public Captcha addNoise() {
             noise = Color.BLACK;
@@ -301,6 +346,10 @@ public class Images {
 
         /**
          * Add noise to the captcha.
+         * 
+         * @param color
+         *            a <code>String</code> that represents an opaque color as a 24-bit integer
+         * @return The given captcha
          */
         public Captcha addNoise(String color) {
             noise = Color.decode(color);
@@ -309,6 +358,12 @@ public class Images {
 
         /**
          * Set a gradient background.
+         * 
+         * @param from
+         *            a <code>String</code> that represents an opaque color use to start the gradient
+         * @param to
+         *            a <code>String</code> that represents an opaque color use to end the gradient
+         * @return The given captcha
          */
         public Captcha setBackground(String from, String to) {
             GradiatedBackgroundProducer bg = new GradiatedBackgroundProducer();
@@ -320,6 +375,10 @@ public class Images {
 
         /**
          * Set a solid background.
+         * 
+         * @param color
+         *            a <code>String</code> that represents an opaque color as a 24-bit integer
+         * @return The given captcha
          */
         public Captcha setBackground(String color) {
             background = new FlatColorBackgroundProducer(Color.decode(color));
@@ -328,13 +387,13 @@ public class Images {
 
         /**
          * Set a squiggles background
+         * 
+         * @return The given captcha
          */
         public Captcha setSquigglesBackground() {
             background = new SquigglesBackgroundProducer();
             return this;
         } // ~~ rendering
-
-        ByteArrayInputStream bais = null;
 
         @Override
         public int read() throws IOException {

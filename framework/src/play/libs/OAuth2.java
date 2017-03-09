@@ -4,17 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import play.libs.WS.HttpResponse;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
 
-import play.libs.WS.HttpResponse;
-
-import com.google.gson.JsonObject;
-
 /**
- * Library to access resources protected by OAuth 2.0. For OAuth 1.0a, see play.libs.OAuth.
- * See the facebook-oauth2 example for usage.
+ * Library to access resources protected by OAuth 2.0. For OAuth 1.0a, see play.libs.OAuth. See the facebook-oauth2
+ * example for usage.
  */
 public class OAuth2 {
 
@@ -26,10 +25,7 @@ public class OAuth2 {
     public String clientid;
     public String secret;
 
-    public OAuth2(String authorizationURL,
-                  String accessTokenURL,
-                  String clientid,
-                  String secret) {
+    public OAuth2(String authorizationURL, String accessTokenURL, String clientid, String secret) {
         this.accessTokenURL = accessTokenURL;
         this.authorizationURL = authorizationURL;
         this.clientid = clientid;
@@ -44,18 +40,23 @@ public class OAuth2 {
      * First step of the OAuth2 process: redirects the user to the authorisation page
      *
      * @param callbackURL
+     *            The callback URL
      */
     public void retrieveVerificationCode(String callbackURL) {
         retrieveVerificationCode(callbackURL, new HashMap<String, String>());
     }
 
     /**
-     * First step of the oAuth2 process. This redirects the user to the authorization page on the oAuth2 provider. This is a helper method that only takes one parameter name,value pair and then
-     * converts them into a map to be used by {@link #retrieveVerificationCode(String, Map)}
+     * First step of the oAuth2 process. This redirects the user to the authorization page on the oAuth2 provider. This
+     * is a helper method that only takes one parameter name,value pair and then converts them into a map to be used by
+     * {@link #retrieveVerificationCode(String, Map)}
      *
-     * @param callbackURL    The URL to redirect the user to after authorization
-     * @param parameterName  An additional parameter name
-     * @param parameterValue An additional parameter value
+     * @param callbackURL
+     *            The URL to redirect the user to after authorization
+     * @param parameterName
+     *            An additional parameter name
+     * @param parameterValue
+     *            An additional parameter value
      */
     public void retrieveVerificationCode(String callbackURL, String parameterName, String parameterValue) {
         Map<String, String> parameters = new HashMap<>();
@@ -66,8 +67,11 @@ public class OAuth2 {
     /**
      * First step of the oAuth2 process. This redirects the user to the authorisation page on the oAuth2 provider.
      *
-     * @param callbackURL The URL to redirect the user to after authorisation
-     * @param parameters  Any additional parameters that weren't included in the constructor. For example you might need to add a response_type.
+     * @param callbackURL
+     *            The URL to redirect the user to after authorisation
+     * @param parameters
+     *            Any additional parameters that weren't included in the constructor. For example you might need to add
+     *            a response_type.
      */
     public void retrieveVerificationCode(String callbackURL, Map<String, String> parameters) {
         parameters.put(CLIENT_ID_NAME, clientid);
@@ -103,6 +107,7 @@ public class OAuth2 {
     }
 
     /**
+     * @return The access token
      * @deprecated Use @{link play.libs.OAuth2.retrieveAccessToken()} instead
      */
     @Deprecated
@@ -151,9 +156,7 @@ public class OAuth2 {
         public final String description;
 
         public enum Type {
-            COMMUNICATION,
-            OAUTH,
-            UNKNOWN
+            COMMUNICATION, OAUTH, UNKNOWN
         }
 
         private Error(Type type, String error, String description) {
@@ -169,13 +172,11 @@ public class OAuth2 {
         static Error oauth2(WS.HttpResponse response) {
             if (response.getQueryString().containsKey("error")) {
                 Map<String, String> qs = response.getQueryString();
-                return new Error(Type.OAUTH,
-                        qs.get("error"),
-                        qs.get("error_description"));
-            } else if (response.getContentType().startsWith("text/javascript")) { // Stupid Facebook returns JSON with the wrong encoding
+                return new Error(Type.OAUTH, qs.get("error"), qs.get("error_description"));
+            } else if (response.getContentType().startsWith("text/javascript")) { // Stupid Facebook returns JSON with
+                                                                                  // the wrong encoding
                 JsonObject jsonResponse = response.getJson().getAsJsonObject().getAsJsonObject("error");
-                return new Error(Type.OAUTH,
-                        jsonResponse.getAsJsonPrimitive("type").getAsString(),
+                return new Error(Type.OAUTH, jsonResponse.getAsJsonPrimitive("type").getAsString(),
                         jsonResponse.getAsJsonPrimitive("message").getAsString());
             } else {
                 return new Error(Type.UNKNOWN, null, null);

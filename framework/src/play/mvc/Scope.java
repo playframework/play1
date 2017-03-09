@@ -314,8 +314,9 @@ public class Scope {
         }
 
         /**
-         * Returns true if the session is empty, e.g. does not contain anything
-         * else than the timestamp
+         * Returns true if the session is empty, e.g. does not contain anything else than the timestamp
+         * 
+         * @return true if the session is empty, otherwise false
          */
         public boolean isEmpty() {
             for (String key : data.keySet()) {

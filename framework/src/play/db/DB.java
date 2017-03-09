@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 import javax.sql.RowSet;
@@ -18,11 +19,9 @@ import org.hibernate.internal.SessionImpl;
 
 import com.sun.rowset.CachedRowSetImpl;
 
+import play.Logger;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
-import play.Logger;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Database connection utilities.
@@ -31,6 +30,7 @@ public class DB {
 
     /**
      * The loaded datasource.
+     * 
      * @see ExtendedDatasource
      */
     protected static final Map<String, ExtendedDatasource> datasources = new ConcurrentHashMap<>();
@@ -147,6 +147,9 @@ public class DB {
 
     /**
      * Close an given open connections for the current thread
+     * 
+     * @param name
+     *            Name of the DB
      */
     public static void close(String name) {
         Map<String, Connection> map = localConnection.get();
@@ -158,8 +161,7 @@ public class DB {
                 try {
                     connection.close();
                 } catch (Exception e) {
-                    throw new DatabaseException("It's possible than the connection '" + name
-                            + "'was not properly closed !", e);
+                    throw new DatabaseException("It's possible than the connection '" + name + "'was not properly closed !", e);
                 }
             }
         }
@@ -168,6 +170,8 @@ public class DB {
     /**
      * Open a connection for the current thread.
      * 
+     * @param name
+     *            Name of the DB
      * @return A valid SQL connection
      */
     public static Connection getConnection(String name) {
@@ -202,10 +206,13 @@ public class DB {
 
     /**
      * Execute an SQL update
-     * 
+     *
+     * @param name
+     *            the DB name
      * @param SQL
-     * @return true if the next result is a ResultSet object; false if it is an
-     *         update count or there are no more results
+     *            the SQL statement
+     * @return true if the next result is a ResultSet object; false if it is an update count or there are no more
+     *         results
      */
     public static boolean execute(String name, String SQL) {
         Statement statement = null;
@@ -222,10 +229,25 @@ public class DB {
         return false;
     }
 
+    /**
+     * Execute an SQL update
+     *
+     * @param SQL
+     *            the SQL statement
+     * @return true if the next result is a ResultSet object; false if it is an update count or there are no more
+     *         results
+     */
     public static boolean execute(String SQL) {
         return execute(DEFAULT, SQL);
     }
 
+    /**
+     * Execute an SQL query
+     *
+     * @param SQL
+     *            the SQL statement
+     * @return The ResultSet object; false if it is an update count or there are no more results
+     */
     public static RowSet executeQuery(String SQL) {
         return executeQuery(DEFAULT, SQL);
     }
@@ -233,7 +255,10 @@ public class DB {
     /**
      * Execute an SQL query
      * 
+     * @param name
+     *            the DB name
      * @param SQL
+     *            the SQL statement
      * @return The rowSet of the query
      */
     public static RowSet executeQuery(String name, String SQL) {
@@ -281,13 +306,15 @@ public class DB {
 
     /**
      * Destroy the datasource
+     * 
+     * @param name
+     *            the DB name
      */
     public static void destroy(String name) {
         try {
             ExtendedDatasource extDatasource = datasources.get(name);
             if (extDatasource != null && extDatasource.getDestroyMethod() != null) {
-                Method close = extDatasource.datasource.getClass().getMethod(extDatasource.getDestroyMethod(),
-                        new Class[] {});
+                Method close = extDatasource.datasource.getClass().getMethod(extDatasource.getDestroyMethod(), new Class[] {});
                 if (close != null) {
                     close.invoke(extDatasource.getDataSource(), new Object[] {});
                     datasources.remove(name);

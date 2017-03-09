@@ -92,9 +92,10 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * sends a GET request to the application under tests.
+     * Sends a GET request to the application under tests.
      * 
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @return the response
@@ -144,6 +145,7 @@ public abstract class FunctionalTest extends BaseTest {
      * Sends a POST request to the application under tests.
      * 
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param contenttype
@@ -174,8 +176,7 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * Sends a POST request to the application under tests as a multipart form.
-     * Designed for file upload testing.
+     * Sends a POST request to the application under tests as a multipart form. Designed for file upload testing.
      * 
      * @param url
      *            relative url such as <em>"/products/1234"</em>
@@ -211,8 +212,7 @@ public abstract class FunctionalTest extends BaseTest {
 
         MultipartBody requestEntity = null;
         /*
-         * ^1 MultipartBody::read is not working (if parts.isEmpty() == true)
-         * byte[] array = null;
+         * ^1 MultipartBody::read is not working (if parts.isEmpty() == true) byte[] array = null;
          **/
         _ByteArrayOutputStream baos = null;
         try {
@@ -244,6 +244,7 @@ public abstract class FunctionalTest extends BaseTest {
      * Sends a PUT request to the application under tests.
      * 
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param contenttype
@@ -281,6 +282,7 @@ public abstract class FunctionalTest extends BaseTest {
      * Sends a DELETE request to the application under tests.
      * 
      * @param request
+     *            The given request
      * @param url
      *            relative url eg. <em>"/products/1234"</em>
      * @return the response
@@ -454,8 +456,7 @@ public abstract class FunctionalTest extends BaseTest {
      * Asserts response body matched a pattern or contains some text.
      * 
      * @param pattern
-     *            a regular expression pattern or a regular text, ( which must
-     *            be escaped using Pattern.quote)
+     *            a regular expression pattern or a regular text, ( which must be escaped using Pattern.quote)
      * @param response
      *            server response
      */
@@ -466,9 +467,8 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * Verify response charset encoding, as returned by the server in the
-     * Content-Type header. Be aware that if no charset is returned, assertion
-     * will fail.
+     * Verify response charset encoding, as returned by the server in the Content-Type header. Be aware that if no
+     * charset is returned, assertion will fail.
      * 
      * @param charset
      *            expected charset encoding such as "utf-8" or "iso8859-1".
@@ -485,8 +485,7 @@ public abstract class FunctionalTest extends BaseTest {
      * Verify the response content-type
      * 
      * @param contentType
-     *            expected content-type without any charset extension, such as
-     *            "text/html"
+     *            expected content-type without any charset extension, such as "text/html"
      * @param response
      *            server response
      */

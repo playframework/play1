@@ -24,6 +24,8 @@ public abstract class Result extends FastRuntimeException {
 
     /**
      * The encoding that should be used when writing this response to the client
+     * 
+     * @return The encoding of the response
      */
     protected String getEncoding() {
         return Http.Response.current().encoding;

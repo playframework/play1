@@ -60,6 +60,10 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
     /**
      * Makes the code scala compatible (for the scala module).
+     * 
+     * @param source
+     *            The string representation of the code
+     * @return The scala compatible source
      */
     protected String checkScalaCompatibility(String source) {
         // Static access

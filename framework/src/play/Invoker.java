@@ -13,6 +13,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Play.Mode;
 import play.classloading.ApplicationClassloader;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -22,9 +25,6 @@ import play.i18n.Lang;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.utils.PThreadFactory;
-
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 
 /**
  * Run some code in a Play! context
@@ -38,7 +38,9 @@ public class Invoker {
 
     /**
      * Run the code in a new thread took from a thread pool.
-     * @param invocation The code to run
+     * 
+     * @param invocation
+     *            The code to run
      * @return The future object, to know when the task is completed
      */
     public static Future<?> invoke(Invocation invocation) {
@@ -50,8 +52,11 @@ public class Invoker {
 
     /**
      * Run the code in a new thread after a delay
-     * @param invocation The code to run
-     * @param millis The time to wait before, in milliseconds
+     * 
+     * @param invocation
+     *            The code to run
+     * @param millis
+     *            The time to wait before, in milliseconds
      * @return The future object, to know when the task is completed
      */
     public static Future<?> invoke(Invocation invocation, long millis) {
@@ -62,7 +67,9 @@ public class Invoker {
 
     /**
      * Run the code in the same thread than caller.
-     * @param invocation The code to run
+     * 
+     * @param invocation
+     *            The code to run
      */
     public static void invokeInThread(DirectInvocation invocation) {
         boolean retry = true;
@@ -154,8 +161,10 @@ public class Invoker {
         }
 
         /**
-         * Returns the InvocationType for this invocation - Ie: A plugin can use this to
-         * find out if it runs in the context of a background Job
+         * Returns the InvocationType for this invocation - Ie: A plugin can use this to find out if it runs in the
+         * context of a background Job
+         * 
+         * @return the InvocationType for this invocation
          */
         public String getInvocationType() {
             return invocationType;
@@ -186,15 +195,15 @@ public class Invoker {
 
         /**
          * Override this method
+         * 
          * @throws java.lang.Exception
+         *             Thrown if Invocation encounters any problems
          */
         public abstract void execute() throws Exception;
 
-
         /**
-         * Needs this method to do stuff *before* init() is executed.
-         * The different Invocation-implementations does a lot of stuff in init()
-         * and they might do it before calling super.init()
+         * Needs this method to do stuff *before* init() is executed. The different Invocation-implementations does a
+         * lot of stuff in init() and they might do it before calling super.init()
          */
         protected void preInit() {
             // clear language for this request - we're resolving it later when it is needed
@@ -203,6 +212,8 @@ public class Invoker {
 
         /**
          * Init the call (especially useful in DEV mode to detect changes)
+         * 
+         * @return true if successful
          */
         public boolean init() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
@@ -217,7 +228,6 @@ public class Invoker {
             return true;
         }
 
-
         public abstract InvocationContext getInvocationContext();
 
         /**
@@ -229,8 +239,7 @@ public class Invoker {
         }
 
         /**
-         * Things to do after an Invocation.
-         * (if the Invocation code has not thrown any exception)
+         * Things to do after an Invocation. (if the Invocation code has not thrown any exception)
          */
         public void after() {
             Play.pluginCollection.afterInvocation();
@@ -239,6 +248,9 @@ public class Invoker {
 
         /**
          * Things to do when the whole invocation has succeeded (before + execute + after)
+         * 
+         * @throws java.lang.Exception
+         *             Thrown if Invoker encounters any problems
          */
         public void onSuccess() throws Exception {
             Play.pluginCollection.onInvocationSuccess();
@@ -246,6 +258,9 @@ public class Invoker {
 
         /**
          * Things to do if the Invocation code thrown an exception
+         * 
+         * @param e
+         *            The exception
          */
         public void onException(Throwable e) {
             Play.pluginCollection.onInvocationException(e);
@@ -257,7 +272,9 @@ public class Invoker {
 
         /**
          * The request is suspended
+         * 
          * @param suspendRequest
+         *            the suspended request
          */
         public void suspend(Suspend suspendRequest) {
             if (suspendRequest.task != null) {
@@ -276,10 +293,10 @@ public class Invoker {
         }
 
         private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
-          F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
-          if (filters.isDefined()) {
-            filters.get().withinFilter(fct);
-          }
+            F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
+            if (filters.isDefined()) {
+                filters.get().withinFilter(fct);
+            }
         }
 
         /**
@@ -351,7 +368,8 @@ public class Invoker {
      * Init executor at load time.
      */
     static {
-        int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
+        int core = Integer.parseInt(Play.configuration.getProperty("play.pool",
+                Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), new ThreadPoolExecutor.AbortPolicy());
     }
 
@@ -364,7 +382,7 @@ public class Invoker {
          * Suspend for a timeout (in milliseconds).
          */
         long timeout;
-        
+
         /**
          * Wait for task execution.
          */

@@ -1,17 +1,8 @@
 package play.classloading;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-
-import play.Logger;
-import play.Play;
-import play.cache.Cache;
-import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.hash.ClassStateHashCreator;
-import play.exceptions.RestartNeededException;
-import play.exceptions.UnexpectedException;
-import play.libs.IO;
-import play.vfs.VirtualFile;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,24 +16,40 @@ import java.security.CodeSource;
 import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+
+import play.Logger;
+import play.Play;
+import play.cache.Cache;
+import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.hash.ClassStateHashCreator;
+import play.exceptions.RestartNeededException;
+import play.exceptions.UnexpectedException;
+import play.libs.IO;
+import play.vfs.VirtualFile;
 
 /**
- * The application classLoader. 
- * Load the classes from the application Java sources files.
+ * The application classLoader. Load the classes from the application Java sources files.
  */
 public class ApplicationClassloader extends ClassLoader {
-
 
     private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
 
     /**
-     * A representation of the current state of the ApplicationClassloader.
-     * It gets a new value each time the state of the classloader changes.
+     * A representation of the current state of the ApplicationClassloader. It gets a new value each time the state of
+     * the classloader changes.
      */
     public ApplicationClassloaderState currentState = new ApplicationClassloaderState();
 
@@ -51,7 +58,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     public ProtectionDomain protectionDomain;
 
-    private final Object lock = new Object(); 
+    private final Object lock = new Object();
 
     public ApplicationClassloader() {
         super(ApplicationClassloader.class.getClassLoader());
@@ -78,8 +85,8 @@ public class ApplicationClassloader extends ClassLoader {
             return c;
         }
 
-        synchronized( lock ) {
-             // First check if it's an application Class
+        synchronized (lock) {
+            // First check if it's an application Class
             Class<?> applicationClass = loadApplicationClass(name);
             if (applicationClass != null) {
                 if (resolve) {
@@ -96,7 +103,7 @@ public class ApplicationClassloader extends ClassLoader {
 
         if (ApplicationClass.isClass(name)) {
             Class maybeAlreadyLoaded = findLoadedClass(name);
-            if(maybeAlreadyLoaded != null) {
+            if (maybeAlreadyLoaded != null) {
                 return maybeAlreadyLoaded;
             }
         }
@@ -149,7 +156,8 @@ public class ApplicationClassloader extends ClassLoader {
             }
             if (bc != null) {
                 applicationClass.enhancedByteCode = bc;
-                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0,
+                        applicationClass.enhancedByteCode.length, protectionDomain);
                 resolveClass(applicationClass.javaClass);
                 if (!applicationClass.isClass()) {
                     applicationClass.javaPackage = applicationClass.javaClass.getPackage();
@@ -163,7 +171,8 @@ public class ApplicationClassloader extends ClassLoader {
             }
             if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
                 applicationClass.enhance();
-                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0,
+                        applicationClass.enhancedByteCode.length, protectionDomain);
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 resolveClass(applicationClass.javaClass);
                 if (!applicationClass.isClass()) {
@@ -296,6 +305,9 @@ public class ApplicationClassloader extends ClassLoader {
 
     /**
      * Detect Java changes
+     * 
+     * @throws play.exceptions.RestartNeededException
+     *             Thrown if the application need to be restarted
      */
     public void detectChanges() throws RestartNeededException {
         // Now check for file modification
@@ -316,7 +328,7 @@ public class ApplicationClassloader extends ClassLoader {
         for (ApplicationClass applicationClass : modifiedWithDependencies) {
             if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
-                currentState = new ApplicationClassloaderState();//show others that we have changed..
+                currentState = new ApplicationClassloaderState();// show others that we have changed..
             } else {
                 int sigChecksum = applicationClass.sigChecksum;
                 applicationClass.enhance();
@@ -325,10 +337,10 @@ public class ApplicationClassloader extends ClassLoader {
                 }
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
-                currentState = new ApplicationClassloaderState();//show others that we have changed..
+                currentState = new ApplicationClassloaderState();// show others that we have changed..
             }
         }
-        
+
         if (!newDefinitions.isEmpty()) {
             Cache.clear();
             if (HotswapAgent.enabled) {
@@ -353,11 +365,11 @@ public class ApplicationClassloader extends ClassLoader {
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 if (!applicationClass.javaFile.exists()) {
                     Play.classes.classes.remove(applicationClass.name);
-                    currentState = new ApplicationClassloaderState();//show others that we have changed..
+                    currentState = new ApplicationClassloaderState();// show others that we have changed..
                 }
                 if (applicationClass.name.contains("$")) {
                     Play.classes.classes.remove(applicationClass.name);
-                    currentState = new ApplicationClassloaderState();//show others that we have changed..
+                    currentState = new ApplicationClassloaderState();// show others that we have changed..
                     // Ok we have to remove all classes from the same file ...
                     VirtualFile vf = applicationClass.javaFile;
                     for (ApplicationClass ac : Play.classes.all()) {
@@ -370,7 +382,7 @@ public class ApplicationClassloader extends ClassLoader {
             throw new RestartNeededException("Path has changed");
         }
     }
-    
+
     /**
      * Used to track change of the application sources path
      */
@@ -382,6 +394,7 @@ public class ApplicationClassloader extends ClassLoader {
 
     /**
      * Try to load all .java files found.
+     * 
      * @return The list of well defined Class
      */
     public List<Class> getAllClasses() {
@@ -450,13 +463,15 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return allClasses;
     }
-    
+
     private List<Class> allClasses;
     private Map<String, ApplicationClass> allClassesByNormalizedName;
 
     /**
      * Retrieve all application classes assignable to this class.
-     * @param clazz The superclass, or the interface.
+     * 
+     * @param clazz
+     *            The superclass, or the interface.
      * @return A list of class
      */
     public List<Class> getAssignableClasses(Class clazz) {
@@ -483,7 +498,9 @@ public class ApplicationClassloader extends ClassLoader {
 
     /**
      * Find a class in a case insensitive way
-     * @param name The class name.
+     * 
+     * @param name
+     *            The class name.
      * @return a class
      */
     public Class getClassIgnoreCase(String name) {
@@ -501,7 +518,9 @@ public class ApplicationClassloader extends ClassLoader {
 
     /**
      * Retrieve all application classes with a specific annotation.
-     * @param clazz The annotation class.
+     * 
+     * @param clazz
+     *            The annotation class.
      * @return A list of class
      */
     public List<Class> getAnnotatedClasses(Class<? extends Annotation> clazz) {
@@ -520,7 +539,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
-    
+
     private List<ApplicationClass> getAllClasses(VirtualFile path) {
         return getAllClasses(path, "");
     }

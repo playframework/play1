@@ -1,17 +1,22 @@
 package play.mvc.results;
 
+import static org.apache.commons.io.IOUtils.closeQuietly;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
+
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * 200 OK with application/octet-stream
@@ -30,9 +35,12 @@ public class RenderBinary extends Result {
     private String contentType;
 
     /**
-     * send a binary stream as the response
-     * @param is the stream to read from
-     * @param name the name to use as Content-Disposition attachment filename
+     * Send a binary stream as the response
+     * 
+     * @param is
+     *            the stream to read from
+     * @param name
+     *            the name to use as Content-Disposition attachment filename
      */
     public RenderBinary(InputStream is, String name) {
         this(is, name, false);
@@ -43,20 +51,30 @@ public class RenderBinary extends Result {
     }
 
     /**
-     * send a binary stream as the response
-     * @param is the stream to read from
-     * @param name the name to use as Content-Disposition attachment filename
-     * @param inline true to set the response Content-Disposition to inline
+     * Send a binary stream as the response
+     * 
+     * @param is
+     *            the stream to read from
+     * @param name
+     *            the name to use as Content-Disposition attachment filename
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     public RenderBinary(InputStream is, String name, boolean inline) {
         this(is, name, null, inline);
     }
 
     /**
-     * send a binary stream as the response
-     * @param is the stream to read from
-     * @param name the name to use as Content-Disposition attachment filename
-     * @param inline true to set the response Content-Disposition to inline
+     * Send a binary stream as the response
+     * 
+     * @param is
+     *            the stream to read from
+     * @param name
+     *            the name to use as Content-Disposition attachment filename
+     * @param contentType
+     *            The content type of the stream
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     public RenderBinary(InputStream is, String name, String contentType, boolean inline) {
         this.is = is;
@@ -64,7 +82,7 @@ public class RenderBinary extends Result {
         this.contentType = contentType;
         this.inline = inline;
     }
-    
+
     public RenderBinary(InputStream is, String name, long length, String contentType, boolean inline) {
         this.is = is;
         this.name = name;
@@ -83,26 +101,34 @@ public class RenderBinary extends Result {
     /**
      * Send a file as the response. Content-disposition is set to attachment.
      * 
-     * @param file readable file to send back
-     * @param name a name to use as Content-disposition's filename
+     * @param file
+     *            readable file to send back
+     * @param name
+     *            a name to use as Content-disposition's filename
      */
     public RenderBinary(File file, String name) {
         this(file, name, false);
     }
 
     /**
-     * Send a file as the response. 
-     * Content-disposition is set to attachment, name is taken from file's name
-     * @param file readable file to send back
+     * Send a file as the response. Content-disposition is set to attachment, name is taken from file's name
+     * 
+     * @param file
+     *            readable file to send back
      */
     public RenderBinary(File file) {
         this(file, file.getName(), true);
     }
 
     /**
-     * Send a file as the response. 
-     * Content-disposition is set to attachment, name is taken from file's name
-     * @param file readable file to send back
+     * Send a file as the response. Content-disposition is set to attachment, name is taken from file's name
+     * 
+     * @param file
+     *            readable file to send back
+     * @param name
+     *            a name to use as Content-disposition's filename
+     * @param inline
+     *            true to set the response Content-Disposition to inline
      */
     public RenderBinary(File file, String name, boolean inline) {
         if (file == null) {
@@ -138,12 +164,10 @@ public class RenderBinary extends Result {
     private void addContentDispositionHeader(Response response) throws UnsupportedEncodingException {
         if (name == null) {
             response.setHeader("Content-Disposition", dispositionType());
-        }
-        else if (canAsciiEncode(name)) {
+        } else if (canAsciiEncode(name)) {
             String contentDisposition = "%s; filename=\"%s\"";
             response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType(), name));
-        }
-        else {
+        } else {
             String encoding = getEncoding();
             String contentDisposition = "%1$s; filename*=" + encoding + "''%2$s; filename=\"%2$s\"";
             response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType(), encoder.encode(name, encoding)));
@@ -181,8 +205,7 @@ public class RenderBinary extends Result {
     private static void copyInputStreamAndClose(InputStream is, OutputStream out) throws IOException {
         try {
             IOUtils.copyLarge(is, out);
-        }
-        finally {
+        } finally {
             closeQuietly(is);
         }
     }

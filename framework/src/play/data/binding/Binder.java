@@ -1,22 +1,51 @@
 package play.data.binding;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+
 import play.Logger;
 import play.Play;
 import play.data.Upload;
-import play.data.binding.types.*;
+import play.data.binding.types.BinaryBinder;
+import play.data.binding.types.ByteArrayArrayBinder;
+import play.data.binding.types.ByteArrayBinder;
+import play.data.binding.types.CalendarBinder;
+import play.data.binding.types.DateBinder;
+import play.data.binding.types.DateTimeBinder;
+import play.data.binding.types.FileArrayBinder;
+import play.data.binding.types.FileBinder;
+import play.data.binding.types.LocaleBinder;
+import play.data.binding.types.UploadArrayBinder;
+import play.data.binding.types.UploadBinder;
 import play.data.validation.Validation;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
-
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.util.*;
-
 
 /**
  * The binder try to convert String values to Java objects.
@@ -48,9 +77,15 @@ public abstract class Binder {
      * 
      * E.g. @{code Binder.register(BigDecimal.class, new MyBigDecimalBinder());}
      * 
-     * NB! Do not forget to UNREGISTER your custom binder when applications is reloaded (most probably in method onApplicationStop()).
-     * Otherwise you will have a memory leak.
+     * NB! Do not forget to UNREGISTER your custom binder when applications is reloaded (most probably in method
+     * onApplicationStop()). Otherwise you will have a memory leak.
      * 
+     * @param clazz
+     *            The class to register
+     * @param typeBinder
+     *            The custom binder
+     * @param <T>
+     *            The Class type to register
      * @see #unregister(java.lang.Class)
      */
     public static <T> void register(Class<T> clazz, TypeBinder<T> typeBinder) {
@@ -59,6 +94,11 @@ public abstract class Binder {
 
     /**
      * Remove custom binder that was add with method #register(java.lang.Class, play.data.binding.TypeBinder)
+     * 
+     * @param clazz
+     *            The class to remove the custom binder
+     * @param <T>
+     *            The Class type to register
      */
     public static <T> void unregister(Class<T> clazz) {
         supportedTypes.remove(clazz);
@@ -88,6 +128,14 @@ public abstract class Binder {
 
     /**
      * Deprecated. Use bindBean() instead.
+     * 
+     * @param o
+     *            Object to bind
+     * @param name
+     *            Name of the object
+     * @param params
+     *            List of the parameters
+     * @return : The binding object
      */
     @Deprecated
     public static Object bind(Object o, String name, Map<String, String[]> params) {
@@ -106,7 +154,8 @@ public abstract class Binder {
         return bind(parentParamNode, name, clazz, type, annotations, null);
     }
 
-    public static Object bind(RootParamNode parentParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations, MethodAndParamInfo methodAndParamInfo) {
+    public static Object bind(RootParamNode parentParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations,
+            MethodAndParamInfo methodAndParamInfo) {
         ParamNode paramNode = parentParamNode.getChild(name, true);
 
         Object result = null;
@@ -136,7 +185,8 @@ public abstract class Binder {
             if (methodAndParamInfo != null) {
                 try {
                     Method method = methodAndParamInfo.method;
-                    Method defaultMethod = method.getDeclaringClass().getDeclaredMethod(method.getName() + "$default$" + methodAndParamInfo.parameterIndex);
+                    Method defaultMethod = method.getDeclaringClass()
+                            .getDeclaredMethod(method.getName() + "$default$" + methodAndParamInfo.parameterIndex);
                     return defaultMethod.invoke(methodAndParamInfo.objectInstance);
                 } catch (NoSuchMethodException ignore) {
                 } catch (Exception e) {
@@ -173,7 +223,6 @@ public abstract class Binder {
 
     }
 
-
     protected static Object internalBind(ParamNode paramNode, Class<?> clazz, Type type, BindingAnnotations bindingAnnotations) {
 
         if (paramNode == null) {
@@ -202,14 +251,16 @@ public abstract class Binder {
                 return bindCollection(clazz, type, paramNode, bindingAnnotations);
             }
 
-            Object directBindResult = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, paramNode.getFirstValue(clazz), clazz, type);
-            
+            Object directBindResult = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations,
+                    paramNode.getFirstValue(clazz), clazz, type);
+
             if (directBindResult != DIRECTBINDING_NO_RESULT) {
                 // we found a value/result when direct binding
                 return directBindResult;
             }
 
-            // Must do the default array-check after direct binding, since some custom-binders checks for specific arrays
+            // Must do the default array-check after direct binding, since some custom-binders checks for specific
+            // arrays
             if (clazz.isArray()) {
                 return bindArray(clazz, paramNode, bindingAnnotations);
             }
@@ -267,7 +318,8 @@ public abstract class Binder {
             for (int i = 0; i < size; i++) {
                 String thisValue = values[i];
                 try {
-                    Array.set(array, i - invalidItemsCount, directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, thisValue, componentType, componentType));
+                    Array.set(array, i - invalidItemsCount, directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations,
+                            thisValue, componentType, componentType));
                 } catch (Exception e) {
                     Logger.debug("Bad item #%s: %s", i, e);
                     invalidItemsCount++;
@@ -326,6 +378,13 @@ public abstract class Binder {
 
     /**
      * Invokes the plugins before using the internal bindBean.
+     * 
+     * @param rootParamNode
+     *            List of parameters
+     * @param name
+     *            The object name
+     * @param bean
+     *            the bean object
      */
     public static void bindBean(RootParamNode rootParamNode, String name, Object bean) {
 
@@ -348,6 +407,13 @@ public abstract class Binder {
 
     /**
      * Does NOT invoke plugins
+     * 
+     * @param paramNode
+     *            List of parameters
+     * @param bean
+     *            the bean object
+     * @param annotations
+     *            annotations associated with the object
      */
     public static void bindBean(ParamNode paramNode, Object bean, Annotation[] annotations) {
         internalBindBean(paramNode, bean, new BindingAnnotations(annotations));
@@ -407,7 +473,8 @@ public abstract class Binder {
 
         for (ParamNode child : paramNode.getAllChildren()) {
             try {
-                Object keyObject = directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, child.getName(), keyClass, keyClass);
+                Object keyObject = directBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, child.getName(), keyClass,
+                        keyClass);
                 Object valueObject = internalBind(child, valueClass, valueClass, bindingAnnotations);
                 if (valueObject == NO_BINDING || valueObject == MISSING) {
                     valueObject = null;
@@ -443,7 +510,7 @@ public abstract class Binder {
         Type componentType = String.class;
         if (type instanceof ParameterizedType) {
             componentType = ((ParameterizedType) type).getActualTypeArguments()[0];
-            if(componentType instanceof ParameterizedType) {
+            if (componentType instanceof ParameterizedType) {
                 componentClass = (Class) ((ParameterizedType) componentType).getRawType();
             } else {
                 componentClass = (Class) componentType;
@@ -479,10 +546,11 @@ public abstract class Binder {
             boolean hasMissing = false;
             for (int i = 0; i < values.length; i++) {
                 try {
-                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass, componentType);
-                    if ( value == DIRECTBINDING_NO_RESULT) {
-                        hasMissing  = true;
-                    } else { 
+                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass,
+                            componentType);
+                    if (value == DIRECTBINDING_NO_RESULT) {
+                        hasMissing = true;
+                    } else {
                         l.add(value);
                     }
                 } catch (Exception e) {
@@ -490,10 +558,10 @@ public abstract class Binder {
                     logBindingNormalFailure(paramNode, e); // TODO debug or error?
                 }
             }
-            if(hasMissing && l.size() == 0){
+            if (hasMissing && l.size() == 0) {
                 return MISSING;
             }
-            return l;  
+            return l;
         }
 
         Collection r = (Collection) createNewInstance(clazz);
@@ -550,21 +618,54 @@ public abstract class Binder {
     }
 
     /**
+     * Bind a object
+     * 
+     * @param value
+     *            value to bind
+     * @param clazz
+     *            class of the object
      * @return The binding object
+     * @throws Exception
+     *             if problem occurred during binding
      */
     public static Object directBind(String value, Class<?> clazz) throws Exception {
         return directBind(null, value, clazz, null);
     }
 
     /**
+     * Bind a object
+     * 
+     * @param name
+     *            name of the object
+     * @param annotations
+     *            annotation on the object
+     * @param value
+     *            Value to bind
+     * @param clazz
+     *            The class of the object
+     * 
      * @return The binding object
+     * @throws Exception
+     *             if problem occurred during binding
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         return directBind(name, annotations, value, clazz, null);
     }
 
     /**
+     * Bind a object
+     * 
+     * @param annotations
+     *            annotation on the object
+     * @param value
+     *            value to bind
+     * @param clazz
+     *            class of the object
+     * @param type
+     *            type to bind
      * @return The binding object
+     * @throws Exception
+     *             if problem occurred during binding
      */
     public static Object directBind(Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         return directBind(null, annotations, value, clazz, type);
@@ -572,13 +673,25 @@ public abstract class Binder {
 
     /**
      * This method calls the user's defined binders prior to bind simple type
-     *
+     * 
+     * @param name
+     *            name of the object
+     * @param annotations
+     *            annotation on the object
+     * @param value
+     *            value to bind
+     * @param clazz
+     *            class of the object
+     * @param type
+     *            type to bind
      * @return The binding object
+     * @throws Exception
+     *             if problem occurred during binding
      */
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         // calls the direct binding and returns null if no value could be resolved..
         Object r = internalDirectBind(name, annotations, value, clazz, type);
-        if ( r == DIRECTBINDING_NO_RESULT) {
+        if (r == DIRECTBINDING_NO_RESULT) {
             return null;
         } else {
             return r;
@@ -587,7 +700,8 @@ public abstract class Binder {
 
     // If internalDirectBind was not able to bind it, it returns a special variable instance: DIRECTBIND_MISSING
     // Needs this because sometimes we need to know if no value was returned..
-    private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
+    private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type)
+            throws Exception {
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (annotations != null) {

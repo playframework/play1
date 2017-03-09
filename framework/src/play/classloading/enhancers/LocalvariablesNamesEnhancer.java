@@ -1,13 +1,21 @@
 package play.classloading.enhancers;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import javassist.CtClass;
 import javassist.CtMethod;
-import javassist.bytecode.*;
+import javassist.bytecode.Bytecode;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.CodeIterator;
+import javassist.bytecode.LocalVariableAttribute;
+import javassist.bytecode.Opcode;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
-
-import java.lang.reflect.Field;
-import java.util.*;
 
 /**
  * Track names of local variables ...
@@ -21,7 +29,8 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         CtClass ctClass = makeClass(applicationClass);
-        if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName())) && !ctClass.getName().matches("^controllers\\..*\\$class$")) {
+        if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName()))
+                && !ctClass.getName().matches("^controllers\\..*\\$class$")) {
             return;
         }
 
@@ -71,7 +80,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     CodeIterator codeIterator = codeAttribute.iterator();
                     codeIterator.move(pc);
                     pc = codeIterator.next();
-                    
+
                     Bytecode b = makeBytecodeForLVStore(method, localVariableAttribute.signature(i), name, localVariableAttribute.index(i));
                     codeIterator.insert(pc, b.get());
                     codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
@@ -95,9 +104,12 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
                         // Si c'est un store de la variable en cours d'examination
                         // et que c'est dans la frame d'utilisation de cette variable on trace l'affectation.
-                        // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
-                        //  mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à localVariableAttribute.startPc(i))
-                        if (varNumber == localVariableAttribute.index(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
+                        // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première
+                        // affectation
+                        // mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à
+                        // localVariableAttribute.startPc(i))
+                        if (varNumber == localVariableAttribute.index(i)
+                                && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
                             b = makeBytecodeForLVStore(method, localVariableAttribute.signature(i), aliasedName, varNumber);
                             codeIterator.insertEx(b.get());
                             codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
@@ -120,30 +132,31 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         ctClass.defrost();
 
     }
-    
+
     static Bytecode makeBytecodeForLVStore(CtMethod method, String sig, String name, int slot) {
         Bytecode b = new Bytecode(method.getMethodInfo().getConstPool());
         b.addLdc(name);
-        if("I".equals(sig) || "B".equals(sig) || "C".equals(sig) || "S".equals(sig) || "Z".equals(sig))
+        if ("I".equals(sig) || "B".equals(sig) || "C".equals(sig) || "S".equals(sig) || "Z".equals(sig))
             b.addIload(slot);
-        else if("F".equals(sig))
+        else if ("F".equals(sig))
             b.addFload(slot);
-        else if("J".equals(sig))
+        else if ("J".equals(sig))
             b.addLload(slot);
-        else if("D".equals(sig))
+        else if ("D".equals(sig))
             b.addDload(slot);
         else
             b.addAload(slot);
-        
+
         String localVarDescriptor = sig;
-        if(!"B".equals(sig) && !"C".equals(sig) && !"D".equals(sig) && !"F".equals(sig) &&
-           !"I".equals(sig) && !"J".equals(sig) && !"S".equals(sig) && !"Z".equals(sig))
+        if (!"B".equals(sig) && !"C".equals(sig) && !"D".equals(sig) && !"F".equals(sig) && !"I".equals(sig) && !"J".equals(sig)
+                && !"S".equals(sig) && !"Z".equals(sig))
             localVarDescriptor = "Ljava/lang/Object;";
 
         Logger.trace("for variable '%s' in slot=%s, sig was '%s' and is now '%s'", name, slot, sig, localVarDescriptor);
 
-        b.addInvokestatic("play.classloading.enhancers.LocalvariablesNamesEnhancer$LocalVariablesNamesTracer", "addVariable", "(Ljava/lang/String;"+localVarDescriptor+")V");
-        
+        b.addInvokestatic("play.classloading.enhancers.LocalvariablesNamesEnhancer$LocalVariablesNamesTracer", "addVariable",
+                "(Ljava/lang/String;" + localVarDescriptor + ")V");
+
         return b;
     }
 
@@ -252,19 +265,20 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         public static Stack<Map<String, Object>> getLocalVariablesStateBeforeAwait() {
             Stack<Map<String, Object>> state = localVariables.get();
-            // must clear the ThreadLocal to prevent destroying the state when exit() is called due to continuations-suspend
+            // must clear the ThreadLocal to prevent destroying the state when exit() is called due to
+            // continuations-suspend
             localVariables.set(new Stack<Map<String, Object>>());
             return state;
         }
 
         public static void setLocalVariablesStateAfterAwait(Stack<Map<String, Object>> state) {
-            if (state==null) {
+            if (state == null) {
                 state = new Stack<>();
             }
-            localVariables.set( state );
+            localVariables.set(state);
         }
     }
-    
+
     static final Map<Integer, Integer> storeByCode = new HashMap<>();
 
     /*
@@ -305,11 +319,15 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     /**
      * Debug utility. Display a byte code op as plain text.
+     * 
+     * @param op
+     *            The given byte code
      */
     public static void printOp(int op) {
         try {
             for (Field f : Opcode.class.getDeclaredFields()) {
-                if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) && java.lang.reflect.Modifier.isPublic(f.getModifiers()) && f.getInt(null) == op) {
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers()) && java.lang.reflect.Modifier.isPublic(f.getModifiers())
+                        && f.getInt(null) == op) {
                     System.out.println(op + " " + f.getName());
                 }
             }

@@ -215,6 +215,10 @@ public class OpenID {
 
     /**
      * Normalize the given openid as a standard openid
+     * 
+     * @param openID
+     *            the given openid
+     * @return The normalize openID
      */
     public static String normalize(String openID) {
         openID = openID.trim();
@@ -239,6 +243,8 @@ public class OpenID {
 
     /**
      * Is the current request an authentication response from the OP ?
+     * 
+     * @return true if the current request an authentication response
      */
     public static boolean isAuthenticationResponse() {
         return Params.current().get("openid.mode") != null;

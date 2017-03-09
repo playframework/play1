@@ -1,11 +1,14 @@
 package play.vfs;
 
-import org.apache.commons.io.IOUtils;
-import play.Play;
-import play.exceptions.UnexpectedException;
-import play.libs.IO;
+import static org.apache.commons.io.IOUtils.closeQuietly;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.Channel;
 import java.security.AccessControlException;
 import java.util.ArrayList;
@@ -16,7 +19,11 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import org.apache.commons.io.IOUtils;
+
+import play.Play;
+import play.exceptions.UnexpectedException;
+import play.libs.IO;
 
 /**
  * The VFS used by Play!
@@ -74,7 +81,8 @@ public class VirtualFile {
         for (VirtualFile vf : Play.roots) {
             if (vf.realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
                 String modulePathName = vf.getName();
-                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-")) : modulePathName;
+                String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
+                        : modulePathName;
                 return "{module:" + moduleName + "}";
             }
         }
@@ -157,8 +165,7 @@ public class VirtualFile {
             FileInputStream fis = new FileInputStream(realFile);
             try {
                 return fis.getChannel();
-            }
-            finally {
+            } finally {
                 closeQuietly(fis);
             }
         } catch (FileNotFoundException e) {
@@ -179,8 +186,7 @@ public class VirtualFile {
             InputStream is = inputstream();
             try {
                 return IO.readContentAsString(is);
-            }
-            finally {
+            } finally {
                 closeQuietly(is);
             }
         } catch (Exception e) {
@@ -205,8 +211,7 @@ public class VirtualFile {
             InputStream is = inputstream();
             try {
                 return IOUtils.toByteArray(is);
-            }
-            finally {
+            } finally {
                 closeQuietly(is);
             }
         } catch (Exception e) {
@@ -235,19 +240,19 @@ public class VirtualFile {
         Pattern pattern = Pattern.compile("^(\\{(.+?)\\})?(.*)$");
         Matcher matcher = pattern.matcher(relativePath);
 
-        if(matcher.matches()) {
+        if (matcher.matches()) {
             String path = matcher.group(3);
             String module = matcher.group(2);
-            if(module == null || module.equals("?") || module.equals("")) {
+            if (module == null || module.equals("?") || module.equals("")) {
                 return new VirtualFile(Play.applicationPath).child(path);
             } else {
-                if(module.equals("play")) {
+                if (module.equals("play")) {
                     return new VirtualFile(Play.frameworkPath).child(path);
                 }
-                if(module.startsWith("module:")){
+                if (module.startsWith("module:")) {
                     module = module.substring("module:".length());
-                    for(Entry<String, VirtualFile> entry : Play.modules.entrySet()) {
-                        if(entry.getKey().equals(module))
+                    for (Entry<String, VirtualFile> entry : Play.modules.entrySet()) {
+                        if (entry.getKey().equals(module))
                             return entry.getValue().child(path);
                     }
                 }
@@ -259,12 +264,14 @@ public class VirtualFile {
 
     /**
      * Method to check if the name really match (very useful on system without case sensibility (like windows))
+     * 
      * @param fileName
+     *            The given file name
      * @return true if match
      */
     public boolean matchName(String fileName) {
         // we need to check the name case to be sure we is not conflict with a file with the same name
-        String canonicalName = null; 
+        String canonicalName = null;
         try {
             canonicalName = this.realFile.getCanonicalFile().getName();
         } catch (IOException e) {

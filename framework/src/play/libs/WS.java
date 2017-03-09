@@ -63,16 +63,14 @@ public class WS extends PlayPlugin {
     }
 
     /**
-     * Singleton configured with default encoding - this one is used when
-     * calling static method on WS.
+     * Singleton configured with default encoding - this one is used when calling static method on WS.
      */
     private static WSWithEncoding wsWithDefaultEncoding;
 
     /**
-     * Internal class exposing all the methods previously exposed by WS. This
-     * impl has information about encoding. When calling original static methods
-     * on WS, then a singleton of WSWithEncoding is called - configured with
-     * default encoding. This makes this encoding-enabling backward compatible
+     * Internal class exposing all the methods previously exposed by WS. This impl has information about encoding. When
+     * calling original static methods on WS, then a singleton of WSWithEncoding is called - configured with default
+     * encoding. This makes this encoding-enabling backward compatible
      */
     public static class WSWithEncoding {
         public final String encoding;
@@ -108,14 +106,12 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Build a WebService Request with the given URL. This object support
-         * chaining style programming for adding params, file, headers to
-         * requests.
+         * Build a WebService Request with the given URL. This object support chaining style programming for adding
+         * params, file, headers to requests.
          * 
          * @param url
          *            of the request
-         * @return a WSRequest on which you can add params, file headers using a
-         *         chaining style programming.
+         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
          */
         public WSRequest url(String url) {
             init();
@@ -123,17 +119,14 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Build a WebService Request with the given URL. This constructor will
-         * format url using params passed in arguments. This object support
-         * chaining style programming for adding params, file, headers to
-         * requests.
+         * Build a WebService Request with the given URL. This constructor will format url using params passed in
+         * arguments. This object support chaining style programming for adding params, file, headers to requests.
          * 
          * @param url
          *            to format using the given params.
          * @param params
          *            the params passed to format the URL.
-         * @return a WSRequest on which you can add params, file headers using a
-         *         chaining style programming.
+         * @return a WSRequest on which you can add params, file headers using a chaining style programming.
          */
         public WSRequest url(String url, String... params) {
             Object[] encodedParams = new String[params.length];
@@ -209,29 +202,26 @@ public class WS extends PlayPlugin {
     }
 
     /**
-     * Build a WebService Request with the given URL. This object support
-     * chaining style programming for adding params, file, headers to requests.
+     * Build a WebService Request with the given URL. This object support chaining style programming for adding params,
+     * file, headers to requests.
      * 
      * @param url
      *            of the request
-     * @return a WSRequest on which you can add params, file headers using a
-     *         chaining style programming.
+     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
     public static WSRequest url(String url) {
         return wsWithDefaultEncoding.url(url);
     }
 
     /**
-     * Build a WebService Request with the given URL. This constructor will
-     * format url using params passed in arguments. This object support chaining
-     * style programming for adding params, file, headers to requests.
+     * Build a WebService Request with the given URL. This constructor will format url using params passed in arguments.
+     * This object support chaining style programming for adding params, file, headers to requests.
      * 
      * @param url
      *            to format using the given params.
      * @param params
      *            the params passed to format the URL.
-     * @return a WSRequest on which you can add params, file headers using a
-     *         chaining style programming.
+     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
     public static WSRequest url(String url, String... params) {
         return wsWithDefaultEncoding.url(url, params);
@@ -270,7 +260,7 @@ public class WS extends PlayPlugin {
         public boolean followRedirects = true;
 
         /**
-         * timeout: value in seconds
+         * Timeout: value in seconds
          */
         public Integer timeout = 60;
 
@@ -293,6 +283,10 @@ public class WS extends PlayPlugin {
 
         /**
          * Sets the virtual host to use in this request
+         * 
+         * @param virtualHost
+         *            The given virtual host
+         * @return the WSRequest
          */
         public WSRequest withVirtualHost(String virtualHost) {
             this.virtualHost = virtualHost;
@@ -303,6 +297,7 @@ public class WS extends PlayPlugin {
          * Add a MimeType to the web service request.
          * 
          * @param mimeType
+         *            the given mimeType
          * @return the WSRequest for chaining.
          */
         public WSRequest mimeType(String mimeType) {
@@ -311,11 +306,14 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * define client authentication for a server host provided credentials
-         * will be used during the request
+         * Define client authentication for a server host provided credentials will be used during the request
          * 
          * @param username
+         *            Login
          * @param password
+         *            Password
+         * @param scheme
+         *            The given Scheme
          * @return the WSRequest for chaining.
          */
         public WSRequest authenticate(String username, String password, Scheme scheme) {
@@ -326,11 +324,13 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * define client authentication for a server host provided credentials
-         * will be used during the request the basic scheme will be used
+         * define client authentication for a server host provided credentials will be used during the request the basic
+         * scheme will be used
          * 
          * @param username
+         *            Login
          * @param password
+         *            Password
          * @return the WSRequest for chaining.
          */
         public WSRequest authenticate(String username, String password) {
@@ -338,7 +338,14 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Sign the request for do a call to a server protected by oauth
+         * Sign the request for do a call to a server protected by OAuth
+         * 
+         * @param oauthInfo
+         *            OAuth Information
+         * @param token
+         *            The OAuth token
+         * @param secret
+         *            The secret key
          * 
          * @return the WSRequest for chaining.
          */
@@ -357,6 +364,8 @@ public class WS extends PlayPlugin {
         /**
          * Indicate if the WS should continue when hitting a 301 or 302
          * 
+         * @param value
+         *            Indicate if follow or not follow redirects
          * @return the WSRequest for chaining.
          */
         public WSRequest followRedirects(boolean value) {
@@ -365,8 +374,8 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Set the value of the request timeout, i.e. the number of seconds
-         * before cutting the connection - default to 60 seconds
+         * Set the value of the request timeout, i.e. the number of seconds before cutting the connection - default to
+         * 60 seconds
          * 
          * @param timeout
          *            the timeout value, e.g. "30s", "1min"
@@ -381,6 +390,7 @@ public class WS extends PlayPlugin {
          * Add files to request. This will only work with POST or PUT.
          * 
          * @param files
+         *            list of files
          * @return the WSRequest for chaining.
          */
         public WSRequest files(File... files) {
@@ -389,10 +399,10 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add fileParams aka File and Name parameter to the request. This will
-         * only work with POST or PUT.
+         * Add fileParams aka File and Name parameter to the request. This will only work with POST or PUT.
          * 
          * @param fileParams
+         *            The fileParams list
          * @return the WSRequest for chaining.
          */
         public WSRequest files(FileParam... fileParams) {
@@ -404,6 +414,7 @@ public class WS extends PlayPlugin {
          * Add the given body to the request.
          * 
          * @param body
+         *            The request body
          * @return the WSRequest for chaining.
          */
         public WSRequest body(Object body) {
@@ -448,6 +459,7 @@ public class WS extends PlayPlugin {
          * Use the provided headers when executing request.
          * 
          * @param headers
+         *            The request headers
          * @return the WSRequest for chaining.
          */
         public WSRequest headers(Map<String, String> headers) {
@@ -456,10 +468,12 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add parameters to request. If POST or PUT, parameters are passed in
-         * body using x-www-form-urlencoded if alone, or form-data if there is
-         * files too. For any other method, those params are appended to the
+         * Add parameters to request. If POST or PUT, parameters are passed in body using x-www-form-urlencoded if
+         * alone, or form-data if there is files too. For any other method, those params are appended to the
          * queryString.
+         * 
+         * @param parameters
+         *            The request parameters
          * 
          * @return the WSRequest for chaining.
          */
@@ -469,10 +483,12 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * Add parameters to request. If POST or PUT, parameters are passed in
-         * body using x-www-form-urlencoded if alone, or form-data if there is
-         * files too. For any other method, those params are appended to the
+         * Add parameters to request. If POST or PUT, parameters are passed in body using x-www-form-urlencoded if
+         * alone, or form-data if there is files too. For any other method, those params are appended to the
          * queryString.
+         * 
+         * @param parameters
+         *            The request parameters
          * 
          * @return the WSRequest for chaining.
          */
@@ -481,66 +497,130 @@ public class WS extends PlayPlugin {
             return this;
         }
 
-        /** Execute a GET request synchronously. */
+        /**
+         * Execute a GET request synchronously.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse get();
 
-        /** Execute a GET request asynchronously. */
+        /**
+         * Execute a GET request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> getAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a PATCH request. */
+        /**
+         * Execute a PATCH request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse patch();
 
-        /** Execute a PATCH request asynchronously. */
+        /**
+         * Execute a PATCH request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> patchAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a POST request. */
+        /**
+         * Execute a POST request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse post();
 
-        /** Execute a POST request asynchronously. */
+        /**
+         * Execute a POST request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a PUT request. */
+        /**
+         * Execute a PUT request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse put();
 
-        /** Execute a PUT request asynchronously. */
+        /**
+         * Execute a PUT request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a DELETE request. */
+        /**
+         * Execute a DELETE request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse delete();
 
-        /** Execute a DELETE request asynchronously. */
+        /**
+         * Execute a DELETE request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a OPTIONS request. */
+        /**
+         * Execute a OPTIONS request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse options();
 
-        /** Execute a OPTIONS request asynchronously. */
+        /**
+         * Execute a OPTIONS request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a HEAD request. */
+        /**
+         * Execute a HEAD request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse head();
 
-        /** Execute a HEAD request asynchronously. */
+        /**
+         * Execute a HEAD request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
-        /** Execute a TRACE request. */
+        /**
+         * Execute a TRACE request.
+         * 
+         * @return The HTTP response
+         */
         public abstract HttpResponse trace();
 
-        /** Execute a TRACE request asynchronously. */
+        /**
+         * Execute a TRACE request asynchronously.
+         * 
+         * @return The HTTP response
+         */
         public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
@@ -713,8 +793,7 @@ public class WS extends PlayPlugin {
         /**
          * Parse the response string as a query string.
          * 
-         * @return The parameters as a Map. Return an empty map if the response
-         *         is not formed as a query string.
+         * @return The parameters as a Map. Return an empty map if the response is not formed as a query string.
          */
         public Map<String, String> getQueryString() {
             Map<String, String> result = new HashMap<>();
@@ -733,8 +812,8 @@ public class WS extends PlayPlugin {
         /**
          * get the response as a stream
          * <p>
-         * + this method can only be called onced because async implementation
-         * does not allow it to be called + multiple times +
+         * + this method can only be called onced because async implementation does not allow it to be called + multiple
+         * times +
          * </p>
          * 
          * @return an inputstream

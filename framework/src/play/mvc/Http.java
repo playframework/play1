@@ -124,12 +124,10 @@ public class Http {
     public static class Cookie implements Serializable {
 
         /**
-         * When creating cookie without specifying domain, this value is used.
-         * Can be configured using the property
+         * When creating cookie without specifying domain, this value is used. Can be configured using the property
          * 'application.defaultCookieDomain' in application.conf.
          *
-         * This feature can be used to allow sharing session/cookies between
-         * multiple sub domains.
+         * This feature can be used to allow sharing session/cookies between multiple sub domains.
          */
         public static String defaultDomain = null;
 
@@ -188,8 +186,7 @@ public class Http {
          * URL path (excluding scheme, host and port), starting with '/'<br>
          * 
          * <b>Example:</b><br>
-         * With this full URL <code>http://localhost:9000/path0/path1</code>
-         * <br>
+         * With this full URL <code>http://localhost:9000/path0/path1</code> <br>
          * =&gt; <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
@@ -210,8 +207,8 @@ public class Http {
          */
         public String contentType;
         /**
-         * This is the encoding used to decode this request. If encoding-info is
-         * not found in request, then Play.defaultWebEncoding is used
+         * This is the encoding used to decode this request. If encoding-info is not found in request, then
+         * Play.defaultWebEncoding is used
          */
         public String encoding = Play.defaultWebEncoding;
         /**
@@ -304,11 +301,10 @@ public class Http {
         public final Scope.Params params = new Scope.Params();
 
         /**
-         * Deprecate the default constructor to encourage the use of
-         * createRequest() when creating new requests.
+         * Deprecate the default constructor to encourage the use of createRequest() when creating new requests.
          *
-         * Cannot hide it with protected because we have to be backward
-         * compatible with modules - ie PlayGrizzlyAdapter.java
+         * Cannot hide it with protected because we have to be backward compatible with modules - ie
+         * PlayGrizzlyAdapter.java
          */
         @Deprecated
         public Request() {
@@ -317,9 +313,37 @@ public class Http {
         }
 
         /**
-         * All creation / initiating of new requests should use this method. The
-         * purpose of this is to "show" what is needed when creating new
-         * Requests.
+         * All creation / initiating of new requests should use this method. The purpose of this is to "show" what is
+         * needed when creating new Requests.
+         * 
+         * @param _remoteAddress
+         *            The remote IP address
+         * @param _method
+         *            the Method
+         * @param _path
+         *            path
+         * @param _querystring
+         *            The query String
+         * @param _contentType
+         *            The content Type
+         * @param _body
+         *            The request body
+         * @param _url
+         *            The request URL
+         * @param _host
+         *            The request host
+         * @param _isLoopback
+         *            Indicate if the request comes from loopback interface
+         * @param _port
+         *            The request port
+         * @param _domain
+         *            The request domain
+         * @param _secure
+         *            Indicate is request is secure or not
+         * @param _headers
+         *            The request headers
+         * @param _cookies
+         *            The request cookies
          * 
          * @return the newly created Request object
          */
@@ -394,8 +418,8 @@ public class Http {
                 }
             }
 
-            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").toLowerCase().equals("true") && this.host != null
-                    && !this.host.equals(_host)) {
+            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").toLowerCase().equals("true")
+                    && this.host != null && !this.host.equals(_host)) {
                 if (this.host.contains(":")) {
                     String[] hosts = this.host.split(":");
                     this.port = Integer.parseInt(hosts[1]);
@@ -452,8 +476,8 @@ public class Http {
         }
 
         /**
-         * Automatically resolve request format from the Accept header (in this
-         * order : html &gt; xml &gt; json &gt; text)
+         * Automatically resolve request format from the Accept header (in this order : html &gt; xml &gt; json &gt;
+         * text)
          */
         public void resolveFormat() {
 
@@ -513,8 +537,9 @@ public class Http {
         }
 
         /**
-         * This request was sent by an Ajax framework. (rely on the
-         * X-Requested-With header).
+         * This request was sent by an Ajax framework. (rely on the X-Requested-With header).
+         * 
+         * @return True is the request is an Ajax, false otherwise
          */
         public boolean isAjax() {
             if (!headers.containsKey("x-requested-with")) {
@@ -541,12 +566,10 @@ public class Http {
         }
 
         /**
-         * Return the languages requested by the browser, ordered by preference
-         * (preferred first). If no Accept-Language header is present, an empty
-         * list is returned.
+         * Return the languages requested by the browser, ordered by preference (preferred first). If no Accept-Language
+         * header is present, an empty list is returned.
          *
-         * @return Language codes in order of preference, e.g.
-         *         "en-us,en-gb,en,de".
+         * @return Language codes in order of preference, e.g. "en-us,en-gb,en,de".
          */
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
@@ -727,9 +750,11 @@ public class Http {
          * Set a new cookie that will expire in (current) + duration
          * 
          * @param name
+         *            the cookie name
          * @param value
+         *            The cookie value
          * @param duration
-         *            Ex: 3d
+         *            the cookie duration (Ex: 3d)
          */
         public void setCookie(String name, String value, String duration) {
             setCookie(name, value, null, "/", Time.parseDuration(duration), false);
@@ -779,8 +804,13 @@ public class Http {
         /**
          * Add cache-control headers
          * 
+         * @param etag
+         *            the Etag value
+         * 
          * @param duration
-         *            Ex: 3h
+         *            the cache duration (Ex: 3h)
+         * @param lastModified
+         *            The last modified date
          */
         public void cacheFor(String etag, String duration, long lastModified) {
             int maxAge = Time.parseDuration(duration);
@@ -790,53 +820,41 @@ public class Http {
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          */
         public void accessControl(String allowOrigin) {
             accessControl(allowOrigin, null, false);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          * @param allowCredentials
-         *            Let the browser send the cookies when doing a x-domain
-         *            request. Only respected by the browser if allowOrigin !=
-         *            "*"
+         *            Let the browser send the cookies when doing a x-domain request. Only respected by the browser if
+         *            allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, boolean allowCredentials) {
             accessControl(allowOrigin, null, allowCredentials);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          * @param allowMethods
-         *            a comma separated list of HTTP methods allowed, or null
-         *            for all.
+         *            a comma separated list of HTTP methods allowed, or null for all.
          * @param allowCredentials
-         *            Let the browser send the cookies when doing a x-domain
-         *            request. Only respected by the browser if allowOrigin !=
-         *            "*"
+         *            Let the browser send the cookies when doing a x-domain request. Only respected by the browser if
+         *            allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, String allowMethods, boolean allowCredentials) {
             setHeader("Access-Control-Allow-Origin", allowOrigin);
