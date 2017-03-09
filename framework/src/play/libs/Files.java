@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -14,6 +17,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import play.Logger;
 import play.exceptions.UnexpectedException;
 
 /**
@@ -30,6 +34,33 @@ public class Files {
     public static final char ILLEGAL_FILENAME_CHARS_REPLACE = '_';
 
     /**
+     * Indicate if two file refers to the same one
+     * 
+     * @param a
+     *            First file to compare
+     * @param b
+     *            Second file to compare
+     * @return true is file are the same
+     */
+    public static boolean isSameFile(File a, File b) {
+        if (a != null && b != null) {
+            Path aPath = null;
+            Path bPath = null;
+            try {
+                aPath = Paths.get(a.getCanonicalPath());
+                bPath = Paths.get(b.getCanonicalPath());
+                return java.nio.file.Files.isSameFile(aPath, bPath);
+            } catch (NoSuchFileException e) {
+                // As the file may not exist, we only compare path
+                return 0 == aPath.compareTo(bPath);
+            } catch (Exception e) {
+                Logger.error(e, "Cannot get canonical path from files");
+            }
+        }
+        return false;
+    }
+
+    /**
      * Just copy a file
      * 
      * @param from
@@ -38,7 +69,7 @@ public class Files {
      *            destination file
      */
     public static void copy(File from, File to) {
-        if (from.getAbsolutePath().equals(to.getAbsolutePath())) {
+        if (isSameFile(from, to)) {
             return;
         }
 
