@@ -70,11 +70,18 @@ public class Java {
 
     /**
      * Try to discover what is hidden under a FutureTask (hack)
+     * <p>
+     * Field sync first, if not present will try field callable
+     * </p>
+     * 
+     * @param futureTask
+     *            The given tack
+     * @return Field sync first, if not present will try field callable
      */
     public static Object extractUnderlyingCallable(FutureTask<?> futureTask) {
         try {
             Object callable = null;
-            // Try to search for the Filed sync first, if not present will try filed callable
+            // Try to search for the Field sync first, if not present will try field callable
             try {
                 Field syncField = FutureTask.class.getDeclaredField("sync");
                 syncField.setAccessible(true);
@@ -109,6 +116,7 @@ public class Java {
      *            The method name
      * @return The result
      * @throws java.lang.Exception
+     *             if problem occurred during invoking
      */
     public static Object invokeStatic(Class<?> clazz, String method) throws Exception {
         return invokeStatic(clazz, method, new Object[0]);
@@ -129,6 +137,7 @@ public class Java {
      *            Arguments
      * @return The result
      * @throws java.lang.Exception
+     *             if problem occurred during invoking
      */
     public static Object invokeStatic(Class<?> clazz, String method, Object... args) throws Exception {
         Class[] types = new Class[args.length];
@@ -166,7 +175,6 @@ public class Java {
     }
 
     public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
-
         Class invokedClass = null;
         List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
         if (assignableClasses.size() == 0) {
@@ -204,6 +212,12 @@ public class Java {
 
     /**
      * Retrieve parameter names of a method
+     * 
+     * @param method
+     *            The given method
+     * @return Array of parameter names
+     * @throws Exception
+     *             if problem occurred during invoking
      */
     public static String[] parameterNames(Method method) throws Exception {
         Parameter[] parameters = method.getParameters();

@@ -1,19 +1,40 @@
 package play.libs.ws;
 
-import com.ning.http.client.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.net.ssl.SSLContext;
+
+import org.apache.commons.lang.NotImplementedException;
+
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
+import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
+import com.ning.http.client.Response;
 import com.ning.http.client.multipart.ByteArrayPart;
 import com.ning.http.client.multipart.FilePart;
 import com.ning.http.client.multipart.Part;
+
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
-import org.apache.commons.lang.NotImplementedException;
 import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
@@ -23,16 +44,6 @@ import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
-
-import javax.net.ssl.SSLContext;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.*;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -78,7 +89,7 @@ public class WSAsync implements WSImpl {
             try {
                 proxyPortInt = Integer.parseInt(proxyPort);
             } catch (NumberFormatException e) {
-                Logger.error(e, 
+                Logger.error(e,
                         "Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.",
                         proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
@@ -136,8 +147,10 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * Returns the url but removed the queryString-part of it The
-         * QueryString-info is later added with addQueryString()
+         * Returns the URL but removed the queryString-part of it The QueryString-info is later added with
+         * addQueryString()
+         * 
+         * @return The URL without the queryString-part
          */
         protected String getUrlWithoutQueryString() {
             int i = url.indexOf('?');
@@ -150,6 +163,9 @@ public class WSAsync implements WSImpl {
 
         /**
          * Adds the queryString-part of the url to the BoundRequestBuilder
+         * 
+         * @param requestBuilder
+         *            : The request buider to add the queryString-part
          */
         protected void addQueryString(BoundRequestBuilder requestBuilder) {
 
@@ -261,7 +277,7 @@ public class WSAsync implements WSImpl {
             return execute(prepareGet());
         }
 
-        /** Execute a PATCH request.*/
+        /** Execute a PATCH request. */
         @Override
         public HttpResponse patch() {
             this.type = "PATCH";
@@ -272,13 +288,15 @@ public class WSAsync implements WSImpl {
                 throw new RuntimeException(e);
             }
         }
-        /** Execute a PATCH request asynchronously.*/
+
+        /** Execute a PATCH request asynchronously. */
         @Override
         public Promise<HttpResponse> patchAsync() {
             this.type = "PATCH";
             sign();
             return execute(preparePatch());
         }
+
         /** Execute a POST request. */
         @Override
         public HttpResponse post() {
@@ -582,9 +600,8 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * Sets the resolved Content-type - This is added as Content-type-header
-         * to AHC if ser has not specified Content-type or mimeType manually
-         * (Cannot add it directly to this.header since this cause problem when
+         * Sets the resolved Content-type - This is added as Content-type-header to AHC if ser has not specified
+         * Content-type or mimeType manually (Cannot add it directly to this.header since this cause problem when
          * Request-object is used multiple times with first GET, then POST)
          */
         private void setResolvedContentType(String contentType) {
@@ -592,9 +609,8 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * If generatedContentType is present AND if Content-type header is not
-         * already present, add generatedContentType as Content-Type to headers
-         * in requestBuilder
+         * If generatedContentType is present AND if Content-type header is not already present, add
+         * generatedContentType as Content-Type to headers in requestBuilder
          */
         private void addGeneratedContentType(BoundRequestBuilder requestBuilder) {
             if (!headers.containsKey("Content-Type") && generatedContentType != null) {
@@ -612,16 +628,17 @@ public class WSAsync implements WSImpl {
         private Response response;
 
         /**
-         * you shouldnt have to create an HttpResponse yourself
+         * You shouldn't have to create an HttpResponse yourself
          * 
          * @param response
+         *            The given response
          */
         public HttpAsyncResponse(Response response) {
             this.response = response;
         }
 
         /**
-         * the HTTP status code
+         * The HTTP status code
          * 
          * @return the status code of the http response
          */

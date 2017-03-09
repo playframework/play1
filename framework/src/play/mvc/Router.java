@@ -62,6 +62,15 @@ public class Router {
 
     /**
      * This one can be called to add new route. Last added is first in the route list.
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param headers
+     *            The headers
      */
     public static void prependRoute(String method, String path, String action, String headers) {
         prependRoute(method, path, action, null, headers);
@@ -69,6 +78,13 @@ public class Router {
 
     /**
      * This one can be called to add new route. Last added is first in the route list.
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
      */
     public static void prependRoute(String method, String path, String action) {
         prependRoute(method, path, action, null, null);
@@ -76,6 +92,19 @@ public class Router {
 
     /**
      * Add a route at the given position
+     * 
+     * @param position
+     *            The position where to insert the route
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param params
+     *            The parameters
+     * @param headers
+     *            The headers
      */
     public static void addRoute(int position, String method, String path, String action, String params, String headers) {
         if (position > routes.size()) {
@@ -86,6 +115,15 @@ public class Router {
 
     /**
      * Add a route at the given position
+     * 
+     * @param position
+     *            The position where to insert the route
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param headers
+     *            The headers
      */
     public static void addRoute(int position, String method, String path, String headers) {
         addRoute(position, method, path, null, null, headers);
@@ -93,6 +131,17 @@ public class Router {
 
     /**
      * Add a route at the given position
+     * 
+     * @param position
+     *            The position where to insert the route
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param headers
+     *            The headers
      */
     public static void addRoute(int position, String method, String path, String action, String headers) {
         addRoute(position, method, path, action, null, headers);
@@ -100,6 +149,13 @@ public class Router {
 
     /**
      * Add a new route. Will be first in the route list
+     * 
+     * @param method
+     *            The method of the route * @param action : The associated action
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
      */
     public static void addRoute(String method, String path, String action) {
         prependRoute(method, path, action);
@@ -107,6 +163,15 @@ public class Router {
 
     /**
      * Add a route at the given position
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param headers
+     *            The headers
      */
     public static void addRoute(String method, String path, String action, String headers) {
         addRoute(method, path, action, null, headers);
@@ -114,6 +179,17 @@ public class Router {
 
     /**
      * Add a route
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param params
+     *            The parameters
+     * @param headers
+     *            The headers
      */
     public static void addRoute(String method, String path, String action, String params, String headers) {
         appendRoute(method, path, action, params, headers, null, 0);
@@ -122,6 +198,21 @@ public class Router {
     /**
      * This is used internally when reading the route file. The order the routes are added matters and we want the
      * method to append the routes to the list.
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param params
+     *            The parameters
+     * @param headers
+     *            The headers
+     * @param sourceFile
+     *            The source file
+     * @param line
+     *            The source line
      */
     public static void appendRoute(String method, String path, String action, String params, String headers, String sourceFile, int line) {
         routes.add(getRoute(method, path, action, params, headers, sourceFile, line));
@@ -149,6 +240,17 @@ public class Router {
 
     /**
      * Add a new route at the beginning of the route list
+     * 
+     * @param method
+     *            The method of the route
+     * @param path
+     *            The path of the route
+     * @param action
+     *            The associated action
+     * @param params
+     *            The parameters
+     * @param headers
+     *            The headers
      */
     public static void prependRoute(String method, String path, String action, String params, String headers) {
         routes.add(0, getRoute(method, path, action, params, headers));
@@ -214,11 +316,13 @@ public class Router {
     }
 
     /**
-     * In PROD mode and if the routes are already loaded, this does nothing.
      * <p>
+     * In PROD mode and if the routes are already loaded, this does nothing.
+     * </p>
      * <p>
      * In DEV mode, this checks each routes file's "last modified" time to see if the routes need updated.
-     *
+     * </p>
+     * 
      * @param prefix
      *            The prefix that the path of all routes in this route file start with. This prefix should not end with
      *            a '/' character.
@@ -634,7 +738,7 @@ public class Router {
          */
         public String method;
         /**
-         * @todo - what is this? does it include the domain?
+         * FIXME - what is this? does it include the domain?
          */
         public String url;
         /**
@@ -642,11 +746,11 @@ public class Router {
          */
         public boolean star;
         /**
-         * @todo - what is this? does it include the class and package?
+         * FIXME - what is this? does it include the class and package?
          */
         public String action;
         /**
-         * @todo - are these the required args in the routing file, or the query string in a request?
+         * FIXME - are these the required args in the routing file, or the query string in a request?
          */
         public Map<String, Object> args;
 
@@ -717,7 +821,7 @@ public class Router {
         public String method;
         public String path;
         /**
-         * @todo - what is this?
+         * FIXME - what is this?
          */
         public String action;
         Pattern actionPattern;

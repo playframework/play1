@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,11 +150,11 @@ public class Evolutions extends PlayPlugin {
      * Method to handle the "default" action
      * 
      * @param dbName
-     *            : database name
+     *            database name
      * @param moduleRoot
-     *            : the module root of evolutions
+     *            the module root of evolutions
      * @param evolutions
-     *            : list of evolutions
+     *            list of evolutions
      */
     private static void handleDefaultAction(String dbName, Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions) {
         System.out.println("~ Your database " + dbName + " needs evolutions for " + moduleRoot.getKey() + "!");
@@ -175,9 +174,9 @@ public class Evolutions extends PlayPlugin {
      * Method to handle the "resolve" action
      * 
      * @param dbName
-     *            : database name
+     *            database name
      * @param moduleRoot
-     *            : the module root of evolutions
+     *            the module root of evolutions
      * @return true if need to check, false otherwise
      */
     private static boolean handleResolveAction(String dbName, Entry<String, VirtualFile> moduleRoot) {
@@ -202,11 +201,11 @@ public class Evolutions extends PlayPlugin {
      * Method to handle the "apply" action
      * 
      * @param dbName
-     *            : database name
+     *            database name
      * @param moduleRoot
-     *            : the module root of evolutions
+     *            the module root of evolutions
      * @param evolutions
-     *            : list of evolutions
+     *            list of evolutions
      * @return true if action was applied successfully, false otherwise
      */
     private static boolean handleApplyAction(String dbName, Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions) {
@@ -235,11 +234,11 @@ public class Evolutions extends PlayPlugin {
      * Method to handle the "markApplied" action
      * 
      * @param dbName
-     *            : database name
+     *            database name
      * @param moduleRoot
-     *            : the module root of evolutions
+     *            the module root of evolutions
      * @param evolutions
-     *            : list of evolutions
+     *            list of evolutions
      * @return true if action was applied successfully, false otherwise
      */
     private static boolean handleMarkAppliedAction(String dbName, Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions) {
@@ -387,8 +386,7 @@ public class Evolutions extends PlayPlugin {
     }
 
     /**
-     * Checks if evolutions is disabled in application.conf (property
-     * "evolutions.enabled")
+     * Checks if evolutions is disabled in application.conf (property "evolutions.enabled")
      */
     private boolean isDisabled() {
         return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
@@ -578,7 +576,7 @@ public class Evolutions extends PlayPlugin {
     }
 
     public static synchronized Stack<Evolution> listApplicationEvolutions(String dBName, String moduleKey,
-                                                                          VirtualFile evolutionsDirectory) {
+            VirtualFile evolutionsDirectory) {
         Stack<Evolution> evolutions = new Stack<>();
         evolutions.add(new Evolution("", 0, "", "", true));
         if (evolutionsDirectory.exists()) {

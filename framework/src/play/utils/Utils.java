@@ -1,15 +1,24 @@
 package play.utils;
 
-import play.Play;
-import play.mvc.Scope;
-import play.vfs.VirtualFile;
-
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+import play.Play;
+import play.mvc.Scope;
+import play.vfs.VirtualFile;
 
 /**
  * Generic utils
@@ -56,6 +65,11 @@ public class Utils {
     }
 
     /**
+     * Get the list of annotations in string
+     * 
+     * @param values
+     *            Annotations to format
+     * @return The string representation of the annotations
      * @deprecated Use Utils.join(values, " ");
      */
     @Deprecated
@@ -114,6 +128,7 @@ public class Utils {
             }
         }
     }
+
     private static final ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<>();
 
     public static SimpleDateFormat getHttpDateFormatter() {
@@ -141,12 +156,9 @@ public class Utils {
     public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
         Map<String, String> filteredMap = new LinkedHashMap<>();
         prefix += ".";
-        for(Map.Entry<String, String[]> e: params.entrySet()){
-            if(e.getKey().startsWith(prefix)) {
-                filteredMap.put(
-                        e.getKey().substring(prefix.length()),
-                        Utils.join(e.getValue(), separator)
-                );
+        for (Map.Entry<String, String[]> e : params.entrySet()) {
+            if (e.getKey().startsWith(prefix)) {
+                filteredMap.put(e.getKey().substring(prefix.length()), Utils.join(e.getValue(), separator));
             }
         }
         return filteredMap;
@@ -158,9 +170,7 @@ public class Utils {
 
     public static void kill(String pid) throws Exception {
         String os = System.getProperty("os.name");
-        String command = (os.startsWith("Windows"))
-                       ? "taskkill /F /PID " + pid
-                       : "kill " + pid;
+        String command = (os.startsWith("Windows")) ? "taskkill /F /PID " + pid : "kill " + pid;
         Runtime.getRuntime().exec(command).waitFor();
     }
 
@@ -192,42 +202,32 @@ public class Utils {
             }
             throw new ParseException("Date format not understood", 0);
         }
+
         static final ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<>();
 
         public static AlternativeDateFormat getDefaultFormatter() {
             if (dateformat.get() == null) {
-                dateformat.set(new AlternativeDateFormat(Locale.US,
-                        "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
+                dateformat.set(new AlternativeDateFormat(Locale.US, "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
                         "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
-                        "yyyy-MM-dd HH:mm:ss",
-                        "yyyyMMdd HHmmss",
-                        "yyyy-MM-dd",
-                        "yyyyMMdd'T'HHmmss",
-                        "yyyyMMddHHmmss",
-                        "dd'/'MM'/'yyyy",
-                        "dd-MM-yyyy",
-                        "dd'/'MM'/'yyyy HH:mm:ss",
-                        "dd-MM-yyyy HH:mm:ss",
-                        "ddMMyyyy HHmmss",
-                "ddMMyyyy"));
+                        "yyyy-MM-dd HH:mm:ss", "yyyyMMdd HHmmss", "yyyy-MM-dd", "yyyyMMdd'T'HHmmss", "yyyyMMddHHmmss", "dd'/'MM'/'yyyy",
+                        "dd-MM-yyyy", "dd'/'MM'/'yyyy HH:mm:ss", "dd-MM-yyyy HH:mm:ss", "ddMMyyyy HHmmss", "ddMMyyyy"));
             }
             return dateformat.get();
         }
     }
 
-
     public static String urlDecodePath(String enc) {
         try {
-          return URLDecoder.decode(enc.replaceAll("\\+", "%2B"),Play.defaultWebEncoding);
-        } catch(Exception e) {
+            return URLDecoder.decode(enc.replaceAll("\\+", "%2B"), Play.defaultWebEncoding);
+        } catch (Exception e) {
             return enc;
         }
     }
-    
+
     public static String urlEncodePath(String plain) {
         try {
-          return URLEncoder.encode(plain,Play.defaultWebEncoding);
-        } catch(Exception e) {
+            return URLEncoder.encode(plain, Play.defaultWebEncoding);
+        } catch (Exception e) {
             return plain;
         }
     }

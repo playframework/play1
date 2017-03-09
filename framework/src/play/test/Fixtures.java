@@ -168,7 +168,11 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from a YAML file and persist them using the underlying persistence mechanism. The format of
+     * the YAML file is constrained, see the Fixtures manual page
+     * 
      * @param name
+     *            Name of a YAML file somewhere in the classpath (or conf/)
      * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
@@ -194,7 +198,7 @@ public class Fixtures {
      * @param name
      *            Name of a YAML file somewhere in the classpath (or conf/)
      * @param loadAsTemplate
-     *            : indicate if the file must interpreted as a Template
+     *            indicate if the file must interpreted as a Template
      */
     public static void loadModels(boolean loadAsTemplate, String name) {
         VirtualFile yamlFile = null;
@@ -296,6 +300,11 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from multiple YAML files and persist them using the underlying persistence mechanism. The
+     * format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
@@ -306,6 +315,11 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from multiple YAML files and persist them using the underlying persistence mechanism. The
+     * format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @see #loadModels(String name)
      */
     public static void loadModels(String... names) {
@@ -313,6 +327,13 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from multiple YAML files (compile first as a template) and persist them using the underlying
+     * persistence mechanism. The format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param loadAsTemplate
+     *            Indicate if the YAML file should be compile first as a template
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @see #loadModels(boolean loadAsTemplate, String name)
      */
     public static void loadModels(boolean loadAsTemplate, String... names) {
@@ -322,6 +343,11 @@ public class Fixtures {
     }
 
     /**
+     * /** Load Model instances from multiple YAML files (compile first as a template) and persist them using the
+     * underlying persistence mechanism. The format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @deprecated use {@link #loadModels(String...)} instead
      */
     @Deprecated
@@ -330,6 +356,11 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from multiple YAML files (compile first as a template) and persist them using the underlying
+     * persistence mechanism. The format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @see #loadModels(String name)
      */
     public static void loadModels(List<String> names) {
@@ -337,6 +368,13 @@ public class Fixtures {
     }
 
     /**
+     * Load Model instances from multiple YAML files (compile first as a template) and persist them using the underlying
+     * persistence mechanism. The format of the YAML file is constrained, see the Fixtures manual page
+     * 
+     * @param loadAsTemplate
+     *            Indicate if the YAML file should be compile first as a template
+     * @param names
+     *            Name of a YAML files somewhere in the classpath (or conf/)
      * @see #loadModels(boolean, String...)
      */
     public static void loadModels(boolean loadAsTemplate, List<String> names) {
@@ -391,6 +429,8 @@ public class Fixtures {
      *            Name of a YAML file somewhere in the classpath (or conf/)me
      * @param clazz
      *            the expected class
+     * @param <T>
+     *            The entity load
      * @return Object representing the YAML data
      */
     @SuppressWarnings("unchecked")
@@ -441,14 +481,13 @@ public class Fixtures {
 
     /**
      *
-     * TODO: reuse beanutils or MapUtils?
+     * @play.todo TODO: reuse beanutils or MapUtils?
      *
      * @param entityProperties
      * @param prefix
      * @return an hash with the resolved entity name and the corresponding value
      */
     static Map<String, String[]> serialize(Map<?, ?> entityProperties, String prefix) {
-
         if (entityProperties == null) {
             return Collections.EMPTY_MAP;
         }

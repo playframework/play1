@@ -44,17 +44,15 @@ import play.vfs.VirtualFile;
  *
  * Loading/reloading/enabling/disabling is handled here.
  *
- * This class also exposes many PlayPlugin-methods which when called, the method
- * is executed on all enabled plugins.
+ * This class also exposes many PlayPlugin-methods which when called, the method is executed on all enabled plugins.
  *
- * Since all the enabled-plugins-iteration is done here, the code elsewhere is
- * cleaner.
+ * Since all the enabled-plugins-iteration is done here, the code elsewhere is cleaner.
  */
 public class PluginCollection {
 
     /**
-     * Property holding the name of the play.plugins-resource-name. Can be
-     * modified in unittest to supply modifies plugin-list
+     * Property holding the name of the play.plugins-resource-name. Can be modified in unittest to supply modifies
+     * plugin-list
      */
     protected String play_plugins_resourceName = "play.plugins";
 
@@ -64,8 +62,8 @@ public class PluginCollection {
     protected List<PlayPlugin> allPlugins = new ArrayList<>();
 
     /**
-     * Readonly copy of allPlugins - updated each time allPlugins is updated.
-     * Using this cached copy so we don't have to create it all the time..
+     * Readonly copy of allPlugins - updated each time allPlugins is updated. Using this cached copy so we don't have to
+     * create it all the time..
      */
     protected List<PlayPlugin> allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
 
@@ -75,9 +73,8 @@ public class PluginCollection {
     protected List<PlayPlugin> enabledPlugins = new ArrayList<>();
 
     /**
-     * Readonly copy of enabledPlugins - updated each time enabledPlugins is
-     * updated. Using this cached copy so we don't have to create it all the
-     * time
+     * Readonly copy of enabledPlugins - updated each time enabledPlugins is updated. Using this cached copy so we don't
+     * have to create it all the time
      */
     protected List<PlayPlugin> enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
 
@@ -87,9 +84,8 @@ public class PluginCollection {
     protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<>();
 
     /**
-     * Readonly copy of enabledPluginsWithFilters - updated each time
-     * enabledPluginsWithFilters is updated. Using this cached copy so we don't
-     * have to create it all the time
+     * Readonly copy of enabledPluginsWithFilters - updated each time enabledPluginsWithFilters is updated. Using this
+     * cached copy so we don't have to create it all the time
      */
     protected List<PlayPlugin> enabledPluginsWithFilters_readOnlyCopy = createReadonlyCopy(enabledPluginsWithFilters);
 
@@ -97,6 +93,7 @@ public class PluginCollection {
      * Using readonly list to crash if someone tries to modify the copy.
      * 
      * @param list
+     *            The list of plugins
      * @return Read only list of plugins
      */
     protected List<PlayPlugin> createReadonlyCopy(List<PlayPlugin> list) {
@@ -239,6 +236,9 @@ public class PluginCollection {
 
     /**
      * Reloads all loaded plugins that is application-supplied.
+     * 
+     * @throws Exception
+     *             If problem occurred during reload
      */
     public void reloadApplicationPlugins() throws Exception {
 
@@ -284,11 +284,11 @@ public class PluginCollection {
     }
 
     /**
-     * Calls plugin.onLoad but detects if plugin removes other plugins from
-     * Play.plugins-list to detect if plugins disables a plugin the old hacked
-     * way..
+     * Calls plugin.onLoad but detects if plugin removes other plugins from Play.plugins-list to detect if plugins
+     * disables a plugin the old hacked way..
      * 
      * @param plugin
+     *            The given plugin
      */
     @SuppressWarnings({ "deprecation" })
     protected void initializePlugin(PlayPlugin plugin) {
@@ -314,6 +314,7 @@ public class PluginCollection {
      * Adds one plugin and enables it
      * 
      * @param plugin
+     *            The given plugin
      * @return true if plugin was new and was added
      */
     protected synchronized boolean addPlugin(PlayPlugin plugin) {
@@ -352,6 +353,7 @@ public class PluginCollection {
      * Enable plugin.
      *
      * @param plugin
+     *            The given plugin
      * @return true if plugin exists and was enabled now
      */
     public synchronized boolean enablePlugin(PlayPlugin plugin) {
@@ -381,6 +383,9 @@ public class PluginCollection {
     /**
      * enable plugin of specified type
      * 
+     * @param pluginClazz
+     *            The plugin class
+     * 
      * @return true if plugin was enabled
      */
     public boolean enablePlugin(Class<? extends PlayPlugin> pluginClazz) {
@@ -391,6 +396,7 @@ public class PluginCollection {
      * Returns the first instance of a loaded plugin of specified type
      * 
      * @param pluginClazz
+     *            The plugin class
      * @return PlayPlugin
      */
     public synchronized PlayPlugin getPluginInstance(Class<? extends PlayPlugin> pluginClazz) {
@@ -406,6 +412,7 @@ public class PluginCollection {
      * disable plugin
      * 
      * @param plugin
+     *            The given plugin
      * @return true if plugin was enabled and now is disabled
      */
     public synchronized boolean disablePlugin(PlayPlugin plugin) {
@@ -426,7 +433,10 @@ public class PluginCollection {
     }
 
     /**
-     * disable plugin of specified type
+     * Disable plugin of specified type
+     * 
+     * @param pluginClazz
+     *            The plugin class
      * 
      * @return true if plugin was enabled and now is disabled
      */
@@ -527,8 +537,10 @@ public class PluginCollection {
     }
 
     /**
-     *
+     * Indicate if a plugin is enabled
+     * 
      * @param plugin
+     *            The given plugin
      * @return true if plugin is enabled
      */
     public boolean isEnabled(PlayPlugin plugin) {

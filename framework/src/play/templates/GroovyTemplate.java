@@ -1,24 +1,55 @@
 package play.templates;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
-import groovy.lang.*;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
-import org.codehaus.groovy.control.*;
+import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.codehaus.groovy.control.Phases;
+import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.ExceptionMessage;
 import org.codehaus.groovy.control.messages.Message;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
+import groovy.lang.Binding;
+import groovy.lang.Closure;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyObjectSupport;
+import groovy.lang.GroovyShell;
+import groovy.lang.MissingPropertyException;
+import groovy.lang.Script;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
 import play.data.binding.Unbinder;
-import play.exceptions.*;
+import play.exceptions.ActionNotFoundException;
+import play.exceptions.NoRouteFoundException;
+import play.exceptions.PlayException;
+import play.exceptions.TagInternalException;
+import play.exceptions.TemplateCompilationException;
+import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateExecutionException.DoBodyException;
+import play.exceptions.TemplateNotFoundException;
+import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
@@ -32,17 +63,10 @@ import play.templates.types.SafeXMLFormatter;
 import play.utils.HTML;
 import play.utils.Java;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-
 public class GroovyTemplate extends BaseTemplate {
 
     static final Map<String, SafeFormatter> safeFormatters = new HashMap<>();
-    
+
     static {
         safeFormatters.put("csv", new SafeCSVFormatter());
         safeFormatters.put("html", new SafeHTMLFormatter());
@@ -56,7 +80,7 @@ public class GroovyTemplate extends BaseTemplate {
     static {
         new GroovyShell().evaluate("java.lang.String.metaClass.if = { condition -> if(condition) delegate; else '' }");
     }
-    
+
     public GroovyTemplate(String name, String source) {
         super(name, source);
     }
@@ -70,7 +94,7 @@ public class GroovyTemplate extends BaseTemplate {
         public TClassLoader() {
             super(Play.classloader);
         }
-       
+
         public Class defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
@@ -92,14 +116,14 @@ public class GroovyTemplate extends BaseTemplate {
             }
         }
     }
-    
-    protected CompilerConfiguration setUpCompilerConfiguration(){
-        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();        
+
+    protected CompilerConfiguration setUpCompilerConfiguration() {
+        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
         compilerConfiguration.setSourceEncoding("utf-8"); // ouf
         return compilerConfiguration;
     }
-    
-    protected void onCompileEnd(){  
+
+    protected void onCompileEnd() {
     }
 
     @Override
@@ -113,9 +137,10 @@ public class GroovyTemplate extends BaseTemplate {
                 final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<>();
                 // ~~~ Please !
                 CompilerConfiguration compilerConfiguration = this.setUpCompilerConfiguration();
-                
+
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-                compilationUnit.addSource(new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));         
+                compilationUnit.addSource(
+                        new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
 
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
@@ -129,7 +154,7 @@ public class GroovyTemplate extends BaseTemplate {
                     }
                 });
                 compilationUnit.compile();
-                // ouf 
+                // ouf
 
                 // Define script classes
                 StringBuilder sb = new StringBuilder();
@@ -152,7 +177,8 @@ public class GroovyTemplate extends BaseTemplate {
                 if (System.getProperty("precompile") != null) {
                     try {
                         // emit bytecode to standard class layout as well
-                        File f = Play.getFile("precompiled/templates/" + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
+                        File f = Play.getFile("precompiled/templates/"
+                                + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
                         f.getParentFile().mkdirs();
                         FileUtils.write(f, sb.toString(), "utf-8");
                     } catch (Exception e) {
@@ -161,7 +187,8 @@ public class GroovyTemplate extends BaseTemplate {
                 }
 
                 if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name, groovyClassesForThisTemplate.size());
+                    Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name,
+                            groovyClassesForThisTemplate.size());
                 }
 
             } catch (MultipleCompilationErrorsException e) {
@@ -179,18 +206,18 @@ public class GroovyTemplate extends BaseTemplate {
                             message = message.substring(0, message.lastIndexOf("@"));
                         }
                         throw new TemplateCompilationException(this, line, message);
-                    } else{
-                        ExceptionMessage  errorMessage = (ExceptionMessage ) e.getErrorCollector().getLastError();
+                    } else {
+                        ExceptionMessage errorMessage = (ExceptionMessage) e.getErrorCollector().getLastError();
                         Exception exception = errorMessage.getCause();
                         Integer line = 0;
                         String message = exception.getMessage();
-                        throw new TemplateCompilationException(this, line, message); 
+                        throw new TemplateCompilationException(this, line, message);
                     }
                 }
                 throw new UnexpectedException(e);
             } catch (Exception e) {
                 throw new UnexpectedException(e);
-            } finally{
+            } finally {
                 this.onCompileEnd();
             }
         }
@@ -206,20 +233,20 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    protected Binding setUpBindingVariables(Map<String, Object> args){
+    protected Binding setUpBindingVariables(Map<String, Object> args) {
         Binding binding = new Binding(args);
         binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
         return binding;
     }
-    
+
     @Override
     protected String internalRender(Map<String, Object> args) {
         compile();
 
         Binding binding = this.setUpBindingVariables(args);
-        
+
         // If current response-object is present, add _response_encoding'
         Http.Response currentResponse = Http.Response.current();
         if (currentResponse != null) {
@@ -292,12 +319,12 @@ public class GroovyTemplate extends BaseTemplate {
             // Must replace '____%LAYOUT%____' inside the string layoutR with the content from writer..
             String whatToFind = "____%LAYOUT%____";
             int pos = layoutR.indexOf(whatToFind);
-            if (pos >=0) {
+            if (pos >= 0) {
                 // prepending and appending directly to writer/buffer to prevent us
                 // from having to duplicate the string.
                 // this makes us use half of the memory!
-                writer.getBuffer().insert(0,layoutR.substring(0,pos));
-                writer.append(layoutR.substring(pos+whatToFind.length()));
+                writer.getBuffer().insert(0, layoutR.substring(0, pos));
+                writer.append(layoutR.substring(pos + whatToFind.length()));
                 return writer.toString().trim();
             }
             return layoutR;
@@ -312,15 +339,15 @@ public class GroovyTemplate extends BaseTemplate {
     protected Throwable cleanStackTrace(Throwable e) {
         List<StackTraceElement> cleanTrace = new ArrayList<>();
         for (StackTraceElement se : e.getStackTrace()) {
-            //Here we are parsing the classname to find the file on disk the template was generated from.
-            //See GroovyTemplateCompiler.head() for more info.
+            // Here we are parsing the classname to find the file on disk the template was generated from.
+            // See GroovyTemplateCompiler.head() for more info.
             if (se.getClassName().startsWith("Template_")) {
                 String tn = se.getClassName().substring(9);
                 if (tn.indexOf("$") > -1) {
                     tn = tn.substring(0, tn.indexOf("$"));
                 }
                 BaseTemplate template = TemplateLoader.templates.get(tn);
-                if( template != null ) {
+                if (template != null) {
                     Integer line = template.linesMatrix.get(se.getLineNumber());
                     if (line != null) {
                         String ext = "";
@@ -333,7 +360,9 @@ public class GroovyTemplate extends BaseTemplate {
                     }
                 }
             }
-            if (!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.") && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.") && !se.getClassName().startsWith("Template_")) {
+            if (!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.")
+                    && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.")
+                    && !se.getClassName().startsWith("Template_")) {
                 cleanTrace.add(se);
             }
         }
@@ -357,7 +386,7 @@ public class GroovyTemplate extends BaseTemplate {
                 extension = template.name.substring(index + 1);
             }
         }
-        
+
         @Override
         public Object getProperty(String property) {
             try {
@@ -376,15 +405,16 @@ public class GroovyTemplate extends BaseTemplate {
 
             BaseTemplate tagTemplate = null;
             try {
-                tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + "." + callerExtension);
+                tagTemplate = (BaseTemplate) TemplateLoader.load("tags/" + templateName + "." + callerExtension);
             } catch (TemplateNotFoundException e) {
                 try {
-                    tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + ".tag");
+                    tagTemplate = (BaseTemplate) TemplateLoader.load("tags/" + templateName + ".tag");
                 } catch (TemplateNotFoundException ex) {
                     if (callerExtension.equals("tag")) {
                         throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);
                     }
-                    throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
+                    throw new TemplateNotFoundException(
+                            "tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
                 }
             }
             TagContext.enterTag(tag);
@@ -417,19 +447,27 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         /**
+         * @param className
+         *            The class name
+         * @return The given class
+         * @throws Exception
+         *             if problem occured when loading the class
          * @deprecated '_' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on
-         * use {@link #__loadClass} instead
+         *             use {@link #__loadClass} instead
          */
         @Deprecated
         public Class _(String className) throws Exception {
             return __loadClass(className);
         }
-        
+
         /**
          * Load the class from Pay Class loader
-         * @param className : the class name
+         * 
+         * @param className
+         *            the class name
          * @return the given class
          * @throws Exception
+         *             if problem occured when loading the class
          */
         public Class __loadClass(String className) throws Exception {
             try {
@@ -440,12 +478,15 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         /**
-         * This method is faster to call from groovy than __safe() since we only evaluate val.toString()
-         * if we need to
+         * This method is faster to call from groovy than __safe() since we only evaluate val.toString() if we need to
+         * 
+         * @param val
+         *            the object to evaluate
+         * @return The evaluating string
          */
         public String __safeFaster(Object val) {
             if (val instanceof RawData) {
-                return ((RawData)val).data;
+                return ((RawData) val).data;
             } else if (extension != null) {
                 SafeFormatter formatter = safeFormatters.get(extension);
                 if (formatter != null) {
@@ -456,18 +497,17 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         public String __getMessage(Object[] val) {
-            if (val==null) {
-                throw new NullPointerException("You are trying to resolve a message with an expression " +
-                        "that is resolved to null - " +
-                        "have you forgotten quotes around the message-key?");
+            if (val == null) {
+                throw new NullPointerException("You are trying to resolve a message with an expression " + "that is resolved to null - "
+                        + "have you forgotten quotes around the message-key?");
             }
             if (val.length == 1) {
                 return Messages.get(val[0]);
             } else {
                 // extract args from val
-                Object[] args = new Object[val.length-1];
-                for( int i=1;i<val.length;i++) {
-                    args[i-1] = val[i];
+                Object[] args = new Object[val.length - 1];
+                for (int i = 1; i < val.length; i++) {
+                    args[i - 1] = val[i];
                 }
                 return Messages.get(val[0], args);
             }
@@ -541,8 +581,8 @@ public class GroovyTemplate extends BaseTemplate {
                         Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
                         String[] names = Java.parameterNames(actionMethod);
                         if (param instanceof Object[]) {
-                            if(((Object[])param).length == 1 && ((Object[])param)[0] instanceof Map) {
-                                r = (Map<String,Object>)((Object[])param)[0];
+                            if (((Object[]) param).length == 1 && ((Object[]) param)[0] instanceof Map) {
+                                r = (Map<String, Object>) ((Object[]) param)[0];
                             } else {
                                 // too many parameters versus action, possibly a developer error. we must warn him.
                                 if (names.length < ((Object[]) param).length) {
@@ -550,13 +590,16 @@ public class GroovyTemplate extends BaseTemplate {
                                 }
                                 for (int i = 0; i < ((Object[]) param).length; i++) {
                                     if (((Object[]) param)[i] instanceof Router.ActionDefinition && ((Object[]) param)[i] != null) {
-                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "",
+                                                actionMethod.getAnnotations());
                                     } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
                                         if (((Object[]) param)[i] != null) {
-                                            Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                            Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "",
+                                                    actionMethod.getAnnotations());
                                         }
                                     } else {
-                                        Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "", actionMethod.getAnnotations());
+                                        Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "",
+                                                actionMethod.getAnnotations());
                                     }
                                 }
                             }

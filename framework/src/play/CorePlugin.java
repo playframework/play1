@@ -42,6 +42,10 @@ public class CorePlugin extends PlayPlugin {
 
     /**
      * Get the application status
+     * 
+     * @param json
+     *            true if the status should be return in JSON
+     * @return application status
      */
     public static String computeApplicationStatus(boolean json) {
         if (json) {

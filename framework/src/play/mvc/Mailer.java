@@ -13,9 +13,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.activation.DataSource;
+import javax.activation.URLDataSource;
+import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.*;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailAttachment;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.MultiPartEmail;
+import org.apache.commons.mail.SimpleEmail;
 
 import play.Logger;
 import play.Play;
@@ -24,17 +33,13 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSup
 import play.exceptions.MailException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
+import play.libs.F;
+import play.libs.F.T4;
 import play.libs.Mail;
 import play.libs.MimeTypes;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
-
-import javax.activation.DataSource;
-import javax.activation.URLDataSource;
-import javax.mail.internet.InternetAddress;
-import play.libs.F;
-import play.libs.F.T4;
 
 /**
  * Application mailer support
@@ -45,8 +50,11 @@ public class Mailer implements LocalVariablesSupport {
 
     /**
      * Set subject of mail, optionally providing formatting arguments
-     * @param subject plain String or formatted string - interpreted as formatted string only if arguments are provided
-     * @param args optional arguments for formatting subject
+     * 
+     * @param subject
+     *            plain String or formatted string - interpreted as formatted string only if arguments are provided
+     * @param args
+     *            optional arguments for formatting subject
      */
     public static void setSubject(String subject, Object... args) {
         Map<String, Object> map = infos.get();
@@ -67,8 +75,13 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     /**
-     * @Deprecated use method {{@link #addRecipient(String...)}}
+     * Add recipients
+     * 
+     * @param recipients
+     *            List of recipients
+     * @deprecated use method {{@link #addRecipient(String...)}}
      */
+    @Deprecated
     public static void addRecipient(Object... recipients) {
         List<String> recipientList = new ArrayList<>(recipients.length);
         for (Object recipient : recipients) {
@@ -136,8 +149,8 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-   @SuppressWarnings("unchecked")
-   public static void attachDataSource(DataSource dataSource, String name, String description, String disposition) {
+    @SuppressWarnings("unchecked")
+    public static void attachDataSource(DataSource dataSource, String name, String description, String disposition) {
         Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -150,9 +163,9 @@ public class Mailer implements LocalVariablesSupport {
         datasourceList.add(F.T4(dataSource, name, description, disposition));
         infos.set(map);
     }
-    
-    public static void attachDataSource(DataSource dataSource, String name, String description){
-       attachDataSource(dataSource, name, description, EmailAttachment.ATTACHMENT);
+
+    public static void attachDataSource(DataSource dataSource, String name, String description) {
+        attachDataSource(dataSource, name, description, EmailAttachment.ATTACHMENT);
     }
 
     public static String attachInlineEmbed(DataSource dataSource, String name) {
@@ -188,6 +201,7 @@ public class Mailer implements LocalVariablesSupport {
      * Can be of the form xxx &lt;m@m.com&gt;
      *
      * @param from
+     *            The sender name (ex: xxx &lt;m@m.com&gt;)
      */
     public static void setFrom(String from) {
         Map<String, Object> map = infos.get();
@@ -197,11 +211,11 @@ public class Mailer implements LocalVariablesSupport {
         map.put("from", from);
         infos.set(map);
     }
-    
+
     public static void setFrom(InternetAddress from) {
         setFrom(from.toString());
     }
-    
+
     private static class InlineImage {
         /** content id */
         private final String cid;
@@ -226,7 +240,7 @@ public class Mailer implements LocalVariablesSupport {
             return this.dataSource;
         }
     }
-    
+
     private static class VirtualFileDataSource implements DataSource {
         private final VirtualFile virtualFile;
 
@@ -273,18 +287,18 @@ public class Mailer implements LocalVariablesSupport {
             return this.virtualFile.equals(rhs.virtualFile);
         }
     }
-    
+
     @Deprecated
     public static String getEmbedddedSrc(String urlString, String name) {
         return getEmbeddedSrc(urlString, name);
     }
-    
+
     public static String getEmbeddedSrc(String urlString, String name) {
         Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
-        
+
         DataSource dataSource;
         URL url = null;
 
@@ -306,8 +320,7 @@ public class Mailer implements LocalVariablesSupport {
                 throw new UnexpectedException("name cannot be null or empty");
             }
 
-            dataSource = url.getProtocol().equals("file") ? new VirtualFileDataSource(
-                    url.getFile()) : new URLDataSource(url);
+            dataSource = url.getProtocol().equals("file") ? new VirtualFileDataSource(url.getFile()) : new URLDataSource(url);
         } else {
             dataSource = new VirtualFileDataSource(img);
         }
@@ -320,24 +333,19 @@ public class Mailer implements LocalVariablesSupport {
             InlineImage ii = inlineEmbeds.get(name);
 
             if (ii.getDataSource() instanceof URLDataSource) {
-                URLDataSource urlDataSource = (URLDataSource) ii
-                        .getDataSource();
+                URLDataSource urlDataSource = (URLDataSource) ii.getDataSource();
                 // Make sure the supplied URL points to the same thing
                 // as the one already associated with this name.
                 // NOTE: Comparing URLs with URL.equals() is a blocking
                 // operation
                 // in the case of a network failure therefore we use
                 // url.toExternalForm().equals() here.
-                if (url == null || urlDataSource == null || !url.toExternalForm().equals(
-                        urlDataSource.getURL().toExternalForm())) {
-                    throw new UnexpectedException("embedded name '" + name
-                            + "' is already bound to URL "
-                            + urlDataSource.getURL()
+                if (url == null || urlDataSource == null || !url.toExternalForm().equals(urlDataSource.getURL().toExternalForm())) {
+                    throw new UnexpectedException("embedded name '" + name + "' is already bound to URL " + urlDataSource.getURL()
                             + "; existing names cannot be rebound");
                 }
             } else if (!ii.getDataSource().equals(dataSource)) {
-                throw new UnexpectedException("embedded name '" + name
-                        + "' is already bound to URL " + dataSource.getName()
+                throw new UnexpectedException("embedded name '" + name + "' is already bound to URL " + dataSource.getName()
                         + "; existing names cannot be rebound");
             }
 
@@ -345,7 +353,7 @@ public class Mailer implements LocalVariablesSupport {
         }
 
         // Verify that the data source is valid.
-        
+
         try (InputStream is = dataSource.getInputStream()) {
         } catch (IOException e) {
             throw new UnexpectedException("Invalid URL " + urlString + " for image " + name, e);
@@ -358,6 +366,7 @@ public class Mailer implements LocalVariablesSupport {
      * Can be of the form xxx &lt;m@m.com&gt;
      *
      * @param replyTo
+     *            : The reply to address (ex: xxx &lt;m@m.com&gt;)
      */
     public static void setReplyTo(String replyTo) {
         Map<String, Object> map = infos.get();
@@ -367,7 +376,7 @@ public class Mailer implements LocalVariablesSupport {
         map.put("replyTo", replyTo);
         infos.set(map);
     }
-    
+
     public static void setReplyTo(InternetAddress replyTo) {
         setReplyTo(replyTo.toString());
     }
@@ -442,7 +451,7 @@ public class Mailer implements LocalVariablesSupport {
             // If contentType is not specified look at the template available:
             // - .txt only -> text/plain
             // else
-            // -           -> text/html
+            // - -> text/html
             String contentType = (String) infos.get().get("contentType");
             String bodyHtml = null;
             String bodyText = "";
@@ -481,7 +490,8 @@ public class Mailer implements LocalVariablesSupport {
             String replyTo = (String) infos.get().get("replyTo");
 
             Email email;
-            if (infos.get().get("attachments") == null && infos.get().get("datasources") == null && infos.get().get("inlineEmbeds") == null ) {
+            if (infos.get().get("attachments") == null && infos.get().get("datasources") == null
+                    && infos.get().get("inlineEmbeds") == null) {
                 if (StringUtils.isEmpty(bodyHtml)) {
                     email = new SimpleEmail();
                     email.setMsg(bodyText);
@@ -505,7 +515,7 @@ public class Mailer implements LocalVariablesSupport {
                         htmlEmail.setTextMsg(bodyText);
                     }
                     email = htmlEmail;
-                    
+
                     Map<String, InlineImage> inlineEmbeds = (Map<String, InlineImage>) infos.get().get("inlineEmbeds");
                     if (inlineEmbeds != null) {
                         for (Map.Entry<String, InlineImage> entry : inlineEmbeds.entrySet()) {
@@ -513,7 +523,7 @@ public class Mailer implements LocalVariablesSupport {
                         }
                     }
                 }
-                
+
                 MultiPartEmail multiPartEmail = (MultiPartEmail) email;
                 List<EmailAttachment> objectList = (List<EmailAttachment>) infos.get().get("attachments");
                 if (objectList != null) {
@@ -523,8 +533,8 @@ public class Mailer implements LocalVariablesSupport {
                 }
 
                 // Handle DataSource
-                List<T4<DataSource, String, String, String>> datasourceList = 
-                        (List<T4<DataSource, String, String, String>>) infos.get().get("datasources");
+                List<T4<DataSource, String, String, String>> datasourceList = (List<T4<DataSource, String, String, String>>) infos.get()
+                        .get("datasources");
                 if (datasourceList != null) {
                     for (T4<DataSource, String, String, String> ds : datasourceList) {
                         multiPartEmail.attach(ds._1, ds._2, ds._3, ds._4);
@@ -565,7 +575,6 @@ public class Mailer implements LocalVariablesSupport {
             } else {
                 throw new MailException("You must specify at least one recipient.");
             }
-
 
             List<String> ccsList = (List<String>) infos.get().get("ccs");
             if (ccsList != null) {

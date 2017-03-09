@@ -66,8 +66,8 @@ import play.utils.Java;
 import play.vfs.VirtualFile;
 
 /**
- * Application controller support: The controller receives input and initiates a
- * response by making calls on model objects.
+ * Application controller support: The controller receives input and initiates a response by making calls on model
+ * objects.
  *
  * This is the class that your controllers should extend in most cases.
  */
@@ -76,115 +76,90 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     /**
      * The current HTTP request: the message sent by the client to the server.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.request -
-     * controller.request.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.request - controller.request.current()
      *
      */
     protected static Http.Request request = null;
     /**
-     * The current HTTP response: The message sent back from the server after a
-     * request.
+     * The current HTTP response: The message sent back from the server after a request.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.response -
-     * controller.response.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.response - controller.response.current()
      *
      */
     protected static Http.Response response = null;
     /**
-     * The current HTTP session. The Play! session is not living on the server
-     * side but on the client side. In fact, it is stored in a signed cookie.
-     * This session is therefore limited to 4kb.
+     * The current HTTP session. The Play! session is not living on the server side but on the client side. In fact, it
+     * is stored in a signed cookie. This session is therefore limited to 4kb.
      *
      * From Wikipedia:
      *
-     * Client-side sessions use cookies and cryptographic techniques to maintain
-     * state without storing as much data on the server. When presenting a
-     * dynamic web page, the server sends the current state data to the client
-     * (web browser) in the form of a cookie. The client saves the cookie in
-     * memory or on disk. With each successive request, the client sends the
-     * cookie back to the server, and the server uses the data to "remember" the
-     * state of the application for that specific client and generate an
-     * appropriate response. This mechanism may work well in some contexts;
-     * however, data stored on the client is vulnerable to tampering by the user
-     * or by software that has access to the client computer. To use client-side
-     * sessions where confidentiality and integrity are required, the following
-     * must be guaranteed: Confidentiality: Nothing apart from the server should
-     * be able to interpret session data. Data integrity: Nothing apart from the
-     * server should manipulate session data (accidentally or maliciously).
-     * Authenticity: Nothing apart from the server should be able to initiate
-     * valid sessions. To accomplish this, the server needs to encrypt the
-     * session data before sending it to the client, and modification of such
-     * information by any other party should be prevented via cryptographic
-     * means. Transmitting state back and forth with every request is only
-     * practical when the size of the cookie is small. In essence, client-side
-     * sessions trade server disk space for the extra bandwidth that each web
-     * request will require. Moreover, web browsers limit the number and size of
-     * cookies that may be stored by a web site. To improve efficiency and allow
-     * for more session data, the server may compress the data before creating
-     * the cookie, decompressing it later when the cookie is returned by the
-     * client.
+     * Client-side sessions use cookies and cryptographic techniques to maintain state without storing as much data on
+     * the server. When presenting a dynamic web page, the server sends the current state data to the client (web
+     * browser) in the form of a cookie. The client saves the cookie in memory or on disk. With each successive request,
+     * the client sends the cookie back to the server, and the server uses the data to "remember" the state of the
+     * application for that specific client and generate an appropriate response. This mechanism may work well in some
+     * contexts; however, data stored on the client is vulnerable to tampering by the user or by software that has
+     * access to the client computer. To use client-side sessions where confidentiality and integrity are required, the
+     * following must be guaranteed: Confidentiality: Nothing apart from the server should be able to interpret session
+     * data. Data integrity: Nothing apart from the server should manipulate session data (accidentally or maliciously).
+     * Authenticity: Nothing apart from the server should be able to initiate valid sessions. To accomplish this, the
+     * server needs to encrypt the session data before sending it to the client, and modification of such information by
+     * any other party should be prevented via cryptographic means. Transmitting state back and forth with every request
+     * is only practical when the size of the cookie is small. In essence, client-side sessions trade server disk space
+     * for the extra bandwidth that each web request will require. Moreover, web browsers limit the number and size of
+     * cookies that may be stored by a web site. To improve efficiency and allow for more session data, the server may
+     * compress the data before creating the cookie, decompressing it later when the cookie is returned by the client.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.session -
-     * controller.session.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.session - controller.session.current()
      */
     protected static Scope.Session session = null;
     /**
-     * The current flash scope. The flash is a temporary storage mechanism that
-     * is a hash map You can store values associated with keys and later
-     * retrieve them. It has one special property: by default, values stored
-     * into the flash during the processing of a request will be available
-     * during the processing of the immediately following request. Once that
-     * second request has been processed, those values are removed automatically
-     * from the storage
+     * The current flash scope. The flash is a temporary storage mechanism that is a hash map You can store values
+     * associated with keys and later retrieve them. It has one special property: by default, values stored into the
+     * flash during the processing of a request will be available during the processing of the immediately following
+     * request. Once that second request has been processed, those values are removed automatically from the storage
      *
      * This scope is very useful to display messages after issuing a Redirect.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.flash - controller.flash.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.flash - controller.flash.current()
      */
     protected static Scope.Flash flash = null;
     /**
-     * The current HTTP params. This scope allows you to access the HTTP
-     * parameters supplied with the request.
+     * The current HTTP params. This scope allows you to access the HTTP parameters supplied with the request.
      *
-     * This is useful for example to know which submit button a user pressed on
-     * a form.
+     * This is useful for example to know which submit button a user pressed on a form.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.params - controller.params.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.params - controller.params.current()
      */
     protected static Scope.Params params = null;
     /**
-     * The current renderArgs scope: This is a hash map that is accessible
-     * during the rendering phase. It means you can access variables stored in
-     * this scope during the rendering phase (the template phase).
+     * The current renderArgs scope: This is a hash map that is accessible during the rendering phase. It means you can
+     * access variables stored in this scope during the rendering phase (the template phase).
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.renderArgs -
-     * controller.renderArgs.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.renderArgs - controller.renderArgs.current()
      */
     protected static Scope.RenderArgs renderArgs = null;
     /**
-     * The current routeArgs scope: This is a hash map that is accessible during
-     * the reverse routing phase. Any variable added to this scope will be used
-     * for reverse routing. Useful when you have a param that you want to add to
-     * any route without add it explicitly to every action method.
+     * The current routeArgs scope: This is a hash map that is accessible during the reverse routing phase. Any variable
+     * added to this scope will be used for reverse routing. Useful when you have a param that you want to add to any
+     * route without add it explicitly to every action method.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.routeArgs -
-     * controller.routeArgs.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.routeArgs - controller.routeArgs.current()
      */
     protected static Scope.RouteArgs routeArgs = null;
     /**
-     * The current Validation object. It allows you to validate objects and to
-     * retrieve potential validations errors for those objects.
+     * The current Validation object. It allows you to validate objects and to retrieve potential validations errors for
+     * those objects.
      *
-     * Note: The ControllersEnhancer makes sure that an appropriate thread local
-     * version is applied. ie : controller.validation -
-     * controller.validation.current()
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied. ie :
+     * controller.validation - controller.validation.current()
      */
     protected static Validation validation = null;
 
@@ -246,8 +221,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to
-     * customize the result.
+     * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to customize the result.
      *
      * @param o
      *            the object to serialize
@@ -262,16 +236,16 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * @param o
      *            the object to serialize
      * @param xstream
-     *            the XStream object to use for serialization. See XStream's
-     *            documentation for details about customizing the output.
+     *            the XStream object to use for serialization. See XStream's documentation for details about customizing
+     *            the output.
      */
     protected static void renderXml(Object o, XStream xstream) {
         throw new RenderXml(o, xstream);
     }
 
     /**
-     * Return a 200 OK application/binary response. Content is fully loaded in
-     * memory, so it should not be used with large data.
+     * Return a 200 OK application/binary response. Content is fully loaded in memory, so it should not be used with
+     * large data.
      *
      * @param is
      *            The stream to copy
@@ -293,9 +267,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment. Content is fully loaded in memory, so it should not be used
-     * with large data.
+     * Return a 200 OK application/binary response with content-disposition attachment. Content is fully loaded in
+     * memory, so it should not be used with large data.
      *
      * @param is
      *            The stream to copy
@@ -307,8 +280,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment.
+     * Return a 200 OK application/binary response with content-disposition attachment.
      *
      * @param is
      *            The stream to copy. Content is streamed.
@@ -322,9 +294,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment. Content is fully loaded in memory, so it should not be used
-     * with large data.
+     * Return a 200 OK application/binary response with content-disposition attachment. Content is fully loaded in
+     * memory, so it should not be used with large data.
      *
      * @param is
      *            The stream to copy
@@ -338,8 +309,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment.
+     * Return a 200 OK application/binary response with content-disposition attachment.
      *
      * @param is
      *            The stream to copy
@@ -355,9 +325,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment. Content is fully loaded in memory, so it should not be used
-     * with large data.
+     * Return a 200 OK application/binary response with content-disposition attachment. Content is fully loaded in
+     * memory, so it should not be used with large data.
      *
      * @param is
      *            The stream to copy
@@ -373,8 +342,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment.
+     * Return a 200 OK application/binary response with content-disposition attachment.
      *
      * @param is
      *            The stream to copy
@@ -402,8 +370,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition
-     * attachment
+     * Return a 200 OK application/binary response with content-disposition attachment
      *
      * @param file
      *            The file to copy
@@ -452,8 +419,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * @param o
      *            The Java object to serialize
      * @param adapters
-     *            A set of GSON serializers/deserializers/instance creator to
-     *            use
+     *            A set of GSON serializers/deserializers/instance creator to use
      */
     protected static void renderJSON(Object o, JsonSerializer<?>... adapters) {
         throw new RenderJson(o, adapters);
@@ -480,6 +446,9 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
 
     /**
      * Send a 400 Bad request
+     * 
+     * @param msg
+     *            The message
      */
     protected static void badRequest(String msg) {
         throw new BadRequest(msg);
@@ -849,8 +818,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Render the template corresponding to the action's package-class-method
-     * name (@see <code>template()</code>).
+     * Render the template corresponding to the action's package-class-method name (@see <code>template()</code>).
      *
      * @param args
      *            The template data.
@@ -876,8 +844,10 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Work out the default template to load for the invoked action. E.g.
-     * "controllers.Pages.index" returns "views/Pages/index.html".
+     * Work out the default template to load for the invoked action. E.g. "controllers.Pages.index" returns
+     * "views/Pages/index.html".
+     * 
+     * @return The template name
      */
     protected static String template() {
         Request theRequest = Request.current();
@@ -894,8 +864,12 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Work out the default template to load for the action. E.g.
-     * "controllers.Pages.index" returns "views/Pages/index.html".
+     * Work out the default template to load for the action. E.g. "controllers.Pages.index" returns
+     * "views/Pages/index.html".
+     * 
+     * @param templateName
+     *            The template name to work out
+     * @return The template name
      */
     protected static String template(String templateName) {
         Request theRequest = Request.current();
@@ -915,6 +889,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      *
      * @param clazz
      *            The annotation class
+     * @param <T>
+     *            The class type
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
@@ -930,6 +906,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      *
      * @param clazz
      *            The annotation class
+     * @param <T>
+     *            The class type
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerAnnotation(Class<T> clazz) {
@@ -944,6 +922,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      *
      * @param clazz
      *            The annotation class
+     * @param <T>
+     *            The class type
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
@@ -969,6 +949,10 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
 
     /**
      * Call the parent action adding this objects to the params scope
+     * 
+     * @param args
+     *            List of parameters
+     * @deprecated
      */
     @Deprecated
     protected static void parent(Object... args) {
@@ -983,7 +967,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Call the parent method
+     * Call the parent method * @deprecated
      */
     @Deprecated
     protected static void parent() {
@@ -992,6 +976,10 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
 
     /**
      * Call the parent action adding this objects to the params scope
+     * 
+     * @param map
+     *            List of objects to the params scop
+     * @deprecated
      */
     @Deprecated
     protected static void parent(Map<String, Object> map) {
@@ -1041,11 +1029,12 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * Suspend the current request for a specified amount of time.
      *
      * <p>
-     * <b>Important:</b> The method will not resume on the line after you call
-     * this. The method will be called again as if there was a new HTTP request.
+     * <b>Important:</b> The method will not resume on the line after you call this. The method will be called again as
+     * if there was a new HTTP request.
      *
      * @param timeout
      *            Period of time to wait, e.g. "1h" means 1 hour.
+     * @deprecated
      */
     @Deprecated
     protected static void suspend(String timeout) {
@@ -1053,15 +1042,15 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Suspend the current request for a specified amount of time (in
-     * milliseconds).
+     * Suspend the current request for a specified amount of time (in milliseconds).
      *
      * <p>
-     * <b>Important:</b> The method will not resume on the line after you call
-     * this. The method will be called again as if there was a new HTTP request.
+     * <b>Important:</b> The method will not resume on the line after you call this. The method will be called again as
+     * if there was a new HTTP request.
      *
      * @param millis
      *            Number of milliseconds to wait until trying again.
+     * @deprecated
      */
     @Deprecated
     protected static void suspend(int millis) {
@@ -1073,10 +1062,13 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * Suspend this request and wait for the task completion
      *
      * <p>
-     * <b>Important:</b> The method will not resume on the line after you call
-     * this. The method will be called again as if there was a new HTTP request.
-     *
+     * <b>Important:</b> The method will not resume on the line after you call this. The method will be called again as
+     * if there was a new HTTP request.
+     * </p>
+     * 
      * @param task
+     *            Taks to wait for
+     * @deprecated
      */
     @Deprecated
     protected static void waitFor(Future<?> task) {
@@ -1104,14 +1096,11 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      *
      * If isRestoring == null, the method will try to resolve it.
      *
-     * important: when using isRestoring == null you have to KNOW that
-     * continuation suspend is going to happen and that this method is called
-     * twice for this single continuation suspend operation for this specific
-     * request.
+     * important: when using isRestoring == null you have to KNOW that continuation suspend is going to happen and that
+     * this method is called twice for this single continuation suspend operation for this specific request.
      *
      * @param isRestoring
-     *            true if restoring, false if storing, and null if you don't
-     *            know
+     *            true if restoring, false if storing, and null if you don't know
      */
     private static void storeOrRestoreDataStateForContinuations(Boolean isRestoring) {
 
@@ -1222,9 +1211,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Verifies that all application-code is properly enhanced.
-     * "application code" is the code on the callstack after leaving
-     * actionInvoke into the app, and before reentering Controller.await
+     * Verifies that all application-code is properly enhanced. "application code" is the code on the callstack after
+     * leaving actionInvoke into the app, and before reentering Controller.await
      */
     private static void verifyContinuationsEnhancement() {
         // only check in dev mode..
@@ -1278,16 +1266,18 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     public static final ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<>();
 
     /**
-     * @todo - this "Usage" example below doesn't make sense.
+     * @play.todo TODO - this "Usage" example below doesn't make sense.
      *
-     *       Usage:
+     *            Usage:
      *
-     *       <code>
+     *            <code>
      * ActionDefinition action = reverse(); {
      *     Application.anyAction(anyParam, "toto");
      * }
      * String url = action.url;
      * </code>
+     * 
+     * @return The ActionDefiniton
      */
     protected static ActionDefinition reverse() {
         ActionDefinition actionDefinition = new ActionDefinition();
@@ -1296,8 +1286,10 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Register a customer template name resolver. That letter allows to override
-     * the way templates are resolved.
+     * Register a customer template name resolver. That letter allows to override the way templates are resolved.
+     * 
+     * @param templateNameResolver
+     *            The template resolver
      */
     public static void registerTemplateNameResolver(ITemplateNameResolver templateNameResolver) {
         if (null != Controller.templateNameResolver)
@@ -1306,12 +1298,15 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * This allow people that implements their own template engine to override
-     * the way template are resolved.
+     * This allow people that implements their own template engine to override the way template are resolved.
      */
     public interface ITemplateNameResolver {
         /**
          * Return the template path given a template name.
+         * 
+         * @param templateName
+         *            The template name
+         * @return The template path
          */
         String resolveTemplateName(String templateName);
     }

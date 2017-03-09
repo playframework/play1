@@ -30,9 +30,8 @@ import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
 
 /**
- * Implementation of the WS interface based on Java URL Fetch API. This is to be
- * used for example in Google App Engine, where the async http client can't be
- * used.
+ * Implementation of the WS interface based on Java URL Fetch API. This is to be used for example in Google App Engine,
+ * where the async http client can't be used.
  */
 public class WSUrlFetch implements WSImpl {
 
@@ -306,6 +305,7 @@ public class WSUrlFetch implements WSImpl {
          * you shouldn't have to create an HttpResponse yourself
          * 
          * @param connection
+         *            The current connection
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
             try {

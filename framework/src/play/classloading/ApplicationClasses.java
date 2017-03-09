@@ -123,6 +123,9 @@ public class ApplicationClasses {
 
     /**
      * Put a new class to the cache.
+     * 
+     * @param applicationClass
+     *            The class to add
      */
     public void add(ApplicationClass applicationClass) {
         classes.put(applicationClass.name, applicationClass);
@@ -130,11 +133,20 @@ public class ApplicationClasses {
 
     /**
      * Remove a class from cache
+     * 
+     * @param applicationClass
+     *            The class to remove
      */
     public void remove(ApplicationClass applicationClass) {
         classes.remove(applicationClass.name);
     }
 
+    /**
+     * Remove a class from cache
+     * 
+     * @param applicationClass
+     *            The class name to remove
+     */
     public void remove(String applicationClass) {
         classes.remove(applicationClass);
     }
@@ -144,6 +156,7 @@ public class ApplicationClasses {
      * 
      * @param name
      *            The fully qualified class name
+     * @return true if the class is loaded
      */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
