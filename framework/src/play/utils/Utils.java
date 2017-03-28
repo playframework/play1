@@ -169,8 +169,7 @@ public class Utils {
     }
 
     public static void kill(String pid) throws Exception {
-        String os = System.getProperty("os.name");
-        String command = (os.startsWith("Windows")) ? "taskkill /F /PID " + pid : "kill " + pid;
+        String command = OS.isWindows() ? "taskkill /F /PID " + pid : "kill " + pid;
         Runtime.getRuntime().exec(command).waitFor();
     }
 
