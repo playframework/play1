@@ -141,6 +141,7 @@ samples-and-tests/zencontact/precompiled
 !modules/grizzly
 !modules/secure
 !modules/testrunner
+!modules/mockito-0.1
 !framework/src/play/db
 .idea
 *~
