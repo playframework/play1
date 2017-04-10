@@ -168,7 +168,7 @@ public class Utils {
         return filterParams(params, prefix, ", ");
     }
 
-    public static void kill(String pid) throws Exception {
+    public static void kill(long pid) throws Exception {
         String command = OS.isWindows() ? "taskkill /F /PID " + pid : "kill " + pid;
         Runtime.getRuntime().exec(command).waitFor();
     }
