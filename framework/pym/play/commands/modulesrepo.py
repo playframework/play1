@@ -11,6 +11,9 @@ import urllib
 import yaml
 
 from play.utils import *
+import pipes
+import subprocess
+import platform
 
 NM = ['new-module', 'nm']
 LM = ['list-modules', 'lm']
@@ -318,7 +321,10 @@ def build(app, args, env):
         print "~"
         print "~ Building..."
         print "~"
-        os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
+        if any(platform.win32_ver()):
+            os.system('ant -f %s -Dplay.path=%s' % (('"'+pipes.quote(build_file)[1:])[:-1]+'"', ('"'+pipes.quote(ftb)[1:])[:-1]+'"') )
+        else:
+            os.system('ant -f %s -Dplay.path=%s' % (pipes.quote(build_file), pipes.quote(ftb)) )
         print "~"
 
     mv = '%s-%s' % (name, version)
