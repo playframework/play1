@@ -2,6 +2,7 @@ package play.db.jpa;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Level;
+import org.hibernate.ejb.AvailableSettings;
 import org.hibernate.ejb.Ejb3Configuration;
 
 import play.Logger;
@@ -21,6 +22,8 @@ import play.exceptions.UnexpectedException;
 import javax.persistence.*;
 
 import java.beans.PropertyDescriptor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -33,7 +36,6 @@ import java.util.*;
  * JPA Plugin
  */
 public class JPAPlugin extends PlayPlugin {
-
 
     public static boolean autoTxs = true;
 
@@ -180,6 +182,7 @@ public class JPAPlugin extends PlayPlugin {
             }
           
             Map<String, String> properties = dbConfig.getProperties();
+            properties.putAll(Collections.singletonMap(AvailableSettings.FLUSH_MODE, Play.configuration.getProperty(AvailableSettings.FLUSH_MODE, "MANUAL")));
             properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
             properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
             properties.put("hibernate.dialect", getDefaultDialect(dbConfig, dbConfig.getProperty("db.driver")));
@@ -388,5 +391,25 @@ public class JPAPlugin extends PlayPlugin {
             return new JPAModelLoader(modelClass);
         }
         return null;
-    }  
+    }
+
+    @Override
+    public String getStatus() {
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw);
+        out.println("JPA:");
+        out.println("~~~~~~~~~~~~~~~~~~~");
+        Set<String> keySet = JPA.emfs.keySet();
+        if (keySet.isEmpty()) {
+            out.println("(not yet started)");
+            return sw.toString();
+        }
+        for (String key : keySet) {
+            EntityManagerFactory emf = JPA.emfs.get(key);
+            Map<String, Object> properties = emf.getProperties();
+            Object o = properties.get(AvailableSettings.FLUSH_MODE);
+            out.println(String.format("database: %s, property: %s, value: %s", key, AvailableSettings.FLUSH_MODE, o.toString()));
+        }
+        return sw.toString();
+    }
 }
