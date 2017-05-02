@@ -1,4 +1,3 @@
-# -*- coding: iso-8859-1 -*-
 """Parser for command line options.
 
 This module helps scripts to parse the command line arguments in
@@ -20,7 +19,7 @@ option involved with the exception.
 # Gerrit Holl <gerrit@nl.linux.org> moved the string-based exceptions
 # to class-based exceptions.
 #
-# Peter Åstrand <astrand@lysator.liu.se> added gnu_getopt().
+# Peter Astrand <astrand@lysator.liu.se> added gnu_getopt().
 #
 # TODO for gnu_getopt():
 #
@@ -29,7 +28,7 @@ option involved with the exception.
 # - RETURN_IN_ORDER option
 # - GNU extension with '-' as first character of option string
 # - optional arguments, specified by double colons
-# - a option string with a W followed by semicolon should
+# - an option string with a W followed by semicolon should
 #   treat "-W foo" as "--foo"
 
 __all__ = ["GetoptError","error","getopt","gnu_getopt"]
@@ -130,7 +129,7 @@ def gnu_getopt(args, shortopts, longopts = []):
 
         if args[0][:2] == '--':
             opts, args = do_longs(opts, args[0][2:], longopts, args[1:])
-        elif args[0][:1] == '-':
+        elif args[0][:1] == '-' and args[0] != '-':
             opts, args = do_shorts(opts, args[0][1:], shortopts, args[1:])
         else:
             if all_options_first:
@@ -156,7 +155,7 @@ def do_longs(opts, opt, longopts, args):
             if not args:
                 raise GetoptError('option --%s requires argument' % opt, opt)
             optarg, args = args[0], args[1:]
-    elif optarg:
+    elif optarg is not None:
         raise GetoptError('option --%s must not have an argument' % opt, opt)
     opts.append(('--' + opt, optarg or ''))
     return opts, args

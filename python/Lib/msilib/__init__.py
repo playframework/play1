@@ -2,9 +2,15 @@
 # Copyright (C) 2005 Martin v. Löwis
 # Licensed to PSF under a Contributor Agreement.
 from _msi import *
-import os, string, re
+import glob
+import os
+import re
+import string
+import sys
 
-Win64=0
+AMD64 = "AMD64" in sys.version
+Itanium = "Itanium" in sys.version
+Win64 = AMD64 or Itanium
 
 # Partially taken from Wine
 datasizemask=      0x00ff
@@ -145,8 +151,10 @@ def init_database(name, schema,
     si.SetProperty(PID_TITLE, "Installation Database")
     si.SetProperty(PID_SUBJECT, ProductName)
     si.SetProperty(PID_AUTHOR, Manufacturer)
-    if Win64:
+    if Itanium:
         si.SetProperty(PID_TEMPLATE, "Intel64;1033")
+    elif AMD64:
+        si.SetProperty(PID_TEMPLATE, "x64;1033")
     else:
         si.SetProperty(PID_TEMPLATE, "Intel;1033")
     si.SetProperty(PID_REVNUMBER, gen_uuid())
@@ -169,11 +177,10 @@ def add_tables(db, module):
         add_data(db, table, getattr(module, table))
 
 def make_id(str):
-    #str = str.replace(".", "_") # colons are allowed
-    str = str.replace(" ", "_")
-    str = str.replace("-", "_")
-    if str[0] in string.digits:
-        str = "_"+str
+    identifier_chars = string.ascii_letters + string.digits + "._"
+    str = "".join([c if c in identifier_chars else "_" for c in str])
+    if str[0] in (string.digits + "."):
+        str = "_" + str
     assert re.match("^[A-Za-z_][A-Za-z0-9_.]*$", str), "FILE"+str
     return str
 
@@ -281,19 +288,28 @@ class Directory:
                         [(feature.id, component)])
 
     def make_short(self, file):
+        oldfile = file
+        file = file.replace('+', '_')
+        file = ''.join(c for c in file if not c in ' "/\[]:;=,')
         parts = file.split(".")
-        if len(parts)>1:
+        if len(parts) > 1:
+            prefix = "".join(parts[:-1]).upper()
             suffix = parts[-1].upper()
+            if not prefix:
+                prefix = suffix
+                suffix = None
         else:
+            prefix = file.upper()
             suffix = None
-        prefix = parts[0].upper()
-        if len(prefix) <= 8 and (not suffix or len(suffix)<=3):
+        if len(parts) < 3 and len(prefix) <= 8 and file == oldfile and (
+                                                not suffix or len(suffix) <= 3):
             if suffix:
                 file = prefix+"."+suffix
             else:
                 file = prefix
-            assert file not in self.short_names
         else:
+            file = None
+        if file is None or file in self.short_names:
             prefix = prefix[:6]
             if suffix:
                 suffix = suffix[:3]
@@ -314,7 +330,7 @@ class Directory:
 
     def add_file(self, file, src=None, version=None, language=None):
         """Add a file to the current component of the directory, starting a new one
-        one if there is no current component. By default, the file name in the source
+        if there is no current component. By default, the file name in the source
         and the file table will be identical. If the src file is specified, it is
         interpreted relative to the current directory. Optionally, a version and a
         language can be specified for the entry in the File table."""
@@ -326,7 +342,7 @@ class Directory:
             file = os.path.basename(file)
         absolute = os.path.join(self.absolute, src)
         assert not re.search(r'[\?|><:/*]"', file) # restrictions on long names
-        if self.keyfiles.has_key(file):
+        if file in self.keyfiles:
             logical = self.keyfiles[file]
         else:
             logical = None

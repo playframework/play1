@@ -37,7 +37,6 @@ __version__ = "2.6"
 from operator import attrgetter
 import sys
 import os
-import urllib
 import UserDict
 import urlparse
 
@@ -45,10 +44,10 @@ from warnings import filterwarnings, catch_warnings, warn
 with catch_warnings():
     if sys.py3kwarning:
         filterwarnings("ignore", ".*mimetools has been removed",
-                        DeprecationWarning)
+                       DeprecationWarning)
+        filterwarnings("ignore", ".*rfc822 has been removed",
+                       DeprecationWarning)
     import mimetools
-    if sys.py3kwarning:
-        filterwarnings("ignore", ".*rfc822 has been removed", DeprecationWarning)
     import rfc822
 
 try:
@@ -132,7 +131,7 @@ def parse(fp=None, environ=os.environ, keep_blank_values=0, strict_parsing=0):
         environ         : environment dictionary; default: os.environ
 
         keep_blank_values: flag indicating whether blank values in
-            URL encoded forms should be treated as blank strings.
+            percent-encoded forms should be treated as blank strings.
             A true value indicates that blanks should be retained as
             blank strings.  The default false value indicates that
             blank values are to be ignored and treated as if they were
@@ -172,23 +171,23 @@ def parse(fp=None, environ=os.environ, keep_blank_values=0, strict_parsing=0):
         else:
             qs = ""
         environ['QUERY_STRING'] = qs    # XXX Shouldn't, really
-    return parse_qs(qs, keep_blank_values, strict_parsing)
+    return urlparse.parse_qs(qs, keep_blank_values, strict_parsing)
 
 
 # parse query string function called from urlparse,
-# this is done in order to maintain backward compatiblity.
+# this is done in order to maintain backward compatibility.
 
 def parse_qs(qs, keep_blank_values=0, strict_parsing=0):
     """Parse a query given as a string argument."""
-    warn("cgi.parse_qs is deprecated, use urlparse.parse_qs \
-            instead",PendingDeprecationWarning)
+    warn("cgi.parse_qs is deprecated, use urlparse.parse_qs instead",
+         PendingDeprecationWarning, 2)
     return urlparse.parse_qs(qs, keep_blank_values, strict_parsing)
 
 
 def parse_qsl(qs, keep_blank_values=0, strict_parsing=0):
     """Parse a query given as a string argument."""
     warn("cgi.parse_qsl is deprecated, use urlparse.parse_qsl instead",
-            PendingDeprecationWarning)
+         PendingDeprecationWarning, 2)
     return urlparse.parse_qsl(qs, keep_blank_values, strict_parsing)
 
 def parse_multipart(fp, pdict):
@@ -289,16 +288,28 @@ def parse_multipart(fp, pdict):
     return partdict
 
 
+def _parseparam(s):
+    while s[:1] == ';':
+        s = s[1:]
+        end = s.find(';')
+        while end > 0 and (s.count('"', 0, end) - s.count('\\"', 0, end)) % 2:
+            end = s.find(';', end + 1)
+        if end < 0:
+            end = len(s)
+        f = s[:end]
+        yield f.strip()
+        s = s[end:]
+
 def parse_header(line):
     """Parse a Content-type like header.
 
     Return the main content-type and a dictionary of options.
 
     """
-    plist = [x.strip() for x in line.split(';')]
-    key = plist.pop(0).lower()
+    parts = _parseparam(';' + line)
+    key = parts.next()
     pdict = {}
-    for p in plist:
+    for p in parts:
         i = p.find('=')
         if i >= 0:
             name = p[:i].strip().lower()
@@ -399,7 +410,7 @@ class FieldStorage:
         environ         : environment dictionary; default: os.environ
 
         keep_blank_values: flag indicating whether blank values in
-            URL encoded forms should be treated as blank strings.
+            percent-encoded forms should be treated as blank strings.
             A true value indicates that blanks should be retained as
             blank strings.  The default false value indicates that
             blank values are to be ignored and treated as if they were
@@ -686,6 +697,9 @@ class FieldStorage:
             if not line:
                 self.done = -1
                 break
+            if delim == "\r":
+                line = delim + line
+                delim = ""
             if line[:2] == "--" and last_line_lfend:
                 strippedline = line.strip()
                 if strippedline == next:
@@ -702,6 +716,12 @@ class FieldStorage:
                 delim = "\n"
                 line = line[:-1]
                 last_line_lfend = True
+            elif line[-1] == "\r":
+                # We may interrupt \r\n sequences if they span the 2**16
+                # byte boundary
+                delim = "\r"
+                line = line[:-1]
+                last_line_lfend = False
             else:
                 delim = ""
                 last_line_lfend = False

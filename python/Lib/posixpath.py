@@ -11,10 +11,12 @@ for manipulation of the pathname component of URLs.
 """
 
 import os
+import sys
 import stat
 import genericpath
 import warnings
 from genericpath import *
+from genericpath import _unicode
 
 __all__ = ["normcase","isabs","join","splitdrive","split","splitext",
            "basename","dirname","commonprefix","getsize","getmtime",
@@ -59,7 +61,8 @@ def isabs(s):
 def join(a, *p):
     """Join two or more pathname components, inserting '/' as needed.
     If any component is an absolute path, all previous path components
-    will be discarded."""
+    will be discarded.  An empty last part will result in a path that
+    ends with a separator."""
     path = a
     for b in p:
         if b.startswith('/'):
@@ -139,7 +142,7 @@ def islink(path):
 def lexists(path):
     """Test whether a path exists.  Returns True for broken symbolic links"""
     try:
-        st = os.lstat(path)
+        os.lstat(path)
     except os.error:
         return False
     return True
@@ -178,9 +181,12 @@ def samestat(s1, s2):
 
 def ismount(path):
     """Test whether a path is a mount point"""
+    if islink(path):
+        # A symlink can never be a mount point
+        return False
     try:
         s1 = os.lstat(path)
-        s2 = os.lstat(join(path, '..'))
+        s2 = os.lstat(realpath(join(path, '..')))
     except os.error:
         return False # It doesn't exist -- so not a mount point :-)
     dev1 = s1.st_dev
@@ -216,7 +222,8 @@ def walk(top, func, arg):
     beyond that arg is always passed to func.  It can be used, e.g., to pass
     a filename pattern, or a mutable object designed to accumulate
     statistics.  Passing None for arg is common."""
-    warnings.warnpy3k("In 3.x, os.path.walk is removed in favor of os.walk.")
+    warnings.warnpy3k("In 3.x, os.path.walk is removed in favor of os.walk.",
+                      stacklevel=2)
     try:
         names = os.listdir(top)
     except os.error:
@@ -263,7 +270,7 @@ def expanduser(path):
             return path
         userhome = pwent.pw_dir
     userhome = userhome.rstrip('/')
-    return userhome + path[i:]
+    return (userhome + path[i:]) or '/'
 
 
 # Expand paths containing shell variable substitutions.
@@ -271,28 +278,43 @@ def expanduser(path):
 # Non-existent variables are left unchanged.
 
 _varprog = None
+_uvarprog = None
 
 def expandvars(path):
     """Expand shell variables of form $var and ${var}.  Unknown variables
     are left unchanged."""
-    global _varprog
+    global _varprog, _uvarprog
     if '$' not in path:
         return path
-    if not _varprog:
-        import re
-        _varprog = re.compile(r'\$(\w+|\{[^}]*\})')
+    if isinstance(path, _unicode):
+        if not _uvarprog:
+            import re
+            _uvarprog = re.compile(ur'\$(\w+|\{[^}]*\})', re.UNICODE)
+        varprog = _uvarprog
+        encoding = sys.getfilesystemencoding()
+    else:
+        if not _varprog:
+            import re
+            _varprog = re.compile(r'\$(\w+|\{[^}]*\})')
+        varprog = _varprog
+        encoding = None
     i = 0
     while True:
-        m = _varprog.search(path, i)
+        m = varprog.search(path, i)
         if not m:
             break
         i, j = m.span(0)
         name = m.group(1)
         if name.startswith('{') and name.endswith('}'):
             name = name[1:-1]
+        if encoding:
+            name = name.encode(encoding)
         if name in os.environ:
             tail = path[j:]
-            path = path[:i] + os.environ[name]
+            value = os.environ[name]
+            if encoding:
+                value = value.decode(encoding)
+            path = path[:i] + value
             i = len(path)
             path += tail
         else:
@@ -306,8 +328,10 @@ def expandvars(path):
 
 def normpath(path):
     """Normalize path, eliminating double slashes, etc."""
+    # Preserve unicode (if path is unicode)
+    slash, dot = (u'/', u'.') if isinstance(path, _unicode) else ('/', '.')
     if path == '':
-        return '.'
+        return dot
     initial_slashes = path.startswith('/')
     # POSIX allows one or two initial slashes, but treats three or more
     # as single slash.
@@ -325,16 +349,20 @@ def normpath(path):
         elif new_comps:
             new_comps.pop()
     comps = new_comps
-    path = '/'.join(comps)
+    path = slash.join(comps)
     if initial_slashes:
-        path = '/'*initial_slashes + path
-    return path or '.'
+        path = slash*initial_slashes + path
+    return path or dot
 
 
 def abspath(path):
     """Return an absolute path."""
     if not isabs(path):
-        path = join(os.getcwd(), path)
+        if isinstance(path, _unicode):
+            cwd = os.getcwdu()
+        else:
+            cwd = os.getcwd()
+        path = join(cwd, path)
     return normpath(path)
 
 
@@ -344,47 +372,54 @@ def abspath(path):
 def realpath(filename):
     """Return the canonical path of the specified filename, eliminating any
 symbolic links encountered in the path."""
-    if isabs(filename):
-        bits = ['/'] + filename.split('/')[1:]
-    else:
-        bits = [''] + filename.split('/')
+    path, ok = _joinrealpath('', filename, {})
+    return abspath(path)
 
-    for i in range(2, len(bits)+1):
-        component = join(*bits[0:i])
-        # Resolve symbolic links.
-        if islink(component):
-            resolved = _resolve_link(component)
-            if resolved is None:
-                # Infinite loop -- return original component + rest of the path
-                return abspath(join(*([component] + bits[i:])))
+# Join two paths, normalizing and eliminating any symbolic links
+# encountered in the second path.
+def _joinrealpath(path, rest, seen):
+    if isabs(rest):
+        rest = rest[1:]
+        path = sep
+
+    while rest:
+        name, _, rest = rest.partition(sep)
+        if not name or name == curdir:
+            # current dir
+            continue
+        if name == pardir:
+            # parent dir
+            if path:
+                path, name = split(path)
+                if name == pardir:
+                    path = join(path, pardir, pardir)
             else:
-                newpath = join(*([resolved] + bits[i:]))
-                return realpath(newpath)
+                path = pardir
+            continue
+        newpath = join(path, name)
+        if not islink(newpath):
+            path = newpath
+            continue
+        # Resolve the symbolic link
+        if newpath in seen:
+            # Already seen this path
+            path = seen[newpath]
+            if path is not None:
+                # use cached value
+                continue
+            # The symlink is not resolved, so we must have a symlink loop.
+            # Return already resolved part + rest of the path unchanged.
+            return join(newpath, rest), False
+        seen[newpath] = None # not resolved symlink
+        path, ok = _joinrealpath(path, os.readlink(newpath), seen)
+        if not ok:
+            return join(path, rest), False
+        seen[newpath] = path # resolved symlink
 
-    return abspath(filename)
+    return path, True
 
 
-def _resolve_link(path):
-    """Internal helper function.  Takes a path and follows symlinks
-    until we either arrive at something that isn't a symlink, or
-    encounter a path we've seen before (meaning that there's a loop).
-    """
-    paths_seen = []
-    while islink(path):
-        if path in paths_seen:
-            # Already seen this path, so we must have a symlink loop
-            return None
-        paths_seen.append(path)
-        # Resolve where the link points to
-        resolved = os.readlink(path)
-        if not isabs(resolved):
-            dir = dirname(path)
-            path = normpath(join(dir, resolved))
-        else:
-            path = normpath(resolved)
-    return path
-
-supports_unicode_filenames = False
+supports_unicode_filenames = (sys.platform == 'darwin')
 
 def relpath(path, start=curdir):
     """Return a relative version of a path"""
@@ -392,8 +427,8 @@ def relpath(path, start=curdir):
     if not path:
         raise ValueError("no path specified")
 
-    start_list = abspath(start).split(sep)
-    path_list = abspath(path).split(sep)
+    start_list = [x for x in abspath(start).split(sep) if x]
+    path_list = [x for x in abspath(path).split(sep) if x]
 
     # Work out how much of the filepath is shared by start and path.
     i = len(commonprefix([start_list, path_list]))

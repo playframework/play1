@@ -1,4 +1,3 @@
-#!/bin/env python
 #------------------------------------------------------------------------
 #           Copyright (c) 1997-2001 by Total Control Software
 #                         All Rights Reserved
@@ -29,9 +28,6 @@ storage.
 
 #------------------------------------------------------------------------
 
-import cPickle
-import sys
-
 import sys
 absolute_import = (sys.version_info[0] >= 3)
 if absolute_import :
@@ -40,32 +36,40 @@ if absolute_import :
 else :
     import db
 
-#At version 2.3 cPickle switched to using protocol instead of bin
-if sys.version_info[:3] >= (2, 3, 0):
-    HIGHEST_PROTOCOL = cPickle.HIGHEST_PROTOCOL
-# In python 2.3.*, "cPickle.dumps" accepts no
-# named parameters. "pickle.dumps" accepts them,
-# so this seems a bug.
-    if sys.version_info[:3] < (2, 4, 0):
-        def _dumps(object, protocol):
-            return cPickle.dumps(object, protocol)
+if sys.version_info[0] >= 3 :
+    import cPickle  # Will be converted to "pickle" by "2to3"
+else :
+    if sys.version_info < (2, 6) :
+        import cPickle
     else :
-        def _dumps(object, protocol):
-            return cPickle.dumps(object, protocol=protocol)
+        # When we drop support for python 2.4
+        # we could use: (in 2.5 we need a __future__ statement)
+        #
+        #    with warnings.catch_warnings():
+        #        warnings.filterwarnings(...)
+        #        ...
+        #
+        # We can not use "with" as is, because it would be invalid syntax
+        # in python 2.4 and (with no __future__) 2.5.
+        # Here we simulate "with" following PEP 343 :
+        import warnings
+        w = warnings.catch_warnings()
+        w.__enter__()
+        try :
+            warnings.filterwarnings('ignore',
+                message='the cPickle module has been removed in Python 3.0',
+                category=DeprecationWarning)
+            import cPickle
+        finally :
+            w.__exit__()
+        del w
 
-else:
-    HIGHEST_PROTOCOL = None
-    def _dumps(object, protocol):
-        return cPickle.dumps(object, bin=protocol)
+HIGHEST_PROTOCOL = cPickle.HIGHEST_PROTOCOL
+def _dumps(object, protocol):
+    return cPickle.dumps(object, protocol=protocol)
 
-
-if sys.version_info[0:2] <= (2, 5) :
-    try:
-        from UserDict import DictMixin
-    except ImportError:
-        # DictMixin is new in Python 2.3
-        class DictMixin: pass
-    MutableMapping = DictMixin
+if sys.version_info < (2, 6) :
+    from UserDict import DictMixin as MutableMapping
 else :
     import collections
     MutableMapping = collections.MutableMapping
@@ -157,14 +161,21 @@ class DBShelf(MutableMapping):
 
 
     def keys(self, txn=None):
-        if txn != None:
+        if txn is not None:
             return self.db.keys(txn)
         else:
             return self.db.keys()
 
-    if sys.version_info[0:2] >= (2, 6) :
-        def __iter__(self) :
-            return self.db.__iter__()
+    if sys.version_info >= (2, 6) :
+        def __iter__(self) :  # XXX: Load all keys in memory :-(
+            for k in self.db.keys() :
+                yield k
+
+        # Do this when "DB"  support iteration
+        # Or is it enough to pass thru "getattr"?
+        #
+        # def __iter__(self) :
+        #    return self.db.__iter__()
 
 
     def open(self, *args, **kwargs):
@@ -185,7 +196,7 @@ class DBShelf(MutableMapping):
 
 
     def items(self, txn=None):
-        if txn != None:
+        if txn is not None:
             items = self.db.items(txn)
         else:
             items = self.db.items()
@@ -196,7 +207,7 @@ class DBShelf(MutableMapping):
         return newitems
 
     def values(self, txn=None):
-        if txn != None:
+        if txn is not None:
             values = self.db.values(txn)
         else:
             values = self.db.values()
@@ -234,7 +245,7 @@ class DBShelf(MutableMapping):
         # given nothing is passed to the extension module.  That way
         # an exception can be raised if set_get_returns_none is turned
         # off.
-        data = apply(self.db.get, args, kw)
+        data = self.db.get(*args, **kw)
         try:
             return cPickle.loads(data)
         except (EOFError, TypeError, cPickle.UnpicklingError):
@@ -303,7 +314,7 @@ class DBShelfCursor:
     def get(self, *args):
         count = len(args)  # a method overloading hack
         method = getattr(self, 'get_%d' % count)
-        apply(method, args)
+        method(*args)
 
     def get_1(self, flags):
         rec = self.dbc.get(flags)

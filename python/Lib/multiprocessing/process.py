@@ -3,7 +3,33 @@
 #
 # multiprocessing/process.py
 #
-# Copyright (c) 2006-2008, R Oudkerk --- see COPYING.txt
+# Copyright (c) 2006-2008, R Oudkerk
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of author nor the names of any contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
 #
 
 __all__ = ['Process', 'current_process', 'active_children']
@@ -138,7 +164,7 @@ class Process(object):
 
     @name.setter
     def name(self, name):
-        assert isinstance(name, str), 'name must be a string'
+        assert isinstance(name, basestring), 'name must be a string'
         self._name = name
 
     @property
@@ -179,7 +205,7 @@ class Process(object):
     @property
     def ident(self):
         '''
-        Return indentifier (PID) of process or `None` if it has yet to start
+        Return identifier (PID) of process or `None` if it has yet to start
         '''
         if self is _current_process:
             return os.getpid()
@@ -220,7 +246,8 @@ class Process(object):
             self._children = set()
             self._counter = itertools.count(1)
             try:
-                os.close(sys.stdin.fileno())
+                sys.stdin.close()
+                sys.stdin = open(os.devnull)
             except (OSError, ValueError):
                 pass
             _current_process = self
@@ -235,10 +262,10 @@ class Process(object):
         except SystemExit, e:
             if not e.args:
                 exitcode = 1
-            elif type(e.args[0]) is int:
+            elif isinstance(e.args[0], int):
                 exitcode = e.args[0]
             else:
-                sys.stderr.write(e.args[0] + '\n')
+                sys.stderr.write(str(e.args[0]) + '\n')
                 sys.stderr.flush()
                 exitcode = 1
         except:

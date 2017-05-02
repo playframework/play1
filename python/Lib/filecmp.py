@@ -48,11 +48,12 @@ def cmp(f1, f2, shallow=1):
     if s1[1] != s2[1]:
         return False
 
-    result = _cache.get((f1, f2))
-    if result and (s1, s2) == result[:2]:
-        return result[2]
-    outcome = _do_cmp(f1, f2)
-    _cache[f1, f2] = s1, s2, outcome
+    outcome = _cache.get((f1, f2, s1, s2))
+    if outcome is None:
+        outcome = _do_cmp(f1, f2)
+        if len(_cache) > 100:      # limit the maximum size of the cache
+            _cache.clear()
+        _cache[f1, f2, s1, s2] = outcome
     return outcome
 
 def _sig(st):
@@ -62,15 +63,14 @@ def _sig(st):
 
 def _do_cmp(f1, f2):
     bufsize = BUFSIZE
-    fp1 = open(f1, 'rb')
-    fp2 = open(f2, 'rb')
-    while True:
-        b1 = fp1.read(bufsize)
-        b2 = fp2.read(bufsize)
-        if b1 != b2:
-            return False
-        if not b1:
-            return True
+    with open(f1, 'rb') as fp1, open(f2, 'rb') as fp2:
+        while True:
+            b1 = fp1.read(bufsize)
+            b2 = fp2.read(bufsize)
+            if b1 != b2:
+                return False
+            if not b1:
+                return True
 
 # Directory comparison class.
 #
@@ -268,7 +268,7 @@ def cmpfiles(a, b, common, shallow=1):
 def _cmp(a, b, sh, abs=abs, cmp=cmp):
     try:
         return not abs(cmp(a, b, sh))
-    except os.error:
+    except (os.error, IOError):
         return 2
 
 

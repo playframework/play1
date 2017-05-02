@@ -4,9 +4,11 @@ def url2pathname(url):
     """OS-specific conversion from a relative URL of the 'file' scheme
     to a file system path; not recommended for general use."""
     # e.g.
-    # ///C|/foo/bar/spam.foo
-    # becomes
-    # C:\foo\bar\spam.foo
+    #   ///C|/foo/bar/spam.foo
+    # and
+    #   ///C:/foo/bar/spam.foo
+    # become
+    #   C:\foo\bar\spam.foo
     import string, urllib
     # Windows itself uses ":" even in URLs.
     url = url.replace(':', '|')
@@ -25,20 +27,23 @@ def url2pathname(url):
         error = 'Bad URL: ' + url
         raise IOError, error
     drive = comp[0][-1].upper()
-    components = comp[1].split('/')
     path = drive + ':'
-    for  comp in components:
+    components = comp[1].split('/')
+    for comp in components:
         if comp:
             path = path + '\\' + urllib.unquote(comp)
+    # Issue #11474: url like '/C|/' should convert into 'C:\\'
+    if path.endswith(':') and url.endswith('/'):
+        path += '\\'
     return path
 
 def pathname2url(p):
     """OS-specific conversion from a file system path to a relative URL
     of the 'file' scheme; not recommended for general use."""
     # e.g.
-    # C:\foo\bar\spam.foo
+    #   C:\foo\bar\spam.foo
     # becomes
-    # ///C|/foo/bar/spam.foo
+    #   ///C:/foo/bar/spam.foo
     import urllib
     if not ':' in p:
         # No drive specifier, just convert slashes and quote the name
@@ -56,7 +61,7 @@ def pathname2url(p):
 
     drive = urllib.quote(comp[0].upper())
     components = comp[1].split('\\')
-    path = '///' + drive + '|'
+    path = '///' + drive + ':'
     for comp in components:
         if comp:
             path = path + '/' + urllib.quote(comp)

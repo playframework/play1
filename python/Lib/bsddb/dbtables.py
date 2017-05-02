@@ -15,14 +15,42 @@
 # This provides a simple database table interface built on top of
 # the Python Berkeley DB 3 interface.
 #
-_cvsid = '$Id: dbtables.py 66088 2008-08-31 14:00:51Z jesus.cea $'
+_cvsid = '$Id$'
 
 import re
 import sys
 import copy
 import random
 import struct
-import cPickle as pickle
+
+
+if sys.version_info[0] >= 3 :
+    import pickle
+else :
+    if sys.version_info < (2, 6) :
+        import cPickle as pickle
+    else :
+        # When we drop support for python 2.4
+        # we could use: (in 2.5 we need a __future__ statement)
+        #
+        #    with warnings.catch_warnings():
+        #        warnings.filterwarnings(...)
+        #        ...
+        #
+        # We can not use "with" as is, because it would be invalid syntax
+        # in python 2.4 and (with no __future__) 2.5.
+        # Here we simulate "with" following PEP 343 :
+        import warnings
+        w = warnings.catch_warnings()
+        w.__enter__()
+        try :
+            warnings.filterwarnings('ignore',
+                message='the cPickle module has been removed in Python 3.0',
+                category=DeprecationWarning)
+            import cPickle as pickle
+        finally :
+            w.__exit__()
+        del w
 
 try:
     # For Pythons w/distutils pybsddb
@@ -30,12 +58,6 @@ try:
 except ImportError:
     # For Python 2.3
     from bsddb import db
-
-# XXX(nnorwitz): is this correct? DBIncompleteError is conditional in _bsddb.c
-if not hasattr(db,"DBIncompleteError") :
-    class DBIncompleteError(Exception):
-        pass
-    db.DBIncompleteError = DBIncompleteError
 
 class TableDBError(StandardError):
     pass
@@ -179,14 +201,14 @@ class bsdTableDB :
 
                 def set_range(self, search) :
                     v = self._dbcursor.set_range(bytes(search, "iso8859-1"))
-                    if v != None :
+                    if v is not None :
                         v = (v[0].decode("iso8859-1"),
                                 v[1].decode("iso8859-1"))
                     return v
 
                 def __next__(self) :
                     v = getattr(self._dbcursor, "next")()
-                    if v != None :
+                    if v is not None :
                         v = (v[0].decode("iso8859-1"),
                                 v[1].decode("iso8859-1"))
                     return v
@@ -204,7 +226,7 @@ class bsdTableDB :
 
                 def put(self, key, value, flags=0, txn=None) :
                     key = bytes(key, "iso8859-1")
-                    if value != None :
+                    if value is not None :
                         value = bytes(value, "iso8859-1")
                     return self._db.put(key, value, flags=flags, txn=txn)
 
@@ -215,7 +237,7 @@ class bsdTableDB :
                 def get(self, key, txn=None, flags=0) :
                     key = bytes(key, "iso8859-1")
                     v = self._db.get(key, txn=txn, flags=flags)
-                    if v != None :
+                    if v is not None :
                         v = v.decode("iso8859-1")
                     return v
 
@@ -261,16 +283,10 @@ class bsdTableDB :
             self.env = None
 
     def checkpoint(self, mins=0):
-        try:
-            self.env.txn_checkpoint(mins)
-        except db.DBIncompleteError:
-            pass
+        self.env.txn_checkpoint(mins)
 
     def sync(self):
-        try:
-            self.db.sync()
-        except db.DBIncompleteError:
-            pass
+        self.db.sync()
 
     def _db_print(self) :
         """Print the database to stdout for debugging"""
@@ -332,7 +348,7 @@ class bsdTableDB :
         except db.DBError, dberror:
             if txn:
                 txn.abort()
-            if sys.version_info[0] < 3 :
+            if sys.version_info < (2, 6) :
                 raise TableDBError, dberror[1]
             else :
                 raise TableDBError, dberror.args[1]
@@ -398,7 +414,7 @@ class bsdTableDB :
                 # column names
                 newcolumnlist = copy.copy(oldcolumnlist)
                 for c in columns:
-                    if not oldcolumnhash.has_key(c):
+                    if not c in oldcolumnhash:
                         newcolumnlist.append(c)
 
                 # store the table's new extended column list
@@ -416,7 +432,7 @@ class bsdTableDB :
             except db.DBError, dberror:
                 if txn:
                     txn.abort()
-                if sys.version_info[0] < 3 :
+                if sys.version_info < (2, 6) :
                     raise TableDBError, dberror[1]
                 else :
                     raise TableDBError, dberror.args[1]
@@ -472,7 +488,7 @@ class bsdTableDB :
                 raise TableDBError, "unknown table"
 
             # check the validity of each column name
-            if not self.__tablecolumns.has_key(table):
+            if not table in self.__tablecolumns:
                 self.__load_column_info(table)
             for column in rowdict.keys() :
                 if not self.__tablecolumns[table].count(column):
@@ -499,7 +515,7 @@ class bsdTableDB :
             if txn:
                 txn.abort()
                 self.db.delete(_rowid_key(table, rowid))
-            if sys.version_info[0] < 3 :
+            if sys.version_info < (2, 6) :
                 raise TableDBError, dberror[1], info[2]
             else :
                 raise TableDBError, dberror.args[1], info[2]
@@ -540,7 +556,7 @@ class bsdTableDB :
                              # error
                             dataitem = None
                         dataitem = mappings[column](dataitem)
-                        if dataitem <> None:
+                        if dataitem is not None:
                             self.db.put(
                                 _data_key(table, column, rowid),
                                 dataitem, txn=txn)
@@ -554,7 +570,7 @@ class bsdTableDB :
                     raise
 
         except db.DBError, dberror:
-            if sys.version_info[0] < 3 :
+            if sys.version_info < (2, 6) :
                 raise TableDBError, dberror[1]
             else :
                 raise TableDBError, dberror.args[1]
@@ -598,7 +614,7 @@ class bsdTableDB :
                         txn.abort()
                     raise
         except db.DBError, dberror:
-            if sys.version_info[0] < 3 :
+            if sys.version_info < (2, 6) :
                 raise TableDBError, dberror[1]
             else :
                 raise TableDBError, dberror.args[1]
@@ -615,13 +631,13 @@ class bsdTableDB :
           argument and returning a boolean.
         """
         try:
-            if not self.__tablecolumns.has_key(table):
+            if not table in self.__tablecolumns:
                 self.__load_column_info(table)
             if columns is None:
                 columns = self.__tablecolumns[table]
             matching_rowids = self.__Select(table, columns, conditions)
         except db.DBError, dberror:
-            if sys.version_info[0] < 3 :
+            if sys.version_info < (2, 6) :
                 raise TableDBError, dberror[1]
             else :
                 raise TableDBError, dberror.args[1]
@@ -639,7 +655,7 @@ class bsdTableDB :
         argument and returning a boolean.
         """
         # check the validity of each column name
-        if not self.__tablecolumns.has_key(table):
+        if not table in self.__tablecolumns:
             self.__load_column_info(table)
         if columns is None:
             columns = self.tablecolumns[table]
@@ -659,6 +675,13 @@ class bsdTableDB :
             a = atuple[1]
             b = btuple[1]
             if type(a) is type(b):
+
+                # Needed for python 3. "cmp" vanished in 3.0.1
+                def cmp(a, b) :
+                    if a==b : return 0
+                    if a<b : return -1
+                    return 1
+
                 if isinstance(a, PrefixCond) and isinstance(b, PrefixCond):
                     # longest prefix first
                     return cmp(len(b.prefix), len(a.prefix))
@@ -677,7 +700,7 @@ class bsdTableDB :
             # leave all unknown condition callables alone as equals
             return 0
 
-        if sys.version_info[0] < 3 :
+        if sys.version_info < (2, 6) :
             conditionlist = conditions.items()
             conditionlist.sort(cmp_conditions)
         else :  # Insertion Sort. Please, improve
@@ -709,28 +732,24 @@ class bsdTableDB :
                     # extract the rowid from the key
                     rowid = key[-_rowid_str_len:]
 
-                    if not rejected_rowids.has_key(rowid):
+                    if not rowid in rejected_rowids:
                         # if no condition was specified or the condition
                         # succeeds, add row to our match list.
                         if not condition or condition(data):
-                            if not matching_rowids.has_key(rowid):
+                            if not rowid in matching_rowids:
                                 matching_rowids[rowid] = {}
                             if savethiscolumndata:
                                 matching_rowids[rowid][column] = data
                         else:
-                            if matching_rowids.has_key(rowid):
+                            if rowid in matching_rowids:
                                 del matching_rowids[rowid]
                             rejected_rowids[rowid] = rowid
 
                     key, data = cur.next()
 
             except db.DBError, dberror:
-                if sys.version_info[0] < 3 :
-                    if dberror[0] != db.DB_NOTFOUND:
-                        raise
-                else :
-                    if dberror.args[0] != db.DB_NOTFOUND:
-                        raise
+                if dberror.args[0] != db.DB_NOTFOUND:
+                    raise
                 continue
 
         cur.close()
@@ -743,13 +762,13 @@ class bsdTableDB :
         if len(columns) > 0:
             for rowid, rowdata in matching_rowids.items():
                 for column in columns:
-                    if rowdata.has_key(column):
+                    if column in rowdata:
                         continue
                     try:
                         rowdata[column] = self.db.get(
                             _data_key(table, column, rowid))
                     except db.DBError, dberror:
-                        if sys.version_info[0] < 3 :
+                        if sys.version_info < (2, 6) :
                             if dberror[0] != db.DB_NOTFOUND:
                                 raise
                         else :
@@ -815,13 +834,10 @@ class bsdTableDB :
             txn.commit()
             txn = None
 
-            if self.__tablecolumns.has_key(table):
+            if table in self.__tablecolumns:
                 del self.__tablecolumns[table]
 
         except db.DBError, dberror:
             if txn:
                 txn.abort()
-            if sys.version_info[0] < 3 :
-                raise TableDBError, dberror[1]
-            else :
-                raise TableDBError, dberror.args[1]
+            raise TableDBError(dberror.args[1])
