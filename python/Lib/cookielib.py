@@ -1,4 +1,4 @@
-"""HTTP cookie handling for web clients.
+r"""HTTP cookie handling for web clients.
 
 This module has (now fairly distant) origins in Gisle Aas' Perl module
 HTTP::Cookies, from the libwww-perl library.
@@ -113,7 +113,7 @@ def time2netscape(t=None):
     """
     if t is None: t = time.time()
     year, mon, mday, hour, min, sec, wday = time.gmtime(t)[:7]
-    return "%s %02d-%s-%04d %02d:%02d:%02d GMT" % (
+    return "%s, %02d-%s-%04d %02d:%02d:%02d GMT" % (
         DAYS[wday], mday, MONTHS[mon-1], year, hour, min, sec)
 
 
@@ -434,6 +434,13 @@ def join_header_words(lists):
         if attr: headers.append("; ".join(attr))
     return ", ".join(headers)
 
+def _strip_quotes(text):
+    if text.startswith('"'):
+        text = text[1:]
+    if text.endswith('"'):
+        text = text[:-1]
+    return text
+
 def parse_ns_headers(ns_headers):
     """Ad-hoc parser for Netscape protocol cookie-attributes.
 
@@ -451,33 +458,48 @@ def parse_ns_headers(ns_headers):
     """
     known_attrs = ("expires", "domain", "path", "secure",
                    # RFC 2109 attrs (may turn up in Netscape cookies, too)
-                   "port", "max-age")
+                   "version", "port", "max-age")
 
     result = []
     for ns_header in ns_headers:
         pairs = []
         version_set = False
-        for ii, param in enumerate(re.split(r";\s*", ns_header)):
-            param = param.rstrip()
-            if param == "": continue
-            if "=" not in param:
-                k, v = param, None
-            else:
-                k, v = re.split(r"\s*=\s*", param, 1)
-                k = k.lstrip()
+
+        # XXX: The following does not strictly adhere to RFCs in that empty
+        # names and values are legal (the former will only appear once and will
+        # be overwritten if multiple occurrences are present). This is
+        # mostly to deal with backwards compatibility.
+        for ii, param in enumerate(ns_header.split(';')):
+            param = param.strip()
+
+            key, sep, val = param.partition('=')
+            key = key.strip()
+
+            if not key:
+                if ii == 0:
+                    break
+                else:
+                    continue
+
+            # allow for a distinction between present and empty and missing
+            # altogether
+            val = val.strip() if sep else None
+
             if ii != 0:
-                lc = k.lower()
+                lc = key.lower()
                 if lc in known_attrs:
-                    k = lc
-                if k == "version":
+                    key = lc
+
+                if key == "version":
                     # This is an RFC 2109 cookie.
+                    if val is not None:
+                        val = _strip_quotes(val)
                     version_set = True
-                if k == "expires":
+                elif key == "expires":
                     # convert expires date to seconds since epoch
-                    if v.startswith('"'): v = v[1:]
-                    if v.endswith('"'): v = v[:-1]
-                    v = http2time(v)  # None if invalid
-            pairs.append((k, v))
+                    if val is not None:
+                        val = http2time(_strip_quotes(val))  # None if invalid
+            pairs.append((key, val))
 
         if pairs:
             if not version_set:
@@ -601,19 +623,14 @@ def eff_request_host(request):
     return req_host, erhn
 
 def request_path(request):
-    """request-URI, as defined by RFC 2965."""
+    """Path component of request-URI, as defined by RFC 2965."""
     url = request.get_full_url()
-    #scheme, netloc, path, parameters, query, frag = urlparse.urlparse(url)
-    #req_path = escape_path("".join(urlparse.urlparse(url)[2:]))
-    path, parameters, query, frag = urlparse.urlparse(url)[2:]
-    if parameters:
-        path = "%s;%s" % (path, parameters)
-    path = escape_path(path)
-    req_path = urlparse.urlunparse(("", "", path, "", query, frag))
-    if not req_path.startswith("/"):
+    parts = urlparse.urlsplit(url)
+    path = escape_path(parts.path)
+    if not path.startswith("/"):
         # fix bad RFC 2396 absoluteURI
-        req_path = "/"+req_path
-    return req_path
+        path = "/" + path
+    return path
 
 def request_port(request):
     host = request.get_host()
@@ -1013,7 +1030,7 @@ class DefaultCookiePolicy(CookiePolicy):
                     (not erhn.startswith(".") and
                      not ("."+erhn).endswith(domain))):
                     _debug("   effective request-host %s (even with added "
-                           "initial dot) does not end end with %s",
+                           "initial dot) does not end with %s",
                            erhn, domain)
                     return False
             if (cookie.version > 0 or
@@ -1417,7 +1434,7 @@ class CookieJar:
                         break
                     # convert RFC 2965 Max-Age to seconds since epoch
                     # XXX Strictly you're supposed to follow RFC 2616
-                    #   age-calculation rules.  Remember that zero Max-Age is a
+                    #   age-calculation rules.  Remember that zero Max-Age
                     #   is a request to discard (old and new) cookie, though.
                     k = "expires"
                     v = self._now + v
@@ -1450,7 +1467,11 @@ class CookieJar:
 
         # set the easy defaults
         version = standard.get("version", None)
-        if version is not None: version = int(version)
+        if version is not None:
+            try:
+                version = int(version)
+            except ValueError:
+                return None  # invalid version, ignore cookie
         secure = standard.get("secure", False)
         # (discard is also set if expires is Absent)
         discard = standard.get("discard", False)
@@ -1714,12 +1735,12 @@ class CookieJar:
     def __repr__(self):
         r = []
         for cookie in self: r.append(repr(cookie))
-        return "<%s[%s]>" % (self.__class__, ", ".join(r))
+        return "<%s[%s]>" % (self.__class__.__name__, ", ".join(r))
 
     def __str__(self):
         r = []
         for cookie in self: r.append(str(cookie))
-        return "<%s[%s]>" % (self.__class__, ", ".join(r))
+        return "<%s[%s]>" % (self.__class__.__name__, ", ".join(r))
 
 
 # derives from IOError for backwards-compatibility with Python 2.4.0

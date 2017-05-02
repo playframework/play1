@@ -34,6 +34,22 @@ class IncrementalEncoder(codecs.IncrementalEncoder):
         codecs.IncrementalEncoder.reset(self)
         self.encoder = None
 
+    def getstate(self):
+        # state info we return to the caller:
+        # 0: stream is in natural order for this platform
+        # 2: endianness hasn't been determined yet
+        # (we're never writing in unnatural order)
+        return (2 if self.encoder is None else 0)
+
+    def setstate(self, state):
+        if state:
+            self.encoder = None
+        else:
+            if sys.byteorder == 'little':
+                self.encoder = codecs.utf_16_le_encode
+            else:
+                self.encoder = codecs.utf_16_be_encode
+
 class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
     def __init__(self, errors='strict'):
         codecs.BufferedIncrementalDecoder.__init__(self, errors)
@@ -58,17 +74,23 @@ class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
 
 class StreamWriter(codecs.StreamWriter):
     def __init__(self, stream, errors='strict'):
-        self.bom_written = False
         codecs.StreamWriter.__init__(self, stream, errors)
+        self.encoder = None
+
+    def reset(self):
+        codecs.StreamWriter.reset(self)
+        self.encoder = None
 
     def encode(self, input, errors='strict'):
-        self.bom_written = True
-        result = codecs.utf_16_encode(input, errors)
-        if sys.byteorder == 'little':
-            self.encode = codecs.utf_16_le_encode
+        if self.encoder is None:
+            result = codecs.utf_16_encode(input, errors)
+            if sys.byteorder == 'little':
+                self.encoder = codecs.utf_16_le_encode
+            else:
+                self.encoder = codecs.utf_16_be_encode
+            return result
         else:
-            self.encode = codecs.utf_16_be_encode
-        return result
+            return self.encoder(input, errors)
 
 class StreamReader(codecs.StreamReader):
 

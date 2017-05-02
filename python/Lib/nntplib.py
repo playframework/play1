@@ -37,6 +37,13 @@ __all__ = ["NNTP","NNTPReplyError","NNTPTemporaryError",
            "error_reply","error_temp","error_perm","error_proto",
            "error_data",]
 
+# maximal line length when calling readline(). This is to prevent
+# reading arbitrary length lines. RFC 3977 limits NNTP line length to
+# 512 characters, including CRLF. We have selected 2048 just to be on
+# the safe side.
+_MAXLINE = 2048
+
+
 # Exceptions raised when an error or invalid response is received
 class NNTPError(Exception):
     """Base class for all nntplib exceptions"""
@@ -103,14 +110,13 @@ class NNTP:
 
         readermode is sometimes necessary if you are connecting to an
         NNTP server on the local machine and intend to call
-        reader-specific comamnds, such as `group'.  If you get
+        reader-specific commands, such as `group'.  If you get
         unexpected NNTPPermanentErrors, you might need to set
         readermode.
         """
         self.host = host
         self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((self.host, self.port))
+        self.sock = socket.create_connection((host, port))
         self.file = self.sock.makefile('rb')
         self.debugging = 0
         self.welcome = self.getresp()
@@ -201,7 +207,9 @@ class NNTP:
     def getline(self):
         """Internal: return one line from the server, stripping CRLF.
         Raise EOFError if the connection is closed."""
-        line = self.file.readline()
+        line = self.file.readline(_MAXLINE + 1)
+        if len(line) > _MAXLINE:
+            raise NNTPDataError('line too long')
         if self.debugging > 1:
             print '*get*', repr(line)
         if not line: raise EOFError

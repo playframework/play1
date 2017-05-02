@@ -47,6 +47,10 @@ ecre = re.compile(r'''
 # For use with .match()
 fcre = re.compile(r'[\041-\176]+:$')
 
+# Find a header embedded in a putative header value.  Used to check for
+# header injection attack.
+_embeded_header = re.compile(r'\n[^ \t]+:')
+
 
 
 # Helpers
@@ -62,7 +66,7 @@ def decode_header(header):
     header, otherwise a lower-case string containing the name of the character
     set specified in the encoded string.
 
-    An email.Errors.HeaderParseError may be raised when certain decoding error
+    An email.errors.HeaderParseError may be raised when certain decoding error
     occurs (e.g. a base64 decoding exception).
     """
     # If no encoding, just return the header
@@ -92,6 +96,9 @@ def decode_header(header):
                 if encoding == 'q':
                     dec = email.quoprimime.header_decode(encoded)
                 elif encoding == 'b':
+                    paderr = len(encoded) % 4   # Postel's law: add missing padding
+                    if paderr:
+                        encoded += '==='[:4 - paderr]
                     try:
                         dec = email.base64mime.decode(encoded)
                     except binascii.Error:
@@ -337,8 +344,8 @@ class Header:
         # different charsets and/or encodings, and the resulting header will
         # accurately reflect each setting.
         #
-        # Each encoding can be email.Utils.QP (quoted-printable, for
-        # ASCII-like character sets like iso-8859-1), email.Utils.BASE64
+        # Each encoding can be email.utils.QP (quoted-printable, for
+        # ASCII-like character sets like iso-8859-1), email.utils.BASE64
         # (Base64, for non-ASCII like character sets like KOI8-R and
         # iso-2022-jp), or None (no encoding).
         #
@@ -400,7 +407,11 @@ class Header:
             newchunks += self._split(s, charset, targetlen, splitchars)
             lastchunk, lastcharset = newchunks[-1]
             lastlen = lastcharset.encoded_header_len(lastchunk)
-        return self._encode_chunks(newchunks, maxlinelen)
+        value = self._encode_chunks(newchunks, maxlinelen)
+        if _embeded_header.search(value):
+            raise HeaderParseError("header value appears to contain "
+                "an embedded header: {!r}".format(value))
+        return value
 
 
 

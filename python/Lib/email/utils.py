@@ -1,4 +1,4 @@
-# Copyright (C) 2001-2006 Python Software Foundation
+# Copyright (C) 2001-2010 Python Software Foundation
 # Author: Barry Warsaw
 # Contact: email-sig@python.org
 
@@ -13,6 +13,7 @@ __all__ = [
     'formatdate',
     'getaddresses',
     'make_msgid',
+    'mktime_tz',
     'parseaddr',
     'parsedate',
     'parsedate_tz',
@@ -59,19 +60,20 @@ def _identity(s):
 
 
 def _bdecode(s):
-    # We can't quite use base64.encodestring() since it tacks on a "courtesy
-    # newline".  Blech!
+    """Decodes a base64 string.
+
+    This function is equivalent to base64.decodestring and it's retained only
+    for backward compatibility. It used to remove the last \\n of the decoded
+    string, if it had any (see issue 7143).
+    """
     if not s:
         return s
-    value = base64.decodestring(s)
-    if not s.endswith('\n') and value.endswith('\n'):
-        return value[:-1]
-    return value
+    return base64.decodestring(s)
 
 
 
 def fix_eols(s):
-    """Replace all line-ending characters with \r\n."""
+    """Replace all line-ending characters with \\r\\n."""
     # Fix newlines with no preceding carriage return
     s = re.sub(r'(?<!\r)\n', CRLF, s)
     # Fix carriage returns with no following newline
@@ -175,21 +177,20 @@ def formatdate(timeval=None, localtime=False, usegmt=False):
 def make_msgid(idstring=None):
     """Returns a string suitable for RFC 2822 compliant Message-ID, e.g:
 
-    <20020201195627.33539.96671@nightshade.la.mastaler.com>
+    <142480216486.20800.16526388040877946887@nightshade.la.mastaler.com>
 
     Optional idstring if given is a string used to strengthen the
     uniqueness of the message id.
     """
-    timeval = time.time()
-    utcdate = time.strftime('%Y%m%d%H%M%S', time.gmtime(timeval))
+    timeval = int(time.time()*100)
     pid = os.getpid()
-    randint = random.randrange(100000)
+    randint = random.getrandbits(64)
     if idstring is None:
         idstring = ''
     else:
         idstring = '.' + idstring
     idhost = socket.getfqdn()
-    msgid = '<%s.%s.%s%s@%s>' % (utcdate, pid, randint, idstring, idhost)
+    msgid = '<%d.%d.%d%s@%s>' % (timeval, pid, randint, idstring, idhost)
     return msgid
 
 
