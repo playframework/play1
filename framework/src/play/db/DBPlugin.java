@@ -89,7 +89,7 @@ public class DBPlugin extends PlayPlugin {
                 
                 Set<String> dbNames = Configuration.getDbNames();
                 Iterator<String> it = dbNames.iterator();
-                while(it.hasNext()) {
+                while (it.hasNext()) {
                     dbName = it.next();
                     Configuration dbConfig = new Configuration(dbName);
                     
@@ -246,11 +246,11 @@ public class DBPlugin extends PlayPlugin {
             }
             out.println("Min pool size: " + datasource.getMinPoolSize());
             out.println("Max pool size: " + datasource.getMaxPoolSize());
-            try{
+            try {
                 out.println("Busy connection numbers: " + datasource.getNumBusyConnections());
                 out.println("Idle connection numbers: " + datasource.getNumIdleConnections());
                 out.println("Connection numbers: " + datasource.getNumConnections());
-            }catch(SQLException e){
+            } catch (SQLException e) {
                 out.println("Connection status error: " + e.getMessage());
             }
             out.println("Initial pool size: " + datasource.getInitialPoolSize());
