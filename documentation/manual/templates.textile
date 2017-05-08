@@ -80,7 +80,7 @@ All dynamic expressions are escaped by the template engine to avoid XSS security
 
 bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
 
-If you really want to display it in an unescaped way, you need to explicitely call the @raw()@ method:
+If you really want to display it in an unescaped way, you need to explicitly call the @raw()@ method:
 
 bc. ${title.raw()} --> <h1>Title</h1>
 
