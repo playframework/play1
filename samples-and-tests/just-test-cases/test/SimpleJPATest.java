@@ -215,4 +215,3 @@ public class SimpleJPATest extends UnitTest {
         assertFalse(a1.equals(userA)); // compare array key with scalar key
     }
 }
-
