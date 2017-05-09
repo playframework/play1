@@ -13,10 +13,12 @@ import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
 
-import java.util.Arrays;
 import java.util.Collection;
 
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 public class PluginCollectionTest {
     
@@ -67,6 +69,27 @@ public class PluginCollectionTest {
                 corePlugin_first_instance,
                 testPlugin_first_instance);
 
+    }
+
+    /**
+     * Avoid including the same class+index twice.
+     * 
+     * This happened in the past under a range of circumstances, including:
+     * 1. Class path on NTFS or other case insensitive file system includes
+     *    play.plugins directory 2x (C:/myproject/conf;c:/myproject/conf)
+     * 2. https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
+     */
+    @Test
+    public void skipsDuplicatePlugins() {
+        PluginCollection pc = spy(new PluginCollection());
+        when(pc.loadPlayPluginDescriptors()).thenReturn(asList(
+                getClass().getResource("custom-play.plugins"), 
+                getClass().getResource("custom-play.plugins.duplicate"))
+        );
+        pc.loadPlugins();
+        assertThat(pc.getAllPlugins()).containsExactly(
+                pc.getPluginInstance(CorePlugin.class),
+                pc.getPluginInstance(TestPlugin.class));
     }
 
     @Test
@@ -181,12 +204,12 @@ class PluginWithTests extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnit.class});
+        return asList(new Class[]{PluginUnit.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFunc.class});
+        return asList(new Class[]{PluginFunc.class});
     }
 }
 
@@ -194,12 +217,12 @@ class PluginWithTests2 extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnit2.class});
+        return asList(new Class[]{PluginUnit2.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFunc2.class});
+        return asList(new Class[]{PluginFunc2.class});
     }
 }
 

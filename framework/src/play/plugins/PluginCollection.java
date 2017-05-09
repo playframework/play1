@@ -140,21 +140,9 @@ public class PluginCollection {
         Logger.trace("Loading plugins");
         List<URL> urls = loadPlayPluginDescriptors();
 
-        // First we build one big SortedSet of all plugins to load (sorted based
-        // on index)
+        // First we build one big SortedSet of all plugins to load (sorted based on index)
         // This must be done to make sure the enhancing is happening
         // when loading plugins using other classes that must be enhanced.
-        // Data structure is a SortedSet instead of a List to avoid including
-        // the same class+index twice --
-        // this happened in the past under a range of circumstances, including:
-        // 1. Class path on NTFS or other case insensitive file system includes
-        // play.plugins directory 2x
-        // (C:/myproject/conf;c:/myproject/conf)
-        // 2.
-        // https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
-        // I can see loading the same plugin with different indexes, but I can't
-        // think of a reasonable use case for
-        // loading the same plugin multiple times at the same priority.
         SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<>();
         for (URL url : urls) {
             Logger.trace("Found one plugins descriptor, %s", url);
