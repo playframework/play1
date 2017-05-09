@@ -23,13 +23,13 @@ require:    &allDependencies
     - commons-lang 2.6
     - commons-logging 1.2
     - dom4j 1.6.1
-    - com.h2database -> h2 1.4.193
+    - com.h2database -> h2 1.4.194
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.7
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
     - jaxen 1.1.6
-    - joda-time 2.9.7
+    - joda-time 2.9.9
     - org.hamcrest -> hamcrest-all 1.3
     - junit 4.12
     - jregex 1.2_01
@@ -38,12 +38,12 @@ require:    &allDependencies
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.1
     - net.sf.oval -> oval 1.86
-    - mysql -> mysql-connector-java 5.1.40
+    - mysql -> mysql-connector-java 5.1.41
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.4.0
-    - org.bouncycastle -> bcprov-jdk15 1.46
-    - org.codehaus.groovy -> groovy-all 2.4.7
+    - org.bouncycastle -> bcprov-jdk15 1.56
+    - org.codehaus.groovy -> groovy-all 2.4.10
     - org.eclipse.jdt.core 3.10.0.v20140604-1726
     - org.hibernate -> hibernate-core 4.2.19.Final
     - org.hibernate -> hibernate-commons-annotations 4.0.2.Final
