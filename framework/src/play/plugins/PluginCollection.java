@@ -7,19 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import play.Logger;
 import play.Play;
@@ -38,6 +26,9 @@ import play.templates.Template;
 import play.test.BaseTest;
 import play.test.TestEngine;
 import play.vfs.VirtualFile;
+
+import static java.util.Collections.emptyList;
+import static java.util.Objects.hash;
 
 /**
  * Class handling all plugins used by Play.
@@ -113,7 +104,7 @@ public class PluginCollection {
 
         @Override
         public String toString() {
-            return "LoadingPluginInfo{" + "name='" + name + '\'' + ", index=" + index + ", url=" + url + '}';
+            return String.format("LoadingPluginInfo{name='%s', index=%s, url=%s}", name, index, url);
         }
 
         @Override
@@ -136,36 +127,18 @@ public class PluginCollection {
                 return false;
 
             LoadingPluginInfo that = (LoadingPluginInfo) o;
-
-            if (index != that.index)
-                return false;
-            if (name != null ? !name.equals(that.name) : that.name != null)
-                return false;
-
-            return true;
+            return Objects.equals(index, that.index) && Objects.equals(name, that.name);
         }
 
         @Override
         public int hashCode() {
-            int result = name != null ? name.hashCode() : 0;
-            result = 31 * result + index;
-            return result;
+            return hash(name, index);
         }
     }
 
-    /**
-     * Enable found plugins
-     */
     public void loadPlugins() {
         Logger.trace("Loading plugins");
-        // Play! plugins
-        Enumeration<URL> urls = null;
-        try {
-            urls = Play.classloader.getResources(play_plugins_resourceName);
-        } catch (Exception e) {
-            Logger.error("Error loading play.plugins", e);
-            return;
-        }
+        List<URL> urls = loadPlayPluginDescriptors();
 
         // First we build one big SortedSet of all plugins to load (sorted based
         // on index)
@@ -183,11 +156,9 @@ public class PluginCollection {
         // think of a reasonable use case for
         // loading the same plugin multiple times at the same priority.
         SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<>();
-        while (urls != null && urls.hasMoreElements()) {
-            URL url = urls.nextElement();
+        for (URL url : urls) {
             Logger.trace("Found one plugins descriptor, %s", url);
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (line.trim().length() == 0) {
@@ -200,7 +171,6 @@ public class PluginCollection {
             } catch (Exception e) {
                 Logger.error(e, "Error interpreting %s", url);
             }
-
         }
 
         for (LoadingPluginInfo info : pluginsToLoad) {
@@ -217,7 +187,7 @@ public class PluginCollection {
                 Logger.error(ex, "Error loading plugin %s", info.toString());
             }
         }
-        // Mow we must call onLoad for all plugins - and we must detect if a
+        // Now we must call onLoad for all plugins - and we must detect if a
         // plugin
         // disables another plugin the old way, by removing it from
         // Play.plugins.
@@ -232,6 +202,15 @@ public class PluginCollection {
         // Must update Play.plugins-list one last time
         updatePlayPluginsList();
 
+    }
+
+    List<URL> loadPlayPluginDescriptors() {
+        try {
+            return Collections.list(Play.classloader.getResources(play_plugins_resourceName));
+        } catch (Exception e) {
+            Logger.error(e, "Error loading play.plugins");
+            return emptyList();
+        }
     }
 
     /**

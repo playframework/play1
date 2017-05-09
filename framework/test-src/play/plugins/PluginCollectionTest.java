@@ -1,11 +1,7 @@
 package play.plugins;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import play.*;
 import play.data.parsing.TempFilePlugin;
 import play.data.validation.ValidationPlugin;
@@ -16,19 +12,16 @@ import play.i18n.MessagesPlugin;
 import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
+
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.fest.assertions.Assertions.assertThat;
 
-/**
- * Created by IntelliJ IDEA.
- * User: mortenkjetland
- * Date: 3/3/11
- * Time: 12:14 AM
- * To change this template use File | Settings | File Templates.
- */
 public class PluginCollectionTest {
     
     @Before
-    public void init(){
+    public void init() {
         new PlayBuilder().build();
     }
 
@@ -55,7 +48,7 @@ public class PluginCollectionTest {
     @Test
     public void verifyLoadingFromFilesWithBlankLines() throws Exception {
         //create custom PluginCollection that fakes that TestPlugin is application plugin
-        PluginCollection pc = new PluginCollection(){
+        PluginCollection pc = new PluginCollection() {
             @Override
             protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
                 //return true only if This is our TestPlugin
@@ -77,9 +70,9 @@ public class PluginCollectionTest {
     }
 
     @Test
-    public void verifyReloading() throws Exception{
+    public void verifyReloading() throws Exception {
         //create custom PluginCollection that fakes that TestPlugin is application plugin
-        PluginCollection pc = new PluginCollection(){
+        PluginCollection pc = new PluginCollection() {
             @Override
             protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
                 //return true only if This is our TestPlugin
@@ -113,7 +106,7 @@ public class PluginCollectionTest {
 
     @SuppressWarnings({"deprecation"})
     @Test
-    public void verifyUpdatePlayPluginsList(){
+    public void verifyUpdatePlayPluginsList() {
         assertThat(Play.plugins).isEmpty();
 
         PluginCollection pc = new PluginCollection();
@@ -126,7 +119,7 @@ public class PluginCollectionTest {
 
     @SuppressWarnings({"deprecation"})
     @Test
-    public void verifyThatDisabelingPluginsTheOldWayStillWorks(){
+    public void verifyThatDisablingPluginsTheOldWayStillWorks() {
         PluginCollection pc = new PluginCollection();
 
 
@@ -173,8 +166,8 @@ class LegacyPlugin extends PlayPlugin {
     public void onLoad() {
         //find TestPlugin in Play.plugins-list and remove it to disable it
         PlayPlugin pluginToRemove = null;
-        for( PlayPlugin pp : Play.plugins){
-            if( pp.getClass().equals( TestPlugin.class)){
+        for (PlayPlugin pp : Play.plugins) {
+            if ( pp.getClass().equals( TestPlugin.class)) {
                 pluginToRemove = pp;
                 break;
             }
