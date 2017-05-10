@@ -1,6 +1,7 @@
 package play.plugins;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -189,13 +190,17 @@ public class PluginCollection {
 
         // Must update Play.plugins-list one last time
         updatePlayPluginsList();
-
     }
 
     List<URL> loadPlayPluginDescriptors() {
         try {
+            String playPluginsDescriptor = Play.configuration.getProperty("play.plugins.descriptor");
+            if (playPluginsDescriptor != null) {
+                return Collections.singletonList(new File(playPluginsDescriptor).toURI().toURL());
+            }
             return Collections.list(Play.classloader.getResources(play_plugins_resourceName));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             Logger.error(e, "Error loading play.plugins");
             return emptyList();
         }

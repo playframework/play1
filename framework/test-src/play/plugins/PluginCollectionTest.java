@@ -13,6 +13,7 @@ import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
 
+import java.io.File;
 import java.util.Collection;
 
 import static java.util.Arrays.asList;
@@ -90,6 +91,15 @@ public class PluginCollectionTest {
         assertThat(pc.getAllPlugins()).containsExactly(
                 pc.getPluginInstance(CorePlugin.class),
                 pc.getPluginInstance(TestPlugin.class));
+    }
+
+    @Test
+    public void canLoadPlayPluginsFromASingleDescriptor() throws Exception {
+        Play.configuration.setProperty("play.plugins.descriptor", "test-src/play/plugins/custom-play.plugins");
+        PluginCollection pc = new PluginCollection();
+        assertThat(pc.loadPlayPluginDescriptors()).containsExactly(
+                new File("test-src/play/plugins/custom-play.plugins").toURI().toURL()
+        );
     }
 
     @Test
