@@ -7,7 +7,7 @@
 #  To update the symbols in this file, 'cd' to the top directory of
 #  the python source tree after building the interpreter and run:
 #
-#    python Lib/symbol.py
+#    ./python Lib/symbol.py
 
 #--start constants--
 single_input = 256
@@ -52,7 +52,7 @@ while_stmt = 294
 for_stmt = 295
 try_stmt = 296
 with_stmt = 297
-with_var = 298
+with_item = 298
 except_clause = 299
 suite = 300
 testlist_safe = 301
@@ -74,7 +74,7 @@ factor = 316
 power = 317
 atom = 318
 listmaker = 319
-testlist_gexp = 320
+testlist_comp = 320
 lambdef = 321
 trailer = 322
 subscriptlist = 323
@@ -82,16 +82,16 @@ subscript = 324
 sliceop = 325
 exprlist = 326
 testlist = 327
-dictmaker = 328
+dictorsetmaker = 328
 classdef = 329
 arglist = 330
 argument = 331
 list_iter = 332
 list_for = 333
 list_if = 334
-gen_iter = 335
-gen_for = 336
-gen_if = 337
+comp_iter = 335
+comp_for = 336
+comp_if = 337
 testlist1 = 338
 encoding_decl = 339
 yield_expr = 340

@@ -13,7 +13,7 @@ __all__ = [
     'quote',
     ]
 
-import time
+import time, calendar
 
 SPACE = ' '
 EMPTYSTRING = ''
@@ -107,6 +107,18 @@ def parsedate_tz(data):
         tss = int(tss)
     except ValueError:
         return None
+    # Check for a yy specified in two-digit format, then convert it to the
+    # appropriate four-digit format, according to the POSIX standard. RFC 822
+    # calls for a two-digit yy, but RFC 2822 (which obsoletes RFC 822)
+    # mandates a 4-digit yy. For more information, see the documentation for
+    # the time module.
+    if yy < 100:
+        # The year is between 1969 and 1999 (inclusive).
+        if yy > 68:
+            yy += 1900
+        # The year is between 2000 and 2068 (inclusive).
+        else:
+            yy += 2000
     tzoffset = None
     tz = tz.upper()
     if tz in _timezones:
@@ -138,17 +150,22 @@ def parsedate(data):
 
 
 def mktime_tz(data):
-    """Turn a 10-tuple as returned by parsedate_tz() into a UTC timestamp."""
+    """Turn a 10-tuple as returned by parsedate_tz() into a POSIX timestamp."""
     if data[9] is None:
         # No zone info, so localtime is better assumption than GMT
         return time.mktime(data[:8] + (-1,))
     else:
-        t = time.mktime(data[:8] + (0,))
-        return t - data[9] - time.timezone
+        t = calendar.timegm(data)
+        return t - data[9]
 
 
 def quote(str):
-    """Add quotes around a string."""
+    """Prepare string to be used in a quoted string.
+
+    Turns backslash and double quote characters into quoted pairs.  These
+    are the only characters that need to be quoted inside a quoted string.
+    Does not add the surrounding double quotes.
+    """
     return str.replace('\\', '\\\\').replace('"', '\\"')
 
 
@@ -306,7 +323,7 @@ class AddrlistClass:
                 aslist.append('.')
                 self.pos += 1
             elif self.field[self.pos] == '"':
-                aslist.append('"%s"' % self.getquote())
+                aslist.append('"%s"' % quote(self.getquote()))
             elif self.field[self.pos] in self.atomends:
                 break
             else:

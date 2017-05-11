@@ -46,6 +46,7 @@ from math import log as _log, exp as _exp, pi as _pi, e as _e, ceil as _ceil
 from math import sqrt as _sqrt, acos as _acos, cos as _cos, sin as _sin
 from os import urandom as _urandom
 from binascii import hexlify as _hexlify
+import hashlib as _hashlib
 
 __all__ = ["Random","seed","random","uniform","randint","choice","sample",
            "randrange","shuffle","normalvariate","lognormvariate",
@@ -107,7 +108,9 @@ class Random(_random.Random):
 
         if a is None:
             try:
-                a = long(_hexlify(_urandom(16)), 16)
+                # Seed with enough bytes to span the 19937 bit
+                # state space for the Mersenne Twister
+                a = long(_hexlify(_urandom(2500)), 16)
             except NotImplementedError:
                 import time
                 a = long(time.time() * 256) # use fractional seconds
@@ -141,6 +144,18 @@ class Random(_random.Random):
                              "Random.setstate() of version %s" %
                              (version, self.VERSION))
 
+    def jumpahead(self, n):
+        """Change the internal state to one that is likely far away
+        from the current state.  This method will not be in Py3.x,
+        so it is better to simply reseed.
+        """
+        # The super.jumpahead() method uses shuffling to change state,
+        # so it needs a large and "interesting" n to work with.  Here,
+        # we use hashing to create a large n for the shuffle.
+        s = repr(n) + repr(self.getstate())
+        n = int(_hashlib.new('sha512', s).hexdigest(), 16)
+        super(Random, self).jumpahead(n)
+
 ## ---- Methods below this point do not need to be overridden when
 ## ---- subclassing for the purpose of using a different core generator.
 
@@ -157,29 +172,28 @@ class Random(_random.Random):
 
 ## -------------------- integer methods  -------------------
 
-    def randrange(self, start, stop=None, step=1, int=int, default=None,
-                  maxwidth=1L<<BPF):
+    def randrange(self, start, stop=None, step=1, _int=int, _maxwidth=1L<<BPF):
         """Choose a random item from range(start, stop[, step]).
 
         This fixes the problem with randint() which includes the
         endpoint; in Python this is usually not what you want.
-        Do not supply the 'int', 'default', and 'maxwidth' arguments.
+
         """
 
         # This code is a bit messy to make it fast for the
         # common case while still doing adequate error checking.
-        istart = int(start)
+        istart = _int(start)
         if istart != start:
             raise ValueError, "non-integer arg 1 for randrange()"
-        if stop is default:
+        if stop is None:
             if istart > 0:
-                if istart >= maxwidth:
+                if istart >= _maxwidth:
                     return self._randbelow(istart)
-                return int(self.random() * istart)
+                return _int(self.random() * istart)
             raise ValueError, "empty range for randrange()"
 
         # stop argument supplied.
-        istop = int(stop)
+        istop = _int(stop)
         if istop != stop:
             raise ValueError, "non-integer stop for randrange()"
         width = istop - istart
@@ -197,14 +211,14 @@ class Random(_random.Random):
             # a long, but we're supposed to return an int (for backward
             # compatibility).
 
-            if width >= maxwidth:
-                return int(istart + self._randbelow(width))
-            return int(istart + int(self.random()*width))
+            if width >= _maxwidth:
+                return _int(istart + self._randbelow(width))
+            return _int(istart + _int(self.random()*width))
         if step == 1:
             raise ValueError, "empty range for randrange() (%d,%d, %d)" % (istart, istop, width)
 
         # Non-unit step argument supplied.
-        istep = int(step)
+        istep = _int(step)
         if istep != step:
             raise ValueError, "non-integer step for randrange()"
         if istep > 0:
@@ -217,9 +231,9 @@ class Random(_random.Random):
         if n <= 0:
             raise ValueError, "empty range for randrange()"
 
-        if n >= maxwidth:
+        if n >= _maxwidth:
             return istart + istep*self._randbelow(n)
-        return istart + istep*int(self.random() * n)
+        return istart + istep*_int(self.random() * n)
 
     def randint(self, a, b):
         """Return random integer in range [a, b], including both end points.
@@ -227,7 +241,7 @@ class Random(_random.Random):
 
         return self.randrange(a, b+1)
 
-    def _randbelow(self, n, _log=_log, int=int, _maxwidth=1L<<BPF,
+    def _randbelow(self, n, _log=_log, _int=int, _maxwidth=1L<<BPF,
                    _Method=_MethodType, _BuiltinMethod=_BuiltinMethodType):
         """Return a random int in the range [0,n)
 
@@ -244,7 +258,7 @@ class Random(_random.Random):
             # has not been overridden or if a new getrandbits() was supplied.
             # This assures that the two methods correspond.
             if type(self.random) is _BuiltinMethod or type(getrandbits) is _Method:
-                k = int(1.00001 + _log(n-1, 2.0))   # 2**k > n-1 > 2**(k-2)
+                k = _int(1.00001 + _log(n-1, 2.0))   # 2**k > n-1 > 2**(k-2)
                 r = getrandbits(k)
                 while r >= n:
                     r = getrandbits(k)
@@ -252,7 +266,7 @@ class Random(_random.Random):
         if n >= _maxwidth:
             _warn("Underlying random() generator does not supply \n"
                 "enough bits to choose from a population range this large")
-        return int(self.random() * n)
+        return _int(self.random() * n)
 
 ## -------------------- sequence methods  -------------------
 
@@ -260,18 +274,20 @@ class Random(_random.Random):
         """Choose a random element from a non-empty sequence."""
         return seq[int(self.random() * len(seq))]  # raises IndexError if seq is empty
 
-    def shuffle(self, x, random=None, int=int):
+    def shuffle(self, x, random=None):
         """x, random=random.random -> shuffle list x in place; return None.
 
         Optional arg random is a 0-argument function returning a random
         float in [0.0, 1.0); by default, the standard random.random.
+
         """
 
         if random is None:
             random = self.random
+        _int = int
         for i in reversed(xrange(1, len(x))):
             # pick an element in x[:i+1] with which to exchange x[i]
-            j = int(random() * (i+1))
+            j = _int(random() * (i+1))
             x[i], x[j] = x[j], x[i]
 
     def sample(self, population, k):
@@ -292,15 +308,6 @@ class Random(_random.Random):
         large population:   sample(xrange(10000000), 60)
         """
 
-        # XXX Although the documentation says `population` is "a sequence",
-        # XXX attempts are made to cater to any iterable with a __len__
-        # XXX method.  This has had mixed success.  Examples from both
-        # XXX sides:  sets work fine, and should become officially supported;
-        # XXX dicts are much harder, and have failed in various subtle
-        # XXX ways across attempts.  Support for mapping types should probably
-        # XXX be dropped (and users should pass mapping.keys() or .values()
-        # XXX explicitly).
-
         # Sampling without replacement entails tracking either potential
         # selections (the pool) in a list or previous selections in a set.
 
@@ -313,7 +320,7 @@ class Random(_random.Random):
 
         n = len(population)
         if not 0 <= k <= n:
-            raise ValueError, "sample larger than population"
+            raise ValueError("sample larger than population")
         random = self.random
         _int = int
         result = [None] * k
@@ -349,7 +356,7 @@ class Random(_random.Random):
 ## -------------------- uniform distribution -------------------
 
     def uniform(self, a, b):
-        """Get a random number in the range [a, b)."""
+        "Get a random number in the range [a, b) or [a, b] depending on rounding."
         return a + (b-a) * self.random()
 
 ## -------------------- triangular --------------------
@@ -364,7 +371,10 @@ class Random(_random.Random):
 
         """
         u = self.random()
-        c = 0.5 if mode is None else (mode - low) / (high - low)
+        try:
+            c = 0.5 if mode is None else (mode - low) / (high - low)
+        except ZeroDivisionError:
+            return low
         if u > c:
             u = 1.0 - u
             c = 1.0 - c
@@ -413,19 +423,19 @@ class Random(_random.Random):
     def expovariate(self, lambd):
         """Exponential distribution.
 
-        lambd is 1.0 divided by the desired mean.  (The parameter would be
-        called "lambda", but that is a reserved word in Python.)  Returned
-        values range from 0 to positive infinity.
+        lambd is 1.0 divided by the desired mean.  It should be
+        nonzero.  (The parameter would be called "lambda", but that is
+        a reserved word in Python.)  Returned values range from 0 to
+        positive infinity if lambd is positive, and from negative
+        infinity to 0 if lambd is negative.
 
         """
         # lambd: rate lambd = 1/mean
         # ('lambda' is a Python reserved word)
 
-        random = self.random
-        u = random()
-        while u <= 1e-7:
-            u = random()
-        return -_log(u)/lambd
+        # we use 1-random() instead of random() to preclude the
+        # possibility of taking the log of zero.
+        return -_log(1.0 - self.random())/lambd
 
 ## -------------------- von Mises distribution --------------------
 
@@ -453,27 +463,25 @@ class Random(_random.Random):
         if kappa <= 1e-6:
             return TWOPI * random()
 
-        a = 1.0 + _sqrt(1.0 + 4.0 * kappa * kappa)
-        b = (a - _sqrt(2.0 * a))/(2.0 * kappa)
-        r = (1.0 + b * b)/(2.0 * b)
+        s = 0.5 / kappa
+        r = s + _sqrt(1.0 + s * s)
 
         while 1:
             u1 = random()
-
             z = _cos(_pi * u1)
-            f = (1.0 + r * z)/(r + z)
-            c = kappa * (r - f)
 
+            d = z / (r + z)
             u2 = random()
-
-            if u2 < c * (2.0 - c) or u2 <= c * _exp(1.0 - c):
+            if u2 < 1.0 - d * d or u2 <= (1.0 - d) * _exp(d):
                 break
 
+        q = 1.0 / r
+        f = (q + z) / (1.0 + q * z)
         u3 = random()
         if u3 > 0.5:
-            theta = (mu % TWOPI) + _acos(f)
+            theta = (mu + _acos(f)) % TWOPI
         else:
-            theta = (mu % TWOPI) - _acos(f)
+            theta = (mu - _acos(f)) % TWOPI
 
         return theta
 
@@ -483,6 +491,12 @@ class Random(_random.Random):
         """Gamma distribution.  Not the gamma function!
 
         Conditions on the parameters are alpha > 0 and beta > 0.
+
+        The probability distribution function is:
+
+                    x ** (alpha - 1) * math.exp(-x / beta)
+          pdf(x) =  --------------------------------------
+                      math.gamma(alpha) * beta ** alpha
 
         """
 
@@ -586,7 +600,7 @@ class Random(_random.Random):
 
 ## -------------------- beta --------------------
 ## See
-## http://sourceforge.net/bugs/?func=detailbug&bug_id=130030&group_id=5470
+## http://mail.python.org/pipermail/python-bugs-list/2001-January/003752.html
 ## for Ivan Frohne's insightful analysis of why the original implementation:
 ##
 ##    def betavariate(self, alpha, beta):

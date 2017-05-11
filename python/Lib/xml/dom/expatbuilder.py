@@ -10,7 +10,7 @@ This avoids all the overhead of SAX and pulldom to gain performance.
 # minidom DOM and can't be used with other DOM implementations.  This
 # is due, in part, to a lack of appropriate methods in the DOM (there is
 # no way to create Entity and Notation nodes via the DOM Level 2
-# interface), and for performance.  The later is the cause of some fairly
+# interface), and for performance.  The latter is the cause of some fairly
 # cryptic code.
 #
 # Performance hacks:
@@ -242,7 +242,7 @@ class ExpatBuilder:
         doctype = self.document.implementation.createDocumentType(
             doctypeName, publicId, systemId)
         doctype.ownerDocument = self.document
-        self.document.childNodes.append(doctype)
+        _append_child(self.document, doctype)
         self.document.doctype = doctype
         if self._filter and self._filter.acceptNode(doctype) == FILTER_REJECT:
             self.document.doctype = None

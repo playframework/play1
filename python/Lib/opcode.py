@@ -58,7 +58,6 @@ def_op('UNARY_CONVERT', 13)
 
 def_op('UNARY_INVERT', 15)
 
-def_op('LIST_APPEND', 18)
 def_op('BINARY_POWER', 19)
 def_op('BINARY_MULTIPLY', 20)
 def_op('BINARY_DIVIDE', 21)
@@ -128,7 +127,7 @@ name_op('STORE_NAME', 90)       # Index in name list
 name_op('DELETE_NAME', 91)      # ""
 def_op('UNPACK_SEQUENCE', 92)   # Number of tuple items
 jrel_op('FOR_ITER', 93)
-
+def_op('LIST_APPEND', 94)
 name_op('STORE_ATTR', 95)       # Index in name list
 name_op('DELETE_ATTR', 96)      # ""
 name_op('STORE_GLOBAL', 97)     # ""
@@ -139,17 +138,19 @@ hasconst.append(100)
 name_op('LOAD_NAME', 101)       # Index in name list
 def_op('BUILD_TUPLE', 102)      # Number of tuple items
 def_op('BUILD_LIST', 103)       # Number of list items
-def_op('BUILD_MAP', 104)        # Number of dict entries (upto 255)
-name_op('LOAD_ATTR', 105)       # Index in name list
-def_op('COMPARE_OP', 106)       # Comparison operator
-hascompare.append(106)
-name_op('IMPORT_NAME', 107)     # Index in name list
-name_op('IMPORT_FROM', 108)     # Index in name list
-
+def_op('BUILD_SET', 104)        # Number of set items
+def_op('BUILD_MAP', 105)        # Number of dict entries (upto 255)
+name_op('LOAD_ATTR', 106)       # Index in name list
+def_op('COMPARE_OP', 107)       # Comparison operator
+hascompare.append(107)
+name_op('IMPORT_NAME', 108)     # Index in name list
+name_op('IMPORT_FROM', 109)     # Index in name list
 jrel_op('JUMP_FORWARD', 110)    # Number of bytes to skip
-jrel_op('JUMP_IF_FALSE', 111)   # ""
-jrel_op('JUMP_IF_TRUE', 112)    # ""
-jabs_op('JUMP_ABSOLUTE', 113)   # Target byte offset from beginning of code
+jabs_op('JUMP_IF_FALSE_OR_POP', 111) # Target byte offset from beginning of code
+jabs_op('JUMP_IF_TRUE_OR_POP', 112)  # ""
+jabs_op('JUMP_ABSOLUTE', 113)        # ""
+jabs_op('POP_JUMP_IF_FALSE', 114)    # ""
+jabs_op('POP_JUMP_IF_TRUE', 115)     # ""
 
 name_op('LOAD_GLOBAL', 116)     # Index in name list
 
@@ -180,7 +181,12 @@ hasfree.append(137)
 def_op('CALL_FUNCTION_VAR', 140)     # #args + (#kwargs << 8)
 def_op('CALL_FUNCTION_KW', 141)      # #args + (#kwargs << 8)
 def_op('CALL_FUNCTION_VAR_KW', 142)  # #args + (#kwargs << 8)
-def_op('EXTENDED_ARG', 143)
-EXTENDED_ARG = 143
+
+jrel_op('SETUP_WITH', 143)
+
+def_op('EXTENDED_ARG', 145)
+EXTENDED_ARG = 145
+def_op('SET_ADD', 146)
+def_op('MAP_ADD', 147)
 
 del def_op, name_op, jrel_op, jabs_op

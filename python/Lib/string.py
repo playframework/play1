@@ -43,15 +43,17 @@ del l
 
 # Capitalize the words in a string, e.g. " aBc  dEf " -> "Abc Def".
 def capwords(s, sep=None):
-    """capwords(s, [sep]) -> string
+    """capwords(s [,sep]) -> string
 
     Split the argument into words using split, capitalize each
     word using capitalize, and join the capitalized words using
-    join. Note that this replaces runs of whitespace characters by
-    a single space.
+    join.  If the optional second argument sep is absent or None,
+    runs of whitespace characters are replaced by a single space
+    and leading and trailing whitespace are removed, otherwise
+    sep is used to split and join the words.
 
     """
-    return (sep or ' ').join([x.capitalize() for x in s.split(sep)])
+    return (sep or ' ').join(x.capitalize() for x in s.split(sep))
 
 
 # Construct a translation string
@@ -143,7 +145,11 @@ class Template:
         raise ValueError('Invalid placeholder in string: line %d, col %d' %
                          (lineno, colno))
 
-    def substitute(self, *args, **kws):
+    def substitute(*args, **kws):
+        if not args:
+            raise TypeError("descriptor 'substitute' of 'Template' object "
+                            "needs an argument")
+        self, args = args[0], args[1:]  # allow the "self" keyword be passed
         if len(args) > 1:
             raise TypeError('Too many positional arguments')
         if not args:
@@ -169,7 +175,11 @@ class Template:
                              self.pattern)
         return self.pattern.sub(convert, self.template)
 
-    def safe_substitute(self, *args, **kws):
+    def safe_substitute(*args, **kws):
+        if not args:
+            raise TypeError("descriptor 'safe_substitute' of 'Template' object "
+                            "needs an argument")
+        self, args = args[0], args[1:]  # allow the "self" keyword be passed
         if len(args) > 1:
             raise TypeError('Too many positional arguments')
         if not args:
@@ -180,24 +190,18 @@ class Template:
             mapping = args[0]
         # Helper function for .sub()
         def convert(mo):
-            named = mo.group('named')
+            named = mo.group('named') or mo.group('braced')
             if named is not None:
                 try:
                     # We use this idiom instead of str() because the latter
                     # will fail if val is a Unicode containing non-ASCII
                     return '%s' % (mapping[named],)
                 except KeyError:
-                    return self.delimiter + named
-            braced = mo.group('braced')
-            if braced is not None:
-                try:
-                    return '%s' % (mapping[braced],)
-                except KeyError:
-                    return self.delimiter + '{' + braced + '}'
+                    return mo.group()
             if mo.group('escaped') is not None:
                 return self.delimiter
             if mo.group('invalid') is not None:
-                return self.delimiter
+                return mo.group()
             raise ValueError('Unrecognized named group in pattern',
                              self.pattern)
         return self.pattern.sub(convert, self.template)
@@ -506,15 +510,15 @@ def capitalize(s):
     return s.capitalize()
 
 # Substring replacement (global)
-def replace(s, old, new, maxsplit=-1):
-    """replace (str, old, new[, maxsplit]) -> string
+def replace(s, old, new, maxreplace=-1):
+    """replace (str, old, new[, maxreplace]) -> string
 
     Return a copy of string str with all occurrences of substring
-    old replaced by new. If the optional argument maxsplit is
-    given, only the first maxsplit occurrences are replaced.
+    old replaced by new. If the optional argument maxreplace is
+    given, only the first maxreplace occurrences are replaced.
 
     """
-    return s.replace(old, new, maxsplit)
+    return s.replace(old, new, maxreplace)
 
 
 # Try importing optional built-in module "strop" -- if it exists,
@@ -532,15 +536,26 @@ except ImportError:
 # the Formatter class
 # see PEP 3101 for details and purpose of this class
 
-# The hard parts are reused from the C implementation.  They're
-# exposed here via the sys module.  sys was chosen because it's always
-# available and doesn't have to be dynamically loaded.
+# The hard parts are reused from the C implementation.  They're exposed as "_"
+# prefixed methods of str and unicode.
 
 # The overall parser is implemented in str._formatter_parser.
 # The field name parser is implemented in str._formatter_field_name_split
 
 class Formatter(object):
-    def format(self, format_string, *args, **kwargs):
+    def format(*args, **kwargs):
+        if not args:
+            raise TypeError("descriptor 'format' of 'Formatter' object "
+                            "needs an argument")
+        self, args = args[0], args[1:]  # allow the "self" keyword be passed
+        try:
+            format_string, args = args[0], args[1:] # allow the "format_string" keyword be passed
+        except IndexError:
+            if 'format_string' in kwargs:
+                format_string = kwargs.pop('format_string')
+            else:
+                raise TypeError("format() missing 1 required positional "
+                                "argument: 'format_string'")
         return self.vformat(format_string, args, kwargs)
 
     def vformat(self, format_string, args, kwargs):
@@ -600,13 +615,13 @@ class Formatter(object):
 
     def convert_field(self, value, conversion):
         # do any conversion on the resulting object
-        if conversion == 'r':
-            return repr(value)
+        if conversion is None:
+            return value
         elif conversion == 's':
             return str(value)
-        elif conversion is None:
-            return value
-        raise ValueError("Unknown converion specifier {0!s}".format(conversion))
+        elif conversion == 'r':
+            return repr(value)
+        raise ValueError("Unknown conversion specifier {0!s}".format(conversion))
 
 
     # returns an iterable that contains tuples of the form:

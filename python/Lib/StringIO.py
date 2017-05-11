@@ -128,7 +128,7 @@ class StringIO:
         if self.buflist:
             self.buf += ''.join(self.buflist)
             self.buflist = []
-        if n < 0:
+        if n is None or n < 0:
             newpos = self.len
         else:
             newpos = min(self.pos+n, self.len)
@@ -158,7 +158,7 @@ class StringIO:
             newpos = self.len
         else:
             newpos = i+1
-        if length is not None:
+        if length is not None and length >= 0:
             if self.pos + length < newpos:
                 newpos = self.pos + length
         r = self.buf[self.pos:newpos]
@@ -266,6 +266,7 @@ class StringIO:
         8th bit) will cause a UnicodeError to be raised when getvalue()
         is called.
         """
+        _complain_ifclosed(self.closed)
         if self.buflist:
             self.buf += ''.join(self.buflist)
             self.buflist = []
