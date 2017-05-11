@@ -399,10 +399,10 @@ public class PluginCollection {
      *            The plugin class
      * @return PlayPlugin
      */
-    public synchronized PlayPlugin getPluginInstance(Class<? extends PlayPlugin> pluginClazz) {
+    public synchronized <T extends PlayPlugin> T getPluginInstance(Class<T> pluginClazz) {
         for (PlayPlugin p : getAllPlugins()) {
             if (pluginClazz.isInstance(p)) {
-                return p;
+                return (T) p;
             }
         }
         return null;
