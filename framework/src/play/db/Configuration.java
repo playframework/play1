@@ -15,6 +15,12 @@ import play.Play;
 
 public class Configuration {
 
+    /** definition of regex to filter db related settings. */
+    final String regexDbRelatedSettings = "^(db|javax\\.persistence|jpa|(?:org\\.)?hibernate){1}";
+
+    /** compiled regex as a pattern for reuse to filter all db related settings. */
+    final java.util.regex.Pattern compiledRegexDbRelatedSettings = java.util.regex.Pattern.compile(regexDbRelatedSettings +".*");
+
     public String configName;
 
     public boolean isDefault() {
@@ -85,7 +91,7 @@ public class Configuration {
     }
 
     String generateKey(String key) {
-        Pattern pattern = new Pattern("^(db|jpa|hibernate){1}(\\.?[\\da-zA-Z\\.-_]*)$");
+        Pattern pattern = new Pattern(regexDbRelatedSettings + "(\\.?[\\da-zA-Z\\.-_]*)$");
         Matcher m = pattern.matcher(key);
         if (m.matches()) {
             return m.group(1) + "." + this.configName + m.group(2);
@@ -99,9 +105,12 @@ public class Configuration {
 
         for (Object key : Collections.list(props.keys())) {
             String keyName = key.toString();
-            if (keyName.startsWith("db") || keyName.startsWith("hibernate")) {
-                if (keyName.startsWith("db." + this.configName) || keyName.startsWith("hibernate." + this.configName)) {
-                    String type = keyName.substring(0, keyName.indexOf('.'));
+
+            final java.util.regex.Matcher matcher = compiledRegexDbRelatedSettings.matcher(keyName);
+            if (matcher.matches()) {
+                final String key_prefix_for_db_related_setting = matcher.group(1);
+                if (keyName.startsWith(key_prefix_for_db_related_setting + "." + this.configName)) {
+                    String type = key_prefix_for_db_related_setting;
                     String newKey = type;
                     if (keyName.length() > (type + "." + this.configName).length()) {
                         newKey += "." + keyName.substring((type + "." + this.configName).length() + 1);
@@ -111,13 +120,14 @@ public class Configuration {
                     boolean isDefaultProperty = true;
                     Set<String> dBNames = Configuration.getDbNames();
                     for (String dbName : dBNames) {
-                        if (key.toString().startsWith("db." + dbName) || key.toString().startsWith("hibernate." + dbName)) {
+                        if (keyName.startsWith("db." + dbName) ||
+                            keyName.startsWith("hibernate." + dbName)) {
                             isDefaultProperty = false;
                             break;
                         }
                     }
                     if (isDefaultProperty) {
-                        properties.put(key.toString(), props.get(key).toString());
+                        properties.put(keyName, props.get(key).toString());
                     }
                 }
             }
