@@ -14,7 +14,9 @@ import os
 import posixpath
 import BaseHTTPServer
 import urllib
+import urlparse
 import cgi
+import sys
 import shutil
 import mimetypes
 try:
@@ -42,8 +44,10 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """Serve a GET request."""
         f = self.send_head()
         if f:
-            self.copyfile(f, self.wfile)
-            f.close()
+            try:
+                self.copyfile(f, self.wfile)
+            finally:
+                f.close()
 
     def do_HEAD(self):
         """Serve a HEAD request."""
@@ -65,10 +69,14 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         path = self.translate_path(self.path)
         f = None
         if os.path.isdir(path):
-            if not self.path.endswith('/'):
+            parts = urlparse.urlsplit(self.path)
+            if not parts.path.endswith('/'):
                 # redirect browser - doing basically what apache does
                 self.send_response(301)
-                self.send_header("Location", self.path + "/")
+                new_parts = (parts[0], parts[1], parts[2] + '/',
+                             parts[3], parts[4])
+                new_url = urlparse.urlunsplit(new_parts)
+                self.send_header("Location", new_url)
                 self.end_headers()
                 return None
             for index in "index.html", "index.htm":
@@ -87,13 +95,17 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except IOError:
             self.send_error(404, "File not found")
             return None
-        self.send_response(200)
-        self.send_header("Content-type", ctype)
-        fs = os.fstat(f.fileno())
-        self.send_header("Content-Length", str(fs[6]))
-        self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
-        self.end_headers()
-        return f
+        try:
+            self.send_response(200)
+            self.send_header("Content-type", ctype)
+            fs = os.fstat(f.fileno())
+            self.send_header("Content-Length", str(fs[6]))
+            self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+            self.end_headers()
+            return f
+        except:
+            f.close()
+            raise
 
     def list_directory(self, path):
         """Helper to produce a directory listing (absent index.html).
@@ -131,7 +143,8 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         length = f.tell()
         f.seek(0)
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        encoding = sys.getfilesystemencoding()
+        self.send_header("Content-type", "text/html; charset=%s" % encoding)
         self.send_header("Content-Length", str(length))
         self.end_headers()
         return f
@@ -147,15 +160,19 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # abandon query parameters
         path = path.split('?',1)[0]
         path = path.split('#',1)[0]
+        # Don't forget explicit trailing slash when normalizing. Issue17324
+        trailing_slash = path.rstrip().endswith('/')
         path = posixpath.normpath(urllib.unquote(path))
         words = path.split('/')
         words = filter(None, words)
         path = os.getcwd()
         for word in words:
-            drive, word = os.path.splitdrive(word)
-            head, word = os.path.split(word)
-            if word in (os.curdir, os.pardir): continue
+            if os.path.dirname(word) or word in (os.curdir, os.pardir):
+                # Ignore components that are not a simple file/directory name
+                continue
             path = os.path.join(path, word)
+        if trailing_slash:
+            path += '/'
         return path
 
     def copyfile(self, source, outputfile):

@@ -3,12 +3,39 @@
 #
 # multiprocessing/forking.py
 #
-# Copyright (c) 2006-2008, R Oudkerk --- see COPYING.txt
+# Copyright (c) 2006-2008, R Oudkerk
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of author nor the names of any contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
 #
 
 import os
 import sys
 import signal
+import errno
 
 from multiprocessing import util, process
 
@@ -103,7 +130,17 @@ if sys.platform != 'win32':
 
         def poll(self, flag=os.WNOHANG):
             if self.returncode is None:
-                pid, sts = os.waitpid(self.pid, flag)
+                while True:
+                    try:
+                        pid, sts = os.waitpid(self.pid, flag)
+                    except os.error as e:
+                        if e.errno == errno.EINTR:
+                            continue
+                        # Child process not yet created. See #1731717
+                        # e.errno == errno.ECHILD == 10
+                        return None
+                    else:
+                        break
                 if pid == self.pid:
                     if os.WIFSIGNALED(sts):
                         self.returncode = -os.WTERMSIG(sts)
@@ -150,7 +187,7 @@ else:
     import _subprocess
     import time
 
-    from ._multiprocessing import win32, Connection, PipeConnection
+    from _multiprocessing import win32, Connection, PipeConnection
     from .util import Finalize
 
     #try:
@@ -167,6 +204,7 @@ else:
 
     TERMINATE = 0x10000
     WINEXE = (sys.platform == 'win32' and getattr(sys, 'frozen', False))
+    WINSERVICE = sys.executable.lower().endswith("pythonservice.exe")
 
     exit = win32.ExitProcess
     close = win32.CloseHandle
@@ -176,7 +214,7 @@ else:
     # People embedding Python want to modify it.
     #
 
-    if sys.executable.lower().endswith('pythonservice.exe'):
+    if WINSERVICE:
         _python_exe = os.path.join(sys.exec_prefix, 'python.exe')
     else:
         _python_exe = sys.executable
@@ -304,7 +342,7 @@ else:
         '''
         Returns prefix of command line used for spawning a child process
         '''
-        if process.current_process()._identity==() and is_forking(sys.argv):
+        if getattr(process.current_process(), '_inheriting', False):
             raise RuntimeError('''
             Attempt to start a new process before the current process
             has finished its bootstrapping phase.
@@ -323,12 +361,13 @@ else:
             return [sys.executable, '--multiprocessing-fork']
         else:
             prog = 'from multiprocessing.forking import main; main()'
-            return [_python_exe, '-c', prog, '--multiprocessing-fork']
+            opts = util._args_from_interpreter_flags()
+            return [_python_exe] + opts + ['-c', prog, '--multiprocessing-fork']
 
 
     def main():
         '''
-        Run code specifed by data received over pipe
+        Run code specified by data received over pipe
         '''
         assert is_forking(sys.argv)
 
@@ -366,7 +405,7 @@ else:
         if _logger is not None:
             d['log_level'] = _logger.getEffectiveLevel()
 
-        if not WINEXE:
+        if not WINEXE and not WINSERVICE:
             main_path = getattr(sys.modules['__main__'], '__file__', None)
             if not main_path and sys.argv[0] not in ('', '-c'):
                 main_path = sys.argv[0]
@@ -431,12 +470,26 @@ def prepare(data):
         process.ORIGINAL_DIR = data['orig_dir']
 
     if 'main_path' in data:
+        # XXX (ncoghlan): The following code makes several bogus
+        # assumptions regarding the relationship between __file__
+        # and a module's real name. See PEP 302 and issue #10845
+        # The problem is resolved properly in Python 3.4+, as
+        # described in issue #19946
+
         main_path = data['main_path']
         main_name = os.path.splitext(os.path.basename(main_path))[0]
         if main_name == '__init__':
             main_name = os.path.basename(os.path.dirname(main_path))
 
-        if main_name != 'ipython':
+        if main_name == '__main__':
+            # For directory and zipfile execution, we assume an implicit
+            # "if __name__ == '__main__':" around the module, and don't
+            # rerun the main module code in spawned processes
+            main_module = sys.modules['__main__']
+            main_module.__file__ = main_path
+        elif main_name != 'ipython':
+            # Main modules not actually called __main__.py may
+            # contain additional code that should still be executed
             import imp
 
             if main_path is None:

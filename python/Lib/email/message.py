@@ -20,7 +20,7 @@ from email import errors
 SEMISPACE = '; '
 
 # Regular expression that matches `special' characters in parameters, the
-# existance of which force quoting of the parameter value.
+# existence of which force quoting of the parameter value.
 tspecials = re.compile(r'[ \(\)<>@,;:\\"/\[\]\?=]')
 
 
@@ -38,7 +38,9 @@ def _splitparam(param):
 def _formatparam(param, value=None, quote=True):
     """Convenience function to format and return a key=value pair.
 
-    This will quote the value if needed or if quote is true.
+    This will quote the value if needed or if quote is true.  If value is a
+    three tuple (charset, language, value), it will be encoded according
+    to RFC2231 rules.
     """
     if value is not None and len(value) > 0:
         # A tuple is used for RFC 2231 encoded parameter values where items
@@ -62,7 +64,7 @@ def _parseparam(s):
     while s[:1] == ';':
         s = s[1:]
         end = s.find(';')
-        while end > 0 and s.count('"', 0, end) % 2:
+        while end > 0 and (s.count('"', 0, end) - s.count('\\"', 0, end)) % 2:
             end = s.find(';', end + 1)
         if end < 0:
             end = len(s)
@@ -97,7 +99,7 @@ class Message:
     objects, otherwise it is a string.
 
     Message objects implement part of the `mapping' interface, which assumes
-    there is exactly one occurrance of the header per message.  Some headers
+    there is exactly one occurrence of the header per message.  Some headers
     do in fact appear multiple times (e.g. Received) and for those headers,
     you must use the explicit API to set or get all the headers.  Not all of
     the mapping methods are implemented.
@@ -129,7 +131,7 @@ class Message:
         "From ".  For more flexibility, use the flatten() method of a
         Generator instance.
         """
-        from email.Generator import Generator
+        from email.generator import Generator
         fp = StringIO()
         g = Generator(fp)
         g.flatten(self, unixfrom=unixfrom)
@@ -249,16 +251,18 @@ class Message:
         # BAW: should we accept strings that can serve as arguments to the
         # Charset constructor?
         self._charset = charset
-        if not self.has_key('MIME-Version'):
+        if 'MIME-Version' not in self:
             self.add_header('MIME-Version', '1.0')
-        if not self.has_key('Content-Type'):
+        if 'Content-Type' not in self:
             self.add_header('Content-Type', 'text/plain',
                             charset=charset.get_output_charset())
         else:
             self.set_param('charset', charset.get_output_charset())
+        if isinstance(self._payload, unicode):
+            self._payload = self._payload.encode(charset.output_charset)
         if str(charset) != charset.get_output_charset():
             self._payload = charset.body_encode(self._payload)
-        if not self.has_key('Content-Transfer-Encoding'):
+        if 'Content-Transfer-Encoding' not in self:
             cte = charset.get_body_encoding()
             try:
                 cte(self)
@@ -284,7 +288,7 @@ class Message:
         Return None if the header is missing instead of raising an exception.
 
         Note that if the header appeared multiple times, exactly which
-        occurrance gets returned is undefined.  Use get_all() to get all
+        occurrence gets returned is undefined.  Use get_all() to get all
         the values matching a header field name.
         """
         return self.get(name)
@@ -387,7 +391,10 @@ class Message:
         name is the header field to add.  keyword arguments can be used to set
         additional parameters for the header field, with underscores converted
         to dashes.  Normally the parameter will be added as key="value" unless
-        value is None, in which case only the key will be added.
+        value is None, in which case only the key will be added.  If a
+        parameter value contains non-ASCII characters it must be specified as a
+        three-tuple of (charset, language, value), in which case it will be
+        encoded according to RFC2231 rules.
 
         Example:
 
@@ -551,7 +558,7 @@ class Message:
         VALUE item in the 3-tuple) is always unquoted, unless unquote is set
         to False.
         """
-        if not self.has_key(header):
+        if header not in self:
             return failobj
         for k, v in self._get_params_preserve(failobj, header):
             if k.lower() == param.lower():
@@ -572,7 +579,7 @@ class Message:
         message, it will be set to "text/plain" and the new parameter and
         value will be appended as per RFC 2045.
 
-        An alternate header can specified in the header argument, and all
+        An alternate header can be specified in the header argument, and all
         parameters will be quoted as necessary unless requote is False.
 
         If charset is specified, the parameter will be encoded according to RFC
@@ -582,7 +589,7 @@ class Message:
         if not isinstance(value, tuple) and charset:
             value = (charset, language, value)
 
-        if not self.has_key(header) and header.lower() == 'content-type':
+        if header not in self and header.lower() == 'content-type':
             ctype = 'text/plain'
         else:
             ctype = self.get(header)
@@ -617,7 +624,7 @@ class Message:
         False.  Optional header specifies an alternative to the Content-Type
         header.
         """
-        if not self.has_key(header):
+        if header not in self:
             return
         new_ctype = ''
         for p, v in self.get_params(header=header, unquote=requote):
@@ -653,7 +660,7 @@ class Message:
         if header.lower() == 'content-type':
             del self['mime-version']
             self['MIME-Version'] = '1.0'
-        if not self.has_key(header):
+        if header not in self:
             self[header] = type
             return
         params = self.get_params(header=header, unquote=requote)
@@ -674,7 +681,7 @@ class Message:
         missing = object()
         filename = self.get_param('filename', missing, 'content-disposition')
         if filename is missing:
-            filename = self.get_param('name', missing, 'content-disposition')
+            filename = self.get_param('name', missing, 'content-type')
         if filename is missing:
             return failobj
         return utils.collapse_rfc2231_value(filename).strip()
@@ -787,4 +794,4 @@ class Message:
         return [part.get_content_charset(failobj) for part in self.walk()]
 
     # I.e. def walk(self): ...
-    from email.Iterators import walk
+    from email.iterators import walk

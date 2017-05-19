@@ -32,13 +32,6 @@ class FileWrapper:
             return data
         raise StopIteration
 
-
-
-
-
-
-
-
 def guess_scheme(environ):
     """Return a guess for whether 'wsgi.url_scheme' should be 'http' or 'https'
     """
@@ -71,7 +64,7 @@ def request_uri(environ, include_query=1):
     """Return the full request URI, optionally including the query string"""
     url = application_uri(environ)
     from urllib import quote
-    path_info = quote(environ.get('PATH_INFO',''))
+    path_info = quote(environ.get('PATH_INFO',''),safe='/;=,')
     if not environ.get('SCRIPT_NAME'):
         url += path_info[1:]
     else:
@@ -161,7 +154,6 @@ def setup_testing_defaults(environ):
 
 
 
-
 _hoppish = {
     'connection':1, 'keep-alive':1, 'proxy-authenticate':1,
     'proxy-authorization':1, 'te':1, 'trailers':1, 'transfer-encoding':1,
@@ -171,35 +163,3 @@ _hoppish = {
 def is_hop_by_hop(header_name):
     """Return true if 'header_name' is an HTTP/1.1 "Hop-by-Hop" header"""
     return _hoppish(header_name.lower())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#

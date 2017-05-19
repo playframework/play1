@@ -61,15 +61,6 @@ class PyCompileError(Exception):
         return self.msg
 
 
-# Define an internal helper according to the platform
-if os.name == "mac":
-    import MacOS
-    def set_creator_type(file):
-        MacOS.SetCreatorAndType(file, 'Pyth', 'PYC ')
-else:
-    def set_creator_type(file):
-        pass
-
 def wr_long(f, x):
     """Internal; write a 32-bit int to a file in little-endian order."""
     f.write(chr( x        & 0xff))
@@ -112,19 +103,16 @@ def compile(file, cfile=None, dfile=None, doraise=False):
     directories).
 
     """
-    f = open(file, 'U')
-    try:
-        timestamp = long(os.fstat(f.fileno()).st_mtime)
-    except AttributeError:
-        timestamp = long(os.stat(file).st_mtime)
-    codestring = f.read()
-    f.close()
-    if codestring and codestring[-1] != '\n':
-        codestring = codestring + '\n'
+    with open(file, 'U') as f:
+        try:
+            timestamp = long(os.fstat(f.fileno()).st_mtime)
+        except AttributeError:
+            timestamp = long(os.stat(file).st_mtime)
+        codestring = f.read()
     try:
         codeobject = __builtin__.compile(codestring, dfile or file,'exec')
     except Exception,err:
-        py_exc = PyCompileError(err.__class__,err.args,dfile or file)
+        py_exc = PyCompileError(err.__class__, err, dfile or file)
         if doraise:
             raise py_exc
         else:
@@ -132,15 +120,13 @@ def compile(file, cfile=None, dfile=None, doraise=False):
             return
     if cfile is None:
         cfile = file + (__debug__ and 'c' or 'o')
-    fc = open(cfile, 'wb')
-    fc.write('\0\0\0\0')
-    wr_long(fc, timestamp)
-    marshal.dump(codeobject, fc)
-    fc.flush()
-    fc.seek(0, 0)
-    fc.write(MAGIC)
-    fc.close()
-    set_creator_type(cfile)
+    with open(cfile, 'wb') as fc:
+        fc.write('\0\0\0\0')
+        wr_long(fc, timestamp)
+        marshal.dump(codeobject, fc)
+        fc.flush()
+        fc.seek(0, 0)
+        fc.write(MAGIC)
 
 def main(args=None):
     """Compile several source files.
@@ -149,19 +135,35 @@ def main(args=None):
     not specified) are compiled and the resulting bytecode is cached
     in the normal manner.  This function does not search a directory
     structure to locate source files; it only compiles files named
-    explicitly.
+    explicitly.  If '-' is the only parameter in args, the list of
+    files is taken from standard input.
 
     """
     if args is None:
         args = sys.argv[1:]
     rv = 0
-    for filename in args:
-        try:
-            compile(filename, doraise=True)
-        except PyCompileError, err:
-            # return value to indicate at least one failure
-            rv = 1
-            sys.stderr.write(err.msg)
+    if args == ['-']:
+        while True:
+            filename = sys.stdin.readline()
+            if not filename:
+                break
+            filename = filename.rstrip('\n')
+            try:
+                compile(filename, doraise=True)
+            except PyCompileError as error:
+                rv = 1
+                sys.stderr.write("%s\n" % error.msg)
+            except IOError as error:
+                rv = 1
+                sys.stderr.write("%s\n" % error)
+    else:
+        for filename in args:
+            try:
+                compile(filename, doraise=True)
+            except PyCompileError as error:
+                # return value to indicate at least one failure
+                rv = 1
+                sys.stderr.write("%s\n" % error.msg)
     return rv
 
 if __name__ == "__main__":

@@ -804,7 +804,7 @@ stackslice = StackObject(
                  obtype=StackObject,
                  doc="""An object representing a contiguous slice of the stack.
 
-                 This is used in conjuction with markobject, to represent all
+                 This is used in conjunction with markobject, to represent all
                  of the stack following the topmost markobject.  For example,
                  the POP_MARK opcode changes the stack from
 
@@ -1214,10 +1214,11 @@ opcodes = [
       stack_before=[anyobject],
       stack_after=[pytuple],
       proto=2,
-      doc="""One-tuple.
+      doc="""Build a one-tuple out of the topmost item on the stack.
 
       This code pops one value off the stack and pushes a tuple of
-      length 1 whose one item is that value back onto it.  IOW:
+      length 1 whose one item is that value back onto it.  In other
+      words:
 
           stack[-1] = tuple(stack[-1:])
       """),
@@ -1228,10 +1229,11 @@ opcodes = [
       stack_before=[anyobject, anyobject],
       stack_after=[pytuple],
       proto=2,
-      doc="""One-tuple.
+      doc="""Build a two-tuple out of the top two items on the stack.
 
-      This code pops two values off the stack and pushes a tuple
-      of length 2 whose items are those values back onto it.  IOW:
+      This code pops two values off the stack and pushes a tuple of
+      length 2 whose items are those values back onto it.  In other
+      words:
 
           stack[-2:] = [tuple(stack[-2:])]
       """),
@@ -1242,10 +1244,11 @@ opcodes = [
       stack_before=[anyobject, anyobject, anyobject],
       stack_after=[pytuple],
       proto=2,
-      doc="""One-tuple.
+      doc="""Build a three-tuple out of the top three items on the stack.
 
-      This code pops three values off the stack and pushes a tuple
-      of length 3 whose items are those values back onto it.  IOW:
+      This code pops three values off the stack and pushes a tuple of
+      length 3 whose items are those values back onto it.  In other
+      words:
 
           stack[-3:] = [tuple(stack[-3:])]
       """),
@@ -1348,7 +1351,7 @@ opcodes = [
       arg=None,
       stack_before=[markobject, stackslice],
       stack_after=[],
-      proto=0,
+      proto=1,
       doc="""Pop all the stack objects at and above the topmost markobject.
 
       When an opcode using a variable number of stack objects is done,
@@ -1367,7 +1370,7 @@ opcodes = [
       proto=0,
       doc="""Read an object from the memo and push it on the stack.
 
-      The index of the memo object to push is given by the newline-teriminated
+      The index of the memo object to push is given by the newline-terminated
       decimal string following.  BINGET and LONG_BINGET are space-optimized
       versions.
       """),
@@ -1926,7 +1929,7 @@ def dis(pickle, out=None, memo=None, indentlevel=4):
 
     stack = []          # crude emulation of unpickler stack
     if memo is None:
-        memo = {}       # crude emulation of unpicker memo
+        memo = {}       # crude emulation of unpickler memo
     maxproto = -1       # max protocol number seen
     markstack = []      # bytecode positions of MARK opcodes
     indentchunk = ' ' * indentlevel
@@ -2083,11 +2086,11 @@ highest protocol among opcodes = 1
 
 Exercise the INST/OBJ/BUILD family.
 
->>> import random
->>> dis(pickle.dumps(random.random, 0))
-    0: c    GLOBAL     'random random'
-   15: p    PUT        0
-   18: .    STOP
+>>> import pickletools
+>>> dis(pickle.dumps(pickletools.dis, 0))
+    0: c    GLOBAL     'pickletools dis'
+   17: p    PUT        0
+   20: .    STOP
 highest protocol among opcodes = 0
 
 >>> from pickletools import _Example

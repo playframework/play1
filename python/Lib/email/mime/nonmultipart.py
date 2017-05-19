@@ -12,9 +12,7 @@ from email.mime.base import MIMEBase
 
 
 class MIMENonMultipart(MIMEBase):
-    """Base class for MIME multipart/* type messages."""
-
-    __pychecker__ = 'unusednames=payload'
+    """Base class for MIME non-multipart type messages."""
 
     def attach(self, payload):
         # The public API prohibits attaching multiple subparts to MIMEBase
@@ -22,5 +20,3 @@ class MIMENonMultipart(MIMEBase):
         # type multipart/*
         raise errors.MultipartConversionError(
             'Cannot attach additional subparts to non-multipart/*')
-
-    del __pychecker__

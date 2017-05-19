@@ -1,4 +1,4 @@
-"""plistlib.py -- a tool to generate and parse MacOSX .plist files.
+r"""plistlib.py -- a tool to generate and parse MacOSX .plist files.
 
 The PropertyList (.plist) file format is a simple XML pickle supporting
 basic object types, like dictionaries, lists, numbers and strings.
@@ -114,7 +114,8 @@ def writePlistToString(rootObject):
 def readPlistFromResource(path, restype='plst', resid=0):
     """Read plst resource from the resource fork of path.
     """
-    warnings.warnpy3k("In 3.x, readPlistFromResource is removed.")
+    warnings.warnpy3k("In 3.x, readPlistFromResource is removed.",
+                      stacklevel=2)
     from Carbon.File import FSRef, FSGetResourceForkName
     from Carbon.Files import fsRdPerm
     from Carbon import Res
@@ -129,7 +130,7 @@ def readPlistFromResource(path, restype='plst', resid=0):
 def writePlistToResource(rootObject, path, restype='plst', resid=0):
     """Write 'rootObject' as a plst resource to the resource fork of path.
     """
-    warnings.warnpy3k("In 3.x, writePlistToResource is removed.")
+    warnings.warnpy3k("In 3.x, writePlistToResource is removed.", stacklevel=2)
     from Carbon.File import FSRef, FSGetResourceForkName
     from Carbon.Files import fsRdWrPerm
     from Carbon import Res
@@ -223,7 +224,7 @@ def _escapeAndEncode(text):
 
 PLISTHEADER = """\
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 """
 
 class PlistWriter(DumbXMLWriter):
@@ -261,8 +262,8 @@ class PlistWriter(DumbXMLWriter):
     def writeData(self, data):
         self.beginElement("data")
         self.indentLevel -= 1
-        maxlinelength = 76 - len(self.indent.replace("\t", " " * 8) *
-                                 self.indentLevel)
+        maxlinelength = max(16, 76 - len(self.indent.replace("\t", " " * 8) *
+                                 self.indentLevel))
         for line in data.asBase64(maxlinelength).split("\n"):
             if line:
                 self.writeln(line)
@@ -300,13 +301,13 @@ class _InternalDict(dict):
             raise AttributeError, attr
         from warnings import warn
         warn("Attribute access from plist dicts is deprecated, use d[key] "
-             "notation instead", PendingDeprecationWarning)
+             "notation instead", PendingDeprecationWarning, 2)
         return value
 
     def __setattr__(self, attr, value):
         from warnings import warn
         warn("Attribute access from plist dicts is deprecated, use d[key] "
-             "notation instead", PendingDeprecationWarning)
+             "notation instead", PendingDeprecationWarning, 2)
         self[attr] = value
 
     def __delattr__(self, attr):
@@ -316,14 +317,14 @@ class _InternalDict(dict):
             raise AttributeError, attr
         from warnings import warn
         warn("Attribute access from plist dicts is deprecated, use d[key] "
-             "notation instead", PendingDeprecationWarning)
+             "notation instead", PendingDeprecationWarning, 2)
 
 class Dict(_InternalDict):
 
     def __init__(self, **kwargs):
         from warnings import warn
         warn("The plistlib.Dict class is deprecated, use builtin dict instead",
-             PendingDeprecationWarning)
+             PendingDeprecationWarning, 2)
         super(Dict, self).__init__(**kwargs)
 
 
@@ -336,7 +337,7 @@ class Plist(_InternalDict):
     def __init__(self, **kwargs):
         from warnings import warn
         warn("The Plist class is deprecated, use the readPlist() and "
-             "writePlist() functions instead", PendingDeprecationWarning)
+             "writePlist() functions instead", PendingDeprecationWarning, 2)
         super(Plist, self).__init__(**kwargs)
 
     def fromFile(cls, pathOrFile):

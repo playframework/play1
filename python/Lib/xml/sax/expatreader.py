@@ -43,6 +43,9 @@ else:
     _mkproxy = weakref.proxy
     del weakref, _weakref
 
+class _ClosedParser:
+    pass
+
 # --- ExpatLocator
 
 class ExpatLocator(xmlreader.Locator):
@@ -108,7 +111,10 @@ class ExpatParser(xmlreader.IncrementalParser, xmlreader.Locator):
 
     def prepareParser(self, source):
         if source.getSystemId() is not None:
-            self._parser.SetBase(source.getSystemId())
+            base = source.getSystemId()
+            if isinstance(base, unicode):
+                base = base.encode('utf-8')
+            self._parser.SetBase(base)
 
     # Redefined setContentHandler to allow changing handlers during parsing
 
@@ -211,14 +217,24 @@ class ExpatParser(xmlreader.IncrementalParser, xmlreader.Locator):
             self._err_handler.fatalError(exc)
 
     def close(self):
-        if self._entity_stack:
+        if (self._entity_stack or self._parser is None or
+            isinstance(self._parser, _ClosedParser)):
             # If we are completing an external entity, do nothing here
             return
-        self.feed("", isFinal = 1)
-        self._cont_handler.endDocument()
-        self._parsing = 0
-        # break cycle created by expat handlers pointing to our methods
-        self._parser = None
+        try:
+            self.feed("", isFinal = 1)
+            self._cont_handler.endDocument()
+            self._parsing = 0
+            # break cycle created by expat handlers pointing to our methods
+            self._parser = None
+        finally:
+            self._parsing = 0
+            if self._parser is not None:
+                # Keep ErrorColumnNumber and ErrorLineNumber after closing.
+                parser = _ClosedParser()
+                parser.ErrorColumnNumber = self._parser.ErrorColumnNumber
+                parser.ErrorLineNumber = self._parser.ErrorLineNumber
+                self._parser = parser
 
     def _reset_cont_handler(self):
         self._parser.ProcessingInstructionHandler = \
@@ -407,8 +423,8 @@ def create_parser(*args, **kwargs):
 # ---
 
 if __name__ == "__main__":
-    import xml.sax
+    import xml.sax.saxutils
     p = create_parser()
-    p.setContentHandler(xml.sax.XMLGenerator())
+    p.setContentHandler(xml.sax.saxutils.XMLGenerator())
     p.setErrorHandler(xml.sax.ErrorHandler())
-    p.parse("../../../hamlet.xml")
+    p.parse("http://www.ibiblio.org/xml/examples/shakespeare/hamlet.xml")

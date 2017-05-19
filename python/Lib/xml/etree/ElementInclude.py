@@ -1,6 +1,6 @@
 #
 # ElementTree
-# $Id: ElementInclude.py 1862 2004-06-18 07:31:02Z Fredrik $
+# $Id: ElementInclude.py 3375 2008-02-13 08:05:08Z fredrik $
 #
 # limited xinclude support for element trees
 #
@@ -16,7 +16,7 @@
 # --------------------------------------------------------------------
 # The ElementTree toolkit is
 #
-# Copyright (c) 1999-2004 by Fredrik Lundh
+# Copyright (c) 1999-2008 by Fredrik Lundh
 #
 # By obtaining, using, and/or copying this software and/or its
 # associated documentation, you agree that you have read, understood,
@@ -42,14 +42,14 @@
 # --------------------------------------------------------------------
 
 # Licensed to PSF under a Contributor Agreement.
-# See http://www.python.org/2.4/license for licensing details.
+# See http://www.python.org/psf/license for licensing details.
 
 ##
 # Limited XInclude support for the ElementTree package.
 ##
 
 import copy
-import ElementTree
+from . import ElementTree
 
 XINCLUDE = "{http://www.w3.org/2001/XInclude}"
 
@@ -75,14 +75,13 @@ class FatalIncludeError(SyntaxError):
 # @throws IOError If the loader fails to load the resource.
 
 def default_loader(href, parse, encoding=None):
-    file = open(href)
-    if parse == "xml":
-        data = ElementTree.parse(file).getroot()
-    else:
-        data = file.read()
-        if encoding:
-            data = data.decode(encoding)
-    file.close()
+    with open(href) as file:
+        if parse == "xml":
+            data = ElementTree.parse(file).getroot()
+        else:
+            data = file.read()
+            if encoding:
+                data = data.decode(encoding)
     return data
 
 ##
@@ -125,7 +124,7 @@ def include(elem, loader=None):
                         )
                 if i:
                     node = elem[i-1]
-                    node.tail = (node.tail or "") + text
+                    node.tail = (node.tail or "") + text + (e.tail or "")
                 else:
                     elem.text = (elem.text or "") + text + (e.tail or "")
                 del elem[i]

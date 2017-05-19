@@ -17,10 +17,9 @@ def wrapper(func, *args, **kwds):
     wrapper().
     """
 
-    res = None
     try:
         # Initialize curses
-        stdscr=curses.initscr()
+        stdscr = curses.initscr()
 
         # Turn off echoing of keys, and enter cbreak mode,
         # where no buffering is performed on keyboard input
@@ -44,7 +43,8 @@ def wrapper(func, *args, **kwds):
         return func(stdscr, *args, **kwds)
     finally:
         # Set everything back to normal
-        stdscr.keypad(0)
-        curses.echo()
-        curses.nocbreak()
-        curses.endwin()
+        if 'stdscr' in locals():
+            stdscr.keypad(0)
+            curses.echo()
+            curses.nocbreak()
+            curses.endwin()
