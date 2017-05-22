@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--nosync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--nosync] [--%fwk_id] [--forProd] [--clearcache] [--jpda] [--shortModuleNames]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -63,3 +63,9 @@
 ~~ --clearcache:
 ~ Clear the ivy cache (equivalent to rm -r ~/.ivy2/cache)
 ~
+~~ --shortModuleNames:
+~ use short module name without version number.
+~ For example, if project depends on module "play-pdf 1.2.3", then 
+~  * command `play deps` creates folder `modules/pdf-1.2.3`
+~  * command `play deps --shortModuleNames` creates folder `modules/pdf`
+~ The latter option is probably convenient for configuring IDE
