@@ -104,8 +104,8 @@ public class CorePlugin extends PlayPlugin {
             }
             response.contentType = request.path.contains(".json") ? "application/json" : "text/plain";
             Header authorization = request.headers.get("authorization");
-            if (authorization != null && (Crypto.sign("@status").equals(authorization.value())
-                    || System.getProperty("statusKey", Play.secretKey).equals(authorization.value()))) {
+            String statusKey = Play.configuration.getProperty("application.statusKey", System.getProperty("statusKey"));
+            if (authorization != null && statusKey != null && statusKey.equals(authorization.value())) {
                 response.print(computeApplicationStatus(request.path.contains(".json")));
                 response.status = 200;
                 return true;
