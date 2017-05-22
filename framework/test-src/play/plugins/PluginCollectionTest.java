@@ -39,7 +39,7 @@ public class PluginCollectionTest {
 
         //the following plugin-list should match the list in the file 'play.plugins'
         assertThat(pc.getEnabledPlugins()).containsExactly(
-                pc.getPluginInstance(CorePlugin.class),
+                pc.getPluginInstance(EnhancerPlugin.class),
                 pc.getPluginInstance(ConfigurationChangeWatcherPlugin.class),
                 pc.getPluginInstance(TempFilePlugin.class),
                 pc.getPluginInstance(ValidationPlugin.class),
@@ -49,7 +49,8 @@ public class PluginCollectionTest {
                 pc.getPluginInstance(MessagesPlugin.class),
                 pc.getPluginInstance(WS.class),
                 pc.getPluginInstance(JobsPlugin.class),
-                pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class));
+                pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class),
+                pc.getPluginInstance(PlayStatusPlugin.class));
     }
 
     @Test
@@ -67,11 +68,11 @@ public class PluginCollectionTest {
 
         pc.loadPlugins();
 
-        CorePlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
+        EnhancerPlugin enhancerPlugin_first_instance = pc.getPluginInstance(EnhancerPlugin.class);
         TestPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
 
         assertThat(pc.getAllPlugins()).containsExactly(
-                corePlugin_first_instance,
+            enhancerPlugin_first_instance,
                 testPlugin_first_instance);
 
     }
@@ -91,22 +92,22 @@ public class PluginCollectionTest {
 
         pc.loadPlugins();
 
-        CorePlugin corePlugin_first_instance = pc.getPluginInstance(CorePlugin.class);
+        EnhancerPlugin enhancerPlugin_first_instance = pc.getPluginInstance(EnhancerPlugin.class);
         TestPlugin testPlugin_first_instance = pc.getPluginInstance(TestPlugin.class);
 
         //the following plugin-list should match the list in the file 'play.plugins'
         assertThat(pc.getEnabledPlugins()).containsExactly(
-                corePlugin_first_instance,
+            enhancerPlugin_first_instance,
                 testPlugin_first_instance);
         assertThat(pc.getAllPlugins()).containsExactly(
-                corePlugin_first_instance,
+            enhancerPlugin_first_instance,
                 testPlugin_first_instance);
 
         pc.reloadApplicationPlugins();
 
         TestPlugin testPlugin_second_instance = pc.getPluginInstance(TestPlugin.class);
 
-        assertThat(pc.getPluginInstance(CorePlugin.class)).isEqualTo( corePlugin_first_instance);
+        assertThat(pc.getPluginInstance(EnhancerPlugin.class)).isEqualTo(enhancerPlugin_first_instance);
         assertThat(testPlugin_second_instance).isNotEqualTo( testPlugin_first_instance);
 
     }

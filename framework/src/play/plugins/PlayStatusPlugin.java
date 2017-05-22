@@ -1,17 +1,4 @@
-package play;
-
-import static java.util.Arrays.asList;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
+package play.plugins;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -19,26 +6,24 @@ import com.google.gson.JsonPrimitive;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
-
+import org.apache.commons.lang.StringUtils;
+import play.Invoker;
+import play.Logger;
+import play.Play;
 import play.Play.Mode;
-import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.ContinuationEnhancer;
-import play.classloading.enhancers.ControllersEnhancer;
-import play.classloading.enhancers.Enhancer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer;
-import play.classloading.enhancers.MailerEnhancer;
-import play.classloading.enhancers.PropertiesEnhancer;
-import play.classloading.enhancers.SigEnhancer;
-import play.exceptions.UnexpectedException;
-import play.libs.Crypto;
+import play.PlayPlugin;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
-/**
- * Plugin used for core tasks
- */
-public class CorePlugin extends PlayPlugin {
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static java.util.Arrays.asList;
+
+public class PlayStatusPlugin extends PlayPlugin {
 
     /**
      * Get the application status
@@ -47,7 +32,7 @@ public class CorePlugin extends PlayPlugin {
      *            true if the status should be return in JSON
      * @return application status
      */
-    public static String computeApplicationStatus(boolean json) {
+    public String computeApplicationStatus(boolean json) {
         if (json) {
             JsonObject o = new JsonObject();
             for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
@@ -184,12 +169,7 @@ public class CorePlugin extends PlayPlugin {
             out.println("Monitors:");
             out.println("~~~~~~~~");
             List<Monitor> monitors = new ArrayList<>(asList(MonitorFactory.getRootMonitor().getMonitors()));
-            Collections.sort(monitors, new Comparator<Monitor>() {
-                @Override
-                public int compare(Monitor m1, Monitor m2) {
-                    return Double.compare(m2.getTotal(), m1.getTotal());
-                }
-            });
+            monitors.sort((m1, m2) -> Double.compare(m2.getTotal(), m1.getTotal()));
             int lm = 10;
             for (Monitor monitor : monitors) {
                 if (monitor.getLabel().length() > lm) {
@@ -269,7 +249,7 @@ public class CorePlugin extends PlayPlugin {
     /**
      * Recursively visit all JVM threads
      */
-    static void visit(PrintWriter out, ThreadGroup group, int level) {
+    private void visit(PrintWriter out, ThreadGroup group, int level) {
         // Get threads in `group'
         int numThreads = group.activeCount();
         Thread[] threads = new Thread[numThreads * 2];
@@ -296,32 +276,11 @@ public class CorePlugin extends PlayPlugin {
     /**
      * Retrieve the JVM root thread group.
      */
-    static ThreadGroup getRootThread() {
+    private ThreadGroup getRootThread() {
         ThreadGroup root = Thread.currentThread().getThreadGroup().getParent();
         while (root.getParent() != null) {
             root = root.getParent();
         }
         return root;
-    }
-
-    protected Enhancer[] defaultEnhancers() {
-        return new Enhancer[] { new PropertiesEnhancer(), new ContinuationEnhancer(), new SigEnhancer(), new ControllersEnhancer(),
-                new MailerEnhancer(), new LocalvariablesNamesEnhancer() };
-    }
-
-    @Override
-    public void enhance(ApplicationClass applicationClass) throws Exception {
-        for (Enhancer enhancer : defaultEnhancers()) {
-            try {
-                long start = System.currentTimeMillis();
-                enhancer.enhanceThisClass(applicationClass);
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getClass().getSimpleName(),
-                            applicationClass.name);
-                }
-            } catch (Exception e) {
-                throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
-            }
-        }
     }
 }
