@@ -263,15 +263,18 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        // Close all presistence units
-        for(EntityManagerFactory emf: JPA.emfs.values()) {
-            if(emf.isOpen()){
+        closeAllPersistenceUnits();    
+    }
+
+    private void closeAllPersistenceUnits() {
+        for (EntityManagerFactory emf : JPA.emfs.values()) {
+            if (emf.isOpen()) {
                 emf.close();
             }
         }
-        JPA.emfs.clear();    
+        JPA.emfs.clear();
     }
-  
+
     @Override
     public void afterFixtureLoad() {
         if (JPA.isEnabled()) {
