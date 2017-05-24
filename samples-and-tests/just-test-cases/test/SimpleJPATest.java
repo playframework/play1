@@ -179,5 +179,40 @@ public class SimpleJPATest extends UnitTest {
 
     }
     
+    /**
+     * Simple tests for {@link play.db.jpa.JPABase#equals()}.
+     */
+    @Test
+    public void testEquals() {
+        List<User> users = User.findAll();
+        User userA = users.get(0);
+        User userB = users.get(1);
+        
+        // Simple tests
+        assertFalse(userA.equals(null)); // null
+        assertTrue(userA.equals(userA)); // ref equals
+        assertFalse(userA.equals(userB)); // different objects
+        
+        // tests with objects that don't have a key set
+        User unsaved1 = new User("Unsaved user #1");
+        User unsaved2 = new User("Unsaved user #2");
+        assertTrue(unsaved1.equals(unsaved1)); // ref equals (always true)
+        assertFalse(unsaved1.equals(unsaved2)); // non-ref+no key
+        assertFalse(unsaved1.equals(userA));
+        assertFalse(userA.equals(unsaved1));
+        
+        // Test completely incompatible objects
+        assertFalse(userA.equals("This is a string, not a model object."));
+
+        // Test with array IDs
+        ArrayIdEntity a1 = new ArrayIdEntity("1", "2");
+        ArrayIdEntity a2 = new ArrayIdEntity("1", "2");
+        ArrayIdEntity b1 = new ArrayIdEntity("1", "X");
+        
+        assertTrue(a1.equals(a2)); // array key equals
+        assertFalse(a1.equals(b1)); // array key with one element difference
+        assertFalse(userA.equals(a1)); // compare scalar key to array key
+        assertFalse(a1.equals(userA)); // compare array key with scalar key
+    }
 }
 
