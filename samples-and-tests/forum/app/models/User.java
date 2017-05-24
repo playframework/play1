@@ -46,7 +46,7 @@ public class User extends Model {
     // ~~~~~~~~~~~~ 
     
     public List<Post> getRecentsPosts() {
-        return Post.find("postedBy = ? order by postedAt", this).fetch(1, 10);
+        return Post.find("postedBy = ?1 order by postedAt", this).fetch(1, 10);
     }
 
     public Long getPostsCount() {
