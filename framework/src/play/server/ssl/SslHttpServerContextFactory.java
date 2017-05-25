@@ -1,8 +1,12 @@
 package play.server.ssl;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import play.Logger;
 import play.Play;
 
@@ -84,10 +88,20 @@ public class SslHttpServerContextFactory {
             final Properties p = Play.configuration;
             String keyFile = p.getProperty("certificate.key.file", "conf/host.key");
 
-            try (PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(keyFile)), new PEMPasswordFinder())) {
-                key = ((KeyPair) keyReader.readObject()).getPrivate();
+            try (PEMParser keyReader = new PEMParser(new FileReader(Play.getFile(keyFile)))) {
+                final Object object = keyReader.readObject();
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+                final KeyPair keyPair;
+                if (object instanceof PEMEncryptedKeyPair) {
+                    PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder()
+                            .build(Play.configuration.getProperty("certificate.password", "secret").toCharArray());
+                    keyPair = converter.getKeyPair(((PEMEncryptedKeyPair) object).decryptKeyPair(decProv));
+                } else {
+                    keyPair = converter.getKeyPair((PEMKeyPair) object);
+                }
+                key = keyPair.getPrivate();
 
-                try (PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))))) {
+                try (PEMParser reader = new PEMParser(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))))) {
                     X509Certificate cert;
                     List<X509Certificate> chainVector = new ArrayList<>();
 
@@ -136,12 +150,4 @@ public class SslHttpServerContextFactory {
             return key;
         }
     }
-    
-    private static class PEMPasswordFinder implements PasswordFinder {
-        @Override
-        public char[] getPassword() {
-            return Play.configuration.getProperty("certificate.password", "secret").toCharArray();
-        }
-    }
-
 }
