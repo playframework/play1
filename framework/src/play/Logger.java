@@ -3,6 +3,8 @@ package play;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,11 +72,16 @@ public class Logger {
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
 
-            if (log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0) {
-                // The log4j configuration file is located somewhere in the application folder,
-                // so it's probably a custom configuration file
-                configuredManually = true;
+            Path path1 = null;
+            try {
+              path1 = Paths.get(log4jConf.toURI());
+            } catch (Throwable t) {
             }
+            Path path2 = Play.applicationPath.toPath();
+            // The log4j configuration file is located somewhere in the application folder,
+            // so it's probably a custom configuration file
+            configuredManually = path1 != null ? path1.startsWith(path2) : false;
+
             if (isXMLConfig) {
                 DOMConfigurator.configure(log4jConf);
             } else {
