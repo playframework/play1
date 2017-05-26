@@ -262,7 +262,13 @@ public class ApplicationClassloader extends ClassLoader {
                     return res.getRealFile().toURI().toURL();
                 }
             }
-            if (Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (Play.usePrecompiled) {
+                File file = Play.getFile("precompiled/java/" + name);
+                if (file.exists()) {
+                    return file.toURI().toURL();
+                }
+            }
+            else if ("true".equals(Play.configuration.getProperty("play.bytecodeCache", "true"))) {
                 File f = new File(Play.tmpDir, "classes/" + name);
                 if (f.exists()) {
                     return f.toURI().toURL();
