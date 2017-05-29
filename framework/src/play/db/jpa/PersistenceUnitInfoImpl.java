@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * @author Vlad Mihalcea
@@ -24,7 +25,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     private PersistenceUnitTransactionType transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
 
-    private final List<String> managedClassNames;
+    private final List<Class> managedClasses;
     private final List<String> mappingFileNames;
 
     private final Properties properties;
@@ -33,9 +34,9 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     private DataSource nonJtaDataSource;
 
-    public PersistenceUnitInfoImpl(String persistenceUnitName, List<String> managedClassNames, List<String> mappingFileNames, Properties properties) {
+    public PersistenceUnitInfoImpl(String persistenceUnitName, List<Class> managedClasses, List<String> mappingFileNames, Properties properties) {
         this.persistenceUnitName = persistenceUnitName;
-        this.managedClassNames = managedClassNames;
+        this.managedClasses = managedClasses;
         this.mappingFileNames = mappingFileNames;
         this.properties = properties;
     }
@@ -96,7 +97,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     @Override
     public List<String> getManagedClassNames() {
-        return managedClassNames;
+        return managedClasses.stream().map(Class::getName).collect(Collectors.toList());
     }
 
     @Override

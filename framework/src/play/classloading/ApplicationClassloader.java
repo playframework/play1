@@ -255,27 +255,15 @@ public class ApplicationClassloader extends ClassLoader {
 
     @Override
     public URL getResource(String name) {
-        try {
             for (VirtualFile vf : Play.javaPath) {
                 VirtualFile res = vf.child(name);
                 if (res != null && res.exists()) {
+                try {
                     return res.getRealFile().toURI().toURL();
-                }
-            }
-            if (Play.usePrecompiled) {
-                File file = Play.getFile("precompiled/java/" + name);
-                if (file.exists()) {
-                    return file.toURI().toURL();
-                }
-            }
-            else if ("true".equals(Play.configuration.getProperty("play.bytecodeCache", "true"))) {
-                File f = new File(Play.tmpDir, "classes/" + name);
-                if (f.exists()) {
-                    return f.toURI().toURL();
-                }
-            }
         } catch (MalformedURLException ex) {
             throw new UnexpectedException(ex);
+        }
+            }
         }
         return super.getResource(name);
     }
