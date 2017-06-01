@@ -157,14 +157,15 @@ public class JobsPlugin extends PlayPlugin {
             // @Every
             if (clazz.isAnnotationPresent(Every.class)) {
                 try {
-                    Job job = createJob(clazz);
+                    Job<?> job = (Job<?>) clazz.newInstance();
+
                     String value = job.getClass().getAnnotation(Every.class).value();
                     if (value.startsWith("cron.")) {
                         value = Play.configuration.getProperty(value);
                     }
                     value = Expression.evaluate(value, value).toString();
                     if (!"never".equalsIgnoreCase(value)) {
-                        executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
+                        job.every(value);
                     }
                 } catch (InstantiationException | IllegalAccessException ex) {
                     throw new UnexpectedException("Cannot instantiate Job " + clazz.getName(), ex);
