@@ -984,6 +984,17 @@ Default: none.
 h2(#play). Play run-time
 
 
+h3(#play.plugins.descriptor). play.plugins.descriptor
+
+File to load play plugins from. 
+* If given, play with load plugins ONLY from this file. @since play 1.5
+* If not given, play will find ALL files "play.plugins" from classpath and load plugins from them (this is the default behaviour).
+
+bc. play.plugins.descriptor=conf/my-play-app.plugins
+
+Default: none.
+
+
 h3(#play.bytecodeCache). play.bytecodeCache
 
 Used to disable the bytecode cache in @dev@ mode; has no effect in @prod@ mode.

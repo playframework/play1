@@ -1,11 +1,7 @@
 package play.plugins;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import play.*;
 import play.data.parsing.TempFilePlugin;
 import play.data.validation.ValidationPlugin;
@@ -16,19 +12,19 @@ import play.i18n.MessagesPlugin;
 import play.jobs.JobsPlugin;
 import play.libs.WS;
 import play.test.TestEngine;
-import static org.fest.assertions.Assertions.assertThat;
 
-/**
- * Created by IntelliJ IDEA.
- * User: mortenkjetland
- * Date: 3/3/11
- * Time: 12:14 AM
- * To change this template use File | Settings | File Templates.
- */
+import java.io.File;
+import java.util.Collection;
+
+import static java.util.Arrays.asList;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 public class PluginCollectionTest {
     
     @Before
-    public void init(){
+    public void init() {
         new PlayBuilder().build();
     }
 
@@ -55,7 +51,7 @@ public class PluginCollectionTest {
     @Test
     public void verifyLoadingFromFilesWithBlankLines() throws Exception {
         //create custom PluginCollection that fakes that TestPlugin is application plugin
-        PluginCollection pc = new PluginCollection(){
+        PluginCollection pc = new PluginCollection() {
             @Override
             protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
                 //return true only if This is our TestPlugin
@@ -76,10 +72,40 @@ public class PluginCollectionTest {
 
     }
 
+    /**
+     * Avoid including the same class+index twice.
+     * 
+     * This happened in the past under a range of circumstances, including:
+     * 1. Class path on NTFS or other case insensitive file system includes
+     *    play.plugins directory 2x (C:/myproject/conf;c:/myproject/conf)
+     * 2. https://play.lighthouseapp.com/projects/57987/tickets/176-app-playplugins-loaded-twice-conf-on-2-classpaths
+     */
     @Test
-    public void verifyReloading() throws Exception{
+    public void skipsDuplicatePlugins() {
+        PluginCollection pc = spy(new PluginCollection());
+        when(pc.loadPlayPluginDescriptors()).thenReturn(asList(
+                getClass().getResource("custom-play.plugins"), 
+                getClass().getResource("custom-play.plugins.duplicate"))
+        );
+        pc.loadPlugins();
+        assertThat(pc.getAllPlugins()).containsExactly(
+                pc.getPluginInstance(CorePlugin.class),
+                pc.getPluginInstance(TestPlugin.class));
+    }
+
+    @Test
+    public void canLoadPlayPluginsFromASingleDescriptor() throws Exception {
+        Play.configuration.setProperty("play.plugins.descriptor", "test-src/play/plugins/custom-play.plugins");
+        PluginCollection pc = new PluginCollection();
+        assertThat(pc.loadPlayPluginDescriptors()).containsExactly(
+                new File("test-src/play/plugins/custom-play.plugins").toURI().toURL()
+        );
+    }
+
+    @Test
+    public void verifyReloading() throws Exception {
         //create custom PluginCollection that fakes that TestPlugin is application plugin
-        PluginCollection pc = new PluginCollection(){
+        PluginCollection pc = new PluginCollection() {
             @Override
             protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
                 //return true only if This is our TestPlugin
@@ -113,7 +139,7 @@ public class PluginCollectionTest {
 
     @SuppressWarnings({"deprecation"})
     @Test
-    public void verifyUpdatePlayPluginsList(){
+    public void verifyUpdatePlayPluginsList() {
         assertThat(Play.plugins).isEmpty();
 
         PluginCollection pc = new PluginCollection();
@@ -126,7 +152,7 @@ public class PluginCollectionTest {
 
     @SuppressWarnings({"deprecation"})
     @Test
-    public void verifyThatDisabelingPluginsTheOldWayStillWorks(){
+    public void verifyThatDisablingPluginsTheOldWayStillWorks() {
         PluginCollection pc = new PluginCollection();
 
 
@@ -173,8 +199,8 @@ class LegacyPlugin extends PlayPlugin {
     public void onLoad() {
         //find TestPlugin in Play.plugins-list and remove it to disable it
         PlayPlugin pluginToRemove = null;
-        for( PlayPlugin pp : Play.plugins){
-            if( pp.getClass().equals( TestPlugin.class)){
+        for (PlayPlugin pp : Play.plugins) {
+            if ( pp.getClass().equals( TestPlugin.class)) {
                 pluginToRemove = pp;
                 break;
             }
@@ -188,12 +214,12 @@ class PluginWithTests extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnit.class});
+        return asList(new Class[]{PluginUnit.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFunc.class});
+        return asList(new Class[]{PluginFunc.class});
     }
 }
 
@@ -201,12 +227,12 @@ class PluginWithTests2 extends PlayPlugin {
 
     @Override
     public Collection<Class> getUnitTests() {
-        return Arrays.asList(new Class[]{PluginUnit2.class});
+        return asList(new Class[]{PluginUnit2.class});
     }
 
     @Override
     public Collection<Class> getFunctionalTests() {
-        return Arrays.asList(new Class[]{PluginFunc2.class});
+        return asList(new Class[]{PluginFunc2.class});
     }
 }
 
