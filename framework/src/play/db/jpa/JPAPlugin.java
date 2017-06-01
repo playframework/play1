@@ -135,8 +135,8 @@ public class JPAPlugin extends PlayPlugin {
         JPQL.instance = new JPQL();
     }
     
-    private List<String> entityClasses(String dbName) {
-        List<String> entityClasses = new ArrayList<>();
+    private List<Class> entityClasses(String dbName) {
+        List<Class> entityClasses = new ArrayList<>();
         
         List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         for (Class<?> clazz : classes) {
@@ -144,9 +144,9 @@ public class JPAPlugin extends PlayPlugin {
                 // Do we have a transactional annotation matching our dbname?
                 PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
                 if (pu != null && pu.name().equals(dbName)) {
-                    entityClasses.add(clazz.getName());
+                    entityClasses.add(clazz);
                 } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
-                    entityClasses.add(clazz.getName());
+                    entityClasses.add(clazz);
                 }                    
             }
         }
@@ -162,9 +162,9 @@ public class JPAPlugin extends PlayPlugin {
                 // Do we have a transactional annotation matching our dbname?
                 PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
                 if (pu != null && pu.name().equals(dbName)) {
-                    entityClasses.add(clazz.getName());
+                    entityClasses.add(clazz);
                 } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
-                    entityClasses.add(clazz.getName());
+                    entityClasses.add(clazz);
                 }         
             } catch (Exception e) {
                 Logger.warn(e, "JPA -> Entity not found: %s", entity);
@@ -184,8 +184,11 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     protected PersistenceUnitInfoImpl persistenceUnitInfo(String dbName, Configuration dbConfig) {
-        return new PersistenceUnitInfoImpl(dbName, 
-                entityClasses(dbName), mappingFiles(dbConfig), properties(dbName, dbConfig));
+        final List<Class> managedClasses = entityClasses(dbName);
+        final Properties properties = properties(dbName, dbConfig);
+        properties.put(org.hibernate.jpa.AvailableSettings.LOADED_CLASSES,managedClasses);
+        return new PersistenceUnitInfoImpl(dbName,
+                managedClasses, mappingFiles(dbConfig), properties);
     }
 
     private List<String> mappingFiles(Configuration dbConfig) {
