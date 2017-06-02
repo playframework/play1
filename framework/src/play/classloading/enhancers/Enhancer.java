@@ -1,15 +1,5 @@
 package play.classloading.enhancers;
 
-import java.io.File;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.lang.annotation.Annotation;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -19,9 +9,20 @@ import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.MemberValue;
-import play.Play;
 import play.Logger;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Enhancer support
@@ -59,6 +60,7 @@ public abstract class Enhancer {
      */
     public static class ApplicationClassesClasspath implements ClassPath {
 
+        @Override
         public InputStream openClassfile(String className) throws NotFoundException {
 
             if(Play.usePrecompiled) {
@@ -78,6 +80,7 @@ public abstract class Enhancer {
             return new ByteArrayInputStream(appClass.enhancedByteCode);
         }
 
+        @Override
         public URL find(String className) {
             if (Play.classes.getApplicationClass(className) != null) {
                 String cname = className.replace('.', '/') + ".class";
@@ -90,6 +93,7 @@ public abstract class Enhancer {
             return null;
         }
 
+        @Override
         public void close() {
         }
     }
