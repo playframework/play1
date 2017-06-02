@@ -196,7 +196,7 @@ public class PluginCollection {
         try {
             String playPluginsDescriptor = Play.configuration.getProperty("play.plugins.descriptor");
             if (playPluginsDescriptor != null) {
-                return Collections.singletonList(new File(playPluginsDescriptor).toURI().toURL());
+                return Collections.singletonList(new File(Play.applicationPath, playPluginsDescriptor).toURI().toURL());
             }
             return Collections.list(Play.classloader.getResources(play_plugins_resourceName));
         }
