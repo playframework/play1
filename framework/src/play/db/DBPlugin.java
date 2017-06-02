@@ -26,9 +26,6 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.DatabaseException;
-import play.mvc.Http;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.ConnectionCustomizer;
@@ -38,37 +35,6 @@ import play.db.DB.ExtendedDatasource;
 public class DBPlugin extends PlayPlugin {
 
     public static String url = "";
-    org.h2.tools.Server h2Server;
-
-    @Override
-    public boolean rawInvocation(Request request, Response response) throws Exception {
-        if (Play.mode.isDev() && request.path.equals("/@db")) {
-            response.status = Http.StatusCode.FOUND;
-            String serverOptions[] = new String[] { };
-
-            // For H2 embedded database, we'll also start the Web console
-            if (h2Server != null) {
-                h2Server.stop();
-            }
-
-            String domain = request.domain;
-            if (domain.equals("")) {
-                domain = "localhost";
-            }
-
-            if (!domain.equals("localhost")) {
-                serverOptions = new String[] {"-webAllowOthers"};
-            }
-            
-            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
-            h2Server.start();
-
-            response.setHeader("Location", "http://" + domain + ":8082/");
-            return true;
-        }
-        return false;
-    }
-
    
     @Override
     public void onApplicationStart() {
