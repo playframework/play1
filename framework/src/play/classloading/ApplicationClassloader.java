@@ -39,7 +39,7 @@ import java.util.Set;
  */
 public class ApplicationClassloader extends ClassLoader {
 
-
+    private boolean verboseDebug = Boolean.parseBoolean(Play.configuration.getProperty("play.classloader.debug", "false"));
     private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
 
     // commons collection LRU cache (this version at least,) isn't templated
@@ -176,9 +176,13 @@ public class ApplicationClassloader extends ClassLoader {
                 return applicationClass.javaClass;
             }
             if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
-                System.out.println("About to enhance class " + name);
+                if (verboseDebug) {
+                    Logger.info("About to enhance class " + name);
+                }
                 applicationClass.enhance();
-                System.out.println("Done enhancing class " + name);
+                if (verboseDebug) {
+                    Logger.info("Done enhancing class " + name);
+                }
                 applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 resolveClass(applicationClass.javaClass);
@@ -190,7 +194,9 @@ public class ApplicationClassloader extends ClassLoader {
                     Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
                 }
 
-                System.out.println("Leaving loadApplicationClass for " + name);
+                if (verboseDebug) {
+                    Logger.info("Leaving loadApplicationClass for " + name);
+                }
                 return applicationClass.javaClass;
             }
             Play.classes.classes.remove(name);

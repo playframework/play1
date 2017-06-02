@@ -19,8 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -43,7 +46,8 @@ public class Router {
      *
      * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not end with a '/' character.
      */
-    public static void load(String prefix) {
+    // this "big hammer" lock is *NOT* permanent, just until i can get a stacktrace from jesse
+    public static synchronized void load(String prefix) {
         routes.clear();
         parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
