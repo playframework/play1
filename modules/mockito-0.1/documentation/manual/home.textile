@@ -1,0 +1,11 @@
+h1. Mockito module
+
+This module allows you to use "Mockito":http://mockito.org/ in your Play application, without the class cast exceptions that you get if 
+you use a vanilla Mockito.
+
+See "play-mockito on Github":https://github.com/eamelink/play-mockito/blob/master/README for more information.
+
+h2. Usage
+
+See the examples on the Mockito webpage. 
+
