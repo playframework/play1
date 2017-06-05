@@ -1,10 +1,5 @@
 package play.classloading.enhancers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.Stack;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtField;
@@ -18,6 +13,12 @@ import javassist.expr.Handler;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Stack;
 
 /**
  * Enhance controllers classes. 
@@ -40,7 +41,7 @@ public class ControllersEnhancer extends Enhancer {
 
         for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
-            // Threaded access		
+            // Threaded access
             ctMethod.instrument(new ExprEditor() {
 
                 @Override
@@ -194,7 +195,7 @@ public class ControllersEnhancer extends Enhancer {
         public static void stopActionCall() {
             allow.set(false);
         }
-        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();
+        static final ThreadLocal<Boolean> allow = new ThreadLocal<>();
     }
 
     @Retention(RetentionPolicy.RUNTIME)

@@ -1,11 +1,5 @@
 package play.classloading.enhancers;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -14,6 +8,10 @@ import javassist.expr.MethodCall;
 import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContinuationEnhancer extends Enhancer {
 
@@ -40,6 +38,7 @@ public class ContinuationEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        Thread.currentThread().setContextClassLoader(Play.classloader);
         if (isScala(applicationClass)) {
             return;
         }
@@ -62,7 +61,7 @@ public class ContinuationEnhancer extends Enhancer {
         // we add the interface EnhancedForContinuations to the class
         CtClass enhancedForContinuationsInterface;
         try {
-            InputStream in = getClass().getClassLoader().getResourceAsStream("play/classloading/enhancers/EnhancedForContinuations.class");
+            InputStream in = Play.classloader.getResourceAsStream("play/classloading/enhancers/EnhancedForContinuations.class");
             enhancedForContinuationsInterface = classPool.makeClass( in );
             in.close();
         } catch (Exception e) {
@@ -71,7 +70,7 @@ public class ContinuationEnhancer extends Enhancer {
         ctClass.addInterface( enhancedForContinuationsInterface );
 
         // Apply continuations
-        applicationClass.enhancedByteCode = new AsmClassTransformer().transform( ctClass.toBytecode());
+        applicationClass.enhancedByteCode = new AsmClassTransformer().transform(ctClass.toBytecode());
 
         ctClass.defrost();
         enhancedForContinuationsInterface.defrost();

@@ -1,12 +1,5 @@
 package play.classloading.enhancers;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.CtClass;
@@ -14,8 +7,8 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
+import javassist.Modifier;
 import javassist.NotFoundException;
-import javassist.bytecode.AccessFlag;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import play.Logger;
@@ -23,47 +16,78 @@ import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /**
- * Generate valid JavaBeans. 
+ * Generate valid JavaBeans.
  */
 public class PropertiesEnhancer extends Enhancer {
+
+    private boolean enabled = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
+    private boolean generateAccessors = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.generateAccessors", "true"));
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
-        final CtClass ctClass = makeClass(applicationClass);
-        if (ctClass.isInterface()) {
-            return;
-        }
-        if(ctClass.getName().endsWith(".package")) {
+        if (!enabled) return;
+
+        CtClass ctClass = makeClass(applicationClass);
+        if (ctClass.isInterface() || ctClass.getName().endsWith(".package")) {
             return;
         }
 
-        // Add a default constructor if needed
+        addDefaultConstructor(ctClass);
+
+        if (generateAccessors && !isScala(applicationClass)) { // Temporary hack for Scala: skip generating getters/setters
+            generateAccessors(ctClass);
+            addDefaultConstructor2(ctClass);
+            interceptAllFieldsAccess(ctClass);
+        }
+
+        applicationClass.enhancedByteCode = ctClass.toBytecode();
+        ctClass.defrost();
+    }
+
+    private void addDefaultConstructor(CtClass ctClass) {
         try {
-            boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
-                if (constructor.getParameterTypes().length == 0) {
-                    hasDefaultConstructor = true;
-                    break;
-                }
-            }
+            boolean hasDefaultConstructor = hasDefaultConstructor(ctClass);
             if (!hasDefaultConstructor && !ctClass.isInterface()) {
                 CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            Logger.error(e, "Error in PropertiesEnhancer");
-            throw new UnexpectedException("Error in PropertiesEnhancer", e);
+            Logger.error(e, "Failed to generate default constructor for " + ctClass.getName());
+            throw new UnexpectedException("Failed to generate default constructor for " + ctClass.getName(), e);
         }
+    }
 
-        if (isScala(applicationClass)) {
-            // Temporary hack for Scala. Done.
-            applicationClass.enhancedByteCode = ctClass.toBytecode();
-            ctClass.defrost();
-            return;
+    private void addDefaultConstructor2(CtClass ctClass) {
+        try {
+            if (!hasDefaultConstructor(ctClass)) {
+                CtConstructor defaultConstructor = CtNewConstructor.defaultConstructor(ctClass);
+                ctClass.addConstructor(defaultConstructor);
+            }
+        } catch (Exception e) {
+            Logger.error(e, "Failed to generate default constructor for " + ctClass.getName());
+            throw new UnexpectedException("Failed to generate default constructor for " + ctClass.getName(), e);
         }
+    }
 
+    private boolean hasDefaultConstructor(CtClass ctClass) throws NotFoundException {
+        for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
+            if (constructor.getParameterTypes().length == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void generateAccessors(CtClass ctClass) {
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 
@@ -81,11 +105,11 @@ public class PropertiesEnhancer extends Enhancer {
                         }
                     } catch (NotFoundException noGetter) {
 
-                        // Créé le getter
+                        // Getter creation
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
-                        getMethod.setModifiers(getMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(getMethod);
+                        createAnnotation(getAnnotations(getMethod), PlayPropertyAccessor.class);
                     }
 
                     if (!isFinal(ctField)) {
@@ -95,9 +119,8 @@ public class PropertiesEnhancer extends Enhancer {
                                 throw new NotFoundException("it's not a setter !");
                             }
                         } catch (NotFoundException noSetter) {
-                            // Créé le setter
+                            // Setter creation
                             CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
-                            setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
                             ctClass.addMethod(setMethod);
                             createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                         }
@@ -106,31 +129,14 @@ public class PropertiesEnhancer extends Enhancer {
                 }
 
             } catch (Exception e) {
-                Logger.error(e, "Error in PropertiesEnhancer");
-                throw new UnexpectedException("Error in PropertiesEnhancer", e);
+                String message = "Failed to generate default accessor for " + ctClass.getName() + "." + ctField.getName();
+                Logger.error(e, message);
+                throw new UnexpectedException(message, e);
             }
-
         }
+    }
 
-        // Add a default constructor if needed
-        try {
-            boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
-                if (constructor.getParameterTypes().length == 0) {
-                    hasDefaultConstructor = true;
-                    break;
-                }
-            }
-            if (!hasDefaultConstructor) {
-                CtConstructor defaultConstructor = CtNewConstructor.defaultConstructor(ctClass);
-                ctClass.addConstructor(defaultConstructor);
-            }
-        } catch (Exception e) {
-            Logger.error(e, "Error in PropertiesEnhancer");
-            throw new UnexpectedException("Error in PropertiesEnhancer", e);
-        }
-
-        // Intercept all fields access
+    private void interceptAllFieldsAccess(final CtClass ctClass) throws CannotCompileException {
         for (final CtBehavior ctMethod : ctClass.getDeclaredBehaviors()) {
             ctMethod.instrument(new ExprEditor() {
 
@@ -138,34 +144,35 @@ public class PropertiesEnhancer extends Enhancer {
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     try {
 
-                        // Acces à une property ?
+                        // Check access to property ?
                         if (isProperty(fieldAccess.getField())) {
 
-                            // TODO : vérifier que c'est bien un champ d'une classe de l'application (fieldAccess.getClassName())
+                            // TODO : Check if it is a application class field (fieldAccess.getClassName())
 
-                            // Si c'est un getter ou un setter
+                            // Getter or setter ?
                             String propertyName = null;
+
                             if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
-                                || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
+                                    || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
                                 if ((ctMethod.getName().startsWith("get") || (!isFinal(fieldAccess.getField()) && ctMethod.getName().startsWith("set"))) && ctMethod.getName().length() > 3) {
                                     propertyName = ctMethod.getName().substring(3);
                                     propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
                                 }
                             }
 
-                            // On n'intercepte pas le getter de sa propre property
+                            // To intercept getter of its own property
                             if (propertyName == null || !propertyName.equals(fieldAccess.getFieldName())) {
 
                                 String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", line " + fieldAccess.getLineNumber();
 
                                 if (fieldAccess.isReader()) {
 
-                                    // Réécris l'accés en lecture à la property
+                                    // Rewrite read access to the property
                                     fieldAccess.replace("$_ = ($r)play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeReadProperty($0, \"" + fieldAccess.getFieldName() + "\", \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
 
                                 } else if (!isFinal(fieldAccess.getField()) && fieldAccess.isWriter()) {
 
-                                    // Réécris l'accés en ecriture à la property
+                                    // Rewrite write access to the property
                                     fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", " + fieldAccess.getField().getType().getName() + ".class, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
 
 
@@ -174,15 +181,12 @@ public class PropertiesEnhancer extends Enhancer {
                         }
 
                     } catch (Exception e) {
-                        throw new UnexpectedException("Error in PropertiesEnhancer", e);
+                        String message = "Failed to modify access to " + ctClass.getName() + "." + ctMethod.getName();
+                        throw new UnexpectedException(message, e);
                     }
                 }
             });
         }
-
-        // Done.
-        applicationClass.enhancedByteCode = ctClass.toBytecode();
-        ctClass.defrost();
     }
 
     /**

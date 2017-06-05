@@ -64,7 +64,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="1.5" target="1.5">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="1.8" target="1.8">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -85,6 +85,7 @@
                author="false"
                version="true"
                use="true"
+               additionalparam="-Xdoclint:none"
                windowtitle="Play! API">
             <classpath refid="project.classpath"/>
             <doctitle><![CDATA[<h1>Play! ${version}</h1>]]></doctitle>
@@ -339,7 +340,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" target="1.5">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source= "1.8" target="1.8">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">
@@ -372,7 +373,7 @@
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
             <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
-            <zipfileset prefix="play-${version}" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**,modules/mockito-0.1/**" excludes="**/*.pyc" />
+            <zipfileset prefix="play-${version}" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**,modules/mockito-0.2/**" excludes="**/*.pyc" />
         </zip>
     </target>
 
