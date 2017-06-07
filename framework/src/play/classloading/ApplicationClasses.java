@@ -22,7 +22,6 @@ import java.util.Map;
  * Application classes container.
  */
 public class ApplicationClasses {
-
     /**
      * Reference to the eclipse compiler.
      */

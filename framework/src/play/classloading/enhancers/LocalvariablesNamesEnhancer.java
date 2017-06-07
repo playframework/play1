@@ -1,10 +1,10 @@
 package play.classloading.enhancers;
 
-import javassist.*;
+import javassist.CtClass;
+import javassist.CtMethod;
 import javassist.bytecode.*;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.libs.F.T2;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -16,7 +16,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
-        if (isAnon(applicationClass)) {
+        if (isAnon(applicationClass) || isScala(applicationClass)) {
             return;
         }
 
@@ -37,72 +37,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             if (codeAttribute == null || javassist.Modifier.isAbstract(method.getModifiers())) {
                 continue;
             }
+
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
-            List<T2<Integer,String>> parameterNames = new ArrayList<>();
-            
             if (localVariableAttribute == null) {
-                if(method.getParameterTypes().length > 0)
-                    continue;
-            } else {
-                if(localVariableAttribute.tableLength() < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1)) {
-                    Logger.warn("weird: skipping method %s %s as its number of local variables is incorrect (lv=%s || lv.length=%s || params.length=%s || (isStatic? %s)", method.getReturnType().getName(), method.getLongName(), localVariableAttribute, localVariableAttribute != null ? localVariableAttribute.tableLength() : -1, method.getParameterTypes().length, Modifier.isStatic(method.getModifiers()));
-                }
-                for(int i=0; i<localVariableAttribute.tableLength(); i++) {
-                    if (!"__stackRecorder".equals(localVariableAttribute.variableName(i))) {
-                        parameterNames.add(new T2<>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
-                    }
-                }
-                Collections.sort(parameterNames, new Comparator<T2<Integer,String>>() {
-                    @Override
-                    public int compare(T2<Integer, String> o1, T2<Integer, String> o2) {
-                        return o1._1.compareTo(o2._1);
-                    }
-
-                });
-            }
-            List<String> names = new ArrayList<>();
-            for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {
-                if (localVariableAttribute == null) {
-                    continue;
-                }
-                try {
-                    String name = parameterNames.get(i)._2;
-                    if (!"this".equals(name)) {
-                        names.add(name);
-                    }
-                } catch (Exception e) {
-                    Logger.warn(e, "While applying localvariables to %s.%s, param %s", ctClass.getName(), method.getName(), i);
-                }
-            }
-            StringBuilder iv = new StringBuilder();
-            if (names.isEmpty()) {
-                iv.append("new String[0];");
-            } else {
-                iv.append("new String[] {");
-                for (Iterator<String> i = names.iterator(); i.hasNext();) {
-                    iv.append("\"");
-                    String aliasedName = i.next();
-                    if (aliasedName.contains("$")) {
-                        aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
-                    }
-                    iv.append(aliasedName);
-                    iv.append("\"");
-                    if (i.hasNext()) {
-                        iv.append(",");
-                    }
-                }
-                iv.append("};");
-            }
-            
-            String sigField = "$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes());
-            try { // #1198
-                ctClass.getDeclaredField(sigField);
-            } catch (NotFoundException nfe) {
-                CtField signature = CtField.make("public static String[] " + sigField + " = " + iv, ctClass);
-                ctClass.addField(signature);
-            }
-
-            if (localVariableAttribute == null || isScala(applicationClass)) {
                 continue;
             }
 
@@ -122,18 +59,11 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
                 }
 
-
                 if ("this".equals(name)) {
                     continue;
                 }
 
-                /* DEBUG
-                IO.write(ctClass.toBytecode(), new File("/tmp/lv_"+applicationClass.name+".class"));
-                ctClass.defrost();
-                 */
-
                 try {
-
                     // The instruction at which this local variable has been created
                     Integer pc = localVariableAttribute.startPc(i);
 
@@ -191,7 +121,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     }
     
-    private static Bytecode makeBytecodeForLVStore(CtMethod method, String sig, String name, int slot) {
+    static Bytecode makeBytecodeForLVStore(CtMethod method, String sig, String name, int slot) {
         Bytecode b = new Bytecode(method.getMethodInfo().getConstPool());
         b.addLdc(name);
         if("I".equals(sig) || "B".equals(sig) || "C".equals(sig) || "S".equals(sig) || "Z".equals(sig))
@@ -228,49 +158,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
      */
     public static class LocalVariablesNamesTracer {
 
-        public static Integer computeMethodHash(CtClass[] parameters) {
-            String[] names = new String[parameters.length];
-            for (int i = 0; i < parameters.length; i++) {
-                names[i] = parameters[i].getName();
-            }
-            return computeMethodHash(names);
-        }
-
-        public static Integer computeMethodHash(Class<?>[] parameters) {
-            String[] names = new String[parameters.length];
-            for (int i = 0; i < parameters.length; i++) {
-                Class<?> param = parameters[i];
-                names[i] = "";
-                if (param.isArray()) {
-                    int level = 1;
-                    param = param.getComponentType();
-                    // Array of array
-                    while (param.isArray()) {
-                        level++;
-                        param = param.getComponentType();
-                    }
-                    names[i] = param.getName();
-                    for (int j = 0; j < level; j++) {
-                        names[i] += "[]";
-                    }
-                } else {
-                    names[i] = param.getName();
-                }
-            }
-            return computeMethodHash(names);
-        }
-
-        public static Integer computeMethodHash(String[] parameters) {
-            StringBuilder buffer = new StringBuilder();
-            for (String param : parameters) {
-                buffer.append(param);
-            }
-            Integer hash = buffer.toString().hashCode();
-            if (hash < 0) {
-                return -hash;
-            }
-            return hash;
-        }
         static final ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<>();
 
         public static void checkEmpty() {
@@ -378,9 +265,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
     }
     
-    private static final Map<Integer, Integer> storeByCode = new HashMap<>();
+    static final Map<Integer, Integer> storeByCode = new HashMap<>();
 
-    /**
+    /*
      * Useful instructions
      */
     static {

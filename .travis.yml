@@ -2,7 +2,7 @@ sudo: required
 dist: trusty
 language: java
 jdk:
-  - openjdk7 
+  - oraclejdk8
 #before_install:
 #  - cat /etc/hosts # optionally check the content *before*
 #  - sudo hostname "$(hostname | cut -c1-63)"
