@@ -1,0 +1,13 @@
+# Play Mockito module
+
+Mockito is slightly incompatible with Play, for two reasons:
+
+* Mockito caches classes, causing class cast exceptions when play reloads them after modification.
+* Mockito uses a classloader to find the MockitoConfiguration class, that does not find source java files as used in Play.
+
+This plugin solves those problems by:
+
+* Shipping a minimally modified mockito in which you can disable the cache.
+* Shipping a compiled MockitoConfiguration class that will be found by Mockito.
+
+Hopefully, the patch for the first issue will be accepted upstream, so that this plugin no longer needs to ship a modified Mockito in the future.
