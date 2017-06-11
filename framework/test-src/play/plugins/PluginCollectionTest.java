@@ -88,7 +88,7 @@ public class PluginCollectionTest {
     public void canLoadPlayPluginsFromASingleDescriptor() throws Exception {
         Play.configuration.setProperty("play.plugins.descriptor", "test-src/play/plugins/custom-play.plugins");
         PluginCollection pc = new PluginCollection();
-        assertThat(pc.loadPlayPluginDescriptors()).containsExactly(new File("test-src/play/plugins/custom-play.plugins").toURI().toURL());
+        assertThat(pc.loadPlayPluginDescriptors()).containsExactly(new File(Play.applicationPath, "test-src/play/plugins/custom-play.plugins").toURI().toURL());
     }
 
     @Test
