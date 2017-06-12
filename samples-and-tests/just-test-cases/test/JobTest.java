@@ -1,9 +1,12 @@
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
 import play.jobs.Every;
 import play.jobs.Job;
+import play.jobs.On;
+import play.libs.F.Promise;
 import play.test.UnitTest;
 
 /**
@@ -53,6 +56,27 @@ public class JobTest extends UnitTest {
     }
 
     /**
+     * A Job class that is annotated with {@link On} to run every second.
+     */
+    @On("* * * * * ? *")
+    public static class RunOnSecond extends Job {
+        private static final AtomicLong totalRuns = new AtomicLong(0);
+        private static volatile boolean throwException = false;
+
+        @Override
+        public void doJob() throws Exception {
+            totalRuns.getAndIncrement();
+
+            // To avoid logging an error every second, we only throw an
+            // exception when the relevant test case is running.
+            if (throwException) {
+                throwException = false;
+                throw new Exception("Throwing an exception");
+            }
+        }
+    }
+
+    /**
      * A Job class that is annotated with {@link Every} to never run.
      */
     @Every("never")
@@ -75,6 +99,63 @@ public class JobTest extends UnitTest {
         @Override
         public void doJob() throws Exception {
             totalRuns.getAndIncrement();
+        }
+    }
+
+    /**
+     * Tests that if a Job's execution throws an exception when scheduled from {@link Job#now}, that the exception is
+     * thrown from the promise.
+     */
+    @Test
+    public void testCanCollectExceptionFromJobNow() throws Exception {
+
+        // Schedule a job that throws an exception to run now.
+        Job job = new Job() {
+            @Override
+            public void doJob() throws Exception {
+                throw new Exception("Intentional exception");
+            }
+        };
+        Promise promise = job.now();
+
+        try {
+            promise.get();
+            fail("Calling Promise.get() for a job result that threw an exception did not throw the exception");
+        } catch (ExecutionException ex) {
+            // The exception that gets thrown must be unwrapped to get to the original.
+            // Here, we unwrap twice (instead of once) because the Job infrastructure
+            // wraps it twice. This might be a bug, but since programs may depend on it,
+            // it's the behavior we test for.
+            assertEquals("Intentional exception", ex.getCause().getCause().getMessage());
+        }
+    }
+
+    /**
+     * Tests that if a Job's execution throws an exception when scheduled from {@link Job#in(int)}, that the exception
+     * is thrown from the promise.
+     */
+    @Test
+    public void testCanCollectExceptionFromJobIn() throws Exception {
+
+        // Schedule a job that throws an exception to run now.
+        Job job = new Job() {
+            @Override
+            public void doJob() throws Exception {
+                throw new Exception("Intentional exception");
+            }
+        };
+        // Schedule the job to run in 0 seconds (that is, now).
+        Promise promise = job.in(0);
+
+        try {
+            promise.get();
+            fail("Calling Promise.get() for a job result that threw an exception did not throw the exception");
+        } catch (ExecutionException ex) {
+            // The exception that gets thrown must be unwrapped to get to the original.
+            // Here, we unwrap twice (instead of once) because the Job infrastructure
+            // wraps it twice. This might be a bug, but since programs may depend on it,
+            // it's the behavior we test for.
+            assertEquals("Intentional exception", ex.getCause().getCause().getMessage());
         }
     }
 
@@ -135,5 +216,23 @@ public class JobTest extends UnitTest {
         // Make sure it threw an exception and ran multiple times.
         assertFalse("TestJob job never ran", job.throwException);
         assertTrue("TestJob job was not run after throwing an exception", 2 <= job.totalRuns.get());
+    }
+
+    /**
+     * Tests that throwing an exception does not halt the periodic scheduling of an {@code @On} annotation.
+     */
+    @Test
+    public void testExceptionDoesNotHaltReschedulingWithOnAnnotation() {
+
+        // Configure RunEverySecond to throw an exception.
+        RunOnSecond.throwException = true;
+        long beforeRuns = RunOnSecond.totalRuns.get();
+
+        pause(2500); // wait long enough for the job to have run at least twice
+
+        // Make sure it threw an exception and ran multiple times.
+        long afterRuns = RunOnSecond.totalRuns.get();
+        assertFalse("RunOnSecond job never ran", RunEverySecond.throwException);
+        assertTrue("RunOnSecond job was not run after throwing an exception", 2 <= afterRuns - beforeRuns);
     }
 }
