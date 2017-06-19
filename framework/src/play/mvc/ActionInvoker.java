@@ -147,11 +147,15 @@ public class ActionInvoker {
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
-                    cacheKey = actionMethod.getAnnotation(CacheFor.class).id();
+                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);;
+                    cacheKey = cacheFor.id();
                     if ("".equals(cacheKey)) {
-                        cacheKey = "urlcache:" + request.url + request.querystring;
+                        // Generate a cache key for this request
+                        cacheKey = cacheFor.generator().newInstance().generate(request);
                     }
-                    actionResult = (Result) Cache.get(cacheKey);
+                    if(cacheKey != null && !"".equals(cacheKey)) {
+                    	actionResult = (Result) Cache.get(cacheKey);
+                    }
                 }
 
                 if (actionResult == null) {
@@ -161,7 +165,7 @@ public class ActionInvoker {
             } catch (Result result) {
                 actionResult = result;
                 // Cache it if needed
-                if (cacheKey != null) {
+                if (cacheKey != null && !"".equals(cacheKey)) {
                     Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                 }
             } catch (JavaExecutionException e) {
