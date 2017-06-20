@@ -38,6 +38,9 @@ def execute(**kargs):
     mlXML = ""
     msXML = ""
     jdXML = ""
+    meXML = ""
+    intellij_exclude = app.readConf('play.idealize.exclude').split(',')
+    print intellij_exclude
     if os.path.exists(os.path.join(app.path, 'lib')):
         mlXML += '<root url="file://$MODULE_DIR$/lib" />\n'
     if len(modules):
@@ -45,6 +48,7 @@ def execute(**kargs):
             libpath = os.path.join(module, 'lib')
             srcpath = os.path.join(module, 'src')
             lXML += '        <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
+            meXML += '       <excludeFolder url="file://%s" />\n' % (module.replace('\\', '/'))
             if os.path.exists(srcpath):
                 msXML += '                    <root url="file://$MODULE_DIR$/%s"/>\n' % (app.toRelative(srcpath).replace('\\', '/'))
             if os.path.exists(libpath):
@@ -54,6 +58,7 @@ def execute(**kargs):
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
     replaceAll(imlFile, r'%MODULE_SOURCES%', msXML)
     replaceAll(imlFile, r'%MODULE_LIBRARIES%', jdXML)
+    replaceAll(imlFile, r'%MODULE_EXCLUDES%', meXML)
     
     iprFile = os.path.join(app.path, application_name + '.ipr')
     # Only copy/create if missing to avoid overwriting customizations
