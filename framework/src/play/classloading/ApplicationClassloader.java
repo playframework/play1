@@ -150,7 +150,9 @@ public class ApplicationClassloader extends ClassLoader {
             }
 
             if (!applicationClass.isClass()) {
-                definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
+                if(null == getPackage(applicationClass.getPackage())) {
+                    definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
+                }
             } else {
                 loadPackage(name);
             }
