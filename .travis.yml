@@ -2,19 +2,16 @@ sudo: required
 dist: trusty
 language: java
 jdk:
-  - oraclejdk8 
-#before_install:
-#  - cat /etc/hosts # optionally check the content *before*
-#  - sudo hostname "$(hostname | cut -c1-63)"
-#  - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
-#  - sudo mv /tmp/hosts /etc/hosts
-#  - cat /etc/hosts # optionally check the content *after*
+  - oraclejdk8
+install:
+- sudo apt-get install ant-optional
 addons:
   hosts:
     - myshorthost
   hostname: myshorthost
 
-script: ant -buildfile ./framework/build.xml test
+script:
+- ant -buildfile ./framework/build.xml test
 
 after_failure:
     find samples-and-tests -name '*.failed.html' -exec echo {} \; -exec cat {} \;
