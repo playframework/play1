@@ -313,6 +313,20 @@ bc. db.destroyMethod=close
 Default: none.
 
 
+h3(#db.factory). db.factory
+
+Factory class that will create DataSource instances.
+
+bc. db.factory=play.db.hikaricp.HikariDataSourceFactory
+
+Currently two values are supported out-of-the-box: 
+* play.db.hikaricp.HikariDataSourceFactory   (default starting from Play 1.5)
+* play.db.c3p0.C3P0DataSourceFactory         (it was the only data source available prior to Play 1.5)
+
+Default:
+
+* @play.db.hikaricp.HikariDataSourceFactory@
+
 h3(#db.driver). db.driver
 
 Database driver class name, for use with "db.url":#db.url. For example:
