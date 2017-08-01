@@ -254,6 +254,12 @@
         <condition property="playExtension" value="">
             <and><os family="unix"/></and>
         </condition>
+        <condition property="pythonExecutable" value="${basedir}/../python/python.exe">
+            <and><os family="windows"/></and>
+        </condition>
+        <condition property="pythonExecutable" value="python">
+            <and><os family="unix"/></and>
+        </condition>
 
         <echo message="Testing unittests" />
 
@@ -261,11 +267,11 @@
         
         <echo message="Testing development lifecycle (wait ...)" />
 
-        <exec executable="python" failonerror="true">
+        <exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
         </exec>
 
-        <exec executable="python" failonerror="true">
+        <exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/test_jvm_version_flag.py" />
         </exec>
 
