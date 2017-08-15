@@ -40,7 +40,9 @@ public class PluginCollectionTest {
         // the following plugin-list should match the list in the file 'play.plugins'
         assertThat(pc.getEnabledPlugins()).containsExactly(pc.getPluginInstance(EnhancerPlugin.class),
                 pc.getPluginInstance(ConfigurationChangeWatcherPlugin.class), pc.getPluginInstance(TempFilePlugin.class),
-                pc.getPluginInstance(ValidationPlugin.class), pc.getPluginInstance(DBPlugin.class), pc.getPluginInstance(JPAPlugin.class),
+                pc.getPluginInstance(ValidationPlugin.class), 
+                pc.getPluginInstance(DBPlugin.class), pc.getPluginInstance(play.db.DBBrowserPlugin.class), 
+                pc.getPluginInstance(JPAPlugin.class),
                 pc.getPluginInstance(Evolutions.class), pc.getPluginInstance(MessagesPlugin.class), pc.getPluginInstance(WS.class),
                 pc.getPluginInstance(JobsPlugin.class), pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class),
                 pc.getPluginInstance(PlayStatusPlugin.class));

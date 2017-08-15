@@ -9,6 +9,7 @@ transitiveDependencies: false
 require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.9.5.2
+    - com.zaxxer -> HikariCP 2.6.3
     - org.ow2.asm -> asm-all 5.2
     - cglib -> cglib 3.2.4
     - com.google.code.gson -> gson 2.8.0
