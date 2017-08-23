@@ -18,6 +18,8 @@ import java.lang.annotation.Annotation;
 import java.net.URLEncoder;
 import java.util.*;
 
+import static play.templates.JavaExtensions.capitalizeWords;
+
 /**
  * All application Scopes
  */
@@ -31,6 +33,19 @@ public class Scope {
             .equals("true");
     public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
+
+    public static SessionStore sessionStore = createSessionStore();
+
+    private static SessionStore createSessionStore() {
+        String sessionStoreParameter = Play.configuration.getProperty("application.session.store", "cookie");
+        String sessionStoreClass = "play.mvc." + capitalizeWords(sessionStoreParameter) + "SessionStore";
+        try {
+            return (SessionStore) Class.forName(sessionStoreClass).newInstance();
+        }
+        catch (Exception e) {
+            throw new UnexpectedException("Cannot create instance of " + sessionStoreClass, e);
+        }
+    }
 
     /**
      * Flash scope
@@ -152,14 +167,13 @@ public class Scope {
      * Session scope
      */
     public static class Session {
-        public static SessionStore store = new CookieSessionStore();
 
         static final String AT_KEY = "___AT";
         static final String ID_KEY = "___ID";
         static final String TS_KEY = "___TS";
 
         public static Session restore() {
-            return store.restore();
+            return sessionStore.restore();
         }
 
         Map<String, String> data = new HashMap<>(); // ThreadLocal access
@@ -194,7 +208,7 @@ public class Scope {
         }
 
         void save() {
-            store.save(this);
+            sessionStore.save(this);
         }
 
         public void put(String key, String value) {
