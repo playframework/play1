@@ -184,7 +184,7 @@ public class Scope {
 
         public String getAuthenticityToken() {
             if (!data.containsKey(AT_KEY)) {
-                this.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+                this.put(AT_KEY, Crypto.sign(Codec.UUID()));
             }
             return data.get(AT_KEY);
         }
