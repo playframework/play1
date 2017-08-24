@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
 public class ActionInvoker {
 
     @SuppressWarnings("unchecked")
-    public static void resolve(Http.Request request, Http.Response response) {
+    public static void resolve(Http.Request request) {
 
         if (!Play.started) {
             return;
