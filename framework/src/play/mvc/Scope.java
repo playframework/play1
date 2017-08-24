@@ -18,8 +18,6 @@ import java.lang.annotation.Annotation;
 import java.net.URLEncoder;
 import java.util.*;
 
-import static play.templates.JavaExtensions.capitalizeWords;
-
 /**
  * All application Scopes
  */
@@ -37,9 +35,10 @@ public class Scope {
     public static SessionStore sessionStore = createSessionStore();
 
     private static SessionStore createSessionStore() {
-        String sessionStoreParameter = Play.configuration.getProperty("application.session.store", "cookie");
-        String sessionStoreClass = "play.mvc." + capitalizeWords(sessionStoreParameter) + "SessionStore";
+        String sessionStoreClass = Play.configuration.getProperty("application.session.storeClass");
+        if (sessionStoreClass == null) return new CookieSessionStore();
         try {
+            Logger.info("Storing sessions using " + sessionStoreClass);
             return (SessionStore) Class.forName(sessionStoreClass).newInstance();
         }
         catch (Exception e) {
