@@ -240,7 +240,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         @Override
         public InvocationContext getInvocationContext() {
-            ActionInvoker.resolve(request, response);
+            ActionInvoker.resolve(request);
             return new InvocationContext(Http.invocationType, request.invokedMethod.getAnnotations(),
                     request.invokedMethod.getDeclaringClass().getAnnotations());
         }
