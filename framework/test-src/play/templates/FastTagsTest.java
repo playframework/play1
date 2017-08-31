@@ -1,6 +1,7 @@
 package play.templates;
 
 import groovy.lang.Closure;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import play.mvc.Http;
@@ -18,14 +19,26 @@ import static org.mockito.Mockito.mock;
 public class FastTagsTest {
 
     private StringWriter out = new StringWriter();
+    final String backupSystemLineBreak = System.getProperty("line.separator");
 
     @Before
     public void setUp() throws Exception {
+        //if you render html into out
+        // and expect results with line breaks
+        // take into account that your tests will fail on other platforms
+        // force line.separator be the same on any platform
+        // or use String.format in expected code with the placeholder '%n' for any expected line separation.
+        System.setProperty("line.separator","\n");
         Http.Response.current.set(new Http.Response());
         Http.Response.current().encoding = "UTF-8";
 
         Scope.Session.current.set(new Scope.Session());
         Scope.Session.current().put("___AT", "1234");
+    }
+    @After
+    public void tearDown() throws Exception {
+        // restore line.separator
+        System.setProperty("line.separator", backupSystemLineBreak);
     }
 
     @Test
