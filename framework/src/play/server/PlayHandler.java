@@ -19,8 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -547,14 +546,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     static String getRemoteIPAddress(MessageEvent e) {
-        String fullAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress().getHostAddress();
-        if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
-            fullAddress = fullAddress.substring(1);
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
-        } else if (fullAddress.matches(".*[%].*")) {
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
+        final InetAddress inetAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress();
+        final byte[] address = inetAddress.getAddress();
+        try { //create a new inetaddress only from numeric ( without host and interface information)
+            return InetAddress.getByAddress(address).getHostAddress();
+        } catch (UnknownHostException unknownHostException) { //should never happen, else address is wrong
+            Logger.error(unknownHostException,"Error: resolving numeric address: %s", inetAddress.getHostAddress());
         }
-        return fullAddress;
+        return null;
     }
 
     public Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest, MessageEvent messageEvent) throws Exception {
