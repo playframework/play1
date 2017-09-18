@@ -1,0 +1,8 @@
+~ Name:
+~ ~~~~~
+~ deps -- synonym for dependencies
+~
+~ Alias:
+~ ~~~~~
+~ dependencies
+~
