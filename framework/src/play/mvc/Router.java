@@ -1,22 +1,9 @@
 package play.mvc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.commons.lang.StringUtils;
-
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -27,6 +14,14 @@ import play.templates.TemplateLoader;
 import play.utils.Default;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The router matches HTTP requests to action invocations
@@ -354,13 +349,9 @@ public class Router {
                 if (route.matches(request.method, request.path, request.format, request.domain) != null) {
                     break;
                 }
-            } catch (Throwable t) {
-                if (t instanceof RenderStatic) {
-                    throw (RenderStatic) t;
-                }
-                if (t instanceof NotFound) {
-                    throw (NotFound) t;
-                }
+            } catch (RenderStatic | NotFound e) {
+                throw e;
+            } catch (Throwable ignore) {
             }
         }
     }

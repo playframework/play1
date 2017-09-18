@@ -11,7 +11,6 @@ import play.cache.Cache;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
-import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
 import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.binding.ParamNode;
@@ -48,23 +47,11 @@ import java.util.concurrent.Future;
 public class ActionInvoker {
 
     @SuppressWarnings("unchecked")
-    public static void resolve(Http.Request request, Http.Response response) {
+    public static void resolve(Http.Request request) {
 
         if (!Play.started) {
             return;
         }
-
-        Http.Request.current.set(request);
-        Http.Response.current.set(response);
-
-        Scope.Params.current.set(request.params);
-        Scope.RenderArgs.current.set(new Scope.RenderArgs());
-        Scope.RouteArgs.current.set(new Scope.RouteArgs());
-        Scope.Session.current.set(Scope.Session.restore());
-        Scope.Flash.current.set(Scope.Flash.restore());
-        CachedBoundActionMethodArgs.init();
-
-        ControllersEnhancer.currentAction.set(new Stack<String>());
 
         if (request.resolved) {
             return;
@@ -102,11 +89,25 @@ public class ActionInvoker {
 
     }
 
+    private static void initActionContext(Http.Request request, Http.Response response) {
+        Http.Request.current.set(request);
+        Http.Response.current.set(response);
+
+        Scope.Params.current.set(request.params);
+        Scope.RenderArgs.current.set(new Scope.RenderArgs());
+        Scope.RouteArgs.current.set(new Scope.RouteArgs());
+        Scope.Session.current.set(Scope.Session.restore());
+        Scope.Flash.current.set(Scope.Flash.restore());
+        CachedBoundActionMethodArgs.init();
+
+        ControllersEnhancer.currentAction.set(new Stack<>());
+    }
+
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
 
         try {
-            resolve(request, response);
+            initActionContext(request, response);
             Method actionMethod = request.invokedMethod;
 
             // 1. Prepare request params
