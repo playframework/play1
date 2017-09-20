@@ -7,6 +7,10 @@ import play.mvc.Http;
  */
 public class Forbidden extends Error {
 
+    public Forbidden() {
+        this("Access denied");
+    }
+
     public Forbidden(String reason) {
         super(Http.StatusCode.FORBIDDEN, reason);
     }
