@@ -15,7 +15,7 @@ import play.mvc.Mailer;
 public class Injector {
 
     /**
-     * For now, inject beans in controllers and any classes that implements Injectable interface.
+     * For now, inject beans in controllers and any classes that include @RequireInjection.
      * 
      * @param source
      *            the beanSource to inject
@@ -24,7 +24,7 @@ public class Injector {
         List<Class> classes = new ArrayList<>(Play.classloader.getAssignableClasses(ControllerSupport.class));
         classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
         classes.addAll(Play.classloader.getAssignableClasses(Job.class));
-        classes.addAll(Play.classloader.getAssignableClasses(Injectable.class));
+        classes.addAll(Play.classloader.getAnnotatedClasses(RequireInjection.class));
         for (Class<?> clazz : classes) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {
