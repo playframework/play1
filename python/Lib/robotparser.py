@@ -7,7 +7,8 @@
     2) PSF license for Python 2.2
 
     The robots.txt Exclusion Protocol is implemented as specified in
-    http://info.webcrawler.com/mak/projects/robots/norobots-rfc.html
+    http://www.robotstxt.org/norobots-rfc.txt
+
 """
 import urlparse
 import urllib
@@ -60,7 +61,7 @@ class RobotFileParser:
         self.errcode = opener.errcode
         if self.errcode in (401, 403):
             self.disallow_all = True
-        elif self.errcode >= 400:
+        elif self.errcode >= 400 and self.errcode < 500:
             self.allow_all = True
         elif self.errcode == 200 and lines:
             self.parse(lines)
@@ -68,7 +69,9 @@ class RobotFileParser:
     def _add_entry(self, entry):
         if "*" in entry.useragents:
             # the default entry is considered last
-            self.default_entry = entry
+            if self.default_entry is None:
+                # the first default entry wins
+                self.default_entry = entry
         else:
             self.entries.append(entry)
 
@@ -84,6 +87,7 @@ class RobotFileParser:
         linenumber = 0
         entry = Entry()
 
+        self.modified()
         for line in lines:
             linenumber += 1
             if not line:
@@ -120,7 +124,7 @@ class RobotFileParser:
                         entry.rulelines.append(RuleLine(line[1], True))
                         state = 2
         if state == 2:
-            self.entries.append(entry)
+            self._add_entry(entry)
 
 
     def can_fetch(self, useragent, url):
@@ -129,9 +133,22 @@ class RobotFileParser:
             return False
         if self.allow_all:
             return True
+
+        # Until the robots.txt file has been read or found not
+        # to exist, we must assume that no url is allowable.
+        # This prevents false positives when a user erroneously
+        # calls can_fetch() before calling read().
+        if not self.last_checked:
+            return False
+
         # search for given user agent matches
         # the first match counts
-        url = urllib.quote(urlparse.urlparse(urllib.unquote(url))[2]) or "/"
+        parsed_url = urlparse.urlparse(urllib.unquote(url))
+        url = urlparse.urlunparse(('', '', parsed_url.path,
+            parsed_url.params, parsed_url.query, parsed_url.fragment))
+        url = urllib.quote(url)
+        if not url:
+            url = "/"
         for entry in self.entries:
             if entry.applies_to(useragent):
                 return entry.allowance(url)
@@ -153,6 +170,7 @@ class RuleLine:
         if path == '' and not allowance:
             # an empty value means allow all
             allowance = True
+        path = urlparse.urlunparse(urlparse.urlparse(path))
         self.path = urllib.quote(path)
         self.allowance = allowance
 

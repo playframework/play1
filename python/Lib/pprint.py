@@ -35,8 +35,12 @@ saferepr()
 """
 
 import sys as _sys
+import warnings
 
-from cStringIO import StringIO as _StringIO
+try:
+    from cStringIO import StringIO as _StringIO
+except ImportError:
+    from StringIO import StringIO as _StringIO
 
 __all__ = ["pprint","pformat","isreadable","isrecursive","saferepr",
            "PrettyPrinter"]
@@ -69,6 +73,13 @@ def isreadable(object):
 def isrecursive(object):
     """Determine if object requires a recursive representation."""
     return _safe_repr(object, {}, None, 0)[2]
+
+def _sorted(iterable):
+    with warnings.catch_warnings():
+        if _sys.py3kwarning:
+            warnings.filterwarnings("ignore", "comparing unequal types "
+                                    "not supported", DeprecationWarning)
+        return sorted(iterable)
 
 class PrettyPrinter:
     def __init__(self, indent=1, width=80, depth=None, stream=None):
@@ -144,8 +155,7 @@ class PrettyPrinter:
             if length:
                 context[objid] = 1
                 indent = indent + self._indent_per_level
-                items  = object.items()
-                items.sort()
+                items = _sorted(object.items())
                 key, ent = items[0]
                 rep = self._repr(key, context, level)
                 write(rep)
@@ -175,25 +185,18 @@ class PrettyPrinter:
             if issubclass(typ, list):
                 write('[')
                 endchar = ']'
-            elif issubclass(typ, set):
-                if not length:
-                    write('set()')
-                    return
-                write('set([')
-                endchar = '])'
-                object = sorted(object)
-                indent += 4
-            elif issubclass(typ, frozenset):
-                if not length:
-                    write('frozenset()')
-                    return
-                write('frozenset([')
-                endchar = '])'
-                object = sorted(object)
-                indent += 10
-            else:
+            elif issubclass(typ, tuple):
                 write('(')
                 endchar = ')'
+            else:
+                if not length:
+                    write(rep)
+                    return
+                write(typ.__name__)
+                write('([')
+                endchar = '])'
+                indent += len(typ.__name__) + 1
+                object = _sorted(object)
             if self._indent_per_level > 1 and sepLines:
                 write((self._indent_per_level - 1) * ' ')
             if length:
@@ -274,7 +277,7 @@ def _safe_repr(object, context, maxlevels, level):
         append = components.append
         level += 1
         saferepr = _safe_repr
-        for k, v in sorted(object.items()):
+        for k, v in _sorted(object.items()):
             krepr, kreadable, krecur = saferepr(k, context, maxlevels, level)
             vrepr, vreadable, vrecur = saferepr(v, context, maxlevels, level)
             append("%s: %s" % (krepr, vrepr))

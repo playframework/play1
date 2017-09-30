@@ -17,6 +17,7 @@ class Number(object):
     caring what kind, use isinstance(x, Number).
     """
     __metaclass__ = ABCMeta
+    __slots__ = ()
 
     # Concrete numeric types must provide their own hash implementation
     __hash__ = None
@@ -41,6 +42,8 @@ class Complex(Number):
     type as described below.
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def __complex__(self):
         """Return a builtin complex instance. Called for complex(self)."""
@@ -60,7 +63,7 @@ class Complex(Number):
 
     @abstractproperty
     def imag(self):
-        """Retrieve the real component of this number.
+        """Retrieve the imaginary component of this number.
 
         This should subclass Real.
         """
@@ -172,6 +175,8 @@ class Real(Complex):
     Real also provides defaults for the derived operations.
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def __float__(self):
         """Any Real can be converted to a native float object.
@@ -265,6 +270,8 @@ Real.register(float)
 class Rational(Real):
     """.numerator and .denominator should be in lowest terms."""
 
+    __slots__ = ()
+
     @abstractproperty
     def numerator(self):
         raise NotImplementedError
@@ -288,13 +295,15 @@ class Rational(Real):
 class Integral(Rational):
     """Integral adds a conversion to long and the bit-string operations."""
 
+    __slots__ = ()
+
     @abstractmethod
     def __long__(self):
         """long(self)"""
         raise NotImplementedError
 
     def __index__(self):
-        """index(self)"""
+        """Called whenever an index is needed, such as in slicing"""
         return long(self)
 
     @abstractmethod

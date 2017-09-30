@@ -46,7 +46,7 @@ public class Forum extends Model {
     }
 
     public Post getLastPost() {
-        return Post.find("topic.forum = ? order by postedAt desc", this).first();
+        return Post.find("topic.forum = ?1 order by postedAt desc", this).first();
     }
     
 }

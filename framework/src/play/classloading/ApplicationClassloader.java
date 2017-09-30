@@ -255,14 +255,14 @@ public class ApplicationClassloader extends ClassLoader {
 
     @Override
     public URL getResource(String name) {
-        for (VirtualFile vf : Play.javaPath) {
-            VirtualFile res = vf.child(name);
-            if (res != null && res.exists()) {
+            for (VirtualFile vf : Play.javaPath) {
+                VirtualFile res = vf.child(name);
+                if (res != null && res.exists()) {
                 try {
                     return res.getRealFile().toURI().toURL();
-                } catch (MalformedURLException ex) {
-                    throw new UnexpectedException(ex);
-                }
+        } catch (MalformedURLException ex) {
+            throw new UnexpectedException(ex);
+        }
             }
         }
         return super.getResource(name);

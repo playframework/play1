@@ -12,7 +12,7 @@ Now all dynamic expressions are escaped by the template engine to avoid XSS secu
 
 bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
 
-If you really want to display it in an unescaped way, you need to explicitely call the **raw()** method:
+If you really want to display it in an unescaped way, you need to explicitly call the **raw()** method:
 
 bc. ${title.raw()} --> <h1>Title</h1>
 
@@ -71,7 +71,7 @@ bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
 }
 
-Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the followin line to your **application.conf** file:
+Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the following line to your **application.conf** file:
 
 bc. future.bindJPAObjects=true
 
@@ -119,7 +119,7 @@ bc. public class User {
 
 h2. <a>Test runner update</a>
 
-We've updated selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
+We've updated selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in full screen. And some new functionalities like the "Run all tests" have been added.
 
 !images/selenium-fullscreen!
 

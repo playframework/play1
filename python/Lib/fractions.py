@@ -4,6 +4,7 @@
 """Rational, infinite-precision, real numbers."""
 
 from __future__ import division
+from decimal import Decimal
 import math
 import numbers
 import operator
@@ -30,74 +31,135 @@ _RATIONAL_FORMAT = re.compile(r"""
     (?P<sign>[-+]?)            # an optional sign, then
     (?=\d|\.\d)                # lookahead for digit or .digit
     (?P<num>\d*)               # numerator (possibly empty)
-    (?:                        # followed by an optional
-       /(?P<denom>\d+)         # / and denominator
+    (?:                        # followed by
+       (?:/(?P<denom>\d+))?    # an optional denominator
     |                          # or
-       \.(?P<decimal>\d*)      # decimal point and fractional part
-    )?
+       (?:\.(?P<decimal>\d*))? # an optional fractional part
+       (?:E(?P<exp>[-+]?\d+))? # and optional exponent
+    )
     \s*\Z                      # and optional whitespace to finish
-""", re.VERBOSE)
+""", re.VERBOSE | re.IGNORECASE)
 
 
 class Fraction(Rational):
     """This class implements rational numbers.
 
-    Fraction(8, 6) will produce a rational number equivalent to
-    4/3. Both arguments must be Integral. The numerator defaults to 0
-    and the denominator defaults to 1 so that Fraction(3) == 3 and
-    Fraction() == 0.
+    In the two-argument form of the constructor, Fraction(8, 6) will
+    produce a rational number equivalent to 4/3. Both arguments must
+    be Rational. The numerator defaults to 0 and the denominator
+    defaults to 1 so that Fraction(3) == 3 and Fraction() == 0.
 
-    Fractions can also be constructed from strings of the form
-    '[-+]?[0-9]+((/|.)[0-9]+)?', optionally surrounded by spaces.
+    Fractions can also be constructed from:
+
+      - numeric strings similar to those accepted by the
+        float constructor (for example, '-2.3' or '1e10')
+
+      - strings of the form '123/456'
+
+      - float and Decimal instances
+
+      - other Rational instances (including integers)
 
     """
 
     __slots__ = ('_numerator', '_denominator')
 
     # We're immutable, so use __new__ not __init__
-    def __new__(cls, numerator=0, denominator=1):
+    def __new__(cls, numerator=0, denominator=None):
         """Constructs a Fraction.
 
-        Takes a string like '3/2' or '1.5', another Fraction, or a
-        numerator/denominator pair.
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+
+        Examples
+        --------
+
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
 
         """
         self = super(Fraction, cls).__new__(cls)
 
-        if type(numerator) not in (int, long) and denominator == 1:
-            if isinstance(numerator, basestring):
-                # Handle construction from strings.
-                input = numerator
-                m = _RATIONAL_FORMAT.match(input)
-                if m is None:
-                    raise ValueError('Invalid literal for Fraction: %r' % input)
-                numerator = m.group('num')
-                decimal = m.group('decimal')
-                if decimal:
-                    # The literal is a decimal number.
-                    numerator = int(numerator + decimal)
-                    denominator = 10**len(decimal)
-                else:
-                    # The literal is an integer or fraction.
-                    numerator = int(numerator)
-                    # Default denominator to 1.
-                    denominator = int(m.group('denom') or 1)
+        if denominator is None:
+            if isinstance(numerator, Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
 
+            elif isinstance(numerator, float):
+                # Exact conversion from float
+                value = Fraction.from_float(numerator)
+                self._numerator = value._numerator
+                self._denominator = value._denominator
+                return self
+
+            elif isinstance(numerator, Decimal):
+                value = Fraction.from_decimal(numerator)
+                self._numerator = value._numerator
+                self._denominator = value._denominator
+                return self
+
+            elif isinstance(numerator, basestring):
+                # Handle construction from strings.
+                m = _RATIONAL_FORMAT.match(numerator)
+                if m is None:
+                    raise ValueError('Invalid literal for Fraction: %r' %
+                                     numerator)
+                numerator = int(m.group('num') or '0')
+                denom = m.group('denom')
+                if denom:
+                    denominator = int(denom)
+                else:
+                    denominator = 1
+                    decimal = m.group('decimal')
+                    if decimal:
+                        scale = 10**len(decimal)
+                        numerator = numerator * scale + int(decimal)
+                        denominator *= scale
+                    exp = m.group('exp')
+                    if exp:
+                        exp = int(exp)
+                        if exp >= 0:
+                            numerator *= 10**exp
+                        else:
+                            denominator *= 10**-exp
                 if m.group('sign') == '-':
                     numerator = -numerator
 
-            elif isinstance(numerator, Rational):
-                # Handle copies from other rationals. Integrals get
-                # caught here too, but it doesn't matter because
-                # denominator is already 1.
-                other_rational = numerator
-                numerator = other_rational.numerator
-                denominator = other_rational.denominator
+            else:
+                raise TypeError("argument should be a string "
+                                "or a Rational instance")
+
+        elif (isinstance(numerator, Rational) and
+            isinstance(denominator, Rational)):
+            numerator, denominator = (
+                numerator.numerator * denominator.denominator,
+                denominator.numerator * numerator.denominator
+                )
+        else:
+            raise TypeError("both arguments should be "
+                            "Rational instances")
 
         if denominator == 0:
             raise ZeroDivisionError('Fraction(%s, 0)' % numerator)
-        numerator = operator.index(numerator)
-        denominator = operator.index(denominator)
         g = gcd(numerator, denominator)
         self._numerator = numerator // g
         self._denominator = denominator // g
@@ -111,7 +173,7 @@ class Fraction(Rational):
 
         """
         if isinstance(f, numbers.Integral):
-            f = float(f)
+            return cls(f)
         elif not isinstance(f, float):
             raise TypeError("%s.from_float() only takes floats, not %r (%s)" %
                             (cls.__name__, f, type(f).__name__))
@@ -148,8 +210,8 @@ class Fraction(Rational):
         Fraction(22, 7)
         >>> Fraction('3.141592653589793').limit_denominator(100)
         Fraction(311, 99)
-        >>> Fraction(1234, 5678).limit_denominator(10000)
-        Fraction(1234, 5678)
+        >>> Fraction(4321, 8765).limit_denominator(10000)
+        Fraction(4321, 8765)
 
         """
         # Algorithm notes: For any real number x, define a *best upper
@@ -470,54 +532,58 @@ class Fraction(Rational):
         if isinstance(b, numbers.Complex) and b.imag == 0:
             b = b.real
         if isinstance(b, float):
-            return a == a.from_float(b)
+            if math.isnan(b) or math.isinf(b):
+                # comparisons with an infinity or nan should behave in
+                # the same way for any finite a, so treat a as zero.
+                return 0.0 == b
+            else:
+                return a == a.from_float(b)
         else:
-            # XXX: If b.__eq__ is implemented like this method, it may
-            # give the wrong answer after float(a) changes a's
-            # value. Better ways of doing this are welcome.
-            return float(a) == b
+            # Since a doesn't know how to compare with b, let's give b
+            # a chance to compare itself with a.
+            return NotImplemented
 
-    def _subtractAndCompareToZero(a, b, op):
-        """Helper function for comparison operators.
+    def _richcmp(self, other, op):
+        """Helper for comparison operators, for internal use only.
 
-        Subtracts b from a, exactly if possible, and compares the
-        result with 0 using op, in such a way that the comparison
-        won't recurse. If the difference raises a TypeError, returns
-        NotImplemented instead.
+        Implement comparison between a Rational instance `self`, and
+        either another Rational instance or a float `other`.  If
+        `other` is not a Rational instance or a float, return
+        NotImplemented. `op` should be one of the six standard
+        comparison operators.
 
         """
-        if isinstance(b, numbers.Complex) and b.imag == 0:
-            b = b.real
-        if isinstance(b, float):
-            b = a.from_float(b)
-        try:
-            # XXX: If b <: Real but not <: Rational, this is likely
-            # to fall back to a float. If the actual values differ by
-            # less than MIN_FLOAT, this could falsely call them equal,
-            # which would make <= inconsistent with ==. Better ways of
-            # doing this are welcome.
-            diff = a - b
-        except TypeError:
+        # convert other to a Rational instance where reasonable.
+        if isinstance(other, Rational):
+            return op(self._numerator * other.denominator,
+                      self._denominator * other.numerator)
+        # comparisons with complex should raise a TypeError, for consistency
+        # with int<->complex, float<->complex, and complex<->complex comparisons.
+        if isinstance(other, complex):
+            raise TypeError("no ordering relation is defined for complex numbers")
+        if isinstance(other, float):
+            if math.isnan(other) or math.isinf(other):
+                return op(0.0, other)
+            else:
+                return op(self, self.from_float(other))
+        else:
             return NotImplemented
-        if isinstance(diff, Rational):
-            return op(diff.numerator, 0)
-        return op(diff, 0)
 
     def __lt__(a, b):
         """a < b"""
-        return a._subtractAndCompareToZero(b, operator.lt)
+        return a._richcmp(b, operator.lt)
 
     def __gt__(a, b):
         """a > b"""
-        return a._subtractAndCompareToZero(b, operator.gt)
+        return a._richcmp(b, operator.gt)
 
     def __le__(a, b):
         """a <= b"""
-        return a._subtractAndCompareToZero(b, operator.le)
+        return a._richcmp(b, operator.le)
 
     def __ge__(a, b):
         """a >= b"""
-        return a._subtractAndCompareToZero(b, operator.ge)
+        return a._richcmp(b, operator.ge)
 
     def __nonzero__(a):
         """a != 0"""

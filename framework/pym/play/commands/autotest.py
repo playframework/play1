@@ -118,15 +118,17 @@ def autotest(app, args):
     if app.readConf('headlessBrowser'):
         headless_browser = app.readConf('headlessBrowser')
 
-    fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
+    fpcp = []
+    fpcp.append(os.path.normpath(os.path.join(app.play_env["basedir"], 'modules/testrunner/conf')))
+    fpcp.append(os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar'))
     fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
     for jar in os.listdir(fpcp_libs):
         if jar.endswith('.jar'):
            fpcp.append(os.path.normpath(os.path.join(fpcp_libs, jar)))
     cp_args = ':'.join(fpcp)
     if os.name == 'nt':
-        cp_args = ';'.join(fpcp)    
-    java_cmd = [java_path()] + add_options + ['-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
+        cp_args = ';'.join(fpcp)
+    java_cmd = [java_path()] + add_options + ['-Djava.util.logging.config.file=logging.properties', '-classpath', cp_args, '-Dapplication.url=%s://localhost:%s' % (protocol, http_port), '-DheadlessBrowser=%s' % (headless_browser), 'play.modules.testrunner.FirePhoque']
     if protocol == 'https':
         java_cmd.insert(-1, '-Djavax.net.ssl.trustStore=' + app.readConf('keystore.file'))
     try:

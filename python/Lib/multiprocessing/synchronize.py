@@ -3,7 +3,33 @@
 #
 # multiprocessing/synchronize.py
 #
-# Copyright (c) 2006-2008, R Oudkerk --- see COPYING.txt
+# Copyright (c) 2006-2008, R Oudkerk
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of author nor the names of any contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
 #
 
 __all__ = [
@@ -58,8 +84,12 @@ class SemLock(object):
     def _make_methods(self):
         self.acquire = self._semlock.acquire
         self.release = self._semlock.release
-        self.__enter__ = self._semlock.__enter__
-        self.__exit__ = self._semlock.__exit__
+
+    def __enter__(self):
+        return self._semlock.__enter__()
+
+    def __exit__(self, *args):
+        return self._semlock.__exit__(*args)
 
     def __getstate__(self):
         assert_spawning(self)
@@ -181,18 +211,22 @@ class Condition(object):
          self._woken_count, self._wait_semaphore) = state
         self._make_methods()
 
+    def __enter__(self):
+        return self._lock.__enter__()
+
+    def __exit__(self, *args):
+        return self._lock.__exit__(*args)
+
     def _make_methods(self):
         self.acquire = self._lock.acquire
         self.release = self._lock.release
-        self.__enter__ = self._lock.__enter__
-        self.__exit__ = self._lock.__exit__
 
     def __repr__(self):
         try:
             num_waiters = (self._sleeping_count._semlock._get_value() -
                            self._woken_count._semlock._get_value())
         except Exception:
-            num_waiters = 'unkown'
+            num_waiters = 'unknown'
         return '<Condition(%s, %s)>' % (self._lock, num_waiters)
 
     def wait(self, timeout=None):
@@ -301,5 +335,10 @@ class Event(object):
                 self._flag.release()
             else:
                 self._cond.wait(timeout)
+
+            if self._flag.acquire(False):
+                self._flag.release()
+                return True
+            return False
         finally:
             self._cond.release()

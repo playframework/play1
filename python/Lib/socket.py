@@ -16,7 +16,7 @@ gethostname() -- return the current hostname
 gethostbyname() -- map a hostname to its IP number
 gethostbyaddr() -- map an IP number or hostname to DNS info
 getservbyname() -- map a service name and a protocol name to a port number
-getprotobyname() -- mape a protocol name (e.g. 'tcp') to a number
+getprotobyname() -- map a protocol name (e.g. 'tcp') to a number
 ntohs(), ntohl() -- convert 16, 32 bit int from network to host byte order
 htons(), htonl() -- convert 16, 32 bit int from host to network byte order
 inet_aton() -- convert IP addr string (123.45.67.89) to 32-bit packed format
@@ -24,7 +24,8 @@ inet_ntoa() -- convert 32-bit packed format IP to string (123.45.67.89)
 ssl() -- secure socket layer support (only available if configured)
 socket.getdefaulttimeout() -- get the default timeout value
 socket.setdefaulttimeout() -- set the default timeout value
-create_connection() -- connects to an address, with an optional timeout
+create_connection() -- connects to an address, with an optional timeout and
+                       optional source address.
 
  [*] not available on all platforms!
 
@@ -45,6 +46,8 @@ the setsockopt() and getsockopt() methods.
 
 import _socket
 from _socket import *
+from functools import partial
+from types import MethodType
 
 try:
     import _ssl
@@ -64,7 +67,6 @@ else:
     from _ssl import SSLError as sslerror
     from _ssl import \
          RAND_add, \
-         RAND_egd, \
          RAND_status, \
          SSL_ERROR_ZERO_RETURN, \
          SSL_ERROR_WANT_READ, \
@@ -75,6 +77,11 @@ else:
          SSL_ERROR_WANT_CONNECT, \
          SSL_ERROR_EOF, \
          SSL_ERROR_INVALID_ERROR_CODE
+    try:
+        from _ssl import RAND_egd
+    except ImportError:
+        # LibreSSL does not provide RAND_egd
+        pass
 
 import os, sys, warnings
 
@@ -84,11 +91,13 @@ except ImportError:
     from StringIO import StringIO
 
 try:
-    from errno import EBADF
+    import errno
 except ImportError:
-    EBADF = 9
+    errno = None
+EBADF = getattr(errno, 'EBADF', 9)
+EINTR = getattr(errno, 'EINTR', 4)
 
-__all__ = ["getfqdn"]
+__all__ = ["getfqdn", "create_connection"]
 __all__.extend(os._get_exports_list(_socket))
 
 
@@ -184,7 +193,9 @@ class _socketobject(object):
         for method in _delegate_methods:
             setattr(self, method, getattr(_sock, method))
 
-    def close(self):
+    def close(self, _closedsocket=_closedsocket,
+              _delegate_methods=_delegate_methods, setattr=setattr):
+        # This function should not reference any globals. See issue #808164.
         self._sock = _closedsocket()
         dummy = self._sock._dummy
         for method in _delegate_methods:
@@ -213,11 +224,15 @@ class _socketobject(object):
     type = property(lambda self: self._sock.type, doc="the socket type")
     proto = property(lambda self: self._sock.proto, doc="the socket protocol")
 
-    _s = ("def %s(self, *args): return self._sock.%s(*args)\n\n"
-          "%s.__doc__ = _realsocket.%s.__doc__\n")
-    for _m in _socketmethods:
-        exec _s % (_m, _m, _m, _m)
-    del _m, _s
+def meth(name,self,*args):
+    return getattr(self._sock,name)(*args)
+
+for _m in _socketmethods:
+    p = partial(meth,_m)
+    p.__name__ = _m
+    p.__doc__ = getattr(_realsocket,_m).__doc__
+    m = MethodType(p,None,_socketobject)
+    setattr(_socketobject,_m,m)
 
 socket = SocketType = _socketobject
 
@@ -229,7 +244,7 @@ class _fileobject(object):
 
     __slots__ = ["mode", "bufsize", "softspace",
                  # "closed" is a property, see below
-                 "_sock", "_rbufsize", "_wbufsize", "_rbuf", "_wbuf",
+                 "_sock", "_rbufsize", "_wbufsize", "_rbuf", "_wbuf", "_wbuf_len",
                  "_close"]
 
     def __init__(self, sock, mode='rb', bufsize=-1, close=False):
@@ -255,6 +270,7 @@ class _fileobject(object):
         # realloc()ed down much smaller than their original allocation.
         self._rbuf = StringIO()
         self._wbuf = [] # A list of strings
+        self._wbuf_len = 0
         self._close = close
 
     def _getclosed(self):
@@ -279,9 +295,23 @@ class _fileobject(object):
 
     def flush(self):
         if self._wbuf:
-            buffer = "".join(self._wbuf)
+            data = "".join(self._wbuf)
             self._wbuf = []
-            self._sock.sendall(buffer)
+            self._wbuf_len = 0
+            buffer_size = max(self._rbufsize, self.default_bufsize)
+            data_size = len(data)
+            write_offset = 0
+            view = memoryview(data)
+            try:
+                while write_offset < data_size:
+                    self._sock.sendall(view[write_offset:write_offset+buffer_size])
+                    write_offset += buffer_size
+            finally:
+                if write_offset < data_size:
+                    remainder = data[write_offset:]
+                    del view, data  # explicit free
+                    self._wbuf.append(remainder)
+                    self._wbuf_len = len(remainder)
 
     def fileno(self):
         return self._sock.fileno()
@@ -291,24 +321,21 @@ class _fileobject(object):
         if not data:
             return
         self._wbuf.append(data)
+        self._wbuf_len += len(data)
         if (self._wbufsize == 0 or
-            self._wbufsize == 1 and '\n' in data or
-            self._get_wbuf_len() >= self._wbufsize):
+            (self._wbufsize == 1 and '\n' in data) or
+            (self._wbufsize > 1 and self._wbuf_len >= self._wbufsize)):
             self.flush()
 
     def writelines(self, list):
         # XXX We could do better here for very long lists
         # XXX Should really reject non-string non-buffers
-        self._wbuf.extend(filter(None, map(str, list)))
+        lines = filter(None, map(str, list))
+        self._wbuf_len += sum(map(len, lines))
+        self._wbuf.extend(lines)
         if (self._wbufsize <= 1 or
-            self._get_wbuf_len() >= self._wbufsize):
+            self._wbuf_len >= self._wbufsize):
             self.flush()
-
-    def _get_wbuf_len(self):
-        buf_len = 0
-        for x in self._wbuf:
-            buf_len += len(x)
-        return buf_len
 
     def read(self, size=-1):
         # Use max, disallow tiny reads in a loop as they are very inefficient.
@@ -324,7 +351,12 @@ class _fileobject(object):
             # Read until EOF
             self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
             while True:
-                data = self._sock.recv(rbufsize)
+                try:
+                    data = self._sock.recv(rbufsize)
+                except error, e:
+                    if e.args[0] == EINTR:
+                        continue
+                    raise
                 if not data:
                     break
                 buf.write(data)
@@ -348,7 +380,12 @@ class _fileobject(object):
                 # than that.  The returned data string is short lived
                 # as we copy it into a StringIO and free it.  This avoids
                 # fragmentation issues on many platforms.
-                data = self._sock.recv(left)
+                try:
+                    data = self._sock.recv(left)
+                except error, e:
+                    if e.args[0] == EINTR:
+                        continue
+                    raise
                 if not data:
                     break
                 n = len(data)
@@ -391,17 +428,31 @@ class _fileobject(object):
                 self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
                 data = None
                 recv = self._sock.recv
-                while data != "\n":
-                    data = recv(1)
-                    if not data:
-                        break
-                    buffers.append(data)
+                while True:
+                    try:
+                        while data != "\n":
+                            data = recv(1)
+                            if not data:
+                                break
+                            buffers.append(data)
+                    except error, e:
+                        # The try..except to catch EINTR was moved outside the
+                        # recv loop to avoid the per byte overhead.
+                        if e.args[0] == EINTR:
+                            continue
+                        raise
+                    break
                 return "".join(buffers)
 
             buf.seek(0, 2)  # seek end
             self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
             while True:
-                data = self._sock.recv(self._rbufsize)
+                try:
+                    data = self._sock.recv(self._rbufsize)
+                except error, e:
+                    if e.args[0] == EINTR:
+                        continue
+                    raise
                 if not data:
                     break
                 nl = data.find('\n')
@@ -425,7 +476,12 @@ class _fileobject(object):
                 return rv
             self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
             while True:
-                data = self._sock.recv(self._rbufsize)
+                try:
+                    data = self._sock.recv(self._rbufsize)
+                except error, e:
+                    if e.args[0] == EINTR:
+                        continue
+                    raise
                 if not data:
                     break
                 left = size - buf_len
@@ -482,7 +538,8 @@ class _fileobject(object):
 
 _GLOBAL_DEFAULT_TIMEOUT = object()
 
-def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT):
+def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
+                      source_address=None):
     """Connect to *address* and return the socket object.
 
     Convenience function.  Connect to *address* (a 2-tuple ``(host,
@@ -490,11 +547,13 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT):
     *timeout* parameter will set the timeout on the socket instance
     before attempting to connect.  If no *timeout* is supplied, the
     global default timeout setting returned by :func:`getdefaulttimeout`
-    is used.
+    is used.  If *source_address* is set it must be a tuple of (host, port)
+    for the socket to bind as a source address before making the connection.
+    A host of '' or port 0 tells the OS to use the default.
     """
 
-    msg = "getaddrinfo returns an empty list"
     host, port = address
+    err = None
     for res in getaddrinfo(host, port, 0, SOCK_STREAM):
         af, socktype, proto, canonname, sa = res
         sock = None
@@ -502,11 +561,17 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT):
             sock = socket(af, socktype, proto)
             if timeout is not _GLOBAL_DEFAULT_TIMEOUT:
                 sock.settimeout(timeout)
+            if source_address:
+                sock.bind(source_address)
             sock.connect(sa)
             return sock
 
-        except error, msg:
+        except error as _:
+            err = _
             if sock is not None:
                 sock.close()
 
-    raise error, msg
+    if err is not None:
+        raise err
+    else:
+        raise error("getaddrinfo returns an empty list")

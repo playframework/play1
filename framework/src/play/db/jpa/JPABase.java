@@ -274,14 +274,14 @@ public class JPABase implements Serializable, play.db.Model {
      */
     @Override
     public boolean equals(Object other) {
-        Object key = this._key();
-
         if (other == null) {
             return false;
         }
         if (this == other) {
             return true;
         }
+
+        Object key = this._key();
         if (key == null) {
             return false;
         }

@@ -10,10 +10,10 @@ except ImportError:
 
 import warnings
 
-from functools import wraps
+from collections import deque as _deque
+from itertools import count as _count
 from time import time as _time, sleep as _sleep
 from traceback import format_exc as _format_exc
-from collections import deque
 
 # Note regarding PEP 8 compliant aliases
 #  This threading model was originally inspired by Java, and inherited
@@ -64,8 +64,14 @@ if __debug__:
         def _note(self, format, *args):
             if self.__verbose:
                 format = format % args
-                format = "%s: %s\n" % (
-                    current_thread().name, format)
+                # Issue #4188: calling current_thread() can incur an infinite
+                # recursion if it has to create a DummyThread on the fly.
+                ident = _get_ident()
+                try:
+                    name = _active[ident].name
+                except KeyError:
+                    name = "<OS thread %d>" % ident
+                format = "%s: %s\n" % (name, format)
                 _sys.stderr.write(format)
 
 else:
@@ -82,10 +88,22 @@ _profile_hook = None
 _trace_hook = None
 
 def setprofile(func):
+    """Set a profile function for all threads started from the threading module.
+
+    The func will be passed to sys.setprofile() for each thread, before its
+    run() method is called.
+
+    """
     global _profile_hook
     _profile_hook = func
 
 def settrace(func):
+    """Set a trace function for all threads started from the threading module.
+
+    The func will be passed to sys.settrace() for each thread, before its run()
+    method is called.
+
+    """
     global _trace_hook
     _trace_hook = func
 
@@ -94,9 +112,22 @@ def settrace(func):
 Lock = _allocate_lock
 
 def RLock(*args, **kwargs):
+    """Factory function that returns a new reentrant lock.
+
+    A reentrant lock must be released by the thread that acquired it. Once a
+    thread has acquired a reentrant lock, the same thread may acquire it again
+    without blocking; the thread must release it once for each time it has
+    acquired it.
+
+    """
     return _RLock(*args, **kwargs)
 
 class _RLock(_Verbose):
+    """A reentrant lock must be released by the thread that acquired it. Once a
+       thread has acquired a reentrant lock, the same thread may acquire it
+       again without blocking; the thread must release it once for each time it
+       has acquired it.
+    """
 
     def __init__(self, verbose=None):
         _Verbose.__init__(self, verbose)
@@ -106,14 +137,36 @@ class _RLock(_Verbose):
 
     def __repr__(self):
         owner = self.__owner
-        return "<%s(%s, %d)>" % (
-                self.__class__.__name__,
-                owner and owner.name,
-                self.__count)
+        try:
+            owner = _active[owner].name
+        except KeyError:
+            pass
+        return "<%s owner=%r count=%d>" % (
+                self.__class__.__name__, owner, self.__count)
 
     def acquire(self, blocking=1):
-        me = current_thread()
-        if self.__owner is me:
+        """Acquire a lock, blocking or non-blocking.
+
+        When invoked without arguments: if this thread already owns the lock,
+        increment the recursion level by one, and return immediately. Otherwise,
+        if another thread owns the lock, block until the lock is unlocked. Once
+        the lock is unlocked (not owned by any thread), then grab ownership, set
+        the recursion level to one, and return. If more than one thread is
+        blocked waiting until the lock is unlocked, only one at a time will be
+        able to grab ownership of the lock. There is no return value in this
+        case.
+
+        When invoked with the blocking argument set to true, do the same thing
+        as when called without arguments, and return true.
+
+        When invoked with the blocking argument set to false, do not block. If a
+        call without an argument would block, return false immediately;
+        otherwise, do the same thing as when called without arguments, and
+        return true.
+
+        """
+        me = _get_ident()
+        if self.__owner == me:
             self.__count = self.__count + 1
             if __debug__:
                 self._note("%s.acquire(%s): recursive success", self, blocking)
@@ -132,8 +185,23 @@ class _RLock(_Verbose):
     __enter__ = acquire
 
     def release(self):
-        if self.__owner is not current_thread():
-            raise RuntimeError("cannot release un-aquired lock")
+        """Release a lock, decrementing the recursion level.
+
+        If after the decrement it is zero, reset the lock to unlocked (not owned
+        by any thread), and if any other threads are blocked waiting for the
+        lock to become unlocked, allow exactly one of them to proceed. If after
+        the decrement the recursion level is still nonzero, the lock remains
+        locked and owned by the calling thread.
+
+        Only call this method when the calling thread owns the lock. A
+        RuntimeError is raised if this method is called when the lock is
+        unlocked.
+
+        There is no return value.
+
+        """
+        if self.__owner != _get_ident():
+            raise RuntimeError("cannot release un-acquired lock")
         self.__count = count = self.__count - 1
         if not count:
             self.__owner = None
@@ -168,13 +236,26 @@ class _RLock(_Verbose):
         return (count, owner)
 
     def _is_owned(self):
-        return self.__owner is current_thread()
+        return self.__owner == _get_ident()
 
 
 def Condition(*args, **kwargs):
+    """Factory function that returns a new condition variable object.
+
+    A condition variable allows one or more threads to wait until they are
+    notified by another thread.
+
+    If the lock argument is given and not None, it must be a Lock or RLock
+    object, and it is used as the underlying lock. Otherwise, a new RLock object
+    is created and used as the underlying lock.
+
+    """
     return _Condition(*args, **kwargs)
 
 class _Condition(_Verbose):
+    """Condition variables allow one or more threads to wait until they are
+       notified by another thread.
+    """
 
     def __init__(self, lock=None, verbose=None):
         _Verbose.__init__(self, verbose)
@@ -226,8 +307,30 @@ class _Condition(_Verbose):
             return True
 
     def wait(self, timeout=None):
+        """Wait until notified or until a timeout occurs.
+
+        If the calling thread has not acquired the lock when this method is
+        called, a RuntimeError is raised.
+
+        This method releases the underlying lock, and then blocks until it is
+        awakened by a notify() or notifyAll() call for the same condition
+        variable in another thread, or until the optional timeout occurs. Once
+        awakened or timed out, it re-acquires the lock and returns.
+
+        When the timeout argument is present and not None, it should be a
+        floating point number specifying a timeout for the operation in seconds
+        (or fractions thereof).
+
+        When the underlying lock is an RLock, it is not released using its
+        release() method, since this may not actually unlock the lock when it
+        was acquired multiple times recursively. Instead, an internal interface
+        of the RLock class is used, which really unlocks it even when it has
+        been recursively acquired several times. Another internal interface is
+        then used to restore the recursion level when the lock is reacquired.
+
+        """
         if not self._is_owned():
-            raise RuntimeError("cannot wait on un-aquired lock")
+            raise RuntimeError("cannot wait on un-acquired lock")
         waiter = _allocate_lock()
         waiter.acquire()
         self.__waiters.append(waiter)
@@ -268,8 +371,17 @@ class _Condition(_Verbose):
             self._acquire_restore(saved_state)
 
     def notify(self, n=1):
+        """Wake up one or more threads waiting on this condition, if any.
+
+        If the calling thread has not acquired the lock when this method is
+        called, a RuntimeError is raised.
+
+        This method wakes up at most n of the threads waiting for the condition
+        variable; it is a no-op if no threads are waiting.
+
+        """
         if not self._is_owned():
-            raise RuntimeError("cannot notify on un-aquired lock")
+            raise RuntimeError("cannot notify on un-acquired lock")
         __waiters = self.__waiters
         waiters = __waiters[:n]
         if not waiters:
@@ -286,15 +398,35 @@ class _Condition(_Verbose):
                 pass
 
     def notifyAll(self):
+        """Wake up all threads waiting on this condition.
+
+        If the calling thread has not acquired the lock when this method
+        is called, a RuntimeError is raised.
+
+        """
         self.notify(len(self.__waiters))
 
     notify_all = notifyAll
 
 
 def Semaphore(*args, **kwargs):
+    """A factory function that returns a new semaphore.
+
+    Semaphores manage a counter representing the number of release() calls minus
+    the number of acquire() calls, plus an initial value. The acquire() method
+    blocks if necessary until it can return without making the counter
+    negative. If not given, value defaults to 1.
+
+    """
     return _Semaphore(*args, **kwargs)
 
 class _Semaphore(_Verbose):
+    """Semaphores manage a counter representing the number of release() calls
+       minus the number of acquire() calls, plus an initial value. The acquire()
+       method blocks if necessary until it can return without making the counter
+       negative. If not given, value defaults to 1.
+
+    """
 
     # After Tim Peters' semaphore class, but not quite the same (no maximum)
 
@@ -306,58 +438,123 @@ class _Semaphore(_Verbose):
         self.__value = value
 
     def acquire(self, blocking=1):
+        """Acquire a semaphore, decrementing the internal counter by one.
+
+        When invoked without arguments: if the internal counter is larger than
+        zero on entry, decrement it by one and return immediately. If it is zero
+        on entry, block, waiting until some other thread has called release() to
+        make it larger than zero. This is done with proper interlocking so that
+        if multiple acquire() calls are blocked, release() will wake exactly one
+        of them up. The implementation may pick one at random, so the order in
+        which blocked threads are awakened should not be relied on. There is no
+        return value in this case.
+
+        When invoked with blocking set to true, do the same thing as when called
+        without arguments, and return true.
+
+        When invoked with blocking set to false, do not block. If a call without
+        an argument would block, return false immediately; otherwise, do the
+        same thing as when called without arguments, and return true.
+
+        """
         rc = False
-        self.__cond.acquire()
-        while self.__value == 0:
-            if not blocking:
-                break
-            if __debug__:
-                self._note("%s.acquire(%s): blocked waiting, value=%s",
-                           self, blocking, self.__value)
-            self.__cond.wait()
-        else:
-            self.__value = self.__value - 1
-            if __debug__:
-                self._note("%s.acquire: success, value=%s",
-                           self, self.__value)
-            rc = True
-        self.__cond.release()
+        with self.__cond:
+            while self.__value == 0:
+                if not blocking:
+                    break
+                if __debug__:
+                    self._note("%s.acquire(%s): blocked waiting, value=%s",
+                            self, blocking, self.__value)
+                self.__cond.wait()
+            else:
+                self.__value = self.__value - 1
+                if __debug__:
+                    self._note("%s.acquire: success, value=%s",
+                            self, self.__value)
+                rc = True
         return rc
 
     __enter__ = acquire
 
     def release(self):
-        self.__cond.acquire()
-        self.__value = self.__value + 1
-        if __debug__:
-            self._note("%s.release: success, value=%s",
-                       self, self.__value)
-        self.__cond.notify()
-        self.__cond.release()
+        """Release a semaphore, incrementing the internal counter by one.
+
+        When the counter is zero on entry and another thread is waiting for it
+        to become larger than zero again, wake up that thread.
+
+        """
+        with self.__cond:
+            self.__value = self.__value + 1
+            if __debug__:
+                self._note("%s.release: success, value=%s",
+                        self, self.__value)
+            self.__cond.notify()
 
     def __exit__(self, t, v, tb):
         self.release()
 
 
 def BoundedSemaphore(*args, **kwargs):
+    """A factory function that returns a new bounded semaphore.
+
+    A bounded semaphore checks to make sure its current value doesn't exceed its
+    initial value. If it does, ValueError is raised. In most situations
+    semaphores are used to guard resources with limited capacity.
+
+    If the semaphore is released too many times it's a sign of a bug. If not
+    given, value defaults to 1.
+
+    Like regular semaphores, bounded semaphores manage a counter representing
+    the number of release() calls minus the number of acquire() calls, plus an
+    initial value. The acquire() method blocks if necessary until it can return
+    without making the counter negative. If not given, value defaults to 1.
+
+    """
     return _BoundedSemaphore(*args, **kwargs)
 
 class _BoundedSemaphore(_Semaphore):
-    """Semaphore that checks that # releases is <= # acquires"""
+    """A bounded semaphore checks to make sure its current value doesn't exceed
+       its initial value. If it does, ValueError is raised. In most situations
+       semaphores are used to guard resources with limited capacity.
+    """
+
     def __init__(self, value=1, verbose=None):
         _Semaphore.__init__(self, value, verbose)
         self._initial_value = value
 
     def release(self):
-        if self._Semaphore__value >= self._initial_value:
-            raise ValueError, "Semaphore released too many times"
-        return _Semaphore.release(self)
+        """Release a semaphore, incrementing the internal counter by one.
+
+        When the counter is zero on entry and another thread is waiting for it
+        to become larger than zero again, wake up that thread.
+
+        If the number of releases exceeds the number of acquires,
+        raise a ValueError.
+
+        """
+        with self._Semaphore__cond:
+            if self._Semaphore__value >= self._initial_value:
+                raise ValueError("Semaphore released too many times")
+            self._Semaphore__value += 1
+            self._Semaphore__cond.notify()
 
 
 def Event(*args, **kwargs):
+    """A factory function that returns a new event.
+
+    Events manage a flag that can be set to true with the set() method and reset
+    to false with the clear() method. The wait() method blocks until the flag is
+    true.
+
+    """
     return _Event(*args, **kwargs)
 
 class _Event(_Verbose):
+    """A factory function that returns a new event object. An event manages a
+       flag that can be set to true with the set() method and reset to false
+       with the clear() method. The wait() method blocks until the flag is true.
+
+    """
 
     # After Tim Peters' event class (without is_posted())
 
@@ -366,40 +563,62 @@ class _Event(_Verbose):
         self.__cond = Condition(Lock())
         self.__flag = False
 
+    def _reset_internal_locks(self):
+        # private!  called by Thread._reset_internal_locks by _after_fork()
+        self.__cond.__init__(Lock())
+
     def isSet(self):
+        'Return true if and only if the internal flag is true.'
         return self.__flag
 
     is_set = isSet
 
     def set(self):
-        self.__cond.acquire()
-        try:
+        """Set the internal flag to true.
+
+        All threads waiting for the flag to become true are awakened. Threads
+        that call wait() once the flag is true will not block at all.
+
+        """
+        with self.__cond:
             self.__flag = True
             self.__cond.notify_all()
-        finally:
-            self.__cond.release()
 
     def clear(self):
-        self.__cond.acquire()
-        try:
+        """Reset the internal flag to false.
+
+        Subsequently, threads calling wait() will block until set() is called to
+        set the internal flag to true again.
+
+        """
+        with self.__cond:
             self.__flag = False
-        finally:
-            self.__cond.release()
 
     def wait(self, timeout=None):
-        self.__cond.acquire()
-        try:
+        """Block until the internal flag is true.
+
+        If the internal flag is true on entry, return immediately. Otherwise,
+        block until another thread calls set() to set the flag to true, or until
+        the optional timeout occurs.
+
+        When the timeout argument is present and not None, it should be a
+        floating point number specifying a timeout for the operation in seconds
+        (or fractions thereof).
+
+        This method returns the internal flag on exit, so it will always return
+        True except if a timeout is given and the operation times out.
+
+        """
+        with self.__cond:
             if not self.__flag:
                 self.__cond.wait(timeout)
-        finally:
-            self.__cond.release()
+            return self.__flag
 
 # Helper to generate new thread names
-_counter = 0
+_counter = _count().next
+_counter() # Consume 0 so first non-main thread has id 1.
 def _newname(template="Thread-%d"):
-    global _counter
-    _counter = _counter + 1
-    return template % _counter
+    return template % _counter()
 
 # Active thread administration
 _active_limbo_lock = _allocate_lock()
@@ -410,7 +629,11 @@ _limbo = {}
 # Main class for threads
 
 class Thread(_Verbose):
+    """A class that represents a thread of control.
 
+    This class can be safely subclassed in a limited fashion.
+
+    """
     __initialized = False
     # Need to store a reference to sys.exc_info for printing
     # out exceptions when a thread tries to use a global var. during interp.
@@ -423,6 +646,27 @@ class Thread(_Verbose):
 
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs=None, verbose=None):
+        """This constructor should always be called with keyword arguments. Arguments are:
+
+        *group* should be None; reserved for future extension when a ThreadGroup
+        class is implemented.
+
+        *target* is the callable object to be invoked by the run()
+        method. Defaults to None, meaning nothing is called.
+
+        *name* is the thread name. By default, a unique name is constructed of
+        the form "Thread-N" where N is a small decimal number.
+
+        *args* is the argument tuple for the target invocation. Defaults to ().
+
+        *kwargs* is a dictionary of keyword arguments for the target
+        invocation. Defaults to {}.
+
+        If a subclass overrides the constructor, it must make sure to invoke
+        the base class constructor (Thread.__init__()) before doing anything
+        else to the thread.
+
+"""
         assert group is None, "group argument must be None for now"
         _Verbose.__init__(self, verbose)
         if kwargs is None:
@@ -440,6 +684,18 @@ class Thread(_Verbose):
         # sys.stderr is not stored in the class like
         # sys.exc_info since it can be changed between instances
         self.__stderr = _sys.stderr
+
+    def _reset_internal_locks(self):
+        # private!  Called by _after_fork() to reset our internal locks as
+        # they may be in an invalid state leading to a deadlock or crash.
+        if hasattr(self, '_Thread__block'):  # DummyThread deletes self.__block
+            self.__block.__init__()
+        self.__started._reset_internal_locks()
+
+    @property
+    def _block(self):
+        # used by a unittest
+        return self.__block
 
     def _set_daemon(self):
         # Overridden in _MainThread and _DummyThread
@@ -459,19 +715,40 @@ class Thread(_Verbose):
         return "<%s(%s, %s)>" % (self.__class__.__name__, self.__name, status)
 
     def start(self):
+        """Start the thread's activity.
+
+        It must be called at most once per thread object. It arranges for the
+        object's run() method to be invoked in a separate thread of control.
+
+        This method will raise a RuntimeError if called more than once on the
+        same thread object.
+
+        """
         if not self.__initialized:
             raise RuntimeError("thread.__init__() not called")
         if self.__started.is_set():
-            raise RuntimeError("thread already started")
+            raise RuntimeError("threads can only be started once")
         if __debug__:
             self._note("%s.start(): starting thread", self)
-        _active_limbo_lock.acquire()
-        _limbo[self] = self
-        _active_limbo_lock.release()
-        _start_new_thread(self.__bootstrap, ())
+        with _active_limbo_lock:
+            _limbo[self] = self
+        try:
+            _start_new_thread(self.__bootstrap, ())
+        except Exception:
+            with _active_limbo_lock:
+                del _limbo[self]
+            raise
         self.__started.wait()
 
     def run(self):
+        """Method representing the thread's activity.
+
+        You may override this method in a subclass. The standard run() method
+        invokes the callable object passed to the object's constructor as the
+        target argument, if any, with sequential and keyword arguments taken
+        from the args and kwargs arguments, respectively.
+
+        """
         try:
             if self.__target:
                 self.__target(*self.__args, **self.__kwargs)
@@ -500,14 +777,16 @@ class Thread(_Verbose):
                 return
             raise
 
+    def _set_ident(self):
+        self.__ident = _get_ident()
+
     def __bootstrap_inner(self):
         try:
-            self.__ident = _get_ident()
+            self._set_ident()
             self.__started.set()
-            _active_limbo_lock.acquire()
-            _active[self.__ident] = self
-            del _limbo[self]
-            _active_limbo_lock.release()
+            with _active_limbo_lock:
+                _active[self.__ident] = self
+                del _limbo[self]
             if __debug__:
                 self._note("%s.__bootstrap(): thread started", self)
 
@@ -530,10 +809,10 @@ class Thread(_Verbose):
                 # shutdown) use self.__stderr.  Otherwise still use sys (as in
                 # _sys) in case sys.stderr was redefined since the creation of
                 # self.
-                if _sys:
-                    _sys.stderr.write("Exception in thread %s:\n%s\n" %
-                                      (self.name, _format_exc()))
-                else:
+                if _sys and _sys.stderr is not None:
+                    print>>_sys.stderr, ("Exception in thread %s:\n%s" %
+                                         (self.name, _format_exc()))
+                elif self.__stderr is not None:
                     # Do the best job possible w/o a huge amt. of code to
                     # approximate a traceback (code ideas from
                     # Lib/traceback.py)
@@ -576,6 +855,10 @@ class Thread(_Verbose):
                     pass
 
     def __stop(self):
+        # DummyThreads delete self.__block, but they have no waiters to
+        # notify anyway (join() is forbidden on them).
+        if not hasattr(self, '_Thread__block'):
+            return
         self.__block.acquire()
         self.__stopped = True
         self.__block.notify_all()
@@ -617,6 +900,29 @@ class Thread(_Verbose):
                 raise
 
     def join(self, timeout=None):
+        """Wait until the thread terminates.
+
+        This blocks the calling thread until the thread whose join() method is
+        called terminates -- either normally or through an unhandled exception
+        or until the optional timeout occurs.
+
+        When the timeout argument is present and not None, it should be a
+        floating point number specifying a timeout for the operation in seconds
+        (or fractions thereof). As join() always returns None, you must call
+        isAlive() after join() to decide whether a timeout happened -- if the
+        thread is still alive, the join() call timed out.
+
+        When the timeout argument is not present or None, the operation will
+        block until the thread terminates.
+
+        A thread can be join()ed many times.
+
+        join() raises a RuntimeError if an attempt is made to join the current
+        thread as that would cause a deadlock. It is also an error to join() a
+        thread before it has been started and attempts to do so raises the same
+        exception.
+
+        """
         if not self.__initialized:
             raise RuntimeError("Thread.__init__() not called")
         if not self.__started.is_set():
@@ -651,6 +957,12 @@ class Thread(_Verbose):
 
     @property
     def name(self):
+        """A string used for identification purposes only.
+
+        It has no semantics. Multiple threads may be given the same name. The
+        initial name is set by the constructor.
+
+        """
         assert self.__initialized, "Thread.__init__() not called"
         return self.__name
 
@@ -661,10 +973,24 @@ class Thread(_Verbose):
 
     @property
     def ident(self):
+        """Thread identifier of this thread or None if it has not been started.
+
+        This is a nonzero integer. See the thread.get_ident() function. Thread
+        identifiers may be recycled when a thread exits and another thread is
+        created. The identifier is available even after the thread has exited.
+
+        """
         assert self.__initialized, "Thread.__init__() not called"
         return self.__ident
 
     def isAlive(self):
+        """Return whether the thread is alive.
+
+        This method returns True just before the run() method starts until just
+        after the run() method terminates. The module function enumerate()
+        returns a list of all alive threads.
+
+        """
         assert self.__initialized, "Thread.__init__() not called"
         return self.__started.is_set() and not self.__stopped
 
@@ -672,6 +998,17 @@ class Thread(_Verbose):
 
     @property
     def daemon(self):
+        """A boolean value indicating whether this thread is a daemon thread (True) or not (False).
+
+        This must be set before start() is called, otherwise RuntimeError is
+        raised. Its initial value is inherited from the creating thread; the
+        main thread is not a daemon thread and therefore all threads created in
+        the main thread default to daemon = False.
+
+        The entire Python program exits when no alive non-daemon threads are
+        left.
+
+        """
         assert self.__initialized, "Thread.__init__() not called"
         return self.__daemonic
 
@@ -698,14 +1035,24 @@ class Thread(_Verbose):
 # The timer class was contributed by Itamar Shtull-Trauring
 
 def Timer(*args, **kwargs):
+    """Factory function to create a Timer object.
+
+    Timers call a function after a specified number of seconds:
+
+        t = Timer(30.0, f, args=[], kwargs={})
+        t.start()
+        t.cancel()     # stop the timer's action if it's still waiting
+
+    """
     return _Timer(*args, **kwargs)
 
 class _Timer(Thread):
     """Call a function after a specified number of seconds:
 
-    t = Timer(30.0, f, args=[], kwargs={})
-    t.start()
-    t.cancel() # stop the timer's action if it's still waiting
+            t = Timer(30.0, f, args=[], kwargs={})
+            t.start()
+            t.cancel()     # stop the timer's action if it's still waiting
+
     """
 
     def __init__(self, interval, function, args=[], kwargs={}):
@@ -734,9 +1081,9 @@ class _MainThread(Thread):
     def __init__(self):
         Thread.__init__(self, name="MainThread")
         self._Thread__started.set()
-        _active_limbo_lock.acquire()
-        _active[_get_ident()] = self
-        _active_limbo_lock.release()
+        self._set_ident()
+        with _active_limbo_lock:
+            _active[_get_ident()] = self
 
     def _set_daemon(self):
         return False
@@ -780,9 +1127,9 @@ class _DummyThread(Thread):
         del self._Thread__block
 
         self._Thread__started.set()
-        _active_limbo_lock.acquire()
-        _active[_get_ident()] = self
-        _active_limbo_lock.release()
+        self._set_ident()
+        with _active_limbo_lock:
+            _active[_get_ident()] = self
 
     def _set_daemon(self):
         return True
@@ -794,6 +1141,12 @@ class _DummyThread(Thread):
 # Global API functions
 
 def currentThread():
+    """Return the current Thread object, corresponding to the caller's thread of control.
+
+    If the caller's thread of control was not created through the threading
+    module, a dummy thread object with limited functionality is returned.
+
+    """
     try:
         return _active[_get_ident()]
     except KeyError:
@@ -803,18 +1156,31 @@ def currentThread():
 current_thread = currentThread
 
 def activeCount():
-    _active_limbo_lock.acquire()
-    count = len(_active) + len(_limbo)
-    _active_limbo_lock.release()
-    return count
+    """Return the number of Thread objects currently alive.
+
+    The returned count is equal to the length of the list returned by
+    enumerate().
+
+    """
+    with _active_limbo_lock:
+        return len(_active) + len(_limbo)
 
 active_count = activeCount
 
+def _enumerate():
+    # Same as enumerate(), but without the lock. Internal use only.
+    return _active.values() + _limbo.values()
+
 def enumerate():
-    _active_limbo_lock.acquire()
-    active = _active.values() + _limbo.values()
-    _active_limbo_lock.release()
-    return active
+    """Return a list of all Thread objects currently alive.
+
+    The list includes daemonic threads, dummy thread objects created by
+    current_thread(), and the main thread. It excludes terminated threads and
+    threads that have not yet been started.
+
+    """
+    with _active_limbo_lock:
+        return _active.values() + _limbo.values()
 
 from thread import stack_size
 
@@ -847,7 +1213,11 @@ def _after_fork():
     new_active = {}
     current = current_thread()
     with _active_limbo_lock:
-        for thread in _active.itervalues():
+        for thread in _enumerate():
+            # Any lock/condition variable may be currently locked or in an
+            # invalid state, so we reinitialize them.
+            if hasattr(thread, '_reset_internal_locks'):
+                thread._reset_internal_locks()
             if thread is current:
                 # There is only one active thread. We reset the ident to
                 # its new value since it can have changed.
@@ -856,10 +1226,7 @@ def _after_fork():
                 new_active[ident] = thread
             else:
                 # All the others are already stopped.
-                # We don't call _Thread__stop() because it tries to acquire
-                # thread._Thread__block which could also have been held while
-                # we forked.
-                thread._Thread__stopped = True
+                thread._Thread__stop()
 
         _limbo.clear()
         _active.clear()
@@ -879,7 +1246,7 @@ def _test():
             self.rc = Condition(self.mon)
             self.wc = Condition(self.mon)
             self.limit = limit
-            self.queue = deque()
+            self.queue = _deque()
 
         def put(self, item):
             self.mon.acquire()

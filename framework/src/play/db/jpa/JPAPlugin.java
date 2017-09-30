@@ -1,8 +1,9 @@
 package play.db.jpa;
 
 import org.apache.log4j.Level;
-import org.hibernate.ejb.Ejb3Configuration;
-
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
+import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -10,27 +11,24 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
 import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
+import play.db.Configuration;
 import play.db.DB;
 import play.db.Model;
-import play.db.Configuration;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 
 import javax.persistence.*;
+import javax.persistence.spi.PersistenceUnitInfo;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 
-/**
- * JPA Plugin
- */
 public class JPAPlugin extends PlayPlugin {
-
-
     public static boolean autoTxs = true;
-
   
     @Override
     public Object bind(RootParamNode rootParamNode, String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations) {
@@ -110,73 +108,11 @@ public class JPAPlugin extends PlayPlugin {
      */
     @Override
     public void onApplicationStart() {  
-        org.hibernate.ejb.HibernatePersistence persistence = new org.hibernate.ejb.HibernatePersistence();
         org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
 
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
             Configuration dbConfig = new Configuration(dbName);
-            
-            Ejb3Configuration cfg = new Ejb3Configuration();
-            List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
-            for (Class<?> clazz : classes) {
-                if (clazz.isAnnotationPresent(Entity.class)) {
-                    // Do we have a transactional annotation matching our dbname?
-                    PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
-                    if (pu != null && pu.name().equals(dbName)) {
-                      cfg.addAnnotatedClass(clazz);
-                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
-                    } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
-                      cfg.addAnnotatedClass(clazz);
-                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
-                    }                    
-                }
-            }
-            
-            // Add entities
-            String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
-            for (String entity : moreEntities) {
-                if (entity.trim().equals("")) {
-                    continue;
-                }
-                try {
-                    Class<?> clazz = Play.classloader.loadClass(entity);  
-                    // Do we have a transactional annotation matching our dbname?
-                    PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
-                    if (pu != null && pu.name().equals(dbName)) {
-                      cfg.addAnnotatedClass(clazz);
-                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
-                    } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
-                      cfg.addAnnotatedClass(clazz);
-                      Logger.debug("Add JPA Model : %s to db %s", clazz, dbName);
-                    }         
-                } catch (Exception e) {
-                    Logger.warn(e, "JPA -> Entity not found: %s", entity);
-                }
-            }
-            
-            for (ApplicationClass applicationClass : Play.classes.all()) {
-                if (applicationClass.isClass() || applicationClass.javaPackage == null) {
-                    continue;
-                }
-                Package p = applicationClass.javaPackage;
-                Logger.info("JPA -> Adding package: %s", p.getName());
-                cfg.addPackage(p.getName());
-            }
-
-            String mappingFile = dbConfig.getProperty("jpa.mapping-file", "");
-            if (mappingFile != null && mappingFile.length() > 0) {
-                cfg.addResource(mappingFile);
-            }
-
-            if (!dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
-                cfg.setProperty("hibernate.hbm2ddl.auto", dbConfig.getProperty("jpa.ddl", "update"));
-            }
-          
-            Map<String, String> properties = dbConfig.getProperties();
-            properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
-            properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
-            properties.put("hibernate.dialect", getDefaultDialect(dbConfig, dbConfig.getProperty("db.driver")));
             
             if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
@@ -186,21 +122,94 @@ public class JPAPlugin extends PlayPlugin {
             ClassLoader contextClassLoader = thread.getContextClassLoader();
             thread.setContextClassLoader(Play.classloader);
             try {
-                cfg.configure(properties);
-                cfg.setDataSource(DB.getDataSource(dbName));
-
-                cfg.setInterceptor(new HibernateInterceptor());
 
                 if (Logger.isTraceEnabled()) {
                     Logger.trace("Initializing JPA for %s...", dbName);
                 }
-
-                JPA.emfs.put(dbName, cfg.buildEntityManagerFactory());
+                
+                JPA.emfs.put(dbName, newEntityManagerFactory(dbName, dbConfig));
             } finally {
-                if (thread != null) thread.setContextClassLoader(contextClassLoader);
+                thread.setContextClassLoader(contextClassLoader);
             }
         }
         JPQL.instance = new JPQL();
+    }
+    
+    private List<Class> entityClasses(String dbName) {
+        List<Class> entityClasses = new ArrayList<>();
+        
+        List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+        for (Class<?> clazz : classes) {
+            if (clazz.isAnnotationPresent(Entity.class)) {
+                // Do we have a transactional annotation matching our dbname?
+                PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
+                if (pu != null && pu.name().equals(dbName)) {
+                    entityClasses.add(clazz);
+                } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
+                    entityClasses.add(clazz);
+                }                    
+            }
+        }
+
+        // Add entities
+        String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
+        for (String entity : moreEntities) {
+            if (entity.trim().equals("")) {
+                continue;
+            }
+            try {
+                Class<?> clazz = Play.classloader.loadClass(entity);  
+                // Do we have a transactional annotation matching our dbname?
+                PersistenceUnit pu = clazz.getAnnotation(PersistenceUnit.class);
+                if (pu != null && pu.name().equals(dbName)) {
+                    entityClasses.add(clazz);
+                } else if (pu == null && JPA.DEFAULT.equals(dbName)) {
+                    entityClasses.add(clazz);
+                }         
+            } catch (Exception e) {
+                Logger.warn(e, "JPA -> Entity not found: %s", entity);
+            }
+        }
+        return entityClasses;
+    }
+
+    protected EntityManagerFactory newEntityManagerFactory(String dbName, Configuration dbConfig) {
+        PersistenceUnitInfo persistenceUnitInfo = persistenceUnitInfo(dbName, dbConfig);
+        Map<String, Object> configuration = new HashMap<>();
+        configuration.put(AvailableSettings.INTERCEPTOR, new HibernateInterceptor());
+
+        return new EntityManagerFactoryBuilderImpl(
+                new PersistenceUnitInfoDescriptor(persistenceUnitInfo), configuration
+        ).build();
+    }
+
+    protected PersistenceUnitInfoImpl persistenceUnitInfo(String dbName, Configuration dbConfig) {
+        final List<Class> managedClasses = entityClasses(dbName);
+        final Properties properties = properties(dbName, dbConfig);
+        properties.put(org.hibernate.jpa.AvailableSettings.LOADED_CLASSES,managedClasses);
+        return new PersistenceUnitInfoImpl(dbName,
+                managedClasses, mappingFiles(dbConfig), properties);
+    }
+
+    private List<String> mappingFiles(Configuration dbConfig) {
+        String mappingFile = dbConfig.getProperty("jpa.mapping-file", "");
+        return mappingFile != null && mappingFile.length() > 0 ? singletonList(mappingFile) : emptyList();
+
+    }
+
+    protected Properties properties(String dbName, Configuration dbConfig) {
+        Properties properties = new Properties();
+        properties.putAll(dbConfig.getProperties());
+        properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
+        properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
+        properties.put("hibernate.dialect", getDefaultDialect(dbConfig, dbConfig.getProperty("db.driver")));
+
+        if (!dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
+            properties.setProperty("hibernate.hbm2ddl.auto", dbConfig.getProperty("jpa.ddl", "update"));
+        }
+
+        properties.put("hibernate.connection.datasource", DB.getDataSource(dbName));
+        return properties;
     }
 
     public static String getDefaultDialect(String driver) {
@@ -257,15 +266,18 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        // Close all presistence units
-        for(EntityManagerFactory emf: JPA.emfs.values()) {
-            if(emf.isOpen()){
+        closeAllPersistenceUnits();    
+    }
+
+    private void closeAllPersistenceUnits() {
+        for (EntityManagerFactory emf : JPA.emfs.values()) {
+            if (emf.isOpen()) {
                 emf.close();
             }
         }
-        JPA.emfs.clear();    
+        JPA.emfs.clear();
     }
-  
+
     @Override
     public void afterFixtureLoad() {
         if (JPA.isEnabled()) {
