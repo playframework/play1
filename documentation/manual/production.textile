@@ -189,7 +189,8 @@ bc. # X509 certificates
 certificate.key.file=conf/host.key
 certificate.file=conf/host.cert
 # In case your key file is password protected
-certificate.password=secret
+# certificate.key.file=conf/host.pass.key
+# certificate.password=secret
 trustmanager.algorithm=JKS
 
 If you are using keystore:
@@ -202,8 +203,13 @@ Note that the values above are the default values.
 
 You can generate self-signed certificates using *openssl*: 
 
-bc. openssl genrsa 1024 > host.key
-openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
+bc. openssl genrsa -des3 -passout pass:secret -out host.pass.key 2048
+openssl rsa -passin pass:secret -in host.pass.key -out host.key
+openssl req -new -key host.key -out host.csr -subj '/C=GB/ST=Test State or Province/L=Test Locality/O=Organization Name/OU=Organizational Unit Name/CN=Common Name/emailAddress=test@email.address'
+openssl x509 -req -days 3650 -in host.csr -signkey host.key -out host.cert
+
+note. the first command creates a password-protected-key ('host.pass.key').
+the second command converts/writes the same key ('host.key') without password protection.
 
 If you are using the Java keystore mechanism, then the following properties can be configured in your @application.conf@ file:
 

@@ -2,6 +2,9 @@ h1. About Play releases
 
 You can download Play releases "here":https://www.playframework.com/download. Each release has a Migration Guide that explains how to upgrade from the previous release.
 
+h2. Play 1.5.x
+
+# "Play 1.5.0":release1.5.x/releasenotes-1.5.0
 
 h2. Play 1.4.x
 

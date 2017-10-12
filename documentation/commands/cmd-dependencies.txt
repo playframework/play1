@@ -15,9 +15,8 @@
 ~ Compute resolve and retrieve project dependencies and install them either in
 ~ lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
 ~
-~ By default the command will not delete unrecognized artifacts.
-~ Use the --sync option to keep both lib/ and modules/ directory synchronized
-~ with the dependencies management system.
+~ By default the command will delete unrecognized artifacts.
+~ Use the --nosync to keep unrecognized artifacts in lib/ and modules/ directories.
 ~
 ~ Some options specified after the application path are passed to the JVM : java memory( example. -Xms64m -Xmx256m).  
 ~ If JVM memory options (starting with -Xm') are not specified in command line arguments, then any
@@ -48,6 +47,7 @@
 ~ --nosync:
 ~ Keep lib/ and modules/ directory unchanged.
 ~ Keep unknown dependencies.
+~ It was default behaviour until play 1.4.4
 ~
 ~ --forceCopy:
 ~ Never create files pointing to the original folder, always copy the folder

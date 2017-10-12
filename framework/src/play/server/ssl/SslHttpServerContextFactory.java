@@ -1,19 +1,24 @@
 package play.server.ssl;
 
+import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import play.Logger;
 import play.Play;
 
 import javax.net.ssl.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Properties;
 
 public class SslHttpServerContextFactory {
@@ -84,18 +89,22 @@ public class SslHttpServerContextFactory {
             final Properties p = Play.configuration;
             String keyFile = p.getProperty("certificate.key.file", "conf/host.key");
 
-            try (PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(keyFile)), new PEMPasswordFinder())) {
-                key = ((KeyPair) keyReader.readObject()).getPrivate();
-
-                try (PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))))) {
-                    X509Certificate cert;
-                    List<X509Certificate> chainVector = new ArrayList<>();
-
-                    while ((cert = (X509Certificate) reader.readObject()) != null) {
-                        chainVector.add(cert);
-                    }
-                    chain = chainVector.toArray(new X509Certificate[1]);
+            try (PEMParser keyReader = new PEMParser(new FileReader(Play.getFile(keyFile)))) {
+                final Object object = keyReader.readObject();
+                JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+                final KeyPair keyPair;
+                if (object instanceof PEMEncryptedKeyPair) {
+                    PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder()
+                            .build(Play.configuration.getProperty("certificate.password", "secret").toCharArray());
+                    keyPair = converter.getKeyPair(((PEMEncryptedKeyPair) object).decryptKeyPair(decProv));
+                } else {
+                    keyPair = converter.getKeyPair((PEMKeyPair) object);
                 }
+                key = keyPair.getPrivate();
+
+                final File hostCertFile = Play.getFile(p.getProperty("certificate.file", "conf/host.cert"));
+                final Collection collection = new CertificateFactory().engineGenerateCertificates(new FileInputStream(hostCertFile));
+                chain = (X509Certificate[]) collection.toArray(new X509Certificate[collection.size()]);
             } catch (Exception e) {
                 Logger.error(e, "Failed to initialize PEMKeyManager from file %s", keyFile);
             }
@@ -136,12 +145,4 @@ public class SslHttpServerContextFactory {
             return key;
         }
     }
-    
-    private static class PEMPasswordFinder implements PasswordFinder {
-        @Override
-        public char[] getPassword() {
-            return Play.configuration.getProperty("certificate.password", "secret").toCharArray();
-        }
-    }
-
 }
