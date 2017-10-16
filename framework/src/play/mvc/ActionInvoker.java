@@ -21,6 +21,7 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.inject.Injector;
 import play.mvc.Http.Request;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
@@ -445,7 +446,7 @@ public class ActionInvoker {
         Http.Request request = Http.Request.current();
 
         if (!isStatic && request.controllerInstance == null) {
-            request.controllerInstance = request.controllerClass.newInstance();
+            request.controllerInstance = Injector.getBeanOfType(request.controllerClass);
         }
 
         Object[] args = forceArgs != null ? forceArgs : getActionMethodArgs(method, request.controllerInstance);
@@ -465,7 +466,7 @@ public class ActionInvoker {
 
         Object methodClassInstance = isStatic ? null :
             (method.getDeclaringClass().isAssignableFrom(request.controllerClass)) ? request.controllerInstance :
-                method.getDeclaringClass().newInstance();
+                Injector.getBeanOfType(method.getDeclaringClass());
 
         return invoke(method, methodClassInstance, args);
     }

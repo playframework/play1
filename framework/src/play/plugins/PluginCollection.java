@@ -18,6 +18,7 @@ import play.classloading.ApplicationClassloader;
 import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
+import play.inject.Injector;
 import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -165,7 +166,7 @@ public class PluginCollection {
         for (LoadingPluginInfo info : pluginsToLoad) {
             Logger.trace("Loading plugin %s", info.name);
             try {
-                PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(info.name).newInstance();
+                PlayPlugin plugin = (PlayPlugin) Injector.getBeanOfType(Play.classloader.loadClass(info.name));
                 plugin.index = info.index;
                 if (addPlugin(plugin)) {
                     Logger.trace("Plugin %s loaded", plugin);
@@ -220,21 +221,8 @@ public class PluginCollection {
             // Is this plugin an application-supplied-plugin?
             if (isLoadedByApplicationClassloader(plugin)) {
                 // This plugin is application-supplied - Must reload it
-                String pluginClassName = plugin.getClass().getName();
-                Class pluginClazz = Play.classloader.loadClass(pluginClassName);
-
-                // First look for constructors the old way
-                Constructor<?>[] constructors = pluginClazz.getConstructors();
-
-                if (constructors.length == 0) {
-                    // No constructors in plugin
-                    // using getDeclaredConstructors() instead of
-                    // getConstructors() to make it work for plugins without
-                    // constructor
-                    constructors = pluginClazz.getDeclaredConstructors();
-                }
-
-                PlayPlugin newPlugin = (PlayPlugin) constructors[0].newInstance();
+                Class pluginClazz = Play.classloader.loadClass(plugin.getClass().getName());
+                PlayPlugin newPlugin = (PlayPlugin) Injector.getBeanOfType(pluginClazz);
                 newPlugin.index = plugin.index;
                 // Replace this plugin
                 replacePlugin(plugin, newPlugin);

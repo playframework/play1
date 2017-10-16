@@ -10,6 +10,7 @@ import play.data.parsing.DataParsers;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
+import play.inject.Injector;
 import play.libs.Codec;
 import play.libs.Crypto;
 import play.utils.Utils;
@@ -36,10 +37,13 @@ public class Scope {
 
     private static SessionStore createSessionStore() {
         String sessionStoreClass = Play.configuration.getProperty("application.session.storeClass");
-        if (sessionStoreClass == null) return new CookieSessionStore();
+        if (sessionStoreClass == null) {
+            return Injector.getBeanOfType(CookieSessionStore.class);
+        }
+
         try {
             Logger.info("Storing sessions using " + sessionStoreClass);
-            return (SessionStore) Class.forName(sessionStoreClass).newInstance();
+            return (SessionStore) Injector.getBeanOfType(sessionStoreClass);
         }
         catch (Exception e) {
             throw new UnexpectedException("Cannot create instance of " + sessionStoreClass, e);

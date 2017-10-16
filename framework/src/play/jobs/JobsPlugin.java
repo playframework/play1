@@ -1,5 +1,18 @@
 package play.jobs;
 
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
+import play.inject.Injector;
+import play.libs.CronExpression;
+import play.libs.Expression;
+import play.libs.Time;
+import play.mvc.Http.Request;
+import play.utils.Java;
+import play.utils.PThreadFactory;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -7,24 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.exceptions.PlayException;
-import play.exceptions.UnexpectedException;
-import play.libs.CronExpression;
-import play.libs.Expression;
-import play.libs.Time;
-import play.mvc.Http.Request;
-import play.utils.Java;
-import play.utils.PThreadFactory;
+import java.util.concurrent.*;
 
 public class JobsPlugin extends PlayPlugin {
 
@@ -158,7 +154,7 @@ public class JobsPlugin extends PlayPlugin {
             if (clazz.isAnnotationPresent(Every.class)) {
                 try {
                     Job job = createJob(clazz);
-                    String value = job.getClass().getAnnotation(Every.class).value();
+                    String value = clazz.getAnnotation(Every.class).value();
                     if (value.startsWith("cron.")) {
                         value = Play.configuration.getProperty(value);
                     }
@@ -174,7 +170,7 @@ public class JobsPlugin extends PlayPlugin {
     }
 
     private Job<?> createJob(Class<?> clazz) throws InstantiationException, IllegalAccessException {
-        Job<?> job = (Job<?>) clazz.newInstance();
+        Job<?> job = (Job<?>) Injector.getBeanOfType(clazz);
         scheduledJobs.add(job);
         return job;
     }

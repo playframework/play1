@@ -1,0 +1,2 @@
+500:plugins.DebugPlugin
+1000:play.modules.guice.GuicePlugin
