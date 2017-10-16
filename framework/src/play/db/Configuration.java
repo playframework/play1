@@ -39,7 +39,7 @@ public class Configuration {
 
         // List of properties with 2 words
         List<String> dbProperties = Arrays.asList("db.driver", "db.url", "db.user", "db.pass", "db.isolation", "db.destroyMethod",
-                "db.testquery");
+                "db.testquery", "db.factory");
 
         for (String property : Play.configuration.stringPropertyNames()) {
             Matcher m = pattern.matcher(property);
