@@ -38,7 +38,7 @@ public class Configuration {
         Pattern pattern = new jregex.Pattern(DB_CONFIG_PATTERN);
 
         // List of properties with 2 words
-        List<String> dbProperties = Arrays.asList("db.driver", "db.url", "db.user", "db.pass", "db.isolation", "db.destroyMethod",
+        List<String> dbProperties = Arrays.asList("db.driver", "db.url", "db.user", "db.pass", "db.factory", "db.isolation", "db.destroyMethod",
                 "db.testquery", "db.factory");
 
         for (String property : Play.configuration.stringPropertyNames()) {
