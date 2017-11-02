@@ -20,6 +20,8 @@ def execute(**kargs):
 
     force = "false"
     trim = "false"
+    shortModuleNames = "false"
+    
     if args.count('--forceCopy') == 1:
         args.remove('--forceCopy')
         force = "true"
@@ -29,11 +31,15 @@ def execute(**kargs):
         force = "true"
         trim = "true"
 
+    if args.count('--shortModuleNames') == 1:
+        args.remove('--shortModuleNames')
+        shortModuleNames = "true"
+
     classpath = app.getClasspath()
     args_memory = app.java_args_memory(args) 
     app.jpda_port = app.readConf('jpda.port')
 
-    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version'], '-Dplay.forcedeps=%s' % (force), '-Dplay.trimdeps=%s' % (trim)]
+    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version'], '-Dplay.forcedeps=%s' % (force), '-Dplay.trimdeps=%s' % (trim), '-Dplay.shortModuleNames=%s' % (shortModuleNames)]
     if args.count('--verbose'):
         args.remove('--verbose')
         add_options.append('-Dverbose')

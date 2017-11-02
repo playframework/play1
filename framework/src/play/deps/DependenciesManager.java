@@ -273,8 +273,10 @@ public class DependenciesManager {
     }
 
     public File install(ArtifactDownloadReport artifact) throws Exception {
-        Boolean force = "true".equalsIgnoreCase(System.getProperty("play.forcedeps"));
-        Boolean trim = "true".equalsIgnoreCase(System.getProperty("play.trimdeps"));
+        boolean force = "true".equalsIgnoreCase(System.getProperty("play.forcedeps"));
+        boolean trim = "true".equalsIgnoreCase(System.getProperty("play.trimdeps"));
+        boolean shortModuleNames = "true".equalsIgnoreCase(System.getProperty("play.shortModuleNames"));
+        
         try {
             File from = artifact.getLocalFile();
 
@@ -298,10 +300,7 @@ public class DependenciesManager {
 
             } else {
                 // A module
-                String mName = from.getName();
-                if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
-                    mName = mName.substring(0, mName.length() - 4);
-                }
+                String mName = moduleName(artifact, shortModuleNames);
                 File to = new File(application, "modules" + File.separator + mName).getCanonicalFile();
                 new File(application, "modules").mkdir();
                 Files.delete(to);
@@ -329,6 +328,18 @@ public class DependenciesManager {
             System.out.println("~ \tError installing " + artifact.getLocalFile());
             throw e;
         }
+    }
+
+    String moduleName(ArtifactDownloadReport artifact, boolean shortModuleNames) {
+        if (shortModuleNames) {
+            return artifact.getName();
+        }
+
+        String mName = artifact.getLocalFile().getName();
+        if (mName.endsWith(".jar") || mName.endsWith(".zip")) {
+            mName = mName.substring(0, mName.length() - 4);
+        }
+        return mName;
     }
 
     private boolean isFrameworkLocal(ArtifactDownloadReport artifact) throws Exception {

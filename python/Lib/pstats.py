@@ -1,35 +1,23 @@
 """Class for printing reports on profiled python code."""
 
-# Class for printing reports on profiled python code. rev 1.0  4/1/94
-#
+# Written by James Roskind
 # Based on prior profile module by Sjoerd Mullender...
 #   which was hacked somewhat by: Guido van Rossum
-#
-# see profile.doc and profile.py for more info.
 
-# Copyright 1994, by InfoSeek Corporation, all rights reserved.
-# Written by James Roskind
+# Copyright Disney Enterprises, Inc.  All Rights Reserved.
+# Licensed to PSF under a Contributor Agreement
 #
-# Permission to use, copy, modify, and distribute this Python software
-# and its associated documentation for any purpose (subject to the
-# restriction in the following sentence) without fee is hereby granted,
-# provided that the above copyright notice appears in all copies, and
-# that both that copyright notice and this permission notice appear in
-# supporting documentation, and that the name of InfoSeek not be used in
-# advertising or publicity pertaining to distribution of the software
-# without specific, written prior permission.  This permission is
-# explicitly restricted to the copying and modification of the software
-# to remain in Python, compiled Python, or other languages (such as C)
-# wherein the modified or derived code is exclusively imported into a
-# Python module.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# INFOSEEK CORPORATION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
-# SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS. IN NO EVENT SHALL INFOSEEK CORPORATION BE LIABLE FOR ANY
-# SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
-# RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
-# CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-# CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied.  See the License for the specific language
+# governing permissions and limitations under the License.
 
 
 import sys
@@ -37,6 +25,7 @@ import os
 import time
 import marshal
 import re
+from functools import cmp_to_key
 
 __all__ = ["Stats"]
 
@@ -65,13 +54,13 @@ class Stats:
     minor key of 'the name of the function'.  Look at the two tables in
     sort_stats() and get_sort_arg_defs(self) for more examples.
 
-    All methods return self,  so you can string together commands like:
+    All methods return self, so you can string together commands like:
         Stats('foo', 'goo').strip_dirs().sort_stats('calls').\
                             print_stats(5).print_callers(5)
     """
 
     def __init__(self, *args, **kwds):
-        # I can't figure out how to explictly specify a stream keyword arg
+        # I can't figure out how to explicitly specify a stream keyword arg
         # with *args:
         #   def __init__(self, *args, stream=sys.stdout): ...
         # so I use **kwds and sqauwk if something unexpected is passed in.
@@ -131,8 +120,8 @@ class Stats:
             self.stats = arg.stats
             arg.stats = {}
         if not self.stats:
-            raise TypeError,  "Cannot create or construct a %r object from '%r''" % (
-                              self.__class__, arg)
+            raise TypeError("Cannot create or construct a %r object from %r"
+                            % (self.__class__, arg))
         return
 
     def get_top_level_stats(self):
@@ -183,15 +172,19 @@ class Stats:
     # along with some printable description
     sort_arg_dict_default = {
               "calls"     : (((1,-1),              ), "call count"),
+              "ncalls"    : (((1,-1),              ), "call count"),
+              "cumtime"   : (((3,-1),              ), "cumulative time"),
               "cumulative": (((3,-1),              ), "cumulative time"),
               "file"      : (((4, 1),              ), "file name"),
+              "filename"  : (((4, 1),              ), "file name"),
               "line"      : (((5, 1),              ), "line number"),
               "module"    : (((4, 1),              ), "file name"),
               "name"      : (((6, 1),              ), "function name"),
               "nfl"       : (((6, 1),(4, 1),(5, 1),), "name/file/line"),
-              "pcalls"    : (((0,-1),              ), "call count"),
+              "pcalls"    : (((0,-1),              ), "primitive call count"),
               "stdname"   : (((7, 1),              ), "standard name"),
               "time"      : (((2,-1),              ), "internal time"),
+              "tottime"   : (((2,-1),              ), "internal time"),
               }
 
     def get_sort_arg_defs(self):
@@ -217,12 +210,12 @@ class Stats:
         if not field:
             self.fcn_list = 0
             return self
-        if len(field) == 1 and type(field[0]) == type(1):
+        if len(field) == 1 and isinstance(field[0], (int, long)):
             # Be compatible with old profiler
             field = [ {-1: "stdname",
-                      0:"calls",
-                      1:"time",
-                      2: "cumulative" }  [ field[0] ] ]
+                       0:  "calls",
+                       1:  "time",
+                       2:  "cumulative"}[field[0]] ]
 
         sort_arg_defs = self.get_sort_arg_defs()
         sort_tuple = ()
@@ -238,7 +231,7 @@ class Stats:
             stats_list.append((cc, nc, tt, ct) + func +
                               (func_std_string(func), func))
 
-        stats_list.sort(key=CmpToKey(TupleComp(sort_tuple).compare))
+        stats_list.sort(key=cmp_to_key(TupleComp(sort_tuple).compare))
 
         self.fcn_list = fcn_list = []
         for tuple in stats_list:
@@ -299,48 +292,53 @@ class Stats:
 
     def eval_print_amount(self, sel, list, msg):
         new_list = list
-        if type(sel) == type(""):
+        if isinstance(sel, basestring):
+            try:
+                rex = re.compile(sel)
+            except re.error:
+                msg += "   <Invalid regular expression %r>\n" % sel
+                return new_list, msg
             new_list = []
             for func in list:
-                if re.search(sel, func_std_string(func)):
+                if rex.search(func_std_string(func)):
                     new_list.append(func)
         else:
             count = len(list)
-            if type(sel) == type(1.0) and 0.0 <= sel < 1.0:
+            if isinstance(sel, float) and 0.0 <= sel < 1.0:
                 count = int(count * sel + .5)
                 new_list = list[:count]
-            elif type(sel) == type(1) and 0 <= sel < count:
+            elif isinstance(sel, (int, long)) and 0 <= sel < count:
                 count = sel
                 new_list = list[:count]
         if len(list) != len(new_list):
-            msg = msg + "   List reduced from %r to %r due to restriction <%r>\n" % (
-                         len(list), len(new_list), sel)
+            msg += "   List reduced from %r to %r due to restriction <%r>\n" % (
+                len(list), len(new_list), sel)
 
         return new_list, msg
 
     def get_print_list(self, sel_list):
         width = self.max_name_len
         if self.fcn_list:
-            list = self.fcn_list[:]
+            stat_list = self.fcn_list[:]
             msg = "   Ordered by: " + self.sort_type + '\n'
         else:
-            list = self.stats.keys()
+            stat_list = self.stats.keys()
             msg = "   Random listing order was used\n"
 
         for selection in sel_list:
-            list, msg = self.eval_print_amount(selection, list, msg)
+            stat_list, msg = self.eval_print_amount(selection, stat_list, msg)
 
-        count = len(list)
+        count = len(stat_list)
 
-        if not list:
-            return 0, list
+        if not stat_list:
+            return 0, stat_list
         print >> self.stream, msg
         if count < len(self.stats):
             width = 0
-            for func in list:
+            for func in stat_list:
                 if  len(func_std_string(func)) > width:
                     width = len(func_std_string(func))
-        return width+2, list
+        return width+2, stat_list
 
     def print_stats(self, *amount):
         for filename in self.files:
@@ -353,7 +351,7 @@ class Stats:
         print >> self.stream, indent, self.total_calls, "function calls",
         if self.total_calls != self.prim_calls:
             print >> self.stream, "(%d primitive calls)" % self.prim_calls,
-        print >> self.stream, "in %.3f CPU seconds" % self.total_tt
+        print >> self.stream, "in %.3f seconds" % self.total_tt
         print >> self.stream
         width, list = self.get_print_list(amount)
         if list:
@@ -442,12 +440,12 @@ class Stats:
         if nc == 0:
             print >> self.stream, ' '*8,
         else:
-            print >> self.stream, f8(tt/nc),
+            print >> self.stream, f8(float(tt)/nc),
         print >> self.stream, f8(ct),
         if cc == 0:
             print >> self.stream, ' '*8,
         else:
-            print >> self.stream, f8(ct/cc),
+            print >> self.stream, f8(float(ct)/cc),
         print >> self.stream, func_std_string(func)
 
 class TupleComp:
@@ -470,16 +468,6 @@ class TupleComp:
             if l > r:
                 return direction
         return 0
-
-def CmpToKey(mycmp):
-    """Convert a cmp= function into a key= function"""
-    class K(object):
-        def __init__(self, obj):
-            self.obj = obj
-        def __lt__(self, other):
-            return mycmp(self.obj, other.obj) == -1
-    return K
-
 
 #**************************************************************************
 # func_name is a triple (file:string, line:int, name:string)
@@ -522,8 +510,13 @@ def add_callers(target, source):
         new_callers[func] = caller
     for func, caller in source.iteritems():
         if func in new_callers:
-            new_callers[func] = tuple([i[0] + i[1] for i in
-                                       zip(caller, new_callers[func])])
+            if isinstance(caller, tuple):
+                # format used by cProfile
+                new_callers[func] = tuple([i[0] + i[1] for i in
+                                           zip(caller, new_callers[func])])
+            else:
+                # format used by profile
+                new_callers[func] += caller
         else:
             new_callers[func] = caller
     return new_callers
@@ -557,12 +550,10 @@ if __name__ == '__main__':
         def __init__(self, profile=None):
             cmd.Cmd.__init__(self)
             self.prompt = "% "
+            self.stats = None
+            self.stream = sys.stdout
             if profile is not None:
-                self.stats = Stats(profile)
-                self.stream = self.stats.stream
-            else:
-                self.stats = None
-                self.stream = sys.stdout
+                self.do_read(profile)
 
         def generic(self, fn, line):
             args = line.split()
@@ -597,7 +588,10 @@ if __name__ == '__main__':
             print >> self.stream, "  that match it are printed."
 
         def do_add(self, line):
-            self.stats.add(line)
+            if self.stats:
+                self.stats.add(line)
+            else:
+                print >> self.stream, "No statistics object is loaded."
             return 0
         def help_add(self):
             print >> self.stream, "Add profile info from given file to current statistics object."
@@ -632,24 +626,35 @@ if __name__ == '__main__':
                 except IOError, args:
                     print >> self.stream, args[1]
                     return
+                except Exception as err:
+                    print >> self.stream, err.__class__.__name__ + ':', err
+                    return
                 self.prompt = line + "% "
             elif len(self.prompt) > 2:
-                line = self.prompt[-2:]
+                line = self.prompt[:-2]
+                self.do_read(line)
             else:
                 print >> self.stream, "No statistics object is current -- cannot reload."
             return 0
         def help_read(self):
             print >> self.stream, "Read in profile data from a specified file."
+            print >> self.stream, "Without argument, reload the current file."
 
         def do_reverse(self, line):
-            self.stats.reverse_order()
+            if self.stats:
+                self.stats.reverse_order()
+            else:
+                print >> self.stream, "No statistics object is loaded."
             return 0
         def help_reverse(self):
             print >> self.stream, "Reverse the sort order of the profiling report."
 
         def do_sort(self, line):
+            if not self.stats:
+                print >> self.stream, "No statistics object is loaded."
+                return
             abbrevs = self.stats.get_sort_arg_defs()
-            if line and not filter(lambda x,a=abbrevs: x not in a,line.split()):
+            if line and all((x in abbrevs) for x in line.split()):
                 self.stats.sort_stats(*line.split())
             else:
                 print >> self.stream, "Valid sort keys (unique prefixes are accepted):"
@@ -669,10 +674,15 @@ if __name__ == '__main__':
             self.generic_help()
 
         def do_strip(self, line):
-            self.stats.strip_dirs()
-            return 0
+            if self.stats:
+                self.stats.strip_dirs()
+            else:
+                print >> self.stream, "No statistics object is loaded."
         def help_strip(self):
             print >> self.stream, "Strip leading path information from filenames in the report."
+
+        def help_help(self):
+            print >> self.stream, "Show help for a given command."
 
         def postcmd(self, stop, line):
             if stop:

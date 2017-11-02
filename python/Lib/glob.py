@@ -5,32 +5,54 @@ import os
 import re
 import fnmatch
 
+try:
+    _unicode = unicode
+except NameError:
+    # If Python is built without Unicode support, the unicode type
+    # will not exist. Fake one.
+    class _unicode(object):
+        pass
+
 __all__ = ["glob", "iglob"]
 
 def glob(pathname):
     """Return a list of paths matching a pathname pattern.
 
-    The pattern may contain simple shell-style wildcards a la fnmatch.
+    The pattern may contain simple shell-style wildcards a la
+    fnmatch. However, unlike fnmatch, filenames starting with a
+    dot are special cases that are not matched by '*' and '?'
+    patterns.
 
     """
     return list(iglob(pathname))
 
 def iglob(pathname):
-    """Return a list of paths matching a pathname pattern.
+    """Return an iterator which yields the paths matching a pathname pattern.
 
-    The pattern may contain simple shell-style wildcards a la fnmatch.
+    The pattern may contain simple shell-style wildcards a la
+    fnmatch. However, unlike fnmatch, filenames starting with a
+    dot are special cases that are not matched by '*' and '?'
+    patterns.
 
     """
-    if not has_magic(pathname):
-        if os.path.lexists(pathname):
-            yield pathname
-        return
     dirname, basename = os.path.split(pathname)
+    if not has_magic(pathname):
+        if basename:
+            if os.path.lexists(pathname):
+                yield pathname
+        else:
+            # Patterns ending with a slash should match only directories
+            if os.path.isdir(dirname):
+                yield pathname
+        return
     if not dirname:
         for name in glob1(os.curdir, basename):
             yield name
         return
-    if has_magic(dirname):
+    # `os.path.split()` returns the argument itself as a dirname if it is a
+    # drive or UNC path.  Prevent an infinite recursion if a drive or UNC path
+    # contains magic characters (i.e. r'\\?\C:').
+    if dirname != pathname and has_magic(dirname):
         dirs = iglob(dirname)
     else:
         dirs = [dirname]
@@ -49,7 +71,7 @@ def iglob(pathname):
 def glob1(dirname, pattern):
     if not dirname:
         dirname = os.curdir
-    if isinstance(pattern, unicode) and not isinstance(dirname, unicode):
+    if isinstance(pattern, _unicode) and not isinstance(dirname, unicode):
         dirname = unicode(dirname, sys.getfilesystemencoding() or
                                    sys.getdefaultencoding())
     try:

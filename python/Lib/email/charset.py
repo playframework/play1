@@ -9,6 +9,7 @@ __all__ = [
     'add_codec',
     ]
 
+import codecs
 import email.base64mime
 import email.quoprimime
 
@@ -182,7 +183,7 @@ class Charset:
                    header encoding.  Charset.SHORTEST is not allowed for
                    body_encoding.
 
-    output_charset: Some character sets must be converted before the can be
+    output_charset: Some character sets must be converted before they can be
                     used in email headers or bodies.  If the input_charset is
                     one of them, this attribute will contain the name of the
                     charset output will be converted to.  Otherwise, it will
@@ -208,8 +209,13 @@ class Charset:
                 input_charset = unicode(input_charset, 'ascii')
         except UnicodeError:
             raise errors.CharsetError(input_charset)
-        input_charset = input_charset.lower()
-        # Set the input charset after filtering through the aliases
+        input_charset = input_charset.lower().encode('ascii')
+        # Set the input charset after filtering through the aliases and/or codecs
+        if not (input_charset in ALIASES or input_charset in CHARSETS):
+            try:
+                input_charset = codecs.lookup(input_charset).name
+            except LookupError:
+                pass
         self.input_charset = ALIASES.get(input_charset, input_charset)
         # We can try to guess which encoding and conversion to use by the
         # charset_map dictionary.  Try that first, but let the user override

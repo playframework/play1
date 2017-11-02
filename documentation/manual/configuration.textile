@@ -126,6 +126,16 @@ bc. application.session.cookie=PLAY
 Default: sessions are written to the transient @PLAY_SESSION@ cookie.
 
 
+h3(#application.session.storeClass). application.session.storeClass
+
+Session storage implementation. By default Play! stores session in cookie. 
+It can be overridden with this setting. For example:
+
+bc. application.session.storeClass=com.company.CacheSessionStore
+
+Default: sessions are stored in cookie (see `play.mvc.CookieSessionStore` for implementation)
+
+
 h3(#application.session.httpOnly). application.session.httpOnly
 
 Enables the ‘HTTP only’ flag on cookies, which mitigates some XSS attacks. For example:
@@ -312,6 +322,20 @@ bc. db.destroyMethod=close
 
 Default: none.
 
+
+h3(#db.factory). db.factory
+
+Factory class that will create DataSource instances.
+
+bc. db.factory=play.db.hikaricp.HikariDataSourceFactory
+
+Currently two values are supported out-of-the-box: 
+* play.db.hikaricp.HikariDataSourceFactory   (default starting from Play 1.5)
+* play.db.c3p0.C3P0DataSourceFactory         (it was the only data source available prior to Play 1.5)
+
+Default:
+
+* @play.db.hikaricp.HikariDataSourceFactory@
 
 h3(#db.driver). db.driver
 
@@ -982,6 +1006,17 @@ Default: none.
 
 
 h2(#play). Play run-time
+
+
+h3(#play.plugins.descriptor). play.plugins.descriptor
+
+File to load play plugins from. 
+* If given, play with load plugins ONLY from this file. @since play 1.5
+* If not given, play will find ALL files "play.plugins" from classpath and load plugins from them (this is the default behaviour).
+
+bc. play.plugins.descriptor=conf/my-play-app.plugins
+
+Default: none.
 
 
 h3(#play.bytecodeCache). play.bytecodeCache

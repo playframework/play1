@@ -10,19 +10,27 @@ __all__ = ['commonprefix', 'exists', 'getatime', 'getctime', 'getmtime',
            'getsize', 'isdir', 'isfile']
 
 
+try:
+    _unicode = unicode
+except NameError:
+    # If Python is built without Unicode support, the unicode type
+    # will not exist. Fake one.
+    class _unicode(object):
+        pass
+
 # Does a path exist?
 # This is false for dangling symbolic links on systems that support them.
 def exists(path):
     """Test whether a path exists.  Returns False for broken symbolic links"""
     try:
-        st = os.stat(path)
+        os.stat(path)
     except os.error:
         return False
     return True
 
 
 # This follows symbolic links, so both islink() and isdir() can be true
-# for the same path ono systems that support symlinks
+# for the same path on systems that support symlinks
 def isfile(path):
     """Test whether a path is a regular file"""
     try:

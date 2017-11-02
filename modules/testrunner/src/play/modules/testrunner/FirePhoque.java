@@ -32,9 +32,6 @@ public class FirePhoque {
 
     public static void main(String[] args) throws Exception {
 
-        Logger.getLogger(DefaultCssErrorHandler.class.getName()).setLevel(Level.OFF);
-        Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.OFF);
-
         String app = System.getProperty("application.url", "http://localhost:9000");
 
         // Tests description

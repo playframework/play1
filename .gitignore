@@ -84,6 +84,7 @@ support/textmate
 samples-and-tests/yabe/logs
 samples-and-tests/yabe/test-result
 samples-and-tests/yabe/tmp
+samples-and-tests/yabe/modules
 *.ser
 modules/cobertura/lib
 modules/scala/lib/play-scala.jar

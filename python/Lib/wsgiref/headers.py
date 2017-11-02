@@ -1,6 +1,6 @@
 """Manage HTTP Response Headers
 
-Much of this module is red-handedly pilfered from email.Message in the stdlib,
+Much of this module is red-handedly pilfered from email.message in the stdlib,
 so portions are Copyright (C) 2001,2002 Python Software Foundation, and were
 written by Barry Warsaw.
 """
@@ -8,7 +8,7 @@ written by Barry Warsaw.
 from types import ListType, TupleType
 
 # Regular expression that matches `special' characters in parameters, the
-# existance of which force quoting of the parameter value.
+# existence of which force quoting of the parameter value.
 import re
 tspecials = re.compile(r'[ \(\)<>@,;:\\"/\[\]\?=]')
 
@@ -25,18 +25,6 @@ def _formatparam(param, value=None, quote=1):
             return '%s=%s' % (param, value)
     else:
         return param
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class Headers:
@@ -71,14 +59,10 @@ class Headers:
         Return None if the header is missing instead of raising an exception.
 
         Note that if the header appeared multiple times, the first exactly which
-        occurrance gets returned is undefined.  Use getall() to get all
+        occurrence gets returned is undefined.  Use getall() to get all
         the values matching a header field name.
         """
         return self.get(name)
-
-
-
-
 
     def has_key(self, name):
         """Return true if the message contains the header."""
@@ -117,9 +101,6 @@ class Headers:
         list.
         """
         return [k for k, v in self._headers]
-
-
-
 
     def values(self):
         """Return a list of all header values.
@@ -161,7 +142,6 @@ class Headers:
         else:
             return result
 
-
     def add_header(self, _name, _value, **_params):
         """Extended header setting.
 
@@ -174,7 +154,7 @@ class Headers:
 
         h.add_header('content-disposition', 'attachment', filename='bud.gif')
 
-        Note that unlike the corresponding 'email.Message' method, this does
+        Note that unlike the corresponding 'email.message' method, this does
         *not* handle '(charset, language, value)' tuples: all values must be
         strings or None.
         """
@@ -187,19 +167,3 @@ class Headers:
             else:
                 parts.append(_formatparam(k.replace('_', '-'), v))
         self._headers.append((_name, "; ".join(parts)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#

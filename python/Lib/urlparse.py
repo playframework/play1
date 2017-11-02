@@ -1,8 +1,34 @@
 """Parse (absolute and relative) URLs.
 
-See RFC 1808: "Relative Uniform Resource Locators", by R. Fielding,
-UC Irvine, June 1995.
+urlparse module is based upon the following RFC specifications.
+
+RFC 3986 (STD66): "Uniform Resource Identifiers" by T. Berners-Lee, R. Fielding
+and L.  Masinter, January 2005.
+
+RFC 2732 : "Format for Literal IPv6 Addresses in URL's by R.Hinden, B.Carpenter
+and L.Masinter, December 1999.
+
+RFC 2396:  "Uniform Resource Identifiers (URI)": Generic Syntax by T.
+Berners-Lee, R. Fielding, and L. Masinter, August 1998.
+
+RFC 2368: "The mailto URL scheme", by P.Hoffman , L Masinter, J. Zwinski, July 1998.
+
+RFC 1808: "Relative Uniform Resource Locators", by R. Fielding, UC Irvine, June
+1995.
+
+RFC 1738: "Uniform Resource Locators (URL)" by T. Berners-Lee, L. Masinter, M.
+McCahill, December 1994
+
+RFC 3986 is considered the current standard and any future changes to
+urlparse module should conform with it.  The urlparse module is
+currently not entirely compliant with this RFC due to defacto
+scenarios for parsing, and for backward compatibility purposes, some
+parsing quirks from older RFCs are retained. The testcases in
+test_urlparse.py provides a good indicator of parsing behavior.
+
 """
+
+import re
 
 __all__ = ["urlparse", "urlunparse", "urljoin", "urldefrag",
            "urlsplit", "urlunsplit", "parse_qs", "parse_qsl"]
@@ -10,16 +36,20 @@ __all__ = ["urlparse", "urlunparse", "urljoin", "urldefrag",
 # A classification of schemes ('' means apply by default)
 uses_relative = ['ftp', 'http', 'gopher', 'nntp', 'imap',
                  'wais', 'file', 'https', 'shttp', 'mms',
-                 'prospero', 'rtsp', 'rtspu', '', 'sftp']
+                 'prospero', 'rtsp', 'rtspu', '', 'sftp',
+                 'svn', 'svn+ssh']
 uses_netloc = ['ftp', 'http', 'gopher', 'nntp', 'telnet',
                'imap', 'wais', 'file', 'mms', 'https', 'shttp',
                'snews', 'prospero', 'rtsp', 'rtspu', 'rsync', '',
-               'svn', 'svn+ssh', 'sftp']
-non_hierarchical = ['gopher', 'hdl', 'mailto', 'news',
-                    'telnet', 'wais', 'imap', 'snews', 'sip', 'sips']
+               'svn', 'svn+ssh', 'sftp','nfs','git', 'git+ssh']
 uses_params = ['ftp', 'hdl', 'prospero', 'http', 'imap',
                'https', 'shttp', 'rtsp', 'rtspu', 'sip', 'sips',
-               'mms', '', 'sftp']
+               'mms', '', 'sftp', 'tel']
+
+# These are not actually used anymore, but should stay for backwards
+# compatibility.  (They are undocumented, but have a public-looking name.)
+non_hierarchical = ['gopher', 'hdl', 'mailto', 'news',
+                    'telnet', 'wais', 'imap', 'snews', 'sip', 'sips']
 uses_query = ['http', 'wais', 'imap', 'https', 'shttp', 'mms',
               'gopher', 'rtsp', 'rtspu', 'sip', 'sips', '']
 uses_fragment = ['ftp', 'hdl', 'http', 'gopher', 'news',
@@ -64,21 +94,26 @@ class ResultMixin(object):
 
     @property
     def hostname(self):
-        netloc = self.netloc
-        if "@" in netloc:
-            netloc = netloc.rsplit("@", 1)[1]
-        if ":" in netloc:
-            netloc = netloc.split(":", 1)[0]
-        return netloc.lower() or None
+        netloc = self.netloc.split('@')[-1]
+        if '[' in netloc and ']' in netloc:
+            return netloc.split(']')[0][1:].lower()
+        elif ':' in netloc:
+            return netloc.split(':')[0].lower()
+        elif netloc == '':
+            return None
+        else:
+            return netloc.lower()
 
     @property
     def port(self):
-        netloc = self.netloc
-        if "@" in netloc:
-            netloc = netloc.rsplit("@", 1)[1]
-        if ":" in netloc:
-            port = netloc.split(":", 1)[1]
-            return int(port, 10)
+        netloc = self.netloc.split('@')[-1].split(']')[-1]
+        if ':' in netloc:
+            port = netloc.split(':')[1]
+            if port:
+                port = int(port, 10)
+                # verify legal port
+                if (0 <= port <= 65535):
+                    return port
         return None
 
 from collections import namedtuple
@@ -151,6 +186,9 @@ def urlsplit(url, scheme='', allow_fragments=True):
             url = url[i+1:]
             if url[:2] == '//':
                 netloc, url = _splitnetloc(url, 2)
+                if (('[' in netloc and ']' not in netloc) or
+                        (']' in netloc and '[' not in netloc)):
+                    raise ValueError("Invalid IPv6 URL")
             if allow_fragments and '#' in url:
                 url, fragment = url.split('#', 1)
             if '?' in url:
@@ -162,12 +200,21 @@ def urlsplit(url, scheme='', allow_fragments=True):
             if c not in scheme_chars:
                 break
         else:
-            scheme, url = url[:i].lower(), url[i+1:]
-    if scheme in uses_netloc and url[:2] == '//':
+            # make sure "url" is not actually a port number (in which case
+            # "scheme" is really part of the path)
+            rest = url[i+1:]
+            if not rest or any(c not in '0123456789' for c in rest):
+                # not a port number
+                scheme, url = url[:i].lower(), rest
+
+    if url[:2] == '//':
         netloc, url = _splitnetloc(url, 2)
-    if allow_fragments and scheme in uses_fragment and '#' in url:
+        if (('[' in netloc and ']' not in netloc) or
+                (']' in netloc and '[' not in netloc)):
+            raise ValueError("Invalid IPv6 URL")
+    if allow_fragments and '#' in url:
         url, fragment = url.split('#', 1)
-    if scheme in uses_query and '?' in url:
+    if '?' in url:
         url, query = url.split('?', 1)
     v = SplitResult(scheme, netloc, url, query, fragment)
     _parse_cache[key] = v
@@ -184,6 +231,11 @@ def urlunparse(data):
     return urlunsplit((scheme, netloc, url, query, fragment))
 
 def urlunsplit(data):
+    """Combine the elements of a tuple as returned by urlsplit() into a
+    complete URL as a string. The data argument can be any five-item iterable.
+    This may result in a slightly different, but equivalent URL, if the URL that
+    was parsed originally had unnecessary delimiters (for example, a ? with an
+    empty query; the RFC states that these are equivalent)."""
     scheme, netloc, url, query, fragment = data
     if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
         if url and url[:1] != '/': url = '/' + url
@@ -217,14 +269,9 @@ def urljoin(base, url, allow_fragments=True):
     if path[:1] == '/':
         return urlunparse((scheme, netloc, path,
                            params, query, fragment))
-    if not path:
+    if not path and not params:
         path = bpath
-        if not params:
-            params = bparams
-        else:
-            path = path[:-1]
-            return urlunparse((scheme, netloc, path,
-                                params, query, fragment))
+        params = bparams
         if not query:
             query = bquery
         return urlunparse((scheme, netloc, path,
@@ -267,35 +314,62 @@ def urldefrag(url):
     else:
         return url, ''
 
-# unquote method for parse_qs and parse_qsl
-# Cannot use directly from urllib as it would create circular reference.
-# urllib uses urlparse methods ( urljoin)
+try:
+    unicode
+except NameError:
+    def _is_unicode(x):
+        return 0
+else:
+    def _is_unicode(x):
+        return isinstance(x, unicode)
 
-_hextochr = dict(('%02x' % i, chr(i)) for i in range(256))
-_hextochr.update(('%02X' % i, chr(i)) for i in range(256))
+# unquote method for parse_qs and parse_qsl
+# Cannot use directly from urllib as it would create a circular reference
+# because urllib uses urlparse methods (urljoin).  If you update this function,
+# update it also in urllib.  This code duplication does not existin in Python3.
+
+_hexdig = '0123456789ABCDEFabcdef'
+_hextochr = dict((a+b, chr(int(a+b,16)))
+                 for a in _hexdig for b in _hexdig)
+_asciire = re.compile('([\x00-\x7f]+)')
 
 def unquote(s):
     """unquote('abc%20def') -> 'abc def'."""
-    res = s.split('%')
-    for i in xrange(1, len(res)):
-        item = res[i]
+    if _is_unicode(s):
+        if '%' not in s:
+            return s
+        bits = _asciire.split(s)
+        res = [bits[0]]
+        append = res.append
+        for i in range(1, len(bits), 2):
+            append(unquote(str(bits[i])).decode('latin1'))
+            append(bits[i + 1])
+        return ''.join(res)
+
+    bits = s.split('%')
+    # fastpath
+    if len(bits) == 1:
+        return s
+    res = [bits[0]]
+    append = res.append
+    for item in bits[1:]:
         try:
-            res[i] = _hextochr[item[:2]] + item[2:]
+            append(_hextochr[item[:2]])
+            append(item[2:])
         except KeyError:
-            res[i] = '%' + item
-        except UnicodeDecodeError:
-            res[i] = unichr(int(item[:2], 16)) + item[2:]
-    return "".join(res)
+            append('%')
+            append(item)
+    return ''.join(res)
 
 def parse_qs(qs, keep_blank_values=0, strict_parsing=0):
     """Parse a query given as a string argument.
 
         Arguments:
 
-        qs: URL-encoded query string to be parsed
+        qs: percent-encoded query string to be parsed
 
         keep_blank_values: flag indicating whether blank values in
-            URL encoded queries should be treated as blank strings.
+            percent-encoded queries should be treated as blank strings.
             A true value indicates that blanks should be retained as
             blank strings.  The default false value indicates that
             blank values are to be ignored and treated as if they were
@@ -318,10 +392,10 @@ def parse_qsl(qs, keep_blank_values=0, strict_parsing=0):
 
     Arguments:
 
-    qs: URL-encoded query string to be parsed
+    qs: percent-encoded query string to be parsed
 
     keep_blank_values: flag indicating whether blank values in
-        URL encoded queries should be treated as blank strings.  A
+        percent-encoded queries should be treated as blank strings.  A
         true value indicates that blanks should be retained as blank
         strings.  The default false value indicates that blank values
         are to be ignored and treated as if they were  not included.
@@ -352,72 +426,3 @@ def parse_qsl(qs, keep_blank_values=0, strict_parsing=0):
             r.append((name, value))
 
     return r
-
-
-test_input = """
-      http://a/b/c/d
-
-      g:h        = <URL:g:h>
-      http:g     = <URL:http://a/b/c/g>
-      http:      = <URL:http://a/b/c/d>
-      g          = <URL:http://a/b/c/g>
-      ./g        = <URL:http://a/b/c/g>
-      g/         = <URL:http://a/b/c/g/>
-      /g         = <URL:http://a/g>
-      //g        = <URL:http://g>
-      ?y         = <URL:http://a/b/c/d?y>
-      g?y        = <URL:http://a/b/c/g?y>
-      g?y/./x    = <URL:http://a/b/c/g?y/./x>
-      .          = <URL:http://a/b/c/>
-      ./         = <URL:http://a/b/c/>
-      ..         = <URL:http://a/b/>
-      ../        = <URL:http://a/b/>
-      ../g       = <URL:http://a/b/g>
-      ../..      = <URL:http://a/>
-      ../../g    = <URL:http://a/g>
-      ../../../g = <URL:http://a/../g>
-      ./../g     = <URL:http://a/b/g>
-      ./g/.      = <URL:http://a/b/c/g/>
-      /./g       = <URL:http://a/./g>
-      g/./h      = <URL:http://a/b/c/g/h>
-      g/../h     = <URL:http://a/b/c/h>
-      http:g     = <URL:http://a/b/c/g>
-      http:      = <URL:http://a/b/c/d>
-      http:?y         = <URL:http://a/b/c/d?y>
-      http:g?y        = <URL:http://a/b/c/g?y>
-      http:g?y/./x    = <URL:http://a/b/c/g?y/./x>
-"""
-
-def test():
-    import sys
-    base = ''
-    if sys.argv[1:]:
-        fn = sys.argv[1]
-        if fn == '-':
-            fp = sys.stdin
-        else:
-            fp = open(fn)
-    else:
-        try:
-            from cStringIO import StringIO
-        except ImportError:
-            from StringIO import StringIO
-        fp = StringIO(test_input)
-    for line in fp:
-        words = line.split()
-        if not words:
-            continue
-        url = words[0]
-        parts = urlparse(url)
-        print '%-10s : %s' % (url, parts)
-        abs = urljoin(base, url)
-        if not base:
-            base = abs
-        wrapped = '<URL:%s>' % abs
-        print '%-10s = %s' % (url, wrapped)
-        if len(words) == 3 and words[1] == '=':
-            if wrapped != words[2]:
-                print 'EXPECTED', words[2], '!!!!!!!!!!'
-
-if __name__ == '__main__':
-    test()

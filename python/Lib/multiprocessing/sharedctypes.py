@@ -3,7 +3,33 @@
 #
 # multiprocessing/sharedctypes.py
 #
-# Copyright (c) 2007-2008, R Oudkerk --- see COPYING.txt
+# Copyright (c) 2006-2008, R Oudkerk
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of author nor the names of any contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
 #
 
 import sys
@@ -20,13 +46,18 @@ __all__ = ['RawValue', 'RawArray', 'Value', 'Array', 'copy', 'synchronized']
 #
 
 typecode_to_type = {
-    'c': ctypes.c_char,  'u': ctypes.c_wchar,
+    'c': ctypes.c_char,
     'b': ctypes.c_byte,  'B': ctypes.c_ubyte,
     'h': ctypes.c_short, 'H': ctypes.c_ushort,
     'i': ctypes.c_int,   'I': ctypes.c_uint,
     'l': ctypes.c_long,  'L': ctypes.c_ulong,
     'f': ctypes.c_float, 'd': ctypes.c_double
     }
+try:
+    typecode_to_type['u'] = ctypes.c_wchar
+except AttributeError:
+    pass
+
 
 #
 #
@@ -52,9 +83,11 @@ def RawArray(typecode_or_type, size_or_initializer):
     Returns a ctypes array allocated from shared memory
     '''
     type_ = typecode_to_type.get(typecode_or_type, typecode_or_type)
-    if isinstance(size_or_initializer, int):
+    if isinstance(size_or_initializer, (int, long)):
         type_ = type_ * size_or_initializer
-        return _new_value(type_)
+        obj = _new_value(type_)
+        ctypes.memset(ctypes.addressof(obj), 0, ctypes.sizeof(obj))
+        return obj
     else:
         type_ = type_ * len(size_or_initializer)
         result = _new_value(type_)
@@ -69,9 +102,12 @@ def Value(typecode_or_type, *args, **kwds):
     if kwds:
         raise ValueError('unrecognized keyword argument(s): %s' % kwds.keys())
     obj = RawValue(typecode_or_type, *args)
-    if lock is None:
+    if lock is False:
+        return obj
+    if lock in (True, None):
         lock = RLock()
-    assert hasattr(lock, 'acquire')
+    if not hasattr(lock, 'acquire'):
+        raise AttributeError("'%r' has no method 'acquire'" % lock)
     return synchronized(obj, lock)
 
 def Array(typecode_or_type, size_or_initializer, **kwds):
@@ -82,9 +118,12 @@ def Array(typecode_or_type, size_or_initializer, **kwds):
     if kwds:
         raise ValueError('unrecognized keyword argument(s): %s' % kwds.keys())
     obj = RawArray(typecode_or_type, size_or_initializer)
-    if lock is None:
+    if lock is False:
+        return obj
+    if lock in (True, None):
         lock = RLock()
-    assert hasattr(lock, 'acquire')
+    if not hasattr(lock, 'acquire'):
+        raise AttributeError("'%r' has no method 'acquire'" % lock)
     return synchronized(obj, lock)
 
 def copy(obj):

@@ -103,13 +103,13 @@ public class SimpleJPATest extends UnitTest {
         User b = users.get(1);
         //
         assertEquals(a, User.find("name", "A").first());
-        assertEquals(a, User.find("name = ?", "A").first());
-        assertEquals(a, User.find("name=?", "A").first());
-        assertEquals(b, User.find("name = ? and c = ?", "B", true).first());
-        assertNull(User.find("name = ? and c = ?", "B", false).first());
-        assertEquals(a, User.find("name like ? and j = ?", "%A%", 45).first());
-        assertEquals(b, User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).first());
-        assertNull(User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("name = ?1", "A").first());
+        assertEquals(a, User.find("name=?1", "A").first());
+        assertEquals(b, User.find("name = ?1 and c = ?2", "B", true).first());
+        assertNull(User.find("name = ?1 and c = ?2", "B", false).first());
+        assertEquals(a, User.find("name like ?1 and j = ?2", "%A%", 45).first());
+        assertEquals(b, User.find("name like ?1 and b = ?2 and c = ?3 and l = ?4 and i = ?5", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("name like ?1 and b = ?2 and c = ?3 and l = ?4 and i = ?5", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("b is null").first());
         assertEquals(b, User.find("b is not null").first());
     }  
@@ -120,21 +120,21 @@ public class SimpleJPATest extends UnitTest {
         User a = users.get(0);
         User b = users.get(1);
         //
-        assertEquals(a, User.find("from User where name = ?", "A").first());
-        assertEquals(b, User.find("from User where  name = ? and c = ?", "B", true).first());
-        assertNull(User.find("from User where name = ? and c = ?", "B", false).first());
-        assertEquals(a, User.find("from User where name like ? and j = ?", "%A%", 45).first());
-        assertEquals(b, User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).first());
-        assertNull(User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("from User where name = ?1", "A").first());
+        assertEquals(b, User.find("from User where  name = ?1 and c = ?2", "B", true).first());
+        assertNull(User.find("from User where name = ?1 and c = ?2", "B", false).first());
+        assertEquals(a, User.find("from User where name like ?1 and j = ?2", "%A%", 45).first());
+        assertEquals(b, User.find("from User where name like ?1 and b = ?2 and c = ?3 and l = ?4 and i = ?5", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("from User where name like ?1 and b = ?2 and c = ?3 and l = ?4 and i = ?5", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("from User where b is null").first());
         assertEquals(b, User.find("from User where b is not null").first());
         
-        assertEquals(a, User.find("select u from User u where u.name = ?", "A").first());
-        assertEquals(b, User.find("select u from User u where u.name = ? and u.c = ?", "B", true).first());
-        assertNull(User.find("select u from User u where u.name = ? and u.c = ?", "B", false).first());
-        assertEquals(a, User.find("select u from User u where u.name like ? and u.j = ?", "%A%", 45).first());
-        assertEquals(b, User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 34).first());
-        assertNull(User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("select u from User u where u.name = ?1", "A").first());
+        assertEquals(b, User.find("select u from User u where u.name = ?1 and u.c = ?2", "B", true).first());
+        assertNull(User.find("select u from User u where u.name = ?1 and u.c = ?2", "B", false).first());
+        assertEquals(a, User.find("select u from User u where u.name like ?1 and u.j = ?2", "%A%", 45).first());
+        assertEquals(b, User.find("select u from User u where u.name like ?1 and u.b = ?2 and u.c = ?3 and u.l = ?4 and u.i = ?5", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("select u from User u where u.name like ?1 and u.b = ?2 and u.c = ?3 and u.l = ?4 and u.i = ?5", "%B%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("select u from User u where u.b is null").first());
         assertEquals(b, User.find("select u from User u where u.b is not null").first());
     } 
@@ -179,5 +179,39 @@ public class SimpleJPATest extends UnitTest {
 
     }
     
-}
+    /**
+     * Simple tests for {@link play.db.jpa.JPABase#equals()}.
+     */
+    @Test
+    public void testEquals() {
+        List<User> users = User.findAll();
+        User userA = users.get(0);
+        User userB = users.get(1);
+        
+        // Simple tests
+        assertFalse(userA.equals(null)); // null
+        assertTrue(userA.equals(userA)); // ref equals
+        assertFalse(userA.equals(userB)); // different objects
+        
+        // tests with objects that don't have a key set
+        User unsaved1 = new User("Unsaved user #1");
+        User unsaved2 = new User("Unsaved user #2");
+        assertTrue(unsaved1.equals(unsaved1)); // ref equals (always true)
+        assertFalse(unsaved1.equals(unsaved2)); // non-ref+no key
+        assertFalse(unsaved1.equals(userA));
+        assertFalse(userA.equals(unsaved1));
+        
+        // Test completely incompatible objects
+        assertFalse(userA.equals("This is a string, not a model object."));
 
+        // Test with array IDs
+        ArrayIdEntity a1 = new ArrayIdEntity("1", "2");
+        ArrayIdEntity a2 = new ArrayIdEntity("1", "2");
+        ArrayIdEntity b1 = new ArrayIdEntity("1", "X");
+        
+        assertTrue(a1.equals(a2)); // array key equals
+        assertFalse(a1.equals(b1)); // array key with one element difference
+        assertFalse(userA.equals(a1)); // compare scalar key to array key
+        assertFalse(a1.equals(userA)); // compare array key with scalar key
+    }
+}

@@ -3,6 +3,14 @@
 
 """Abstract Base Classes (ABCs) according to PEP 3119."""
 
+import types
+
+from _weakrefset import WeakSet
+
+# Instance of old-style class
+class _C: pass
+_InstanceType = type(_C())
+
 
 def abstractmethod(funcobj):
     """A decorator indicating abstract methods.
@@ -10,12 +18,13 @@ def abstractmethod(funcobj):
     Requires that the metaclass is ABCMeta or derived from it.  A
     class that has a metaclass derived from ABCMeta cannot be
     instantiated unless all of its abstract methods are overridden.
-    The abstract methods can be called using any of the the normal
+    The abstract methods can be called using any of the normal
     'super' call mechanisms.
 
     Usage:
 
-        class C(metaclass=ABCMeta):
+        class C:
+            __metaclass__ = ABCMeta
             @abstractmethod
             def my_abstract_method(self, ...):
                 ...
@@ -30,12 +39,13 @@ class abstractproperty(property):
     Requires that the metaclass is ABCMeta or derived from it.  A
     class that has a metaclass derived from ABCMeta cannot be
     instantiated unless all of its abstract properties are overridden.
-    The abstract properties can be called using any of the the normal
+    The abstract properties can be called using any of the normal
     'super' call mechanisms.
 
     Usage:
 
-        class C(metaclass=ABCMeta):
+        class C:
+            __metaclass__ = ABCMeta
             @abstractproperty
             def my_abstract_property(self):
                 ...
@@ -43,7 +53,8 @@ class abstractproperty(property):
     This defines a read-only property; you can also define a read-write
     abstract property using the 'long' form of property declaration:
 
-        class C(metaclass=ABCMeta):
+        class C:
+            __metaclass__ = ABCMeta
             def getx(self): ...
             def setx(self, value): ...
             x = abstractproperty(getx, setx)
@@ -85,15 +96,15 @@ class ABCMeta(type):
                     abstracts.add(name)
         cls.__abstractmethods__ = frozenset(abstracts)
         # Set up inheritance registry
-        cls._abc_registry = set()
-        cls._abc_cache = set()
-        cls._abc_negative_cache = set()
+        cls._abc_registry = WeakSet()
+        cls._abc_cache = WeakSet()
+        cls._abc_negative_cache = WeakSet()
         cls._abc_negative_cache_version = ABCMeta._abc_invalidation_counter
         return cls
 
     def register(cls, subclass):
         """Register a virtual subclass of an ABC."""
-        if not isinstance(cls, type):
+        if not isinstance(subclass, (type, types.ClassType)):
             raise TypeError("Can only register classes")
         if issubclass(subclass, cls):
             return  # Already a subclass
@@ -118,9 +129,12 @@ class ABCMeta(type):
         """Override for isinstance(instance, cls)."""
         # Inline the cache checking when it's simple.
         subclass = getattr(instance, '__class__', None)
-        if subclass in cls._abc_cache:
+        if subclass is not None and subclass in cls._abc_cache:
             return True
         subtype = type(instance)
+        # Old-style instances
+        if subtype is _InstanceType:
+            subtype = subclass
         if subtype is subclass or subclass is None:
             if (cls._abc_negative_cache_version ==
                 ABCMeta._abc_invalidation_counter and
@@ -139,7 +153,7 @@ class ABCMeta(type):
         # Check negative cache; may have to invalidate
         if cls._abc_negative_cache_version < ABCMeta._abc_invalidation_counter:
             # Invalidate the negative cache
-            cls._abc_negative_cache = set()
+            cls._abc_negative_cache = WeakSet()
             cls._abc_negative_cache_version = ABCMeta._abc_invalidation_counter
         elif subclass in cls._abc_negative_cache:
             return False

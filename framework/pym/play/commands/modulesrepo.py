@@ -30,6 +30,8 @@ HELP = {
 
 DEFAULT_REPO = 'https://www.playframework.com'
 
+DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
     mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
@@ -72,7 +74,6 @@ def get_repositories(play_base):
             return repos
     return [DEFAULT_REPO]
 
-
 class Downloader(object):
     before = .0
     history = []
@@ -86,8 +87,14 @@ class Downloader(object):
 
     def retrieve(self, url, destination, callback=None):
         self.size = 0
-        time.clock()
-        try: urllib.urlretrieve(url, destination, self.progress)
+        time.clock()   
+        try:
+          headers={'User-Agent':DEFAULT_USER_AGENT,
+                  'Accept': 'application/json'
+          } 
+          req = urllib2.Request(url, headers=headers)
+          result = urllib2.urlopen(req)
+          self.chunk_read(result, destination, report_hook=self.chunk_report)        
         except KeyboardInterrupt:
             print '\n~ Download cancelled'
             print '~'
@@ -103,14 +110,43 @@ class Downloader(object):
         print ''
         return self.size
 
-    def progress(self, blocks, blocksize, filesize):
+    def chunk_read(self, response, destination, chunk_size=8192, report_hook=None):
+        total_size = response.info().getheader('Content-Length').strip()
+        total_size = int(total_size)
+        bytes_so_far = 0
+        file = open(destination,"wb")
+
+        while 1:
+            chunk = response.read(chunk_size)
+            file.write(chunk)
+            bytes_so_far += len(chunk)
+
+            if not chunk:
+                break
+
+            if report_hook:
+                #report_hook(bytes_so_far, chunk_size, total_size)
+                self.progress(bytes_so_far, chunk_size, total_size)
+
+        return bytes_so_far
+        
+        
+    def chunk_report(self, bytes_so_far, chunk_size, total_size):
+      percent = float(bytes_so_far) / total_size
+      percent = round(percent*100, 2)
+      sys.stdout.write("Downloaded %d of %d bytes (%0.2f%%)\r" % (bytes_so_far, total_size, percent))
+      if bytes_so_far >= total_size:
+          sys.stdout.write('\n')
+
+        
+    def progress(self, bytes_so_far, blocksize, filesize):
         self.cycles += 1
-        bits = min(blocks*blocksize, filesize)
+        bits = min(bytes_so_far, filesize)
         if bits != filesize:
             done = self.proc(bits, filesize)
         else:
             done = 100
-        bar = self.bar(done)
+        bar = self.bar(bytes_so_far, filesize, done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
             elapsed = now-self.before
@@ -123,12 +159,11 @@ class Downloader(object):
         self.size = self.kibi(bits)
         print '\r~ [%s] %s KiB/s  ' % (bar, str(average)),
 
-    def bar(self, done):
+    def bar(self, bytes_so_far, filesize, done):
         span = self.width * done * 0.01
         offset = len(str(int(done))) - .99
-        result = ('%d%%' % (done,)).center(self.width)
+        result = ('%s of %s KiB (%d%%)' % (self.kibi(bytes_so_far), self.kibi(filesize), done,)).center(self.width)
         return result.replace(' ', '-', int(span - offset))
-
 
 class Unzip:
     def __init__(self, verbose = False, percent = 10):
@@ -431,6 +466,7 @@ def install(app, args, env):
 
     print '~'
     print '~ Fetching %s' % fetch
+
     Downloader().retrieve(fetch, archive)
 
     if not os.path.exists(archive):
@@ -527,13 +563,16 @@ def load_module_list(custom_server=None):
 def load_modules_from(modules_server):
     try:
         url = '%s/modules' % modules_server
-        req = urllib2.Request(url)
-        req.add_header('Accept', 'application/json')
+        headers={'User-Agent':DEFAULT_USER_AGENT,
+                'Accept': 'application/json'
+        } 
+        req = urllib2.Request(url, headers=headers)
         result = urllib2.urlopen(req)
         return json.loads(result.read())
     except urllib2.HTTPError, e:
         print "~ Oops,"
         print "~ Cannot fetch the modules list from %s (%s)..." % (url, e.code)
+        print e.reason
         print "~"
         sys.exit(-1)
     except urllib2.URLError, e:

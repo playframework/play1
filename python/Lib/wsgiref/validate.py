@@ -134,9 +134,9 @@ def validator(application):
     When applied between a WSGI server and a WSGI application, this
     middleware will check for WSGI compliancy on a number of levels.
     This middleware does not modify the request or response in any
-    way, but will throw an AssertionError if anything seems off
+    way, but will raise an AssertionError if anything seems off
     (except for a failure to close the application iterator, which
-    will be printed to stderr -- there's no way to throw an exception
+    will be printed to stderr -- there's no way to raise an exception
     at that point).
     """
 
@@ -329,7 +329,7 @@ def check_environ(environ):
 
     # @@: these need filling out:
     if environ['REQUEST_METHOD'] not in (
-        'GET', 'HEAD', 'POST', 'OPTIONS','PUT','DELETE','TRACE'):
+        'GET', 'HEAD', 'POST', 'OPTIONS', 'PATCH', 'PUT', 'DELETE', 'TRACE'):
         warnings.warn(
             "Unknown REQUEST_METHOD: %r" % environ['REQUEST_METHOD'],
             WSGIWarning)
@@ -345,7 +345,7 @@ def check_environ(environ):
             "Invalid CONTENT_LENGTH: %r" % environ['CONTENT_LENGTH'])
 
     if not environ.get('SCRIPT_NAME'):
-        assert_(environ.has_key('PATH_INFO'),
+        assert_('PATH_INFO' in environ,
             "One of SCRIPT_NAME or PATH_INFO are required (PATH_INFO "
             "should at least be '/' if SCRIPT_NAME is empty)")
     assert_(environ.get('SCRIPT_NAME') != '/',

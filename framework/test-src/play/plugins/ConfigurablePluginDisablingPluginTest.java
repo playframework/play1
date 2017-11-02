@@ -140,8 +140,7 @@ public class ConfigurablePluginDisablingPluginTest {
 
         new PlayBuilder().build();
         pc.loadPlugins();
-        PlayPlugin pi = pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class);
-        assertThat(pi).isInstanceOf(ConfigurablePluginDisablingPlugin.class);
+        ConfigurablePluginDisablingPlugin pi = pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class);
         assertThat(pc.getEnabledPlugins()).contains( pi );
     }
 
