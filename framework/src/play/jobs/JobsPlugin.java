@@ -171,6 +171,9 @@ public class JobsPlugin extends PlayPlugin {
 
     private Job<?> createJob(Class<?> clazz) throws InstantiationException, IllegalAccessException {
         Job<?> job = (Job<?>) Injector.getBeanOfType(clazz);
+        if (!job.getClass().equals(clazz)) {
+            throw new RuntimeException("Enhanced job are not allowed: " + clazz.getName() + " vs. " + job.getClass().getName());
+        }
         scheduledJobs.add(job);
         return job;
     }
