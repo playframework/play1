@@ -1,0 +1,50 @@
+h1. Play 1.5.0 -- Release notes
+
+Play 1.5.0 has been released of the master branch.
+
+The changes in this release are listed in the "Play 1.5.0 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/225445-150 on Lighthouse and "1.5.0 on github":https://github.com/playframework/play1/milestone/4?closed=1
+and "1.5.0 on github":https://github.com/playframework/play1/pulls?q=is%3Apr+milestone%3A1.5.0+is%3Aclosed
+including 101 resolved tickets. 
+
+
+h2. What's new in Play 1.5.0
+
+* "#1113":https://github.com/playframework/play1/issues/1113 : Upgrade Hibernate to 5.x
+* "#1100":https://github.com/playframework/play1/issues/1100 : Add support for non-static @Before and @After methods
+* "#1142":https://github.com/playframework/play1/issues/1142 : Make names of modules short (without version number)
+* "#994":https://github.com/playframework/play1/issues/994 : Use HikariCP instead of c3p0 connection pool improvement
+
+h2. What's fixed in Play 1.5.0
+
+* "#1162":https://github.com/playframework/play1/issues/1162 : Play should search play.plugins descriptor in application path
+* "#1145":https://github.com/playframework/play1/issues/1145), "#1126":https://github.com/playframework/play1/issues/1126 : Fix problem of module installation
+* "#1137":https://github.com/playframework/play1/issues/1137 : Make it possible to load plugins from single `play.plugins`
+* "#1115":https://github.com/playframework/play1/issues/1115 : Fix javadoc warning documentation
+* "#1112":https://github.com/playframework/play1/issues/1112 : Allow to limit the size of whole request or the size of one uploaded file in a request.
+* "#1111":https://github.com/playframework/play1/issues/1111 : Websockets documentation
+* "#1105":https://github.com/playframework/play1/issues/1105 : Play calls action method in parent class instead of child class
+* "#1103":https://github.com/playframework/play1/issues/1103 : Make it possible to exclude DocViewer in dev mode 
+* "#1097":https://github.com/playframework/play1/issues/1097 : Support for Java8 parameters instead of slow additional enhancement in LocalvariablesNamesEnhancer. 
+* "#1096":https://github.com/playframework/play1/issues/1096 : Drop support for java version prior to 1.8 documentation
+* "#1095":https://github.com/playframework/play1/issues/1095 : Allow custom implementation of base Controller 
+* "#1043":https://github.com/playframework/play1/issues/1043 : Use `-parameters` compiler option instead of enhancing classes
+* "#2122":https://play.lighthouseapp.com/projects/57987/tickets/2122 : FastTagsTest: Comparison Failure: differences only in line separators tests
+* "#2125":https://play.lighthouseapp.com/projects/57987/tickets/2125 : testLogLevelsAndLog4jConfig TIMEOUT waitFor 'I am a debug message' tests
+* "#2089":https://play.lighthouseapp.com/projects/57987/tickets/2089 : Upgrade dependencies dependencies libraries libs
+* "#2124":https://play.lighthouseapp.com/projects/57987/tickets/2124 : Import Error: No module named unittest pythons
+* "#1188":https://github.com/playframework/play1/pull/1188), [#2126":https://play.lighthouseapp.com/projects/57987/tickets/2126 : MessagesTest.class testMessageInAnotherLanguage test testing testrunner tests
+* "#2123":https://play.lighthouseapp.com/projects/57987/tickets/2123 : framework\build.xml:264: Execute failed: java.io.IOException: Cannot run program "python": CreateProcess error=2 python
+* "#2130":https://play.lighthouseapp.com/projects/57987/tickets/2130 : remove annoying log messages from autotest logs tests
+* "#2131":https://play.lighthouseapp.com/projects/57987/tickets/2131 : update travis for new worker test testing tests
+* "#2079":https://play.lighthouseapp.com/projects/57987/tickets/2079 : dependencies install on windows fails if yml defines source and target the same dependencies files
+* "#1191":https://github.com/playframework/play1/pull/1191 : Fix deps documentation
+* "#1190":https://github.com/playframework/play1/pull/1190 : create a default constructor for `play.mvc.results.Forbidden`
+* "#2123, #1187":https://github.com/playframework/play1/issues/2123 : Cannot run program "python": CreateProcess error=2
+* "#1180":https://github.com/playframework/play1/pull/1180 : Make it possible to change session store implementation
+* "#1159":https://github.com/playframework/play1/pull/1159), #2089":https://play.lighthouseapp.com/projects/57987/tickets/2089 : upgrade bouncycastle
+* "#1155":https://github.com/playframework/play1/pull/1155 : fix loaded entity classes in hibernate from #1114
+* "#1152":https://github.com/playframework/play1/pull/1152 :finds classes in precompiled folder too
+* "#1144":https://github.com/playframework/play1/pull/1144 , "#1142":https://github.com/playframework/play1/pull/1142 : use "application.statusKey" instead of "application.secret"
+* "#2121":https://play.lighthouseapp.com/projects/57987/tickets/2121 : JPABase.equals() invokes _key() before checking null/ref equality 
+* "#2120":https://play.lighthouseapp.com/projects/57987/tickets/2120 : Add support for (special) hibernate properties through application
+* "#1138":https://github.com/playframework/play1/pull/1138 : Make it possible to load plugins from single `play.plugins` file

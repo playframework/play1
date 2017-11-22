@@ -45,7 +45,7 @@ def execute(**kargs):
             http_port = int(app.readConf('http.port'))
             url = 'http://localhost:%s/@status' % http_port
         if not secret_key:
-            secret_key = app.readConf('application.secret')
+            secret_key = app.readConf('application.statusKey')
 
     hm = hmac.new(secret_key, '@status', sha)
     authorization = hm.hexdigest()

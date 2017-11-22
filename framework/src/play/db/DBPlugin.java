@@ -1,75 +1,35 @@
 package play.db;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import jregex.Matcher;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.db.DB.ExtendedDatasource;
+import play.exceptions.DatabaseException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-
-import org.apache.commons.lang.StringUtils;
-
-import jregex.Matcher;
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.exceptions.DatabaseException;
-import play.mvc.Http;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mchange.v2.c3p0.ConnectionCustomizer;
-
-import play.db.DB.ExtendedDatasource;
+import java.io.File;
+import java.sql.*;
+import java.util.*;
 
 public class DBPlugin extends PlayPlugin {
 
     public static String url = "";
-    org.h2.tools.Server h2Server;
-
-    @Override
-    public boolean rawInvocation(Request request, Response response) throws Exception {
-        if (Play.mode.isDev() && request.path.equals("/@db")) {
-            response.status = Http.StatusCode.FOUND;
-            String serverOptions[] = new String[] { };
-
-            // For H2 embedded database, we'll also start the Web console
-            if (h2Server != null) {
-                h2Server.stop();
-            }
-
-            String domain = request.domain;
-            if (domain.equals("")) {
-                domain = "localhost";
-            }
-
-            if (!domain.equals("localhost")) {
-                serverOptions = new String[] {"-webAllowOthers"};
-            }
-            
-            h2Server = org.h2.tools.Server.createWebServer(serverOptions);
-            h2Server.start();
-
-            response.setHeader("Location", "http://" + domain + ":8082/");
-            return true;
-        }
-        return false;
-    }
-
    
+    protected DataSourceFactory factory(Configuration dbConfig) {
+        String dbFactory = dbConfig.getProperty("db.factory", "play.db.hikaricp.HikariDataSourceFactory");
+        try {
+            return (DataSourceFactory) Class.forName(dbFactory).newInstance();
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException("Expected implementation of " + DataSourceFactory.class.getName() + 
+                ", but received: " + dbFactory);
+        }
+    }
+    
     @Override
     public void onApplicationStart() {
         if (changed()) {
@@ -134,53 +94,7 @@ public class DBPlugin extends PlayPlugin {
                             }
                         }
 
-                        ComboPooledDataSource ds = new ComboPooledDataSource();
-                        ds.setDriverClass(dbConfig.getProperty("db.driver"));
-                        ds.setJdbcUrl(dbConfig.getProperty("db.url"));
-                        ds.setUser(dbConfig.getProperty("db.user"));
-                        ds.setPassword(dbConfig.getProperty("db.pass"));
-                        ds.setAcquireIncrement(Integer.parseInt(dbConfig.getProperty("db.pool.acquireIncrement", "3")));
-                        ds.setAcquireRetryAttempts(Integer.parseInt(dbConfig.getProperty("db.pool.acquireRetryAttempts", "10")));
-                        ds.setAcquireRetryDelay(Integer.parseInt(dbConfig.getProperty("db.pool.acquireRetryDelay", "1000")));
-                        ds.setCheckoutTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.timeout", "5000")));
-                        ds.setBreakAfterAcquireFailure(Boolean.parseBoolean(dbConfig.getProperty("db.pool.breakAfterAcquireFailure", "false")));
-                        ds.setMaxPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.maxSize", "30")));
-                        ds.setMinPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.minSize", "1")));
-                        ds.setInitialPoolSize(Integer.parseInt(dbConfig.getProperty("db.pool.initialSize", "1")));
-                        ds.setMaxIdleTimeExcessConnections(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleTimeExcessConnections", "0")));
-                        ds.setIdleConnectionTestPeriod(Integer.parseInt(dbConfig.getProperty("db.pool.idleConnectionTestPeriod", "10")));
-                        ds.setMaxIdleTime(Integer.parseInt(dbConfig.getProperty("db.pool.maxIdleTime", "0")));
-                        ds.setTestConnectionOnCheckin(Boolean.parseBoolean(dbConfig.getProperty("db.pool.testConnectionOnCheckin", "true")));
-                        ds.setTestConnectionOnCheckout(Boolean.parseBoolean(dbConfig.getProperty("db.pool.testConnectionOnCheckout", "false")));
-                        ds.setLoginTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.loginTimeout", "0")));
-                        ds.setMaxAdministrativeTaskTime(Integer.parseInt(dbConfig.getProperty("db.pool.maxAdministrativeTaskTime", "0")));
-                        ds.setMaxConnectionAge(Integer.parseInt(dbConfig.getProperty("db.pool.maxConnectionAge", "0")));
-                        ds.setMaxStatements(Integer.parseInt(dbConfig.getProperty("db.pool.maxStatements", "0")));
-                        ds.setMaxStatementsPerConnection(Integer.parseInt(dbConfig.getProperty("db.pool.maxStatementsPerConnection", "0")));
-                        ds.setNumHelperThreads(Integer.parseInt(dbConfig.getProperty("db.pool.numHelperThreads", "3")));
-                        ds.setUnreturnedConnectionTimeout(Integer.parseInt(dbConfig.getProperty("db.pool.unreturnedConnectionTimeout", "0")));
-                        ds.setDebugUnreturnedConnectionStackTraces(Boolean.parseBoolean(dbConfig.getProperty("db.pool.debugUnreturnedConnectionStackTraces", "false")));
-                        ds.setContextClassLoaderSource("library");
-                        ds.setPrivilegeSpawnedThreads(true);
-
-                        if (dbConfig.getProperty("db.testquery") != null) {
-                            ds.setPreferredTestQuery(dbConfig.getProperty("db.testquery"));
-                        } else {
-                            String driverClass = dbConfig.getProperty("db.driver");
-                            /*
-                             * Pulled from http://dev.mysql.com/doc/refman/5.5/en/connector-j-usagenotes-j2ee-concepts-connection-pooling.html
-                             * Yes, the select 1 also needs to be in there.
-                             */
-                            if (driverClass.equals("com.mysql.jdbc.Driver")) {
-                                ds.setPreferredTestQuery("/* ping */ SELECT 1");
-                            }
-                        }
-
-                        // This check is not required, but here to make it clear that nothing changes for people
-                        // that don't set this configuration property. It may be safely removed.
-                        if(dbConfig.getProperty("db.isolation") != null) {
-                            ds.setConnectionCustomizerClassName(play.db.DBPlugin.PlayConnectionCustomizer.class.getName());
-                        }
+                        DataSource ds = factory(dbConfig).createDataSource(dbConfig);
                        
                         // Current datasource. This is actually deprecated. 
                         String destroyMethod = dbConfig.getProperty("db.destroyMethod", "");
@@ -189,16 +103,8 @@ public class DBPlugin extends PlayPlugin {
 
                         DB.ExtendedDatasource extDs = new DB.ExtendedDatasource(ds, destroyMethod);
 
-                        url = ds.getJdbcUrl();
-                        Connection c = null;
-                        try {
-                            c = ds.getConnection();
-                        } finally {
-                            if (c != null) {
-                                c.close();
-                            }
-                        }
-                        Logger.info("Connected to %s for %s", ds.getJdbcUrl(), dbName);
+                        url = testDataSource(ds);
+                        Logger.info("Connected to %s for %s", url, dbName);
                         DB.datasources.put(dbName, extDs);
                     }
                 }
@@ -214,53 +120,19 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
+    protected String testDataSource(DataSource ds) throws SQLException {
+        try (Connection connection = ds.getConnection()) {
+            return connection.getMetaData().getURL();
+        }
+    }
+    
     @Override
     public void onApplicationStop() {
         if (Play.mode.isProd()) {
             DB.destroyAll();
         }
     }
-
-    @Override
-    public String getStatus() {
-        StringWriter sw = new StringWriter();
-        PrintWriter out = new PrintWriter(sw);     
-        Set<String> dbNames = Configuration.getDbNames();
-               
-        for (String dbName : dbNames) {
-            DataSource ds = DB.getDataSource(dbName);
-            if (ds == null || !(ds instanceof ComboPooledDataSource)) {
-                out.println("Datasource:");
-                out.println("~~~~~~~~~~~");
-                out.println("(not yet connected)");
-                return sw.toString();
-            }
-            ComboPooledDataSource datasource = (ComboPooledDataSource) ds;
-            out.println("Datasource (" + dbName + "):");
-            out.println("~~~~~~~~~~~");
-            out.println("Jdbc url: " + datasource.getJdbcUrl());
-            out.println("Jdbc driver: " + datasource.getDriverClass());
-            out.println("Jdbc user: " + datasource.getUser());
-            if (Play.mode.isDev()) {
-              out.println("Jdbc password: " + datasource.getPassword());
-            }
-            out.println("Min pool size: " + datasource.getMinPoolSize());
-            out.println("Max pool size: " + datasource.getMaxPoolSize());
-            try {
-                out.println("Busy connection numbers: " + datasource.getNumBusyConnections());
-                out.println("Idle connection numbers: " + datasource.getNumIdleConnections());
-                out.println("Connection numbers: " + datasource.getNumConnections());
-            } catch (SQLException e) {
-                out.println("Connection status error: " + e.getMessage());
-            }
-            out.println("Initial pool size: " + datasource.getInitialPoolSize());
-            out.println("Checkout timeout: " + datasource.getCheckoutTimeout());
-            out.println("Test query : " + datasource.getPreferredTestQuery());
-            out.println("\r\n");
-        }
-        return sw.toString();
-    }
-
+    
     @Override
     public void invocationFinally() {
         DB.closeAll();
@@ -272,7 +144,7 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
-    private static boolean changed() {
+    private boolean changed() {
         Set<String> dbNames = Configuration.getDbNames();
         
         for (String dbName : dbNames) {
@@ -358,17 +230,15 @@ public class DBPlugin extends PlayPlugin {
             if (ds == null) {
                 return true;
             } else {
-                ComboPooledDataSource cds = (ComboPooledDataSource) ds;
-                if (!dbConfig.getProperty("db.driver").equals(cds.getDriverClass())) {
+                DataSourceFactory factory = factory(dbConfig);
+                
+                if (!dbConfig.getProperty("db.driver").equals(factory.getDriverClass(ds))) {
                     return true;
                 }
-                if (!dbConfig.getProperty("db.url").equals(cds.getJdbcUrl())) {
+                if (!dbConfig.getProperty("db.url").equals(factory.getJdbcUrl(ds))) {
                     return true;
                 }
-                if (!dbConfig.getProperty("db.user", "").equals(cds.getUser())) {
-                    return true;
-                }
-                if (!dbConfig.getProperty("db.pass", "").equals(cds.getPassword())) {
+                if (!dbConfig.getProperty("db.user", "").equals(factory.getUser(ds))) {
                     return true;
                 }
             }
@@ -381,7 +251,7 @@ public class DBPlugin extends PlayPlugin {
         }
         return false;
     }
-    
+
     private static void addParameters(Map<String, String> paramsMap, String urlQuery) {
         if (!StringUtils.isBlank(urlQuery)) {
             String[] params = urlQuery.split("[\\&]");
@@ -453,63 +323,6 @@ public class DBPlugin extends PlayPlugin {
                 return (java.util.logging.Logger) Driver.class.getDeclaredMethod("getParentLogger").invoke(this.driver);
             } catch (Throwable e) {
                 return null;
-            }
-        }
-    }
-
-    public static class PlayConnectionCustomizer implements ConnectionCustomizer {
-
-        public static Map<String, Integer> isolationLevels;
-
-        static {
-            isolationLevels = new HashMap<>();
-            isolationLevels.put("NONE", Connection.TRANSACTION_NONE);
-            isolationLevels.put("READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED);
-            isolationLevels.put("READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED);
-            isolationLevels.put("REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ);
-            isolationLevels.put("SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE);
-        }
-
-        @Override
-        public void onAcquire(Connection c, String parentDataSourceIdentityToken) {
-            Integer isolation = getIsolationLevel();
-            if (isolation != null) {
-                try {
-                    Logger.trace("Setting connection isolation level to %s", isolation);
-                    c.setTransactionIsolation(isolation);
-                } catch (SQLException e) {
-                    throw new DatabaseException("Failed to set isolation level to " + isolation, e);
-                }
-            }
-        }
-
-        @Override
-        public void onDestroy(Connection c, String parentDataSourceIdentityToken) {}
-
-        @Override
-        public void onCheckOut(Connection c, String parentDataSourceIdentityToken) {}
-
-        @Override
-        public void onCheckIn(Connection c, String parentDataSourceIdentityToken) {}
-
-        /**
-         * Get the isolation level from either the isolationLevels map, or by
-         * parsing into an int.
-         */
-        private Integer getIsolationLevel() {
-            String isolation = Play.configuration.getProperty("db.isolation");
-            if (isolation == null) {
-                return null;
-            }
-            Integer level = isolationLevels.get(isolation);
-            if (level != null) {
-                return level;
-            }
-
-            try {
-                return Integer.valueOf(isolation);
-            } catch (NumberFormatException e) {
-                throw new DatabaseException("Invalid isolation level configuration" + isolation, e);
             }
         }
     }
