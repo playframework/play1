@@ -31,6 +31,7 @@ import com.ning.http.client.multipart.StringPart;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.libs.F.Action;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -399,6 +400,31 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response newResponse() {
         Response response = new Response();
         response.out = new ByteArrayOutputStream();
+
+        // Register an onWriteChunk action so that Response.writeChunk() won't throw
+        // an unhandled exception if the controller action calls it.
+        response.onWriteChunk(
+            new Action<Object>() {
+                @Override
+                public void invoke(Object chunk) {
+                    // Mimic the behavior of PlayHandler$LazyChunkedInput.writeChunk()
+                    if (chunk != null) {
+                        try {
+                            byte[] bytes;
+                            if (chunk instanceof byte[]) {
+                                bytes = (byte[]) chunk;
+                            } else {
+                                bytes = chunk.toString().getBytes(response.encoding);
+                            }
+                            response.out.write(bytes);
+                        } catch (Exception exception) {
+                            // Something is wrong with the chunk.
+                            throw new RuntimeException(exception);
+                        }
+                    }
+                }
+            });
+
         return response;
     }
 
