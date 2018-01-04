@@ -126,5 +126,18 @@ public class FunctionalTestTest extends FunctionalTest {
 	Response response = GET("http://localhost:9003/public/session.test?req=1");
 	assertIsOk(response);
     }
+
+    /**
+     * This is a regression test for [#2140], which is a bug in FunctionalTest that prevented it from
+     * testing a controller action that uses {@link Response#writeChunk(Object)}.
+     */
+    @Test
+    public void testWriteChunks() {
+        Response response = GET("/application/writeChunks");
+        assertTrue(response.chunked);
+        assertIsOk(response);
+        assertContentType("text/plain", response);
+        assertContentEquals("abcæøåæøå", response);
+    }
 }
 
