@@ -914,7 +914,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         return false;
                     }
                 } catch (ParseException ex) {
-                    Logger.warn("Can't parse HTTP date", ex);
+                    Logger.warn(ex, "Can't parse HTTP date");
                 }
                 return true;
             }
