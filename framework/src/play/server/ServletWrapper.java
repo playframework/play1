@@ -20,6 +20,7 @@ import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
+import play.utils.HTTP;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 
@@ -34,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.*;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -198,7 +198,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     long last = file.lastModified();
                     String etag = "\"" + last + "-" + file.hashCode() + "\"";
                     String lastDate = Utils.getHttpDateFormatter().format(new Date(last));
-                    if (!isModified(etag, lastDate, servletRequest)) {
+                    if (!isModified(etag, last, servletRequest)) {
                         servletResponse.setHeader("Etag", etag);
                         servletResponse.setStatus(304);
                     } else {
@@ -212,38 +212,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
-    public static boolean isModified(String etag, String lastDate,
-            HttpServletRequest request) {
-        // See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
+    public static boolean isModified(String etag, long last, HttpServletRequest request) {
         String browserEtag = request.getHeader(IF_NONE_MATCH);
         String dateString = request.getHeader(IF_MODIFIED_SINCE);
-        if (browserEtag != null) {
-            boolean etagMatches = browserEtag.equals(etag);
-            if (!etagMatches) {
-                return true;
-            }
-            if (dateString != null) {
-                return !isValidTimeStamp(lastDate, dateString);
-            }
-            return false;
-        } else {
-            if (dateString != null) {
-                return !isValidTimeStamp(lastDate, dateString);
-            } else {
-                return true;
-            }
-        }
-    }
-
-    private static boolean isValidTimeStamp(String lastDateString, String dateString) {
-        try {
-            long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
-            long lastDate = Utils.getHttpDateFormatter().parse(lastDateString).getTime();
-            return browserDate >= lastDate;
-        } catch (ParseException e) {
-            Logger.error("Can't parse date", e);
-            return false;
-        }
+        return HTTP.isModified(etag, last, browserEtag, dateString);
     }
 
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {

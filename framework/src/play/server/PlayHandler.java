@@ -1,7 +1,6 @@
 package play.server;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -45,7 +44,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -894,32 +892,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
+
     public static boolean isModified(String etag, long last, HttpRequest nettyRequest) {
-
-        if (nettyRequest.headers().contains(IF_NONE_MATCH)) {
-            String browserEtag = nettyRequest.headers().get(IF_NONE_MATCH);
-            if (browserEtag.equals(etag)) {
-                return false;
-            }
-            return true;
-        }
-
-        if (nettyRequest.headers().contains(IF_MODIFIED_SINCE)) {
-            String ifModifiedSince = nettyRequest.headers().get(IF_MODIFIED_SINCE);
-
-            if (!StringUtils.isEmpty(ifModifiedSince)) {
-                try {
-                    Date browserDate = Utils.getHttpDateFormatter().parse(ifModifiedSince);
-                    if (browserDate.getTime() >= last) {
-                        return false;
-                    }
-                } catch (ParseException ex) {
-                    Logger.warn(ex, "Can't parse HTTP date");
-                }
-                return true;
-            }
-        }
-        return true;
+        String browserEtag = nettyRequest.headers().get(IF_NONE_MATCH);
+        String ifModifiedSince = nettyRequest.headers().get(IF_MODIFIED_SINCE);
+        return HTTP.isModified(etag, last, browserEtag, ifModifiedSince);
     }
 
     private static HttpResponse addEtag(HttpRequest nettyRequest, HttpResponse httpResponse, File file) {
