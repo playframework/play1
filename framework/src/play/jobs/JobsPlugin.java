@@ -192,7 +192,7 @@ public class JobsPlugin extends PlayPlugin {
         }
         String cron = job.getClass().getAnnotation(On.class).value();
         if (cron.startsWith("cron.")) {
-            cron = Play.configuration.getProperty(cron);
+            cron = Play.configuration.getProperty(cron, "");
         }
         cron = Expression.evaluate(cron, cron).toString();
         if (cron == null || cron.isEmpty() || "never".equalsIgnoreCase(cron)) {
