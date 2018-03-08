@@ -238,34 +238,39 @@ public class ApplicationClassloader extends ClassLoader {
                 return res.inputstream();
             }
         }
-        URL url = this.getResource(name);
-        if (url != null) {
-            try {
-                File file = new File(url.toURI());
-                String fileName = file.getCanonicalFile().getName();
-                if (!name.endsWith(fileName)) {
-                    return null;
-                }
-            } catch (Exception e) {
-            }
-        }
+        URL url = getResource(name);
 
         return super.getResourceAsStream(name);
     }
 
     @Override
     public URL getResource(String name) {
-            for (VirtualFile vf : Play.javaPath) {
-                VirtualFile res = vf.child(name);
-                if (res != null && res.exists()) {
+        URL url = null;
+        for (VirtualFile vf : Play.javaPath) {
+            VirtualFile res = vf.child(name);
+            if (res != null && res.exists()) {
                 try {
-                    return res.getRealFile().toURI().toURL();
-        } catch (MalformedURLException ex) {
-            throw new UnexpectedException(ex);
-        }
+                    url = res.getRealFile().toURI().toURL();
+                    break;
+                } catch (MalformedURLException ex) {
+                    throw new UnexpectedException(ex);
+                }
             }
         }
-        return super.getResource(name);
+        if (url == null) {
+            url = super.getResource(name);
+            if (url != null) {
+                try {
+                    File file = new File(url.toURI());
+                    String fileName = file.getCanonicalFile().getName();
+                    if (!name.endsWith(fileName)) {
+                        url = null;
+                    }
+                } catch (Exception ignore) {
+                }
+            }
+        }
+        return url;
     }
 
     @Override
