@@ -432,7 +432,7 @@ public class Router {
         ActionDefinition actionDefinition = reverse(action, args);
         String base = getBaseUrl();
         if (actionDefinition.method.equals("WS")) {
-            return base.replaceFirst("https?", "ws") + actionDefinition;
+            return base.replaceFirst("http:", "ws:").replaceFirst("https:", "wss:") + actionDefinition;
         }
         return base + actionDefinition;
     }
@@ -790,7 +790,7 @@ public class Router {
                     url = (isSecure ? "https://" : "http://") + hostPart + url;
                 }
                 if (method.equals("WS")) {
-                    url = url.replaceFirst("https?", "ws");
+                    url = isSecure ? url.replaceFirst("https:", "wss:") : url.replaceFirst("http:", "ws:");
                 }
             }
         }
