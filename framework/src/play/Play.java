@@ -48,7 +48,8 @@ public class Play {
     public enum Mode {
 
         /**
-         * Enable development-specific features, e.g. view the documentation at the URL {@literal "/@documentation"}.
+         * Enable development-specific features, e.g. view the documentation at the URL
+         * {@literal "/@documentation"}.
          */
         DEV,
         /**
@@ -155,8 +156,9 @@ public class Play {
      */
     public static PluginCollection pluginCollection = new PluginCollection();
     /**
-     * Readonly list containing currently enabled plugins. This list is updated from pluginCollection when
-     * pluginCollection is modified Play plugins Use pluginCollection instead.
+     * Readonly list containing currently enabled plugins. This list is updated from
+     * pluginCollection when pluginCollection is modified Play plugins Use
+     * pluginCollection instead.
      */
     @Deprecated
     public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
@@ -181,12 +183,14 @@ public class Play {
     public static boolean lazyLoadTemplates = false;
 
     /**
-     * This is used as default encoding everywhere related to the web: request, response, WS
+     * This is used as default encoding everywhere related to the web: request,
+     * response, WS
      */
     public static String defaultWebEncoding = "utf-8";
 
     /**
-     * This flag indicates if the app is running in a standalone Play server or as a WAR in an applicationServer
+     * This flag indicates if the app is running in a standalone Play server or as a
+     * WAR in an applicationServer
      */
     public static boolean standalonePlayServer = true;
 
@@ -281,7 +285,8 @@ public class Play {
 
         // Build basic templates path
         templatesPath.clear();
-        if (appRoot.child("app/views").exists() || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
+        if (appRoot.child("app/views").exists()
+                || (usePrecompiled && appRoot.child("precompiled/templates/app/views").exists())) {
             templatesPath.add(appRoot.child("app/views"));
         }
 
@@ -342,7 +347,8 @@ public class Play {
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
             if (frameworkPath == null || !frameworkPath.exists()) {
                 if (uri.getScheme().equals("jar")) {
-                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                    String jarPath = uri.getSchemeSpecificPart().substring(5,
+                            uri.getSchemeSpecificPart().lastIndexOf("!"));
                     frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
                 } else if (uri.getScheme().equals("file")) {
                     frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
@@ -473,7 +479,8 @@ public class Play {
                 // Can only register shutdown-hook if running as standalone server
                 if (!shutdownHookEnabled) {
                     // registers shutdown hook - Now there's a good chance that we can notify
-                    // our plugins that we're going down when some calls ctrl+c or just kills our process..
+                    // our plugins that we're going down when some calls ctrl+c or just kills our
+                    // process..
                     shutdownHookEnabled = true;
                     Thread hook = new Thread() {
                         @Override
@@ -505,7 +512,8 @@ public class Play {
             if (!Logger.configuredManually) {
                 Logger.setUp(logLevel);
             }
-            Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
+            Logger.recordCaller = Boolean
+                    .parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
             // Locales
             langs = new ArrayList<>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
@@ -710,14 +718,16 @@ public class Play {
     }
 
     /**
-     * Load all modules. You can even specify the list using the MODULES environment variable.
+     * Load all modules. You can even specify the list using the MODULES environment
+     * variable.
      */
     public static void loadModules() {
         loadModules(VirtualFile.open(applicationPath));
     }
 
     /**
-     * Load all modules. You can even specify the list using the MODULES environment variable.
+     * Load all modules. You can even specify the list using the MODULES environment
+     * variable.
      * 
      * @param appRoot
      *            the application path virtual file
@@ -734,7 +744,8 @@ public class Play {
                                 modulePath.getAbsolutePath());
                     } else {
                         String modulePathName = modulePath.getName();
-                        String moduleName = modulePathName.contains("-") ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
+                        String moduleName = modulePathName.contains("-")
+                                ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
                                 : modulePathName;
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -742,7 +753,8 @@ public class Play {
             }
         }
 
-        // Load modules from modules/ directory, but get the order from the dependencies.yml file
+        // Load modules from modules/ directory, but get the order from the
+        // dependencies.yml file
         // .listFiles() returns items in an OS dependant sequence, which is bad
         // See #781
         // the yaml parser wants play.version as an environment variable
@@ -757,7 +769,8 @@ public class Play {
                 DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
                 modules = dm.retrieveModules();
             } catch (Exception e) {
-                Logger.error("There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)",
+                Logger.error(
+                        "There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)",
                         e);
                 // Load module without considering the dependencies.yml order
                 modules.addAll(Arrays.asList(localModules.list()));
@@ -773,13 +786,15 @@ public class Play {
                 }
 
                 if (module == null || !module.exists()) {
-                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, module.getAbsolutePath());
+                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName,
+                            module.getAbsolutePath());
                 } else if (module.isDirectory()) {
                     addModule(appRoot, moduleName, module);
                 } else {
                     File modulePath = new File(IO.readContentAsString(module).trim());
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
-                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName,
+                                modulePath.getAbsolutePath());
                     } else {
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -788,7 +803,7 @@ public class Play {
         }
 
         // Auto add special modules
-        if (Play.runingInTestMode()) {
+        if (Play.runningInTestMode()) {
             addModule(appRoot, "_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
     }
@@ -821,12 +836,12 @@ public class Play {
         if (root.child("app").exists()) {
             javaPath.add(root.child("app"));
         }
-        if (root.child("app/views").exists()
-                || (usePrecompiled && appRoot.child("precompiled/templates/from_module_" + name + "/app/views").exists())) {
+        if (root.child("app/views").exists() || (usePrecompiled
+                && appRoot.child("precompiled/templates/from_module_" + name + "/app/views").exists())) {
             templatesPath.add(root.child("app/views"));
         }
-        if (root.child("conf/routes").exists()
-                || (usePrecompiled && appRoot.child("precompiled/templates/from_module_" + name + "/conf/routes").exists())) {
+        if (root.child("conf/routes").exists() || (usePrecompiled
+                && appRoot.child("precompiled/templates/from_module_" + name + "/conf/routes").exists())) {
             modulesRoutes.put(name, root.child("conf/routes"));
         }
         roots.add(root);
@@ -858,18 +873,21 @@ public class Play {
     }
 
     /**
-     * Returns true if application is runing in test-mode. Test-mode is resolved from the framework id.
+     * Returns true if application is running in test-mode. Test-mode is resolved
+     * from the framework id.
      *
-     * Your app is running in test-mode if the framwork id (Play.id) is 'test' or 'test-?.*'
+     * Your app is running in test-mode if the framework id (Play.id) is 'test' or
+     * 'test-?.*'
      * 
-     * @return true if testmode
+     * @return true if test mode
      */
-    public static boolean runingInTestMode() {
+    public static boolean runningInTestMode() {
         return id.matches("test|test-?.*");
     }
 
     /**
-     * Call this method when there has been a fatal error that Play cannot recover from
+     * Call this method when there has been a fatal error that Play cannot recover
+     * from
      */
     public static void fatalServerErrorOccurred() {
         if (standalonePlayServer) {

@@ -124,7 +124,7 @@ public class Server {
             Logger.error("Could not bind on port " + httpsPort, e);
             Play.fatalServerErrorOccurred();
         }
-        if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
+        if (Play.mode == Mode.DEV || Play.runningInTestMode()) {
            // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
            System.out.println("~ Server is up and running");
         }
