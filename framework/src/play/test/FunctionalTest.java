@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
@@ -31,6 +32,7 @@ import com.ning.http.client.multipart.StringPart;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.exceptions.UnexpectedException;
 import play.libs.F.Action;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
@@ -39,6 +41,7 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.RenderArgs;
+import play.mvc.results.NotFound;
 
 /**
  * Application tests support
@@ -310,7 +313,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         final CountDownLatch actionCompleted = new CountDownLatch(1);
-        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        Future<?> task = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
             public void execute() throws Exception {
@@ -355,6 +358,16 @@ public abstract class FunctionalTest extends BaseTest {
         try {
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
+            }
+            // If the action could not be resolved and a NotFound result was thrown then apply it to the response
+            if (request.actionMethod == null) {
+                try {
+                    task.get();
+                } catch (Exception e) {
+                    if (e.getCause() instanceof UnexpectedException && e.getCause().getCause() instanceof NotFound) {
+                        ((NotFound) e.getCause().getCause()).apply(request, response);
+                    }
+                }
             }
             if (savedCookies == null) {
                 savedCookies = new HashMap<>();
