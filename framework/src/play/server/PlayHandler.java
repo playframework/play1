@@ -19,7 +19,6 @@ import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
-import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -199,13 +198,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             Request.current.set(request);
             Response.current.set(response);
-
-            Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(null);
-            Scope.RouteArgs.current.set(null);
-            Scope.Session.current.set(null);
-            Scope.Flash.current.set(null);
-            CachedBoundActionMethodArgs.init();
 
             try {
                 if (Play.mode == Play.Mode.DEV) {
