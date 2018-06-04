@@ -1,65 +1,59 @@
 package play.server;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Date;
-
-import play.utils.Utils;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ServletWrapperTest {
     private String browserEtag;
     private String browserLastModified;
+    private long lastModified;
 
     @Before
     public void setUp() {
         browserEtag = "\"1299752290000-1192808478\"";
         browserLastModified = "Thu, 10 Mar 2011 10:18:10 GMT";
+        lastModified = 1299752290000L;
     }
 
     @Test
     public void isNotModifiedHTTP11ClientTest() {
-        assertFalse(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
-                new HttpServletStub(createHeaderMap())));
+        assertFalse(ServletWrapper.isModified(browserEtag, lastModified, new HttpServletStub(createHeaderMap())));
     }
 
     @Test
     public void isNotModifiedHTTP10ClientTest() {
         HashMap<String, String> headers = createHeaderMap();
         headers.remove(ServletWrapper.IF_NONE_MATCH);
-        assertFalse(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
-                new HttpServletStub(headers)));
+        assertFalse(ServletWrapper.isModified(browserEtag, 0, new HttpServletStub(headers)));
+        assertFalse(ServletWrapper.isModified(browserEtag, lastModified, new HttpServletStub(headers)));
     }
 
     @Test
     public void isModifiedHTTP10ClientTest() {
         HashMap<String, String> headers = createHeaderMap();
         headers.remove(ServletWrapper.IF_NONE_MATCH);
-        assertTrue(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(Long.MAX_VALUE)),
-                new HttpServletStub(headers)));
+        assertTrue(ServletWrapper.isModified(browserEtag, Long.MAX_VALUE, new HttpServletStub(headers)));
     }
 
     @Test
     public void browserHasNoCache() {
-        assertTrue(ServletWrapper.isModified(browserEtag, Utils.getHttpDateFormatter().format(new Date(0)),
-                new HttpServletStub(new HashMap<String, String>())));
+        assertTrue(ServletWrapper.isModified(browserEtag, lastModified, new HttpServletStub(new HashMap<>())));
     }
 
     private HashMap<String, String> createHeaderMap() {
@@ -357,8 +351,7 @@ public class ServletWrapperTest {
         }
 
         @Override
-        public void setCharacterEncoding(String arg0)
-                throws UnsupportedEncodingException {
+        public void setCharacterEncoding(String arg0) {
             throw new RuntimeException("Method not implemented");
         }
 

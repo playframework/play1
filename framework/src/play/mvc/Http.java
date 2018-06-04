@@ -606,20 +606,7 @@ public class Http {
             if (!(headers.containsKey("if-none-match") && headers.containsKey("if-modified-since"))) {
                 return true;
             } else {
-                String browserEtag = headers.get("if-none-match").value();
-                if (!browserEtag.equals(etag)) {
-                    return true;
-                } else {
-                    try {
-                        Date browserDate = Utils.getHttpDateFormatter().parse(headers.get("if-modified-since").value());
-                        if (browserDate.getTime() >= last) {
-                            return false;
-                        }
-                    } catch (ParseException ex) {
-                        Logger.error("Can't parse date", ex);
-                    }
-                    return true;
-                }
+                return HTTP.isModified(etag, last, headers.get("if-none-match").value(), headers.get("if-modified-since").value());
             }
         }
     }
