@@ -7,7 +7,7 @@ import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.results.WebSocketDisconnect;
 
-public class WebSocketController implements ControllerSupport, LocalVariablesSupport {
+public class WebSocketController implements ControllerSupport, LocalVariablesSupport, PlayController {
 
     protected static Http.Request request = null;
     protected static Http.Inbound inbound = null;
