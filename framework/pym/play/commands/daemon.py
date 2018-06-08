@@ -1,4 +1,6 @@
+import errno
 import os, os.path
+import signal
 import subprocess
 from play.utils import *
 import time
@@ -148,11 +150,30 @@ def kill(pid):
             sys.exit(-1)
     else:
         try:
-            os.kill(int(pid), 15)
+            _terminate_unix_process_if_exists(int(pid))
         except OSError:
             print "~ Play was not running (Process id %s not found)" % pid
             print "~"
             sys.exit(-1)
+
+
+def _terminate_unix_process_if_exists(pid_to_terminate):
+    os.kill(pid_to_terminate, signal.SIGTERM)
+
+    try:
+        os.waitpid(pid_to_terminate, 0)
+
+    except OSError as error:
+        message_format = (
+            "~ Failed to wait for process {} to finish after requesting "
+            "termination\n~")
+        message = message_format.format(pid_to_terminate)
+
+        # If the child process managed to terminate itself before Play started
+        # waiting for it, that's OK.
+        if error.errno != errno.ECHILD:
+            print(message)
+
 
 def process_running(pid):
 	if os.name == 'nt':
