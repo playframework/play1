@@ -162,16 +162,15 @@ def _terminate_unix_process_if_exists(pid_to_terminate):
 
     try:
         os.waitpid(pid_to_terminate, 0)
-
     except OSError as error:
-        message_format = (
-            "~ Failed to wait for process {} to finish after requesting "
-            "termination\n~")
-        message = message_format.format(pid_to_terminate)
 
         # If the child process managed to terminate itself before Play started
         # waiting for it, that's OK.
         if error.errno != errno.ECHILD:
+            message_format = (
+                "~ Failed to wait for process {} to finish after requesting "
+                "termination\n~")
+            message = message_format.format(pid_to_terminate)
             print(message)
 
 
