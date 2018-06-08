@@ -1,50 +1,49 @@
 package play.templates;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.Collections;
 
 import play.Logger;
 import play.Play;
-import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
+import play.vfs.VirtualFile;
 
-/**
- * Load templates
- */
 public class TemplateLoader {
 
-    protected static Map<String, BaseTemplate> templates = new HashMap<String, BaseTemplate>();
+    protected static Map<String, BaseTemplate> templates = new HashMap<>();
     /**
      * See getUniqueNumberForTemplateFile() for more info
      */
-    private static AtomicLong nextUniqueNumber = new AtomicLong(1000);//we start on 1000
+    private static AtomicLong nextUniqueNumber = new AtomicLong(1000);// we start on 1000
     private static Map<String, String> templateFile2UniqueNumber = Collections.synchronizedMap(new HashMap<String, String>());
 
     /**
-     * All loaded templates is cached in the templates-list using a key.
-     * This key is included as part of the classname for the generated class for a specific template.
-     * The key is included in the classname to make it possible to resolve the original template-file
-     * from the classname, when creating cleanStackTrace
+     * All loaded templates is cached in the templates-list using a key. This key is included as part of the classname
+     * for the generated class for a specific template. The key is included in the classname to make it possible to
+     * resolve the original template-file from the classname, when creating cleanStackTrace
      *
      * This method returns a unique representation of the path which is usable as part of a classname
      *
      * @param path
+     *            Path of the template file
      * @return a unique representation of the path which is usable as part of a classname
      */
     public static String getUniqueNumberForTemplateFile(String path) {
-        //a path cannot be a valid classname so we have to convert it somehow.
-        //If we did some encoding on the path, the result would be at least as long as the path.
-        //Therefor we assign a unique number to each path the first time we see it, and store it..
-        //This way, all seen paths gets a unique number. This number is our UniqueValidClassnamePart..
+        // a path cannot be a valid classname so we have to convert it somehow.
+        // If we did some encoding on the path, the result would be at least as long as the path.
+        // Therefor we assign a unique number to each path the first time we see it, and store it..
+        // This way, all seen paths gets a unique number. This number is our UniqueValidClassnamePart..
 
         String uniqueNumber = templateFile2UniqueNumber.get(path);
         if (uniqueNumber == null) {
-            //this is the first time we see this path - must assign a unique number to it.
+            // this is the first time we see this path - must assign a unique number to it.
             uniqueNumber = Long.toString(nextUniqueNumber.getAndIncrement());
             templateFile2UniqueNumber.put(path, uniqueNumber);
         }
@@ -53,7 +52,9 @@ public class TemplateLoader {
 
     /**
      * Load a template from a virtual file
-     * @param file A VirtualFile
+     * 
+     * @param file
+     *            A VirtualFile
      * @return The executable template
      */
     public static Template load(VirtualFile file) {
@@ -64,17 +65,18 @@ public class TemplateLoader {
         }
 
         // Use default engine
-        final String fileRelativePath = file.relativePath();
-        final String key = getUniqueNumberForTemplateFile(fileRelativePath);
+        String fileRelativePath = file.relativePath();
+        String key = getUniqueNumberForTemplateFile(fileRelativePath);
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
-                BaseTemplate template = new GroovyTemplate(fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");
+                BaseTemplate template = new GroovyTemplate(
+                        fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");
                 try {
                     template.loadPrecompiled();
                     templates.put(key, template);
                     return template;
-                } catch(Exception e) {
-                    Logger.warn("Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
+                } catch (Exception e) {
+                    Logger.warn(e, "Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
                 }
             }
             BaseTemplate template = new GroovyTemplate(fileRelativePath, file.contentAsString());
@@ -97,8 +99,11 @@ public class TemplateLoader {
 
     /**
      * Load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
-     * @param source The template source
+     * 
+     * @param key
+     *            A unique identifier for the template, used for retrieving a cached template
+     * @param source
+     *            The template source
      * @return A Template
      */
     public static BaseTemplate load(String key, String source) {
@@ -122,10 +127,14 @@ public class TemplateLoader {
     }
 
     /**
-     * Clean the cache for that key
-     * Then load a template from a String
-     * @param key A unique identifier for the template, used for retreiving a cached template
-     * @param source The template source
+     * Clean the cache for that key Then load a template from a String
+     * 
+     * @param key
+     *            A unique identifier for the template, used for retrieving a cached template
+     * @param source
+     *            The template source
+     * @param reload
+     *            : Indicate if we must clean the cache
      * @return A Template
      */
     public static BaseTemplate load(String key, String source, boolean reload) {
@@ -135,7 +144,9 @@ public class TemplateLoader {
 
     /**
      * Load template from a String, but don't cache it
-     * @param source The template source
+     * 
+     * @param source
+     *            The template source
      * @return A Template
      */
     public static BaseTemplate loadString(String source) {
@@ -152,7 +163,9 @@ public class TemplateLoader {
 
     /**
      * Cleans the specified key from the cache
-     * @param key The template key
+     * 
+     * @param key
+     *            The template key
      */
     public static void cleanCompiledCache(String key) {
         templates.remove(key);
@@ -160,7 +173,9 @@ public class TemplateLoader {
 
     /**
      * Load a template
-     * @param path The path of the template (ex: Application/index.html)
+     * 
+     * @param path
+     *            The path of the template (ex: Application/index.html)
      * @return The executable template
      */
     public static Template load(String path) {
@@ -181,16 +196,12 @@ public class TemplateLoader {
             }
         }
         /*
-        if (template == null) {
-        //When using the old 'key = (file.relativePath().hashCode() + "").replace("-", "M");',
-        //the next line never return anything, since all values written to templates is using the
-        //above key.
-        //when using just file.relativePath() as key, the next line start returning stuff..
-        //therefor I have commented it out.
-        template = templates.get(path);
-        }
+         * if (template == null) { //When using the old 'key = (file.relativePath().hashCode() + "").replace("-",
+         * "M");', //the next line never return anything, since all values written to templates is using the //above
+         * key. //when using just file.relativePath() as key, the next line start returning stuff.. //therefor I have
+         * commented it out. template = templates.get(path); }
          */
-        //TODO: remove ?
+        // TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
             if (tf != null && tf.exists()) {
@@ -204,10 +215,11 @@ public class TemplateLoader {
 
     /**
      * List all found templates
+     * 
      * @return A list of executable templates
      */
     public static List<Template> getAllTemplate() {
-        List<Template> res = new ArrayList<Template>();
+        List<Template> res = new ArrayList<>();
         for (VirtualFile virtualFile : Play.templatesPath) {
             scan(res, virtualFile);
         }
@@ -217,6 +229,43 @@ public class TemplateLoader {
                 Template template = load(vf);
                 if (template != null) {
                     template.compile();
+                }
+            }
+        }
+
+        String play_templates_compile = Play.configuration.getProperty("play.templates.compile",
+                System.getProperty("play.templates.compile", System.getenv("PLAY_TEMPLATES_COMPILE")));
+        String play_templates_compile_path_separator = Play.configuration.getProperty("play.templates.compile.path.separator",
+                System.getProperty("play.templates.compile.path.separator", System.getProperty("path.separator")));
+        if (play_templates_compile != null) {
+            for (String yamlTemplate : play_templates_compile.split(play_templates_compile_path_separator)) {
+                VirtualFile vf = null;
+                for (int retry = 0;; retry++) {
+                    if (retry == 0) {
+                        try {
+                            vf = VirtualFile.open(Play.applicationPath.toPath().resolve(Paths.get(yamlTemplate)).toFile());
+                        } catch (InvalidPathException invalidPathException) {
+                            /* ignored */}
+                    } else if (retry == 1) {
+                        vf = VirtualFile.fromRelativePath(yamlTemplate);
+                    } else {
+                        vf = null;
+                        break;
+                    }
+                    if (vf != null && vf.exists()) {
+                        Template template = load(vf);
+                        if (template != null) {
+                            template.compile();
+                            break;
+                        }
+                    } else {
+                        vf = null;
+                    }
+                }
+                if (vf == null) {
+                    Logger.warn(
+                            "A template specified by system environment 'PLAY_YAML_TEMPLATES' does not exist or path is wrong. template: '%s'",
+                            yamlTemplate);
                 }
             }
         }

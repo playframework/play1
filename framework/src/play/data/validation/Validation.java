@@ -19,8 +19,8 @@ import play.exceptions.UnexpectedException;
 
 public class Validation {
 
-    public static ThreadLocal<Validation> current = new ThreadLocal<Validation>();
-    List<Error> errors = new ArrayList<Error>();
+    public static final ThreadLocal<Validation> current = new ThreadLocal<>();
+    List<Error> errors = new ArrayList<>();
     boolean keep = false;
 
     protected Validation() {
@@ -58,7 +58,7 @@ public class Validation {
      * @return All errors keyed by field name
      */
     public Map<String, List<Error>> errorsMap() {
-        Map<String, List<Error>> result = new LinkedHashMap<String, List<Error>>();
+        Map<String, List<Error>> result = new LinkedHashMap<>();
         for (Error error : errors()) {
             result.put(error.key, errors(error.key));
         }
@@ -168,7 +168,7 @@ public class Validation {
         if (validation == null)
             return Collections.emptyList();
       
-        List<Error> errors = new ArrayList<Error>();
+        List<Error> errors = new ArrayList<>();
         for (Error error : validation.errors) {
             if (error.key!=null && error.key.equals(field)) {
                 errors.add(error);
@@ -201,14 +201,14 @@ public class Validation {
 
     // ~~~~ Integration helper
     public static Map<String, List<Validator>> getValidators(Class<?> clazz, String name) {
-        Map<String, List<Validator>> result = new HashMap<String, List<Validator>>();
+        Map<String, List<Validator>> result = new HashMap<>();
         searchValidator(clazz, name, result);
         return result;
     }
 
     public static List<Validator> getValidators(Class<?> clazz, String property, String name) {
         try {
-            List<Validator> validators = new ArrayList<Validator>();
+            List<Validator> validators = new ArrayList<>();
             while (!clazz.equals(Object.class)) {
                 try {
                     Field field = clazz.getDeclaredField(property);
@@ -234,14 +234,14 @@ public class Validation {
             }
             return validators;
         } catch (Exception e) {
-            return new ArrayList<Validator>();
+            return new ArrayList<>();
         }
     }
 
     static void searchValidator(Class<?> clazz, String name, Map<String, List<Validator>> result) {
         for (Field field : clazz.getDeclaredFields()) {
 
-            List<Validator> validators = new ArrayList<Validator>();
+            List<Validator> validators = new ArrayList<>();
             String key = name + "." + field.getName();
             boolean containsAtValid = false;
             for (Annotation annotation : field.getDeclaredAnnotations()) {
@@ -275,7 +275,7 @@ public class Validation {
     public static class Validator {
 
         public Annotation annotation;
-        public Map<String, Object> params = new HashMap<String, Object>();
+        public Map<String, Object> params = new HashMap<>();
 
         public Validator(Annotation annotation) {
             this.annotation = annotation;

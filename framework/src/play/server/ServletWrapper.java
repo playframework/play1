@@ -20,6 +20,7 @@ import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
+import play.utils.HTTP;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 
@@ -34,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.*;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
@@ -65,12 +65,13 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     private static boolean routerInitializedWithContext = false;
 
+    @Override
     public void contextInitialized(ServletContextEvent e) {
         Play.standalonePlayServer = false;
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        final String playId = System.getProperty("play.id", e.getServletContext().getInitParameter("play.id"));
+        String playId = System.getProperty("play.id", e.getServletContext().getInitParameter("play.id"));
         if (StringUtils.isEmpty(playId)) {
             throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
         }
@@ -91,6 +92,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Thread.currentThread().setContextClassLoader(oldClassLoader);
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent e) {
         Play.stop();
     }
@@ -157,8 +159,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             serveStatic(httpServletResponse, httpServletRequest, e);
             return;
         } catch(URISyntaxException e) {
-			 serve404(httpServletRequest, httpServletResponse, new NotFound(e.toString()));
-	         return;
+            serve404(httpServletRequest, httpServletResponse, new NotFound(e.toString()));
+            return;
         } catch (Throwable e) {
             throw new ServletException(e);
         } finally {
@@ -196,7 +198,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     long last = file.lastModified();
                     String etag = "\"" + last + "-" + file.hashCode() + "\"";
                     String lastDate = Utils.getHttpDateFormatter().format(new Date(last));
-                    if (!isModified(etag, lastDate, servletRequest)) {
+                    if (!isModified(etag, last, servletRequest)) {
                         servletResponse.setHeader("Etag", etag);
                         servletResponse.setStatus(304);
                     } else {
@@ -210,43 +212,15 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
-    public static boolean isModified(String etag, String lastDate,
-            HttpServletRequest request) {
-        // See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
+    public static boolean isModified(String etag, long last, HttpServletRequest request) {
         String browserEtag = request.getHeader(IF_NONE_MATCH);
         String dateString = request.getHeader(IF_MODIFIED_SINCE);
-        if (browserEtag != null) {
-            boolean etagMatches = browserEtag.equals(etag);
-            if (!etagMatches) {
-                return true;
-            }
-            if (dateString != null) {
-                return !isValidTimeStamp(lastDate, dateString);
-            }
-            return false;
-        } else {
-            if (dateString != null) {
-                return !isValidTimeStamp(lastDate, dateString);
-            } else {
-                return true;
-            }
-        }
-    }
-
-    private static boolean isValidTimeStamp(String lastDateString, String dateString) {
-        try {
-            long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
-            long lastDate = Utils.getHttpDateFormatter().parse(lastDateString).getTime();
-            return browserDate >= lastDate;
-        } catch (ParseException e) {
-            Logger.error("Can't parse date", e);
-            return false;
-        }
+        return HTTP.isModified(etag, last, browserEtag, dateString);
     }
 
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
-	 	
-		URI uri = new URI(httpServletRequest.getRequestURI());
+
+        URI uri = new URI(httpServletRequest.getRequestURI());
         String method = httpServletRequest.getMethod().intern();
         String path = uri.getPath();
         String querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
@@ -287,7 +261,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         boolean isLoopback = host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
 
-        final Request request = Request.createRequest(
+        Request request = Request.createRequest(
                 remoteAddress,
                 method,
                 path,
@@ -311,16 +285,16 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     protected static Map<String, Http.Header> getHeaders(HttpServletRequest httpServletRequest) {
-        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        Map<String, Http.Header> headers = new HashMap<>(16);
 
-        Enumeration headersNames = httpServletRequest.getHeaderNames();
+        Enumeration<String> headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
-            hd.name = (String) headersNames.nextElement();
-            hd.values = new ArrayList<String>();
-            Enumeration enumValues = httpServletRequest.getHeaders(hd.name);
+            hd.name = headersNames.nextElement();
+            hd.values = new ArrayList<>();
+            Enumeration<String> enumValues = httpServletRequest.getHeaders(hd.name);
             while (enumValues.hasMoreElements()) {
-                String value = (String) enumValues.nextElement();
+                String value = enumValues.nextElement();
                 hd.values.add(value);
             }
             headers.put(hd.name.toLowerCase(), hd);
@@ -330,7 +304,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     protected static Map<String, Http.Cookie> getCookies(HttpServletRequest httpServletRequest) {
-        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        Map<String, Http.Cookie> cookies = new HashMap<>(16);
         javax.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
         if (cookiesViaServlet != null) {
             for (javax.servlet.http.Cookie cookie : cookiesViaServlet) {
@@ -352,7 +326,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
         servletResponse.setStatus(404);
         servletResponse.setContentType("text/html");
-        Map<String, Object> binding = new HashMap<String, Object>();
+        Map<String, Object> binding = new HashMap<>();
         binding.put("result", e);
         binding.put("session", Scope.Session.current());
         binding.put("request", Http.Request.current());
@@ -362,7 +336,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         try {
             binding.put("errors", Validation.errors());
         } catch (Exception ex) {
-            //
+            Logger.error(ex, "Failed to bind errors");
         }
         String format = Request.current().format;
         servletResponse.setStatus(404);
@@ -384,7 +358,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     public void serve500(Exception e, HttpServletRequest request, HttpServletResponse response) {
         try {
-            Map<String, Object> binding = new HashMap<String, Object>();
+            Map<String, Object> binding = new HashMap<>();
             if (!(e instanceof PlayException)) {
                 e = new play.exceptions.UnexpectedException(e);
             }
@@ -403,7 +377,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     }
                 }
             } catch (Exception exx) {
-                // humm ?
+                Logger.error(exx, "Failed to flush cookies");
             }
             binding.put("exception", e);
             binding.put("session", Scope.Session.current());
@@ -414,7 +388,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             try {
                 binding.put("errors", Validation.errors());
             } catch (Exception ex) {
-                //
+                Logger.error(ex, "Failed to bind errors");
             }
             response.setStatus(500);
             String format = "html";
@@ -569,7 +543,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         @Override
         public InvocationContext getInvocationContext() {
-            ActionInvoker.resolve(request, response);
+            ActionInvoker.resolve(request);
             return new InvocationContext(Http.invocationType,
                     request.invokedMethod.getAnnotations(),
                     request.invokedMethod.getDeclaringClass().getAnnotations());

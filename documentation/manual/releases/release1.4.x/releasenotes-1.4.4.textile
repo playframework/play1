@@ -1,0 +1,51 @@
+h1. Play 1.4.4 -- Release notes
+
+Play 1.4.4 has been released of the 1.4.x maintenance branch.
+
+The changes in this release are listed in the "Play 1.4.4 milestone":https://play.lighthouseapp.com/projects/57987/milestones/222767-144 on Lighthouse and "1.4.4 on github":https://github.com/playframework/play1/milestone/3?closed=1
+including 72 resolved tickets. 
+
+h2. What's new in Play 1.4.4
+
+* "#1007":https://github.com/playframework/play1/pull/1007 Calculate template rendering time, so it can be logged/profiled
+* "#983":https://github.com/playframework/play1/issues/983 feat(DependenciesManager): sync option should be ON by default. 
+* "#2072":https://play.lighthouseapp.com/projects/57987-play-framework/tickets/2072 add method Binder.unregister()
+* "#2071":https://play.lighthouseapp.com/projects/57987-play-framework/tickets/2071 Precompile additional templates
+* "#1007":https://github.com/playframework/play1/issues/1007 Calculate template rendering time, so it can be logged/profiled
+
+h2. What's fixed in Play 1.4.4
+
+* "#1005":https://github.com/playframework/play1/issues/1005 feat(fixture): add id/type in log when loading a fixture file throw exception
+* "#1009":https://github.com/playframework/play1/pull/1009 fix(templates): not log error and exception when compiling a template with a non GroovyInlineTag 
+* "#1014":https://github.com/playframework/play1/pull/1014 chore(travis): fix buffer overflow exception
+* fix h2.jar binary 
+* "#995":https://github.com/playframework/play1/pull/995 use hamcrest-all 1.3 instead of hamcrest-core 1.3 
+* "#1011":https://github.com/playframework/play1/pull/1011 upgrade to cglib 3.2.4 
+* "#1008":https://github.com/playframework/play1/pull/1008 fix(ConfigurationChangeWatcherPlugin): initialized configLastModified on application start 
+* "#2066":https://play.lighthouseapp.com/projects/57987/tickets/2066 fix open file on 500 error pages for modules
+* "#998":https://github.com/playframework/play1/pull/998 fix(router): allow to have space when defining static args in routes
+* "#1025":https://github.com/playframework/play1/pull/1025 fix(DB): Detect changed for JNDI datasource which using jndi: prefix
+* "#2068":https://play.lighthouseapp.com/projects/57987/tickets/2068 chore(lib): dependency upgrade: joda-time (2.9.4 -> 2.9.5)
+* "#1024":https://github.com/playframework/play1/pull/1024 Default application.path to working directory
+* "#1090":https://github.com/playframework/play1/issues/1090 Fix performance issue in classloader
+* "#2074":https://github.com/playframework/play1/issues/2074 Dependency upgrade: joda-time (2.9.6 -> 2.9.7)
+* "#1067":https://github.com/playframework/play1/issues/1067 test(tag): add demo and test for used of #{set} and #{get}
+* "#1090":https://github.com/playframework/play1/pull/1072 add method RenderJson.getResponse()
+* "#1070":https://github.com/playframework/play1/pull/1070 Avoid reflection and make the default list of enhancers overridable
+* "#1040":https://github.com/playframework/play1/pull/1040 Avoid reflection and make the default list of enhancers overridable
+* "#1064":https://github.com/playframework/play1/issues/1064 [#1064] fix(messages): add some test on parameters to avoid NullpointerException
+* "#1064":https://github.com/playframework/play1/issues/1064 Initialize play static field early
+* "#1061":https://github.com/playframework/play1/issues/1061 Methods marked with `@Catch(Throwable.class)` catch all `Results`
+* "#1058 ":https://github.com/playframework/play1/issues/1058 Improve performance of RenderJson
+* "#1056":https://github.com/playframework/play1/issues/1056 Add getters to all `Result` subclasses
+* "#1051":https://github.com/playframework/play1/issues/1051 Play dependencies silently resolve not found dependencies
+* "#1033":https://github.com/playframework/play1/pull/1033 add possibility to disable generating getters/setters
+* "#1025":https://github.com/playframework/play1/pull/1025 Detect changed for JNDI datasource which using jndi: prefix and its documentation
+* "#2066":https://github.com/playframework/play1/pull/2066 Avoid NPE in regex matcher
+* "#1919":https://github.com/playframework/play1/issues/1919 fixes Building modules with a space in path under windows fails
+* "#2066":https://play.lighthouseapp.com/projects/57987-play-framework/tickets/2066 fix(router): allow to have space when defining static args in routes
+* "#998":https://github.com/playframework/play1/issues/998 fix open file on 500 error pages for modules
+* "#2066":https://play.lighthouseapp.com/projects/57987-play-framework/tickets/2066 fix open file on 500 error pages for modules
+* "#1005":https://github.com/playframework/play1/issues/1005 add id/type in log when loading a fixture file throw exception
+* "#998":https://github.com/playframework/play1/issues/998 Routes 'Assign static args' only work for first argument 
+* "#985":https://github.com/playframework/play1/issues/985 Play should NOT clear cache after every code change

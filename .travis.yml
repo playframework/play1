@@ -1,15 +1,27 @@
-sudo: false
+sudo: required
+dist: trusty
 language: java
 jdk:
-  - openjdk7 
-script: ant -buildfile ./framework/build.xml test
-after_failure: 
-    cat ./samples-and-tests/just-test-cases/test-result/*.failed.html
-    cat ./samples-and-tests/forum/test-result/*.failed.html
-    cat ./samples-and-tests/zencontact/test-result/*.failed.html
-    cat ./samples-and-tests/jobboard/test-result/*.failed.html
-    cat ./samples-and-tests/yabe/test-result/*.failed.html
+  - oraclejdk8
+install:
+- sudo apt-get install ant-optional
+addons:
+  hosts:
+    - myshorthost
+  hostname: myshorthost
+
+script:
+- ant -buildfile ./framework/build.xml test
+
+after_failure:
+    find samples-and-tests -name '*.failed.html' -exec echo {} \; -exec cat {} \;
+
 notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6da3b55e59cded84b8bd
+    on_success: always
+    on_failure: always
   email:
     on_success: change
     on_failure: always

@@ -8,7 +8,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class EmailCheck extends AbstractAnnotationCheck<Email> {
 
-    final static String mes = "validation.email";
+    static final String mes = "validation.email";
     static Pattern emailPattern = Pattern.compile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?");
 
     @Override
@@ -16,6 +16,7 @@ public class EmailCheck extends AbstractAnnotationCheck<Email> {
         setMessage(email.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         value = Validation.willBeValidated(value);
         if (value == null || value.toString().length() == 0) {

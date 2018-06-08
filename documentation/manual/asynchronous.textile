@@ -1,6 +1,6 @@
 h1. Asynchronous programming with HTTP
 
-This section explains how to deal with asynchonism in a Play application to achieve typical long-polling, streaming and other "Comet-style":http://en.wikipedia.org/wiki/Comet_(programming%29 applications that can scale to thousands of concurrent connections.
+This section explains how to deal with asynchronism in a Play application to achieve typical long-polling, streaming and other "Comet-style":http://en.wikipedia.org/wiki/Comet_(programming%29 applications that can scale to thousands of concurrent connections.
 
 h2. Suspending HTTP requests
 
@@ -114,7 +114,7 @@ h2. Using WebSockets
 
 WebSockets are a way to open a two-way communication channel between a browser and your application. On the browser side, you open a socket using a "ws://" url:
 
-bc. new Socket("ws://localhost:9000/helloSocket?name=Guillaume")
+bc. new WebSocket("ws://localhost:9000/helloSocket?name=Guillaume")
 
 On the Play side you declare a WS route:
 
@@ -124,7 +124,7 @@ bc. WS   /helloSocket            MyWebSocket.hello
 
 * It has a request object, but no response object.
 * It has access to the session, but read-only.
-* It doesn’t have @renderArgs@, @routeArgs@ or flash scope.
+* It doesn't have @renderArgs@, @routeArgs@ or flash scope.
 * It can read params only from the route pattern or from the QueryString.
 * It has two communication channels: inbound and outbound.
 

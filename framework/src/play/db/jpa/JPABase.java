@@ -1,8 +1,29 @@
 package play.db.jpa;
 
-import org.hibernate.collection.spi.PersistentCollection;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.EntityManager;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PersistenceException;
+
 import org.hibernate.collection.internal.PersistentMap;
-import org.hibernate.engine.spi.*;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.engine.spi.CollectionEntry;
+import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.internal.SessionImpl;
@@ -14,21 +35,13 @@ import org.hibernate.type.Type;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
-import javax.persistence.*;
-
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.sql.SQLException;
-import java.util.*;
-
 /**
  * A super class for JPA entities
  */
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
 
-   
+    @Override
     public void _save() {
         String dbName = JPA.getDBName(this.getClass());
         if (!em(dbName).contains(this)) {
@@ -58,9 +71,10 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public void _delete() {
         String dbName = JPA.getDBName(this.getClass());
-         
+
         try {
             avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
@@ -92,13 +106,14 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    @Override
     public Object _key() {
         return Model.Manager.factoryFor(this.getClass()).keyValue(this);
     }
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<Set<JPABase>>();
+    static final transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
@@ -112,7 +127,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
         // Cascade save
         try {
-            Set<Field> fields = new HashSet<Field>();
+            Set<Field> fields = new HashSet<>();
             Class clazz = this.getClass();
             while (!clazz.equals(JPABase.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());
@@ -186,7 +201,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     private void cascadeOrphans(JPABase base, PersistentCollection persistentCollection, boolean willBeSaved) {
         String dbName = JPA.getDBName(this.getClass());
-        
+
         SessionImpl session = ((SessionImpl) JPA.em(dbName).getDelegate());
         PersistenceContext pc = session.getPersistenceContext();
         CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
@@ -197,7 +212,7 @@ public class JPABase implements Serializable, play.db.Model {
                 Type ct = cp.getElementType();
                 if (ct instanceof EntityType) {
                     EntityEntry entry = pc.getEntry(base);
-                    String entityName =  entry.getEntityName();
+                    String entityName = entry.getEntityName();
                     entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
                     if (ce.getSnapshot() != null) {
                         Collection orphans = ce.getOrphans(entityName, persistentCollection);
@@ -227,6 +242,9 @@ public class JPABase implements Serializable, play.db.Model {
 
     /**
      * Retrieve the current entityManager
+     * 
+     * @param name
+     *            The DB name
      *
      * @return the current entityManager
      */
@@ -234,7 +252,7 @@ public class JPABase implements Serializable, play.db.Model {
         return JPA.em(name);
     }
 
-     public static EntityManager em() {
+    public static EntityManager em() {
         return JPA.em();
     }
 
@@ -247,21 +265,23 @@ public class JPABase implements Serializable, play.db.Model {
     }
 
     /**
-     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same <strong>{@link #_key key} and class</strong>
+     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same
+     * <strong>{@link #_key key} and class</strong>
      *
      * @param other
+     *            The object to compare to
      * @return true if equality condition above is verified
      */
     @Override
     public boolean equals(Object other) {
-        final Object key = this._key();
-
         if (other == null) {
             return false;
         }
         if (this == other) {
             return true;
         }
+
+        Object key = this._key();
         if (key == null) {
             return false;
         }
@@ -273,7 +293,6 @@ public class JPABase implements Serializable, play.db.Model {
             return false;
         }
 
-
         if (!this.getClass().isAssignableFrom(other.getClass())) {
             return false;
         }
@@ -283,7 +302,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     @Override
     public int hashCode() {
-        final Object key = this._key();
+        Object key = this._key();
         if (key == null) {
             return 0;
         }
@@ -295,7 +314,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     @Override
     public String toString() {
-        final Object key = this._key();
+        Object key = this._key();
         String keyStr = "";
         if (key != null && key.getClass().isArray()) {
             for (Object object : (Object[]) key) {

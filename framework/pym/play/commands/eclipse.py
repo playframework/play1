@@ -29,13 +29,12 @@ def execute(**kargs):
     vm_arguments = app.readConf('jvm.memory')
     
     javaVersion = getJavaVersion()
+    
     print "~ using java version \"%s\"" % javaVersion
-    if javaVersion.startswith("1.7"):
-        # JDK 7 compat
-        vm_arguments = vm_arguments +' -XX:-UseSplitVerifier'
-    elif javaVersion.startswith("1.8"):
-        # JDK 8 compatible
-        vm_arguments = vm_arguments +' -noverify'
+    if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
+        print "~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion
+            
+    vm_arguments = vm_arguments +' -noverify'
 
     if application_name:
         application_name = application_name.replace("/", " ")

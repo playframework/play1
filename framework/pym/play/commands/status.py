@@ -1,12 +1,7 @@
 import os, os.path
 import shutil
 import getopt
-import hmac
 import urllib2
-try:
-   from hashlib import sha1 as sha
-except ImportError:
-   import sha
 
 from play.utils import *
 
@@ -45,15 +40,12 @@ def execute(**kargs):
             http_port = int(app.readConf('http.port'))
             url = 'http://localhost:%s/@status' % http_port
         if not secret_key:
-            secret_key = app.readConf('application.secret')
-
-    hm = hmac.new(secret_key, '@status', sha)
-    authorization = hm.hexdigest()
+            secret_key = app.readConf('application.statusKey')
 
     try:
         proxy_handler = urllib2.ProxyHandler({})
         req = urllib2.Request(url)
-        req.add_header('Authorization', authorization)
+        req.add_header('Authorization', secret_key)
         opener = urllib2.build_opener(proxy_handler)
         status = opener.open(req)
         print '~ Status from %s,' % url

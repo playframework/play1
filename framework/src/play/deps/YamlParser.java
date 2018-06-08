@@ -43,18 +43,19 @@ import play.libs.IO;
 public class YamlParser extends AbstractModuleDescriptorParser {
 
     static class Oops extends Exception {
-
         public Oops(String message) {
             super(message);
         }
     }
 
+    @Override
     public boolean accept(Resource rsrc) {
         return rsrc.exists() && rsrc.getName().endsWith(".yml");
     }
-    
-    
-    
+
+
+
+    @Override
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
         try {
             InputStream srcStream =  rsrc.openStream();
@@ -112,7 +113,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
             boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
             
-            List<String> confs = new ArrayList<String>();
+            List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {
                 if (data.get("configurations") instanceof List) {
                     boolean allExcludes = true;
@@ -175,6 +176,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         if(depName.matches("play\\s+->\\s+secure") || depName.equals("secure")) {
                             depName = "play -> secure " + System.getProperty("play.version");
                         }
+                        if(depName.matches("play\\s+->\\s+docviewer") || depName.equals("docviewer")) {
+                            depName = "play -> docviewer " + System.getProperty("play.version");
+                        }
 
                         // Pattern compile to match [organisation name] - > [artifact] [revision] [classifier]
                         Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+)(\\s+[^\\s]+)?.*").matcher(depName);
@@ -188,11 +192,11 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             }
                         }
                         HashMap extraAttributesMap = null;
-            			if(m.groupCount() == 4 &&  m.group(4) != null && !m.group(4).trim().isEmpty()){
-            			    // dependency has a classifier
-            			    extraAttributesMap = new HashMap();
-            			    extraAttributesMap.put("classifier", m.group(4).trim());
-            			}
+                        if (m.groupCount() == 4 && m.group(4) != null && !m.group(4).trim().isEmpty()) {
+                            // dependency has a classifier
+                            extraAttributesMap = new HashMap();
+                            extraAttributesMap.put("classifier", m.group(4).trim());
+                        }
 
                         ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3), extraAttributesMap);
 
@@ -267,8 +271,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         }
     }
 
+    @Override
     public void toIvyFile(InputStream in, Resource rsrc, File file, ModuleDescriptor md) throws ParseException, IOException {
-        ((DefaultModuleDescriptor)md).toIvyFile(file);
+        md.toIvyFile(file);
     }
 
     @SuppressWarnings("unchecked")
@@ -294,13 +299,13 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return o;
     }
 
-    public static Set<String> getOrderedModuleList(File file) throws FileNotFoundException, ParseException, IOException {
-        Set<String> modules = new LinkedHashSet<String>();
+    public static Set<String> getOrderedModuleList(File file) throws ParseException, IOException {
+        Set<String> modules = new LinkedHashSet<>();
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
         return getOrderedModuleList(modules, file);
     }
         
-   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws FileNotFoundException, ParseException, IOException {
+   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws ParseException, IOException {
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
         }

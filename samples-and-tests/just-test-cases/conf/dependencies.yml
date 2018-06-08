@@ -3,6 +3,7 @@
 require:
     - play
     - crud
+    - secure
     - org.playframework -> example 1.0-SNAPSHOT
     - play.test.modules  -> testModule latest.integration
 

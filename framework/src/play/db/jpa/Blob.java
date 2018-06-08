@@ -11,6 +11,7 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
@@ -32,9 +33,17 @@ public class Blob implements BinaryField, UserType {
         this.UUID = UUID;
         this.type = type;
     }
-    
+
+    private Blob(String coded) {
+        if (coded != null && coded.length() > 0 && coded.contains("|")) {
+            this.UUID = coded.split("[|]")[0];
+            this.type = coded.split("[|]")[1];
+        }
+    }
+
+    @Override
     public InputStream get() {
-        if(exists()) {
+        if (exists()) {
             try {
                 return new FileInputStream(getFile());
             } catch(Exception e) {
@@ -43,21 +52,25 @@ public class Blob implements BinaryField, UserType {
         }
         return null;
     }
-    
+
+    @Override
     public void set(InputStream is, String type) {
         this.UUID = Codec.UUID();
         this.type = type;
         IO.write(is, getFile());
     }
 
+    @Override
     public long length() {
         return getFile().length();
     }
 
+    @Override
     public String type() {
         return type;
     }
 
+    @Override
     public boolean exists() {
         return UUID != null && getFile().exists();
     }
@@ -73,12 +86,12 @@ public class Blob implements BinaryField, UserType {
         return UUID;
     }
 
-    //
-
+    @Override
     public int[] sqlTypes() {
         return new int[] {Types.VARCHAR};
     }
 
+    @Override
     public Class returnedClass() {
         return Blob.class;
     }
@@ -87,6 +100,7 @@ public class Blob implements BinaryField, UserType {
       return a == b || (a != null && a.equals(b));
     }
 
+    @Override
     public boolean equals(Object o, Object o1) throws HibernateException {
         if(o instanceof Blob && o1 instanceof Blob) {
             return equal(((Blob)o).UUID, ((Blob)o1).UUID) &&
@@ -95,26 +109,31 @@ public class Blob implements BinaryField, UserType {
         return equal(o, o1);
     }
 
+    @Override
     public int hashCode(Object o) throws HibernateException {
         return o.hashCode();
     }
 
-    public Object nullSafeGet(ResultSet resultSet, String[] names, SessionImplementor sessionImplementor, Object o) throws HibernateException, SQLException {
-       String val = (String) StringType.INSTANCE.nullSafeGet(resultSet, names[0], sessionImplementor, o);
-        if(val == null || val.length() == 0 || !val.contains("|")) {
-            return new Blob();
-        }
-        return new Blob(val.split("[|]")[0], val.split("[|]")[1]);
+    @Override
+    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
+        String val = (String) StringType.INSTANCE.nullSafeGet(rs, names[0], session, owner);
+        return new Blob(val);
     }
 
-    public void nullSafeSet(PreparedStatement ps, Object o, int i, SessionImplementor sessionImplementor) throws HibernateException, SQLException {
-         if(o != null) {
-            ps.setString(i, ((Blob)o).UUID + "|" + ((Blob)o).type);
+    @Override
+    public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+        if (value != null) {
+            ps.setString(index, encode((Blob) value));
         } else {
-            ps.setNull(i, Types.VARCHAR);
+            ps.setNull(index, Types.VARCHAR);
         }
     }
 
+    private String encode(Blob o) {
+        return o.UUID != null ? o.UUID + "|" + o.type : null;
+    }
+
+    @Override
     public Object deepCopy(Object o) throws HibernateException {
         if(o == null) {
             return null;
@@ -122,23 +141,27 @@ public class Blob implements BinaryField, UserType {
         return new Blob(((Blob)o).UUID, ((Blob)o).type);
     }
 
+    @Override
     public boolean isMutable() {
         return true;
     }
 
+    @Override
     public Serializable disassemble(Object o) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (o == null) return null;
+        return encode((Blob) o);
     }
 
-    public Object assemble(Serializable srlzbl, Object o) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public Object assemble(Serializable cached, Object owner) throws HibernateException {
+        if (cached == null) return null;
+        return new Blob((String) cached);
     }
 
-    public Object replace(Object o, Object o1, Object o2) throws HibernateException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public Object replace(Object original, Object target, Object owner) throws HibernateException {
+        return original;
     }
-
-    //
 
     public static String getUUID(String dbValue) {
        return dbValue.split("[|]")[0];
@@ -146,13 +169,11 @@ public class Blob implements BinaryField, UserType {
 
     public static File getStore() {
         String name = Play.configuration.getProperty("attachments.path", "attachments");
-        File store = null;
-        if(new File(name).isAbsolute()) {
-            store = new File(name);
-        } else {
+        File store = new File(name);
+        if (!store.isAbsolute()) {
             store = Play.getFile(name);
         }
-        if(!store.exists()) {
+        if (!store.exists()) {
             store.mkdirs();
         }
         return store;

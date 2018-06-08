@@ -27,7 +27,7 @@ public class TempFilePlugin extends PlayPlugin {
     private static synchronized long getCountLocal() {
         return count++;
     }
-    public static ThreadLocal<File> tempFolder = new ThreadLocal<File>();
+    public static final ThreadLocal<File> tempFolder = new ThreadLocal<>();
 
     public static File createTempFolder() {
         if (Play.tmpDir == null || Play.readOnlyTmp) {

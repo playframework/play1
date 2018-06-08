@@ -17,4 +17,5 @@ import java.lang.annotation.Target;
 public @interface CacheFor {
     String value() default "1h";
     String id() default "";
+    Class<? extends CacheKeyGenerator> generator() default DefaultCacheKeyGenerator.class;
 }

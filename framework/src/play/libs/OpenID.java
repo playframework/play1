@@ -35,10 +35,10 @@ public class OpenID {
     String id;
     String returnAction;
     String realmAction;
-    List<String> sregRequired = new ArrayList<String>();
-    List<String> sregOptional = new ArrayList<String>();
-    Map<String, String> axRequired = new HashMap<String, String>();
-    Map<String, String> axOptional = new HashMap<String, String>();
+    List<String> sregRequired = new ArrayList<>();
+    List<String> sregOptional = new ArrayList<>();
+    Map<String, String> axRequired = new HashMap<>();
+    Map<String, String> axOptional = new HashMap<>();
 
     public OpenID returnTo(String action) {
         this.returnAction = action;
@@ -201,9 +201,7 @@ public class OpenID {
             }
 
             throw new Redirect(url);
-        } catch (Redirect e) {
-            throw e;
-        } catch (PlayException e) {
+        } catch (Redirect | PlayException e) {
             throw e;
         } catch (Exception e) {
             return false;
@@ -217,6 +215,10 @@ public class OpenID {
 
     /**
      * Normalize the given openid as a standard openid
+     * 
+     * @param openID
+     *            the given openid
+     * @return The normalize openID
      */
     public static String normalize(String openID) {
         openID = openID.trim();
@@ -234,13 +236,15 @@ public class OpenID {
             }
             openID = new URI(openID).toString();
         } catch (Exception e) {
-            throw new RuntimeException(openID + " is not a valid URL");
+            throw new RuntimeException(openID + " is not a valid URL", e);
         }
         return openID;
     }
 
     /**
      * Is the current request an authentication response from the OP ?
+     * 
+     * @return true if the current request an authentication response
      */
     public static boolean isAuthenticationResponse() {
         return Params.current().get("openid.mode") != null;
@@ -354,7 +358,7 @@ public class OpenID {
         /**
          * Extensions values
          */
-        public Map<String, String> extensions = new HashMap<String, String>();
+        public Map<String, String> extensions = new HashMap<>();
 
         @Override
         public String toString() {

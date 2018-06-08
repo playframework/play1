@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class PlayException extends RuntimeException {
 
-    static AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());
-    String id;
+    private static AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());
+    private String id;
 
     public PlayException() {
         setId();
@@ -51,12 +51,6 @@ public abstract class PlayException extends RuntimeException {
         return id;
     }
 
-    /**
-     * Get the stack trace element
-     * @deprecated since 1.3.0
-     * @param cause
-     * @return the stack trace element
-     */
     @Deprecated
     public static StackTraceElement getInterestingStrackTraceElement(Throwable cause) {
       return getInterestingStackTraceElement(cause);

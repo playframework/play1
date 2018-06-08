@@ -1,9 +1,6 @@
 
 package play.exceptions;
 
-/**
- * Database error
- */
 public class DatabaseException extends PlayExceptionWithJavaSource {
     
     public DatabaseException(String message) {
@@ -21,6 +18,6 @@ public class DatabaseException extends PlayExceptionWithJavaSource {
 
     @Override
     public String getErrorDescription() {
-        return String.format("A database error occured : <strong>%s</strong>", getMessage());
+        return String.format("A database error occurred : <strong>%s</strong>", getMessage());
     }
 }

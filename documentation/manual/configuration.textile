@@ -29,6 +29,15 @@ bc. application.defaultCookieDomain=.example.com
 Default: a cookie is only valid for a specific domain.
 
 
+h3(#application.forceSecureReverseRoutes). application.forceSecureReverseRoutes
+
+Forces all reverse routes and controller action redirection to be secure (https). This is useful for SSL-enabled apps to prevent insecure (http) url generation when redirecting to another action from inside your controllers, or when using the <code>@{..}</code> template syntax. For example:
+
+bc. application.forceSecureReverseRoutes=true
+
+Default: @false@
+
+
 h3(#application.lang.cookie). application.lang.cookie
 
 The name of the cookie that is used to store the current language, set by @play.i18n.Lang.change(String locale)@, which you can change if you want separate language settings for separate Play applications. For example:
@@ -115,6 +124,16 @@ Session cookie name. The cookies are not secured by default, only set it to true
 bc. application.session.cookie=PLAY
 
 Default: sessions are written to the transient @PLAY_SESSION@ cookie.
+
+
+h3(#application.session.storeClass). application.session.storeClass
+
+Session storage implementation. By default Play! stores session in cookie. 
+It can be overridden with this setting. For example:
+
+bc. application.session.storeClass=com.company.CacheSessionStore
+
+Default: sessions are stored in cookie (see `play.mvc.CookieSessionStore` for implementation)
 
 
 h3(#application.session.httpOnly). application.session.httpOnly
@@ -286,7 +305,11 @@ To reuse an existing Datasource from your application server:
 
 bc. db=java:/comp/env/jdbc/myDatasource@
 
-If you specify a @Datasource@, the database plugin detects the pattern @db=java:@ and will de-activate the default JDBC system.
+And for application server where Datasource doesn't have @java:@ prefix (Glassfish and its derivative), you could use @jndi:@ instead. The @jndi:@ prefix will be omitted:
+
+bc. db=jndi:jdbc/myDataSource
+
+If you specify a @Datasource@, the database plugin detects the pattern @db=java:@ and @db=jndi:@ and will de-activate the default JDBC system.
 
 Default: none.
 
@@ -299,6 +322,20 @@ bc. db.destroyMethod=close
 
 Default: none.
 
+
+h3(#db.factory). db.factory
+
+Factory class that will create DataSource instances.
+
+bc. db.factory=play.db.hikaricp.HikariDataSourceFactory
+
+Currently two values are supported out-of-the-box: 
+* play.db.hikaricp.HikariDataSourceFactory   (default starting from Play 1.5)
+* play.db.c3p0.C3P0DataSourceFactory         (it was the only data source available prior to Play 1.5)
+
+Default:
+
+* @play.db.hikaricp.HikariDataSourceFactory@
 
 h3(#db.driver). db.driver
 
@@ -693,11 +730,11 @@ h3(#java.source). java.source
 
 Java source level, which overrides the @java.version@ system property. For example:
 
-bc. java.source=1.7
+bc. java.source=1.8
 
-Values:  @1.5@ (No longer supported since 1.3.0), @1.6@, @1.7@, @1.8@ (experimental).
+Values:  @1.7@ (No longer supported since 1.5.0), @1.8@.
 
-Default: @1.6@
+Default: @1.8@
 
 
 h2(#jpa). JPA
@@ -971,6 +1008,17 @@ Default: none.
 h2(#play). Play run-time
 
 
+h3(#play.plugins.descriptor). play.plugins.descriptor
+
+File to load play plugins from. 
+* If given, play with load plugins ONLY from this file. @since play 1.5
+* If not given, play will find ALL files "play.plugins" from classpath and load plugins from them (this is the default behaviour).
+
+bc. play.plugins.descriptor=conf/my-play-app.plugins
+
+Default: none.
+
+
 h3(#play.bytecodeCache). play.bytecodeCache
 
 Used to disable the bytecode cache in @dev@ mode; has no effect in @prod@ mode.
@@ -1044,6 +1092,32 @@ bc. play.pool=10
 Default: @1@ (in @dev@ mode), number of processors + 1 (in @prod@ mode).
 
 
+h3(#play.templates.compile). play.templates.compile
+
+The value is a list of files separated by a property like "@path.separator@":configuration#play.templates.compile.path.separator .
+
+bc. play.templates.compile=/absolue/path/file.ext;conf/relative/path/file.ext;{module:reporting}module/relative/path/file.ext
+
+The path notation of files can use:
+
+* absolute file path
+* relative file path
+* module relative file path.
+
+Default: no default the parameter is optional
+
+
+h3(#play.templates.compile.path.separator). play.templates.compile.path.separator
+
+Override the path separator for separating list elements of @play.templates.compile@":configuration#play.templates.compile .
+This parameter would be usefull when using the path notation for module relative file path on unix systems,
+where the default value would be @:@ . That would separate module prefix notations like @{module:modname}@ on unix.
+
+bc. play.templates.compile.path.separator=;
+
+Default: the system property @path.separator@
+
+
 h3(#play.tmp). play.tmp
 
 Folder used to store temporary files. For example:
@@ -1054,7 +1128,7 @@ Values:
 
 * an absolute path
 * a relative path, relative to the application directory
-* @none@ so that no temporary directory will be used 
+* @none@ so that no temporary directory will be used
 
 Default: @tmp@
 
@@ -1126,6 +1200,21 @@ bc. upload.threshold=20480
 
 Default: @10240@
 
+h3(#upload.maxRequestSize). upload.maxRequestSize
+
+The maximum size permitted for the complete request. A value of -1 indicates no maximum.
+
+bc. upload.maxRequestSize=2048
+
+Default: @-1@
+
+h3(#upload.maxFileSize). upload.maxFileSize
+
+The maximum size permitted for a single uploaded file, as opposed to. A value of -1 indicates no maximum.
+
+bc. upload.maxFileSize=1024
+
+Default: @-1@
 
 h2(#xforwarded). Proxy forwarding
 
@@ -1157,13 +1246,26 @@ For example:
 
 bc. XForwardedOverwriteDomainAndPort=true
 
+Default: @false@
 
 h2(#enhancers). Enhancers
 
 h3(#play.propertiesEnhancer.enabled). play.propertiesEnhancer.enabled
 
-Used to disable play enhancing of play class (can be used to switch off getter/setter generation). For example:
+Used to disable play enhancing of play class (can be used to switch off default constructors/getter/setter generation). For example:
 
 bc. play.propertiesEnhancer.enabled=false
+
+Default: @true@
+
+h3(#play.propertiesEnhancer.generateAccessors). play.propertiesEnhancer.generateAccessors
+
+Used to partially disable PropertyEnhancer. Namely, it switches off generating getters/setters and replacing 
+all direct field accesses with getters/setters (which is the slowest part of "play precompile").
+But it leaves generating default constructors.
+
+For example:
+
+bc. play.propertiesEnhancer.generateAccessors=false
 
 Default: @true@

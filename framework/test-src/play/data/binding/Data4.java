@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class Data4 {
+class Data4 {
 
     public String s;
     public List<Data1> datas;
@@ -28,23 +28,5 @@ public class Data4 {
         if (mapDatas != null ? !mapDatas.equals(data4.mapDatas) : data4.mapDatas != null) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = s != null ? s.hashCode() : 0;
-        result = 31 * result + (datas != null ? datas.hashCode() : 0);
-        result = 31 * result + (datasArray != null ? Arrays.hashCode(datasArray) : 0);
-        result = 31 * result + (mapDatas != null ? mapDatas.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Data4{" +
-                "s='" + s + '\'' +
-                ", datas=" + datas +
-                ", datasArray=" + Arrays.toString(datasArray) +
-                '}';
     }
 }

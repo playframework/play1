@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class MaxCheck extends AbstractAnnotationCheck<Max> {
 
-    final static String mes = "validation.max";
+    static final String mes = "validation.max";
 
     double max;
 
@@ -19,6 +19,7 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
         setMessage(max.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {
@@ -43,7 +44,7 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("max", Double.toString(max));
         return messageVariables;
     }

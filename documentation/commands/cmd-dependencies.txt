@@ -8,16 +8,15 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--forProd] [--clearcache] [--jpda]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--nosync] [--%fwk_id] [--forProd] [--clearcache] [--jpda] [--shortModuleNames]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Compute resolve and retrieve project dependencies and install them either in
 ~ lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
 ~
-~ By default the command will not delete unrecognized artifacts.
-~ Use the --sync option to keep both lib/ and modules/ directory synchronized
-~ with the dependencies management system.
+~ By default the command will delete unrecognized artifacts.
+~ Use the --nosync to keep unrecognized artifacts in lib/ and modules/ directories.
 ~
 ~ Some options specified after the application path are passed to the JVM : java memory( example. -Xms64m -Xmx256m).  
 ~ If JVM memory options (starting with -Xm') are not specified in command line arguments, then any
@@ -34,7 +33,7 @@
 ~ Verbose mode
 ~
 ~ --debug:
-~ Debug mode (even more informations logged than in verbose mode)
+~ Debug mode (even more information logged than in verbose mode)
 ~
 ~ --jpda:
 ~ Listen for JPDA connection. The process will be suspended until
@@ -43,6 +42,12 @@
 ~ --sync:
 ~ Keep lib/ and modules/ directory synced.
 ~ Delete unknown dependencies.
+~ Since 1.4.4: This option is activated by default
+~
+~ --nosync:
+~ Keep lib/ and modules/ directory unchanged.
+~ Keep unknown dependencies.
+~ It was default behaviour until play 1.4.4
 ~
 ~ --forceCopy:
 ~ Never create files pointing to the original folder, always copy the folder
@@ -58,3 +63,9 @@
 ~~ --clearcache:
 ~ Clear the ivy cache (equivalent to rm -r ~/.ivy2/cache)
 ~
+~~ --shortModuleNames:
+~ use short module name without version number.
+~ For example, if project depends on module "play-pdf 1.2.3", then 
+~  * command `play deps` creates folder `modules/pdf-1.2.3`
+~  * command `play deps --shortModuleNames` creates folder `modules/pdf`
+~ The latter option is probably convenient for configuring IDE

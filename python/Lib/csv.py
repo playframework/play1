@@ -93,6 +93,10 @@ class DictReader:
         self.line_num = self.reader.line_num
         return self._fieldnames
 
+    # Issue 20004: Because DictReader is a classic class, this setter is
+    # ignored.  At this point in 2.7's lifecycle, it is too late to change the
+    # base class for fear of breaking working code.  If you want to change
+    # fieldnames without overwriting the getter, set _fieldnames directly.
     @fieldnames.setter
     def fieldnames(self, value):
         self._fieldnames = value
@@ -132,12 +136,16 @@ class DictWriter:
         self.extrasaction = extrasaction
         self.writer = writer(f, dialect, *args, **kwds)
 
+    def writeheader(self):
+        header = dict(zip(self.fieldnames, self.fieldnames))
+        self.writerow(header)
+
     def _dict_to_list(self, rowdict):
         if self.extrasaction == "raise":
             wrong_fields = [k for k in rowdict if k not in self.fieldnames]
             if wrong_fields:
-                raise ValueError("dict contains fields not in fieldnames: " +
-                                 ", ".join(wrong_fields))
+                raise ValueError("dict contains fields not in fieldnames: "
+                                 + ", ".join([repr(x) for x in wrong_fields]))
         return [rowdict.get(key, self.restval) for key in self.fieldnames]
 
     def writerow(self, rowdict):
@@ -170,7 +178,7 @@ class Sniffer:
         Returns a dialect (or None) corresponding to the sample
         """
 
-        quotechar, delimiter, skipinitialspace = \
+        quotechar, doublequote, delimiter, skipinitialspace = \
                    self._guess_quote_and_delimiter(sample, delimiters)
         if not delimiter:
             delimiter, skipinitialspace = self._guess_delimiter(sample,
@@ -184,8 +192,8 @@ class Sniffer:
             lineterminator = '\r\n'
             quoting = QUOTE_MINIMAL
             # escapechar = ''
-            doublequote = False
 
+        dialect.doublequote = doublequote
         dialect.delimiter = delimiter
         # _csv.reader won't accept a quotechar of ''
         dialect.quotechar = quotechar or '"'
@@ -217,8 +225,8 @@ class Sniffer:
                 break
 
         if not matches:
-            return ('', None, 0) # (quotechar, delimiter, skipinitialspace)
-
+            # (quotechar, doublequote, delimiter, skipinitialspace)
+            return ('', False, None, 0)
         quotes = {}
         delims = {}
         spaces = 0
@@ -255,7 +263,20 @@ class Sniffer:
             delim = ''
             skipinitialspace = 0
 
-        return (quotechar, delim, skipinitialspace)
+        # if we see an extra quote between delimiters, we've got a
+        # double quoted format
+        dq_regexp = re.compile(
+                               r"((%(delim)s)|^)\W*%(quote)s[^%(delim)s\n]*%(quote)s[^%(delim)s\n]*%(quote)s\W*((%(delim)s)|$)" % \
+                               {'delim':re.escape(delim), 'quote':quotechar}, re.MULTILINE)
+
+
+
+        if dq_regexp.search(data):
+            doublequote = True
+        else:
+            doublequote = False
+
+        return (quotechar, doublequote, delim, skipinitialspace)
 
 
     def _guess_delimiter(self, data, delimiters):
@@ -265,7 +286,7 @@ class Sniffer:
         an all or nothing approach, so we allow for small variations in this
         number.
           1) build a table of the frequency of each character on every line.
-          2) build a table of freqencies of this frequency (meta-frequency?),
+          2) build a table of frequencies of this frequency (meta-frequency?),
              e.g.  'x occurred 5 times in 10 rows, 6 times in 1000 rows,
              7 times in 2 rows'
           3) use the mode of the meta-frequency to determine the /expected/

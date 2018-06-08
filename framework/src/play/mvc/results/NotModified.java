@@ -9,7 +9,7 @@ import play.mvc.Http.Response;
  */
 public class NotModified extends Result {
 
-    String etag;
+    private String etag;
 
     public NotModified() {
         super("NotModified");
@@ -19,10 +19,15 @@ public class NotModified extends Result {
         this.etag = etag;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = Http.StatusCode.NOT_MODIFIED;
         if (etag != null) {
             response.setHeader("Etag", etag);
         }
+    }
+
+    public String getEtag() {
+        return etag;
     }
 }

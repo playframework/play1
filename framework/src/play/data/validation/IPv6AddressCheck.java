@@ -11,13 +11,14 @@ import net.sf.oval.exception.OValException;
 
 public class IPv6AddressCheck extends AbstractAnnotationCheck<IPv6Address> {
 
-    final static String mes = "validation.ipv6";
+    static final String mes = "validation.ipv6";
 
     @Override
     public void configure(IPv6Address phone) {
         setMessage(phone.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator)
     throws OValException {
         if (value == null || value.toString().length() == 0) {

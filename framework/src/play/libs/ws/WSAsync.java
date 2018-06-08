@@ -89,14 +89,14 @@ public class WSAsync implements WSImpl {
             try {
                 proxyPortInt = Integer.parseInt(proxyPort);
             } catch (NumberFormatException e) {
-                Logger.error(
+                Logger.error(e,
                         "Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.",
                         proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             if (nonProxyHosts != null) {
-                final String[] strings = nonProxyHosts.split("\\|");
+                String[] strings = nonProxyHosts.split("\\|");
                 for (String uril : strings) {
                     proxy.addNonProxyHost(uril);
                 }
@@ -147,8 +147,10 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * Returns the url but removed the queryString-part of it The
-         * QueryString-info is later added with addQueryString()
+         * Returns the URL but removed the queryString-part of it The QueryString-info is later added with
+         * addQueryString()
+         * 
+         * @return The URL without the queryString-part
          */
         protected String getUrlWithoutQueryString() {
             int i = url.indexOf('?');
@@ -161,6 +163,9 @@ public class WSAsync implements WSImpl {
 
         /**
          * Adds the queryString-part of the url to the BoundRequestBuilder
+         * 
+         * @param requestBuilder
+         *            : The request buider to add the queryString-part
          */
         protected void addQueryString(BoundRequestBuilder requestBuilder) {
 
@@ -272,7 +277,7 @@ public class WSAsync implements WSImpl {
             return execute(prepareGet());
         }
 
-        /** Execute a PATCH request.*/
+        /** Execute a PATCH request. */
         @Override
         public HttpResponse patch() {
             this.type = "PATCH";
@@ -283,13 +288,15 @@ public class WSAsync implements WSImpl {
                 throw new RuntimeException(e);
             }
         }
-        /** Execute a PATCH request asynchronously.*/
+
+        /** Execute a PATCH request asynchronously. */
         @Override
         public Promise<HttpResponse> patchAsync() {
             this.type = "PATCH";
             sign();
             return execute(preparePatch());
         }
+
         /** Execute a POST request. */
         @Override
         public HttpResponse post() {
@@ -446,7 +453,7 @@ public class WSAsync implements WSImpl {
 
         private Promise<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                final Promise<HttpResponse> smartFuture = new Promise<HttpResponse>();
+                final Promise<HttpResponse> smartFuture = new Promise<>();
                 prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
@@ -593,9 +600,8 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * Sets the resolved Content-type - This is added as Content-type-header
-         * to AHC if ser has not specified Content-type or mimeType manually
-         * (Cannot add it directly to this.header since this cause problem when
+         * Sets the resolved Content-type - This is added as Content-type-header to AHC if ser has not specified
+         * Content-type or mimeType manually (Cannot add it directly to this.header since this cause problem when
          * Request-object is used multiple times with first GET, then POST)
          */
         private void setResolvedContentType(String contentType) {
@@ -603,9 +609,8 @@ public class WSAsync implements WSImpl {
         }
 
         /**
-         * If generatedContentType is present AND if Content-type header is not
-         * already present, add generatedContentType as Content-Type to headers
-         * in requestBuilder
+         * If generatedContentType is present AND if Content-type header is not already present, add
+         * generatedContentType as Content-Type to headers in requestBuilder
          */
         private void addGeneratedContentType(BoundRequestBuilder requestBuilder) {
             if (!headers.containsKey("Content-Type") && generatedContentType != null) {
@@ -623,16 +628,17 @@ public class WSAsync implements WSImpl {
         private Response response;
 
         /**
-         * you shouldnt have to create an HttpResponse yourself
+         * You shouldn't have to create an HttpResponse yourself
          * 
          * @param response
+         *            The given response
          */
         public HttpAsyncResponse(Response response) {
             this.response = response;
         }
 
         /**
-         * the HTTP status code
+         * The HTTP status code
          * 
          * @return the status code of the http response
          */
@@ -659,11 +665,29 @@ public class WSAsync implements WSImpl {
         @Override
         public List<Header> getHeaders() {
             Map<String, List<String>> hdrs = response.getHeaders();
-            List<Header> result = new ArrayList<Header>();
+            List<Header> result = new ArrayList<>();
             for (String key : hdrs.keySet()) {
                 result.add(new Header(key, hdrs.get(key)));
             }
             return result;
+        }
+
+        @Override
+        public String getString() {
+            try {
+                return response.getResponseBody(getEncoding());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public String getString(String encoding) {
+            try {
+                return response.getResponseBody(encoding);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         /**

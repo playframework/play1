@@ -14,7 +14,7 @@ import com.thoughtworks.xstream.XStream;
  */
 public class RenderXml extends Result {
 
-    String xml;
+    private final String xml;
 
     public RenderXml(CharSequence xml) {
         this.xml = xml.toString();
@@ -32,6 +32,7 @@ public class RenderXml extends Result {
         this(o, new XStream());
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/xml");
@@ -41,4 +42,7 @@ public class RenderXml extends Result {
         }
     }
 
+    public String getXml() {
+        return xml;
+    }
 }

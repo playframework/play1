@@ -128,10 +128,12 @@ public class MemcachedImpl implements CacheImpl {
         }
     }
 
+    @Override
     public void add(String key, Object value, int expiration) {
         client.add(key, expiration, value, tc);
     }
 
+    @Override
     public Object get(String key) {
         Future<Object> future = client.asyncGet(key, tc);
         try {
@@ -142,14 +144,17 @@ public class MemcachedImpl implements CacheImpl {
         return null;
     }
 
+    @Override
     public void clear() {
         client.flush();
     }
 
+    @Override
     public void delete(String key) {
         client.delete(key);
     }
 
+    @Override
     public Map<String, Object> get(String[] keys) {
         Future<Map<String, Object>> future = client.asyncGetBulk(tc, keys);
         try {
@@ -160,18 +165,22 @@ public class MemcachedImpl implements CacheImpl {
         return Collections.<String, Object>emptyMap();
     }
 
+    @Override
     public long incr(String key, int by) {
         return client.incr(key, by, 0);
     }
 
+    @Override
     public long decr(String key, int by) {
         return client.decr(key, by, 0);
     }
 
+    @Override
     public void replace(String key, Object value, int expiration) {
         client.replace(key, expiration, value, tc);
     }
 
+    @Override
     public boolean safeAdd(String key, Object value, int expiration) {
         Future<Boolean> future = client.add(key, expiration, value, tc);
         try {
@@ -182,6 +191,7 @@ public class MemcachedImpl implements CacheImpl {
         return false;
     }
 
+    @Override
     public boolean safeDelete(String key) {
         Future<Boolean> future = client.delete(key);
         try {
@@ -192,6 +202,7 @@ public class MemcachedImpl implements CacheImpl {
         return false;
     }
 
+    @Override
     public boolean safeReplace(String key, Object value, int expiration) {
         Future<Boolean> future = client.replace(key, expiration, value, tc);
         try {
@@ -202,6 +213,7 @@ public class MemcachedImpl implements CacheImpl {
         return false;
     }
 
+    @Override
     public boolean safeSet(String key, Object value, int expiration) {
         Future<Boolean> future = client.set(key, expiration, value, tc);
         try {
@@ -212,10 +224,12 @@ public class MemcachedImpl implements CacheImpl {
         return false;
     }
 
+    @Override
     public void set(String key, Object value, int expiration) {
         client.set(key, expiration, value, tc);
     }
 
+    @Override
     public void stop() {
         client.shutdown();
     }

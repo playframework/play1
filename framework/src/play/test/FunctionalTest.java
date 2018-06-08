@@ -33,6 +33,7 @@ import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.UnexpectedException;
+import play.libs.F.Action;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -54,7 +55,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored
                                                           // between calls
 
-    private static Map<String, Object> renderArgs = new HashMap<String, Object>();
+    private static Map<String, Object> renderArgs = new HashMap<>();
 
     @Before
     public void clearCookies() {
@@ -68,7 +69,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * sends a GET request to the application under tests.
-     * 
+     *
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param followRedirect
@@ -96,9 +97,10 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * sends a GET request to the application under tests.
-     * 
+     * Sends a GET request to the application under tests.
+     *
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @return the response
@@ -146,8 +148,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a POST request to the application under tests.
-     * 
+     *
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param contenttype
@@ -178,9 +181,8 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * Sends a POST request to the application under tests as a multipart form.
-     * Designed for file upload testing.
-     * 
+     * Sends a POST request to the application under tests as a multipart form. Designed for file upload testing.
+     *
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param parameters
@@ -198,10 +200,10 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
-        List<Part> parts = new ArrayList<Part>();
+        List<Part> parts = new ArrayList<>();
 
         for (String key : parameters.keySet()) {
-            final StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
+            StringPart stringPart = new StringPart(key, parameters.get(key), request.contentType, Charset.forName(request.encoding));
             parts.add(stringPart);
         }
 
@@ -215,8 +217,7 @@ public abstract class FunctionalTest extends BaseTest {
 
         MultipartBody requestEntity = null;
         /*
-         * ^1 MultipartBody::read is not working (if parts.isEmpty() == true)
-         * byte[] array = null;
+         * ^1 MultipartBody::read is not working (if parts.isEmpty() == true) byte[] array = null;
          **/
         _ByteArrayOutputStream baos = null;
         try {
@@ -246,8 +247,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a PUT request to the application under tests.
-     * 
+     *
      * @param request
+     *            The given request
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param contenttype
@@ -283,8 +285,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a DELETE request to the application under tests.
-     * 
+     *
      * @param request
+     *            The given request
      * @param url
      *            relative url eg. <em>"/products/1234"</em>
      * @return the response
@@ -333,7 +336,7 @@ public abstract class FunctionalTest extends BaseTest {
             }
 
             @Override
-            public void onException(final Throwable e) {
+            public void onException(Throwable e) {
                 try {
                     super.onException(e);
                 } finally {
@@ -347,7 +350,7 @@ public abstract class FunctionalTest extends BaseTest {
 
             @Override
             public InvocationContext getInvocationContext() {
-                ActionInvoker.resolve(request, response);
+                ActionInvoker.resolve(request);
                 return new InvocationContext(Http.invocationType, request.invokedMethod.getAnnotations(),
                         request.invokedMethod.getDeclaringClass().getAnnotations());
             }
@@ -376,7 +379,7 @@ public abstract class FunctionalTest extends BaseTest {
         }
         try {
             if (savedCookies == null) {
-                savedCookies = new HashMap<String, Http.Cookie>();
+                savedCookies = new HashMap<>();
             }
             for (Map.Entry<String, Http.Cookie> e : response.cookies.entrySet()) {
                 // If Max-Age is unset, browsers discard on exit; if
@@ -411,7 +414,7 @@ public abstract class FunctionalTest extends BaseTest {
         return new RuntimeException(e);
     }
 
-    public static Response makeRequest(final Request request) {
+    public static Response makeRequest(Request request) {
         Response response = newResponse();
         makeRequest(request, response);
 
@@ -434,6 +437,31 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response newResponse() {
         Response response = new Response();
         response.out = new ByteArrayOutputStream();
+
+        // Register an onWriteChunk action so that Response.writeChunk() won't throw
+        // an unhandled exception if the controller action calls it.
+        response.onWriteChunk(
+            new Action<Object>() {
+                @Override
+                public void invoke(Object chunk) {
+                    // Mimic the behavior of PlayHandler$LazyChunkedInput.writeChunk()
+                    if (chunk != null) {
+                        try {
+                            byte[] bytes;
+                            if (chunk instanceof byte[]) {
+                                bytes = (byte[]) chunk;
+                            } else {
+                                bytes = chunk.toString().getBytes(response.encoding);
+                            }
+                            response.out.write(bytes);
+                        } catch (Exception exception) {
+                            // Something is wrong with the chunk.
+                            throw new RuntimeException(exception);
+                        }
+                    }
+                }
+            });
+
         return response;
     }
 
@@ -445,7 +473,7 @@ public abstract class FunctionalTest extends BaseTest {
     // Assertions
     /**
      * Asserts a <em>2OO Success</em> response
-     * 
+     *
      * @param response
      *            server response
      */
@@ -455,7 +483,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts a <em>404 (not found)</em> response
-     * 
+     *
      * @param response
      *            server response
      */
@@ -465,7 +493,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts response status code
-     * 
+     *
      * @param status
      *            expected HTTP response code
      * @param response
@@ -477,7 +505,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Exact equality assertion on response body
-     * 
+     *
      * @param content
      *            expected body content
      * @param response
@@ -489,10 +517,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts response body matched a pattern or contains some text.
-     * 
+     *
      * @param pattern
-     *            a regular expression pattern or a regular text, ( which must
-     *            be escaped using Pattern.quote)
+     *            a regular expression pattern or a regular text, ( which must be escaped using Pattern.quote)
      * @param response
      *            server response
      */
@@ -503,10 +530,9 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     /**
-     * Verify response charset encoding, as returned by the server in the
-     * Content-Type header. Be aware that if no charset is returned, assertion
-     * will fail.
-     * 
+     * Verify response charset encoding, as returned by the server in the Content-Type header. Be aware that if no
+     * charset is returned, assertion will fail.
+     *
      * @param charset
      *            expected charset encoding such as "utf-8" or "iso8859-1".
      * @param response
@@ -520,10 +546,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Verify the response content-type
-     * 
+     *
      * @param contentType
-     *            expected content-type without any charset extension, such as
-     *            "text/html"
+     *            expected content-type without any charset extension, such as "text/html"
      * @param response
      *            server response
      */
@@ -536,7 +561,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Exact equality assertion on a response header value
-     * 
+     *
      * @param headerName
      *            header to verify. case-insensitive
      * @param value
@@ -551,7 +576,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * obtains the response body as a string
-     * 
+     *
      * @param response
      *            server response
      * @return the response body as an <em>utf-8 string</em>

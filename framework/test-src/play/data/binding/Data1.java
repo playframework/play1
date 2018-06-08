@@ -1,6 +1,6 @@
 package play.data.binding;
 
-public class Data1 {
+class Data1 {
 
     public static int myStatic;
 
@@ -25,21 +25,5 @@ public class Data1 {
         if (a != null ? !a.equals(data1.a) : data1.a != null) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = a != null ? a.hashCode() : 0;
-        result = 31 * result + b;
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Data1{" +
-                "f='" + f + '\'' +
-                ", a='" + a + '\'' +
-                ", b=" + b +
-                '}';
     }
 }

@@ -29,7 +29,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 public class FileService  {
 
     public static void serve(File localFile, HttpRequest nettyRequest, HttpResponse nettyResponse, ChannelHandlerContext ctx, Request request, Response response, Channel channel) throws FileNotFoundException {
-        final RandomAccessFile raf = new RandomAccessFile(localFile, "r");
+        RandomAccessFile raf = new RandomAccessFile(localFile, "r");
         try {
             long fileLength = raf.length();
             
@@ -145,7 +145,7 @@ public class FileService  {
                 }
                 long length = 0;
                 for(ByteRange range: byteRanges) {
-                    length += range.computeTotalLengh();
+                    length += range.computeTotalLength();
                 }
                 nettyResponse.headers().set("Content-length", length);
             }
@@ -201,7 +201,7 @@ public class FileService  {
             try {
                 String headerValue = request.headers().get("range").trim().substring("bytes=".length());
                 String[] rangesValues = headerValue.split(",");
-                ArrayList<long[]> ranges = new ArrayList<long[]>(rangesValues.length);
+                ArrayList<long[]> ranges = new ArrayList<>(rangesValues.length);
                 for(int i = 0; i < rangesValues.length; i++) {
                     String rangeValue = rangesValues[i];
                     long start, end;
@@ -252,11 +252,12 @@ public class FileService  {
                 return new long[0][];
             long[][] sortedChunks = Arrays.copyOf(chunks, chunks.length);
             Arrays.sort(sortedChunks, new Comparator<long[]>() {
+                @Override
                 public int compare(long[] t1, long[] t2) {
                     return new Long(t1[0]).compareTo(t2[0]);
                 }
             });
-            ArrayList<long[]> result = new ArrayList<long[]>();
+            ArrayList<long[]> result = new ArrayList<>();
             result.add(sortedChunks[0]);
             for (int i = 1; i < sortedChunks.length; i++) {
                 long[] c1 = sortedChunks[i];
@@ -289,7 +290,7 @@ public class FileService  {
                 return end - start + 1 - servedRange;
             }
             
-            public long computeTotalLengh() {
+            public long computeTotalLength() {
                 return length() + header.length;
             }
             

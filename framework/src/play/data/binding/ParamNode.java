@@ -10,18 +10,18 @@ import java.util.Set;
 
 public class ParamNode {
     private final String name;
-    private final Map<String, ParamNode> _children = new HashMap<String, ParamNode>(8);
+    private final Map<String, ParamNode> _children = new HashMap<>(8);
     private String[] values = null;
     private String originalKey;
 
     // splits a string on one-ore-more instances of .[]
-    // this works so that all the following strings (param naming syntaxes)
+    // this works so that all the following strings (param naming syntax)
     // is resolved into the same structural hierarchy:
     // a.b.c=12
     // a[b].c=12
     // a[b][c]=12
     // a.b[c]=12
-    private final static String keyPartDelimiterRegexpString = "[\\.\\[\\]]+";
+    private static final String keyPartDelimiterRegexpString = "[\\.\\[\\]]+";
 
     public ParamNode(String name) {
         this.name = name;

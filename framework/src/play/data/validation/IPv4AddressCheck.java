@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
 
-    final static String mes = "validation.ipv4";
+    static final String mes = "validation.ipv4";
 
     @Override
     public void configure(IPv4Address ipv4Address) {
@@ -29,7 +29,7 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
             }
 
             for (int i = 0; i < parts.length; i++) {
-                // Check taht we don't have empty part or (+-) sign
+                // Check that we don't have empty part or (+-) sign
                 if (parts[i].isEmpty() || !parts[i].matches("[0-9]{1,3}")) {
                     return false;
                 }

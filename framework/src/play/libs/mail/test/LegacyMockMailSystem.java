@@ -1,28 +1,21 @@
 package play.libs.mail.test;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.Email;
+import play.Logger;
+import play.libs.Mail;
+import play.libs.mail.MailSystem;
+import play.utils.ImmediateFuture;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
-
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.mail.Email;
-
-import play.Logger;
-import play.libs.Mail;
-import play.libs.mail.MailSystem;
-import play.utils.ImmediateFuture;
 
 /**
  * Just kept for compatibility reasons, use test double substitution mechanism instead.
@@ -34,12 +27,12 @@ import play.utils.ImmediateFuture;
 public class LegacyMockMailSystem implements MailSystem {
 
     // Has to remain static to preserve the possibility of testing mail sending within Selenium tests
-    static Map<String, String> emails = new HashMap<String, String>();
+    static Map<String, String> emails = new HashMap<>();
 
     @Override
     public Future<Boolean> sendMessage(Email email) {
         try {
-            final StringBuffer content = new StringBuffer();
+            StringBuilder content = new StringBuilder();
             Properties props = new Properties();
             props.put("mail.smtp.host", "myfakesmtpserver.com");
 
@@ -56,21 +49,21 @@ public class LegacyMockMailSystem implements MailSystem {
             content.append("From Mock Mailer\n\tNew email received by");
 
 
-            content.append("\n\tFrom: " + email.getFromAddress().getAddress());
-            content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
+            content.append("\n\tFrom: ").append(email.getFromAddress().getAddress());
+            content.append("\n\tReplyTo: ").append(email.getReplyToAddresses().get(0).getAddress());
 
             addAddresses(content, "To",  email.getToAddresses());
             addAddresses(content, "Cc",  email.getCcAddresses());
             addAddresses(content, "Bcc", email.getBccAddresses());
 
-            content.append("\n\tSubject: " + email.getSubject());
-            content.append("\n\t" + body);
+            content.append("\n\tSubject: ").append(email.getSubject());
+            content.append("\n\t").append(body);
 
             content.append("\n");
             Logger.info(content.toString());
 
             for (Object add : email.getToAddresses()) {
-                content.append(", " + add.toString());
+                content.append(", ").append(add);
                 emails.put(((InternetAddress) add).getAddress(), content.toString());
             }
 
@@ -117,18 +110,18 @@ public class LegacyMockMailSystem implements MailSystem {
     }
 
 
-    private static void addAddresses(final StringBuffer content,
-            String header, List<?> ccAddresses) {
+    private static void addAddresses(StringBuilder content,
+                                     String header, List<?> ccAddresses) {
         if (ccAddresses != null && !ccAddresses.isEmpty()) {
-            content.append("\n\t" + header + ": ");
+            content.append("\n\t").append(header).append(": ");
             for (Object add : ccAddresses) {
-                content.append(add.toString() + ", ");
+                content.append(add).append(", ");
             }
             removeTheLastComma(content);
         }
     }
 
-    private static void removeTheLastComma(final StringBuffer content) {
+    private static void removeTheLastComma(StringBuilder content) {
         content.delete(content.length() - 2, content.length());
     }
 

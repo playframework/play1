@@ -25,11 +25,11 @@ public class MailerEnhancer extends Enhancer {
             return;
         }
 
-        for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
+        for (CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
             if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers())) {
                 try {
-                    ctMethod.insertBefore("if(infos.get() != null) {play.Logger.warn(\"You call " + ctMethod.getLongName() + " from \" + ((java.util.Map)infos.get()).get(\"method\") + \". It's forbidden in a Mailer. It will propably fail...\", new Object[0]);}; infos.set(new java.util.HashMap());((java.util.Map)infos.get()).put(\"method\", \"" + ctMethod.getLongName() + "\");");
+                    ctMethod.insertBefore("if(infos.get() != null) {play.Logger.warn(\"You call " + ctMethod.getLongName() + " from \" + ((java.util.Map)infos.get()).get(\"method\") + \". It's forbidden in a Mailer. It will probably fail...\", new Object[0]);}; infos.set(new java.util.HashMap());((java.util.Map)infos.get()).put(\"method\", \"" + ctMethod.getLongName() + "\");");
                     ctMethod.insertAfter("infos.set(null);", true);
                 } catch (Exception e) {
                     Logger.error(e, "Error in MailerEnhancer");

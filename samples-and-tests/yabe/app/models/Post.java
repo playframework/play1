@@ -32,7 +32,7 @@ public class Post extends Model {
     public Set<Tag> tags;
     
     public Post(User author, String title, String content) { 
-        this.comments = new ArrayList<Comment>();
+        this.comments = new ArrayList<>();
         this.tags = new TreeSet();  
         this.author = author;
         this.title = title;
@@ -62,7 +62,7 @@ public class Post extends Model {
     
     public static List<Post> findTaggedWith(String tag) {
         return Post.find(
-            "select distinct p from Post p join p.tags as t where t.name = ?",
+            "select distinct p from Post p join p.tags as t where t.name = ?1",
             tag
         ).fetch();
     }

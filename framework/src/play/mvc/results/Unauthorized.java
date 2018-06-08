@@ -9,15 +9,20 @@ import play.mvc.Http.Response;
  */
 public class Unauthorized extends Result {
     
-    String realm;
+    private final String realm;
     
     public Unauthorized(String realm) {
         super(realm);
         this.realm = realm;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = Http.StatusCode.UNAUTHORIZED;
         response.setHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
+    }
+
+    public String getRealm() {
+        return realm;
     }
 }

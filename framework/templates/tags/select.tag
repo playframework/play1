@@ -23,6 +23,9 @@
 
 <select name="${_name}" size="${_size?:1}" ${serializedAttrs}>
     #{doBody /}
+    #{if _showEmpty == true}
+        #{option _emptyValue}  #{/option}
+    #{/if}
     #{list items:_items, as:'i'}
         #{option _valueProperty && i.hasProperty(_valueProperty) ? i[_valueProperty] : i}&{(_labelProperty && i.hasProperty(_labelProperty) ? play.utils.HTML.htmlEscape(i[_labelProperty]?.toString()) : i?.toString())?.replace("%", "%%")}#{/option}
     #{/list}

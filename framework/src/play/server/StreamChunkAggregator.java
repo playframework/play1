@@ -16,7 +16,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
 
     private volatile HttpMessage currentMessage;
     private volatile OutputStream out;
-    private final static int maxContentLength = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
+    private static final int maxContentLength = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
     private volatile File file;
 
     /**
@@ -37,7 +37,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
         if (currentMessage == null) {
             HttpMessage m = (HttpMessage) msg;
             if (m.isChunked()) {
-                final String localName = UUID.randomUUID().toString();
+                String localName = UUID.randomUUID().toString();
                 // A chunked message - remove 'Transfer-Encoding' header,
                 // initialize the cumulative buffer, and wait for incoming chunks.
                 List<String> encodings = m.headers().getAll(HttpHeaders.Names.TRANSFER_ENCODING);
@@ -55,7 +55,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
         } else {
             // TODO: If less that threshold then in memory
             // Merge the received chunk into the content of the current message.
-            final HttpChunk chunk = (HttpChunk) msg;
+            HttpChunk chunk = (HttpChunk) msg;
             if (maxContentLength != -1 && (localFile.length() > (maxContentLength - chunk.getContent().readableBytes()))) {
                 currentMessage.headers().set(HttpHeaders.Names.WARNING, "play.netty.content.length.exceeded");
             } else {
@@ -72,7 +72,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
                     currentMessage.setContent(new FileChannelBuffer(localFile));
                     this.out = null;
                     this.currentMessage = null;
-		            this.file.delete();
+                    this.file.delete();
                     this.file = null;
                     Channels.fireMessageReceived(ctx, currentMessage, e.getRemoteAddress());
                 }

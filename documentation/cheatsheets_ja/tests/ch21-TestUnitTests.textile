@@ -14,7 +14,7 @@ h2. Test - Unit Tests
 *==@After public void cleanupJunk()==*
 各ユニットテストの後に実行されます。
 
-*==@BeforeClass void whenTestClassInstanciated();==*
+*==@BeforeClass void whenTestClassInstantiated();==*
 当該テストクラスがインスタンス化されたときに一度だけ実行されます。
 
 *==@AfterClass void whenTestClassCompleted()==*

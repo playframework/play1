@@ -15,7 +15,7 @@ import play.libs.I18N;
 @SuppressWarnings("serial")
 public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
-    final static String mes = "validation.future";
+    static final String mes = "validation.future";
 
     Date reference;
 
@@ -33,6 +33,7 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
         }
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {
@@ -57,7 +58,7 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("reference", new SimpleDateFormat(I18N.getDateFormat()).format(reference));
         return messageVariables;
     }

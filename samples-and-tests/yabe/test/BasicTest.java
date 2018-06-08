@@ -117,7 +117,7 @@ public class BasicTest extends UnitTest {
         // Delete the post
         bobPost.delete();
 
-        // Chech the all comments have been deleted
+        // Check the all comments have been deleted
         assertEquals(1, User.count());
         assertEquals(0, Post.count());
         assertEquals(0, Comment.count());
@@ -192,10 +192,15 @@ public class BasicTest extends UnitTest {
                 return m1.get("tag").toString().compareTo(m2.get("tag").toString());
             }
         });
-		
-        assertTrue("[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]".equals(cloud.toString())
-				|| "[{pound=1, tag=Blue}, {pound=1, tag=Green}, {pound=2, tag=Red}]".equals(cloud.toString()));
-        
+
+        assertEquals(3, cloud.size());
+        assertTag(cloud.get(0), "Blue", 1L);
+        assertTag(cloud.get(1), "Green", 1L);
+        assertTag(cloud.get(2), "Red", 2L);
     }
- 
+
+    private void assertTag(Map tag, String tagName, long pound) {
+        assertEquals(tagName, tag.get("tag"));
+        assertEquals(pound, tag.get("pound"));
+    }
 }

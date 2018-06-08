@@ -89,12 +89,12 @@ public class Http {
         public List<String> values;
 
         public Header() {
-            this.values = new ArrayList<String>(5);
+            this.values = new ArrayList<>(5);
         }
 
         public Header(String name, String value) {
             this.name = name;
-            this.values = new ArrayList<String>(5);
+            this.values = new ArrayList<>(5);
             this.values.add(value);
         }
 
@@ -124,12 +124,10 @@ public class Http {
     public static class Cookie implements Serializable {
 
         /**
-         * When creating cookie without specifying domain, this value is used.
-         * Can be configured using the property
+         * When creating cookie without specifying domain, this value is used. Can be configured using the property
          * 'application.defaultCookieDomain' in application.conf.
          *
-         * This feature can be used to allow sharing session/cookies between
-         * multiple sub domains.
+         * This feature can be used to allow sharing session/cookies between multiple sub domains.
          */
         public static String defaultDomain = null;
 
@@ -188,8 +186,7 @@ public class Http {
          * URL path (excluding scheme, host and port), starting with '/'<br>
          * 
          * <b>Example:</b><br>
-         * With this full URL <code>http://localhost:9000/path0/path1</code>
-         * <br>
+         * With this full URL <code>http://localhost:9000/path0/path1</code> <br>
          * =&gt; <b>url</b> will be <code>/path0/path1</code>
          */
         public String url;
@@ -210,8 +207,8 @@ public class Http {
          */
         public String contentType;
         /**
-         * This is the encoding used to decode this request. If encoding-info is
-         * not found in request, then Play.defaultWebEncoding is used
+         * This is the encoding used to decode this request. If encoding-info is not found in request, then
+         * Play.defaultWebEncoding is used
          */
         public String encoding = Play.defaultWebEncoding;
         /**
@@ -257,23 +254,23 @@ public class Http {
         /**
          * Bind to thread
          */
-        public static ThreadLocal<Request> current = new ThreadLocal<Request>();
+        public static final ThreadLocal<Request> current = new ThreadLocal<>();
         /**
-         * The really invoker Java methid
+         * The really invoker Java method
          */
         public transient Method invokedMethod;
         /**
          * The invoked controller class
          */
-        public transient Class<? extends Controller> controllerClass;
+        public transient Class<? extends PlayController> controllerClass;
         /**
          * The instance of invoked controller in case it uses non-static action methods.
          */
-        public transient Controller controllerInstance;
+        public transient PlayController controllerInstance;
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap<String, Object>(16);
+        public Map<String, Object> args = new HashMap<>(16);
         /**
          * When the request has been received
          */
@@ -304,22 +301,49 @@ public class Http {
         public final Scope.Params params = new Scope.Params();
 
         /**
-         * Deprecate the default constructor to encourage the use of
-         * createRequest() when creating new requests.
+         * Deprecate the default constructor to encourage the use of createRequest() when creating new requests.
          *
-         * Cannot hide it with protected because we have to be backward
-         * compatible with modules - ie PlayGrizzlyAdapter.java
+         * Cannot hide it with protected because we have to be backward compatible with modules - ie
+         * PlayGrizzlyAdapter.java
          */
         @Deprecated
         public Request() {
-            headers = new HashMap<String, Http.Header>(16);
-            cookies = new HashMap<String, Http.Cookie>(16);
+            headers = new HashMap<>(16);
+            cookies = new HashMap<>(16);
         }
 
         /**
-         * All creation / initing of new requests should use this method. The
-         * purpose of this is to "show" what is needed when creating new
-         * Requests.
+         * All creation / initiating of new requests should use this method. The purpose of this is to "show" what is
+         * needed when creating new Requests.
+         * 
+         * @param _remoteAddress
+         *            The remote IP address
+         * @param _method
+         *            the Method
+         * @param _path
+         *            path
+         * @param _querystring
+         *            The query String
+         * @param _contentType
+         *            The content Type
+         * @param _body
+         *            The request body
+         * @param _url
+         *            The request URL
+         * @param _host
+         *            The request host
+         * @param _isLoopback
+         *            Indicate if the request comes from loopback interface
+         * @param _port
+         *            The request port
+         * @param _domain
+         *            The request domain
+         * @param _secure
+         *            Indicate is request is secure or not
+         * @param _headers
+         *            The request headers
+         * @param _cookies
+         *            The request cookies
          * 
          * @return the newly created Request object
          */
@@ -356,12 +380,12 @@ public class Http {
             newRequest.secure = _secure;
 
             if (_headers == null) {
-                _headers = new HashMap<String, Http.Header>(16);
+                _headers = new HashMap<>(16);
             }
             newRequest.headers = _headers;
 
             if (_cookies == null) {
-                _cookies = new HashMap<String, Http.Cookie>(16);
+                _cookies = new HashMap<>(16);
             }
             newRequest.cookies = _cookies;
 
@@ -394,10 +418,10 @@ public class Http {
                 }
             }
 
-            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "true").toLowerCase().equals("true") && this.host != null
-                    && !this.host.equals(_host)) {
+            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").toLowerCase().equals("true")
+                    && this.host != null && !this.host.equals(_host)) {
                 if (this.host.contains(":")) {
-                    final String[] hosts = this.host.split(":");
+                    String[] hosts = this.host.split(":");
                     this.port = Integer.parseInt(hosts[1]);
                     this.domain = hosts[0];
                 } else {
@@ -452,8 +476,8 @@ public class Http {
         }
 
         /**
-         * Automatically resolve request format from the Accept header (in this
-         * order : html &gt; xml &gt; json &gt; text)
+         * Automatically resolve request format from the Accept header (in this order : html &gt; xml &gt; json &gt;
+         * text)
          */
         public void resolveFormat() {
 
@@ -513,8 +537,9 @@ public class Http {
         }
 
         /**
-         * This request was sent by an Ajax framework. (rely on the
-         * X-Requested-With header).
+         * This request was sent by an Ajax framework. (rely on the X-Requested-With header).
+         * 
+         * @return True is the request is an Ajax, false otherwise
          */
         public boolean isAjax() {
             if (!headers.containsKey("x-requested-with")) {
@@ -541,17 +566,15 @@ public class Http {
         }
 
         /**
-         * Return the languages requested by the browser, ordered by preference
-         * (preferred first). If no Accept-Language header is present, an empty
-         * list is returned.
+         * Return the languages requested by the browser, ordered by preference (preferred first). If no Accept-Language
+         * header is present, an empty list is returned.
          *
-         * @return Language codes in order of preference, e.g.
-         *         "en-us,en-gb,en,de".
+         * @return Language codes in order of preference, e.g. "en-us,en-gb,en,de".
          */
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
             if (!headers.containsKey("accept-language")) {
-                return Collections.<String> emptyList();
+                return Collections.emptyList();
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
@@ -572,7 +595,7 @@ public class Http {
                     return (int) (q2 - q1);
                 }
             });
-            List<String> result = new ArrayList<String>(10);
+            List<String> result = new ArrayList<>(10);
             for (String lang : languages) {
                 result.add(lang.trim().split(";")[0]);
             }
@@ -583,20 +606,7 @@ public class Http {
             if (!(headers.containsKey("if-none-match") && headers.containsKey("if-modified-since"))) {
                 return true;
             } else {
-                String browserEtag = headers.get("if-none-match").value();
-                if (!browserEtag.equals(etag)) {
-                    return true;
-                } else {
-                    try {
-                        Date browserDate = Utils.getHttpDateFormatter().parse(headers.get("if-modified-since").value());
-                        if (browserDate.getTime() >= last) {
-                            return false;
-                        }
-                    } catch (ParseException ex) {
-                        Logger.error("Can't parse date", ex);
-                    }
-                    return true;
-                }
+                return HTTP.isModified(etag, last, headers.get("if-none-match").value(), headers.get("if-modified-since").value());
             }
         }
     }
@@ -617,11 +627,11 @@ public class Http {
         /**
          * Response headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Header>(16);
+        public Map<String, Http.Header> headers = new HashMap<>(16);
         /**
          * Response cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>(16);
+        public Map<String, Http.Cookie> cookies = new HashMap<>(16);
         /**
          * Response body stream
          */
@@ -638,7 +648,7 @@ public class Http {
         /**
          * Bind to thread
          */
-        public static ThreadLocal<Response> current = new ThreadLocal<Response>();
+        public static final ThreadLocal<Response> current = new ThreadLocal<>();
 
         /**
          * Retrieve the current response
@@ -678,7 +688,7 @@ public class Http {
         public void setHeader(String name, String value) {
             Header h = new Header();
             h.name = name;
-            h.values = new ArrayList<String>(1);
+            h.values = new ArrayList<>(1);
             h.values.add(value);
             headers.put(name, h);
         }
@@ -705,7 +715,7 @@ public class Http {
          * Removes the specified cookie with path /
          * 
          * @param name
-         *            cookiename
+         *            cookie name
          */
         public void removeCookie(String name) {
             removeCookie(name, "/");
@@ -715,9 +725,9 @@ public class Http {
          * Removes the cookie
          * 
          * @param name
-         *            cookiename
+         *            cookie name
          * @param path
-         *            cookiepath
+         *            cookie path
          */
         public void removeCookie(String name, String path) {
             setCookie(name, "", null, path, 0, false);
@@ -727,9 +737,11 @@ public class Http {
          * Set a new cookie that will expire in (current) + duration
          * 
          * @param name
+         *            the cookie name
          * @param value
+         *            The cookie value
          * @param duration
-         *            Ex: 3d
+         *            the cookie duration (Ex: 3d)
          */
         public void setCookie(String name, String value, String duration) {
             setCookie(name, value, null, "/", Time.parseDuration(duration), false);
@@ -779,8 +791,13 @@ public class Http {
         /**
          * Add cache-control headers
          * 
+         * @param etag
+         *            the Etag value
+         * 
          * @param duration
-         *            Ex: 3h
+         *            the cache duration (Ex: 3h)
+         * @param lastModified
+         *            The last modified date
          */
         public void cacheFor(String etag, String duration, long lastModified) {
             int maxAge = Time.parseDuration(duration);
@@ -790,53 +807,41 @@ public class Http {
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          */
         public void accessControl(String allowOrigin) {
             accessControl(allowOrigin, null, false);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          * @param allowCredentials
-         *            Let the browser send the cookies when doing a x-domain
-         *            request. Only respected by the browser if allowOrigin !=
-         *            "*"
+         *            Let the browser send the cookies when doing a x-domain request. Only respected by the browser if
+         *            allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, boolean allowCredentials) {
             accessControl(allowOrigin, null, allowCredentials);
         }
 
         /**
-         * Add headers to allow cross-domain requests. Be careful, a lot of
-         * browsers don't support these features and will ignore the headers.
-         * Refer to the browsers' documentation to know what versions support
-         * them.
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support these features and
+         * will ignore the headers. Refer to the browsers' documentation to know what versions support them.
          * 
          * @param allowOrigin
-         *            a comma separated list of domains allowed to perform the
-         *            x-domain call, or "*" for all.
+         *            a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          * @param allowMethods
-         *            a comma separated list of HTTP methods allowed, or null
-         *            for all.
+         *            a comma separated list of HTTP methods allowed, or null for all.
          * @param allowCredentials
-         *            Let the browser send the cookies when doing a x-domain
-         *            request. Only respected by the browser if allowOrigin !=
-         *            "*"
+         *            Let the browser send the cookies when doing a x-domain request. Only respected by the browser if
+         *            allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, String allowMethods, boolean allowCredentials) {
             setHeader("Access-Control-Allow-Origin", allowOrigin);
@@ -866,7 +871,7 @@ public class Http {
 
         // Chunked stream
         public boolean chunked = false;
-        final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
+        final List<F.Action<Object>> writeChunkHandlers = new ArrayList<>();
 
         public void writeChunk(Object o) {
             this.chunked = true;
@@ -888,11 +893,11 @@ public class Http {
      */
     public abstract static class Inbound {
 
-        public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+        public static final ThreadLocal<Inbound> current = new ThreadLocal<>();
         final BlockingEventStream<WebSocketEvent> stream;
 
         public Inbound(ChannelHandlerContext ctx) {
-            stream = new BlockingEventStream<WebSocketEvent>(ctx);
+            stream = new BlockingEventStream<>(ctx);
         }
 
         public static Inbound current() {
@@ -920,9 +925,9 @@ public class Http {
     /**
      * A Websocket Outbound channel
      */
-    public static abstract class Outbound {
+    public abstract static class Outbound {
 
-        public static ThreadLocal<Outbound> current = new ThreadLocal<Outbound>();
+        public static final ThreadLocal<Outbound> current = new ThreadLocal<>();
 
         public static Outbound current() {
             return current.get();
@@ -994,9 +999,9 @@ public class Http {
      */
     public static class WebSocketFrame extends WebSocketEvent {
 
-        final public boolean isBinary;
-        final public String textData;
-        final public byte[] binaryData;
+        public final boolean isBinary;
+        public final String textData;
+        public final byte[] binaryData;
 
         public WebSocketFrame(String data) {
             this.isBinary = false;

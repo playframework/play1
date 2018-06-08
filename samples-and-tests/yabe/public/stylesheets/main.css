@@ -60,7 +60,7 @@ body {
     -moz-border-radius: 16px;
 }
 
-/** A little hacky to create arrows without images **/
+/** A little hack to create arrows without images **/
 .about {
     text-indent: -999em;
     display: block;

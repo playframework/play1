@@ -2,17 +2,21 @@ package play.test;
 
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+
 import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 
 @RunWith(PlayJUnitRunner.class)
-public class BaseTest extends org.junit.Assert {
+public abstract class BaseTest extends org.junit.Assert {
 
     @Rule
     public PlayJUnitRunner.StartPlay startPlayBeforeTests = PlayJUnitRunner.StartPlay.rule();
 
     /**
      * Pause the current thread
+     * 
+     * @param millis
+     *            Time in milliseconds
      */
     public void pause(long millis) {
         try {
@@ -21,7 +25,7 @@ public class BaseTest extends org.junit.Assert {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     /**
      * Flush and clear the JPA session
      */
@@ -30,5 +34,4 @@ public class BaseTest extends org.junit.Assert {
         JPA.em().flush();
         JPA.em().clear();
     }
-    
 }

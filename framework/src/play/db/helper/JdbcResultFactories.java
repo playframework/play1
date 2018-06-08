@@ -31,8 +31,8 @@ public class JdbcResultFactories {
             || objectClass == Long.class
             || objectClass == Float.class
             || objectClass == Double.class
-                ? new PrimitiveFactory<T>(objectClass, fields)
-                : new ClassFactory<T>(objectClass, fields);
+                ? new PrimitiveFactory<>(objectClass, fields)
+                : new ClassFactory<>(objectClass, fields);
     }
 
 
@@ -42,11 +42,11 @@ public class JdbcResultFactories {
     }
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass, int columnIndex) {
-        return new PrimitiveFactory<T>(objectClass, columnIndex);
+        return new PrimitiveFactory<>(objectClass, columnIndex);
     }
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass, String field) {
-        return new PrimitiveFactory<T>(objectClass, field);
+        return new PrimitiveFactory<>(objectClass, field);
     }
 
 
@@ -60,7 +60,7 @@ public class JdbcResultFactories {
     }
 
     public static <T> JdbcResultFactory<T> buildClass(Class<T> objectClass, List<String> fields) {
-        return new ClassFactory<T>(objectClass, fields);
+        return new ClassFactory<>(objectClass, fields);
     }
 
 
@@ -89,6 +89,7 @@ public class JdbcResultFactories {
             this.columnIndex = 1;
         }
 
+        @Override
         public void init(ResultSet result) throws SQLException {
             if (field != null) {
                 ResultSetMetaData meta = result.getMetaData();
@@ -104,6 +105,7 @@ public class JdbcResultFactories {
         }
 
         @SuppressWarnings("unchecked")
+        @Override
         public T create(ResultSet result) throws SQLException {
             Object value = result.getObject(columnIndex);
             if (value instanceof BigDecimal) value = new Long(((BigDecimal)value).longValue());
@@ -123,9 +125,10 @@ public class JdbcResultFactories {
             this.fields = fields;
         }
 
+        @Override
         public void init(ResultSet result) throws SQLException {
             if (fields == null) {
-                fields = new ArrayList<String>();
+                fields = new ArrayList<>();
                 ResultSetMetaData meta = result.getMetaData();
                 int count = meta.getColumnCount();
                 for (int i = 1; i <= count; i++) {
@@ -135,6 +138,7 @@ public class JdbcResultFactories {
             }
         }
 
+        @Override
         public T create(ResultSet result) throws SQLException {
             try {
                 T obj = objectClass.newInstance();
@@ -144,11 +148,7 @@ public class JdbcResultFactories {
                     objectClass.getDeclaredField(field).set(obj, value);
                 }
                 return obj;
-            } catch (InstantiationException ex) {
-                throw new RuntimeException(ex);
-            } catch (NoSuchFieldException ex) {
-                throw new RuntimeException(ex);
-            } catch (IllegalAccessException ex) {
+            } catch (InstantiationException | NoSuchFieldException | IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             }
         }

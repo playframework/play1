@@ -116,7 +116,7 @@ class PlayApplication(object):
             sys.exit(-1)
         toFile = os.path.join(self.path, t)
         if os.path.exists(toFile):
-            response = raw_input("~ Warning! %s already exists and will be overriden (y/n)? " % toFile)
+            response = raw_input("~ Warning! %s already exists and will be overridden (y/n)? " % toFile)
             if not response == 'y':
                 return
         if not os.path.exists(os.path.dirname(toFile)):
@@ -224,7 +224,7 @@ class PlayApplication(object):
             s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
-            if self.play_env["disable_random_jpda"]:
+            if "disable_random_jpda" in self.play_env and self.play_env["disable_random_jpda"]:
                 print 'JPDA port %s is already used, and command line option "-f" was specified. Cannot start server\n' % self.jpda_port
                 sys.exit(-1)
             else:
@@ -281,11 +281,11 @@ class PlayApplication(object):
         else:
             javaVersion = getJavaVersion() 
         print "~ using java version \"%s\"" % javaVersion
-        if javaVersion.startswith("1.7"):
-            # JDK 7 compat
-            java_args.append('-XX:-UseSplitVerifier')
-        elif javaVersion.startswith("1.8"):
-            java_args.append('-noverify')
+        
+        if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
+            print "~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion
+            
+        java_args.append('-noverify')
 
         java_policy = self.readConf('java.policy')
         if java_policy != '':

@@ -27,7 +27,7 @@ public class ConfigurationTest {
     public void dbNameResolver_multipleDatabases() {
         Play.configuration.put("db", "mysql:user:pwd@database_name");
         Play.configuration.put("db.test", "mysql:user:pwd@database_name2");
-        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
+        List<String> dbNames = new ArrayList<>(Configuration.getDbNames());
         assertEquals(2, dbNames.size());
         assertEquals("default", dbNames.get(0));
         assertEquals("test", dbNames.get(1));
@@ -58,7 +58,7 @@ public class ConfigurationTest {
         Play.configuration.put("db.test.user", "user2");
         Play.configuration.put("db.test.pass", "pass2");
         
-        List<String> dbNames = new ArrayList<String>(Configuration.getDbNames());
+        List<String> dbNames = new ArrayList<>(Configuration.getDbNames());
         assertEquals(2, dbNames.size());
         assertEquals("default", dbNames.get(0));
         assertEquals("test", dbNames.get(1));
@@ -241,6 +241,7 @@ public class ConfigurationTest {
     
     @Test
     public void getPropertiesForDefaultTest() {
+        //db
         Play.configuration.put("db.url", "jdbc:mysql://127.0.0.1/testPlay");
         Play.configuration.put("db.driver", "com.mysql.jdbc.Driver");
         Play.configuration.put("db.user", "root");
@@ -249,13 +250,23 @@ public class ConfigurationTest {
         Play.configuration.put("db.pool.maxSize", "20");
         Play.configuration.put("db.pool.minSize", "1");
         Play.configuration.put("db.pool.maxIdleTimeExcessConnections", "60");
-        
+        //javax.persistence
+        Play.configuration.put("javax.persistence.lock.scope", "EXTENDED");
+        Play.configuration.put("javax.persistence.lock.timeout", "1000");
+        //jpa
+        Play.configuration.put("jpa.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        Play.configuration.put("jpa.ddl", "update");
+        Play.configuration.put("jpa.debugSQL", "true");
+        //hibernate
         Play.configuration.put("hibernate.ejb.event.post-insert", "postInsert");
         Play.configuration.put("hibernate.ejb.event.post-update", "postUpdate");
+        //org.hibernate
+        Play.configuration.put("org.hibernate.flushMode", "AUTO");
 
         Configuration dbConfig = new Configuration("default");
         Map<String, String> properties = dbConfig.getProperties();
-        
+
+        //db
         assertEquals("jdbc:mysql://127.0.0.1/testPlay", properties.get("db.url"));
         assertEquals("com.mysql.jdbc.Driver", properties.get("db.driver"));
         assertEquals("root",properties.get("db.user"));
@@ -264,15 +275,25 @@ public class ConfigurationTest {
         assertEquals("20", properties.get("db.pool.maxSize"));
         assertEquals("1", properties.get("db.pool.minSize"));
         assertEquals("60", properties.get("db.pool.maxIdleTimeExcessConnections"));
-        
+        //javax.persistence
+        assertEquals("EXTENDED", properties.get("javax.persistence.lock.scope"));
+        assertEquals("1000", properties.get("javax.persistence.lock.timeout"));
+        //jpa
+        assertEquals("org.hibernate.dialect.PostgreSQLDialect", properties.get("jpa.dialect"));
+        assertEquals("update", properties.get("jpa.ddl"));
+        assertEquals("true", properties.get("jpa.debugSQL"));
+        //hibernate
         assertEquals("postInsert", properties.get("hibernate.ejb.event.post-insert"));
         assertEquals("postUpdate", properties.get("hibernate.ejb.event.post-update"));
-        
+        //org.hibernate
+        assertEquals("AUTO", properties.get("org.hibernate.flushMode"));
+
         assertEquals(Play.configuration.size(), properties.size());
     }
     
     @Test
     public void getPropertiesForDBTest() {
+        //db
         Play.configuration.put("db.test.url", "jdbc:mysql://127.0.0.1/testPlay");
         Play.configuration.put("db.test.driver", "com.mysql.jdbc.Driver");
         Play.configuration.put("db.test.user", "root");
@@ -281,13 +302,23 @@ public class ConfigurationTest {
         Play.configuration.put("db.test.pool.maxSize", "20");
         Play.configuration.put("db.test.pool.minSize", "1");
         Play.configuration.put("db.test.pool.maxIdleTimeExcessConnections", "60");
-        
+        //javax.persistence
+        Play.configuration.put("javax.persistence.test.lock.scope", "EXTENDED");
+        Play.configuration.put("javax.persistence.test.lock.timeout", "1000");
+        //jpa
+        Play.configuration.put("jpa.test.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        Play.configuration.put("jpa.test.ddl", "update");
+        Play.configuration.put("jpa.test.debugSQL", "true");
+        //hibernate
         Play.configuration.put("hibernate.test.ejb.event.post-insert", "postInsert");
         Play.configuration.put("hibernate.test.ejb.event.post-update", "postUpdate");
+        //org.hibernate
+        Play.configuration.put("org.hibernate.test.flushMode", "AUTO");
 
         Configuration dbConfig = new Configuration("test");
         Map<String, String> properties = dbConfig.getProperties();
-        
+
+        //db
         assertEquals("jdbc:mysql://127.0.0.1/testPlay", properties.get("db.url"));
         assertEquals("com.mysql.jdbc.Driver", properties.get("db.driver"));
         assertEquals("root",properties.get("db.user"));
@@ -296,10 +327,19 @@ public class ConfigurationTest {
         assertEquals("20", properties.get("db.pool.maxSize"));
         assertEquals("1", properties.get("db.pool.minSize"));
         assertEquals("60", properties.get("db.pool.maxIdleTimeExcessConnections"));
-        
+        //javax.persistence
+        assertEquals("EXTENDED", properties.get("javax.persistence.lock.scope"));
+        assertEquals("1000", properties.get("javax.persistence.lock.timeout"));
+        //jpa
+        assertEquals("org.hibernate.dialect.PostgreSQLDialect", properties.get("jpa.dialect"));
+        assertEquals("update", properties.get("jpa.ddl"));
+        assertEquals("true", properties.get("jpa.debugSQL"));
+        //hibernate
         assertEquals("postInsert", properties.get("hibernate.ejb.event.post-insert"));
         assertEquals("postUpdate", properties.get("hibernate.ejb.event.post-update"));
-        
+        //org.hibernate
+        assertEquals("AUTO", properties.get("org.hibernate.flushMode"));
+
         assertEquals(Play.configuration.size(), properties.size());
     }
 

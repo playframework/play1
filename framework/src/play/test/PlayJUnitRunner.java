@@ -65,15 +65,15 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     }
 
     @Override
-    public void run(final RunNotifier notifier) {
-	initTest();
-	jUnit4.run(notifier);
+    public void run(RunNotifier notifier) {
+        initTest();
+        jUnit4.run(notifier);
     }
-    
+
     @Override
     public void filter(Filter toFilter) throws NoTestsRemainException {
-    	jUnit4.filter(toFilter);
-    	
+        jUnit4.filter(toFilter);
+
     }
 
     // *********************
@@ -81,6 +81,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
 
         INVOKE_THE_TEST_IN_PLAY_CONTEXT {
 
+            @Override
             public Statement apply(final Statement base, FrameworkMethod method, Object target) {
 
                 return new Statement() {
@@ -118,6 +119,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
         },
         JUST_RUN_THE_TEST {
 
+            @Override
             public Statement apply(final Statement base, FrameworkMethod method, Object target) {
                 return new Statement() {
 

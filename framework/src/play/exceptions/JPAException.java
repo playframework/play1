@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.exception.GenericJDBCException;
 
-/**
- * JPA exception
- */
 public class JPAException extends PlayException implements SourceAttachment {
 
     public JPAException(String message) {
@@ -26,7 +23,8 @@ public class JPAException extends PlayException implements SourceAttachment {
     public String getErrorDescription() {
         if(getCause() != null && getCause() instanceof GenericJDBCException) {
             String SQL = ((GenericJDBCException)getCause()).getSQL();
-            return String.format("A JPA error occurred (%s): <strong>%s</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete, in case of ...", getMessage(), getCause() == null ? "" : getCause().getMessage(), SQL);
+            return String.format("A JPA error occurred (%s): <strong>%s</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete. SQL: (%s)", 
+                    getMessage(), getCause() == null ? "" : getCause().getMessage(), SQL);
         }
         return String.format("A JPA error occurred (%s): <strong>%s</strong>", getMessage(), getCause() == null ? "" : getCause().getMessage());
     }
@@ -41,9 +39,10 @@ public class JPAException extends PlayException implements SourceAttachment {
         return 1;
     }
 
+    @Override
     public List<String> getSource() {
-        List<String> sql = new ArrayList<String>();
-        if(getCause() != null && getCause() instanceof GenericJDBCException) {
+        List<String> sql = new ArrayList<>();
+        if (getCause() != null && getCause() instanceof GenericJDBCException) {
             sql.add(((GenericJDBCException)getCause()).getSQL());
         }
         return sql;

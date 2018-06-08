@@ -13,9 +13,9 @@ import org.apache.ivy.util.MessageLogger;
 
 public class HumanReadyLogger implements MessageLogger, TransferListener {
 
-    Set<String> notFound = new HashSet<String>();
-    Set<String> dynamics = new HashSet<String>();
-    Set<String> evicteds = new HashSet<String>();
+    Set<String> notFound = new HashSet<>();
+    Set<String> dynamics = new HashSet<>();
+    Set<String> evicteds = new HashSet<>();
     Pattern dep = Pattern.compile("found ([^#]+)#([^;]+);([^\\s]+) in (.*)");
     Pattern depNotFound = Pattern.compile("module not found: ([^#]+)#([^;]+);([^\\s]+)");
     Pattern dynamic = Pattern.compile("\\[(.*)\\] ([^#]+)#([^;]+);([^\\s]+)");
@@ -40,7 +40,7 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
                 return;
             }
 
-            if (msg.startsWith("found ")) { // Depedency found
+            if (msg.startsWith("found ")) { // Dependency found
                 if (msg.contains("playCore")) {
                     return;
                 }
@@ -69,7 +69,7 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
 
             Matcher m = evicted.matcher(msg);
             if (m.matches()) {
-                evicteds.add(m.group(2) + " " + m.group(3) + " is overriden by " + m.group(5) + " " + m.group(6));
+                evicteds.add(m.group(2) + " " + m.group(3) + " is overridden by " + m.group(5) + " " + m.group(6));
                 return;
             }
 
@@ -100,74 +100,93 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
 
     }
 
-    // ~~~~~~
+    @Override
     public void log(String string, int i) {
         niceLog(string, i);
     }
 
+    @Override
     public void rawlog(String string, int i) {
         niceLog(string, i);
     }
 
+    @Override
     public void debug(String string) {
     }
 
+    @Override
     public void verbose(String string) {
     }
 
+    @Override
     public void deprecated(String string) {
     }
 
+    @Override
     public void info(String string) {
         niceLog(string, Message.MSG_INFO);
     }
 
+    @Override
     public void rawinfo(String string) {
         niceLog(string, Message.MSG_INFO);
     }
 
+    @Override
     public void warn(String string) {
         niceLog(string, Message.MSG_WARN);
     }
 
+    @Override
     public void error(String string) {
         niceLog(string, Message.MSG_ERR);
     }
 
-    public List getProblems() {
+    @Override
+    public List<String> getProblems() {
         return null;
     }
 
-    public List getWarns() {
+    @Override
+    public List<String> getWarns() {
         return null;
     }
 
-    public List getErrors() {
+    @Override
+    public List<String> getErrors() {
         return null;
     }
 
+    @Override
     public void clearProblems() {
     }
 
+    @Override
     public void sumupProblems() {
     }
 
+    @Override
     public void progress() {
     }
 
+    @Override
     public void endProgress() {
     }
 
+    @Override
     public void endProgress(String string) {
     }
 
+    @Override
     public boolean isShowProgress() {
         return false;
     }
 
+    @Override
     public void setShowProgress(boolean bln) {
     }
 
+    @Override
     public void transferProgress(TransferEvent te) {
         //System.out.println(te.getResource().getContentLength());
         if (downloading != null) {

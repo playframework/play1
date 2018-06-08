@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
-    final static String mes = "validation.maxSize";
+    static final String mes = "validation.maxSize";
 
     int maxSize;
 
@@ -19,6 +19,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
         setMessage(annotation.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null || value.toString().length() == 0) {
@@ -29,7 +30,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("maxSize", Integer.toString(maxSize));
         return messageVariables;
     }

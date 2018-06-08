@@ -31,12 +31,12 @@ public class CompilationException extends PlayException implements SourceAttachm
 
     @Override
     public String getErrorTitle() {
-        return String.format("Compilation error");
+        return "Compilation error";
     }
 
     @Override
     public String getErrorDescription() {
-        return String.format("The file <strong>%s</strong> could not be compiled.\nError raised is : <strong>%s</strong>", isSourceAvailable() ? source.relativePath() : "", problem.toString().replace("<", "&lt;"));
+        return String.format("The file <strong>%s</strong> could not be compiled.\nError raised is : <strong>%s</strong>", isSourceAvailable() ? source.relativePath() : "", problem.replace("<", "&lt;"));
     }
     
     @Override
@@ -44,10 +44,11 @@ public class CompilationException extends PlayException implements SourceAttachm
         return problem;
     }
 
+    @Override
     public List<String> getSource() {
         String sourceCode = source.contentAsString();
-        if(start != -1 && end != -1) {
-            if(start.equals(end)) {
+        if (start != -1 && end != -1) {
+            if (start.equals(end)) {
                 sourceCode = sourceCode.substring(0, start + 1) + "↓" + sourceCode.substring(end + 1);
             } else {
                 sourceCode = sourceCode.substring(0, start) + "\000" + sourceCode.substring(start, end + 1) + "\001" + sourceCode.substring(end + 1);
@@ -78,5 +79,4 @@ public class CompilationException extends PlayException implements SourceAttachm
     public boolean isSourceAvailable() {
         return source != null && line != null;
     }
-    
 }

@@ -23,7 +23,7 @@ public class MessagesPlugin extends PlayPlugin {
 
     static Long lastLoading = 0L;
 
-    private static List<String> includeMessageFilenames = new ArrayList<String>();
+    private static List<String> includeMessageFilenames = new ArrayList<>();
 
     @Override
     public void onApplicationStart() {
@@ -33,7 +33,7 @@ public class MessagesPlugin extends PlayPlugin {
             File message = new File(Play.frameworkPath, "resources/messages");
             Messages.defaults.putAll(read(message));
         } catch (Exception e) {
-            Logger.warn("Defaults messsages file missing");
+            Logger.warn("Default messages file missing: %s", e);
         }
         for (VirtualFile module : Play.modules.values()) {
             VirtualFile messages = module.child("conf/messages");
@@ -85,7 +85,7 @@ public class MessagesPlugin extends PlayPlugin {
             propsFromFile = IO.readUtf8Properties(inStream);
 
             // Include
-            Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
+            Map<Object, Object> toInclude = new HashMap<>(16);
             for (Object key : propsFromFile.keySet()) {
                 if (key.toString().startsWith("@include.")) {
                     try {
@@ -101,7 +101,7 @@ public class MessagesPlugin extends PlayPlugin {
                             Logger.warn("Missing include: %s from file %s", filenameToInclude, file.getPath());
                         }
                     } catch (Exception ex) {
-                        Logger.warn("Missing include: %s", key);
+                        Logger.warn("Missing include: %s, caused by: %s", key, ex);
                     }
                 }
             }

@@ -40,22 +40,23 @@ public class HTML {
     private static final HtmlCharacterEntityReferences characterEntityReferences = new HtmlCharacterEntityReferences();
 
     /**
-     * Turn special characters into HTML character references.
-     * Handles complete character set defined in HTML 4.01 recommendation.
-     * <p>Escapes all special characters to their corresponding
-     * entity reference (e.g. <code>&lt;</code>).
-     * <p>Reference:
-     * <a href="http://www.w3.org/TR/html4/sgml/entities.html">
-     * http://www.w3.org/TR/html4/sgml/entities.html
+     * Turn special characters into HTML character references. Handles complete character set defined in HTML 4.01
+     * recommendation.
+     * <p>
+     * Escapes all special characters to their corresponding entity reference (e.g. <code>&lt;</code>).
+     * <p>
+     * Reference: <a href="http://www.w3.org/TR/html4/sgml/entities.html"> http://www.w3.org/TR/html4/sgml/entities.html
      * </a>
-     * @param input the (unescaped) input string
+     * 
+     * @param input
+     *            the (unescaped) input string
      * @return the escaped string
      */
     public static String htmlEscape(String input) {
         if (input == null) {
             return null;
         }
-        StringBuffer escaped = new StringBuffer(input.length() * 2);
+        StringBuilder escaped = new StringBuilder(input.length() * 2);
         for (int i = 0; i < input.length(); i++) {
             char character = input.charAt(i);
             String reference = characterEntityReferences.convertToReference(character);
@@ -77,7 +78,7 @@ public class HTML {
         static final char CHAR_NULL = (char) -1;
         private static final String PROPERTIES_FILE = "htmlentities.properties";
         private final String[] characterToEntityReferenceMap = new String[3000];
-        private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<String, Character>(252);
+        private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
 
         /**
          * Returns a new set of character entity references reflecting the HTML 4.0 character set.
@@ -85,11 +86,10 @@ public class HTML {
         public HtmlCharacterEntityReferences() {
             Properties entityReferences = new Properties();
 
-            // Load refeence definition file.
+            // Load reference definition file.
             InputStream is = HtmlCharacterEntityReferences.class.getResourceAsStream(PROPERTIES_FILE);
             if (is == null) {
-                throw new IllegalStateException(
-                        "Cannot find reference definition file [htmlentities.properties] as class path resource");
+                throw new IllegalStateException("Cannot find reference definition file [htmlentities.properties] as class path resource");
             }
             try {
                 try {
@@ -102,7 +102,7 @@ public class HTML {
                         "Failed to parse reference definition file [HtmlCharacterEntityReferences.properties]: " + ex.getMessage());
             }
 
-            // Parse reference definition properites.
+            // Parse reference definition propertes.
             Enumeration<?> keys = entityReferences.propertyNames();
             while (keys.hasMoreElements()) {
                 String key = (String) keys.nextElement();
@@ -116,6 +116,8 @@ public class HTML {
 
         /**
          * Return the number of supported entity references.
+         * 
+         * @return Number of supported entity references
          */
         public int getSupportedReferenceCount() {
             return this.entityReferenceToCharacterMap.size();
@@ -123,6 +125,10 @@ public class HTML {
 
         /**
          * Return true if the given character is mapped to a supported entity reference.
+         * 
+         * @param character
+         *            The given character
+         * @return true if the given character is mapped to a supported entity reference
          */
         public boolean isMappedToReference(char character) {
             return (convertToReference(character) != null);
@@ -130,6 +136,10 @@ public class HTML {
 
         /**
          * Return the reference mapped to the given character or <code>null</code>.
+         * 
+         * @param character
+         *            The given character
+         * @return The reference mapped to the given character or <code>null</code>
          */
         public String convertToReference(char character) {
             if (character < 1000 || (character >= 8000 && character < 10000)) {
@@ -144,6 +154,10 @@ public class HTML {
 
         /**
          * Return the char mapped to the given entityReference or -1.
+         * 
+         * @param entityReference
+         *            The given entityReference
+         * @return The char mapped to the given entityReference or -1.
          */
         public char convertToCharacter(String entityReference) {
             Character referredCharacter = this.entityReferenceToCharacterMap.get(entityReference);
@@ -151,6 +165,6 @@ public class HTML {
                 return referredCharacter.charValue();
             }
             return CHAR_NULL;
-        } 
+        }
     }
 }

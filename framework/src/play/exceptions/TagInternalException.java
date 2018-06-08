@@ -9,4 +9,8 @@ public class TagInternalException extends RuntimeException {
         super(message);
     }
 
+    public TagInternalException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

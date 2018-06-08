@@ -33,9 +33,6 @@ import play.templates.BaseTemplate.RawData;
 import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.utils.HTML;
 
-/**
- * Fast tags implementation
- */
 public class FastTags {
 
     public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
@@ -84,12 +81,12 @@ public class FastTags {
     }
 
     public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        final Object arg = args.get("arg");
+        Object arg = args.get("arg");
         if (!(arg instanceof ActionDefinition)) {
             throw new TemplateExecutionException(template.template, fromLine,
                     "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
         }
-        final ActionDefinition action = (ActionDefinition) arg;
+        ActionDefinition action = (ActionDefinition) arg;
         out.print("{");
         if (action.args.isEmpty()) {
             out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");
@@ -130,7 +127,16 @@ public class FastTags {
      *            template line number where the tag is defined
      */
     public static void _form(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        ActionDefinition actionDef = (ActionDefinition) args.get("arg");
+        ActionDefinition actionDef = null;
+        Object arg = args.get("arg");
+        if (arg instanceof ActionDefinition) {
+            actionDef = (ActionDefinition) arg;
+        }
+        else if (arg != null) {
+            actionDef = new ActionDefinition();
+            actionDef.url = arg.toString();
+            actionDef.method = "POST";
+        }
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
         }
@@ -154,7 +160,7 @@ public class FastTags {
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\"" + encoding
+        out.println("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\"" + encoding
                 + "\" enctype=\"" + enctype + "\" " + serialize(args, "name", "action", "method", "accept-charset", "enctype")
                 + (name != null ? "name=\"" + name + "\"" : "") + ">");
         if (!("GET".equals(actionDef.method))) {
@@ -179,7 +185,7 @@ public class FastTags {
      *            template line number where the tag is defined
      */
     public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        Map<String, Object> field = new HashMap<String, Object>();
+        Map<String, Object> field = new HashMap<>();
         String _arg = args.get("arg").toString();
         field.put("name", _arg);
         field.put("id", _arg.replace('.', '_'));
@@ -408,7 +414,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.internalRender(newArgs);
@@ -435,7 +441,7 @@ public class FastTags {
             }
             args.remove("arg");
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
             newArgs.put("out", out);
@@ -450,7 +456,7 @@ public class FastTags {
             String src = (args.containsKey("arg") && args.get("arg") != null) ? args.get("arg").toString() : args.get("src").toString();
             if (src != null) {
                 String name = (args.containsKey("name")) ? args.get("name").toString() : null;
-                out.print("<img src=\"" + Mailer.getEmbedddedSrc(src, name) + "\" " + serialize(args, "src", "name") + "/>");
+                out.print("<img src=\"" + Mailer.getEmbeddedSrc(src, name) + "\" " + serialize(args, "src", "name") + "/>");
             }
         } else {
             throw new TemplateExecutionException(template.template, fromLine, "Specify a file name", new TagInternalException(

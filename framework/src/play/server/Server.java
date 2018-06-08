@@ -21,12 +21,12 @@ public class Server {
     public static int httpPort;
     public static int httpsPort;
 
-    public final static String PID_FILE = "server.pid";
+    public static final String PID_FILE = "server.pid";
 
     public Server(String[] args) {
 
         System.setProperty("file.encoding", "utf-8");
-        final Properties p = Play.configuration;
+        Properties p = Play.configuration;
 
         httpPort = Integer.parseInt(getOpt(args, "http.port", p.getProperty("http.port", "-1")));
         httpsPort = Integer.parseInt(getOpt(args, "https.port", p.getProperty("https.port", "-1")));
@@ -124,10 +124,10 @@ public class Server {
             Logger.error("Could not bind on port " + httpsPort, e);
             Play.fatalServerErrorOccurred();
         }
-        if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
+        if (Play.mode == Mode.DEV || Play.runningInTestMode()) {
            // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
            System.out.println("~ Server is up and running");
-	}
+        }
     }
 
     private String getOpt(String[] args, String arg, String defaultValue) {
@@ -150,19 +150,26 @@ public class Server {
     }
 
     public static void main(String[] args) throws Exception {
-        File root = new File(System.getProperty("application.path"));
-        if (System.getProperty("precompiled", "false").equals("true")) {
-            Play.usePrecompiled = true;
+        try {
+            File root = new File(System.getProperty("application.path", "."));
+            if (System.getProperty("precompiled", "false").equals("true")) {
+                Play.usePrecompiled = true;
+            }
+            if (System.getProperty("writepid", "false").equals("true")) {
+                writePID(root);
+            }
+
+            Play.init(root, System.getProperty("play.id", ""));
+
+            if (System.getProperty("precompile") == null) {
+                new Server(args);
+            } else {
+                Logger.info("Done.");
+            }
         }
-        if (System.getProperty("writepid", "false").equals("true")) {
-            writePID(root);
-        }
-        Play.init(root, System.getProperty("play.id", ""));
-        if (System.getProperty("precompile") == null) {
-            new Server(args);
-        } else {
-            Logger.info("Done.");
+        catch (Throwable e) {
+            Logger.fatal(e, "Failed to start");
+            System.exit(1);
         }
     }
-
 }

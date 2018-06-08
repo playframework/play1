@@ -1,0 +1,12 @@
+We have declared &#35;{set transactionsData:@Application.hello()/}
+#{set transactionsData:@Application.hello()/}
+<ul>
+<li>Get var with &#35{get 'transactionsData' /}: #{get 'transactionsData' /}</li>
+<li>Get var with &#36;{transactionsData}: ${transactionsData?.url}</li>
+</ul>
+
+We can use it in form:
+#{form transactionsData, method:'POST', id:'creationForm' }
+   <input name="test">
+   <input type="submit">
+#{/form}

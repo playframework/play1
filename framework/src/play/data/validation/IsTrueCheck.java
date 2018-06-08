@@ -7,13 +7,14 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
 
-    final static String mes = "validation.isTrue";
+    static final String mes = "validation.isTrue";
 
     @Override
     public void configure(IsTrue isTrue) {
         setMessage(isTrue.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         if (value == null) {
             return false;

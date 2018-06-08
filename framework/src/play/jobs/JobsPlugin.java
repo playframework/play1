@@ -29,8 +29,8 @@ import play.utils.PThreadFactory;
 public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
-    public static List<Job> scheduledJobs;
-    private static ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<List<Callable<?>>>();
+    public static List<Job> scheduledJobs = new ArrayList<>();
+    private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
     public String getStatus() {
@@ -101,13 +101,13 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void afterApplicationStart() {
-        List<Class<?>> jobs = new ArrayList<Class<?>>();
+        List<Class<?>> jobs = new ArrayList<>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (Job.class.isAssignableFrom(clazz)) {
                 jobs.add(clazz);
             }
         }
-        for (final Class<?> clazz : jobs) {
+        for (Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
                 // check if we're going to run the job sync or async
@@ -123,9 +123,7 @@ public class JobsPlugin extends PlayPlugin {
                             }
                             throw new RuntimeException("@OnApplicationStart Job has failed");
                         }
-                    } catch (InstantiationException e) {
-                        throw new UnexpectedException("Job could not be instantiated", e);
-                    } catch (IllegalAccessException e) {
+                    } catch (InstantiationException | IllegalAccessException e) {
                         throw new UnexpectedException("Job could not be instantiated", e);
                     } catch (Throwable ex) {
                         if (ex instanceof PlayException) {
@@ -141,10 +139,8 @@ public class JobsPlugin extends PlayPlugin {
                         @SuppressWarnings("unchecked")
                         Callable<Job> callable = (Callable<Job>) job;
                         executor.submit(callable);
-                    } catch (InstantiationException ex) {
-                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                    } catch (IllegalAccessException ex) {
-                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    } catch (InstantiationException | IllegalAccessException ex) {
+                        throw new UnexpectedException("Cannot instantiate Job " + clazz.getName(), ex);
                     }
                 }
             }
@@ -154,10 +150,8 @@ public class JobsPlugin extends PlayPlugin {
                 try {
                     Job<?> job = createJob(clazz);
                     scheduleForCRON(job);
-                } catch (InstantiationException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                } catch (IllegalAccessException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                } catch (InstantiationException | IllegalAccessException ex) {
+                    throw new UnexpectedException("Cannot instantiate Job " + clazz.getName(), ex);
                 }
             }
             // @Every
@@ -172,10 +166,8 @@ public class JobsPlugin extends PlayPlugin {
                     if (!"never".equalsIgnoreCase(value)) {
                         executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                     }
-                } catch (InstantiationException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                } catch (IllegalAccessException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                } catch (InstantiationException | IllegalAccessException ex) {
+                    throw new UnexpectedException("Cannot instantiate Job " + clazz.getName(), ex);
                 }
             }
         }
@@ -191,7 +183,7 @@ public class JobsPlugin extends PlayPlugin {
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
-        scheduledJobs = new ArrayList<Job>();
+        scheduledJobs.clear();
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {
@@ -200,7 +192,7 @@ public class JobsPlugin extends PlayPlugin {
         }
         String cron = job.getClass().getAnnotation(On.class).value();
         if (cron.startsWith("cron.")) {
-            cron = Play.configuration.getProperty(cron);
+            cron = Play.configuration.getProperty(cron, "");
         }
         cron = Expression.evaluate(cron, cron).toString();
         if (cron == null || cron.isEmpty() || "never".equalsIgnoreCase(cron)) {
@@ -237,7 +229,7 @@ public class JobsPlugin extends PlayPlugin {
 
         List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
 
-        for (final Class clazz : jobs) {
+        for (Class clazz : jobs) {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
                 try {
@@ -249,9 +241,7 @@ public class JobsPlugin extends PlayPlugin {
                         }
                         throw new RuntimeException("@OnApplicationStop Job has failed");
                     }
-                } catch (InstantiationException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (IllegalAccessException e) {
+                } catch (InstantiationException | IllegalAccessException e) {
                     throw new UnexpectedException("Job could not be instantiated", e);
                 } catch (Throwable ex) {
                     if (ex instanceof PlayException) {

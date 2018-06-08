@@ -2,7 +2,10 @@ package play;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,10 +73,11 @@ public class Logger {
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
 
-            if (log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0) {
-                // The log4j configuration file is located somewhere in the application folder,
-                // so it's probably a custom configuration file
-                configuredManually = true;
+            try {
+                if (Paths.get(log4jConf.toURI()).startsWith(Play.applicationPath.toPath())) {
+                    configuredManually = true;
+                }
+            } catch (IllegalArgumentException | FileSystemNotFoundException | SecurityException | URISyntaxException e) {
             }
             if (isXMLConfig) {
                 DOMConfigurator.configure(log4jConf);
@@ -82,7 +86,7 @@ public class Logger {
             }
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
-            if (Play.runingInTestMode()) {
+            if (Play.runningInTestMode()) {
                 org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
                 try {
                     if (!Play.getFile("test-result").exists()) {
@@ -121,7 +125,7 @@ public class Logger {
     }
 
     /**
-     * Utility method that translayte log4j levels to java.util.logging levels.
+     * Utility method that translate log4j levels to java.util.logging levels.
      */
     static java.util.logging.Level toJuliLevel(String level) {
         java.util.logging.Level juliLevel = java.util.logging.Level.INFO;
@@ -532,7 +536,7 @@ public class Logger {
             Throwable toClean = e;
             for (int i = 0; i < 5; i++) {
                 // Clean stack trace
-                List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
+                List<StackTraceElement> cleanTrace = new ArrayList<>();
                 for (StackTraceElement se : toClean.getStackTrace()) {
                     if (se.getClassName().startsWith("play.server.PlayHandler$NettyInvocation")) {
                         cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));
@@ -647,15 +651,15 @@ public class Logger {
      * @return the className of the class actually logging the message
      */
     static String getCallerClassName() {
-        final int level = 5;
+        int level = 5;
         return getCallerClassName(level);
     }
 
     /**
      * @return the className of the class actually logging the message
      */
-    static String getCallerClassName(final int level) {
-        CallInfo ci = getCallerInformations(level);
+    static String getCallerClassName(int level) {
+        CallInfo ci = getCallerInformation(level);
         return ci.className;
     }
 
@@ -664,7 +668,7 @@ public class Logger {
      * @param level method stack depth
      * @return who called the logger
      */
-    static CallInfo getCallerInformations(int level) {
+    static CallInfo getCallerInformation(int level) {
         StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
         StackTraceElement caller = callStack[level];
         return new CallInfo(caller.getClassName(), caller.getMethodName());

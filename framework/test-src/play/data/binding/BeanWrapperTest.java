@@ -10,10 +10,10 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class BeanWrapperTest {
 
-    public static class Bean {
+    private static class Bean {
         public String a = "a";
         public String b = "b";
-        public int i = 1;
+        int i = 1;
 
         public String getA() {
             return a;
@@ -45,7 +45,7 @@ public class BeanWrapperTest {
 
         new PlayBuilder().build();
         ValidationBuilder.build();
-        Map<String, String[]> m = new HashMap<String, String[]>();
+        Map<String, String[]> m = new HashMap<>();
         m.put("b.a", new String[]{"a1"});
         m.put("b.b", new String[]{"b1"});
         m.put("b.i", new String[]{"2"});

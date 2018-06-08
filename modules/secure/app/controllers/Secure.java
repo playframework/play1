@@ -1,7 +1,6 @@
 package controllers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Date;
 import play.Play;
 import play.mvc.*;
@@ -13,7 +12,7 @@ public class Secure extends Controller {
 
     @Before(unless={"login", "authenticate", "logout"})
     static void checkAccess() throws Throwable {
-        // Authent
+        // Authentication
         if(!session.contains("username")) {
             flash.put("url", "GET".equals(request.method) ? request.url : Play.ctxPath + "/"); // seems a good default
             login();

@@ -29,8 +29,7 @@ public class Properties extends HashMap<String, String> {
         if (is == null) {
             throw new NullPointerException("Can't read from null stream");
         }
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding));
-        try {
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding))) {
             while (true) {
                 String tmp = rd.readLine();
                 if (tmp == null) {
@@ -53,9 +52,6 @@ public class Properties extends HashMap<String, String> {
                     put(kv[0], "");
                 }
             }
-        }
-        finally {
-            rd.close();
         }
     }
 
@@ -112,9 +108,7 @@ public class Properties extends HashMap<String, String> {
             return Class.forName(s).newInstance();
         } catch (ClassNotFoundException nfe) {
             throw new IllegalArgumentException(s + ": invalid class name for key " + key, nfe);
-        } catch (InstantiationException e) {
-            throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
         }
     }
@@ -129,7 +123,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Double.parseDouble(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an double value :" + key);
+            throw new IllegalArgumentException("Property must be an double value :" + key, e);
         }
     }
 
@@ -141,7 +135,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Double.parseDouble(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an double value :" + key);
+            throw new IllegalArgumentException("Property must be an double value :" + key, e);
         }
     }
 
@@ -154,7 +148,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Float.parseFloat(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an float value :" + key);
+            throw new IllegalArgumentException("Property must be an float value :" + key, e);
         }
     }
 
@@ -166,7 +160,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Float.parseFloat(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an float value :" + key);
+            throw new IllegalArgumentException("Property must be an float value :" + key, e);
         }
     }
 
@@ -179,7 +173,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an integer value :" + key);
+            throw new IllegalArgumentException("Property must be an integer value :" + key, e);
         }
     }
 
@@ -191,7 +185,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an integer value :" + key);
+            throw new IllegalArgumentException("Property must be an integer value :" + key, e);
         }
     }
 
@@ -204,7 +198,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Long.parseLong(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an long value :" + key);
+            throw new IllegalArgumentException("Property must be an long value :" + key, e);
         }
     }
 
@@ -216,7 +210,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return Long.parseLong(s);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Property must be an long value :" + key);
+            throw new IllegalArgumentException("Property must be an long value :" + key, e);
         }
     }
 
@@ -228,7 +222,7 @@ public class Properties extends HashMap<String, String> {
         try {
             return new URL(get(key));
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Property " + key + " must be a valid URL (" + get(key) + ")");
+            throw new IllegalArgumentException("Property " + key + " must be a valid URL (" + get(key) + ")", e);
         }
     }
 }

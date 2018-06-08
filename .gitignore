@@ -1,3 +1,4 @@
+out
 bin
 framework/classes
 framework/test-classes
@@ -55,11 +56,16 @@ samples-and-tests/with-gwt/nbproject
 samples-and-tests/jobboard/db
 samples-and-tests/jobboard/tmp
 samples-and-tests/jobboard/test-result
+samples-and-tests/jobboard/modules
+samples-and-tests/jobboard/lib
 samples-and-tests/jobboard/attachments
 samples-and-tests/just-test-cases/tmp
 samples-and-tests/just-test-cases/test-result
+samples-and-tests/just-test-cases/lib
+samples-and-tests/just-test-cases/modules
 samples-and-tests/chat/tmp
 samples-and-tests/chat/logs
+samples-and-tests/java8Support/lib/
 .git
 modules/spring/lib/play-spring.jar
 modules/search/bin
@@ -78,6 +84,7 @@ support/textmate
 samples-and-tests/yabe/logs
 samples-and-tests/yabe/test-result
 samples-and-tests/yabe/tmp
+samples-and-tests/yabe/modules
 *.ser
 modules/cobertura/lib
 modules/scala/lib/play-scala.jar

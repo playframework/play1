@@ -33,7 +33,7 @@ public abstract class TemplateCompiler {
     protected TemplateParser parser;
     protected boolean doNextScan = true;
     protected TemplateParser.Token state;
-    protected Stack<Tag> tagsStack = new Stack<Tag>();
+    protected Stack<Tag> tagsStack = new Stack<>();
     protected int tagIndex;
     protected boolean skipLineBreak;
     protected int currentLine = 1;

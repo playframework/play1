@@ -19,10 +19,12 @@ public class AnnotationHelper {
      * It can be something like As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"})
      *
      * @param annotations
+     *            Annotations associated with on the date
      * @param value
+     *            The formated date
      * @return null if it cannot be converted because there is no annotation.
      * @throws ParseException
-     *
+     *             if problem occurred during parsing the date
      */
     public static Date getDateAs(Annotation[] annotations, String value) throws ParseException {
         // Look up for the BindAs annotation
@@ -35,7 +37,7 @@ public class AnnotationHelper {
                 Locale locale = Lang.getLocale();
                 String format = as.value()[0];
                 // According to Binder.java line 328 : Fixtures can use (iso) dates as default
-                if(format != null && format.equals(Fixtures.PROFILE_NAME)){
+                if (format != null && format.equals(Fixtures.PROFILE_NAME)) {
                     format = DateBinder.ISO8601;
                     locale = null;
                 } else if (!StringUtils.isEmpty(format)) {
@@ -50,12 +52,7 @@ public class AnnotationHelper {
                 if (StringUtils.isEmpty(format)) {
                     format = I18N.getDateFormat();
                 }
-                SimpleDateFormat sdf = null;
-                if(locale != null) {
-                    sdf = new SimpleDateFormat(format, locale);
-                } else {
-                    sdf = new SimpleDateFormat(format);      
-                }
+                SimpleDateFormat sdf = locale != null ? new SimpleDateFormat(format, locale) : new SimpleDateFormat(format);
                 sdf.setLenient(false);
                 return sdf.parse(value);
             }
@@ -90,7 +87,7 @@ public class AnnotationHelper {
      * Contains the index of the locale inside the @As
      */
     private static class Tuple {
-        
+
         public int index = -1;
         public Locale locale;
 

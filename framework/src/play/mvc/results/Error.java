@@ -1,7 +1,6 @@
 package play.mvc.results;
 
 import java.util.Map;
-import play.Logger;
 
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -17,7 +16,7 @@ import play.templates.TemplateLoader;
  */
 public class Error extends Result {
 
-    protected int status;
+    private final int status;
 
     public Error(String reason) {
         super(reason);
@@ -29,6 +28,7 @@ public class Error extends Result {
         this.status = status;
     }
 
+    @Override
     public void apply(Request request, Response response) {
         response.status = status;
         String format = request.format;
@@ -55,5 +55,9 @@ public class Error extends Result {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    public int getStatus() {
+        return status;
     }
 }

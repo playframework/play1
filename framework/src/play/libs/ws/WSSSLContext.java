@@ -9,7 +9,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class WSSSLContext {
-    public static SSLContext getSslContext(final String keyStore, final String keyStorePass, Boolean CAValidation) {
+    public static SSLContext getSslContext(String keyStore, String keyStorePass, Boolean CAValidation) {
         SSLContext sslCTX = null;
 
         try {

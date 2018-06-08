@@ -1,30 +1,16 @@
 package play.mvc;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.Future;
-
-import org.apache.commons.javaflow.Continuation;
-import org.apache.commons.javaflow.bytecode.StackRecorder;
-
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
-import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
 import play.data.binding.CachedBoundActionMethodArgs;
 import play.data.binding.ParamNode;
@@ -43,29 +29,29 @@ import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.Future;
+
 /**
  * Invoke an action after an HTTP request.
  */
 public class ActionInvoker {
 
     @SuppressWarnings("unchecked")
-    public static void resolve(Http.Request request, Http.Response response) {
+    public static void resolve(Http.Request request) {
 
         if (!Play.started) {
             return;
         }
-
-        Http.Request.current.set(request);
-        Http.Response.current.set(response);
-
-        Scope.Params.current.set(request.params);
-        Scope.RenderArgs.current.set(new Scope.RenderArgs());
-        Scope.RouteArgs.current.set(new Scope.RouteArgs());
-        Scope.Session.current.set(Scope.Session.restore());
-        Scope.Flash.current.set(Scope.Flash.restore());
-        CachedBoundActionMethodArgs.init();
-
-        ControllersEnhancer.currentAction.set(new Stack<String>());
 
         if (request.resolved) {
             return;
@@ -81,7 +67,7 @@ public class ActionInvoker {
 
         // Find the action method
         try {
-            Method actionMethod = null;
+            Method actionMethod;
             Object[] ca = getActionMethod(request.action);
             actionMethod = (Method) ca[1];
             request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
@@ -103,13 +89,26 @@ public class ActionInvoker {
 
     }
 
+    private static void initActionContext(Http.Request request, Http.Response response) {
+        Http.Request.current.set(request);
+        Http.Response.current.set(response);
+
+        Scope.Params.current.set(request.params);
+        Scope.RenderArgs.current.set(new Scope.RenderArgs());
+        Scope.RouteArgs.current.set(new Scope.RouteArgs());
+        Scope.Session.current.set(Scope.Session.restore());
+        Scope.Flash.current.set(Scope.Flash.restore());
+        CachedBoundActionMethodArgs.init();
+
+        ControllersEnhancer.currentAction.set(new Stack<>());
+    }
+
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
 
         try {
-
-            resolve(request, response);
-            final Method actionMethod = request.invokedMethod;
+            initActionContext(request, response);
+            Method actionMethod = request.invokedMethod;
 
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
@@ -137,6 +136,9 @@ public class ActionInvoker {
             // Monitoring
             monitor = MonitorFactory.start(request.action + "()");
 
+            String cacheKey = null;
+            Result actionResult = null;
+
             // 3. Invoke the action
             try {
                 // @Before
@@ -144,102 +146,52 @@ public class ActionInvoker {
 
                 // Action
 
-                Result actionResult = null;
-                String cacheKey = null;
-
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
-                    cacheKey = actionMethod.getAnnotation(CacheFor.class).id();
+                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);;
+                    cacheKey = cacheFor.id();
                     if ("".equals(cacheKey)) {
-                        cacheKey = "urlcache:" + request.url + request.querystring;
+                        // Generate a cache key for this request
+                        cacheKey = cacheFor.generator().newInstance().generate(request);
                     }
-                    actionResult = (Result) play.cache.Cache.get(cacheKey);
+                    if(cacheKey != null && !"".equals(cacheKey)) {
+                    	actionResult = (Result) Cache.get(cacheKey);
+                    }
                 }
 
                 if (actionResult == null) {
                     ControllerInstrumentation.initActionCall();
-                    try {
-                        inferResult(invokeControllerMethod(actionMethod));
-                    } catch (Result result) {
-                        actionResult = result;
-                        // Cache it if needed
-                        if (cacheKey != null) {
-                            play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
-                        }
-                    } catch (InvocationTargetException ex) {
-                        // It's a Result ? (expected)
-                        if (ex.getTargetException() instanceof Result) {
-                            actionResult = (Result) ex.getTargetException();
-                            // Cache it if needed
-                            if (cacheKey != null) {
-                                play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
-                            }
-
-                        } else {
-                            // @Catch
-                            Object[] args = new Object[] { ex.getTargetException() };
-                            List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
-                            ControllerInstrumentation.stopActionCall();
-                            for (Method mCatch : catches) {
-                                Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                                if (exceptions.length == 0) {
-                                    exceptions = new Class[] { Exception.class };
-                                }
-                                for (Class exception : exceptions) {
-                                    if (exception.isInstance(args[0])) {
-                                        mCatch.setAccessible(true);
-                                        inferResult(invokeControllerMethod(mCatch, args));
-                                        break;
-                                    }
-                                }
-                            }
-
-                            throw ex;
-                        }
-                    }
+                    inferResult(invokeControllerMethod(actionMethod));
                 }
-
-                // @After
-                handleAfters(request);
-
-                monitor.stop();
-                monitor = null;
-
-                // OK, re-throw the original action result
-                if (actionResult != null) {
-                    throw actionResult;
+            } catch (Result result) {
+                actionResult = result;
+                // Cache it if needed
+                if (cacheKey != null && !"".equals(cacheKey)) {
+                    Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                 }
-
-                throw new NoResult();
-
-            } catch (IllegalAccessException ex) {
-                throw ex;
-            } catch (IllegalArgumentException ex) {
-                throw ex;
-            } catch (InvocationTargetException ex) {
-                // It's a Result ? (expected)
-                if (ex.getTargetException() instanceof Result) {
-                    throw (Result) ex.getTargetException();
-                }
-                // Re-throw the enclosed exception
-                if (ex.getTargetException() instanceof PlayException) {
-                    throw (PlayException) ex.getTargetException();
-                }
-                StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
-                if (element != null) {
-                    throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
-                            ex.getTargetException());
-                }
-                throw new JavaExecutionException(Http.Request.current().action, ex);
+            } catch (JavaExecutionException e) {
+                invokeControllerCatchMethods(e.getCause());
+                throw e;
             }
 
-        } catch (Result result) {
+            // @After
+            handleAfters(request);
 
+            monitor.stop();
+            monitor = null;
+
+            // OK, re-throw the original action result
+            if (actionResult != null) {
+                throw actionResult;
+            }
+
+            throw new NoResult();
+
+        } catch (Result result) {
             Play.pluginCollection.onActionInvocationResult(result);
 
             // OK there is a result to apply
             // Save session & flash scope now
-
             Scope.Session.current().save();
             Scope.Flash.current().save();
 
@@ -250,6 +202,9 @@ public class ActionInvoker {
             // @Finally
             handleFinallies(request, null);
 
+        } catch (JavaExecutionException e) {
+            handleFinallies(request, e.getCause());
+            throw e;
         } catch (PlayException e) {
             handleFinallies(request, e);
             throw e;
@@ -265,27 +220,60 @@ public class ActionInvoker {
         }
     }
 
+    private static void invokeControllerCatchMethods(Throwable throwable) throws Exception {
+        // @Catch
+        Object[] args = new Object[] {throwable};
+        List<Method> catches = Java.findAllAnnotatedMethods(getControllerClass(), Catch.class);
+        ControllerInstrumentation.stopActionCall();
+        for (Method mCatch : catches) {
+            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+            if (exceptions.length == 0) {
+                exceptions = new Class[]{Exception.class};
+            }
+            for (Class exception : exceptions) {
+                if (exception.isInstance(args[0])) {
+                    mCatch.setAccessible(true);
+                    inferResult(invokeControllerMethod(mCatch, args));
+                    break;
+                }
+            }
+        }
+    }
+
     private static boolean isActionMethod(Method method) {
-        if (method.isAnnotationPresent(Before.class)) {
-            return false;
+        return !method.isAnnotationPresent(Before.class) &&
+                !method.isAnnotationPresent(After.class) &&
+                !method.isAnnotationPresent(Finally.class) &&
+                !method.isAnnotationPresent(Catch.class) &&
+                !method.isAnnotationPresent(Util.class);
+    }
+
+    /**
+     * Find the first public method of a controller class
+     *
+     * @param name
+     *            The method name
+     * @param clazz
+     *            The class
+     * @return The method or null
+     */
+    public static Method findActionMethod(String name, Class clazz) {
+        while (!clazz.getName().equals("java.lang.Object")) {
+            for (Method m : clazz.getDeclaredMethods()) {
+                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
+                    // Check that it is not an interceptor
+                    if (isActionMethod(m)) {
+                        return m;
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
         }
-        if (method.isAnnotationPresent(After.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Finally.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Catch.class)) {
-            return false;
-        }
-        if (method.isAnnotationPresent(Util.class)) {
-            return false;
-        }
-        return true;
+        return null;
     }
 
     private static void handleBefores(Http.Request request) throws Exception {
-        List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
+        List<Method> befores = Java.findAllAnnotatedMethods(getControllerClass(), Before.class);
         ControllerInstrumentation.stopActionCall();
         for (Method before : befores) {
             String[] unless = before.getAnnotation(Before.class).unless();
@@ -319,7 +307,7 @@ public class ActionInvoker {
     }
 
     private static void handleAfters(Http.Request request) throws Exception {
-        List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+        List<Method> afters = Java.findAllAnnotatedMethods(getControllerClass(), After.class);
         ControllerInstrumentation.stopActionCall();
         for (Method after : afters) {
             String[] unless = after.getAnnotation(After.class).unless();
@@ -356,7 +344,7 @@ public class ActionInvoker {
      * Checks and calla all methods in controller annotated with @Finally. The
      * caughtException-value is sent as argument to @Finally-method if method
      * has one argument which is Throwable
-     * 
+     *
      * @param request
      * @param caughtException
      *            If @Finally-methods are called after an error, this variable
@@ -365,13 +353,13 @@ public class ActionInvoker {
      */
     static void handleFinallies(Http.Request request, Throwable caughtException) throws PlayException {
 
-        if (Controller.getControllerClass() == null) {
+        if (getControllerClass() == null) {
             // skip it
             return;
         }
 
         try {
-            List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+            List<Method> allFinally = Java.findAllAnnotatedMethods(Request.current().controllerClass, Finally.class);
             ControllerInstrumentation.stopActionCall();
             for (Method aFinally : allFinally) {
                 String[] unless = aFinally.getAnnotation(Finally.class).unless();
@@ -407,19 +395,14 @@ public class ActionInvoker {
                         // parameter
                         invokeControllerMethod(aFinally, new Object[] { caughtException });
                     } else {
-                        // invoce @Finally-method the regular way without
+                        // invoke @Finally-method the regular way without
                         // caughtException
                         invokeControllerMethod(aFinally, null);
                     }
                 }
             }
-        } catch (InvocationTargetException ex) {
-            StackTraceElement element = PlayException.getInterestingStackTraceElement(ex.getTargetException());
-            if (element != null) {
-                throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
-                        ex.getTargetException());
-            }
-            throw new JavaExecutionException(Http.Request.current().action, ex);
+        } catch (PlayException e) {
+            throw e;
         } catch (Exception e) {
             throw new UnexpectedException("Exception while doing @Finally", e);
         }
@@ -477,23 +460,39 @@ public class ActionInvoker {
                 if (declaringClassName.endsWith("$class")) {
                     args[0] = scalaInstance; // Scala trait method
                 } else {
-                    request.controllerInstance = (Controller) scalaInstance; // Scala
-                                                                             // object
-                                                                             // method
+                    request.controllerInstance = (PlayController) scalaInstance; // Scala object method
                 }
             } catch (NoSuchFieldException e) {
                 // not Scala
             }
         }
 
-        return invoke(method, request.controllerInstance, args);
+        Object methodClassInstance = isStatic ? null :
+            (method.getDeclaringClass().isAssignableFrom(request.controllerClass)) ? request.controllerInstance :
+                method.getDeclaringClass().newInstance();
+
+        return invoke(method, methodClassInstance, args);
     }
 
-    static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        if (isActionMethod(method)) {
-            return invokeWithContinuation(method, instance, realArgs);
-        } else {
-            return method.invoke(instance, realArgs);
+    static Object invoke(Method method, Object instance, Object ... realArgs) throws Exception {
+        try {
+            if (isActionMethod(method)) {
+                return invokeWithContinuation(method, instance, realArgs);
+            } else {
+                return method.invoke(instance, realArgs);
+            }
+        } catch (InvocationTargetException ex) {
+            Throwable originalThrowable = ex.getTargetException();
+
+            if (originalThrowable instanceof Result || originalThrowable instanceof PlayException)
+                throw (Exception) originalThrowable;
+
+            StackTraceElement element = PlayException.getInterestingStackTraceElement(originalThrowable);
+            if (element != null) {
+                throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(),
+                        originalThrowable);
+            }
+            throw new JavaExecutionException(originalThrowable);
         }
     }
 
@@ -508,11 +507,11 @@ public class ActionInvoker {
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case
-        if (Http.Request.current().args.containsKey(A)) {
+        if (Request.current().args.containsKey(A)) {
 
             // Action0
-            instance = Http.Request.current().args.get(A);
-            Future f = (Future) Http.Request.current().args.get(F);
+            instance = Request.current().args.get(A);
+            Future f = (Future) Request.current().args.get(F);
             Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
             Scope.RenderArgs.current.set(renderArgs);
             if (f == null) {
@@ -528,7 +527,7 @@ public class ActionInvoker {
         }
 
         // Continuations case
-        Continuation continuation = (Continuation) Http.Request.current().args.get(C);
+        Continuation continuation = (Continuation) Request.current().args.get(C);
         if (continuation == null) {
             continuation = new Continuation(new StackRecorder((Runnable) null));
         }
@@ -536,7 +535,7 @@ public class ActionInvoker {
         StackRecorder pStackRecorder = new StackRecorder(continuation.stackRecorder);
         Object result = null;
 
-        final StackRecorder old = pStackRecorder.registerThread();
+        StackRecorder old = pStackRecorder.registerThread();
         try {
             pStackRecorder.isRestoring = !pStackRecorder.isEmpty();
 
@@ -549,7 +548,7 @@ public class ActionInvoker {
                 }
                 Object trigger = pStackRecorder.value;
                 Continuation nextContinuation = new Continuation(pStackRecorder);
-                Http.Request.current().args.put(C, nextContinuation);
+                Request.current().args.put(C, nextContinuation);
 
                 if (trigger instanceof Long) {
                     throw new Suspend((Long) trigger);
@@ -563,7 +562,7 @@ public class ActionInvoker {
 
                 throw new UnexpectedException("Unexpected continuation trigger -> " + trigger);
             } else {
-                Http.Request.current().args.remove(C);
+                Request.current().args.remove(C);
             }
         } finally {
             pStackRecorder.deregisterThread(old);
@@ -585,15 +584,15 @@ public class ActionInvoker {
             if (controllerClass == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("Controller " + controller + " not found"));
             }
-            if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+            if (!PlayController.class.isAssignableFrom(controllerClass)) {
                 // Try the scala way
                 controllerClass = Play.classloader.getClassIgnoreCase(controller + "$");
-                if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+                if (!PlayController.class.isAssignableFrom(controllerClass)) {
                     throw new ActionNotFoundException(fullAction,
                             new Exception("class " + controller + " does not extend play.mvc.Controller"));
                 }
             }
-            actionMethod = Java.findActionMethod(action, controllerClass);
+            actionMethod = findActionMethod(action, controllerClass);
             if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction,
                         new Exception("No method public static void " + action + "() was found in class " + controller));
@@ -624,7 +623,7 @@ public class ActionInvoker {
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
             Class<?> type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap<String, String[]>();
+            Map<String, String[]> params = new HashMap<>();
 
             // In case of simple params, we don't want to parse the body.
             if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
@@ -644,4 +643,7 @@ public class ActionInvoker {
         return rArgs;
     }
 
+    private static Class<? extends PlayController> getControllerClass() {
+        return Http.Request.current().controllerClass;
+    }
 }

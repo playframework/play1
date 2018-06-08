@@ -8,12 +8,12 @@
 		
 		#{if flash.error}
 			<p class="error">
-				&{flash.error}
+				${messages.get(flash.error)}
 			</p>
 		#{/if}
 		#{if flash.success}
 			<p class="success">
-				&{flash.success}
+				${messages.get(flash.success)}
 			</p>
 		#{/if}
 	

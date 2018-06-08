@@ -1,13 +1,5 @@
 package play.mvc;
 
-import java.lang.annotation.Annotation;
-import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
@@ -15,13 +7,16 @@ import play.data.binding.ParamNode;
 import play.data.binding.RootParamNode;
 import play.data.parsing.DataParser;
 import play.data.parsing.DataParsers;
-import play.data.parsing.TextParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
+import play.i18n.Messages;
 import play.libs.Codec;
 import play.libs.Crypto;
-import play.libs.Time;
 import play.utils.Utils;
+
+import java.lang.annotation.Annotation;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * All application Scopes
@@ -29,18 +24,35 @@ import play.utils.Utils;
 public class Scope {
 
     public static final String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
-    public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
+    public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase()
+            .equals("true");
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
-    public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
-    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
+    public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase()
+            .equals("true");
+    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
+            .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
+
+    public static SessionStore sessionStore = createSessionStore();
+
+    private static SessionStore createSessionStore() {
+        String sessionStoreClass = Play.configuration.getProperty("application.session.storeClass");
+        if (sessionStoreClass == null) return new CookieSessionStore();
+        try {
+            Logger.info("Storing sessions using " + sessionStoreClass);
+            return (SessionStore) Class.forName(sessionStoreClass).newInstance();
+        }
+        catch (Exception e) {
+            throw new UnexpectedException("Cannot create instance of " + sessionStoreClass, e);
+        }
+    }
 
     /**
      * Flash scope
      */
     public static class Flash {
 
-        Map<String, String> data = new HashMap<String, String>();
-        Map<String, String> out = new HashMap<String, String>();
+        Map<String, String> data = new HashMap<>();
+        Map<String, String> out = new HashMap<>();
 
         public static Flash restore() {
             try {
@@ -61,7 +73,7 @@ public class Scope {
                 return;
             }
             if (out.isEmpty()) {
-                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
+                if (Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
                 }
                 return;
@@ -72,8 +84,9 @@ public class Scope {
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
-        }        // ThreadLocal access
-        public static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        } // ThreadLocal access
+
+        public static final ThreadLocal<Flash> current = new ThreadLocal<>();
 
         public static Flash current() {
             return current.get();
@@ -102,11 +115,11 @@ public class Scope {
         }
 
         public void error(String value, Object... args) {
-            put("error", String.format(value, args));
+            put("error", Messages.get(value, args));
         }
 
         public void success(String value, Object... args) {
-            put("success", String.format(value, args));
+            put("success", Messages.get(value, args));
         }
 
         public void discard(String key) {
@@ -159,52 +172,12 @@ public class Scope {
         static final String TS_KEY = "___TS";
 
         public static Session restore() {
-            try {
-                Session session = new Session();
-                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-				final int duration = Time.parseDuration(COOKIE_EXPIRE) ;
-				final long expiration = (duration * 1000l);
-
-                if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
-                    String value = cookie.value;
-				 	int firstDashIndex = value.indexOf("-");
-				    if(firstDashIndex > -1) {
-                    	String sign = value.substring(0, firstDashIndex);
-                    	String data = value.substring(firstDashIndex + 1);
-                    	if (CookieDataCodec.safeEquals(sign, Crypto.sign(data, Play.secretKey.getBytes()))) {
-                            CookieDataCodec.decode(session.data, data);
-                    	}
-					} 
-                    if (COOKIE_EXPIRE != null) {
-                        // Verify that the session contains a timestamp, and that it's not expired
-					    if (!session.contains(TS_KEY)) {
-                            session = new Session();
-                        } else {
-					        if ((Long.parseLong(session.get(TS_KEY))) < System.currentTimeMillis()) {
-                                // Session expired
-                                session = new Session();
-                            }
-                        }
-					    session.put(TS_KEY, System.currentTimeMillis() + expiration);
-                    } else {
-                        // Just restored. Nothing changed. No cookie-expire.
-                        session.changed = false;
-                    }
-                } else {
-                    // no previous cookie to restore; but we may have to set the timestamp in the new cookie
-			        if (COOKIE_EXPIRE != null) {	
-				        session.put(TS_KEY, (System.currentTimeMillis() + expiration));
-                    }
-                }
-
-                return session;
-            } catch (Exception e) {
-                throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
-            }
+            return sessionStore.restore();
         }
-        Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
+
+        Map<String, String> data = new HashMap<>(); // ThreadLocal access
         boolean changed = false;
-        public static ThreadLocal<Session> current = new ThreadLocal<Session>();
+        public static final ThreadLocal<Session> current = new ThreadLocal<>();
 
         public static Session current() {
             return current.get();
@@ -224,7 +197,7 @@ public class Scope {
 
         public String getAuthenticityToken() {
             if (!data.containsKey(AT_KEY)) {
-                this.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+                this.put(AT_KEY, Crypto.sign(Codec.UUID()));
             }
             return data.get(AT_KEY);
         }
@@ -234,32 +207,7 @@ public class Scope {
         }
 
         void save() {
-            if (Http.Response.current() == null) {
-                // Some request like WebSocket don't have any response
-                return;
-            }
-            if(!changed && SESSION_SEND_ONLY_IF_CHANGED && COOKIE_EXPIRE == null) {
-                // Nothing changed and no cookie-expire, consequently send nothing back.
-                return;
-            }
-            if (isEmpty()) {
-                // The session is empty: delete the cookie
-                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_SESSION") || !SESSION_SEND_ONLY_IF_CHANGED) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
-                }
-                return;
-            }
-            try {
-                String sessionData = CookieDataCodec.encode(data);
-                String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                if (COOKIE_EXPIRE == null) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
-                } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", Time.parseDuration(COOKIE_EXPIRE), COOKIE_SECURE, SESSION_HTTPONLY);
-                }
-            } catch (Exception e) {
-                throw new UnexpectedException("Session serializationProblem", e);
-            }
+            sessionStore.save(this);
         }
 
         public void put(String key, String value) {
@@ -278,8 +226,9 @@ public class Scope {
             change();
             if (value == null) {
                 put(key, (String) null);
+            } else {
+                put(key, value.toString());
             }
-            put(key, value + "");
         }
 
         public String get(String key) {
@@ -303,8 +252,9 @@ public class Scope {
         }
 
         /**
-         * Returns true if the session is empty,
-         * e.g. does not contain anything else than the timestamp
+         * Returns true if the session is empty, e.g. does not contain anything else than the timestamp
+         * 
+         * @return true if the session is empty, otherwise false
          */
         public boolean isEmpty() {
             for (String key : data.keySet()) {
@@ -331,13 +281,14 @@ public class Scope {
     public static class Params {
         // ThreadLocal access
 
-        public static ThreadLocal<Params> current = new ThreadLocal<Params>();
+        public static final ThreadLocal<Params> current = new ThreadLocal<>();
 
         public static Params current() {
             return current.get();
         }
+
         boolean requestIsParsed;
-        public Map<String, String[]> data = new LinkedHashMap<String, String[]>();
+        public Map<String, String[]> data = new LinkedHashMap<>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
@@ -380,7 +331,7 @@ public class Scope {
 
         public void put(String key, String value) {
             checkAndParse();
-            data.put(key, new String[]{value});
+            data.put(key, new String[] { value });
             // make sure rootsParamsNode is regenerated if needed
             rootParamsNodeIsGenerated = false;
         }
@@ -398,7 +349,7 @@ public class Scope {
             // make sure rootsParamsNode is regenerated if needed
             rootParamsNodeIsGenerated = false;
         }
-        
+
         public void removeStartWith(String prefix) {
             checkAndParse();
             Iterator<Map.Entry<String, String[]>> iterator = data.entrySet().iterator();
@@ -426,9 +377,11 @@ public class Scope {
         public <T> T get(String key, Class<T> type) {
             try {
                 checkAndParse();
-                // TODO: This is used by the test, but this is not the most convenient.
+                // TODO: This is used by the test, but this is not the most
+                // convenient.
                 return (T) Binder.bind(getRootParamNode(), key, type, type, null);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
+                Logger.error(e, "Failed to get %s of type %s", key, type);
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
@@ -439,6 +392,7 @@ public class Scope {
             try {
                 return (T) Binder.directBind(annotations, get(key), type, null);
             } catch (Exception e) {
+                Logger.error(e, "Failed to get %s of type %s", key, type);
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
@@ -462,7 +416,7 @@ public class Scope {
 
         public Map<String, String[]> sub(String prefix) {
             checkAndParse();
-            Map<String, String[]> result = new LinkedHashMap<String, String[]>();
+            Map<String, String[]> result = new LinkedHashMap<>();
             for (String key : data.keySet()) {
                 if (key.startsWith(prefix + ".")) {
                     result.put(key.substring(prefix.length() + 1), data.get(key));
@@ -473,7 +427,7 @@ public class Scope {
 
         public Map<String, String> allSimple() {
             checkAndParse();
-            Map<String, String> result = new HashMap<String, String>();
+            Map<String, String> result = new HashMap<>();
             for (String key : data.keySet()) {
                 result.put(key, data.get(key)[0]);
             }
@@ -561,8 +515,8 @@ public class Scope {
      */
     public static class RenderArgs {
 
-        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
-        public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();
+        public Map<String, Object> data = new HashMap<>(); // ThreadLocal access
+        public static final ThreadLocal<RenderArgs> current = new ThreadLocal<>();
 
         public static RenderArgs current() {
             return current.get();
@@ -592,8 +546,8 @@ public class Scope {
      */
     public static class RouteArgs {
 
-        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
-        public static ThreadLocal<RouteArgs> current = new ThreadLocal<RouteArgs>();
+        public Map<String, Object> data = new HashMap<>(); // ThreadLocal access
+        public static final ThreadLocal<RouteArgs> current = new ThreadLocal<>();
 
         public static RouteArgs current() {
             return current.get();

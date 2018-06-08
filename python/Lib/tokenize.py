@@ -23,15 +23,16 @@ function to which the 5 fields described above are passed as 5 arguments,
 each time a new token is found."""
 
 __author__ = 'Ka-Ping Yee <ping@lfw.org>'
-__credits__ = \
-    'GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, Skip Montanaro, Raymond Hettinger'
+__credits__ = ('GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, '
+               'Skip Montanaro, Raymond Hettinger')
 
+from itertools import chain
 import string, re
 from token import *
 
 import token
-__all__ = [x for x in dir(token) if x[0] != '_'] + ["COMMENT", "tokenize",
-           "generate_tokens", "NL", "untokenize"]
+__all__ = [x for x in dir(token) if not x.startswith("_")]
+__all__ += ["COMMENT", "tokenize", "generate_tokens", "NL", "untokenize"]
 del x
 del token
 
@@ -70,10 +71,10 @@ Double = r'[^"\\]*(?:\\.[^"\\]*)*"'
 Single3 = r"[^'\\]*(?:(?:\\.|'(?!''))[^'\\]*)*'''"
 # Tail end of """ string.
 Double3 = r'[^"\\]*(?:(?:\\.|"(?!""))[^"\\]*)*"""'
-Triple = group("[uU]?[rR]?'''", '[uU]?[rR]?"""')
+Triple = group("[uUbB]?[rR]?'''", '[uUbB]?[rR]?"""')
 # Single-line ' or " string.
-String = group(r"[uU]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*'",
-               r'[uU]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
+String = group(r"[uUbB]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*'",
+               r'[uUbB]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
 
 # Because of leftmost-then-longest match semantics, be sure to put the
 # longest operators first (e.g., if = came before ==, == would get
@@ -91,11 +92,11 @@ PlainToken = group(Number, Funny, String, Name)
 Token = Ignore + PlainToken
 
 # First (or only) line of ' or " string.
-ContStr = group(r"[uU]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*" +
+ContStr = group(r"[uUbB]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*" +
                 group("'", r'\\\r?\n'),
-                r'[uU]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*' +
+                r'[uUbB]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*' +
                 group('"', r'\\\r?\n'))
-PseudoExtras = group(r'\\\r?\n', Comment, Triple)
+PseudoExtras = group(r'\\\r?\n|\Z', Comment, Triple)
 PseudoToken = Whitespace + group(PseudoExtras, Number, Funny, ContStr, Name)
 
 tokenprog, pseudoprog, single3prog, double3prog = map(
@@ -184,17 +185,43 @@ class Untokenizer:
 
     def add_whitespace(self, start):
         row, col = start
-        assert row <= self.prev_row
+        if row < self.prev_row or row == self.prev_row and col < self.prev_col:
+            raise ValueError("start ({},{}) precedes previous end ({},{})"
+                             .format(row, col, self.prev_row, self.prev_col))
+        row_offset = row - self.prev_row
+        if row_offset:
+            self.tokens.append("\\\n" * row_offset)
+            self.prev_col = 0
         col_offset = col - self.prev_col
         if col_offset:
             self.tokens.append(" " * col_offset)
 
     def untokenize(self, iterable):
-        for t in iterable:
+        it = iter(iterable)
+        indents = []
+        startline = False
+        for t in it:
             if len(t) == 2:
-                self.compat(t, iterable)
+                self.compat(t, it)
                 break
             tok_type, token, start, end, line = t
+            if tok_type == ENDMARKER:
+                break
+            if tok_type == INDENT:
+                indents.append(token)
+                continue
+            elif tok_type == DEDENT:
+                indents.pop()
+                self.prev_row, self.prev_col = end
+                continue
+            elif tok_type in (NEWLINE, NL):
+                startline = True
+            elif startline and indents:
+                indent = indents[-1]
+                if start[1] >= len(indent):
+                    self.tokens.append(indent)
+                    self.prev_col = len(indent)
+                startline = False
             self.add_whitespace(start)
             self.tokens.append(token)
             self.prev_row, self.prev_col = end
@@ -204,16 +231,12 @@ class Untokenizer:
         return "".join(self.tokens)
 
     def compat(self, token, iterable):
-        startline = False
         indents = []
         toks_append = self.tokens.append
-        toknum, tokval = token
-        if toknum in (NAME, NUMBER):
-            tokval += ' '
-        if toknum in (NEWLINE, NL):
-            startline = True
+        startline = token[0] in (NEWLINE, NL)
         prevstring = False
-        for tok in iterable:
+
+        for tok in chain([token], iterable):
             toknum, tokval = tok[:2]
 
             if toknum in (NAME, NUMBER):
@@ -263,7 +286,7 @@ def untokenize(iterable):
 
 def generate_tokens(readline):
     """
-    The generate_tokens() generator requires one argment, readline, which
+    The generate_tokens() generator requires one argument, readline, which
     must be a callable object which provides the same interface as the
     readline() method of built-in file objects. Each call to the function
     should return one line of input as a string.  Alternately, readline
@@ -288,7 +311,7 @@ def generate_tokens(readline):
             line = readline()
         except StopIteration:
             line = ''
-        lnum = lnum + 1
+        lnum += 1
         pos, max = 0, len(line)
 
         if contstr:                            # continued string
@@ -316,12 +339,17 @@ def generate_tokens(readline):
             if not line: break
             column = 0
             while pos < max:                   # measure leading whitespace
-                if line[pos] == ' ': column = column + 1
-                elif line[pos] == '\t': column = (column/tabsize + 1)*tabsize
-                elif line[pos] == '\f': column = 0
-                else: break
-                pos = pos + 1
-            if pos == max: break
+                if line[pos] == ' ':
+                    column += 1
+                elif line[pos] == '\t':
+                    column = (column//tabsize + 1)*tabsize
+                elif line[pos] == '\f':
+                    column = 0
+                else:
+                    break
+                pos += 1
+            if pos == max:
+                break
 
             if line[pos] in '#\r\n':           # skip comments or blank lines
                 if line[pos] == '#':
@@ -357,6 +385,8 @@ def generate_tokens(readline):
             if pseudomatch:                                # scan for tokens
                 start, end = pseudomatch.span(1)
                 spos, epos, pos = (lnum, start), (lnum, end), end
+                if start == end:
+                    continue
                 token, initial = line[start:end], line[start]
 
                 if initial in numchars or \
@@ -397,13 +427,15 @@ def generate_tokens(readline):
                 elif initial == '\\':                      # continued stmt
                     continued = 1
                 else:
-                    if initial in '([{': parenlev = parenlev + 1
-                    elif initial in ')]}': parenlev = parenlev - 1
+                    if initial in '([{':
+                        parenlev += 1
+                    elif initial in ')]}':
+                        parenlev -= 1
                     yield (OP, token, spos, epos, line)
             else:
                 yield (ERRORTOKEN, line[pos],
                            (lnum, pos), (lnum, pos+1), line)
-                pos = pos + 1
+                pos += 1
 
     for indent in indents[1:]:                 # pop remaining indent levels
         yield (DEDENT, '', (lnum, 0), (lnum, 0), '')
@@ -411,5 +443,7 @@ def generate_tokens(readline):
 
 if __name__ == '__main__':                     # testing
     import sys
-    if len(sys.argv) > 1: tokenize(open(sys.argv[1]).readline)
-    else: tokenize(sys.stdin.readline)
+    if len(sys.argv) > 1:
+        tokenize(open(sys.argv[1]).readline)
+    else:
+        tokenize(sys.stdin.readline)

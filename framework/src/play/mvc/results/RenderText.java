@@ -10,12 +10,13 @@ import play.mvc.Http.Response;
  */
 public class RenderText extends Result {
     
-    String text;
+    private final String text;
     
     public RenderText(CharSequence text) {
         this.text = text.toString();
     }
 
+    @Override
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "text/plain; charset=" + Http.Response.current().encoding);
@@ -25,4 +26,7 @@ public class RenderText extends Result {
         }
     }
 
+    public String getText() {
+        return text;
+    }
 }

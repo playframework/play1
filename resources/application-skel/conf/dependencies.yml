@@ -2,3 +2,4 @@
 
 require:
     - play
+    - play -> docviewer

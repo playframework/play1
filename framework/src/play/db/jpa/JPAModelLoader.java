@@ -49,6 +49,7 @@ public class JPAModelLoader implements Model.Factory {
      * Find object by ID
      * @param id : the id of the entity
      */
+    @Override
     public Model findById(Object id) {
         try {
             if (id == null) {
@@ -81,6 +82,7 @@ public class JPAModelLoader implements Model.Factory {
      * @return a list of results
      */
     @SuppressWarnings("unchecked")
+    @Override
     public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields,
             String keywords, String where) {
         StringBuilder q = new StringBuilder("from ").append(this.clazz.getName());
@@ -113,9 +115,7 @@ public class JPAModelLoader implements Model.Factory {
         return query.getResultList();
     }
 
-    /**
-     * 
-     */
+    @Override
     public Long count(List<String> searchFields, String keywords, String where) {
         String q = "select count(*) from " + this.clazz.getName() + " e";
         if (keywords != null && !keywords.equals("")) {
@@ -134,9 +134,7 @@ public class JPAModelLoader implements Model.Factory {
         return Long.decode(query.getSingleResult().toString());
     }
 
-    /**
-     * 
-     */
+    @Override
     public void deleteAll() {
         JPA.em(this.dbName).createQuery("delete from " + this.clazz.getName()).executeUpdate();
     }
@@ -144,9 +142,10 @@ public class JPAModelLoader implements Model.Factory {
     /**
      * List of all properties
      */
+    @Override
     public List<Model.Property> listProperties() {
-        List<Model.Property> properties = new ArrayList<Model.Property>();
-        Set<Field> fields = new LinkedHashSet<Field>();
+        List<Model.Property> properties = new ArrayList<>();
+        Set<Field> fields = new LinkedHashSet<>();
         Class<?> tclazz = this.clazz;
         while (!tclazz.equals(Object.class)) {
             Collections.addAll(fields, tclazz.getDeclaredFields());
@@ -175,10 +174,12 @@ public class JPAModelLoader implements Model.Factory {
         return properties;
     }
 
+    @Override
     public String keyName() {
         return keyField().getName();
     }
 
+    @Override
     public Class<?> keyType() {
         return keyField().getType();
     }
@@ -226,7 +227,7 @@ public class JPAModelLoader implements Model.Factory {
             if (this.properties != null){
                 return;
             }
-            this.properties = new HashMap<String, Model.Property>();
+            this.properties = new HashMap<>();
             Set<Field> fields = getModelFields(this.clazz);
             for (Field f : fields) {
                 int mod = f.getModifiers();
@@ -291,9 +292,7 @@ public class JPAModelLoader implements Model.Factory {
         return id;
     }
 
-    /**
-     * 
-     */
+    @Override
     public Object keyValue(Model m) {
         try {
             if (m == null) {
@@ -306,11 +305,11 @@ public class JPAModelLoader implements Model.Factory {
             }
 
             // Is it a composite key? If yes we need to return the matching PK
-            final Field[] fields = keyFields();
-            final Object[] values = new Object[fields.length];
+            Field[] fields = keyFields();
+            Object[] values = new Object[fields.length];
             int i = 0;
             for (Field f : fields) {
-                final Object o = f.get(m);
+                Object o = f.get(m);
                 if (o != null) {
                     values[i++] = o;
                 }
@@ -327,13 +326,8 @@ public class JPAModelLoader implements Model.Factory {
         }
     }
 
-    /**
-     * 
-     * @param clazz
-     * @return
-     */
     public static Set<Field> getModelFields(Class<?> clazz) {
-        Set<Field> fields = new LinkedHashSet<Field>();
+        Set<Field> fields = new LinkedHashSet<>();
         Class<?> tclazz = clazz;
         while (!tclazz.equals(Object.class)) {
             // Only add fields for mapped types
@@ -344,10 +338,6 @@ public class JPAModelLoader implements Model.Factory {
         return fields;
     }
 
-    /**
-     * 
-     * @return
-     */
     Field keyField() {
         Class<?> c = this.clazz;
         try {
@@ -361,19 +351,15 @@ public class JPAModelLoader implements Model.Factory {
                 c = c.getSuperclass();
             }
         } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
         }
         throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
     }
 
-    /**
-     * 
-     * @return
-     */
     Field[] keyFields() {
         Class<?> c = this.clazz;
         try {
-            List<Field> fields = new ArrayList<Field>();
+            List<Field> fields = new ArrayList<>();
             while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {
                     if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
@@ -383,21 +369,16 @@ public class JPAModelLoader implements Model.Factory {
                 }
                 c = c.getSuperclass();
             }
-            final Field[] f = fields.toArray(new Field[fields.size()]);
+            Field[] f = fields.toArray(new Field[fields.size()]);
             if (f.length == 0) {
                 throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
             }
             return f;
         } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
         }
     }
 
-    /**
-     * 
-     * @param searchFields
-     * @return
-     */
     String getSearchQuery(List<String> searchFields) {
         StringBuilder q = new StringBuilder("");
         for (Model.Property property : this.listProperties()) {
@@ -412,11 +393,6 @@ public class JPAModelLoader implements Model.Factory {
         return q.toString();
     }
 
-    /**
-     * 
-     * @param field
-     * @return
-     */
     Model.Property buildProperty(final Field field) {
         Model.Property modelProperty = new Model.Property();
         modelProperty.type = field.getType();
@@ -430,6 +406,7 @@ public class JPAModelLoader implements Model.Factory {
                     final String modelDbName = JPA.getDBName(modelProperty.relationType);
                     modelProperty.choices = new Model.Choices() {
                         @SuppressWarnings("unchecked")
+                        @Override
                         public List<Object> list() {
                             return JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
                         }
@@ -442,6 +419,7 @@ public class JPAModelLoader implements Model.Factory {
                 final String modelDbName = JPA.getDBName(modelProperty.relationType);
                 modelProperty.choices = new Model.Choices() {
                     @SuppressWarnings("unchecked")
+                    @Override
                     public List<Object> list() {
                         return JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
                     }
@@ -458,6 +436,7 @@ public class JPAModelLoader implements Model.Factory {
                     final String modelDbName = JPA.getDBName(modelProperty.relationType);
                     modelProperty.choices = new Model.Choices() {
                         @SuppressWarnings("unchecked")
+                        @Override
                         public List<Object> list() {
                             return JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
                         }
@@ -473,6 +452,7 @@ public class JPAModelLoader implements Model.Factory {
                     modelProperty.choices = new Model.Choices() {
 
                         @SuppressWarnings("unchecked")
+                        @Override
                         public List<Object> list() {
                             return JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
                         }
@@ -484,6 +464,7 @@ public class JPAModelLoader implements Model.Factory {
             modelProperty.choices = new Model.Choices() {
 
                 @SuppressWarnings("unchecked")
+                @Override
                 public List<Object> list() {
                     return (List<Object>) Arrays.asList(field.getType().getEnumConstants());
                 }

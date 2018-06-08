@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
 import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
 import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
@@ -20,7 +21,6 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.jdt.internal.compiler.Compiler;
 
 import play.Logger;
 import play.Play;
@@ -33,16 +33,19 @@ import play.exceptions.UnexpectedException;
  */
 public class ApplicationCompiler {
 
-    Map<String, Boolean> packagesCache = new HashMap<String, Boolean>();
+    Map<String, Boolean> packagesCache = new HashMap<>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
 
     /**
      * Try to guess the magic configuration options
+     * 
+     * @param applicationClasses
+     *            The application classes container
      */
     public ApplicationCompiler(ApplicationClasses applicationClasses) {
         this.applicationClasses = applicationClasses;
-        this.settings = new HashMap<String, String>();
+        this.settings = new HashMap<>();
         this.settings.put(CompilerOptions.OPTION_ReportMissingSerialVersion, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
         this.settings.put(CompilerOptions.OPTION_SourceFileAttribute, CompilerOptions.GENERATE);
@@ -50,27 +53,22 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
-        String javaVersion = CompilerOptions.VERSION_1_6;
-        if(System.getProperty("java.version").startsWith("1.6")) {
-            javaVersion = CompilerOptions.VERSION_1_6;
-        } else if (System.getProperty("java.version").startsWith("1.7")) {
-            javaVersion = CompilerOptions.VERSION_1_7;
-        } else if (System.getProperty("java.version").startsWith("1.8")) {
-            javaVersion = CompilerOptions.VERSION_1_8;
+        String javaVersion = CompilerOptions.VERSION_1_8;
+        if (System.getProperty("java.version").startsWith("1.5") || System.getProperty("java.version").startsWith("1.6")
+                || System.getProperty("java.version").startsWith("1.7")) {
+            throw new CompilationException("Java version prior to 1.8 are not supported");
         }
-        if("1.5".equals(Play.configuration.get("java.source"))) {
-            javaVersion = CompilerOptions.VERSION_1_5;
-        } else if("1.6".equals(Play.configuration.get("java.source"))) {
-            javaVersion = CompilerOptions.VERSION_1_6;
-        } else if("1.7".equals(Play.configuration.get("java.source"))) {
-            javaVersion = CompilerOptions.VERSION_1_7;
-        }else if("1.8".equals(Play.configuration.get("java.source"))) {
-            javaVersion = CompilerOptions.VERSION_1_8;
+
+        if ("1.5".equals(Play.configuration.get("java.source")) || "1.6".equals(Play.configuration.get("java.source"))
+                || "1.7".equals(Play.configuration.get("java.source"))) {
+            throw new CompilationException("Java version prior to 1.8 are not supported");
         }
+
         this.settings.put(CompilerOptions.OPTION_Source, javaVersion);
         this.settings.put(CompilerOptions.OPTION_TargetPlatform, javaVersion);
         this.settings.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
         this.settings.put(CompilerOptions.OPTION_Compliance, javaVersion);
+        this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
     }
 
     /**
@@ -78,10 +76,10 @@ public class ApplicationCompiler {
      */
     final class CompilationUnit implements ICompilationUnit {
 
-        final private String clazzName;
-        final private String fileName;
-        final private char[] typeName;
-        final private char[][] packageName;
+        private final String clazzName;
+        private final String fileName;
+        private final char[] typeName;
+        private final char[][] packageName;
 
         CompilationUnit(String pClazzName) {
             clazzName = pClazzName;
@@ -102,35 +100,40 @@ public class ApplicationCompiler {
             }
         }
 
+        @Override
         public char[] getFileName() {
             return fileName.toCharArray();
         }
 
+        @Override
         public char[] getContents() {
             return applicationClasses.getApplicationClass(clazzName).javaSource.toCharArray();
         }
 
+        @Override
         public char[] getMainTypeName() {
             return typeName;
         }
 
+        @Override
         public char[][] getPackageName() {
             return packageName;
         }
 
         @Override
         public boolean ignoreOptionalProblems() {
-            // TODO Auto-generated method stub
             return false;
         }
     }
 
     /**
      * Please compile this className
+     * 
+     * @param classNames
+     *            Arrays of the class name to compile
      */
     @SuppressWarnings("deprecation")
     public void compile(String[] classNames) {
-
         ICompilationUnit[] compilationUnits = new CompilationUnit[classNames.length];
         for (int i = 0; i < classNames.length; i++) {
             compilationUnits[i] = new CompilationUnit(classNames[i]);
@@ -143,8 +146,9 @@ public class ApplicationCompiler {
          */
         INameEnvironment nameEnvironment = new INameEnvironment() {
 
-            public NameEnvironmentAnswer findType(final char[][] compoundTypeName) {
-                final StringBuffer result = new StringBuffer();
+            @Override
+            public NameEnvironmentAnswer findType(char[][] compoundTypeName) {
+                StringBuilder result = new StringBuilder(compoundTypeName.length * 7);
                 for (int i = 0; i < compoundTypeName.length; i++) {
                     if (i != 0) {
                         result.append('.');
@@ -154,8 +158,9 @@ public class ApplicationCompiler {
                 return findType(result.toString());
             }
 
-            public NameEnvironmentAnswer findType(final char[] typeName, final char[][] packageName) {
-                final StringBuffer result = new StringBuffer();
+            @Override
+            public NameEnvironmentAnswer findType(char[] typeName, char[][] packageName) {
+                StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
                 for (int i = 0; i < packageName.length; i++) {
                     result.append(packageName[i]);
                     result.append('.');
@@ -164,7 +169,7 @@ public class ApplicationCompiler {
                 return findType(result.toString());
             }
 
-            private NameEnvironmentAnswer findType(final String name) {
+            private NameEnvironmentAnswer findType(String name) {
                 try {
 
                     if (name.startsWith("play.") || name.startsWith("java.") || name.startsWith("javax.")) {
@@ -206,22 +211,27 @@ public class ApplicationCompiler {
                 }
             }
 
+            @Override
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
-                StringBuilder sb = new StringBuilder();
-                if (parentPackageName != null) {
+                String name;
+                if (parentPackageName == null) {
+                    name = new String(packageName);
+                } else {
+                    StringBuilder sb = new StringBuilder(parentPackageName.length * 7 + packageName.length);
                     for (char[] p : parentPackageName) {
-                        sb.append(new String(p));
+                        sb.append(p);
                         sb.append(".");
                     }
+                    sb.append(new String(packageName));
+                    name = sb.toString();
                 }
-                sb.append(new String(packageName));
-                String name = sb.toString();
+
                 if (packagesCache.containsKey(name)) {
-                    return packagesCache.get(name).booleanValue();
+                    return packagesCache.get(name);
                 }
-                // Check if thera a .java or .class for this ressource
-                if (Play.classloader.getClassDefinition(name) != null) {
+                // Check if there are .java or .class for this resource
+                if (Play.classloader.getResource(name.replace('.', '/') + ".class") != null) {
                     packagesCache.put(name, false);
                     return false;
                 }
@@ -233,6 +243,7 @@ public class ApplicationCompiler {
                 return true;
             }
 
+            @Override
             public void cleanup() {
             }
         };
@@ -242,10 +253,11 @@ public class ApplicationCompiler {
          */
         ICompilerRequestor compilerRequestor = new ICompilerRequestor() {
 
+            @Override
             public void acceptResult(CompilationResult result) {
                 // If error
                 if (result.hasErrors()) {
-                    for (IProblem problem: result.getErrors()) {
+                    for (IProblem problem : result.getErrors()) {
                         String className = new String(problem.getOriginatingFileName()).replace("/", ".");
                         className = className.substring(0, className.length() - 5);
                         String message = problem.getMessage();
@@ -253,15 +265,16 @@ public class ApplicationCompiler {
                             // Non sense !
                             message = problem.getArguments()[0] + " cannot be resolved";
                         }
-                        throw new CompilationException(Play.classes.getApplicationClass(className).javaFile, message, problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+                        throw new CompilationException(Play.classes.getApplicationClass(className).javaFile, message,
+                                problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
                     }
                 }
                 // Something has been compiled
                 ClassFile[] clazzFiles = result.getClassFiles();
                 for (int i = 0; i < clazzFiles.length; i++) {
-                    final ClassFile clazzFile = clazzFiles[i];
-                    final char[][] compoundName = clazzFile.getCompoundName();
-                    final StringBuffer clazzName = new StringBuffer();
+                    ClassFile clazzFile = clazzFiles[i];
+                    char[][] compoundName = clazzFile.getCompoundName();
+                    StringBuilder clazzName = new StringBuilder();
                     for (int j = 0; j < compoundName.length; j++) {
                         if (j != 0) {
                             clazzName.append('.');

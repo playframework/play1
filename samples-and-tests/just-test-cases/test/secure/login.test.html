@@ -1,0 +1,8 @@
+#{selenium 'Secure login'}
+
+	open('@{security.Security.login}')	
+    clickAndWait('css=input[type="submit"]')
+	assertTextPresent(${"<script>alert('My alert message');</script>".escape()})
+
+
+#{/selenium}

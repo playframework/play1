@@ -19,7 +19,7 @@ import play.mvc.Scope;
 @SuppressWarnings("serial")
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
-    final static String mes = "validation.equals";
+    static final String mes = "validation.equals";
 
     String to;
     String otherKey;
@@ -31,6 +31,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
         setMessage(equals.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         try {
@@ -81,7 +82,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("to", otherKey);
         return messageVariables;
     }

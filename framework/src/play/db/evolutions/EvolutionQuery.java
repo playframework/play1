@@ -73,7 +73,7 @@ public class EvolutionQuery{
     }
     
     public static void resolve(String dbName, int revision, String moduleKey) throws SQLException {
-	Connection connection = getNewConnection(dbName);
+        Connection connection = getNewConnection(dbName);
         PreparedStatement ps = connection.prepareStatement("update play_evolutions set state = ?, last_problem = ?  where state = ? and id = ? and module_key = ?" );
         ps.setString(1, EvolutionState.APPLIED.getStateWord() );
         ps.setString(2, "");
@@ -114,7 +114,7 @@ public class EvolutionQuery{
         // Execute script
         if (runScript) {
            for (CharSequence sql : new SQLSplitter((evolution.applyUp ? evolution.sql_up : evolution.sql_down))) {
-                final String s = sql.toString().trim();
+                String s = sql.toString().trim();
                 if (StringUtils.isEmpty(s)) {
                     continue;
                 }              
@@ -138,13 +138,12 @@ public class EvolutionQuery{
     }
     
     public static void setProblem(Connection connection, int applying,
-	    String moduleKey, String message) throws SQLException {
+                                  String moduleKey, String message) throws SQLException {
         PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ? where id = ? and module_key = ?");
         ps.setString(1, message);
         ps.setInt(2, applying);
         ps.setString(3, moduleKey);
         ps.execute();
-	
     }
     
     
@@ -252,14 +251,14 @@ public class EvolutionQuery{
         }
     }
 
-    private synchronized static boolean isOracleDialectInUse(String dbName) {
+    private static synchronized boolean isOracleDialectInUse(String dbName) {
         boolean isOracle = false;
         Configuration dbConfig = new Configuration(dbName);
         String jpaDialect = JPAPlugin.getDefaultDialect(dbConfig.getProperty("db.driver")); 
         if (jpaDialect != null) {
             try {
                 Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
-			
+
                 // Oracle 8i dialect is the base class for oracle dialects (at least for now)
                 isOracle = org.hibernate.dialect.Oracle8iDialect.class.isAssignableFrom(dialectClass);
             } catch (ClassNotFoundException e) {

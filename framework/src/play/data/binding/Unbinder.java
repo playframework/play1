@@ -63,11 +63,11 @@ public class Unbinder {
 
     private static void unbindMap(Map<String, Object> result, Object src, Class<?> srcClazz, String name, Annotation[] annotations) {
         if(src == null){
-            directUnbind( result, src,  srcClazz,  name, annotations);
+            directUnbind( result, null,  srcClazz,  name, annotations);
         } else {
-            Map<?,?> map = (Map) src;
+            Map<?,?> map = (Map<?,?>) src;
 
-            for (Map.Entry entry : map.entrySet()) {
+            for (Map.Entry<?,?> entry : map.entrySet()) {
                 Object key = entry.getKey();
                 if (!isDirect(key.getClass())) {
                     throw new UnsupportedOperationException("Unbind won't work with indirect map keys yet");
@@ -118,19 +118,17 @@ public class Unbinder {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType().equals(As.class)) {
                         // Check the unbinder param first
-                        Class<? extends TypeUnbinder<?>> toInstanciate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
+                        Class<? extends TypeUnbinder<?>> toInstantiate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
                                 .unbinder();
-                        if (!(toInstanciate.equals(As.DEFAULT.class))) {
-                            // Instantiate the binder
-                            TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstanciate.newInstance();
+                        if (!(toInstantiate.equals(As.DEFAULT.class))) {
+                            TypeUnbinder<?> myInstance = toInstantiate.newInstance();
                             isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                         }else{
                             // unbinder is default, test if binder handle the unbinder too
-                            Class<? extends TypeBinder<?>> toInstanciateBinder = (Class<? extends TypeBinder<?>>) ((As) annotation)
-                                    .binder();
-                            if (!(toInstanciateBinder.equals(As.DEFAULT.class))
-                                    && TypeUnbinder.class.isAssignableFrom(toInstanciateBinder)) {
-                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstanciateBinder.newInstance();
+                            Class<? extends TypeBinder<?>> toInstantiateBinder = ((As) annotation).binder();
+                            if (!(toInstantiateBinder.equals(As.DEFAULT.class))
+                                    && TypeUnbinder.class.isAssignableFrom(toInstantiateBinder)) {
+                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstantiateBinder.newInstance();
                                 isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                             }    
                         }             
@@ -141,10 +139,6 @@ public class Unbinder {
             if (!isExtendedTypeBinder) {
                 unBind(result, src, srcClazz, name, annotations);
             }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
         } catch (Exception e) {
             throw new RuntimeException("Object " + srcClazz + " won't unbind field " + name, e);
         }
@@ -180,7 +174,7 @@ public class Unbinder {
                 field.setAccessible(true);
 
                 // first we try with annotations resolved from property
-                List<Annotation> allAnnotations = new ArrayList<Annotation>();
+                List<Annotation> allAnnotations = new ArrayList<>();
                 if (annotations != null && annotations.length > 0) {
                     allAnnotations.addAll(Arrays.asList(annotations));
                 }
@@ -193,11 +187,9 @@ public class Unbinder {
 
                 try {
                     internalUnbind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | IllegalAccessException e) {
                     throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
-                }finally{
+                } finally{
                     field.setAccessible(oldAcc);
                 }
             }

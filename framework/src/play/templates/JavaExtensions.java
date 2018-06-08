@@ -1,27 +1,31 @@
 package play.templates;
 
-import groovy.lang.Closure;
-import groovy.util.XmlSlurper;
-import groovy.util.slurpersupport.GPathResult;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.*;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.Normalizer;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import groovy.lang.Closure;
+import groovy.util.XmlSlurper;
+import groovy.util.slurpersupport.GPathResult;
 import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
@@ -52,7 +56,7 @@ public class JavaExtensions {
         try {
             return (new XmlSlurper()).parseText(xml);
         } catch (Exception e) {
-            throw new RuntimeException("invalid XML");
+            throw new RuntimeException("invalid XML", e);
         }
     }
 
@@ -64,7 +68,7 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List<String> temp = new ArrayList<String>(Arrays.asList(array));
+        List<String> temp = new ArrayList<>(Arrays.asList(array));
         temp.remove(s);
         return temp.toArray(new String[temp.size()]);
     }
@@ -80,7 +84,7 @@ public class JavaExtensions {
 
     public static String capitalizeWords(String source) {
         char prevc = ' '; // first char of source is capitalized
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < source.length(); i++) {
             char c = source.charAt(i);
             if (c != ' ' && prevc == ' ') {
@@ -128,9 +132,9 @@ public class JavaExtensions {
     }
 
     public static RawData asAttr(Map attributes) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (Object key : attributes.keySet()) {
-            buf.append(key + "=\"" + attributes.get(key) + "\" ");
+            buf.append(key).append("=\"").append(attributes.get(key)).append("\" ");
         }
         return new RawData(buf);
     }
@@ -222,7 +226,7 @@ public class JavaExtensions {
     public static String asdate(Long timestamp) {
         return asdate(timestamp, I18N.getDateFormat());
     }
-    
+
     public static String asdate(Long timestamp, String pattern) {
         return asdate(timestamp, pattern, Lang.get());
     }
@@ -358,7 +362,17 @@ public class JavaExtensions {
     }
 
     public static String noAccents(String string) {
-        return Normalizer.normalize(string, Normalizer.Form.NFKC).replaceAll("[àáâãäåāąă]", "a").replaceAll("[çćčĉċ]", "c").replaceAll("[ďđð]", "d").replaceAll("[èéêëēęěĕė]", "e").replaceAll("[ƒſ]", "f").replaceAll("[ĝğġģ]", "g").replaceAll("[ĥħ]", "h").replaceAll("[ìíîïīĩĭįı]", "i").replaceAll("[ĳĵ]", "j").replaceAll("[ķĸ]", "k").replaceAll("[łľĺļŀ]", "l").replaceAll("[ñńňņŉŋ]", "n").replaceAll("[òóôõöøōőŏœ]", "o").replaceAll("[Þþ]", "p").replaceAll("[ŕřŗ]", "r").replaceAll("[śšşŝș]", "s").replaceAll("[ťţŧț]", "t").replaceAll("[ùúûüūůűŭũų]", "u").replaceAll("[ŵ]", "w").replaceAll("[ýÿŷ]", "y").replaceAll("[žżź]", "z").replaceAll("[æ]", "ae").replaceAll("[ÀÁÂÃÄÅĀĄĂ]", "A").replaceAll("[ÇĆČĈĊ]", "C").replaceAll("[ĎĐÐ]", "D").replaceAll("[ÈÉÊËĒĘĚĔĖ]", "E").replaceAll("[ĜĞĠĢ]", "G").replaceAll("[ĤĦ]", "H").replaceAll("[ÌÍÎÏĪĨĬĮİ]", "I").replaceAll("[Ĵ]", "J").replaceAll("[Ķ]", "K").replaceAll("[ŁĽĹĻĿ]", "L").replaceAll("[ÑŃŇŅŊ]", "N").replaceAll("[ÒÓÔÕÖØŌŐŎ]", "O").replaceAll("[ŔŘŖ]", "R").replaceAll("[ŚŠŞŜȘ]", "S").replaceAll("[ÙÚÛÜŪŮŰŬŨŲ]", "U").replaceAll("[Ŵ]", "W").replaceAll("[ÝŶŸ]", "Y").replaceAll("[ŹŽŻ]", "Z").replaceAll("[ß]", "ss");
+        return Normalizer.normalize(string, Normalizer.Form.NFKC).replaceAll("[àáâãäåāąă]", "a").replaceAll("[çćčĉċ]", "c")
+                .replaceAll("[ďđð]", "d").replaceAll("[èéêëēęěĕė]", "e").replaceAll("[ƒſ]", "f").replaceAll("[ĝğġģ]", "g")
+                .replaceAll("[ĥħ]", "h").replaceAll("[ìíîïīĩĭįı]", "i").replaceAll("[ĳĵ]", "j").replaceAll("[ķĸ]", "k")
+                .replaceAll("[łľĺļŀ]", "l").replaceAll("[ñńňņŉŋ]", "n").replaceAll("[òóôõöøōőŏœ]", "o").replaceAll("[Þþ]", "p")
+                .replaceAll("[ŕřŗ]", "r").replaceAll("[śšşŝș]", "s").replaceAll("[ťţŧț]", "t").replaceAll("[ùúûüūůűŭũų]", "u")
+                .replaceAll("[ŵ]", "w").replaceAll("[ýÿŷ]", "y").replaceAll("[žżź]", "z").replaceAll("[æ]", "ae")
+                .replaceAll("[ÀÁÂÃÄÅĀĄĂ]", "A").replaceAll("[ÇĆČĈĊ]", "C").replaceAll("[ĎĐÐ]", "D").replaceAll("[ÈÉÊËĒĘĚĔĖ]", "E")
+                .replaceAll("[ĜĞĠĢ]", "G").replaceAll("[ĤĦ]", "H").replaceAll("[ÌÍÎÏĪĨĬĮİ]", "I").replaceAll("[Ĵ]", "J")
+                .replaceAll("[Ķ]", "K").replaceAll("[ŁĽĹĻĿ]", "L").replaceAll("[ÑŃŇŅŊ]", "N").replaceAll("[ÒÓÔÕÖØŌŐŎ]", "O")
+                .replaceAll("[ŔŘŖ]", "R").replaceAll("[ŚŠŞŜȘ]", "S").replaceAll("[ÙÚÛÜŪŮŰŬŨŲ]", "U").replaceAll("[Ŵ]", "W")
+                .replaceAll("[ÝŶŸ]", "Y").replaceAll("[ŹŽŻ]", "Z").replaceAll("[ß]", "ss");
     }
 
     public static String slugify(String string) {
@@ -396,20 +410,30 @@ public class JavaExtensions {
 
     /**
      * return the last item of a list or null if the List is null
+     * 
+     * @param items
+     *            List of items
+     * @return the last item of a list or null if the List is null
      */
     public static Object last(List<?> items) {
         return (items == null) ? null : items.get(items.size() - 1);
     }
 
     /**
-     * concatenate items of a collection as a string separated with <tt>separator</tt>
-     *  items toString() method should be implemented to provide a string representation
+     * Concatenate items of a collection as a string separated with <tt>separator</tt> items toString() method should be
+     * implemented to provide a string representation
+     * 
+     * @param items
+     *            List of items
+     * @param separator
+     *            The separator to used
+     * @return The concatenate items of a collection as a string
      */
     public static String join(Collection items, String separator) {
         if (items == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Iterator ite = items.iterator();
         int i = 0;
         while (ite.hasNext()) {

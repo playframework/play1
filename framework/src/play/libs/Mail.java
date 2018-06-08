@@ -1,5 +1,18 @@
 package play.libs;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -7,29 +20,21 @@ import org.apache.commons.mail.EmailException;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
-import play.libs.mail.*;
+import play.libs.mail.AbstractMailSystemFactory;
+import play.libs.mail.MailSystem;
 import play.libs.mail.test.LegacyMockMailSystem;
-import play.utils.Utils;
-
-import javax.mail.*;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.*;
+import play.utils.Utils.Maps;
 
 /**
  * Mail utils
  */
 public class Mail {
 
-    private static class StaticMailSystemFactory extends
-            AbstractMailSystemFactory {
+    private static class StaticMailSystemFactory extends AbstractMailSystemFactory {
 
         private final MailSystem mailSystem;
 
-        public StaticMailSystemFactory(MailSystem mailSystem) {
+        private StaticMailSystemFactory(MailSystem mailSystem) {
             this.mailSystem = mailSystem;
         }
 
@@ -40,12 +45,16 @@ public class Mail {
 
     }
 
-    public    static Session session;
-    public    static boolean asynchronousSend = true;
+    public static Session session;
+    public static boolean asynchronousSend = true;
     protected static AbstractMailSystemFactory mailSystemFactory = AbstractMailSystemFactory.DEFAULT;
 
     /**
      * Send an email
+     * 
+     * @param email
+     *            An Email message
+     * @return true if email successfully send
      */
     public static Future<Boolean> send(Email email) {
         try {
@@ -62,11 +71,13 @@ public class Mail {
     }
 
     /**
-     * Through this method you can substitute the current MailSystem. This is
-     * especially helpful for testing purposes like using mock libraries.
+     * Through this method you can substitute the current MailSystem. This is especially helpful for testing purposes
+     * like using mock libraries.
      *
      * @author Andreas Simon &lt;a.simon@quagilis.de&gt;
-     * @see    MailSystem
+     * @param mailSystem
+     *            The mailSystem to use
+     * @see MailSystem
      */
     public static void useMailSystem(MailSystem mailSystem) {
         mailSystemFactory = new StaticMailSystemFactory(mailSystem);
@@ -77,23 +88,21 @@ public class Mail {
     }
 
     public static Email buildMessage(Email email) throws EmailException {
-
         String from = Play.configuration.getProperty("mail.smtp.from");
         if (email.getFromAddress() == null && !StringUtils.isEmpty(from)) {
             email.setFrom(from);
         } else if (email.getFromAddress() == null) {
             throw new MailException("Please define a 'from' email address", new NullPointerException());
         }
-        if ((email.getToAddresses() == null || email.getToAddresses().size() == 0) &&
-            (email.getCcAddresses() == null || email.getCcAddresses().size() == 0)  &&
-            (email.getBccAddresses() == null || email.getBccAddresses().size() == 0)) 
-        {
+        if ((email.getToAddresses() == null || email.getToAddresses().isEmpty())
+                && (email.getCcAddresses() == null || email.getCcAddresses().isEmpty())
+                && (email.getBccAddresses() == null || email.getBccAddresses().isEmpty())) {
             throw new MailException("Please define a recipient email address", new NullPointerException());
         }
         if (email.getSubject() == null) {
             throw new MailException("Please define a subject", new NullPointerException());
         }
-        if (email.getReplyToAddresses() == null || email.getReplyToAddresses().size() == 0) {
+        if (email.getReplyToAddresses() == null || email.getReplyToAddresses().isEmpty()) {
             email.addReplyTo(email.getFromAddress().getAddress());
         }
 
@@ -107,22 +116,24 @@ public class Mail {
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host", "localhost"));
 
             String channelEncryption;
-            if (Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
+            if (Play.configuration.containsKey("mail.smtp.protocol")
+                    && "smtps".equals(Play.configuration.getProperty("mail.smtp.protocol", "smtp"))) {
                 // Backward compatibility before stable5
                 channelEncryption = "starttls";
             } else {
                 channelEncryption = Play.configuration.getProperty("mail.smtp.channel", "clear");
             }
 
-            if (channelEncryption.equals("clear")) {
+            if ("clear".equals(channelEncryption)) {
                 props.put("mail.smtp.port", "25");
-            } else if (channelEncryption.equals("ssl")) {
-                // port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a root ca.)
+            } else if ("ssl".equals(channelEncryption)) {
+                // port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a
+                // root ca.)
                 props.put("mail.smtp.port", "465");
                 props.put("mail.smtp.socketFactory.port", "465");
                 props.put("mail.smtp.socketFactory.class", "play.utils.YesSSLSocketFactory");
                 props.put("mail.smtp.socketFactory.fallback", "false");
-            } else if (channelEncryption.equals("starttls")) {
+            } else if ("starttls".equals(channelEncryption)) {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
@@ -130,16 +141,15 @@ public class Mail {
                 // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
-            // Inject additional  mail.* settings declared in Play! configuration
-            Map<Object, Object> additionalSettings = new HashMap<Object, Object>();
-            additionalSettings = Utils.Maps.filterMap(Play.configuration, "^mail\\..*");
-            if(additionalSettings.size() > 0){
+            // Inject additional mail.* settings declared in Play! configuration
+            Map<Object, Object> additionalSettings = Maps.filterMap(Play.configuration, "^mail\\..*");
+            if (!additionalSettings.isEmpty()) {
                 // Remove "password" fields
                 additionalSettings.remove("mail.smtp.pass");
-                additionalSettings.remove("mail.smtp.password"); 
+                additionalSettings.remove("mail.smtp.password");
                 props.putAll(additionalSettings);
             }
-                 
+
             String user = Play.configuration.getProperty("mail.smtp.user");
             String password = Play.configuration.getProperty("mail.smtp.pass");
             if (password == null) {
@@ -154,7 +164,7 @@ public class Mail {
                 try {
                     session = Session.getInstance(props, (Authenticator) Play.classloader.loadClass(authenticator).newInstance());
                 } catch (Exception e) {
-                    Logger.error(e, "Cannot instanciate custom SMTP authenticator (%s)", authenticator);
+                    Logger.error(e, "Cannot instantiate custom SMTP authenticator (%s)", authenticator);
                 }
             }
 
@@ -178,12 +188,15 @@ public class Mail {
     /**
      * Send a JavaMail message
      *
-     * @param msg An Email message
+     * @param msg
+     *            An Email message
+     * @return true if email successfully send
      */
     public static Future<Boolean> sendMessage(final Email msg) {
         if (asynchronousSend) {
             return executor.submit(new Callable<Boolean>() {
 
+                @Override
                 public Boolean call() {
                     try {
                         msg.setSentDate(new Date());
@@ -197,7 +210,7 @@ public class Mail {
                 }
             });
         } else {
-            final StringBuffer result = new StringBuffer();
+            final StringBuilder result = new StringBuilder();
             try {
                 msg.setSentDate(new Date());
                 msg.send();
@@ -207,24 +220,28 @@ public class Mail {
                 result.append("oops");
             }
             return new Future<Boolean>() {
-
+                @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
                     return false;
                 }
 
+                @Override
                 public boolean isCancelled() {
                     return false;
                 }
 
+                @Override
                 public boolean isDone() {
                     return true;
                 }
 
-                public Boolean get() throws InterruptedException, ExecutionException {
+                @Override
+                public Boolean get() {
                     return result.length() == 0;
                 }
 
-                public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                @Override
+                public Boolean get(long timeout, TimeUnit unit) {
                     return result.length() == 0;
                 }
             };
@@ -252,7 +269,7 @@ public class Mail {
     /**
      * Just kept for compatibility reasons, use test double substitution mechanism instead.
      *
-     * @see    Mail#useMailSystem(MailSystem)
+     * @see Mail#useMailSystem(MailSystem)
      * @author Andreas Simon &lt;a.simon@quagilis.de&gt;
      */
     public static LegacyMockMailSystem Mock = new LegacyMockMailSystem();

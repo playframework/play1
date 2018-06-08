@@ -17,7 +17,7 @@ public class JdbcIterator<T> implements Iterator<T>, Iterable<T>, Closeable {
 
     public static <U> JdbcIterator<U> execute(SqlQuery query, JdbcResultFactory<U> factory) {
         try {
-            return new JdbcIterator<U>(JdbcHelper.execute(query), factory);
+            return new JdbcIterator<>(JdbcHelper.execute(query), factory);
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
@@ -40,7 +40,7 @@ public class JdbcIterator<T> implements Iterator<T>, Iterable<T>, Closeable {
         this(result, JdbcResultFactories.build(resultClass));
     }
 
-
+    @Override
     public void close() {
         if (result != null) {
             try {
@@ -68,11 +68,13 @@ public class JdbcIterator<T> implements Iterator<T>, Iterable<T>, Closeable {
         }
     }
 
+    @Override
     public boolean hasNext() {
         load();
         return next != null;
     }
 
+    @Override
     public T next() {
         load();
         T e = next;
@@ -80,10 +82,12 @@ public class JdbcIterator<T> implements Iterator<T>, Iterable<T>, Closeable {
         return e;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Iterator<T> iterator() {
         return this;
     }

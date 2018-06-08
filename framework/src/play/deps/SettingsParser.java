@@ -26,22 +26,22 @@ public class SettingsParser {
             super(message);
         }
     }
-    
-    HumanReadyLogger logger;
+
+    private final HumanReadyLogger logger;
 
     public SettingsParser(HumanReadyLogger logger) {
         this.logger = logger;
     }
 
     public void parse(IvySettings settings, File desc) {
-        if(!desc.exists()) {
+        if (!desc.exists()) {
             System.out.println("~ !! " + desc.getAbsolutePath() + " does not exist");
             return;
         }
 
         try {
             Yaml yaml = new Yaml();
-            Object o = null;
+            Object o;
 
             // Try to parse the yaml
             try {
@@ -55,7 +55,7 @@ public class SettingsParser {
                 throw new Oops("Unexpected format -> " + o);
             }
 
-            Map data = (Map) o;
+            Map<String, Object> data = (Map<String, Object>) o;
 
             parseIncludes(settings, data);
 
@@ -63,8 +63,8 @@ public class SettingsParser {
                 if (data.get("repositories") instanceof List) {
 
                     List repositories = (List) data.get("repositories");
-                    List<Map<String, String>> modules = new ArrayList<Map<String, String>>();
-                    for (Object dep: repositories) {
+                    List<Map<String, String>> modules = new ArrayList<>();
+                    for (Object dep : repositories) {
                         if (dep instanceof Map) {
                             settings.addResolver(parseRepository((Map) dep, modules));
                         } else {
@@ -72,15 +72,15 @@ public class SettingsParser {
                         }
                     }
 
-                    for (Map attributes: modules) {
-                        settings.addModuleConfiguration(attributes, settings.getMatcher(PatternMatcher.EXACT_OR_REGEXP), (String) attributes.remove("resolver"), null, null, null);
+                    for (Map attributes : modules) {
+                        settings.addModuleConfiguration(attributes, settings.getMatcher(PatternMatcher.EXACT_OR_REGEXP),
+                                (String) attributes.remove("resolver"), null, null, null);
                     }
 
                 } else {
                     throw new Oops("repositories list not found -> " + o);
                 }
             }
-
 
         } catch (Oops e) {
             System.out.println("~ Oops, malformed dependencies.yml descriptor:");
@@ -94,10 +94,10 @@ public class SettingsParser {
     /**
      * Look for an "include" property containing a list of yaml descriptors and load their repositories.
      */
-    private void parseIncludes(IvySettings settings, Map data) throws Oops {
+    private void parseIncludes(IvySettings settings, Map<String, Object> data) throws Oops {
         if (data.containsKey("include") && data.get("include") != null) {
             if (data.get("include") instanceof List) {
-                List<?> includes = (List)data.get("include");
+                List<?> includes = (List<?>) data.get("include");
                 if (includes != null) {
                     for (Object inc : includes) {
                         File include = new File(substitute(inc.toString()));
@@ -129,7 +129,7 @@ public class SettingsParser {
         if (type.equalsIgnoreCase("iBiblio")) {
             IBiblioResolver iBiblioResolver = new IBiblioResolver();
             iBiblioResolver.setName(repName);
-            if(options.containsKey("root")) {
+            if (options.containsKey("root")) {
                 iBiblioResolver.setRoot(get(options, "root", String.class));
             }
             iBiblioResolver.setM2compatible(get(options, "m2compatible", boolean.class, true));
@@ -170,7 +170,7 @@ public class SettingsParser {
             chainResolver.setReturnFirst(true);
             for (Object o : get(options, "using", List.class, new ArrayList())) {
                 DependencyResolver res = parseRepository((Map) o, modules);
-                if(res instanceof FileSystemResolver) {
+                if (res instanceof FileSystemResolver) {
                     chainResolver.setCheckmodified(true);
                 }
                 chainResolver.add(res);
@@ -191,15 +191,27 @@ public class SettingsParser {
                 String revision = null;
                 Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+)").matcher(v);
                 if (m.matches()) {
-                    organisation = m.group(1);
-                    module = m.group(2);
-                    revision = m.group(3).replace("$version", System.getProperty("play.version"));
+                    if (m.groupCount() > 0) {
+                        organisation = m.group(1);
+                    }
+                    if (m.groupCount() > 1) {
+                        module = m.group(2);
+                    }
+                    if (m.groupCount() > 2) {
+                        revision = m.group(3).replace("$version", System.getProperty("play.version"));
+                    }
                 } else {
                     m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+)").matcher(v);
                     if (m.matches()) {
-                        organisation = m.group(1);
-                        module = m.group(2);
-                        revision = m.group(3).replace("$version", System.getProperty("play.version"));
+                        if (m.groupCount() > 0) {
+                            organisation = m.group(1);
+                        }
+                        if (m.groupCount() > 1) {
+                            module = m.group(2);
+                        }
+                        if (m.groupCount() > 2) {
+                            revision = m.group(3).replace("$version", System.getProperty("play.version"));
+                        }
                     } else {
                         m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)").matcher(v);
                         if (m.matches()) {
@@ -210,12 +222,12 @@ public class SettingsParser {
                             if (m.matches()) {
                                 organisation = m.group(1);
                             } else {
-                                throw new Oops("Unknown depedency format -> " + o);
+                                throw new Oops("Unknown dependency format -> " + o);
                             }
                         }
                     }
                 }
-                Map<String, String> attributes = new HashMap<String, String>();
+                Map<String, String> attributes = new HashMap<>();
                 attributes.put("organisation", organisation);
                 if (module != null) {
                     attributes.put("module", module);
@@ -246,20 +258,21 @@ public class SettingsParser {
     }
 
     /**
-     * Substitute environment variables found in a <code>String</code> with their value.
-     * This function search for <code>${variable}</code> patterns and replace them with
-     * their value taken from current environment.
+     * Substitute environment variables found in a <code>String</code> with their value. This function search for
+     * <code>${variable}</code> patterns and replace them with their value taken from current environment.
      *
-     * @param s <code>String</code> to substitute
+     * @param s
+     *            <code>String</code> to substitute
      * @return The substituted <code>String</code>
-     * @throws Oops If an environment variable is not found
+     * @throws Oops
+     *             If an environment variable is not found
      */
     private String substitute(String s) throws Oops {
-        Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher((String)s); //search of ${something} group(1) => something
+        Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher(s); // search of ${something} group(1) => something
         while (m.find()) {
             String propertyValue = System.getProperty(m.group(1));
-            if(propertyValue != null){
-                s = s.replace("${" + m.group(1) + "}",propertyValue);
+            if (propertyValue != null) {
+                s = s.replace("${" + m.group(1) + "}", propertyValue);
             } else {
                 throw new Oops("Unknown property " + m.group(1) + " in " + s);
             }

@@ -104,8 +104,8 @@ public class PlayConfigurationLoadTask {
         }
         BufferedReader reader = null;
         try {
-            properties = new HashMap<String,String>();
-            Map<String,String> idSpecific = new HashMap<String,String>();
+            properties = new HashMap<>();
+            Map<String,String> idSpecific = new HashMap<>();
             reader = new BufferedReader(new FileReader(srcFile));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -148,7 +148,7 @@ public class PlayConfigurationLoadTask {
      * and new style, with dependencies starting at 1.2 (load everything from the modules/ dir)
      */
     private Set<File> modules() {
-        Set<File> modules = new HashSet<File>();
+        Set<File> modules = new HashSet<>();
 
         // Old-skool
         for (Map.Entry<String,String> entry: properties().entrySet()) {

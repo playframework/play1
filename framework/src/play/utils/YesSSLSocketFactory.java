@@ -1,5 +1,7 @@
 package play.utils;
 
+import play.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -19,12 +21,15 @@ public class YesSSLSocketFactory extends SSLSocketFactory {
 
     public static class YesTrustManager implements X509TrustManager {
 
+        @Override
         public void checkClientTrusted(X509Certificate[] cert, String authType) {
         }
 
+        @Override
         public void checkServerTrusted(X509Certificate[] cert, String authType) {
         }
 
+        @Override
         public X509Certificate[] getAcceptedIssuers() {
             return new X509Certificate[0];
         }
@@ -37,6 +42,7 @@ public class YesSSLSocketFactory extends SSLSocketFactory {
             sslcontext.init(null, new TrustManager[]{new YesTrustManager()}, null);
             factory = sslcontext.getSocketFactory();
         } catch (Exception ex) {
+            Logger.error(ex, "Failed to initialize factory");
         }
     }
 
@@ -44,34 +50,42 @@ public class YesSSLSocketFactory extends SSLSocketFactory {
         return new YesSSLSocketFactory();
     }
 
+    @Override
     public Socket createSocket(Socket socket, String s, int i, boolean flag) throws IOException {
         return factory.createSocket(socket, s, i, flag);
     }
 
+    @Override
     public Socket createSocket() throws IOException {
         return factory.createSocket();
     }
 
+    @Override
     public Socket createSocket(InetAddress inaddr, int i, InetAddress inaddr1, int j) throws IOException {
         return factory.createSocket(inaddr, i, inaddr1, j);
     }
 
+    @Override
     public Socket createSocket(InetAddress inaddr, int i) throws IOException {
         return factory.createSocket(inaddr, i);
     }
 
+    @Override
     public Socket createSocket(String s, int i, InetAddress inaddr, int j) throws IOException {
         return factory.createSocket(s, i, inaddr, j);
     }
 
+    @Override
     public Socket createSocket(String s, int i) throws IOException {
         return factory.createSocket(s, i);
     }
 
+    @Override
     public String[] getDefaultCipherSuites() {
         return factory.getDefaultCipherSuites();
     }
 
+    @Override
     public String[] getSupportedCipherSuites() {
         return factory.getSupportedCipherSuites();
     }

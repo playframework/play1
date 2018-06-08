@@ -1,6 +1,28 @@
 package play.data.parsing;
 
-import org.apache.commons.fileupload.*;
+import static org.apache.commons.io.FileUtils.readFileToByteArray;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemHeaders;
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.ParameterParser;
+import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.LimitedInputStream;
@@ -9,6 +31,7 @@ import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.output.DeferredFileOutputStream;
+
 import play.Logger;
 import play.Play;
 import play.data.FileUpload;
@@ -18,14 +41,8 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.utils.HTTP;
 
-import java.io.*;
-import java.util.*;
-
-import static org.apache.commons.io.FileUtils.readFileToByteArray;
-
 /**
- * From Apache commons fileupload.
- * http://commons.apache.org/fileupload/
+ * From Apache commons fileupload. http://commons.apache.org/fileupload/
  */
 public class ApacheMultipartParser extends DataParser {
 
@@ -46,35 +63,33 @@ public class ApacheMultipartParser extends DataParser {
     /*
      * Copyright 2001-2004 The Apache Software Foundation
      *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
+     * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+     * with the License. You may obtain a copy of the License at
      *
-     *     http://www.apache.org/licenses/LICENSE-2.0
+     * http://www.apache.org/licenses/LICENSE-2.0
      *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
+     * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+     * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+     * the specific language governing permissions and limitations under the License.
      *
-     * <p> The default implementation of the
-     * {@link org.apache.commons.fileupload.FileItem FileItem} interface.
+     * <p> The default implementation of the {@link org.apache.commons.fileupload.FileItem FileItem} interface.
      *
-     * <p> After retrieving an instance of this class from a {@link
-     * org.apache.commons.fileupload.DiskFileUpload DiskFileUpload} instance (see
-     * {@link org.apache.commons.fileupload.DiskFileUpload
-     * #parseRequest(javax.servlet.http.HttpServletRequest)}), you may
-     * either request all contents of file at once using {@link #get()} or
-     * request an {@link java.io.InputStream InputStream} with
-     * {@link #getInputStream()} and process the file without attempting to load
-     * it into memory, which may come handy with large files.
+     * <p> After retrieving an instance of this class from a {@link org.apache.commons.fileupload.DiskFileUpload
+     * DiskFileUpload} instance (see {@link org.apache.commons.fileupload.DiskFileUpload
+     * #parseRequest(javax.servlet.http.HttpServletRequest)}), you may either request all contents of file at once using
+     * {@link #get()} or request an {@link java.io.InputStream InputStream} with {@link #getInputStream()} and process
+     * the file without attempting to load it into memory, which may come handy with large files.
      *
      * @author <a href="mailto:Rafal.Krzewski@e-point.pl">Rafal Krzewski</a>
+     * 
      * @author <a href="mailto:sean@informage.net">Sean Legassick</a>
+     * 
      * @author <a href="mailto:jvanzyl@apache.org">Jason van Zyl</a>
+     * 
      * @author <a href="mailto:jmcnally@apache.org">John McNally</a>
+     * 
      * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
+     * 
      * @author Sean C. Sullivan
      *
      * @since FileUpload 1.1
@@ -91,10 +106,9 @@ public class ApacheMultipartParser extends DataParser {
 
         // ----------------------------------------------------- Manifest constants
         /**
-         * Default content charset to be used when no explicit charset
-         * parameter is provided by the sender. Media subtypes of the
-         * "text" type are defined to have a default charset value of
-         * "ISO-8859-1" when received via HTTP.
+         * Default content charset to be used when no explicit charset parameter is provided by the sender. Media
+         * subtypes of the "text" type are defined to have a default charset value of "ISO-8859-1" when received via
+         * HTTP.
          */
         public static final String DEFAULT_CHARSET = "ISO-8859-1";
         /**
@@ -112,8 +126,7 @@ public class ApacheMultipartParser extends DataParser {
          */
         private String fieldName;
         /**
-         * The content type passed by the browser, or <code>null</code> if
-         * not defined.
+         * The content type passed by the browser, or <code>null</code> if not defined.
          */
         private String contentType;
         /**
@@ -140,9 +153,9 @@ public class ApacheMultipartParser extends DataParser {
          * Output stream for this item.
          */
         private DeferredFileOutputStream dfos;
-        
+
         /**
-         * The file items headers. 
+         * The file items headers.
          */
         private FileItemHeaders headers;
 
@@ -157,15 +170,14 @@ public class ApacheMultipartParser extends DataParser {
         // ------------------------------- Methods from javax.activation.DataSource
 
         /**
-         * Returns an {@link java.io.InputStream InputStream} that can be
-         * used to retrieve the contents of the file.
+         * Returns an {@link java.io.InputStream InputStream} that can be used to retrieve the contents of the file.
          *
-         * @return An {@link java.io.InputStream InputStream} that can be
-         *         used to retrieve the contents of the file.
-         * @throws IOException if an error occurs.
+         * @return An {@link java.io.InputStream InputStream} that can be used to retrieve the contents of the file.
+         * @throws IOException
+         *             if an error occurs.
          */
-        public InputStream getInputStream()
-                throws IOException {
+        @Override
+        public InputStream getInputStream() throws IOException {
             if (!dfos.isInMemory()) {
                 return new FileInputStream(dfos.getFile());
             }
@@ -177,29 +189,26 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * Returns the content type passed by the agent or <code>null</code> if
-         * not defined.
+         * Returns the content type passed by the agent or <code>null</code> if not defined.
          *
-         * @return The content type passed by the agent or <code>null</code> if
-         *         not defined.
+         * @return The content type passed by the agent or <code>null</code> if not defined.
          */
+        @Override
         public String getContentType() {
             return contentType;
         }
 
         /**
-         * Returns the content charset passed by the agent or <code>null</code> if
-         * not defined.
+         * Returns the content charset passed by the agent or <code>null</code> if not defined.
          *
-         * @return The content charset passed by the agent or <code>null</code> if
-         *         not defined.
+         * @return The content charset passed by the agent or <code>null</code> if not defined.
          */
         public String getCharSet() {
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
             // Parameter parser can handle null input
-            Map params = parser.parse(getContentType(), ';');
-            return (String) params.get("charset");
+            Map<String, String> params = parser.parse(getContentType(), ';');
+            return params.get("charset");
         }
 
         /**
@@ -207,18 +216,18 @@ public class ApacheMultipartParser extends DataParser {
          *
          * @return The original filename in the client's filesystem.
          */
+        @Override
         public String getName() {
             return fileName;
         }
         // ------------------------------------------------------- FileItem methods
 
         /**
-         * Provides a hint as to whether or not the file contents will be read
-         * from memory.
+         * Provides a hint as to whether or not the file contents will be read from memory.
          *
-         * @return <code>true</code> if the file contents will be read
-         *         from memory; <code>false</code> otherwise.
+         * @return <code>true</code> if the file contents will be read from memory; <code>false</code> otherwise.
          */
+        @Override
         public boolean isInMemory() {
             return (dfos.isInMemory());
         }
@@ -228,6 +237,7 @@ public class ApacheMultipartParser extends DataParser {
          *
          * @return The size of the file, in bytes.
          */
+        @Override
         public long getSize() {
             if (cachedContent != null) {
                 return cachedContent.length;
@@ -239,12 +249,12 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * Returns the contents of the file as an array of bytes.  If the
-         * contents of the file were not yet cached in memory, they will be
-         * loaded from the disk storage and cached.
+         * Returns the contents of the file as an array of bytes. If the contents of the file were not yet cached in
+         * memory, they will be loaded from the disk storage and cached.
          *
          * @return The contents of the file as an array of bytes.
          */
+        @Override
         public byte[] get() {
             if (dfos.isInMemory()) {
                 if (cachedContent == null) {
@@ -261,28 +271,31 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * Returns the contents of the file as a String, using the specified
-         * encoding.  This method uses {@link #get()} to retrieve the
-         * contents of the file.
+         * Returns the contents of the file as a String, using the specified encoding. This method uses {@link #get()}
+         * to retrieve the contents of the file.
          *
-         * @param charset The charset to use.
+         * @param charset
+         *            The charset to use.
          * @return The contents of the file, as a string.
-         * @throws UnsupportedEncodingException if the requested character
-         *                                      encoding is not available.
+         * @throws UnsupportedEncodingException
+         *             if the requested character encoding is not available.
          */
-        public String getString(final String charset)
-                throws UnsupportedEncodingException {
+        @Override
+        public String getString(String charset) throws UnsupportedEncodingException {
             return new String(get(), charset);
         }
 
         /**
-         * Returns the contents of the file as a String, using the default
-         * character encoding.  This method uses {@link #get()} to retrieve the
-         * contents of the file.
-         *
+         * Returns the contents of the file as a String, using the default character encoding. This method uses
+         * {@link #get()} to retrieve the contents of the file.
+         * <p>
+         * 
+         * @play.todo Note: TODO Consider making this method throw UnsupportedEncodingException .
+         *            </p>
+         * 
          * @return The contents of the file, as a string.
-         * @todo Consider making this method throw UnsupportedEncodingException.
          */
+        @Override
         public String getString() {
             byte[] rawdata = get();
             String charset = getCharSet();
@@ -297,24 +310,23 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * A convenience method to write an uploaded item to disk. The client code
-         * is not concerned with whether or not the item is stored in memory, or on
-         * disk in a temporary location. They just want to write the uploaded item
+         * A convenience method to write an uploaded item to disk. The client code is not concerned with whether or not
+         * the item is stored in memory, or on disk in a temporary location. They just want to write the uploaded item
          * to a file.
          * <p>
-         * This implementation first attempts to rename the uploaded item to the
-         * specified destination file, if the item was originally written to disk.
-         * Otherwise, the data will be copied to the specified file.
+         * This implementation first attempts to rename the uploaded item to the specified destination file, if the item
+         * was originally written to disk. Otherwise, the data will be copied to the specified file.
          * <p>
-         * This method is only guaranteed to work <em>once</em>, the first time it
-         * is invoked for a particular item. This is because, in the event that the
-         * method renames a temporary file, that file will no longer be available
+         * This method is only guaranteed to work <em>once</em>, the first time it is invoked for a particular item.
+         * This is because, in the event that the method renames a temporary file, that file will no longer be available
          * to copy or rename again at a later time.
          *
-         * @param file The <code>File</code> into which the uploaded item should
-         *             be stored.
-         * @throws Exception if an error occurs.
+         * @param file
+         *            The <code>File</code> into which the uploaded item should be stored.
+         * @throws Exception
+         *             if an error occurs.
          */
+        @Override
         public void write(File file) throws Exception {
             if (isInMemory()) {
                 FileUtils.writeByteArrayToFile(file, get());
@@ -322,31 +334,27 @@ public class ApacheMultipartParser extends DataParser {
                 File outputFile = getStoreLocation();
                 if (outputFile != null) {
                     /*
-                     * The uploaded file is being stored on disk
-                     * in a temporary location so move it to the
-                     * desired file.
+                     * The uploaded file is being stored on disk in a temporary location so move it to the desired file.
                      */
                     if (!outputFile.renameTo(file)) {
                         FileUtils.copyFile(outputFile, file);
                     }
                 } else {
                     /*
-                     * For whatever reason we cannot write the
-                     * file to disk.
+                     * For whatever reason we cannot write the file to disk.
                      */
-                    throw new FileUploadException(
-                            "Cannot write uploaded file to disk!");
+                    throw new FileUploadException("Cannot write uploaded file to disk!");
                 }
             }
         }
 
         /**
-         * Deletes the underlying storage for a file item, including deleting any
-         * associated temporary disk file. Although this storage will be deleted
-         * automatically when the <code>FileItem</code> instance is garbage
-         * collected, this method can be used to ensure that this is done at an
-         * earlier time, thus preserving system resources.
+         * Deletes the underlying storage for a file item, including deleting any associated temporary disk file.
+         * Although this storage will be deleted automatically when the <code>FileItem</code> instance is garbage
+         * collected, this method can be used to ensure that this is done at an earlier time, thus preserving system
+         * resources.
          */
+        @Override
         public void delete() {
             cachedContent = null;
             File outputFile = getStoreLocation();
@@ -356,12 +364,12 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * Returns the name of the field in the multipart form corresponding to
-         * this file item.
+         * Returns the name of the field in the multipart form corresponding to this file item.
          *
          * @return The name of the form field.
          * @see #setFieldName(java.lang.String)
          */
+        @Override
         public String getFieldName() {
             return fieldName;
         }
@@ -369,45 +377,48 @@ public class ApacheMultipartParser extends DataParser {
         /**
          * Sets the field name used to reference this file item.
          *
-         * @param fieldName The name of the form field.
+         * @param fieldName
+         *            The name of the form field.
          * @see #getFieldName()
          */
+        @Override
         public void setFieldName(String fieldName) {
             this.fieldName = fieldName;
         }
 
         /**
-         * Determines whether or not a <code>FileItem</code> instance represents
-         * a simple form field.
+         * Determines whether or not a <code>FileItem</code> instance represents a simple form field.
          *
-         * @return <code>true</code> if the instance represents a simple form
-         *         field; <code>false</code> if it represents an uploaded file.
+         * @return <code>true</code> if the instance represents a simple form field; <code>false</code> if it represents
+         *         an uploaded file.
          * @see #setFormField(boolean)
          */
+        @Override
         public boolean isFormField() {
             return isFormField;
         }
 
         /**
-         * Specifies whether or not a <code>FileItem</code> instance represents
-         * a simple form field.
+         * Specifies whether or not a <code>FileItem</code> instance represents a simple form field.
          *
-         * @param state <code>true</code> if the instance represents a simple form
-         *              field; <code>false</code> if it represents an uploaded file.
+         * @param state
+         *            <code>true</code> if the instance represents a simple form field; <code>false</code> if it
+         *            represents an uploaded file.
          * @see #isFormField()
          */
+        @Override
         public void setFormField(boolean state) {
             isFormField = state;
         }
 
         /**
-         * Returns an {@link java.io.OutputStream OutputStream} that can
-         * be used for storing the contents of the file.
+         * Returns an {@link java.io.OutputStream OutputStream} that can be used for storing the contents of the file.
          *
-         * @return An {@link java.io.OutputStream OutputStream} that can be used
-         *         for storing the contensts of the file.
-         * @throws IOException if an error occurs.
+         * @return An {@link java.io.OutputStream OutputStream} that can be used for storing the contents of the file.
+         * @throws IOException
+         *             if an error occurs.
          */
+        @Override
         public OutputStream getOutputStream() throws IOException {
             if (dfos == null) {
                 File outputFile = null;
@@ -421,17 +432,13 @@ public class ApacheMultipartParser extends DataParser {
         // --------------------------------------------------------- Public methods
 
         /**
-         * Returns the {@link java.io.File} object for the <code>FileItem</code>'s
-         * data's temporary location on the disk. Note that for
-         * <code>FileItem</code>s that have their data stored in memory,
-         * this method will return <code>null</code>. When handling large
-         * files, you can use {@link java.io.File#renameTo(java.io.File)} to
-         * move the file to new location without copying the data, if the
-         * source and destination locations reside within the same logical
-         * volume.
+         * Returns the {@link java.io.File} object for the <code>FileItem</code>'s data's temporary location on the
+         * disk. Note that for <code>FileItem</code>s that have their data stored in memory, this method will return
+         * <code>null</code>. When handling large files, you can use {@link java.io.File#renameTo(java.io.File)} to move
+         * the file to new location without copying the data, if the source and destination locations reside within the
+         * same logical volume.
          *
-         * @return The data file, or <code>null</code> if the data is stored in
-         *         memory.
+         * @return The data file, or <code>null</code> if the data is stored in memory.
          */
         public File getStoreLocation() {
             return dfos.getFile();
@@ -439,10 +446,9 @@ public class ApacheMultipartParser extends DataParser {
         // ------------------------------------------------------ Protected methods
 
         /**
-         * Creates and returns a {@link java.io.File File} representing a uniquely
-         * named temporary file in the configured repository path. The lifetime of
-         * the file is tied to the lifetime of the <code>FileItem</code> instance;
-         * the file will be deleted when the instance is garbage collected.
+         * Creates and returns a {@link java.io.File File} representing a uniquely named temporary file in the
+         * configured repository path. The lifetime of the file is tied to the lifetime of the <code>FileItem</code>
+         * instance; the file will be deleted when the instance is garbage collected.
          *
          * @return The {@link java.io.File File} to be used for temporary storage.
          */
@@ -461,8 +467,8 @@ public class ApacheMultipartParser extends DataParser {
         // -------------------------------------------------------- Private methods
 
         /**
-         * Returns an identifier that is unique within the class loader used to
-         * load this class, but does not have random-like apearance.
+         * Returns an identifier that is unique within the class loader used to load this class, but does not have
+         * random-like apearance.
          *
          * @return A String with the non-random looking instance identifier.
          */
@@ -481,12 +487,14 @@ public class ApacheMultipartParser extends DataParser {
             return id;
         }
 
+        @Override
         public String toString() {
-            return "name=" + this.getName() + ", StoreLocation=" + String.valueOf(this.getStoreLocation()) + ", size=" + this.getSize() + "bytes, " + "isFormField=" + isFormField() + ", FieldName=" + this.getFieldName();
+            return "name=" + this.getName() + ", StoreLocation=" + String.valueOf(this.getStoreLocation()) + ", size=" + this.getSize()
+                    + "bytes, " + "isFormField=" + isFormField() + ", FieldName=" + this.getFieldName();
         }
 
         /**
-         * Returns the file item headers. 
+         * Returns the file item headers.
          * 
          * @return The file items headers.
          */
@@ -503,14 +511,16 @@ public class ApacheMultipartParser extends DataParser {
          */
         @Override
         public void setHeaders(FileItemHeaders pHeaders) {
-            headers = pHeaders;     
+            headers = pHeaders;
         }
     }
 
+    @Override
     public Map<String, String[]> parse(InputStream body) {
-        Map<String, String[]> result = new HashMap<String, String[]>();
+        Map<String, String[]> result = new HashMap<>();
         try {
-            FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), Request.current().encoding);
+            FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(),
+                    Request.current().encoding);
             while (iter.hasNext()) {
                 FileItemStream item = iter.next();
                 FileItem fileItem = new AutoFileItem(item);
@@ -526,18 +536,19 @@ public class ApacheMultipartParser extends DataParser {
                         // must resolve encoding
                         String _encoding = Request.current().encoding; // this is our default
                         String _contentType = fileItem.getContentType();
-                        if( _contentType != null ) {
+                        if (_contentType != null) {
                             HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
-                            if( contentTypeEncoding.encoding != null ) {
+                            if (contentTypeEncoding.encoding != null) {
                                 _encoding = contentTypeEncoding.encoding;
                             }
                         }
 
-                        putMapEntry(result, fileItem.getFieldName(), fileItem.getString( _encoding ));
+                        putMapEntry(result, fileItem.getFieldName(), fileItem.getString(_encoding));
                     } else {
-                        @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
+                        @SuppressWarnings("unchecked")
+                        List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
                         if (uploads == null) {
-                            uploads = new ArrayList<Upload>();
+                            uploads = new ArrayList<>();
                             Request.current().args.put("__UPLOADS", uploads);
                         }
                         try {
@@ -548,18 +559,11 @@ public class ApacheMultipartParser extends DataParser {
                         }
                         putMapEntry(result, fileItem.getFieldName(), fileItem.getFieldName());
                     }
-                }
-                finally {
+                } finally {
                     fileItem.delete();
                 }
             }
-        } catch (FileUploadIOException e) {
-            Logger.debug(e, "error");
-            throw new IllegalStateException("Error when handling upload", e);
-        } catch (IOException e) {
-            Logger.debug(e, "error");
-            throw new IllegalStateException("Error when handling upload", e);
-        } catch (FileUploadException e) {
+        } catch (IOException | FileUploadException e) {
             Logger.debug(e, "error");
             throw new IllegalStateException("Error when handling upload", e);
         } catch (Exception e) {
@@ -567,8 +571,9 @@ public class ApacheMultipartParser extends DataParser {
             throw new UnexpectedException(e);
         }
         return result;
-    }    // ---------------------------------------------------------- Class methods
-    // ----------------------------------------------------- Manifest constants
+    } // ---------------------------------------------------------- Class methods
+      // ----------------------------------------------------- Manifest constants
+
     /**
      * HTTP content type header name.
      */
@@ -600,22 +605,22 @@ public class ApacheMultipartParser extends DataParser {
     // ----------------------------------------------------------- Data members
     /**
      * The maximum size permitted for the complete request, as opposed to
-     * {@link #fileSizeMax}. A value of -1 indicates no maximum.
+     * {@link #maxFileSize}. A value of -1 indicates no maximum.
      */
-    private long sizeMax = -1;
+    private long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
     /**
      * The maximum size permitted for a single uploaded file, as opposed to
-     * {@link #sizeMax}. A value of -1 indicates no maximum.
+     * {@link #maxRequestSize}. A value of -1 indicates no maximum.
      */
-    private long fileSizeMax = -1;
+    private long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
 
     // ------------------------------------------------------ Protected methods
 
     /**
      * Retrieves the boundary from the <code>Content-type</code> header.
      *
-     * @param contentType The value of the content type header from which to extract the
-     *                    boundary value.
+     * @param contentType
+     *            The value of the content type header from which to extract the boundary value.
      * @return The boundary, as a byte array.
      */
     private byte[] getBoundary(String contentType) {
@@ -623,8 +628,8 @@ public class ApacheMultipartParser extends DataParser {
         ParameterParser parser = new ParameterParser();
         parser.setLowerCaseNames(true);
         // Parameter parser can handle null input
-        Map params = parser.parse(contentType, ';');
-        String boundaryStr = (String) params.get("boundary");
+        Map<String, String> params = parser.parse(contentType, ';');
+        String boundaryStr = params.get("boundary");
 
         if (boundaryStr == null) {
             return null;
@@ -639,13 +644,13 @@ public class ApacheMultipartParser extends DataParser {
     }
 
     /**
-     * Retrieves the file name from the <code>Content-disposition</code>
-     * header.
+     * Retrieves the file name from the <code>Content-disposition</code> header.
      *
-     * @param headers A <code>Map</code> containing the HTTP request headers.
+     * @param headers
+     *            A <code>Map</code> containing the HTTP request headers.
      * @return The file name for the current <code>encapsulation</code>.
      */
-    private String getFileName(Map /* String, String */ headers) {
+    private String getFileName(Map<String, String> headers) {
         String fileName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
         if (cd != null) {
@@ -654,9 +659,9 @@ public class ApacheMultipartParser extends DataParser {
                 ParameterParser parser = new ParameterParser();
                 parser.setLowerCaseNames(true);
                 // Parameter parser can handle null input
-                Map params = parser.parse(cd, ';');
+                Map<String, String> params = parser.parse(cd, ';');
                 if (params.containsKey("filename")) {
-                    fileName = (String) params.get("filename");
+                    fileName = params.get("filename");
                     if (fileName != null) {
                         fileName = fileName.trim();
                         // IE7 returning fullpath name (#300920)
@@ -677,22 +682,22 @@ public class ApacheMultipartParser extends DataParser {
     }
 
     /**
-     * Retrieves the field name from the <code>Content-disposition</code>
-     * header.
+     * Retrieves the field name from the <code>Content-disposition</code> header.
      *
-     * @param headers A <code>Map</code> containing the HTTP request headers.
+     * @param headers
+     *            A <code>Map</code> containing the HTTP request headers.
      * @return The field name for the current <code>encapsulation</code>.
      */
-    private String getFieldName(Map /* String, String */ headers) {
+    private String getFieldName(Map<String, String> headers) {
         String fieldName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
-        if (cd != null && cd.toLowerCase().startsWith(FORM_DATA)) {
+        if (cd != null && (cd.toLowerCase().startsWith(FORM_DATA) || cd.toLowerCase().startsWith(ATTACHMENT))) {
 
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
             // Parameter parser can handle null input
-            Map params = parser.parse(cd, ';');
-            fieldName = (String) params.get("name");
+            Map<String, String> params = parser.parse(cd, ';');
+            fieldName = params.get("name");
             if (fieldName != null) {
                 fieldName = fieldName.trim();
             }
@@ -705,18 +710,18 @@ public class ApacheMultipartParser extends DataParser {
      * Parses the <code>header-part</code> and returns as key/value pairs.
      * <p/>
      * <p/>
-     * If there are multiple headers of the same names, the name will map to a
-     * comma-separated list containing the values.
+     * If there are multiple headers of the same names, the name will map to a comma-separated list containing the
+     * values.
      *
-     * @param headerPart The <code>header-part</code> of the current
-     *                   <code>encapsulation</code>.
+     * @param headerPart
+     *            The <code>header-part</code> of the current <code>encapsulation</code>.
      * @return A <code>Map</code> containing the parsed HTTP request headers.
      */
-    private Map /* String, String */ parseHeaders(String headerPart) {
-        final int len = headerPart.length();
-        Map<String, String> headers = new HashMap<String, String>();
+    private Map<String, String> parseHeaders(String headerPart) {
+        int len = headerPart.length();
+        Map<String, String> headers = new HashMap<>();
         int start = 0;
-        for (; ;) {
+        for (;;) {
             int end = parseEndOfLine(headerPart, start);
             if (start == end) {
                 break;
@@ -748,13 +753,15 @@ public class ApacheMultipartParser extends DataParser {
     /**
      * Skips bytes until the end of the current line.
      *
-     * @param headerPart The headers, which are being parsed.
-     * @param end        Index of the last byte, which has yet been processed.
+     * @param headerPart
+     *            The headers, which are being parsed.
+     * @param end
+     *            Index of the last byte, which has yet been processed.
      * @return Index of the \r\n sequence, which indicates end of line.
      */
     private int parseEndOfLine(String headerPart, int end) {
         int index = end;
-        for (; ;) {
+        for (;;) {
             int offset = headerPart.indexOf('\r', index);
             if (offset == -1 || offset + 1 >= headerPart.length()) {
                 throw new IllegalStateException("Expected headers to be terminated by an empty line.");
@@ -769,11 +776,13 @@ public class ApacheMultipartParser extends DataParser {
     /**
      * Reads the next header line.
      *
-     * @param headers String with all headers.
-     * @param header  Map where to store the current header.
+     * @param headers
+     *            String with all headers.
+     * @param header
+     *            Map where to store the current header.
      */
     private void parseHeaderLine(Map<String, String> headers, String header) {
-        final int colonOffset = header.indexOf(':');
+        int colonOffset = header.indexOf(':');
         if (colonOffset == -1) {
             // This header line is malformed, skip it.
             return;
@@ -790,21 +799,20 @@ public class ApacheMultipartParser extends DataParser {
     }
 
     /**
-     * Returns the header with the specified name from the supplied map. The
-     * header lookup is case-insensitive.
+     * Returns the header with the specified name from the supplied map. The header lookup is case-insensitive.
      *
-     * @param headers A <code>Map</code> containing the HTTP request headers.
-     * @param name    The name of the header to return.
-     * @return The value of specified header, or a comma-separated list if there
-     *         were multiple headers of that name.
+     * @param headers
+     *            A <code>Map</code> containing the HTTP request headers.
+     * @param name
+     *            The name of the header to return.
+     * @return The value of specified header, or a comma-separated list if there were multiple headers of that name.
      */
-    private final String getHeader(Map /* String, String */ headers, String name) {
-        return (String) headers.get(name.toLowerCase());
+    private String getHeader(Map<String, String> headers, String name) {
+        return headers.get(name.toLowerCase());
     }
 
     /**
-     * The iterator, which is returned by
-     * {@link FileUploadBase#getItemIterator(RequestContext)}.
+     * The iterator, which is returned by {@link FileUploadBase#getItemIterator(RequestContext)}.
      */
     private class FileItemIteratorImpl implements FileItemIterator {
 
@@ -843,10 +851,14 @@ public class ApacheMultipartParser extends DataParser {
             /**
              * CReates a new instance.
              *
-             * @param pName        The items file name, or null.
-             * @param pFieldName   The items field name.
-             * @param pContentType The items content type, or null.
-             * @param pFormField   Whether the item is a form field.
+             * @param pName
+             *            The items file name, or null.
+             * @param pFieldName
+             *            The items field name.
+             * @param pContentType
+             *            The items content type, or null.
+             * @param pFormField
+             *            Whether the item is a form field.
              */
             FileItemStreamImpl(String pName, String pFieldName, String pContentType, boolean pFormField) {
                 name = pName;
@@ -854,11 +866,14 @@ public class ApacheMultipartParser extends DataParser {
                 contentType = pContentType;
                 formField = pFormField;
                 InputStream istream = multi.newInputStream();
-                if (fileSizeMax != -1) {
-                    istream = new LimitedInputStream(istream, fileSizeMax) {
+                if (maxFileSize != -1) {
+                    istream = new LimitedInputStream(istream, maxFileSize) {
 
+                        @Override
                         protected void raiseError(long pSizeMax, long pCount) throws IOException {
-                            FileUploadException e = new FileSizeLimitExceededException("The field " + fieldName + " exceeds its maximum permitted " + " size of " + pSizeMax + " characters.", pCount, pSizeMax);
+                            FileUploadException e = new FileSizeLimitExceededException(
+                                    "The field " + fieldName + " exceeds its maximum permitted " + " size of " + pSizeMax + " characters.",
+                                    pCount, pSizeMax);
                             throw new FileUploadIOException(e);
                         }
                     };
@@ -866,20 +881,22 @@ public class ApacheMultipartParser extends DataParser {
                 stream = istream;
             }
 
+            @Override
             public FileItemHeaders getHeaders() {
                 return fileItemHeaders;
             }
 
+            @Override
             public void setHeaders(FileItemHeaders fileItemHeaders) {
                 this.fileItemHeaders = fileItemHeaders;
             }
-
 
             /**
              * Returns the items content type, or null.
              *
              * @return Content type, if known, or null.
              */
+            @Override
             public String getContentType() {
                 return contentType;
             }
@@ -889,6 +906,7 @@ public class ApacheMultipartParser extends DataParser {
              *
              * @return Field name.
              */
+            @Override
             public String getFieldName() {
                 return fieldName;
             }
@@ -898,6 +916,7 @@ public class ApacheMultipartParser extends DataParser {
              *
              * @return File name, if known, or null.
              */
+            @Override
             public String getName() {
                 return name;
             }
@@ -907,17 +926,19 @@ public class ApacheMultipartParser extends DataParser {
              *
              * @return True, if the item is a form field, otherwise false.
              */
+            @Override
             public boolean isFormField() {
                 return formField;
             }
 
             /**
-             * Returns an input stream, which may be used to read the items
-             * contents.
+             * Returns an input stream, which may be used to read the items contents.
              *
              * @return Opened input stream.
-             * @throws IOException An I/O error occurred.
+             * @throws IOException
+             *             An I/O error occurred.
              */
+            @Override
             public InputStream openStream() throws IOException {
                 if (opened) {
                     throw new IllegalStateException("The stream was already opened.");
@@ -931,7 +952,8 @@ public class ApacheMultipartParser extends DataParser {
             /**
              * Closes the file item.
              *
-             * @throws IOException An I/O error occurred.
+             * @throws IOException
+             *             An I/O error occurred.
              */
             void close() throws IOException {
                 stream.close();
@@ -970,23 +992,27 @@ public class ApacheMultipartParser extends DataParser {
         /**
          * Creates a new instance.
          *
-         * @param ctx The request context.
-         * @throws FileUploadException An error occurred while parsing the request.
-         * @throws IOException         An I/O error occurred.
+         * @throws FileUploadException
+         *             An error occurred while parsing the request.
+         * @throws IOException
+         *             An I/O error occurred.
          */
         FileItemIteratorImpl(InputStream input, String contentType, String charEncoding) throws FileUploadException, IOException {
 
             if ((null == contentType) || (!contentType.toLowerCase().startsWith(MULTIPART))) {
-                throw new InvalidContentTypeException("the request doesn't contain a " + MULTIPART_FORM_DATA + " or " + MULTIPART_MIXED + " stream, content type header is " + contentType);
+                throw new InvalidContentTypeException("the request doesn't contain a " + MULTIPART_FORM_DATA + " or " + MULTIPART_MIXED
+                        + " stream, content type header is " + contentType);
             }
 
-            if (sizeMax >= 0) {
+            if (maxRequestSize >= 0) {
                 // TODO check size
 
-                input = new LimitedInputStream(input, sizeMax) {
+                input = new LimitedInputStream(input, maxRequestSize) {
 
+                    @Override
                     protected void raiseError(long pSizeMax, long pCount) throws IOException {
-                        FileUploadException ex = new SizeLimitExceededException("the request was rejected because" + " its size (" + pCount + ") exceeds the configured maximum" + " (" + pSizeMax + ")", pCount, pSizeMax);
+                        FileUploadException ex = new SizeLimitExceededException("the request was rejected because" + " its size (" + pCount
+                                + ") exceeds the configured maximum" + " (" + pSizeMax + ")", pCount, pSizeMax);
                         throw new FileUploadIOException(ex);
                     }
                 };
@@ -1009,7 +1035,8 @@ public class ApacheMultipartParser extends DataParser {
          * Called for finding the nex item, if any.
          *
          * @return True, if an next item was found, otherwise false.
-         * @throws IOException An I/O error occurred.
+         * @throws IOException
+         *             An I/O error occurred.
          */
         private boolean findNextItem() throws IOException {
             if (eof) {
@@ -1019,7 +1046,7 @@ public class ApacheMultipartParser extends DataParser {
                 currentItem.close();
                 currentItem = null;
             }
-            for (; ;) {
+            for (;;) {
                 boolean nextPart;
                 if (skipPreamble) {
                     nextPart = multi.skipPreamble();
@@ -1037,7 +1064,7 @@ public class ApacheMultipartParser extends DataParser {
                     currentFieldName = null;
                     continue;
                 }
-                Map headers = parseHeaders(multi.readHeaders());
+                Map<String, String> headers = parseHeaders(multi.readHeaders());
                 if (currentFieldName == null) {
                     // We're parsing the outer multipart
                     String fieldName = getFieldName(headers);
@@ -1070,14 +1097,15 @@ public class ApacheMultipartParser extends DataParser {
         }
 
         /**
-         * Returns, whether another instance of {@link FileItemStream} is
-         * available.
+         * Returns, whether another instance of {@link FileItemStream} is available.
          *
-         * @return True, if one or more additional file items are available,
-         *         otherwise false.
-         * @throws FileUploadException Parsing or processing the file item failed.
-         * @throws IOException         Reading the file item failed.
+         * @return True, if one or more additional file items are available, otherwise false.
+         * @throws FileUploadException
+         *             Parsing or processing the file item failed.
+         * @throws IOException
+         *             Reading the file item failed.
          */
+        @Override
         public boolean hasNext() throws FileUploadException, IOException {
             if (eof) {
                 return false;
@@ -1091,14 +1119,15 @@ public class ApacheMultipartParser extends DataParser {
         /**
          * Returns the next available {@link FileItemStream}.
          *
-         * @return FileItemStream instance, which provides access to the next
-         *         file item.
+         * @return FileItemStream instance, which provides access to the next file item.
          * @throws java.util.NoSuchElementException
-         *                             No more items are available. Use {@link #hasNext()} to
-         *                             prevent this exception.
-         * @throws FileUploadException Parsing or processing the file item failed.
-         * @throws IOException         Reading the file item failed.
+         *             No more items are available. Use {@link #hasNext()} to prevent this exception.
+         * @throws FileUploadException
+         *             Parsing or processing the file item failed.
+         * @throws IOException
+         *             Reading the file item failed.
          */
+        @Override
         public FileItemStream next() throws FileUploadException, IOException {
             if (eof || (!itemValid && !hasNext())) {
                 throw new NoSuchElementException();
@@ -1109,8 +1138,7 @@ public class ApacheMultipartParser extends DataParser {
     }
 
     /**
-     * This exception is thrown for hiding an inner {@link FileUploadException}
-     * in an {@link IOException}.
+     * This exception is thrown for hiding an inner {@link FileUploadException} in an {@link IOException}.
      */
     private static class FileUploadIOException extends IOException {
 
@@ -1119,15 +1147,15 @@ public class ApacheMultipartParser extends DataParser {
          */
         private static final long serialVersionUID = -7047616958165584154L;
         /**
-         * The exceptions cause; we overwrite the parent classes field, which is
-         * available since Java 1.4 only.
+         * The exceptions cause; we overwrite the parent classes field, which is available since Java 1.4 only.
          */
         private final FileUploadException cause;
 
         /**
          * Creates a <code>FileUploadIOException</code> with the given cause.
          *
-         * @param pCause The exceptions cause, if any, or null.
+         * @param pCause
+         *            The exceptions cause, if any, or null.
          */
         public FileUploadIOException(FileUploadException pCause) {
             // We're not doing super(pCause) cause of 1.3 compatibility.
@@ -1139,6 +1167,7 @@ public class ApacheMultipartParser extends DataParser {
          *
          * @return The exceptions cause, if any, or null.
          */
+        @Override
         public Throwable getCause() {
             return cause;
         }
@@ -1155,10 +1184,10 @@ public class ApacheMultipartParser extends DataParser {
         private static final long serialVersionUID = -9073026332015646668L;
 
         /**
-         * Constructs an <code>InvalidContentTypeException</code> with the
-         * specified detail message.
+         * Constructs an <code>InvalidContentTypeException</code> with the specified detail message.
          *
-         * @param message The detail message.
+         * @param message
+         *            The detail message.
          */
         public InvalidContentTypeException(String message) {
             super(message);
@@ -1175,16 +1204,17 @@ public class ApacheMultipartParser extends DataParser {
          */
         private static final long serialVersionUID = 1749796615868477269L;
         /**
-         * The exceptions cause; we overwrite the parent classes field, which is
-         * available since Java 1.4 only.
+         * The exceptions cause; we overwrite the parent classes field, which is available since Java 1.4 only.
          */
         private final IOException cause;
 
         /**
          * Creates a new instance with the given cause.
          *
-         * @param pMsg       The detail message.
-         * @param pException The exceptions cause.
+         * @param pMsg
+         *            The detail message.
+         * @param pException
+         *            The exceptions cause.
          */
         public IOFileUploadException(String pMsg, IOException pException) {
             super(pMsg);
@@ -1196,6 +1226,7 @@ public class ApacheMultipartParser extends DataParser {
          *
          * @return The exceptions cause, if any, or null.
          */
+        @Override
         public Throwable getCause() {
             return cause;
         }
@@ -1218,9 +1249,12 @@ public class ApacheMultipartParser extends DataParser {
         /**
          * Creates a new instance.
          *
-         * @param message   The detail message.
-         * @param actual    The actual number of bytes in the request.
-         * @param permitted The requests size limit, in bytes.
+         * @param message
+         *            The detail message.
+         * @param actual
+         *            The actual number of bytes in the request.
+         * @param permitted
+         *            The requests size limit, in bytes.
          */
         protected SizeException(String message, long actual, long permitted) {
             super(message);
@@ -1258,12 +1292,15 @@ public class ApacheMultipartParser extends DataParser {
         private static final long serialVersionUID = -2474893167098052828L;
 
         /**
-         * Constructs a <code>SizeExceededException</code> with the specified
-         * detail message, and actual and permitted sizes.
+         * Constructs a <code>SizeExceededException</code> with the specified detail message, and actual and permitted
+         * sizes.
          *
-         * @param message   The detail message.
-         * @param actual    The actual request size.
-         * @param permitted The maximum permitted request size.
+         * @param message
+         *            The detail message.
+         * @param actual
+         *            The actual request size.
+         * @param permitted
+         *            The maximum permitted request size.
          */
         public SizeLimitExceededException(String message, long actual, long permitted) {
             super(message, actual, permitted);
@@ -1281,12 +1318,15 @@ public class ApacheMultipartParser extends DataParser {
         private static final long serialVersionUID = 8150776562029630058L;
 
         /**
-         * Constructs a <code>SizeExceededException</code> with the specified
-         * detail message, and actual and permitted sizes.
+         * Constructs a <code>SizeExceededException</code> with the specified detail message, and actual and permitted
+         * sizes.
          *
-         * @param message   The detail message.
-         * @param actual    The actual request size.
-         * @param permitted The maximum permitted request size.
+         * @param message
+         *            The detail message.
+         * @param actual
+         *            The actual request size.
+         * @param permitted
+         *            The maximum permitted request size.
          */
         public FileSizeLimitExceededException(String message, long actual, long permitted) {
             super(message, actual, permitted);

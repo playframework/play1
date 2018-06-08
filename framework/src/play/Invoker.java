@@ -13,7 +13,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Play.Mode;
+import play.classloading.ApplicationClassloader;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -21,9 +25,6 @@ import play.i18n.Lang;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.utils.PThreadFactory;
-
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 
 /**
  * Run some code in a Play! context
@@ -37,10 +38,12 @@ public class Invoker {
 
     /**
      * Run the code in a new thread took from a thread pool.
-     * @param invocation The code to run
+     * 
+     * @param invocation
+     *            The code to run
      * @return The future object, to know when the task is completed
      */
-    public static Future<?> invoke(final Invocation invocation) {
+    public static Future<?> invoke(Invocation invocation) {
         Monitor monitor = MonitorFactory.getMonitor("Invoker queue size", "elmts.");
         monitor.add(executor.getQueue().size());
         invocation.waitInQueue = MonitorFactory.start("Waiting for execution");
@@ -49,11 +52,14 @@ public class Invoker {
 
     /**
      * Run the code in a new thread after a delay
-     * @param invocation The code to run
-     * @param millis The time to wait before, in milliseconds
+     * 
+     * @param invocation
+     *            The code to run
+     * @param millis
+     *            The time to wait before, in milliseconds
      * @return The future object, to know when the task is completed
      */
-    public static Future<?> invoke(final Invocation invocation, long millis) {
+    public static Future<?> invoke(Invocation invocation, long millis) {
         Monitor monitor = MonitorFactory.getMonitor("Invocation queue", "elmts.");
         monitor.add(executor.getQueue().size());
         return executor.schedule(invocation, millis, TimeUnit.MILLISECONDS);
@@ -61,7 +67,9 @@ public class Invoker {
 
     /**
      * Run the code in the same thread than caller.
-     * @param invocation The code to run
+     * 
+     * @param invocation
+     *            The code to run
      */
     public static void invokeInThread(DirectInvocation invocation) {
         boolean retry = true;
@@ -84,12 +92,21 @@ public class Invoker {
         }
     }
 
+    static void resetClassloaders() {
+        Thread[] executorThreads = new Thread[executor.getPoolSize()];
+        Thread.enumerate(executorThreads);
+        for (Thread thread : executorThreads) {
+            if (thread != null && thread.getContextClassLoader() instanceof ApplicationClassloader)
+                thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+        }
+    }
+
     /**
      * The class/method that will be invoked by the current operation
      */
     public static class InvocationContext {
 
-        public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
+        public static final ThreadLocal<InvocationContext> current = new ThreadLocal<>();
         private final List<Annotation> annotations;
         private final String invocationType;
 
@@ -99,7 +116,7 @@ public class Invoker {
 
         public InvocationContext(String invocationType) {
             this.invocationType = invocationType;
-            this.annotations = new ArrayList<Annotation>();
+            this.annotations = new ArrayList<>();
         }
 
         public InvocationContext(String invocationType, List<Annotation> annotations) {
@@ -114,7 +131,7 @@ public class Invoker {
 
         public InvocationContext(String invocationType, Annotation[]... annotations) {
             this.invocationType = invocationType;
-            this.annotations = new ArrayList<Annotation>();
+            this.annotations = new ArrayList<>();
             for (Annotation[] some : annotations) {
                 this.annotations.addAll(Arrays.asList(some));
             }
@@ -144,8 +161,10 @@ public class Invoker {
         }
 
         /**
-         * Returns the InvocationType for this invocation - Ie: A plugin can use this to
-         * find out if it runs in the context of a background Job
+         * Returns the InvocationType for this invocation - Ie: A plugin can use this to find out if it runs in the
+         * context of a background Job
+         * 
+         * @return the InvocationType for this invocation
          */
         public String getInvocationType() {
             return invocationType;
@@ -167,7 +186,7 @@ public class Invoker {
     /**
      * An Invocation in something to run in a Play! context
      */
-    public static abstract class Invocation implements Runnable {
+    public abstract static class Invocation implements Runnable {
 
         /**
          * If set, monitor the time the invocation waited in the queue
@@ -176,15 +195,15 @@ public class Invoker {
 
         /**
          * Override this method
+         * 
          * @throws java.lang.Exception
+         *             Thrown if Invocation encounters any problems
          */
         public abstract void execute() throws Exception;
 
-
         /**
-         * Needs this method to do stuff *before* init() is executed.
-         * The different Invocation-implementations does a lot of stuff in init()
-         * and they might do it before calling super.init()
+         * Needs this method to do stuff *before* init() is executed. The different Invocation-implementations does a
+         * lot of stuff in init() and they might do it before calling super.init()
          */
         protected void preInit() {
             // clear language for this request - we're resolving it later when it is needed
@@ -192,7 +211,9 @@ public class Invoker {
         }
 
         /**
-         * Init the call (especially usefull in DEV mode to detect changes)
+         * Init the call (especially useful in DEV mode to detect changes)
+         * 
+         * @return true if successful
          */
         public boolean init() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
@@ -207,7 +228,6 @@ public class Invoker {
             return true;
         }
 
-
         public abstract InvocationContext getInvocationContext();
 
         /**
@@ -219,8 +239,7 @@ public class Invoker {
         }
 
         /**
-         * Things to do after an Invocation.
-         * (if the Invocation code has not thrown any exception)
+         * Things to do after an Invocation. (if the Invocation code has not thrown any exception)
          */
         public void after() {
             Play.pluginCollection.afterInvocation();
@@ -229,6 +248,9 @@ public class Invoker {
 
         /**
          * Things to do when the whole invocation has succeeded (before + execute + after)
+         * 
+         * @throws java.lang.Exception
+         *             Thrown if Invoker encounters any problems
          */
         public void onSuccess() throws Exception {
             Play.pluginCollection.onInvocationSuccess();
@@ -236,6 +258,9 @@ public class Invoker {
 
         /**
          * Things to do if the Invocation code thrown an exception
+         * 
+         * @param e
+         *            The exception
          */
         public void onException(Throwable e) {
             Play.pluginCollection.onInvocationException(e);
@@ -247,7 +272,9 @@ public class Invoker {
 
         /**
          * The request is suspended
+         * 
          * @param suspendRequest
+         *            the suspended request
          */
         public void suspend(Suspend suspendRequest) {
             if (suspendRequest.task != null) {
@@ -266,15 +293,16 @@ public class Invoker {
         }
 
         private void withinFilter(play.libs.F.Function0<Void> fct) throws Throwable {
-          for( PlayPlugin plugin :  Play.pluginCollection.getEnabledPlugins() ) {
-               if (plugin.getFilter() != null)
-                plugin.getFilter().withinFilter(fct);
-           }
+            F.Option<PlayPlugin.Filter<Void>> filters = Play.pluginCollection.composeFilters();
+            if (filters.isDefined()) {
+                filters.get().withinFilter(fct);
+            }
         }
 
         /**
          * It's time to execute.
          */
+        @Override
         public void run() {
             if (waitInQueue != null) {
                 waitInQueue.stop();
@@ -285,6 +313,7 @@ public class Invoker {
                     before();
                     final AtomicBoolean executed = new AtomicBoolean(false);
                     this.withinFilter(new play.libs.F.Function0<Void>() {
+                        @Override
                         public Void apply() throws Throwable {
                             executed.set(true);
                             execute();
@@ -312,7 +341,7 @@ public class Invoker {
     /**
      * A direct invocation (in the same thread than caller)
      */
-    public static abstract class DirectInvocation extends Invocation {
+    public abstract static class DirectInvocation extends Invocation {
 
         public static final String invocationType = "DirectInvocation";
 
@@ -339,7 +368,8 @@ public class Invoker {
      * Init executor at load time.
      */
     static {
-        int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
+        int core = Integer.parseInt(Play.configuration.getProperty("play.pool",
+                Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), new ThreadPoolExecutor.AbortPolicy());
     }
 
@@ -352,7 +382,7 @@ public class Invoker {
          * Suspend for a timeout (in milliseconds).
          */
         long timeout;
-        
+
         /**
          * Wait for task execution.
          */
@@ -389,7 +419,7 @@ public class Invoker {
         Map<Future<?>, Invocation> queue;
 
         public WaitForTasksCompletion() {
-            queue = new ConcurrentHashMap<Future<?>, Invocation>();
+            queue = new ConcurrentHashMap<>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
         }
@@ -398,6 +428,7 @@ public class Invoker {
             if (task instanceof Promise) {
                 Promise<V> smartFuture = (Promise<V>) task;
                 smartFuture.onRedeem(new F.Action<F.Promise<V>>() {
+                    @Override
                     public void invoke(Promise<V> result) {
                         executor.submit(invocation);
                     }
@@ -419,7 +450,7 @@ public class Invoker {
             while (true) {
                 try {
                     if (!queue.isEmpty()) {
-                        for (Future<?> task : new HashSet<Future<?>>(queue.keySet())) {
+                        for (Future<?> task : new HashSet<>(queue.keySet())) {
                             if (task.isDone()) {
                                 executor.submit(queue.get(task));
                                 queue.remove(task);

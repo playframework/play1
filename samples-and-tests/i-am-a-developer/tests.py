@@ -1,20 +1,179 @@
 #!/usr/bin/python
 
-import unittest
 import os
 import shutil
-import sys
+import ssl
 import subprocess
-import re
-import time
-import urllib2
-import mechanize
+import sys
 import threading
+import time
+import unittest
+import urllib2
+
+import mechanize
+
 
 # --- TESTS
 
 class IamADeveloper(unittest.TestCase):
-    
+
+    def testSSLConfig(self):
+
+        # Testing ssl config
+        step('Hello, I am testing SSL config')
+
+        self.working_directory = bootstrapWorkingDirectory('i-am-testing-ssl-config-here')
+
+        # play new job-app
+        step('Create a new project')
+
+        self.play = callPlay(self, ['new', '%s/sslconfigapp' % self.working_directory, '--name=SSLCONFIGAPP'])
+        self.assert_(waitFor(self.play, 'The new application will be created'))
+        self.assert_(waitFor(self.play, 'OK, the application is created'))
+        self.assert_(waitFor(self.play, 'Have fun!'))
+
+        self.play.wait()
+
+        app = '%s/sslconfigapp' % self.working_directory
+
+        step('Add config and files')
+        insert(app, "app/controllers/Application.java", 13, '        Logger.info("I am ssl secured!");')
+
+        edit(app, "conf/application.conf",  32, 'http.port=-1')
+        edit(app, "conf/application.conf",  33, 'https.port=9000')
+        edit(app, "conf/application.conf", 232,
+             'play.ssl.netty.pipeline = play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.codec.http.HttpContentCompressor,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler')
+        create(app, 'conf/host.key')
+        insert(app, "conf/host.key",  1, '-----BEGIN RSA PRIVATE KEY-----')
+        insert(app, "conf/host.key",  2, 'MIIEpQIBAAKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj4TkXZTZwEnh/fWyuiH2O')
+        insert(app, "conf/host.key",  3, 'Paj/dTw60Jvll4jshlnRHfJ6yfc/o7YlDUanLrQJm7I3/t3YNgqYg3WXeUTl+GrN')
+        insert(app, "conf/host.key",  4, 'Hn/3QgFGYqKobu8kfrwP4IapQRqlq4ZSdlR/bWpxnYSCZoXeeoimoSUcLlqD5dw7')
+        insert(app, "conf/host.key",  5, '7v2BlG2gqL5+lr5Fx4mDC12vczoUMRg88+VuA1ezU4cuXDe2MbpJMd7rqGN0xK4b')
+        insert(app, "conf/host.key",  6, 'CwkFtSJqBM1TH/Czr1S52hKrDTTys9PVw+eZSKO7BCk+PDq5jjx337XOWiO0kSHf')
+        insert(app, "conf/host.key",  7, 'V64x68xTojfzTzF304byr2Ytq6DjNbpZKwdYBwIDAQABAoIBAQCc6z7w6mp3uIWq')
+        insert(app, "conf/host.key",  8, '0P6K+ISdT7/aliCCJIu9tEHAoSOgiHQAwH4NflfsV9j6RqqxA2Gw+LBDxYkanDDA')
+        insert(app, "conf/host.key",  9, 'UQL8WSL5FbIw0q5rpqQIvnhN6ELWi+q8PFjcHuhawqeB0x7vXd52fqf0xxsQUw2t')
+        insert(app, "conf/host.key", 10, 'noOWw3qmlR9I/Eez9WImlk314RwDzc/bUsfBQhMKbNVHxstR8Q9YQQMp+xb9dqbL')
+        insert(app, "conf/host.key", 11, '3lfz3O70Q/Xc/JxXIOkqcfyoIT9CvpJf2MT1tkd1xolAV+4UJQwKQURlMKqcp7Yi')
+        insert(app, "conf/host.key", 12, 'NIxqv27ZGuhdzPCSFy3zcCIYMxXVvU+oSncGMlBpyf8ONDH2wZ7/nOtaz4Kf9tNZ')
+        insert(app, "conf/host.key", 13, 'ZcqtXd1RAoGBAM7DFMBd78hkJhLztXO5PqB3O87f438aDlQfIGDzi9/KD+Jy1TRz')
+        insert(app, "conf/host.key", 14, 'tJMLjmhPIOuy477k6+P3MmF3KeIjFzZg2Je56++rdpdX+E09Ts4s1gZkUAAfEyeI')
+        insert(app, "conf/host.key", 15, 'QJ53lrXJu0ShmXODSyEc+rtaUgsM0geL7EtacmrUQQI9yKbrUHmHw0glAoGBAMc+')
+        insert(app, "conf/host.key", 16, '9D13ne8bFLQ7upY6GuidgvG+ilAKaJ1YWNWjolTIV86RCEYNmgqxF0BzGT2Db55L')
+        insert(app, "conf/host.key", 17, 'Myt5epDOKJr0RRi7ddidUJFOAOfm/yciPbr+D34LCnj6rkdauAhYsjfjuWDNLHyf')
+        insert(app, "conf/host.key", 18, 'hjpBvvtMfqWE79vfIwVCKOy9xUVjqfZY2KDBu4G7AoGBAMSmjooXzgOOHRhRavdR')
+        insert(app, "conf/host.key", 19, '7Nq6DMxJ7RnqMk6X/De57ANBL7J0/YsRsWFZ0GwtNmZ2kl3xZNpBNk21BMTsExvJ')
+        insert(app, "conf/host.key", 20, 'KLfGQTyGnBh9ts/fy6AUzMrvhZdX9uPWl38gxtrHr7Eq8cQHz+ECqwaedQHFg81h')
+        insert(app, "conf/host.key", 21, 'q7BPqhspHVuAX+NCVBwCoB1xAoGBAME20mC9G6GgUE6LUWCXDjsfa7kEPlpqDZLv')
+        insert(app, "conf/host.key", 22, '9o2ONkAjW8sMJ8rPK99MZjDwrLxTNi153TA+iFXeJdBGKq9WMmyR+Ww/CW/ZOPt5')
+        insert(app, "conf/host.key", 23, 'IAWyk9F14Xz6E4FMfwRRBtpd8gnmTUq449CgqxRE1Ner93Hvi6VwyADz8lZc1Jf5')
+        insert(app, "conf/host.key", 24, 'BnG2DSA7AoGAAWRtgCEkhR/9GyLyAqoUd45FQdRdwIiDwRUsuazSMF2g+FSIfXqR')
+        insert(app, "conf/host.key", 25, 'MgEidXuKYTIRgsiDmgy6fy3XkSzaR1ehjC1uUyyiUzEd+guG9tURrRygR8S6VGw3')
+        insert(app, "conf/host.key", 26, 'mxX+1gneJnzA2cBminkc28ohIQegHEqKKif5gRsc2md+LsvDNR93io4=')
+        insert(app, "conf/host.key", 27, '-----END RSA PRIVATE KEY-----')
+        create(app, 'conf/host.pass.key')
+        insert(app, "conf/host.pass.key",  1, '-----BEGIN RSA PRIVATE KEY-----')
+        insert(app, "conf/host.pass.key",  2, 'Proc-Type: 4,ENCRYPTED')
+        insert(app, "conf/host.pass.key",  3, 'DEK-Info: DES-EDE3-CBC,FC6F4AA83014298F')
+        insert(app, "conf/host.pass.key",  4, '')
+        insert(app, "conf/host.pass.key",  5, 'ZxpC4NYQsMYCOfpMg3iRbQ5UQDBp50NGnT+wBgHnhTqXVUsIZ0x4eFvFKmIoGFne')
+        insert(app, "conf/host.pass.key",  6, 'hX2pnIMFpOJs4tRIItFyvjcwAARRZxg9KCkjL8cPBhNL4LNExYOTKE8QfTzTb9/l')
+        insert(app, "conf/host.pass.key",  7, 'DoF5EJraNwvXKlVNh9wrROW7oMJFqhkVRQN+lMnczTGPznnjbBvOr69ypU8/NWX/')
+        insert(app, "conf/host.pass.key",  8, 'JFgLYqBUnOPUKCaqxEuNzP632jOkhSdXmtl4ft1JFx/uoJG4rCGw5zOVHnTsCMbs')
+        insert(app, "conf/host.pass.key",  9, 'aWfzfYgnreKvSmwk+5J/0aHR14sXoJpPOk1KvJ3U347cJ/RB1hnnShAdEmYxqPmc')
+        insert(app, "conf/host.pass.key", 10, '7Hp2BXt86qlFs9SEBwptPtGmF+YAW7HdcgU0M1ONJ0/GysT4RWFJr5VO4QQWpQT/')
+        insert(app, "conf/host.pass.key", 11, 'DrX8odwKVSQHekmsJz4hD0CXj2v8KU7crbEtTemj3koxnbEn7gcZoGtTMmz37hZS')
+        insert(app, "conf/host.pass.key", 12, 'qJOolpPqHFV7WtheZ/+5ztSJ91eUgRqKTt1gLgQ6wbaCFfgsPIIRAjuklWnAyKxM')
+        insert(app, "conf/host.pass.key", 13, '0dxRb7pTCDLewZ7V2g9MzkF46r+eTCIw31NJC6EUsOYaj46bYbmdK5Smjqgc1z5S')
+        insert(app, "conf/host.pass.key", 14, 'jQGSFUUA+MRlLhx0e/old3fK1oUY1kujcDZcz57arykFDxNHSseFIauJOUeiw0Tp')
+        insert(app, "conf/host.pass.key", 15, '5nZJYtg4yWTEbLMi+iegu/pYZSbuy8APojIgPupg0FiFOED23J2ziXQs8ZxaG7w6')
+        insert(app, "conf/host.pass.key", 16, 'oc6SxWrubxCGt0dlEHAQnAB5eVZGcKCH4hVaF4w85j/oWf0Tw/kFAD1MqyiBPes3')
+        insert(app, "conf/host.pass.key", 17, 'BcrDyO4AJWpmocMZ5ERVkPhx1rqyRrpaYBMdTJ2LoQaKIGeDucfW3Iap0mk+jT31')
+        insert(app, "conf/host.pass.key", 18, 'RTVYNlCqoU1+oACqpV4mRQGW0BDIENvazCb+VJ0qHkedrM/Bx0Gxnx7jrlptOYEn')
+        insert(app, "conf/host.pass.key", 19, '2rU53bOIdwGw9+MjDV+jLKnxuwh56SI5wJzSBCr38jLlA/SgPDM+8K9AjeCJg0w5')
+        insert(app, "conf/host.pass.key", 20, 'C4Na4pDa3tSRwV2WsDJcLnWN+L1NoFNNMnePGzZHCBWaFI9WM2sZI5LsM+gZt37k')
+        insert(app, "conf/host.pass.key", 21, 'EnR/r8rn5Vig7hwxntW7D6IAka2Tkfl0Y+uvl373EGIv9d61/x6cxomPbYGwH0Sn')
+        insert(app, "conf/host.pass.key", 22, '6Emz3so5pXUuP8w2Gx7FNI9m7r+xOAfe87Eplc5DZiwtWyeSLOKDOnkwTxNdFMhk')
+        insert(app, "conf/host.pass.key", 23, 'GerNKG4RrMB5GEU0oI1rkMPlK4vf/K9ynHqLq5HjH839EzWH7aeqlo8059WMZ0Jz')
+        insert(app, "conf/host.pass.key", 24, 'qecDXcEZ2K9RkUPqGC2wdAGTyea/ElEWmplAWfqVHkD497IShQfTgJ23oLxFTDhd')
+        insert(app, "conf/host.pass.key", 25, 'IUso3Xj50N1U2+4JbYABv9zaXLRK+qTEPkTmeQHo+CJC0iIVQwGtQS9p3IcuLzKd')
+        insert(app, "conf/host.pass.key", 26, 's3wqL1Durxe+YVfHNqTYh2uC6eclSwA/21uDa59B37oK9Aymdzujps7IJQ147QWN')
+        insert(app, "conf/host.pass.key", 27, '4e39vDDrfPMthKiQAWm4f3+vduLxzShDgzLyVPDaYVfPAlD7UETz0x6eNCTZXDjg')
+        insert(app, "conf/host.pass.key", 28, 'S4JMnjhH8EFrzKdnUH40oeWa9RKKo5RwvRRRGNgR23OzcibI+54kl5DsMTI229+G')
+        insert(app, "conf/host.pass.key", 29, 'PDd5V4m+ahdfaPsM9DMr1mWGSN/hoLDJtMFPOiZP5R6OSTi99Tj5KJiglSdjmb6u')
+        insert(app, "conf/host.pass.key", 30, '-----END RSA PRIVATE KEY-----')
+        create(app, 'conf/host.cert')
+        insert(app, "conf/host.cert",  1, '-----BEGIN CERTIFICATE-----')
+        insert(app, "conf/host.cert",  2, 'MIID4DCCAsgCCQCdj5qAy7MGoTANBgkqhkiG9w0BAQsFADCBsTEfMB0GA1UECAwW')
+        insert(app, "conf/host.cert",  3, 'VGVzdCBTdGF0ZSBvciBQcm92aW5jZTEWMBQGA1UEBwwNVGVzdCBMb2NhbGl0eTEa')
+        insert(app, "conf/host.cert",  4, 'MBgGA1UECgwRT3JnYW5pemF0aW9uIE5hbWUxITAfBgNVBAsMGE9yZ2FuaXphdGlv')
+        insert(app, "conf/host.cert",  5, 'bmFsIFVuaXQgTmFtZTEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0B')
+        insert(app, "conf/host.cert",  6, 'CQEWEnRlc3RAZW1haWwuYWRkcmVzczAeFw0xNzA1MjkxMjUyMDVaFw0yNzA1Mjcx')
+        insert(app, "conf/host.cert",  7, 'MjUyMDVaMIGxMR8wHQYDVQQIDBZUZXN0IFN0YXRlIG9yIFByb3ZpbmNlMRYwFAYD')
+        insert(app, "conf/host.cert",  8, 'VQQHDA1UZXN0IExvY2FsaXR5MRowGAYDVQQKDBFPcmdhbml6YXRpb24gTmFtZTEh')
+        insert(app, "conf/host.cert",  9, 'MB8GA1UECwwYT3JnYW5pemF0aW9uYWwgVW5pdCBOYW1lMRQwEgYDVQQDDAtDb21t')
+        insert(app, "conf/host.cert", 10, 'b24gTmFtZTEhMB8GCSqGSIb3DQEJARYSdGVzdEBlbWFpbC5hZGRyZXNzMIIBIjAN')
+        insert(app, "conf/host.cert", 11, 'BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj')
+        insert(app, "conf/host.cert", 12, '4TkXZTZwEnh/fWyuiH2OPaj/dTw60Jvll4jshlnRHfJ6yfc/o7YlDUanLrQJm7I3')
+        insert(app, "conf/host.cert", 13, '/t3YNgqYg3WXeUTl+GrNHn/3QgFGYqKobu8kfrwP4IapQRqlq4ZSdlR/bWpxnYSC')
+        insert(app, "conf/host.cert", 14, 'ZoXeeoimoSUcLlqD5dw77v2BlG2gqL5+lr5Fx4mDC12vczoUMRg88+VuA1ezU4cu')
+        insert(app, "conf/host.cert", 15, 'XDe2MbpJMd7rqGN0xK4bCwkFtSJqBM1TH/Czr1S52hKrDTTys9PVw+eZSKO7BCk+')
+        insert(app, "conf/host.cert", 16, 'PDq5jjx337XOWiO0kSHfV64x68xTojfzTzF304byr2Ytq6DjNbpZKwdYBwIDAQAB')
+        insert(app, "conf/host.cert", 17, 'MA0GCSqGSIb3DQEBCwUAA4IBAQAw+cuEp3wbLcTIzKCrZ7KzH3zaMtzIU5ZAjTkt')
+        insert(app, "conf/host.cert", 18, '66QSFALq/ZvAswAybpWKb+2EZZ8iV477W0nFJUkHIOrOav4qWJfmPtdp2k6d2Eey')
+        insert(app, "conf/host.cert", 19, 'cYQjrD9ghV7aKtKCstFdXo4h23FNaKb+kHSXjvEuf8EuDWilXKrjczmJAmGpBeSE')
+        insert(app, "conf/host.cert", 20, 'nUVGGYYMAKf+ndkuSYYnJs/V823o9npSiy0Ke83Z64Co04+yos+BMIuDIhP/+LOp')
+        insert(app, "conf/host.cert", 21, 'pesqro66VwKswcG9O/sjSCaiFgljlQARB4xKBSwR5py8hKDBKfoWnvCpaFPLS34P')
+        insert(app, "conf/host.cert", 22, 'rGPQp900aMtDjORTe2ZP2EP/rMSm7w/PL8djNVMtgFKzY2Tc')
+        insert(app, "conf/host.cert", 23, '-----END CERTIFICATE-----')
+
+
+        # Run the newly created application
+        step('Run our ssl-application')
+
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTPS on port 9000'))
+
+        step("Send request to https")
+
+        browser = mechanize.Browser()
+        response = browser.open('https://localhost:9000/')
+
+        step("check that ssl message is logged")
+        self.assert_(waitFor(self.play, 'I am ssl secured!'))
+
+        step("stop play")
+        killPlay('https')
+        self.play.wait()
+
+        #now we're going to manually configure log4j to log debug messages
+        step('using key file with password')
+
+        insert(app, "conf/application.conf", 236,
+             'certificate.key.file = conf/host.pass.key')
+
+        # re-run the application with new setting
+        step('re-run our ssl-application')
+
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTPS on port 9000'))
+
+        step("Send request to https")
+
+        browser = mechanize.Browser()
+        response = browser.open('https://localhost:9000/')
+
+        step("check that ssl message is logged")
+        self.assert_(waitFor(self.play, 'I am ssl secured!'))
+
+        step("stop play")
+        killPlay('https')
+        self.play.wait()
+
+        step("done testing ssl config")
+
     def testLogLevelsAndLog4jConfig(self):
 
         # Testing job developing
@@ -80,8 +239,7 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "conf/log4j.xml", 15, '     <appender-ref ref="console"/>')
         insert(app, "conf/log4j.xml", 16, ' </root>')
         insert(app, "conf/log4j.xml", 17, '</log4j:configuration>')
-        
-            
+
         # Run the newly created application
         step('re-run our logger-application')
     
@@ -406,7 +564,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Cannot get property \'name\' on null object'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
+            self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assert_(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assert_(waitFor(self.play, '...'))
@@ -426,7 +584,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Cannot get property \'name\' on null object'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assert_(waitFor(self.play, 'Execution error occured in template /app/views/Application/index.html.'))
+            self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assert_(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assert_(waitFor(self.play, '...'))
@@ -458,7 +616,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
+            self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
@@ -477,7 +635,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
+            self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
@@ -668,8 +826,8 @@ def waitForWithFail(process, pattern, failPattern):
 	sys.stdout.flush()
         line = process.stdout.readline().strip()
 	sys.stdout.flush()
-        #print timeoutOccured
-        if timeoutOccured:
+        #print timeoutOccurred
+        if timeoutOccurred:
             return False
         if line == '@KILLED':
             return False
@@ -681,17 +839,17 @@ def waitForWithFail(process, pattern, failPattern):
             timer.cancel()
             return True
 
-timeoutOccured = False
+timeoutOccurred = False
 
 def timeout(process):
-    global timeoutOccured 
+    global timeoutOccurred 
     print '@@@@ TIMEOUT !'
     killPlay()
-    timeoutOccured = True
+    timeoutOccurred = True
 
-def killPlay():
+def killPlay(http = 'http'):
     try:
-        urllib2.urlopen('http://localhost:9000/@kill')
+        urllib2.urlopen('%s://localhost:9000/@kill' % http)
     except:
         pass
 
@@ -748,4 +906,13 @@ def rename(app, fro, to):
     os.rename(os.path.join(app, fro), os.path.join(app, to))
 
 if __name__ == '__main__':
+    # thanks to: https://stackoverflow.com/a/35960702/3221476
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        # Legacy Python that doesn't verify HTTPS certificates by default
+        pass
+    else:
+        # Handle target environment that doesn't support HTTPS verification
+        ssl._create_default_https_context = _create_unverified_https_context
     unittest.main()

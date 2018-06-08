@@ -1,8 +1,5 @@
 package play.data.validation;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.TreeMap;
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.FieldContext;
@@ -12,13 +9,17 @@ import play.db.jpa.JPQL;
 import play.db.jpa.Model;
 import play.exceptions.UnexpectedException;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * Check which proof if one or a set of properties is unique.
  *
  */
 public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
 
-    final static String mes = "validation.unique";
+    static final String mes = "validation.unique";
     private String uniqueKeyContext = null;
 
     @Override
@@ -29,7 +30,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new TreeMap<String, String>();
+        Map<String, String> messageVariables = new TreeMap<>();
         messageVariables.put("2-properties", uniqueKeyContext);
         return messageVariables;
     }
@@ -55,21 +56,21 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
         if (value == null) {
             return true;
         }
-        final String[] propertyNames = getPropertyNames(
+        String[] propertyNames = getPropertyNames(
                 ((FieldContext) context).getField().getName());
-        final GenericModel model = (GenericModel) validatedObject;
-        final Model.Factory factory =  Model.Manager.factoryFor(model.getClass());
-        final String keyProperty = factory.keyName();
-        final Object keyValue = factory.keyValue(model);
+        GenericModel model = (GenericModel) validatedObject;
+        Model.Factory factory =  Model.Manager.factoryFor(model.getClass());
+        String keyProperty = factory.keyName();
+        Object keyValue = factory.keyValue(model);
         //In case of an update make sure that we won't read the current record from database.
-        final boolean isUpdate = (keyValue != null);
-        final String entityName = model.getClass().getName();
-        final StringBuffer jpql = new StringBuffer("SELECT COUNT(o) FROM ");
+        boolean isUpdate = (keyValue != null);
+        String entityName = model.getClass().getName();
+        StringBuilder jpql = new StringBuilder("SELECT COUNT(o) FROM ");
         jpql.append(entityName).append(" AS o where ");
-        final Object[] values = new Object[isUpdate ? propertyNames.length + 1 :
+        Object[] values = new Object[isUpdate ? propertyNames.length + 1 :
                 propertyNames.length];
-        final Class clazz = validatedObject.getClass();
-		int index = 1;
+        Class clazz = validatedObject.getClass();
+        int index = 1;
         for (int i = 0; i < propertyNames.length; i++) {
             Field field = getField(clazz, propertyNames[i]);
             field.setAccessible(true);
@@ -81,11 +82,11 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             if (i > 0) {
                 jpql.append(" And ");
             }
-            jpql.append("o.").append(propertyNames[i]).append(" = ?" + String.valueOf(index++) + " ");
+            jpql.append("o.").append(propertyNames[i]).append(" = ?").append(String.valueOf(index++)).append(" ");
         }
         if (isUpdate) {
             values[propertyNames.length] = keyValue;
-            jpql.append(" and o.").append(keyProperty).append(" <>  ?" + String.valueOf(index++) + " ");
+            jpql.append(" and o.").append(keyProperty).append(" <>  ?").append(String.valueOf(index++)).append(" ");
         }
         return JPQL.instance.count(entityName, jpql.toString(), values) == 0L;
     }
@@ -102,7 +103,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             }
         } catch (Exception e) {
             throw new UnexpectedException("Error while determining the field " +
-                    fieldName + " for an object of type " + clazz);
+                    fieldName + " for an object of type " + clazz, e);
         }
         throw new UnexpectedException("Cannot get the field " +  fieldName +
                 " for an object of type " + clazz);

@@ -9,8 +9,8 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
 public class FlashPolicyHandler extends FrameDecoder {
-	
-	private static final String XML = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
+
+    private static final String XML = "<cross-domain-policy><allow-access-from domain=\"*\" to-ports=\"*\" /></cross-domain-policy>";
     private ChannelBuffer policyResponse = ChannelBuffers.copiedBuffer(XML, CharsetUtil.UTF_8);
 
     /**
@@ -29,13 +29,14 @@ public class FlashPolicyHandler extends FrameDecoder {
         this.policyResponse = policyResponse;
     }
 
+    @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
         if (buffer.readableBytes() < 2) {
             return null;
         }
 
-        final int magic1 = buffer.getUnsignedByte(buffer.readerIndex());
-        final int magic2 = buffer.getUnsignedByte(buffer.readerIndex() + 1);
+        int magic1 = buffer.getUnsignedByte(buffer.readerIndex());
+        int magic2 = buffer.getUnsignedByte(buffer.readerIndex() + 1);
         boolean isFlashPolicyRequest = (magic1 == '<' && magic2 == 'p');
 
         if (isFlashPolicyRequest) {

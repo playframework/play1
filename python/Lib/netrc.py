@@ -2,7 +2,9 @@
 
 # Module and documentation by Eric S. Raymond, 21 Dec 1998
 
-import os, shlex
+import os, stat, shlex
+if os.name == 'posix':
+    import pwd
 
 __all__ = ["netrc", "NetrcParseError"]
 
@@ -21,21 +23,33 @@ class NetrcParseError(Exception):
 
 class netrc:
     def __init__(self, file=None):
+        default_netrc = file is None
         if file is None:
             try:
                 file = os.path.join(os.environ['HOME'], ".netrc")
             except KeyError:
                 raise IOError("Could not find .netrc: $HOME is not set")
-        fp = open(file)
         self.hosts = {}
         self.macros = {}
+        with open(file) as fp:
+            self._parse(file, fp, default_netrc)
+
+    def _parse(self, file, fp, default_netrc):
         lexer = shlex.shlex(fp)
         lexer.wordchars += r"""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
+        lexer.commenters = lexer.commenters.replace('#', '')
         while 1:
             # Look for a machine, default, or macdef top-level keyword
             toplevel = tt = lexer.get_token()
             if not tt:
                 break
+            elif tt[0] == '#':
+                # seek to beginning of comment, in case reading the token put
+                # us on a new line, and then skip the rest of the line.
+                pos = len(tt) + 1
+                lexer.instream.seek(-pos, 1)
+                lexer.instream.readline()
+                continue
             elif tt == 'machine':
                 entryname = lexer.get_token()
             elif tt == 'default':
@@ -61,8 +75,8 @@ class netrc:
             self.hosts[entryname] = {}
             while 1:
                 tt = lexer.get_token()
-                if (tt=='' or tt == 'machine' or
-                    tt == 'default' or tt =='macdef'):
+                if (tt.startswith('#') or
+                    tt in {'', 'machine', 'default', 'macdef'}):
                     if password:
                         self.hosts[entryname] = (login, account, password)
                         lexer.push_token(tt)
@@ -77,6 +91,26 @@ class netrc:
                 elif tt == 'account':
                     account = lexer.get_token()
                 elif tt == 'password':
+                    if os.name == 'posix' and default_netrc:
+                        prop = os.fstat(fp.fileno())
+                        if prop.st_uid != os.getuid():
+                            try:
+                                fowner = pwd.getpwuid(prop.st_uid)[0]
+                            except KeyError:
+                                fowner = 'uid %s' % prop.st_uid
+                            try:
+                                user = pwd.getpwuid(os.getuid())[0]
+                            except KeyError:
+                                user = 'uid %s' % os.getuid()
+                            raise NetrcParseError(
+                                ("~/.netrc file owner (%s) does not match"
+                                 " current user (%s)") % (fowner, user),
+                                file, lexer.lineno)
+                        if (prop.st_mode & (stat.S_IRWXG | stat.S_IRWXO)):
+                            raise NetrcParseError(
+                               "~/.netrc access too permissive: access"
+                               " permissions must restrict access to only"
+                               " the owner", file, lexer.lineno)
                     password = lexer.get_token()
                 else:
                     raise NetrcParseError("bad follower token %r" % tt,

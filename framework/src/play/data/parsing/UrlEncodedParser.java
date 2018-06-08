@@ -29,7 +29,7 @@ public class UrlEncodedParser extends DataParser {
     
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
-            final String encoding = Http.Request.current().encoding;
+            String encoding = Http.Request.current().encoding;
             return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes( encoding )));
         } catch (UnsupportedEncodingException ex) {
             throw new UnexpectedException(ex);
@@ -45,9 +45,9 @@ public class UrlEncodedParser extends DataParser {
     @Override
     public Map<String, String[]> parse(InputStream is) {
         // Encoding is either retrieved from contentType or it is the default encoding
-        final String encoding = Http.Request.current().encoding;
+        String encoding = Http.Request.current().encoding;
         try {
-            Map<String, String[]> params = new LinkedHashMap<String, String[]>();
+            Map<String, String[]> params = new LinkedHashMap<>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -58,7 +58,7 @@ public class UrlEncodedParser extends DataParser {
             String data = new String(os.toByteArray(), encoding);
             if (data.length() == 0) {
                 //data is empty - can skip the rest
-                return new HashMap<String, String[]>(0);
+                return new HashMap<>(0);
             }
 
             // data is o the form:
@@ -112,13 +112,13 @@ public class UrlEncodedParser extends DataParser {
                     "test".getBytes(providedCharset);
                     charset = providedCharset; // it works..
                 } catch (Exception e) {
-                    Logger.debug("Got invalid _charset_ in form: " + providedCharset);
+                    Logger.debug(e, "Got invalid _charset_ in form: " + providedCharset);
                     // lets just use the default one..
                 }
             }
 
             // We're ready to decode the params
-            Map<String, String[]> decodedParams = new LinkedHashMap<String, String[]>(params.size());
+            Map<String, String[]> decodedParams = new LinkedHashMap<>(params.size());
             URLCodec codec = new URLCodec();
             for (Map.Entry<String, String[]> e : params.entrySet()) {
                 String key = e.getKey();

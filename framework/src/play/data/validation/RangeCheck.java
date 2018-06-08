@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 @SuppressWarnings("serial")
 public class RangeCheck extends AbstractAnnotationCheck<Range> {
 
-    final static String mes = "validation.range";
+    static final String mes = "validation.range";
 
     double min;
     double max;
@@ -21,6 +21,7 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
         setMessage(range.message());
     }
 
+    @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
         if (value == null) {
@@ -46,7 +47,7 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap<String, String>();
+        Map<String, String> messageVariables = new HashMap<>();
         messageVariables.put("min", Double.toString(min));
         messageVariables.put("max", Double.toString(max));
         return messageVariables;

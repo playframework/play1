@@ -13,12 +13,16 @@ import org.w3c.dom.Text;
 public class XPath {
 
     /**
-     * Select all nodes that are selected by this XPath expression. If multiple nodes match,
-     * multiple nodes will be returned. Nodes will be returned in document-order,
+     * Select all nodes that are selected by this XPath expression. If multiple nodes match, multiple nodes will be
+     * returned. Nodes will be returned in document-order,
+     * 
      * @param path
+     *            Path expression
      * @param node
-     * @param namespaces Namespaces that need to be available in the xpath, where the key is the
-     * prefix and the value the namespace URI
+     *            The node object
+     * @param namespaces
+     *            Namespaces that need to be available in the xpath, where the key is the prefix and the value the
+     *            namespace URI
      * @return Nodes in document-order
      */
     @SuppressWarnings("unchecked")
@@ -31,10 +35,13 @@ public class XPath {
     }
 
     /**
-     * Select all nodes that are selected by this XPath expression. If multiple nodes match,
-     * multiple nodes will be returned. Nodes will be returned in document-order,
+     * Select all nodes that are selected by this XPath expression. If multiple nodes match, multiple nodes will be
+     * returned. Nodes will be returned in document-order,
+     * 
      * @param path
+     *            Path expression
      * @param node
+     *            The node object
      * @return Nodes in document-order
      */
     public static List<Node> selectNodes(String path, Object node) {
@@ -59,8 +66,14 @@ public class XPath {
 
     /**
      * Return the text of a node, or the value of an attribute
-     * @param path the XPath to execute
-     * @param node the node, node-set or Context object for evaluation. This value can be null.
+     * 
+     * @param path
+     *            the XPath to execute
+     * @param node
+     *            the node, node-set or Context object for evaluation. This value can be null.
+     * @param namespaces
+     *            The name spaces
+     * @return The text of a node
      */
     public static String selectText(String path, Object node, Map<String, String> namespaces) {
         try {
@@ -82,8 +95,12 @@ public class XPath {
 
     /**
      * Return the text of a node, or the value of an attribute
-     * @param path the XPath to execute
-     * @param node the node, node-set or Context object for evaluation. This value can be null.
+     * 
+     * @param path
+     *            the XPath to execute
+     * @param node
+     *            the node, node-set or Context object for evaluation. This value can be null.
+     * @return The text of a node
      */
     public static String selectText(String path, Object node) {
         return selectText(path, node, null);
@@ -92,7 +109,7 @@ public class XPath {
     private static DOMXPath getDOMXPath(String path, Map<String, String> namespaces) throws Exception {
         DOMXPath xpath = new DOMXPath(path);
         if (namespaces != null) {
-            for (String prefix: namespaces.keySet()) {
+            for (String prefix : namespaces.keySet()) {
                 xpath.addNamespace(prefix, namespaces.get(prefix));
             }
         }

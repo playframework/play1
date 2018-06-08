@@ -40,10 +40,10 @@ public class ClassStateHashCreator {
         }
     }
 
-    private final Map<File, FileWithClassDefs> classDefsInFileCache = new HashMap<File, FileWithClassDefs>();
+    private final Map<File, FileWithClassDefs> classDefsInFileCache = new HashMap<>();
 
     public synchronized int computePathHash(List<VirtualFile> paths) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (VirtualFile virtualFile : paths) {
             scan(buf, virtualFile);
         }
@@ -52,13 +52,13 @@ public class ClassStateHashCreator {
         return buf.toString().hashCode();
     }
 
-    private void scan(StringBuffer buf, VirtualFile current) {
+    private void scan(StringBuilder buf, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java")) {
                 buf.append( getClassDefsForFile(current));
             }
         } else if (!current.getName().startsWith(".")) {
-            // TODO: we could later optimizie it further if we check if the entire folder is unchanged
+            // TODO: we could later optimize it further if we check if the entire folder is unchanged
             for (VirtualFile virtualFile : current.list()) {
                 scan(buf, virtualFile);
             }

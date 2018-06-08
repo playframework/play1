@@ -13,7 +13,7 @@ import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 
 /**
- * Library to access ressources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
+ * Library to access resources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
  *
  */
 public class OAuth {
@@ -29,7 +29,9 @@ public class OAuth {
 
     /**
      * Create an OAuth object for the service described in info
-     * @param info must contain all informations related to the service
+     * 
+     * @param info
+     *            must contain all information related to the service
      * @return the OAuth object
      */
     public static OAuth service(ServiceInfo info) {
@@ -42,6 +44,7 @@ public class OAuth {
 
     /**
      * Request the request token and secret.
+     * 
      * @return a Response object holding either the result in case of a success or the error
      */
     public Response retrieveRequestToken() {
@@ -50,7 +53,9 @@ public class OAuth {
 
     /**
      * Request the request token and secret.
-     * @param callbackURL the URL where the provider should redirect to
+     * 
+     * @param callbackURL
+     *            the URL where the provider should redirect to
      * @return a Response object holding either the result in case of a success or the error
      */
     public Response retrieveRequestToken(String callbackURL) {
@@ -65,7 +70,9 @@ public class OAuth {
 
     /**
      * Exchange a request token for an access token.
-     * @param requestTokenResponse a successful response obtained from retrieveRequestToken
+     * 
+     * @param requestTokenResponse
+     *            a successful response obtained from retrieveRequestToken
      * @return a Response object holding either the result in case of a success or the error
      */
     public Response retrieveAccessToken(Response requestTokenResponse) {
@@ -74,12 +81,15 @@ public class OAuth {
 
     /**
      * Exchange a request token for an access token.
-     * @param token the token obtained from a previous call
-     * @param secret your application secret
+     * 
+     * @param token
+     *            the token obtained from a previous call
+     * @param secret
+     *            your application secret
      * @return a Response object holding either the result in case of a success or the error
      */
     public Response retrieveAccessToken(String token, String secret) {
-         OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
+        OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
         consumer.setTokenWithSecret(token, secret);
         String verifier = Params.current().get("oauth_verifier");
         try {
@@ -92,6 +102,7 @@ public class OAuth {
 
     /**
      * Request the unauthorized token and secret. They can then be read with getTokens()
+     * 
      * @return the url to redirect the user to get the verifier and continue the process
      * @deprecated use retrieveRequestToken() instead
      */
@@ -102,6 +113,9 @@ public class OAuth {
     }
 
     /**
+     * @param tokenPair
+     *            The token / secret pair
+     * @return the url
      * @deprecated use retrieveAccessToken() instead
      */
     @Deprecated
@@ -111,14 +125,13 @@ public class OAuth {
     }
 
     public String redirectUrl(String token) {
-        return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(),
-                oauth.signpost.OAuth.OAUTH_TOKEN, token);
+        return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(), oauth.signpost.OAuth.OAUTH_TOKEN, token);
     }
 
     @Deprecated
     public String redirectUrl(TokenPair tokenPair) {
-        return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(),
-                oauth.signpost.OAuth.OAUTH_TOKEN, tokenPair.token);
+        return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(), oauth.signpost.OAuth.OAUTH_TOKEN,
+                tokenPair.token);
     }
 
     /**
@@ -131,11 +144,9 @@ public class OAuth {
         public String authorizationURL;
         public String consumerKey;
         public String consumerSecret;
-        public ServiceInfo(String requestTokenURL,
-                            String accessTokenURL,
-                            String authorizationURL,
-                            String consumerKey,
-                            String consumerSecret) {
+
+        public ServiceInfo(String requestTokenURL, String accessTokenURL, String authorizationURL, String consumerKey,
+                String consumerSecret) {
             this.requestTokenURL = requestTokenURL;
             this.accessTokenURL = accessTokenURL;
             this.authorizationURL = authorizationURL;
@@ -145,34 +156,39 @@ public class OAuth {
     }
 
     /**
-     * Response to an OAuth 1.0 request.
-     *     If success token and secret are non null, and error is null.
-     *     If error token and secret are null, and error is non null.
+     * Response to an OAuth 1.0 request. If success token and secret are non null, and error is null. If error token and
+     * secret are null, and error is non null.
      *
      */
     public static class Response {
         public final String token;
         public final String secret;
         public final Error error;
+
         private Response(String token, String secret, Error error) {
             this.token = token;
             this.secret = secret;
             this.error = error;
         }
+
         /**
          * Create a new success response
-         * @param pair the TokenPair returned by the provider
+         * 
+         * @param pair
+         *            the TokenPair returned by the provider
          * @return a new Response object holding the token pair
          */
         private static Response success(String token, String secret) {
             return new Response(token, secret, null);
         }
+
         private static Response error(Error error) {
             return new Response(null, null, error);
         }
-        @Override public String toString() {
-            return (error != null) ? ("Error: " + error)
-                                    : ("Success: " + token + " - " + secret);
+
+        @Override
+        public String toString() {
+            return (error != null) ? ("Error: " + error) : ("Success: " + token + " - " + secret);
         }
     }
 
@@ -180,13 +196,11 @@ public class OAuth {
         public final OAuthException exception;
         public final Type type;
         public final String details;
+
         public enum Type {
-            MESSAGE_SIGNER,
-            NOT_AUTHORIZED,
-            EXPECTATION_FAILED,
-            COMMUNICATION,
-            OTHER
+            MESSAGE_SIGNER, NOT_AUTHORIZED, EXPECTATION_FAILED, COMMUNICATION, OTHER
         }
+
         private Error(OAuthException exception) {
             this.exception = exception;
             if (this.exception instanceof OAuthMessageSignerException) {
@@ -202,8 +216,13 @@ public class OAuth {
             }
             this.details = exception.getMessage();
         }
-        public String details() { return details; }
-        @Override public String toString() {
+
+        public String details() {
+            return details;
+        }
+
+        @Override
+        public String toString() {
             return "OAuth.Error: " + type + " - " + details;
         }
     }
@@ -212,10 +231,12 @@ public class OAuth {
     public static class TokenPair {
         public String token;
         public String secret;
+
         public TokenPair(String token, String secret) {
             this.token = token;
             this.secret = secret;
         }
+
         @Override
         public String toString() {
             return token + " - " + secret;

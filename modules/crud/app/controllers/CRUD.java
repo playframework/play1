@@ -22,7 +22,6 @@ import play.data.validation.Required;
 import play.db.Model;
 import play.db.Model.Factory;
 import play.exceptions.TemplateNotFoundException;
-import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
@@ -207,7 +206,7 @@ public abstract class CRUD extends Controller {
         public String modelName;
         public String controllerName;
         public String keyName;
-		public Factory factory;
+        public Factory factory;
 
         public ObjectType(Class<? extends Model> modelClass) {
             this.modelName = modelClass.getSimpleName();
@@ -297,8 +296,8 @@ public abstract class CRUD extends Controller {
 
 
         public List<ObjectField> getFields() {
-            List<ObjectField> fields = new ArrayList<ObjectField>();
-            List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
+            List<ObjectField> fields = new ArrayList<>();
+            List<ObjectField> hiddenFields = new ArrayList<>();
             for (Model.Property f : factory.listProperties()) {
                 ObjectField of = new ObjectField(f);
                 if (of.type != null) {

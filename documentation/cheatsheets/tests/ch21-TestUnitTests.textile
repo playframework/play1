@@ -14,7 +14,7 @@ Run before each unit test
 *==@After public void cleanupJunk()==*
 Run after each unit test
 
-*==@BeforeClass void whenTestClassInstanciated();==*
+*==@BeforeClass void whenTestClassInstantiated();==*
 Run once, when the test class gets instantiated
 
 *==@AfterClass void whenTestClassCompleted()==*

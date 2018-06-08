@@ -25,7 +25,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo("hello world: Morten");
 
@@ -49,7 +49,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo("hello world"+longString+": Morten");
 
@@ -87,7 +87,7 @@ public class GroovyTemplateTest {
         GroovyTemplate t = new GroovyTemplate("Template_123", groovySrc);
         new GroovyTemplateCompiler().compile(t);
 
-        Map<String, Object> args = new HashMap<String,Object>();
+        Map<String, Object> args = new HashMap<>();
         args.put("name", "Morten");
         assertThat( t.render( args ) ).isEqualTo(longString+": Morten");
     }
@@ -95,7 +95,7 @@ public class GroovyTemplateTest {
     // [#107] caused any tag broken with a CR to fail. (It would be compiled to list arg:items:....).
     @Test
     public void verifyCompilingWithCR() {
-        final String source = "#{list items:1..3,\ras:'i'}${i}#{/list}";
+        String source = "#{list items:1..3,\ras:'i'}${i}#{/list}";
         GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_CR", source);
         new GroovyTemplateCompiler().compile(groovyTemplate);
         assertEquals("123",groovyTemplate.render());
@@ -103,7 +103,7 @@ public class GroovyTemplateTest {
 
     @Test
     public void verifyCompilingWithLF() {
-        final String source = "#{list items:1..3,\nas:'i'}${i}#{/list}";
+        String source = "#{list items:1..3,\nas:'i'}${i}#{/list}";
         GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_LF", source);
         new GroovyTemplateCompiler().compile(groovyTemplate);
         assertEquals("123", groovyTemplate.render());
@@ -111,7 +111,7 @@ public class GroovyTemplateTest {
 
     @Test
     public void verifyCompilingWithCRLF() {
-        final String source = "#{list items:1..3,\r\nas:'i'}${i}#{/list}";
+        String source = "#{list items:1..3,\r\nas:'i'}${i}#{/list}";
         GroovyTemplate groovyTemplate = new GroovyTemplate("tag_broken_by_CRLF", source);
         new GroovyTemplateCompiler().compile(groovyTemplate);
         assertEquals("123", groovyTemplate.render());
@@ -119,7 +119,7 @@ public class GroovyTemplateTest {
 
     @Test
     public void verifyCompilingWithMultipleCRandLF() {
-        final String source = "#{list items:1..3,\r\n\r\r\n\nas:'i'}${i}#{/list}";
+        String source = "#{list items:1..3,\r\n\r\r\n\nas:'i'}${i}#{/list}";
         GroovyTemplate groovyTemplate = new GroovyTemplate("Broken_with_multiple_CR_and_LF", source);
         new GroovyTemplateCompiler().compile(groovyTemplate);
         assertEquals("123", groovyTemplate.render());
