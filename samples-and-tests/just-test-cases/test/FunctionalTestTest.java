@@ -197,7 +197,6 @@ public class FunctionalTestTest extends FunctionalTest {
         assertContentType("text/plain", response);
         assertContentEquals("abcæøåæøå", response);
     }
-}
 
     /**
      * Even when a controller makes use of continuations, e.g. by calling and waiting for a
