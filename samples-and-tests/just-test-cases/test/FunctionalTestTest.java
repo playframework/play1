@@ -122,9 +122,9 @@ public class FunctionalTestTest extends FunctionalTest {
         assertEquals("Guillaume", u.name);
     }
 
-    @Test
+    @Test(expected = RenderStatic.class)
     public void testGettingStaticFile() {
-	Response response = GET("http://localhost:9003/public/session.test?req=1");
+	Response response = GET("/public/session.test?req=1");
 	assertIsOk(response);
     }
 

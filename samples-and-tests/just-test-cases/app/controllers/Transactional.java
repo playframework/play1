@@ -19,9 +19,8 @@ public class Transactional extends Controller {
         tag2.name = "TransactionalTest";
         post.tags.add(tag1);
         post.tags.add(tag2);
-        post.save();
-        // since this is read only the count will not go up with successive 
-        // calls as the Post we just stored will be rolled back
+        post.save(); // since this is read only the request will fail with javax.persistence.TransactionRequiredException
+
         renderText("Wrote 1 post: total is now " + Post.count());
     }
 
