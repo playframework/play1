@@ -1234,7 +1234,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
                 }
 
                 if (haveSeenFirstApplicationClass) {
-                    if (shouldBeCheckedForEnhancement(className)) {
+                    if (shouldNotBeCheckedForEnhancement(className)) {
                         // we're back into the play framework code...
                         return; // done checking
                     } else {
@@ -1255,11 +1255,8 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
 
     /**
      * Checks if the classname is from the jdk, sun or play package and therefore should not be checked for enhancement
-     * @param String className
-     * @return boolean
      */
-    static boolean shouldBeCheckedForEnhancement(String className)
-    {
+    static boolean shouldNotBeCheckedForEnhancement(String className) {
         return className.startsWith("jdk.") || className.startsWith("sun.") || className.startsWith("play.");
     }
 
