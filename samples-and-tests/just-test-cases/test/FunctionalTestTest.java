@@ -1,17 +1,19 @@
-import org.junit.*;
-
-import play.test.*;
-import play.libs.WS;
-import play.mvc.Http.*;
-import play.mvc.results.*;
-import models.*;
+import models.User;
+import org.junit.Test;
+import play.mvc.Http.Cookie;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.results.NotFound;
+import play.test.Fixtures;
+import play.test.FunctionalTest;
+import play.test.UnitTest;
 
 import java.util.HashMap;
 
 public class FunctionalTestTest extends FunctionalTest {
     
     @org.junit.Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Fixtures.deleteDatabase();
         Fixtures.loadModels("users.yml");
     }
@@ -115,17 +117,17 @@ public class FunctionalTestTest extends FunctionalTest {
     
     @Test
     public void canGetRenderArgs() {
-	Response response = GET("/users/edit");
+        Response response = GET("/users/edit");
         assertIsOk(response);
         assertNotNull(renderArgs("u"));
         User u = (User) renderArgs("u");
         assertEquals("Guillaume", u.name);
     }
     
-    @Test(expected = RenderStatic.class)
+    @Test
     public void testGettingStaticFile() {
-	Response response = GET("/public/session.test?req=1");
-	assertIsOk(response);
+        Response response = GET("/public/session.test?req=1");
+        assertIsStaticFile(response, "public/session.test");
     }
     
       /**
