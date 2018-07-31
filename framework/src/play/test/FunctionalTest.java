@@ -31,12 +31,16 @@ import com.ning.http.client.multipart.StringPart;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.exceptions.JavaExecutionException;
+import play.exceptions.UnexpectedException;
 import play.libs.F.Action;
 import play.mvc.ActionInvoker;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.RenderArgs;
 
@@ -65,7 +69,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * sends a GET request to the application under tests.
-     * 
+     *
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param followRedirect
@@ -94,7 +98,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a GET request to the application under tests.
-     * 
+     *
      * @param request
      *            The given request
      * @param url
@@ -144,7 +148,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a POST request to the application under tests.
-     * 
+     *
      * @param request
      *            The given request
      * @param url
@@ -178,7 +182,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a POST request to the application under tests as a multipart form. Designed for file upload testing.
-     * 
+     *
      * @param url
      *            relative url such as <em>"/products/1234"</em>
      * @param parameters
@@ -243,7 +247,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a PUT request to the application under tests.
-     * 
+     *
      * @param request
      *            The given request
      * @param url
@@ -281,7 +285,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Sends a DELETE request to the application under tests.
-     * 
+     *
      * @param request
      *            The given request
      * @param url
@@ -310,7 +314,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         final CountDownLatch actionCompleted = new CountDownLatch(1);
-        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        final Future<?> invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
             public void execute() throws Exception {
@@ -353,9 +357,27 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
+            // We can not simply wait on the future result because of how continuations
+            // are implemented. Only when the latch is counted down the action is really
+            // completed. Therefore, wait on the latch.
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
             }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        try {
+            // We still call this to raise any exception that might have
+            // occurred during execution of the invocation.
+            invocationResult.get();
+        }
+        catch (ExecutionException e) {
+            throw unwrapOriginalException(e);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
             if (savedCookies == null) {
                 savedCookies = new HashMap<>();
             }
@@ -375,6 +397,21 @@ public abstract class FunctionalTest extends BaseTest {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private static RuntimeException unwrapOriginalException(final ExecutionException e) {
+        // Check if the original exceptions fits the usual patterns. If yes, throw the very
+        // original runtime exception
+        final Throwable executionCause = e.getCause();
+        if (executionCause != null
+              && (executionCause instanceof JavaExecutionException || executionCause instanceof UnexpectedException)) {
+            final Throwable originalCause = executionCause.getCause();
+            if (originalCause != null && originalCause instanceof RuntimeException) {
+                throw (RuntimeException) originalCause;
+            }
+        }
+        // As a last fallback, just wrap everything up
+        return new RuntimeException(e);
     }
 
     public static Response makeRequest(Request request) {
@@ -436,7 +473,7 @@ public abstract class FunctionalTest extends BaseTest {
     // Assertions
     /**
      * Asserts a <em>2OO Success</em> response
-     * 
+     *
      * @param response
      *            server response
      */
@@ -446,7 +483,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts a <em>404 (not found)</em> response
-     * 
+     *
      * @param response
      *            server response
      */
@@ -456,7 +493,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts response status code
-     * 
+     *
      * @param status
      *            expected HTTP response code
      * @param response
@@ -468,7 +505,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Exact equality assertion on response body
-     * 
+     *
      * @param content
      *            expected body content
      * @param response
@@ -480,7 +517,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Asserts response body matched a pattern or contains some text.
-     * 
+     *
      * @param pattern
      *            a regular expression pattern or a regular text, ( which must be escaped using Pattern.quote)
      * @param response
@@ -495,7 +532,7 @@ public abstract class FunctionalTest extends BaseTest {
     /**
      * Verify response charset encoding, as returned by the server in the Content-Type header. Be aware that if no
      * charset is returned, assertion will fail.
-     * 
+     *
      * @param charset
      *            expected charset encoding such as "utf-8" or "iso8859-1".
      * @param response
@@ -509,7 +546,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Verify the response content-type
-     * 
+     *
      * @param contentType
      *            expected content-type without any charset extension, such as "text/html"
      * @param response
@@ -524,7 +561,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * Exact equality assertion on a response header value
-     * 
+     *
      * @param headerName
      *            header to verify. case-insensitive
      * @param value
@@ -539,7 +576,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     /**
      * obtains the response body as a string
-     * 
+     *
      * @param response
      *            server response
      * @return the response body as an <em>utf-8 string</em>

@@ -5,8 +5,8 @@
 GET         /                               Application.index
 PUT         /sayHello                       Application.hello
 GET         /aGetForm                       Application.aGetForm
-GET         /aGetForm/                      Application.aGetForm2 
-GET         /optionalSlash/?                Application.optional 
+GET         /aGetForm/                      Application.aGetForm2
+GET         /optionalSlash/?                Application.optional
 GET         /index                          Application.index
 
 GET         /re/{<[a-z]+>re}                Application.ok
@@ -82,6 +82,12 @@ GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLa
 
 
 GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
+
+GET   /status/ok/             StatusCodes.justOkay
+GET   /status/not-found/      StatusCodes.rendersNotFound
+GET   /status/unauthorized/   StatusCodes.rendersUnauthorized
+POST  /status/job/            StatusCodes.usesContinuation
+GET   /status/failure/        StatusCodes.throwsException
 
 # module
 *         /               module:secure
