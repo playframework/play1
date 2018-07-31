@@ -163,14 +163,14 @@ public class WithContinuations extends Controller {
     
     public static void streamedResult() {
         response.contentType = "text/html";
-        response.writeChunk("<h1>This page should load progressively in about 3 second</h1>");
+        response.writeChunk("<h1>This page should load progressively in about a few seconds</h1>");
         long s = System.currentTimeMillis();
         for(int i=0; i<100; i++) {
             await(10);
             response.writeChunk("<h2>Hello " + i + "</h2>");
         }
         long t = System.currentTimeMillis() - s;
-        response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 10000));
+        response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 25000));
     }
     
     public static void loopWithCallback() {
@@ -206,7 +206,7 @@ public class WithContinuations extends Controller {
                     await(10, this);
                 } else {
                     long t = System.currentTimeMillis() - s.get();
-                    response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 10000));
+                    response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 25000));
                 }                
             }
         };
