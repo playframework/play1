@@ -101,14 +101,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             if (names.size() <= 1 || source.contains("new ")) {
                 for (String cName : names) { // dynamic class binding
                     source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))",
-                            "_('" + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
+                            "__loadClass('" + originalNames.get(cName).replace("$", "\\$") + "').newInstance$1");
                 }
             }
 
             if (names.size() <= 1 || source.contains("instanceof")) {
                 for (String cName : names) { // dynamic class binding
                     source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName),
-                            "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+                            "__loadClass('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
 
                 }
             }
@@ -149,7 +149,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         println(" extends play.templates.GroovyTemplate.ExecutableTemplate {");
         println("public Object run() { use(play.templates.JavaExtensions) {");
         for (String n : extensionsClassnames) {
-            println("use(_('" + n + "')) {");
+            println("use(__loadClass('" + n + "')) {");
         }
     }
 
