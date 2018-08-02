@@ -97,10 +97,9 @@
             <tag name="play.todo" scope="all" description="To do:"/>
         	  <tag name="todo" scope="all" description="To do:"/>
             <group title="Libs" packages="play.libs.*"/>
-            <link offline="false" href="http://docs.oracle.com/javaee/7/api/" />
-            <link offline="false" href="https://docs.oracle.com/javase/8/docs/api//" />      
+            <link offline="false" href="https://docs.oracle.com/javase/" />      
             <link offline="false" href="http://commons.apache.org/proper/commons-fileupload/apidocs/" />
-            <link offline="false" href="https://static.javadoc.io/com.google.code.gson/gson/2.8.0/" />
+            <link offline="false" href="https://www.javadoc.io/doc/com.google.code.gson/gson" />
             <link offline="false" href="https://docs.jboss.org/hibernate/orm/4.2/javadocs/" />
             <link offline="false" href="http://www.mchange.com/projects/c3p0/apidocs/" />
         </javadoc>
@@ -234,7 +233,7 @@
     <!-- Tests -->
 
     <target name="compile-tests" depends="compile">
-        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="1.8" target="1.8">
+        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"  destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="1.8" target="1.8">
             <include name="**/*.java"/>
         </javac>
     </target>

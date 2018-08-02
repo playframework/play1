@@ -36,6 +36,14 @@ public class ApplicationCompiler {
     Map<String, Boolean> packagesCache = new HashMap<>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
+    private static final String JAVA_SOURCE_DEFAULT_VERSION = "1.8";
+    static final Map<String, String> compatibleJavaVersions = new HashMap<>();
+    
+    static {
+    	compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
+    	compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
+    	compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
+	}
 
     /**
      * Try to guess the magic configuration options
@@ -53,21 +61,22 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
-        String javaVersion = CompilerOptions.VERSION_1_8;
-        if (System.getProperty("java.version").startsWith("1.5") || System.getProperty("java.version").startsWith("1.6")
-                || System.getProperty("java.version").startsWith("1.7")) {
-            throw new CompilationException("Java version prior to 1.8 are not supported");
+        
+        final String runningJavaVersion = System.getProperty("java.version");
+		if (runningJavaVersion.startsWith("1.5") || runningJavaVersion.startsWith("1.6") || runningJavaVersion.startsWith("1.7")) {
+            throw new CompilationException("JDK version prior to 1.8 are not supported to run the application");
+        }
+        final String configSourceVersion = Play.configuration.getProperty("java.source", JAVA_SOURCE_DEFAULT_VERSION);
+        final String jdtVersion = compatibleJavaVersions.get(configSourceVersion);
+        if (jdtVersion == null) {
+            throw new CompilationException(String.format("Incompatible Java version specified (%s). Compatible versions are: %s", 
+            		configSourceVersion, compatibleJavaVersions.keySet()));
         }
 
-        if ("1.5".equals(Play.configuration.get("java.source")) || "1.6".equals(Play.configuration.get("java.source"))
-                || "1.7".equals(Play.configuration.get("java.source"))) {
-            throw new CompilationException("Java version prior to 1.8 are not supported");
-        }
-
-        this.settings.put(CompilerOptions.OPTION_Source, javaVersion);
-        this.settings.put(CompilerOptions.OPTION_TargetPlatform, javaVersion);
+        this.settings.put(CompilerOptions.OPTION_Source, jdtVersion);
+        this.settings.put(CompilerOptions.OPTION_TargetPlatform, jdtVersion);
         this.settings.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
-        this.settings.put(CompilerOptions.OPTION_Compliance, javaVersion);
+        this.settings.put(CompilerOptions.OPTION_Compliance, jdtVersion);
         this.settings.put(CompilerOptions.OPTION_MethodParametersAttribute, CompilerOptions.GENERATE);
     }
 
@@ -161,8 +170,8 @@ public class ApplicationCompiler {
             @Override
             public NameEnvironmentAnswer findType(char[] typeName, char[][] packageName) {
                 StringBuilder result = new StringBuilder(packageName.length * 7 + 1 + typeName.length);
-                for (int i = 0; i < packageName.length; i++) {
-                    result.append(packageName[i]);
+                for (final char[] element : packageName) {
+                    result.append(element);
                     result.append('.');
                 }
                 result.append(typeName);
@@ -271,8 +280,7 @@ public class ApplicationCompiler {
                 }
                 // Something has been compiled
                 ClassFile[] clazzFiles = result.getClassFiles();
-                for (int i = 0; i < clazzFiles.length; i++) {
-                    ClassFile clazzFile = clazzFiles[i];
+                for (final ClassFile clazzFile : clazzFiles) {
                     char[][] compoundName = clazzFile.getCompoundName();
                     StringBuilder clazzName = new StringBuilder();
                     for (int j = 0; j < compoundName.length; j++) {

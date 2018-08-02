@@ -235,6 +235,7 @@ public class MultipartStream {
      * @deprecated Use {@link #MultipartStream(InputStream, byte[], ProgressNotifier)},
      * or {@link #MultipartStream(InputStream, byte[], int, ProgressNotifier)}
      */
+    @Deprecated
     public MultipartStream() {
         this(null, null, null);
     }
@@ -256,6 +257,7 @@ public class MultipartStream {
      * @see #MultipartStream(InputStream, byte[], ProgressNotifier)
      * @deprecated Use {@link #MultipartStream(InputStream, byte[], int, ProgressNotifier)}.
      */
+    @Deprecated
     public MultipartStream(InputStream input, byte[] boundary, int bufSize) {
         this(input, boundary, bufSize, null);
     }
@@ -328,6 +330,7 @@ public class MultipartStream {
      *  ProgressNotifier)}.
      * @see #MultipartStream(InputStream, byte[], int, ProgressNotifier)
      */
+    @Deprecated
     public MultipartStream(InputStream input,
             byte[] boundary) {
         this(input, boundary, DEFAULT_BUFSIZE, null);
