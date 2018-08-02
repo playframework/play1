@@ -390,7 +390,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 }
                 if (m != null) {
                     print("play.templates.TagContext.enterTag('" + tag.name + "');");
-                    print("_('" + m.getDeclaringClass().getName() + "')._" + tName + "(attrs" + tagIndex + ",body" + tagIndex
+                    print("__loadClass('" + m.getDeclaringClass().getName() + "')._" + tName + "(attrs" + tagIndex + ",body" + tagIndex
                             + ", out, this, " + tag.startLine + ");");
                     print("play.templates.TagContext.exitTag();");
                 } else {

@@ -14,11 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 
-import org.hibernate.jpa.HibernateEntityManager;
 import org.hibernate.internal.SessionImpl;
-
-import com.sun.rowset.CachedRowSetImpl;
 
 import play.Logger;
 import play.db.jpa.JPA;
@@ -178,7 +176,7 @@ public class DB {
     public static Connection getConnection(String name) {
         try {
             if (JPA.isEnabled()) {
-                return ((SessionImpl) ((HibernateEntityManager) JPA.em(name)).getSession()).connection();
+                return ((SessionImpl) ((org.hibernate.Session) JPA.em(name)).getSession()).connection();
             }
 
             Connection localConnection = getLocalConnection(name);
@@ -274,7 +272,7 @@ public class DB {
             // Need to use a CachedRowSet that caches its rows in memory, which
             // makes it possible to operate without always being connected to
             // its data source
-            CachedRowSet rowset = new CachedRowSetImpl();
+            CachedRowSet rowset = RowSetProvider.newFactory().createCachedRowSet();
             rowset.populate(rs);
             return rowset;
         } catch (SQLException ex) {
