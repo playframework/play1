@@ -10,7 +10,7 @@ require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.9.5.2
     - com.zaxxer -> HikariCP 3.2.0
-    - org.ow2.asm -> asm-all 5.2
+    - org.ow2.asm -> asm 6.2
     - cglib -> cglib 3.2.7
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
@@ -47,7 +47,7 @@ require:    &allDependencies
     - org.bouncycastle -> bcpkix-jdk15on 1.60
     - org.codehaus.groovy -> groovy 2.5.1
     - org.codehaus.groovy -> groovy-xml 2.5.1
-    - org.eclipse.jdt.core 3.12.3
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.14.0
     - org.hibernate -> hibernate-core 5.2.10.patched
     - org.hibernate.common -> hibernate-commons-annotations 5.0.1.Final
     - org.hibernate -> hibernate-validator 5.4.1.Final
