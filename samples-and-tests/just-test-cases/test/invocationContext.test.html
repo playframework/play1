@@ -4,9 +4,9 @@
 	assertTextPresent('@play.db.jpa.Transactional')
 
 	open('@{Application.some2()}')
-	assertTextPresent('@utils.Youhou(value=),@play.db.jpa.Transactional')
+	assertTextPresent('@utils.Youhou(value=""),@play.db.jpa.Transactional')
 
 	open('@{Application.some3()}')
-	assertTextPresent('@utils.Youhou(value=fromJob),')
+	assertTextPresent('@utils.Youhou(value="fromJob"),')
 
 #{/selenium}
