@@ -508,7 +508,7 @@ public class GroovyTemplate extends BaseTemplate {
             return __reverseWithCheck(action, false);
         }
 
-        private static String __reverseWithCheck(String action, boolean absolute) {
+        private String __reverseWithCheck(String action, boolean absolute) {
             return Router.reverseWithCheck(action, Play.getVirtualFile(action), absolute);
         }
 

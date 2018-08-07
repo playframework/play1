@@ -1,10 +1,10 @@
 %{
     if(_object) {
         currentObject = _object
-        currentType = _('controllers.CRUD$ObjectType').forClass(_object.getClass().getName())
+        currentType = __loadClass('controllers.CRUD$ObjectType').forClass(_object.getClass().getName())
     } else if(_class) {
         currentObject = null;
-        currentType = _('controllers.CRUD$ObjectType').forClass(_class)
+        currentType = __loadClass('controllers.CRUD$ObjectType').forClass(_class)
     } else {
         currentObject = _caller.object
         currentType = _caller.type
