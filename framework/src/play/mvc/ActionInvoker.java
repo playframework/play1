@@ -57,6 +57,8 @@ public class ActionInvoker {
             return;
         }
 
+        initActionContext(request, Http.Response.current.get());
+
         // Route and resolve format if not already done
         if (request.action == null) {
             Play.pluginCollection.routeRequest(request);
