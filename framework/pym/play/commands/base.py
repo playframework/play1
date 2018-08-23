@@ -148,8 +148,8 @@ def run(app, args):
     try:
         process = subprocess.Popen (java_cmd, env=os.environ)
         signal.signal(signal.SIGTERM, handle_sigterm)
+        signal.signal(signal.SIGINT, handle_sigint)
         return_code = process.wait()
-	signal.signal(signal.SIGINT, handle_sigint)
         if 0 != return_code:
             sys.exit(return_code)
     except OSError:
