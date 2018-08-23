@@ -45,8 +45,8 @@ public class JavaExtensionsTest {
 
     @Test 
     public void testAdd()  {
-        String[] testArray = {"a", "b", "c"};
-        assertThat(JavaExtensions.add(new String[]{"a", "b"}, "c")).hasSize(3).contains(testArray);
+        final String[] items = JavaExtensions.add(new String[]{"a", "b"}, "c");
+		assertThat(items).hasSize(3).contains((Object[]) new String[] {"a", "b", "c"});
         
     }
 
