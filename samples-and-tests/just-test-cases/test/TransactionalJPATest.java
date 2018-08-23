@@ -6,9 +6,17 @@ import javax.persistence.TransactionRequiredException;
 
 public class TransactionalJPATest extends FunctionalTest {
     
-    @Test(expected = TransactionRequiredException.class)
+    @Test
     public void testImport() {
-        Response response = GET("/Transactional/readOnlyTest");
+        try {
+            GET("/Transactional/readOnlyTest");
+            throw new AssertionError("expected TransactionRequiredException");
+        }
+        catch (TransactionRequiredException expected) {
+        }
+        Response response = GET("/Transactional/echoHowManyPosts");
+        assertIsOk(response);
+        assertEquals("There are 0 posts", getContent(response));
     }
     
     @Test
