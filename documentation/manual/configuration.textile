@@ -1010,11 +1010,13 @@ h2(#play). Play run-time
 
 h3(#play.plugins.descriptor). play.plugins.descriptor
 
-File to load play plugins from. 
+File(s) to load play plugins from.
 * If given, play with load plugins ONLY from this file. @since play 1.5
+  * May contain multiple filenames (separated by comma). @since play 1.5.1
 * If not given, play will find ALL files "play.plugins" from classpath and load plugins from them (this is the default behaviour).
 
 bc. play.plugins.descriptor=conf/my-play-app.plugins
+bc. play.plugins.descriptor=conf/prod.plugins,conf/test.plugins
 
 Default: none.
 
