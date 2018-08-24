@@ -3,8 +3,8 @@
 # ~~~~
 
 # Home page
-GET     /                                       Application.index
-GET     /hello                                  Application.hello
+GET     /                                       NonstaticHello.index
+GET     /hello                                  NonstaticHello.hello
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

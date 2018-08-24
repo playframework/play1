@@ -2,3 +2,12 @@
 
 require:
     - play
+    - play-codeborne -> guice 1.9
+    - com.google.guava -> guava 23.0
+
+repositories:
+    - codeborne:
+        type: http
+        artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].zip
+        contains:
+            - play-codeborne -> *
