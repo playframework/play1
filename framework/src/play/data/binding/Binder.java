@@ -14,6 +14,7 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -788,6 +789,11 @@ public abstract class Binder {
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
             return nullOrEmpty ? null : new BigDecimal(value);
+        }
+
+        // BigInteger binding
+        if (clazz.equals(BigInteger.class)) {
+            return nullOrEmpty ? null : new BigInteger(value);
         }
 
         // boolean or Boolean binding
