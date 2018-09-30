@@ -2,14 +2,14 @@ package play.mvc;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import static play.mvc.Controller.enhancementCheckComplete;
+import static play.mvc.Controller.isFrameworkClass;
 
 public class ControllerTest{
     @Test
     public void jdkAndPlayClassesShouldNeverBeenCheckedForEnhancement() {
-        assertTrue(enhancementCheckComplete("sun.blah"));
-        assertTrue(enhancementCheckComplete("jdk.base"));
-        assertTrue(enhancementCheckComplete("play.foo"));
-        assertFalse(enhancementCheckComplete("com.bar"));
+        assertTrue(isFrameworkClass("sun.blah"));
+        assertTrue(isFrameworkClass("jdk.base"));
+        assertTrue(isFrameworkClass("play.foo"));
+        assertFalse(isFrameworkClass("com.bar"));
     }
 }

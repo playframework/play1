@@ -1222,44 +1222,44 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
 
         try {
             throw new Exception();
+
         } catch (Exception e) {
-            boolean haveSeenFirstApplicationClass = false;
+            boolean inApplicationCode = false;
+
             for (StackTraceElement ste : e.getStackTrace()) {
                 String className = ste.getClassName();
 
-                if (!haveSeenFirstApplicationClass) {
-                    haveSeenFirstApplicationClass = Play.classes.getApplicationClass(className) != null;
-                    // when haveSeenFirstApplicationClass is set to true, we are
-                    // entering the user application code..
+                if (!inApplicationCode) {
+                    // Look for an application class to mark start of application code
+                    inApplicationCode = Play.classes.getApplicationClass(className) != null;
                 }
 
-                if (haveSeenFirstApplicationClass) {
-                    if (enhancementCheckComplete(className)) {
-                        return; // done checking
-                    } else {
-                        // is this class enhanced?
-                        boolean enhanced = ContinuationEnhancer.isEnhanced(className);
-                        if (!enhanced) {
-                            throw new ContinuationsException(
-                                    "Cannot use await/continuations when not all application classes on the callstack are properly enhanced. The following class is not enhanced: "
-                                            + className);
-                        }
+                if(inApplicationCode) {
+                    if(isFrameworkClass(className)) {
+                        // enhancement check complete
+                        return;
                     }
+
+                    assertEnhancedClass(className);
                 }
             }
-
         }
     }
-
 
     /**
      * Checks if the classname is from the jdk, sun, or play package. These packages indicate that stack inspection is
      * back into framework code and the enhancement check is complete.
-     * @param String className
-     * @return boolean
      */
-    static boolean enhancementCheckComplete(String className) {
+    static boolean isFrameworkClass(String className) {
         return className.startsWith("jdk.") || className.startsWith("sun.") || className.startsWith("play.");
+    }
+
+    private static void assertEnhancedClass(String className) {
+        if (!ContinuationEnhancer.isEnhanced(className)) {
+            throw new ContinuationsException(
+                "Cannot use await/continuations when not all application classes on the callstack are properly enhanced. " +
+                "The following class is not enhanced: " + className);
+        }
     }
 
     protected static <T> void await(Future<T> future, F.Action<T> callback) {
