@@ -1215,7 +1215,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * leaving actionInvoke into the app, and before reentering Controller.await
      */
     private static void verifyContinuationsEnhancement() {
-        // only check in dev mode..
+
         if (Play.mode == Play.Mode.PROD) {
             return;
         }
@@ -1224,22 +1224,22 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
             throw new Exception();
 
         } catch (Exception e) {
-            boolean inApplicationCode = false;
+            boolean verificationStarted = false;
 
             for (StackTraceElement ste : e.getStackTrace()) {
                 String className = ste.getClassName();
 
-                if (!inApplicationCode) {
-                    // Look for an application class to mark start of application code
-                    inApplicationCode = Play.classes.getApplicationClass(className) != null;
+                if (!verificationStarted) {
+                    // Look for first application class to mark start of verification
+                    verificationStarted = Play.classes.getApplicationClass(className) != null;
                 }
 
-                if(inApplicationCode && isFrameworkCode(className)) {
-                    // When we next see framework code the verification is complete
+                if(verificationStarted && shouldNotBeEnhanced(className)) {
+                    // When we next see a class that should not be enhanced, the verification is complete
                     return;
                 }
 
-                if(inApplicationCode) {
+                if(verificationStarted) {
                     assertEnhancedClass(className);
                 }
             }
@@ -1247,11 +1247,10 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Checks if the classname is from a play package or from the JDK. These packages indicate that stack inspection has
-     * exited application code and the enhancement check is complete. The JDK classes are encountered through reflective
-     * handles to Play framework code.
+     * Checks if the classname is from a play package or from the JDK. These classes should not be enhanced and
+     * should not be verified. These presence of these packages indicate the verification is complete.
      */
-    private static boolean isFrameworkCode(String className) {
+    static boolean shouldNotBeEnhanced(String className) {
         return className.startsWith("play.") || className.startsWith("jdk.") || className.startsWith("sun.");
     }
 
