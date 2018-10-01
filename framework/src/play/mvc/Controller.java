@@ -1234,12 +1234,12 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
                     inApplicationCode = Play.classes.getApplicationClass(className) != null;
                 }
 
-                if(inApplicationCode) {
-                    if(isFrameworkClass(className)) {
-                        // enhancement check complete
-                        return;
-                    }
+                if(inApplicationCode && isFrameworkCode(className)) {
+                    // When we next see framework code the verification is complete
+                    return;
+                }
 
+                if(inApplicationCode) {
                     assertEnhancedClass(className);
                 }
             }
@@ -1247,11 +1247,12 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     }
 
     /**
-     * Checks if the classname is from the jdk, sun, or play package. These packages indicate that stack inspection is
-     * back into framework code and the enhancement check is complete.
+     * Checks if the classname is from a play package or from the JDK. These packages indicate that stack inspection has
+     * exited application code and the enhancement check is complete. The JDK classes are encountered through reflective
+     * handles to Play framework code.
      */
-    static boolean isFrameworkClass(String className) {
-        return className.startsWith("jdk.") || className.startsWith("sun.") || className.startsWith("play.");
+    private static boolean isFrameworkCode(String className) {
+        return className.startsWith("play.") || className.startsWith("jdk.") || className.startsWith("sun.");
     }
 
     private static void assertEnhancedClass(String className) {
