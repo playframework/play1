@@ -1,0 +1,189 @@
+Index: hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(date 1535476081000)
++++ hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(date 1536758339169)
+@@ -146,6 +146,27 @@
+ //		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
+ 			EntityEntry entry = (EntityEntry) me.getValue();
+ 			Status status = entry.getStatus();
++
++			// This entity will be saved?
++			boolean willBeSaved = true;
++			try {
++			    Object o = me.getKey();
++			    Class c = o.getClass();
++			    Class jpaBase = Class.forName("play.db.jpa.JPABase");
++			    while(!c.equals(Object.class)) {
++			        if(c.equals(jpaBase)) {
++						willBeSaved = (Boolean)(jpaBase.getDeclaredField("willBeSaved").get(o));
++						break;
++			         }
++			          c = c.getSuperclass();
++			    }
++			    if(!willBeSaved) {
++			        continue;
++			    }
++			} catch(Exception e) {
++			   e.printStackTrace();
++			}
++
+ 			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
+ 				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
+ 			}
+@@ -274,8 +295,8 @@
+ 			CollectionEntry ce = me.getValue();
+
+ 			if ( ce.isDorecreate() ) {
+-				session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionRecreate( coll, ce.getCurrentKey() )){
++                    actionQueue.addAction(
+ 						new CollectionRecreateAction(
+ 								coll,
+ 								ce.getCurrentPersister(),
+@@ -283,10 +304,11 @@
+ 								session
+ 							)
+ 					);
++                 }
+ 			}
+ 			if ( ce.isDoremove() ) {
+-				session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionRemove( coll, ce.getLoadedKey() )){
++                    actionQueue.addAction(
+ 						new CollectionRemoveAction(
+ 								coll,
+ 								ce.getLoadedPersister(),
+@@ -295,10 +317,11 @@
+ 								session
+ 							)
+ 					);
++                }
+ 			}
+ 			if ( ce.isDoupdate() ) {
+-				session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() );
+-				actionQueue.addAction(
++				if(session.getInterceptor().onCollectionUpdate( coll, ce.getLoadedKey() )){
++                    actionQueue.addAction(
+ 						new CollectionUpdateAction(
+ 								coll,
+ 								ce.getLoadedPersister(),
+@@ -307,6 +330,7 @@
+ 								session
+ 							)
+ 					);
++                }
+ 			}
+
+ 			// todo : I'm not sure the !wasInitialized part should really be part of this check
+Index: hibernate-core/src/main/java/org/hibernate/Interceptor.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hibernate-core/src/main/java/org/hibernate/Interceptor.java	(date 1535476081000)
++++ hibernate-core/src/main/java/org/hibernate/Interceptor.java	(date 1536758425833)
+@@ -121,7 +121,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	void onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
++    boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException;
+
+ 	/**
+ 	 * Called before a collection is deleted.
+@@ -131,7 +131,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	void onCollectionRemove(Object collection, Serializable key) throws CallbackException;
++    boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException;
+
+ 	/**
+ 	 * Called before a collection is updated.
+@@ -141,7 +141,7 @@
+ 	 *
+ 	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
+ 	 */
+-	void onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
++    boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException;
+
+ 	/**
+ 	 * Called before a flush.
+Index: hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	(date 1535476081000)
++++ hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	(date 1536758395766)
+@@ -121,14 +121,17 @@
+ 	}
+
+ 	@Override
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++	    return true;
+ 	}
+
+ 	@Override
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++	    return true;
+ 	}
+
+ 	@Override
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++	    return true;
+ 	}
+ }
+Index: hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java	(date 1535476081000)
++++ hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java	(date 1536758425850)
+@@ -94,8 +94,8 @@
+ 		return sql;
+ 	}
+
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {}
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {}
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {}
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException { return true;}
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException { return true;}
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException { return true;}
+
+ }
+Index: hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java	(date 1535476081000)
++++ hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java	(date 1536758425863)
+@@ -111,12 +111,15 @@
+ 		return sql;
+ 	}
+
+-	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+
+-	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+
+-	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++	public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
++        return true;
+ 	}
+ }
