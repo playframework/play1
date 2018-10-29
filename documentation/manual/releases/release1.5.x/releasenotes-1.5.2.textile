@@ -1,0 +1,36 @@
+# Play 1.5.2 -- Release notes
+
+Play 1.5.2 has been released of the master branch.
+
+The changes in this release are listed in the "Play 1.5.2 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/_XXXXX on Lighthouse and "1.5.2 on github":https://github.com/playframework/play1/milestone/3515721 including 24 resolved tickets.
+
+
+## What's new in Play 1.5.2
+
+* "#1239":https://github.com/playframework/play1/issues/1239 : Feature/make play stop wait for java process to finish
+* "#1242":https://github.com/playframework/play1/issues/1242 : Add support for navigating XML with namespaces.
+* "#1250":https://github.com/playframework/play1/issues/1250 : dependencies upgrade
+* "#1252":https://github.com/playframework/play1/issues/1252 : Update Play source for build compability with JDK9+ 
+* "#1259":https://github.com/playframework/play1/issues/1259 : [#1849] restore checks in TransactionalJPATest that were accidentally deleted in PR 1246
+* "#1260":https://github.com/playframework/play1/issues/1260 : [#1252] revert back method to static. Fix calls to deprecated '_' met…
+* "#1266":https://github.com/playframework/play1/issues/1266 : sample upgrade for issue #1263
+* "#1269":https://github.com/playframework/play1/issues/1269 : Add BigInteger binding
+
+## What's fixed in Play 1.5.2
+
+* "#1198":https://github.com/playframework/play1/issues/1198 : 1197 support non-static dependencies
+* "#1204":https://github.com/playframework/play1/issues/1204 : allow adding multiple files to "play.plugins.descriptor"
+* "#1212":https://github.com/playframework/play1/issues/1212 : Wrong request-body decoding for content-type "application/x-www-form-urlencoded"
+* "#1213":https://github.com/playframework/play1/issues/1213 : [#1212] Fix non-Latin characters decode in UrlEncodedParser
+* "#1217":https://github.com/playframework/play1/issues/1217 : [play 1.5] documentation is missing
+* "#1230":https://github.com/playframework/play1/issues/1230 : [#2170] Action context access from error templates
+* "#1241":https://github.com/playframework/play1/issues/1241 : [#2086] Fix race in Promise.onRedeem() that called "callback" twice
+* "#1245":https://github.com/playframework/play1/issues/1245 : fix(tests): issue #1200, added testing compatibility for jdk9+
+* "#1246":https://github.com/playframework/play1/issues/1246 : [#1849] Exceptions from controllers are not detected in FunctionalTests
+* "#1247":https://github.com/playframework/play1/issues/1247 : upgraded javassist to 3.23.1-GA to suppress warning with JDK9+
+* "#1248":https://github.com/playframework/play1/issues/1248 : Additions for PR https://github.com/playframework/play1/pull/1246
+* "#1254":https://github.com/playframework/play1/issues/1254 : #1250 dependencies upgrade
+* "#1255":https://github.com/playframework/play1/issues/1255 : fix(tests): issue #1200, added testing compatibility for jdk9+
+* "#1256":https://github.com/playframework/play1/issues/1256 : [#1245] Fix public/protected testing with Javassist, by removing the workaround that was fixed in latest version of javassist
+* "#1257":https://github.com/playframework/play1/issues/1257 : [#1239] make play stop wait for java process to finish
+* "#1258":https://github.com/playframework/play1/issues/1258 : [#1849] Give tests more fine grained control over what exceptions they expect
