@@ -1,0 +1,2 @@
+GET     /                                       Application.index
+GET		/public															staticDir:public
