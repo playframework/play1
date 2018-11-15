@@ -266,14 +266,14 @@ public class Fixtures {
 
                             Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, annotations);
                             for (Field f : model.getClass().getFields()) {
-                            	if (!Modifier.isStatic(f.getModifiers())) {
+                                if (!Modifier.isStatic(f.getModifiers())) {
 	                                if (f.getType().isAssignableFrom(Map.class)) {
 	                                    f.set(model, objects.get(key).get(f.getName()));
 	                                }
 	                                if (f.getType().equals(byte[].class)) {
 	                                    f.set(model, objects.get(key).get(f.getName()));
 	                                }
-                            	}
+                                }
                             }
                             model._save();
 
