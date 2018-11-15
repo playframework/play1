@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -265,12 +266,14 @@ public class Fixtures {
 
                             Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, annotations);
                             for (Field f : model.getClass().getFields()) {
-                                if (f.getType().isAssignableFrom(Map.class)) {
-                                    f.set(model, objects.get(key).get(f.getName()));
-                                }
-                                if (f.getType().equals(byte[].class)) {
-                                    f.set(model, objects.get(key).get(f.getName()));
-                                }
+                            	if (!Modifier.isStatic(f.getModifiers())) {
+	                                if (f.getType().isAssignableFrom(Map.class)) {
+	                                    f.set(model, objects.get(key).get(f.getName()));
+	                                }
+	                                if (f.getType().equals(byte[].class)) {
+	                                    f.set(model, objects.get(key).get(f.getName()));
+	                                }
+                            	}
                             }
                             model._save();
 
