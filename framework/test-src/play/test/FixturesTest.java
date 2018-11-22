@@ -66,7 +66,7 @@ public class FixturesTest {
     	Play.applicationPath = file;
     	VirtualFile appRoot = VirtualFile.open(file);
     	
-    	ApplicationClass testClass = new ApplicationClass(CLASS_WITH_STATIC_FINAL_MAP_NAME, appRoot.child("ClassWithStaticFinalMap.java.src"));
+    	ApplicationClass testClass = new ApplicationClass(CLASS_WITH_STATIC_FINAL_MAP_NAME, appRoot.child("ClassWithStaticFinalMap.java.xml"));
     	
     	Play.classes = new ApplicationClasses() {
     		public ApplicationClass getApplicationClass(String name) {
