@@ -1,7 +1,7 @@
 package play.test.models;
 
 /*
- * Copy below to play/test/ClassWithStaticFinalMap.java.src
+ * Copy below to play/test/ClassWithStaticFinalMap.java.xml
  */
 
 import java.util.HashMap;
