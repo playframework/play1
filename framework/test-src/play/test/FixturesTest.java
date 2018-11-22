@@ -13,8 +13,6 @@ import org.junit.Test;
 
 import play.Play;
 import play.PlayBuilder;
-import play.classloading.ApplicationClasses;
-import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.Model;
 import play.db.Model.Property;
 import play.plugins.PluginCollection;
@@ -52,8 +50,6 @@ public class FixturesTest {
         public List<Property> listProperties() { return null; }
     };
     
-    private static final String CLASS_WITH_STATIC_FINAL_MAP_NAME = "models.ClassWithStaticFinalMap";
-    
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         new PlayBuilder().build();
@@ -64,14 +60,6 @@ public class FixturesTest {
         
         Play.applicationPath = file;
         VirtualFile appRoot = VirtualFile.open(file);
-        
-        ApplicationClass testClass = new ApplicationClass(CLASS_WITH_STATIC_FINAL_MAP_NAME, appRoot.child("ClassWithStaticFinalMap.java.xml"));
-        
-        Play.classes = new ApplicationClasses() {
-            public ApplicationClass getApplicationClass(String name) {
-                return CLASS_WITH_STATIC_FINAL_MAP_NAME.equals(name) ? testClass : super.getApplicationClass(name);
-            }
-        };
         
         Play.pluginCollection = new PluginCollection() {
             public Model.Factory modelFactory(Class<? extends play.db.Model> modelClass) {

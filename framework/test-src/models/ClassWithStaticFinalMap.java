@@ -1,4 +1,4 @@
-package play.test.models;
+package models;
 
 /*
  * Copy below to play/test/ClassWithStaticFinalMap.java.xml
