@@ -1,0 +1,20 @@
+package models;
+
+/*
+ * Import below from play/test/models/ClassWithStaticFinalMap.java
+ */
+
+import java.util.HashMap;
+import java.util.Map;
+
+import play.test.FixturesTest.MockModel;
+
+public class ClassWithStaticFinalMap extends MockModel {
+	public static final Map<String, Object> map = new HashMap<>();
+	
+	public String name;
+	
+	public ClassWithStaticFinalMap() {
+		super();
+	}
+}
