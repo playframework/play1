@@ -1,8 +1,13 @@
 package play.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.After;
@@ -11,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import models.ClassWithStaticFinalMap;
 import play.Play;
 import play.PlayBuilder;
 import play.db.Model;
@@ -20,12 +26,16 @@ import play.vfs.VirtualFile;
 
 
 public class FixturesTest {
+	
+	public static List<MockModel> store;
     
     public static class MockModel implements Model {
+    	public Integer id;
+    	
         @Override
-        public void _save() { /* Do nothing */ }
+        public void _save() { this.id = store.size(); store.add(this); }
         @Override
-        public void _delete() { /* Do nothing */ }
+        public void _delete() { store.remove(this); }
         @Override
         public Object _key() { return Model.Manager.factoryFor(this.getClass()).keyValue(this); }
     }
@@ -36,7 +46,7 @@ public class FixturesTest {
         @Override
         public Class<?> keyType() { return null; }
         @Override
-        public Object keyValue(play.db.Model m) { return Long.valueOf(1); }
+        public Object keyValue(play.db.Model m) { return ((MockModel)m).id; }
         @Override
         public play.db.Model findById(Object id) { return null; }
         @Override
@@ -80,6 +90,8 @@ public class FixturesTest {
 
     @Before
     public void setUp() throws Exception {
+    	// Initialise the model store.
+    	store = new LinkedList<>();
     }
 
     @After
@@ -91,5 +103,12 @@ public class FixturesTest {
         // Fixtures should not attempt to set a static final field
         // on a Model object otherwise an exception would occur.
         Fixtures.loadModels(false, "testModelClassStaticFinalMapField.yml");
+        
+        // Ensure the model was loaded correctly.
+        assertEquals(store.size(), 1);
+        MockModel model = store.get(0);
+        assertNotNull(model);
+        assertTrue(model instanceof ClassWithStaticFinalMap);
+        assertEquals(((ClassWithStaticFinalMap)model).name, "hello");
     }
 }
