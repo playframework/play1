@@ -302,6 +302,10 @@
             <param name="testAppPath" value="${basedir}/../samples-and-tests/nonstatic-app"/>
         </antcall>
 
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/fast-tag"/>
+        </antcall>
+
         <antcall target="test-success" />
 
     </target>
