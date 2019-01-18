@@ -10,7 +10,7 @@ require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.9.5.2
     - com.zaxxer -> HikariCP 3.2.0
-    - org.ow2.asm -> asm 6.2
+    - org.ow2.asm -> asm 7.0
     - cglib -> cglib 3.2.7
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
