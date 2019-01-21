@@ -1,15 +1,3 @@
-From c61bac3eb7750b64333e56bfde3d768a93c38752 Mon Sep 17 00:00:00 2001
-Date: Fri, 16 May 2014 10:52:31 +0800
-Subject: [PATCH 1/2] [#476] Update to ASM 5.0.5
-
----
- pom.xml                                            |  2 +-
- .../javaflow/bytecode/BytecodeClassLoader.java     |  2 +-
- .../asm/ContinuationClassAdapter.java              |  4 +--
- .../asm/ContinuationMethodAdapter.java             | 34 +++++++++++-----------
- .../asm/ContinuationMethodAnalyzer.java            |  9 ++++--
- 5 files changed, 27 insertions(+), 24 deletions(-)
-
 diff --git a/pom.xml b/pom.xml
 index fcb9ba3..00269d3 100644
 --- a/pom.xml
@@ -19,7 +7,7 @@ index fcb9ba3..00269d3 100644
      <commons.componentid>javaflow</commons.componentid>
      <commons.jira.componentid>12311186</commons.jira.componentid>
 -    <asm.version>4.0</asm.version>
-+    <asm.version>5.0.2</asm.version>
++    <asm.version>7.0</asm.version>
    </properties> 
  
    <build>
@@ -32,7 +20,7 @@ index fe06d06..09e32cc 100644
  
          public NameClassAdapter() {
 -            super(Opcodes.ASM4);
-+            super(Opcodes.ASM5);
++            super(Opcodes.ASM7);
          }
          
          public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
@@ -47,7 +35,7 @@ index 41fcb5d..7699597 100644
 -    public ContinuationClassAdapter(ClassVisitor cv) {
 -        super(Opcodes.ASM4, cv);
 +    public ContinuationClassAdapter(final ClassVisitor cv) {
-+        super(Opcodes.ASM5, cv);
++        super(Opcodes.ASM7, cv);
      }
  
      public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -60,7 +48,7 @@ index 126ccc5..d8eef5b 100644
  
      public ContinuationMethodAdapter(ContinuationMethodAnalyzer a) {
 -        super(Opcodes.ASM4, a.mv);
-+        super(Opcodes.ASM5, a.mv);
++        super(Opcodes.ASM7, a.mv);
          this.canalyzer = a;
          this.analyzer = a.analyzer;
          this.labels = a.labels;
@@ -209,7 +197,7 @@ index 2d480b9..c23e900 100644
  
      public ContinuationMethodAnalyzer(String className, ClassVisitor cv, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
 -        super(Opcodes.ASM4, access, name, desc, signature, exceptions);
-+        super(Opcodes.ASM5, access, name, desc, signature, exceptions);
++        super(Opcodes.ASM7, access, name, desc, signature, exceptions);
          this.className = className;
          this.cv = cv;
          this.mv = mv;

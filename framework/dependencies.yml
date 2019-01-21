@@ -11,6 +11,10 @@ require:    &allDependencies
     - com.mchange -> c3p0 0.9.5.2
     - com.zaxxer -> HikariCP 3.2.0
     - org.ow2.asm -> asm 7.0
+    - org.ow2.asm -> asm-commons 7.0
+    - org.ow2.asm -> asm-util 7.0
+    - org.ow2.asm -> asm-tree 7.0
+    - org.ow2.asm -> asm-analysis 7.0
     - cglib -> cglib 3.2.7
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
