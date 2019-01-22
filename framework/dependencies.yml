@@ -48,7 +48,7 @@ require:    &allDependencies
     - org.codehaus.groovy -> groovy 2.5.3
     - org.codehaus.groovy -> groovy-xml 2.5.3
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.14.0
-    - org.hibernate -> hibernate-core 5.4.0.Final.patched
+    - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.0.1.Final
@@ -59,9 +59,9 @@ require:    &allDependencies
     - javax.xml.bind -> jaxb-api 2.3.1
     - org.glassfish.jaxb -> jaxb-runtime 2.3.1
     - com.fasterxml -> classmate 1.3.4
-    - org.hibernate -> hibernate-c3p0 5.4.0.Final
-    - org.hibernate -> hibernate-entitymanager 5.4.0.Final
-    - org.hibernate -> hibernate-ehcache 5.4.0.Final
+    - org.hibernate -> hibernate-c3p0 5.4.1.Final
+    - org.hibernate -> hibernate-entitymanager 5.4.1.Final
+    - org.hibernate -> hibernate-ehcache 5.4.1.Final
     - com.mchange -> mchange-commons-java 0.2.12
     - org.javassist -> javassist 3.24.0-GA
     - io.netty -> netty 3.10.6.Final
