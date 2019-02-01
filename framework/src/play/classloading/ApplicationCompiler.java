@@ -43,6 +43,7 @@ public class ApplicationCompiler {
     	compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
     	compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
     	compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
+    	compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
 	}
 
     /**
