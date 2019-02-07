@@ -1,6 +1,9 @@
 package play.db.jpa;
 
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
@@ -108,14 +111,20 @@ public class JPAPlugin extends PlayPlugin {
      */
     @Override
     public void onApplicationStart() {  
-        org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig("org.hibernate.SQL");
+        loggerConfig.setLevel(Level.OFF);
+        ctx.updateLoggers();
 
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
             Configuration dbConfig = new Configuration(dbName);
             
             if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
-                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
+                ctx = (LoggerContext) LogManager.getContext(false);
+                loggerConfig = ctx.getConfiguration().getLoggerConfig("org.hibernate.SQL");
+                loggerConfig.setLevel(Level.ALL);
+                ctx.updateLoggers();
             }
 
             Thread thread = Thread.currentThread();

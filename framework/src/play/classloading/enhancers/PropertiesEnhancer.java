@@ -16,6 +16,7 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.NotFoundException;
+import javassist.bytecode.AccessFlag;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import play.Logger;
@@ -30,6 +31,9 @@ public class PropertiesEnhancer extends Enhancer {
 
     private boolean enabled = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
     private boolean generateAccessors = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.generateAccessors", "true"));
+
+    private static final boolean constructorsOnly =
+            Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.constructorsOnly", "false"));
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
@@ -57,7 +61,8 @@ public class PropertiesEnhancer extends Enhancer {
         try {
             boolean hasDefaultConstructor = hasDefaultConstructor(ctClass);
             if (!hasDefaultConstructor && !ctClass.isInterface()) {
-                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
+                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName()
+                        + "() { play.Logger.error(new Throwable(), \"Unexpected constructor call\", new Object[0]); }", ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
@@ -227,7 +232,7 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
-                return o.getClass().getField(property).get(o);
+                throw e;
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }

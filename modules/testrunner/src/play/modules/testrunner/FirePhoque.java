@@ -17,10 +17,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.TimeZone;
 
 import net.sourceforge.htmlunit.corejs.javascript.Context;
 import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
@@ -177,7 +181,13 @@ public class FirePhoque {
                 maxLength = testName.length();
             }
         }
-        System.out.println("~ " + tests.size() + " test" + (tests.size() != 1 ? "s" : "") + " to run:");
+
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(tz);
+        String timestamp = df.format(new Date());
+
+        System.out.println("~ " + timestamp +  ": " + tests.size() + " test" + (tests.size() != 1 ? "s" : "") + " to run:");
         System.out.println("~");
         firephoque.openWindow(new URL(app + "/@tests/init"), "headless");
         boolean ok = true;

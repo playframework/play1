@@ -382,6 +382,11 @@ public class WSUrlFetch implements WSImpl {
             }
         }
 
+        @Override
+        public byte[] getBytes() {
+            return body.getBytes();
+        }
+
         /**
          * get the response as a stream
          * 

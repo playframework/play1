@@ -11,6 +11,7 @@ import org.junit.Before;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.libs.F;
 import play.libs.F.Action;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.UnexpectedException;
@@ -422,7 +423,23 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Response makeRequest(Request request) {
-        Response response = newResponse();
+        final Response response = newResponse();
+        response.onWriteChunk(new F.Action<Object>() {
+            public void invoke(Object chunk) {
+                byte[] bytes;
+                try {
+                    if ( chunk instanceof byte[]) {
+                        bytes = (byte[])chunk;
+                    } else {
+                        String message = chunk == null ? "" : chunk.toString();
+                        bytes = message.getBytes(response.encoding);
+                    }
+                    response.out.write(bytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         makeRequest(request, response);
 
         if (response.status == 302) { // redirect

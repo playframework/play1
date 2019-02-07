@@ -1,6 +1,8 @@
 package play.test;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
@@ -9,6 +11,7 @@ import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.Filterable;
 import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.JUnit4;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -19,16 +22,19 @@ import play.Invoker;
 import play.Invoker.DirectInvocation;
 import play.Play;
 
-public class PlayJUnitRunner extends Runner implements Filterable {
+public class PlayJUnitRunner extends BlockJUnit4ClassRunner implements Filterable {
 
     public static final String invocationType = "JUnitTest";
 
     public static boolean useCustomRunner = false;
-    
-    // *******************
-    JUnit4 jUnit4;
+    private final Class tclass;
 
-    public PlayJUnitRunner(Class testClass) throws ClassNotFoundException, InitializationError {
+    public PlayJUnitRunner(Class testClass) throws InitializationError {
+        super(resolve(testClass));
+        this.tclass = testClass;
+    }
+
+    private static Class resolve(Class testClass) {
         synchronized (Play.class) {
             if (!Play.started) {
                 Play.init(new File("."), PlayJUnitRunner.getPlayId());
@@ -39,8 +45,7 @@ public class PlayJUnitRunner extends Runner implements Filterable {
                 }
                 useCustomRunner = true;
             }
-            Class<?> classToRun = Play.classloader.loadApplicationClass(testClass.getName());
-            jUnit4 = new JUnit4(classToRun);
+            return Play.classloader.loadApplicationClass(testClass.getName());
         }
     }
 
@@ -53,12 +58,17 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     }
 
     @Override
-    public Description getDescription() {
-        return jUnit4.getDescription();
+    protected Annotation[] getRunnerAnnotations() {
+        return tclass.getAnnotations();
+    }
+
+    @Override
+    protected Description describeChild(FrameworkMethod method) {
+        return Description.createTestDescription(tclass, testName(method), method.getAnnotations());
     }
     
     private void initTest() {
-        TestClass testClass = jUnit4.getTestClass();
+        TestClass testClass = getTestClass();
         if(testClass != null){
             TestEngine.initTest(testClass.getJavaClass());
         }
@@ -67,14 +77,9 @@ public class PlayJUnitRunner extends Runner implements Filterable {
     @Override
     public void run(RunNotifier notifier) {
         initTest();
-        jUnit4.run(notifier);
+        super.run(notifier);
     }
 
-    @Override
-    public void filter(Filter toFilter) throws NoTestsRemainException {
-        jUnit4.filter(toFilter);
-
-    }
 
     // *********************
     public enum StartPlay implements MethodRule {
