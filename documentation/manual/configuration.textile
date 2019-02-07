@@ -527,6 +527,12 @@ c3p0 is very asynchronous. Slow JDBC operations are generally performed by helpe
 Default: @3@
 
 
+h3(#db.pool.connectionInitSql). db.pool.connectionInitSql
+
+Sets the SQL string that will be executed on all new connections when they are created, before they are added to the pool (HikariCP only).
+
+Default: none
+
 h2(#evolutions). Database evolutions
 
 
