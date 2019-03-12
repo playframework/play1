@@ -184,15 +184,9 @@ public class DBPlugin extends PlayPlugin {
                 String name = m.group("name");
                 String host = m.group("host");
                 String parameters = m.group("parameters");
-
-                Map<String, String> paramMap = new HashMap<>();
-                paramMap.put("useUnicode", "yes");
-                paramMap.put("characterEncoding", "UTF-8");
-                paramMap.put("connectionCollation", "utf8_general_ci");
-                addParameters(paramMap, parameters);
                 
                 dbConfig.put("db.driver", "com.mysql.jdbc.Driver");
-                dbConfig.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?" + toQueryString(paramMap));
+                dbConfig.put("db.url", "jdbc:mysql://" + (host == null ? "localhost" : host) + "/" + name + "?" + parameters);
                 if (user != null) {
                     dbConfig.put("db.user", user);
                 }
@@ -251,28 +245,7 @@ public class DBPlugin extends PlayPlugin {
         }
         return false;
     }
-
-    private static void addParameters(Map<String, String> paramsMap, String urlQuery) {
-        if (!StringUtils.isBlank(urlQuery)) {
-            String[] params = urlQuery.split("[\\&]");
-            for (String param : params) {
-                String[] parts = param.split("[=]");
-                if (parts.length > 0 && !StringUtils.isBlank(parts[0])) {
-                    paramsMap.put(parts[0], parts.length > 1 ? StringUtils.stripToNull(parts[1]) : null);
-                }
-            }
-        }
-    }
     
-    private static String toQueryString(Map<String, String> paramMap) {
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : paramMap.entrySet()) {
-            if (builder.length() > 0) builder.append("&");
-            builder.append(entry.getKey()).append("=").append(entry.getValue() != null ? entry.getValue() : "");
-        }
-        return builder.toString();
-    }
-
     /**
      * Needed because DriverManager will not load a driver ouside of the system classloader
      */
