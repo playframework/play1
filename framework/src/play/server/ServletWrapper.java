@@ -64,7 +64,17 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     public static final String SERVLET_RES = "__SERVLET_RES";
 
     private static boolean routerInitializedWithContext = false;
-
+    
+    
+    private static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    
+    /**
+     * Define allowed methods that will be handled when defined in X-HTTP-Method-Override
+     * You can define allowed method in
+     * application.conf: <code>http.allowed.method.override=POST,PUT</code>
+     */
+    private static List<String> allowedHttpMethodOverride = Arrays.asList(Play.configuration.getProperty("http.allowed.method.override", "").split(","));
+   
     @Override
     public void contextInitialized(ServletContextEvent e) {
         Play.standalonePlayServer = false;
@@ -265,8 +275,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             contentType = "text/html".intern();
         }
 
-        if (httpServletRequest.getHeader("X-HTTP-Method-Override") != null) {
-            method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
+        if (httpServletRequest.getHeader(X_HTTP_METHOD_OVERRIDE) != null && allowedHttpMethodOverride
+                .contains(httpServletRequest.getHeader(X_HTTP_METHOD_OVERRIDE).intern())) {
+            method = httpServletRequest.getHeader(X_HTTP_METHOD_OVERRIDE).intern();
         }
 
         InputStream body = httpServletRequest.getInputStream();

@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -104,6 +105,10 @@ import play.vfs.VirtualFile;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
+    
+    
+    private static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+
     /**
      * If true (the default), Play will send the HTTP header
      * "Server: Play! Framework; ....". This could be a security problem (old
@@ -123,6 +128,15 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public Map<String, ChannelHandler> pipelines = new HashMap<>();
 
     private WebSocketServerHandshaker handshaker;
+
+    
+    /**
+     * Define allowed methods that will be handled when defined in X-HTTP-Method-Override
+     * You can define allowed method in
+     * application.conf: <code>http.allowed.method.override=POST,PUT</code>
+     */
+    private static final List<String> allowedHttpMethodOverride = Arrays.asList(Play.configuration.getProperty("http.allowed.method.override", "").split(","));
+
 
     static {
         try {
@@ -598,8 +612,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String remoteAddress = getRemoteIPAddress(messageEvent);
         String method = nettyRequest.getMethod().getName();
 
-        if (nettyRequest.headers().get("X-HTTP-Method-Override") != null) {
-            method = nettyRequest.headers().get("X-HTTP-Method-Override").intern();
+        if (nettyRequest.headers().get(X_HTTP_METHOD_OVERRIDE) != null
+                && allowedHttpMethodOverride.contains(nettyRequest.headers().get(X_HTTP_METHOD_OVERRIDE).intern())) {
+            method = nettyRequest.headers().get(X_HTTP_METHOD_OVERRIDE).intern();
         }
 
         InputStream body = null;
