@@ -602,6 +602,15 @@ bc. http.cacheControl=0
 Default: @3600@ - set cache expiry to one hour.
 
 
+h3(#http.allowed.method.override). http.allowed.method.override
+
+Define allowed methods that will be handled when defined in X-HTTP-Method-Override
+
+bc. http.allowed.method.override=POST
+
+Default: none
+
+
 h3(#http.exposePlayServer). http.exposePlayServer
 
 Disable the HTTP response header that identifies the HTTP server as Play. For example:
