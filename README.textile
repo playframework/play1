@@ -28,10 +28,10 @@ bc. play run /opt/myFirstApp
 
 6. Start developing your new application:
 
-* "Your first application — the ‘Hello World’ tutorial":https://www.playframework.com/documentation/1.3.0-RC1/firstapp
-* "Tutorial — Play guide, a real world app step-by-step":https://www.playframework.com/documentation/1.3.0-RC1/guide1
+* "Your first application — the ‘Hello World’ tutorial":https://www.playframework.com/documentation/1.5.x/firstapp
+* "Tutorial — Play guide, a real world app step-by-step":https://www.playframework.com/documentation/1.5.x/guide1
 * "The essential documentation":https://www.playframework.com/documentation/1.5.x/home
-* "Java API":https://www.playframework.com/@api/index.html
+* "Java API":https://www.playframework.com/documentation/1.5.x/api/index.html
 
 h2. Get the source
 
@@ -51,9 +51,9 @@ h2. Learn More
 
 * "www.playframework.com":https://www.playframework.com
 * "Download":https://www.playframework.com/download
-* "Install":https://www.playframework.com/documentation/1.3.x/install
-* "Create a new application":https://www.playframework.com/documentation/1.3.x/guide1
-* "Build from source":https://www.playframework.com/documentation/1.3.x/install#build
+* "Install":https://www.playframework.com/documentation/1.5.x/install
+* "Create a new application":https://www.playframework.com/documentation/1.5.x/guide1
+* "Build from source":https://www.playframework.com/documentation/1.5.x/install#build
 * "Modules":https://www.playframework.com/modules
 * "Search or create issues":http://play.lighthouseapp.com/projects/57987-play-framework
 * "Get help":http://stackoverflow.com/questions/tagged/playframework
