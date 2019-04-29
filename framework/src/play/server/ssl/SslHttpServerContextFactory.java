@@ -1,5 +1,6 @@
 package play.server.ssl;
 
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jcajce.provider.asymmetric.x509.CertificateFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
@@ -27,7 +28,6 @@ public class SslHttpServerContextFactory {
     private static final SSLContext SERVER_CONTEXT;
 
     static {
-
         String algorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm");
         if (algorithm == null) {
             algorithm = "SunX509";
@@ -91,16 +91,20 @@ public class SslHttpServerContextFactory {
 
             try (PEMParser keyReader = new PEMParser(new FileReader(Play.getFile(keyFile)))) {
                 final Object object = keyReader.readObject();
-                JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-                final KeyPair keyPair;
-                if (object instanceof PEMEncryptedKeyPair) {
+
+                PrivateKeyInfo privateKeyInfo = null;
+                if (object instanceof PrivateKeyInfo) {
+                	privateKeyInfo = (PrivateKeyInfo)object;
+                } else if (object instanceof PEMKeyPair) {
+                	privateKeyInfo = ((PEMKeyPair)object).getPrivateKeyInfo();
+                } else if (object instanceof PEMEncryptedKeyPair) {
                     PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder()
                             .build(Play.configuration.getProperty("certificate.password", "secret").toCharArray());
-                    keyPair = converter.getKeyPair(((PEMEncryptedKeyPair) object).decryptKeyPair(decProv));
+                    privateKeyInfo = ((PEMEncryptedKeyPair) object).decryptKeyPair(decProv).getPrivateKeyInfo();
                 } else {
-                    keyPair = converter.getKeyPair((PEMKeyPair) object);
+                	throw new UnsupportedOperationException("Unsupported PEM content '" + object.getClass() + "'");
                 }
-                key = keyPair.getPrivate();
+                key = BouncyCastleProvider.getPrivateKey(privateKeyInfo);
 
                 final File hostCertFile = Play.getFile(p.getProperty("certificate.file", "conf/host.cert"));
                 final Collection collection = new CertificateFactory().engineGenerateCertificates(new FileInputStream(hostCertFile));

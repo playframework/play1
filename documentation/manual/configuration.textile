@@ -527,6 +527,12 @@ c3p0 is very asynchronous. Slow JDBC operations are generally performed by helpe
 Default: @3@
 
 
+h3(#db.pool.connectionInitSql). db.pool.connectionInitSql
+
+Sets the SQL string that will be executed on all new connections when they are created, before they are added to the pool (HikariCP only).
+
+Default: none
+
 h2(#evolutions). Database evolutions
 
 
@@ -624,6 +630,15 @@ HTTP Response headers control for static files: sets the default max-age in seco
 bc. http.cacheControl=0
 
 Default: @3600@ - set cache expiry to one hour.
+
+
+h3(#http.allowed.method.override). http.allowed.method.override
+
+Define allowed methods that will be handled when defined in X-HTTP-Method-Override
+
+bc. http.allowed.method.override=POST
+
+Default: none
 
 
 h3(#http.exposePlayServer). http.exposePlayServer

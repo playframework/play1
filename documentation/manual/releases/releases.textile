@@ -4,12 +4,15 @@ You can download Play releases "here":https://www.playframework.com/download. Ea
 
 h2. Play 1.5.x
 
+# "Play 1.5.3":release1.5.x/releasenotes-1.5.3
 # "Play 1.5.2":release1.5.x/releasenotes-1.5.2
 # "Play 1.5.1":release1.5.x/releasenotes-1.5.1
 # "Play 1.5.0":release1.5.x/releasenotes-1.5.0
 
 h2. Play 1.4.x
 
+# "Play 1.4.6":release1.4.x/releasenotes-1.4.6
+# "Play 1.4.5":release1.4.x/releasenotes-1.4.5
 # "Play 1.4.4":release1.4.x/releasenotes-1.4.4
 # "Play 1.4.3":release1.4.x/releasenotes-1.4.3
 # "Play 1.4.2":release1.4.x/releasenotes-1.4.2
