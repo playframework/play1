@@ -221,7 +221,9 @@ class PlayApplication(object):
     def check_jpda(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('', int(self.jpda_port)))
+            jpda_parts = self.jpda_port.split(':')
+            port = jpda_parts[-1]
+            s.bind(('', int(port)))
             s.close()
         except socket.error, e:
             if "disable_random_jpda" in self.play_env and self.play_env["disable_random_jpda"]:
