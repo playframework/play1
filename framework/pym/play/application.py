@@ -221,7 +221,7 @@ class PlayApplication(object):
     def check_jpda(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            jpda_parts = self.jpda_port.split(':')
+            jpda_parts = str(self.jpda_port).split(':')
             port = jpda_parts[-1]
             s.bind(('', int(port)))
             s.close()
