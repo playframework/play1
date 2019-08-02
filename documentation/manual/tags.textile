@@ -570,10 +570,11 @@ h2. <a name="stylesheet">stylesheet</a>
 
 Inserts a @link@ tag in the template. By convention, the tag refers to a CSS file in @/public/stylesheets@
 
-* @src@ (required) - file name, without the leading path @/public/stylesheets@
-* @id@ (optional) - an @id@ attribute value for the generated @link@ tag
-* @media@ (optional) - a @media@ attribute value: screen, print, aural, projection…
+* @src@ (required) - file name without the leading path
+* @id@ (optional) - @id@ attribute value for the generated @link@ tag
+* @media@ (optional) - @media@ attribute value: screen, print, aural, projection…
 * @title@ (optional) - @title@ attribute value (or description)
+* @path@ (optional) - leading path (default: "/public/stylesheets/")
 
 The @src@ parameter can be replaced by the default @arg@ argument.
 
