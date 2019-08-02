@@ -21,7 +21,7 @@ require:    &allDependencies
     - com.ning -> async-http-client 1.9.40
     - commons-beanutils 1.9.2 
     - commons-codec 1.10
-    - org.apache.commons -> commons-email 1.4
+    - org.apache.commons -> commons-email 1.5
     - commons-fileupload 1.3.2
     - commons-io 2.5
     - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
@@ -30,7 +30,7 @@ require:    &allDependencies
     - dom4j 1.6.1
     - com.h2database -> h2 1.4.196
     - javax.activation -> activation 1.1.1
-    - javax.mail -> mail 1.4.7
+    - com.sun.mail -> javax.mail 1.6.2
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
     - jaxen 1.1.6
