@@ -690,6 +690,15 @@ public class WSAsync implements WSImpl {
             }
         }
 
+        @Override
+        public byte[] getBytes() {
+            try {
+                return response.getResponseBodyAsBytes();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         /**
          * get the response as a stream
          * 

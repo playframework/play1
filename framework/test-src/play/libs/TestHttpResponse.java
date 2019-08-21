@@ -62,4 +62,9 @@ public class TestHttpResponse extends HttpResponse {
         return null;
     }
 
+    @Override
+    public byte[] getBytes() {
+        return this.queryContent.getBytes();
+    }
+
 }

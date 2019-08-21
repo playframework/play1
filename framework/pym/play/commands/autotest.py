@@ -59,7 +59,7 @@ def autotest(app, args):
       sys.exit(-1)
       
     # read parameters
-    add_options = []        
+    add_options = []
     if args.count('--unit'):
         args.remove('--unit')
         add_options.append('-DrunUnitTests')
@@ -90,6 +90,7 @@ def autotest(app, args):
     if os.path.exists(test_result):
         shutil.rmtree(test_result)
     sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
+    args.append('-Dplay.autotest')
     java_cmd = app.java_cmd(args)
     try:
         play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)

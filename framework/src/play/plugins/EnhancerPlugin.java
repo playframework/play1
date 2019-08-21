@@ -1,9 +1,16 @@
 package play.plugins;
 
-import play.Logger;
+import java.util.ArrayList;
+import java.util.List;
+
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.*;
+import play.classloading.enhancers.ContinuationEnhancer;
+import play.classloading.enhancers.ControllersEnhancer;
+import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.MailerEnhancer;
+import play.classloading.enhancers.SigEnhancer;
 import play.exceptions.UnexpectedException;
 
 /**
@@ -11,21 +18,24 @@ import play.exceptions.UnexpectedException;
  */
 public class EnhancerPlugin extends PlayPlugin {
 
-    protected Enhancer[] defaultEnhancers() {
-        return new Enhancer[] { new PropertiesEnhancer(), new ContinuationEnhancer(), new SigEnhancer(), new ControllersEnhancer(),
-                new MailerEnhancer(), new LocalvariablesNamesEnhancer() };
-    }
-
     @Override
     public void enhance(ApplicationClass applicationClass) {
-        for (Enhancer enhancer : defaultEnhancers()) {
+        List<Enhancer> enhancers = new ArrayList<Enhancer>(4);
+        if (applicationClass.name.startsWith("controllers.")) {
+            enhancers.add(new SigEnhancer());
+            enhancers.add(new ContinuationEnhancer());
+            enhancers.add(new ControllersEnhancer());
+            if (applicationClass.name.endsWith("Mailer")) {
+                enhancers.add(new MailerEnhancer());
+            }
+            enhancers.add(new LocalvariablesNamesEnhancer());
+        } else if (applicationClass.name.endsWith("Mailer")) {
+            enhancers.add(new MailerEnhancer());
+            enhancers.add(new LocalvariablesNamesEnhancer());
+        }
+        for (Enhancer enhancer : enhancers) {
             try {
-                long start = System.currentTimeMillis();
                 enhancer.enhanceThisClass(applicationClass);
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getClass().getSimpleName(),
-                            applicationClass.name);
-                }
             } catch (Exception e) {
                 throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
             }

@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -335,9 +334,13 @@ public class ApplicationClassloader extends ClassLoader {
                 Play.classes.classes.remove(applicationClass.name);
                 currentState = new ApplicationClassloaderState();// show others that we have changed..
             } else {
-                int sigChecksum = applicationClass.sigChecksum;
-                applicationClass.enhance();
-                if (sigChecksum != applicationClass.sigChecksum) {
+                if (applicationClass.name.startsWith("controllers.")) {
+                    int sigChecksum = applicationClass.sigChecksum;
+                    applicationClass.enhance();
+                    if (sigChecksum != applicationClass.sigChecksum) {
+                        dirtySig = true;
+                    }
+                } else {
                     dirtySig = true;
                 }
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);

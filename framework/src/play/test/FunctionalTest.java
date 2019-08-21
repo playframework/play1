@@ -11,6 +11,7 @@ import org.junit.Before;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.libs.F;
 import play.libs.F.Action;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.UnexpectedException;

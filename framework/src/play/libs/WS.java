@@ -859,5 +859,6 @@ public class WS extends PlayPlugin {
             }
         }
 
+        public abstract byte[] getBytes();
     }
 }
