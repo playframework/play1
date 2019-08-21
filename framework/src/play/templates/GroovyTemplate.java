@@ -494,7 +494,7 @@ public class GroovyTemplate extends BaseTemplate {
                 // extract args from val
                 Object[] args = new Object[val.length - 1];
                 for (int i = 1; i < val.length; i++) {
-                    args[i - 1] = val[i];
+                    args[i - 1] = __safeFaster(val[i]);
                 }
                 return Messages.get(val[0], args);
             }
