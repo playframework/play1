@@ -103,17 +103,17 @@ public class GroovyTemplate extends BaseTemplate {
     @Override
     void directLoad(byte[] code) throws Exception {
         try (TClassLoader tClassLoader = new TClassLoader()) {
-	        String[] lines = new String(code, "utf-8").split("\n");
-	        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
-	        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
-	        for (int i = 4; i < lines.length; i = i + 2) {
-	            String className = lines[i];
-	            byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-	            Class c = tClassLoader.defineTemplate(className, byteCode);
-	            if (compiledTemplate == null) {
-	                compiledTemplate = c;
-	            }
-	        }
+            String[] lines = new String(code, "utf-8").split("\n");
+            this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
+            this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
+            for (int i = 4; i < lines.length; i = i + 2) {
+                String className = lines[i];
+                byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
+                Class c = tClassLoader.defineTemplate(className, byteCode);
+                if (compiledTemplate == null) {
+                    compiledTemplate = c;
+                }
+            }
         }
     }
 
@@ -446,10 +446,10 @@ public class GroovyTemplate extends BaseTemplate {
             TagContext.exitTag();
         }
 
-        
+
         /**
          * Load the class from Pay Class loader
-         * 
+         *
          * @param className
          *            the class name
          * @return the given class
@@ -466,7 +466,7 @@ public class GroovyTemplate extends BaseTemplate {
 
         /**
          * This method is faster to call from groovy than __safe() since we only evaluate val.toString() if we need to
-         * 
+         *
          * @param val
          *            the object to evaluate
          * @return The evaluating string
@@ -483,6 +483,14 @@ public class GroovyTemplate extends BaseTemplate {
             return (val != null) ? val.toString() : "";
         }
 
+        private Object safeString(Object value) {
+            if (value instanceof String) {
+                return __safeFaster(value);
+            } else {
+                return value;
+            }
+        }
+
         public String __getMessage(Object[] val) {
             if (val == null) {
                 throw new NullPointerException("You are trying to resolve a message with an expression " + "that is resolved to null - "
@@ -494,7 +502,7 @@ public class GroovyTemplate extends BaseTemplate {
                 // extract args from val
                 Object[] args = new Object[val.length - 1];
                 for (int i = 1; i < val.length; i++) {
-                    args[i - 1] = __safeFaster(val[i]);
+                    args[i - 1] = safeString(val[i]);
                 }
                 return Messages.get(val[0], args);
             }
