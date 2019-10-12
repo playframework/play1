@@ -115,6 +115,12 @@ public class Play {
      * Main routes file
      */
     public static VirtualFile routes;
+
+    /**
+     * Main routes file
+     */
+    public static List<VirtualFile> internationalizedRoutes;
+
     /**
      * Plugin routes files
      */
@@ -277,6 +283,7 @@ public class Play {
         
         // Main route file
         routes = appRoot.child("conf/routes");
+        internationalizedRoutes = loadMultilanguageRoutesFiles(appRoot);
 
         // Plugin route files
         modulesRoutes.clear();
@@ -319,6 +326,17 @@ public class Play {
         pluginCollection.onApplicationReady();
 
         Play.initialized = true;
+    }
+
+    public static List<VirtualFile> loadMultilanguageRoutesFiles(VirtualFile appRoot) {
+        List<VirtualFile> routes = new ArrayList<VirtualFile>();
+        for (VirtualFile vf: appRoot.child("conf").list()) {
+            String virtualFileName = vf.getName();
+            if(virtualFileName !=null && virtualFileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
+                routes.add(vf);
+            }
+        }
+        return routes;
     }
 
     public static void guessFrameworkPath() {

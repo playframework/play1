@@ -1,32 +1,30 @@
 package play.mvc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.commons.lang.StringUtils;
-
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.exceptions.NoRouteFoundException;
+import play.i18n.Lang;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
 import play.utils.Default;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * The router matches HTTP requests to action invocations
@@ -55,6 +53,9 @@ public class Router {
         routes.clear();
         actionRoutesCache.clear();
         parse(Play.routes, prefix);
+        for (VirtualFile routeFile : Play.internationalizedRoutes) {
+            parse(routeFile, prefix);
+        }
         lastLoading = System.currentTimeMillis();
         // Plugins
         Play.pluginCollection.onRoutesLoaded();
@@ -140,6 +141,7 @@ public class Router {
         route.routesFileLine = line;
         route.addFormat(headers);
         route.addParams(params);
+        route.setLocaleBasedOnMultilangualRoutesFile(sourceFile);
         route.compute();
         if (Logger.isTraceEnabled()) {
             Logger.trace("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
@@ -237,6 +239,12 @@ public class Router {
                 }
             }
         }
+        for (VirtualFile route : Play.internationalizedRoutes) {
+            if (route.lastModified() > lastLoading) {
+                load(prefix);
+                return;
+            }
+        }
     }
 
     /**
@@ -291,6 +299,9 @@ public class Router {
                 }
                 if (request.action.equals("404")) {
                     throw new NotFound(route.path);
+                }
+                if(CollectionUtils.isNotEmpty(Play.internationalizedRoutes) && StringUtils.isNotEmpty(route.locale) && !route.locale.equals(Lang.get())){
+                    Lang.change(route.locale);
                 }
                 return route;
             }
@@ -592,6 +603,9 @@ public class Router {
             matchingRoutes = findActionRoutes(action);
             actionRoutesCache.put(action, matchingRoutes);
         }
+        if(CollectionUtils.isNotEmpty(Play.internationalizedRoutes)){
+            matchingRoutes = prioritizeActionRoutesBasedOnActiveLocale(matchingRoutes);
+        }
         return matchingRoutes;
     }
 
@@ -617,6 +631,28 @@ public class Router {
         }
         return matchingRoutes;
     }
+
+  /**
+   * Prioritize action routes based on active locale and Play.langs properties. Active lang has highest priority, then prioritized according to Play.langs order.
+   *
+   * @param matchingRoutes
+   */
+  private static List<ActionRoute> prioritizeActionRoutesBasedOnActiveLocale(List<ActionRoute> matchingRoutes) {
+      if(matchingRoutes.size()==0) return matchingRoutes;
+      final String locale = Lang.get();
+      if(StringUtils.isEmpty(locale)) return matchingRoutes;
+      List<Router.ActionRoute> sortedMatchingRoutes = new ArrayList<>(matchingRoutes);
+      sortedMatchingRoutes.sort(new Comparator<ActionRoute>() {
+            @Override
+            public int compare(ActionRoute ar1, ActionRoute ar2) {
+                if(locale.equals(ar1.route.locale)) return -1;
+                if(locale.equals(ar2.route.locale)) return 1;
+                return Integer.compare(Play.langs.indexOf(ar1.route.locale), Play.langs.indexOf(ar2.route.locale));
+            }
+        });
+      return sortedMatchingRoutes;
+    }
+
 
     private static final class ActionRoute {
         private Route route;
@@ -736,6 +772,7 @@ public class Router {
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
+        String locale;
 
         public void compute() {
             this.host = "";
@@ -978,6 +1015,16 @@ public class Router {
         @Override
         public String toString() {
             return method + " " + path + " -> " + action;
+        }
+
+        private void setLocaleBasedOnMultilangualRoutesFile(String absolutePath){
+            if(StringUtils.isEmpty(absolutePath)){
+                return;
+            }
+            String fileName = Paths.get(absolutePath).getFileName().toString();
+            if(StringUtils.isNotEmpty(fileName) && fileName.matches("routes\\.[A-Za-z]{2}(_[A-Za-z]{2})?")){
+                this.locale = fileName.split("\\.")[1];
+            }
         }
     }
 }
