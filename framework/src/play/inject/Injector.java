@@ -21,11 +21,7 @@ public class Injector {
     }
 
     public static <T> T getBeanOfType(String className) {
-        try {
-            return getBeanOfType((Class<T>) Class.forName(className));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Cannot instantiate " + className, e);
-        }
+        return getBeanOfType((Class<T>) Play.classloader.loadApplicationClass(className));
     }
 
     public static <T> T getBeanOfType(Class<T> clazz) {
