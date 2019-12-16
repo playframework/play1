@@ -102,18 +102,39 @@ public class F {
                     return;
                 }
             }
+
+            // Notify all registered callbacks that this promise has been invoked.
+            // Do this outside of the synchronized block to avoid deadlocks.
             for (F.Action<Promise<V>> callback : callbacks) {
                 callback.invoke(this);
             }
         }
 
+        /**
+         * Registers an action that is to be invoked after this promise is invoked.
+         * You may register more than one "onRedeem" callback.
+         * Each registered callback is guaranteed to be invoked exactly once after
+         * this promise has been invoked.
+         *
+         * <p>
+         * The thread from which the "onRedeem" callback is invoked is not defined.
+         * </p>
+         *
+         * @param callback
+         *            The callback action to invoke when this promise.
+         */
         public void onRedeem(F.Action<Promise<V>> callback) {
+            // If this promise has already been invoked, then we must call the callback.
+            final boolean mustCallCallback;
             synchronized (this) {
                 if (!invoked) {
                     callbacks.add(callback);
                 }
+                mustCallCallback = invoked;
             }
-            if (invoked) {
+            
+            // Invoke the callback outside the synchronized block to avoid deadlocks.
+            if (mustCallCallback) {
                 callback.invoke(this);
             }
         }

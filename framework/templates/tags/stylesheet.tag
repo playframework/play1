@@ -1,11 +1,11 @@
 *{
  *  create a link element for a CSS file
- *    src   (required) filename without the leading path (default:"/public/stylesheets")
- *    id    (optional) an id attribute for the generated link tag
- *    media (optional) media : screen, print, aural, projection ...
- *    title (optional) title attribute (or description)
- *    path  (optional) : sets the path defaults to "/public/stylesheets"
- *    ${stylesheet src:'default.css' media:'screen,print' /}
+ *    src   (required) filename without the leading path
+ *    id    (optional) id attribute for the generated link tag
+ *    media (optional) media attribute value: screen, print, aural, projection...
+ *    title (optional) title attribute value (or description)
+ *    path  (optional) leading path (default: "/public/stylesheets/")
+ *    ${stylesheet src:'default.css', media:'screen,print' /}
 }*
 %{
     (_arg ) && (_src = _arg);

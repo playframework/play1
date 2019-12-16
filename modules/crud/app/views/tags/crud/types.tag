@@ -1,13 +1,13 @@
 %{
     models = [];
-    for(controllerClass in play.Play.classloader.getAssignableClasses(_('controllers.CRUD'))) {
-        resourceModel = _('controllers.CRUD$ObjectType').get(controllerClass)
+    for(controllerClass in play.Play.classloader.getAssignableClasses(__loadClass('controllers.CRUD'))) {
+        resourceModel = __loadClass('controllers.CRUD$ObjectType').get(controllerClass)
         if(resourceModel != null) {
             models.add(resourceModel)
         }
     }
-    for(controllerClass in play.Play.classloader.getAssignableClasses(_('play.scalasupport.crud.CRUDWrapper'))) {
-        resourceModel = _('controllers.CRUD$ObjectType').get(controllerClass)
+    for(controllerClass in play.Play.classloader.getAssignableClasses(__loadClass('play.scalasupport.crud.CRUDWrapper'))) {
+        resourceModel = __loadClass('controllers.CRUD$ObjectType').get(controllerClass)
         if(resourceModel != null) {
             models.add(resourceModel)
         }

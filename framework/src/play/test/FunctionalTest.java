@@ -1,5 +1,28 @@
 package play.test;
 
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import com.ning.http.client.multipart.FilePart;
+import com.ning.http.client.multipart.MultipartBody;
+import com.ning.http.client.multipart.MultipartUtils;
+import com.ning.http.client.multipart.Part;
+import com.ning.http.client.multipart.StringPart;
+import org.apache.commons.lang.ArrayUtils;
+import org.junit.Before;
+import play.Invoker;
+import play.Invoker.InvocationContext;
+import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.libs.F.Action;
+import play.exceptions.JavaExecutionException;
+import play.exceptions.UnexpectedException;
+import play.mvc.ActionInvoker;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+import play.mvc.Router.ActionDefinition;
+import play.mvc.Scope.RenderArgs;
+import play.mvc.results.RenderStatic;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,31 +37,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.junit.Before;
-
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.client.multipart.FilePart;
-import com.ning.http.client.multipart.MultipartBody;
-import com.ning.http.client.multipart.MultipartUtils;
-import com.ning.http.client.multipart.Part;
-import com.ning.http.client.multipart.StringPart;
-
-import play.Invoker;
-import play.Invoker.InvocationContext;
-import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
-import play.libs.F.Action;
-import play.mvc.ActionInvoker;
-import play.mvc.Controller;
-import play.mvc.Http;
-import play.mvc.Http.Request;
-import play.mvc.Http.Response;
-import play.mvc.Router.ActionDefinition;
-import play.mvc.Scope.RenderArgs;
 
 /**
  * Application tests support
@@ -78,7 +81,7 @@ public abstract class FunctionalTest extends BaseTest {
             Http.Header redirectedTo = response.headers.get("Location");
             String location = redirectedTo.value();
             if (location.contains("http")) {
-                java.net.URL redirectedUrl = null;
+                java.net.URL redirectedUrl;
                 try {
                     redirectedUrl = new java.net.URL(redirectedTo.value());
                 } catch (MalformedURLException e) {
@@ -102,7 +105,7 @@ public abstract class FunctionalTest extends BaseTest {
      * @return the response
      */
     public static Response GET(Request request, Object url) {
-        String path = "";
+        String path;
         String queryString = "";
         String turl = url.toString();
         if (turl.contains("?")) {
@@ -156,7 +159,7 @@ public abstract class FunctionalTest extends BaseTest {
      * @return the response
      */
     public static Response POST(Request request, Object url, String contenttype, InputStream body) {
-        String path = "";
+        String path;
         String queryString = "";
         String turl = url.toString();
         if (turl.contains("?")) {
@@ -192,7 +195,7 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Response POST(Object url, Map<String, String> parameters) {
-        return POST(newRequest(), url, parameters, new HashMap<String, File>());
+        return POST(newRequest(), url, parameters, new HashMap<>());
     }
 
     public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
@@ -211,11 +214,11 @@ public abstract class FunctionalTest extends BaseTest {
             }
         }
 
-        MultipartBody requestEntity = null;
+        MultipartBody requestEntity;
         /*
          * ^1 MultipartBody::read is not working (if parts.isEmpty() == true) byte[] array = null;
          **/
-        _ByteArrayOutputStream baos = null;
+        _ByteArrayOutputStream baos;
         try {
             requestEntity = MultipartUtils.newMultipartBody(parts, new FluentCaseInsensitiveStringsMap());
             request.headers.putAll(ArrayUtils
@@ -233,7 +236,7 @@ public abstract class FunctionalTest extends BaseTest {
         }
         // InputStream body = new ByteArrayInputStream(array != null ? array :
         // new byte[0]); // ^1
-        InputStream body = new ByteArrayInputStream(baos != null ? baos.getByteArray() : new byte[0]);
+        InputStream body = new ByteArrayInputStream(baos.getByteArray());
         return POST(request, url, MULTIPART_FORM_DATA, body);
     }
 
@@ -255,7 +258,7 @@ public abstract class FunctionalTest extends BaseTest {
      * @return the response
      */
     public static Response PUT(Request request, Object url, String contenttype, String body) {
-        String path = "";
+        String path;
         String queryString = "";
         String turl = url.toString();
         if (turl.contains("?")) {
@@ -289,7 +292,7 @@ public abstract class FunctionalTest extends BaseTest {
      * @return the response
      */
     public static Response DELETE(Request request, Object url) {
-        String path = "";
+        String path;
         String queryString = "";
         String turl = url.toString();
         if (turl.contains("?")) {
@@ -310,10 +313,10 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         final CountDownLatch actionCompleted = new CountDownLatch(1);
-        TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+        final Future<?> invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
 
             @Override
-            public void execute() throws Exception {
+            public void execute() {
                 renderArgs.clear();
                 ActionInvoker.invoke(request, response);
 
@@ -353,9 +356,34 @@ public abstract class FunctionalTest extends BaseTest {
 
         });
         try {
+            // We can not simply wait on the future result because of how continuations
+            // are implemented. Only when the latch is counted down the action is really
+            // completed. Therefore, wait on the latch.
             if (!actionCompleted.await(30, TimeUnit.SECONDS)) {
                 throw new TimeoutException("Request did not complete in time");
             }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        try {
+            // We still call this to raise any exception that might have
+            // occurred during execution of the invocation.
+            invocationResult.get();
+        }
+        catch (ExecutionException e) {
+            RuntimeException originalException = unwrapOriginalException(e);
+            if (originalException instanceof RenderStatic) {
+                response.status = 200;
+                response.direct = ((RenderStatic) originalException).file;
+            }
+            else {
+                throw originalException;
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
             if (savedCookies == null) {
                 savedCookies = new HashMap<>();
             }
@@ -375,6 +403,22 @@ public abstract class FunctionalTest extends BaseTest {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * Check if the original exceptions fits the usual patterns.
+     * If yes, return the very original runtime exception.
+     */
+    private static RuntimeException unwrapOriginalException(final ExecutionException e) {
+        Throwable executionCause = e.getCause();
+        if (executionCause instanceof JavaExecutionException || executionCause instanceof UnexpectedException) {
+            Throwable originalCause = executionCause.getCause();
+            if (originalCause instanceof RuntimeException) {
+                return (RuntimeException) originalCause;
+            }
+        }
+        // As a last fallback, just wrap everything up
+        return new RuntimeException(e);
     }
 
     public static Response makeRequest(Request request) {
@@ -404,23 +448,20 @@ public abstract class FunctionalTest extends BaseTest {
         // Register an onWriteChunk action so that Response.writeChunk() won't throw
         // an unhandled exception if the controller action calls it.
         response.onWriteChunk(
-            new Action<Object>() {
-                @Override
-                public void invoke(Object chunk) {
-                    // Mimic the behavior of PlayHandler$LazyChunkedInput.writeChunk()
-                    if (chunk != null) {
-                        try {
-                            byte[] bytes;
-                            if (chunk instanceof byte[]) {
-                                bytes = (byte[]) chunk;
-                            } else {
-                                bytes = chunk.toString().getBytes(response.encoding);
-                            }
-                            response.out.write(bytes);
-                        } catch (Exception exception) {
-                            // Something is wrong with the chunk.
-                            throw new RuntimeException(exception);
+            chunk -> {
+                // Mimic the behavior of PlayHandler$LazyChunkedInput.writeChunk()
+                if (chunk != null) {
+                    try {
+                        byte[] bytes;
+                        if (chunk instanceof byte[]) {
+                            bytes = (byte[]) chunk;
+                        } else {
+                            bytes = chunk.toString().getBytes(response.encoding);
                         }
+                        response.out.write(bytes);
+                    } catch (Exception exception) {
+                        // Something is wrong with the chunk.
+                        throw new RuntimeException(exception);
                     }
                 }
             });
@@ -429,8 +470,7 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Request newRequest() {
-        Request request = Request.createRequest(null, "GET", "/", "", null, null, null, null, false, 80, "localhost", false, null, null);
-        return request;
+        return Request.createRequest(null, "GET", "/", "", null, null, null, null, false, 80, "localhost", false, null, null);
     }
 
     // Assertions
@@ -464,6 +504,13 @@ public abstract class FunctionalTest extends BaseTest {
      */
     public static void assertStatus(int status, Response response) {
         assertEquals("Response status ", (Object) status, response.status);
+    }
+
+    public static void assertIsStaticFile(Response response, String filePath) {
+        assertIsOk(response);
+
+        String file = (String) response.direct;
+        assertEquals(filePath, file);
     }
 
     /**

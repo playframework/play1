@@ -14,8 +14,11 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 /**
@@ -35,6 +38,8 @@ public abstract class Binder {
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(File[].class, new FileArrayBinder());
         supportedTypes.put(LocalDateTime.class, new LocalDateTimeBinder());
+        supportedTypes.put(LocalDate.class, new LocalDateBinder());
+        supportedTypes.put(LocalTime.class, new LocalTimeBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
         supportedTypes.put(Upload.class, new UploadBinder());
         supportedTypes.put(Upload[].class, new UploadArrayBinder());
@@ -788,6 +793,11 @@ public abstract class Binder {
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
             return nullOrEmpty ? null : new BigDecimal(value);
+        }
+
+        // BigInteger binding
+        if (clazz.equals(BigInteger.class)) {
+            return nullOrEmpty ? null : new BigInteger(value);
         }
 
         // boolean or Boolean binding

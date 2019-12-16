@@ -1,0 +1,14 @@
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
+index cb5c232..31c26ff 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
+@@ -104,8 +104,7 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
+             moveNew();
+ 
+             // analyzer = new Analyzer(new BasicVerifier());
+-            analyzer = new Analyzer(new SimpleVerifier() {
+-
++            analyzer = new Analyzer(new SimpleVerifier(Opcodes.ASM7, null,null, null, false) {
+                 protected Class<?> getClass(Type t) {
+                     try {
+                         if (t.getSort() == Type.ARRAY) {

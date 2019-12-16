@@ -100,20 +100,20 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     void directLoad(byte[] code) throws Exception {
-        TClassLoader tClassLoader = new TClassLoader();
-        String[] lines = new String(code, "utf-8").split("\n");
-        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
-        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
-        for (int i = 4; i < lines.length; i = i + 2) {
-            String className = lines[i];
-            byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-            Class c = tClassLoader.defineTemplate(className, byteCode);
-            if (compiledTemplate == null) {
-                compiledTemplate = c;
-            }
+        try (TClassLoader tClassLoader = new TClassLoader()) {
+	        String[] lines = new String(code, "utf-8").split("\n");
+	        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
+	        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
+	        for (int i = 4; i < lines.length; i = i + 2) {
+	            String className = lines[i];
+	            byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
+	            Class c = tClassLoader.defineTemplate(className, byteCode);
+	            if (compiledTemplate == null) {
+	                compiledTemplate = c;
+	            }
+	        }
         }
     }
 
@@ -446,20 +446,7 @@ public class GroovyTemplate extends BaseTemplate {
             TagContext.exitTag();
         }
 
-        /**
-         * @param className
-         *            The class name
-         * @return The given class
-         * @throws Exception
-         *             if problem occured when loading the class
-         * @deprecated '_' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on
-         *             use {@link #__loadClass} instead
-         */
-        @Deprecated
-        public Class _(String className) throws Exception {
-            return __loadClass(className);
-        }
-
+        
         /**
          * Load the class from Pay Class loader
          * 

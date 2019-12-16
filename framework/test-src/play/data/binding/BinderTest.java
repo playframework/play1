@@ -9,6 +9,7 @@ import play.data.validation.ValidationPlugin;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 import static java.math.BigDecimal.TEN;
@@ -330,6 +331,18 @@ public class BinderTest {
         public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
             return new BigDecimal(value).add(TEN);
         }
+    }
+
+    @Test
+    public void verify_binding_of_BigInteger() {
+        Map<String, Object> r = new HashMap<>();
+
+        BigInteger myBigInt = new BigInteger("12");
+        Integer myBigIntAsInteger = 12;
+        Unbinder.unBind(r, myBigIntAsInteger, "myBigInt", noAnnotations);
+        Map<String, String[]> r2 = fromUnbindMap2BindMap(r);
+        RootParamNode root = ParamNode.convert(r2);
+        assertThat(Binder.bind(root, "myBigInt", BigInteger.class, null, null)).isEqualTo(myBigInt);
     }
 }
 

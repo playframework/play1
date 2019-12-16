@@ -6,6 +6,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Collection;
 
 import org.junit.Before;
@@ -80,8 +81,10 @@ public class PluginCollectionTest {
     @Test
     public void skipsDuplicatePlugins() {
         PluginCollection pc = spy(new PluginCollection());
-        when(pc.loadPlayPluginDescriptors())
-                .thenReturn(asList(getClass().getResource("custom-play.plugins"), getClass().getResource("custom-play.plugins.duplicate")));
+        URL resource1 = getClass().getResource("custom-play.plugins");
+        URL resource2 = getClass().getResource("custom-play.duplicate.plugins");
+        assertThat(resource2).isNotNull();
+        when(pc.loadPlayPluginDescriptors()).thenReturn(asList(resource1, resource2));
         pc.loadPlugins();
         assertThat(pc.getAllPlugins()).containsExactly(pc.getPluginInstance(EnhancerPlugin.class), pc.getPluginInstance(TestPlugin.class));
     }
@@ -91,6 +94,16 @@ public class PluginCollectionTest {
         Play.configuration.setProperty("play.plugins.descriptor", "test-src/play/plugins/custom-play.plugins");
         PluginCollection pc = new PluginCollection();
         assertThat(pc.loadPlayPluginDescriptors()).containsExactly(new File(Play.applicationPath, "test-src/play/plugins/custom-play.plugins").toURI().toURL());
+    }
+
+    @Test
+    public void canLoadPlayPluginsFromMultipleDescriptors() throws Exception {
+        Play.configuration.setProperty("play.plugins.descriptor", "test-src/play/plugins/custom-play.plugins,test-src/play/plugins/custom-play.test.plugins");
+        PluginCollection pc = new PluginCollection();
+        assertThat(pc.loadPlayPluginDescriptors()).containsExactly(
+            new File(Play.applicationPath, "test-src/play/plugins/custom-play.plugins").toURI().toURL(),
+            new File(Play.applicationPath, "test-src/play/plugins/custom-play.test.plugins").toURI().toURL()
+        );
     }
 
     @Test

@@ -1,16 +1,16 @@
 package controllers;
 
-import play.*;
+import models.UserWithAvatar;
 import play.data.Upload;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
 import play.test.Fixtures;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.*;
-
-import models.*;
-import play.vfs.VirtualFile;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 public class Binary extends Controller {
     
@@ -114,12 +114,12 @@ public class Binary extends Controller {
 
         @Override
         public int read() throws IOException {
-            throw new IOException();
+            throw new IOException("io ups");
         }
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            throw new IOException();
+            throw new IOException("io failed");
         }
 
         @Override
@@ -128,7 +128,7 @@ public class Binary extends Controller {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             errorInputStreamClosed = true;
         }
     }

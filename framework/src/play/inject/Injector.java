@@ -14,6 +14,20 @@ import play.mvc.Mailer;
 
 public class Injector {
 
+    private static BeanSource beanSource = new DefaultBeanSource();
+
+    public static void setBeanSource(BeanSource beanSource) {
+        Injector.beanSource = beanSource;
+    }
+
+    public static <T> T getBeanOfType(String className) {
+        return getBeanOfType((Class<T>) Play.classloader.loadApplicationClass(className));
+    }
+
+    public static <T> T getBeanOfType(Class<T> clazz) {
+        return beanSource.getBeanOfType(clazz);
+    }
+
     /**
      * For now, inject beans in controllers and any classes that include @RequireInjection.
      * 

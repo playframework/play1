@@ -1,13 +1,5 @@
 package play.db.evolutions;
 
-import play.Logger;
-import play.Play;
-import play.db.Configuration;
-import play.db.DB;
-import play.db.SQLSplitter;
-import play.db.jpa.JPAPlugin;
-import play.exceptions.UnexpectedException;
-
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -17,10 +9,17 @@ import java.sql.Statement;
 
 import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.sun.rowset.CachedRowSetImpl;
+import play.Logger;
+import play.Play;
+import play.db.Configuration;
+import play.db.DB;
+import play.db.SQLSplitter;
+import play.db.jpa.JPAPlugin;
+import play.exceptions.UnexpectedException;
 
 
 public class EvolutionQuery{
@@ -158,7 +157,7 @@ public class EvolutionQuery{
             // Need to use a CachedRowSet that caches its rows in memory, which
             // makes it possible to operate without always being connected to
             // its data source
-            CachedRowSet rowset = new CachedRowSetImpl();
+            CachedRowSet rowset = RowSetProvider.newFactory().createCachedRowSet();
             rowset.populate(resultSet);
             return rowset;
         } catch (SQLException e) {
@@ -180,7 +179,7 @@ public class EvolutionQuery{
             // Need to use a CachedRowSet that caches its rows in memory, which
             // makes it possible to operate without always being connected to
             // its data source
-            CachedRowSet rowset = new CachedRowSetImpl();
+            CachedRowSet rowset = RowSetProvider.newFactory().createCachedRowSet();
             rowset.populate(resultSet);
             return rowset;
         } catch (SQLException e) {
