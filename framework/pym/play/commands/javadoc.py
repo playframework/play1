@@ -39,14 +39,21 @@ def execute(**kargs):
     javadoc_cmd = [javadoc_path, '@'+os.path.join(outdir,'javadocOptions'), '@'+os.path.join(outdir,'javadocFiles')]
     
     print "Generating Javadoc in " + outdir + "..."
-    subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
-    print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
+    return_code = subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
+
     # Remove configuration file
     os.remove(os.path.join(outdir , 'javadocOptions'))
     os.remove(os.path.join(outdir , 'javadocFiles'))
     
-    
-    
+    # Display the status
+    if return_code != 0:
+        print "Unable to create Javadocs.  See " + os.path.join(app.log_path(), 'javadoc.err') + " for errors."
+        sys.exit(return_code)
+
+    print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
+
+
+
 def defineJavadocOptions(app, outdir, args):
     f = open(os.path.join(outdir , 'javadocOptions'), 'w')
     f.write(' '.join(['-classpath', app.cp_args(), '-d', outdir, '-encoding', 'UTF-8', '-charset', 'UTF-8']))
