@@ -33,7 +33,7 @@ require:    &allDependencies
     - com.sun.mail -> javax.mail 1.6.2
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
-    - jaxen 1.1.6
+    - jaxen 1.2.0
     - joda-time 2.10
     - org.hamcrest -> hamcrest-all 1.3
     - junit 4.12
@@ -49,9 +49,9 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.4.0
     - org.bouncycastle -> bcprov-jdk15on 1.61
     - org.bouncycastle -> bcpkix-jdk15on 1.61
-    - org.codehaus.groovy -> groovy 2.5.3
-    - org.codehaus.groovy -> groovy-xml 2.5.3
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.16.0
+    - org.codehaus.groovy -> groovy 2.5.8
+    - org.codehaus.groovy -> groovy-xml 2.5.8
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.20.0
     - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
     - javax.persistence -> javax.persistence-api 2.2
