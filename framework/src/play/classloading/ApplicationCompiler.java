@@ -45,7 +45,6 @@ public class ApplicationCompiler {
     	compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
     	compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
     	compatibleJavaVersions.put("12", CompilerOptions.VERSION_12);
-    	compatibleJavaVersions.put("13", CompilerOptions.VERSION_13);
 	}
 
     /**

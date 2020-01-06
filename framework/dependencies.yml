@@ -10,11 +10,11 @@ require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.9.5.2
     - com.zaxxer -> HikariCP 3.2.0
-    - org.ow2.asm -> asm 7.0
-    - org.ow2.asm -> asm-commons 7.0
-    - org.ow2.asm -> asm-util 7.0
-    - org.ow2.asm -> asm-tree 7.0
-    - org.ow2.asm -> asm-analysis 7.0
+    - org.ow2.asm -> asm 7.2
+    - org.ow2.asm -> asm-commons 7.2
+    - org.ow2.asm -> asm-util 7.2
+    - org.ow2.asm -> asm-tree 7.2
+    - org.ow2.asm -> asm-analysis 7.2
     - cglib -> cglib 3.2.7
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
@@ -51,7 +51,7 @@ require:    &allDependencies
     - org.bouncycastle -> bcpkix-jdk15on 1.61
     - org.codehaus.groovy -> groovy 2.5.8
     - org.codehaus.groovy -> groovy-xml 2.5.8
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.20.0
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.18.0
     - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
     - javax.persistence -> javax.persistence-api 2.2
@@ -66,7 +66,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-c3p0 5.4.1.Final
     - org.hibernate -> hibernate-ehcache 5.4.1.Final
     - com.mchange -> mchange-commons-java 0.2.12
-    - org.javassist -> javassist 3.24.0-GA
+    - org.javassist -> javassist 3.26.0-GA
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.2.4
     - org.slf4j -> slf4j-api 1.7.22
