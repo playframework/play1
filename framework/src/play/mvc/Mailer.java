@@ -579,7 +579,12 @@ public class Mailer implements LocalVariablesSupport {
             List<String> ccsList = (List<String>) infos.get().get("ccs");
             if (ccsList != null) {
                 for (String cc : ccsList) {
-                    email.addCc(cc);
+                    try {
+                        InternetAddress iAddress = new InternetAddress(cc);
+                        email.addCc(iAddress.getAddress(), iAddress.getPersonal());
+                    } catch (Exception e) {
+                        email.addCc(cc);
+                    }
                 }
             }
 
