@@ -75,7 +75,7 @@ public class CookieSessionStore implements SessionStore {
         if (session.isEmpty()) {
             // The session is empty: delete the cookie
             if (Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_SESSION") || !SESSION_SEND_ONLY_IF_CHANGED) {
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY, COOKIE_SAME_SITE);
             }
             return;
         }
@@ -84,10 +84,10 @@ public class CookieSessionStore implements SessionStore {
             String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
             if (COOKIE_EXPIRE == null) {
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE,
-                        SESSION_HTTPONLY);
+                        SESSION_HTTPONLY, COOKIE_SAME_SITE);
             } else {
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/",
-                        Time.parseDuration(COOKIE_EXPIRE), COOKIE_SECURE, SESSION_HTTPONLY);
+                        Time.parseDuration(COOKIE_EXPIRE), COOKIE_SECURE, SESSION_HTTPONLY, COOKIE_SAME_SITE);
             }
         } catch (Exception e) {
             throw new UnexpectedException("Session serializationProblem", e);

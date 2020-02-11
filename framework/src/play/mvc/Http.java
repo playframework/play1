@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -163,6 +162,10 @@ public class Http {
          * See http://www.owasp.org/index.php/HttpOnly
          */
         public boolean httpOnly = false;
+        /**
+         * See https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00
+         */
+        public String sameSite;
     }
 
     /**
@@ -748,16 +751,17 @@ public class Http {
         }
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure) {
-            setCookie(name, value, domain, path, maxAge, secure, false);
+            setCookie(name, value, domain, path, maxAge, secure, false, null);
         }
 
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly, String sameSite) {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path)
                     && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 cookies.get(name).maxAge = maxAge;
                 cookies.get(name).secure = secure;
+                cookies.get(name).sameSite = sameSite;
             } else {
                 Cookie cookie = new Cookie();
                 cookie.name = name;
@@ -765,6 +769,7 @@ public class Http {
                 cookie.path = path;
                 cookie.secure = secure;
                 cookie.httpOnly = httpOnly;
+                cookie.sameSite = sameSite;
                 if (domain != null) {
                     cookie.domain = domain;
                 } else {
