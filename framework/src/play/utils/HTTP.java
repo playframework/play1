@@ -106,7 +106,9 @@ public class HTTP {
         if (!isEmpty(ifModifiedSince)) {
             try {
                 Date browserDate = Utils.getHttpDateFormatter().parse(ifModifiedSince);
-                return browserDate.getTime() < last;
+                //Header value has precision of a second, truncate long to remove possible additional milliseconds
+                long lastTruncated = Math.floorDiv(last, 1000l)*1000l;
+                return browserDate.getTime() < lastTruncated;
             } catch (ParseException ex) {
                 Logger.warn("Can't parse 'If-Modified-Since' header date: %s", ex.getMessage());
             }

@@ -66,5 +66,8 @@ public class HTTPTest {
         assertTrue(HTTP.isModified(etag, lastModified, null, ""));
         assertTrue(HTTP.isModified(etag, lastModified, null, null));
         assertTrue(HTTP.isModified(etag, lastModified, null, unknown));
+
+        long lastModifiedWithAdditionalMillisecondsThatGetTruncatedFromHeader = lastModified + 234;
+        assertFalse(HTTP.isModified(etag, lastModifiedWithAdditionalMillisecondsThatGetTruncatedFromHeader, null, ifModifiedSince));
     }
 }
