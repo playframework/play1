@@ -46,4 +46,9 @@ public class TestXMLHttpResponse extends WS.HttpResponse {
     public InputStream getStream() {
         return null;
     }
+
+    @Override
+    public byte[] getBytes() {
+        return new byte[0];
+    }
 }
