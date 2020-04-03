@@ -7,8 +7,7 @@ import java.util.Date;
 
 import static org.apache.commons.lang.time.DateUtils.addDays;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class HTTPTest {
 
@@ -66,5 +65,16 @@ public class HTTPTest {
         assertTrue(HTTP.isModified(etag, lastModified, null, ""));
         assertTrue(HTTP.isModified(etag, lastModified, null, null));
         assertTrue(HTTP.isModified(etag, lastModified, null, unknown));
+
+        //Test method when source timestamp contains millisecond precision information
+        long lastModifiedWithAdditionalMillisecondsThatGetTruncatedFromHeader = lastModified + 234;
+
+        //verify truncation happens
+        Date withMilliseconds = new Date(lastModifiedWithAdditionalMillisecondsThatGetTruncatedFromHeader);
+        assertNotEquals(date, withMilliseconds);
+        Date afterHeaderFormatting = Utils.getHttpDateFormatter().parse(Utils.getHttpDateFormatter().format(withMilliseconds));
+        assertEquals(date, afterHeaderFormatting);
+
+        assertFalse(HTTP.isModified(etag, lastModifiedWithAdditionalMillisecondsThatGetTruncatedFromHeader, null, ifModifiedSince));
     }
 }
