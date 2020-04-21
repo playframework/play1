@@ -749,11 +749,33 @@ public class WS extends PlayPlugin {
 
         /**
          * Parse and get the response body as a {@link Document DOM document}
-         * 
+         *
          * @return a DOM document
          */
         public Document getXml() {
-            return getXml(getEncoding());
+            return getXml(false);
+        }
+
+        /**
+         * Parse and get the response body as a {@link Document DOM document}
+         *
+         * @param namespaceAware
+         *            whether to output XML namespace information in the returned document
+         * @return a DOM document
+         */
+        public Document getXml(boolean namespaceAware) {
+            return getXml(getEncoding(), namespaceAware);
+        }
+
+        /**
+         * parse and get the response body as a {@link Document DOM document}
+         *
+         * @param encoding
+         *            xml charset encoding
+         * @return a DOM document
+         */
+        public Document getXml(String encoding) {
+            return getXml(encoding, false);
         }
 
         /**
@@ -761,13 +783,15 @@ public class WS extends PlayPlugin {
          * 
          * @param encoding
          *            xml charset encoding
+         * @param namespaceAware
+         *           whether to output XML namespace information in the returned document
          * @return a DOM document
          */
-        public Document getXml(String encoding) {
+        public Document getXml(String encoding, boolean namespaceAware) {
             try {
                 InputSource source = new InputSource(new StringReader(getString()));
                 source.setEncoding(encoding);
-                DocumentBuilder builder = XML.newDocumentBuilder();
+                DocumentBuilder builder = XML.newDocumentBuilder(namespaceAware);
                 return builder.parse(source);
             } catch (Exception e) {
                 throw new RuntimeException(e);

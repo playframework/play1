@@ -1,20 +1,17 @@
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
+import controllers.Binary;
 import org.junit.Before;
 import org.junit.Test;
-
-import play.Logger;
 import play.Play;
-import play.data.MemoryUpload;
-import play.data.Upload;
-import play.mvc.Http;
+import play.exceptions.UnexpectedException;
 import play.mvc.Http.Response;
-import play.mvc.results.Redirect;
 import play.test.Fixtures;
 import play.test.FunctionalTest;
-import controllers.Binary;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class BinaryTest extends FunctionalTest {
 
@@ -28,7 +25,7 @@ public class BinaryTest extends FunctionalTest {
         Response deletedResponse = GET(deleteURL);
         assertStatus(200, deletedResponse);
     }
-    
+
     @Test
     public void testUploadSomething() {
         URL imageURL = reverse(); {
@@ -237,9 +234,18 @@ public class BinaryTest extends FunctionalTest {
 
     @Test
     public void testGetErrorBinary() {
-        Response response = GET("/binary/getErrorBinary");
-        // This does not work. See Lighthouse ticket #1637.
-        // assertStatus(500, response);
-        assertTrue(Binary.errorInputStreamClosed);
+        try {
+            GET("/binary/getErrorBinary");
+            fail("expected wrapped IOException");
+        }
+        catch (RuntimeException expected) {
+            assertTrue(expected.getCause() instanceof ExecutionException);
+            assertTrue(expected.getCause().getCause() instanceof UnexpectedException);
+            assertTrue(expected.getCause().getCause().getCause() instanceof IOException);
+            assertEquals("io failed", expected.getCause().getCause().getCause().getMessage());
+        }
+        finally {
+            assertTrue(Binary.errorInputStreamClosed);
+        }
     }
 }

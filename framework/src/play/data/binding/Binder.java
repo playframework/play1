@@ -1,51 +1,25 @@
 package play.data.binding;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-
 import play.Logger;
 import play.Play;
 import play.data.Upload;
-import play.data.binding.types.BinaryBinder;
-import play.data.binding.types.ByteArrayArrayBinder;
-import play.data.binding.types.ByteArrayBinder;
-import play.data.binding.types.CalendarBinder;
-import play.data.binding.types.DateBinder;
-import play.data.binding.types.DateTimeBinder;
-import play.data.binding.types.FileArrayBinder;
-import play.data.binding.types.FileBinder;
-import play.data.binding.types.LocaleBinder;
-import play.data.binding.types.UploadArrayBinder;
-import play.data.binding.types.UploadBinder;
+import play.data.binding.types.*;
 import play.data.validation.Validation;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -63,6 +37,9 @@ public abstract class Binder {
         supportedTypes.put(DateTime.class, new DateTimeBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(File[].class, new FileArrayBinder());
+        supportedTypes.put(LocalDateTime.class, new LocalDateTimeBinder());
+        supportedTypes.put(LocalDate.class, new LocalDateBinder());
+        supportedTypes.put(LocalTime.class, new LocalTimeBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
         supportedTypes.put(Upload.class, new UploadBinder());
         supportedTypes.put(Upload[].class, new UploadArrayBinder());
@@ -816,6 +793,11 @@ public abstract class Binder {
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
             return nullOrEmpty ? null : new BigDecimal(value);
+        }
+
+        // BigInteger binding
+        if (clazz.equals(BigInteger.class)) {
+            return nullOrEmpty ? null : new BigInteger(value);
         }
 
         // boolean or Boolean binding

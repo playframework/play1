@@ -14,8 +14,22 @@ import play.mvc.Mailer;
 
 public class Injector {
 
+    private static BeanSource beanSource = new DefaultBeanSource();
+
+    public static void setBeanSource(BeanSource beanSource) {
+        Injector.beanSource = beanSource;
+    }
+
+    public static <T> T getBeanOfType(String className) {
+        return getBeanOfType((Class<T>) Play.classloader.loadApplicationClass(className));
+    }
+
+    public static <T> T getBeanOfType(Class<T> clazz) {
+        return beanSource.getBeanOfType(clazz);
+    }
+
     /**
-     * For now, inject beans in controllers
+     * For now, inject beans in controllers and any classes that include @RequireInjection.
      * 
      * @param source
      *            the beanSource to inject
@@ -24,6 +38,7 @@ public class Injector {
         List<Class> classes = new ArrayList<>(Play.classloader.getAssignableClasses(ControllerSupport.class));
         classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
         classes.addAll(Play.classloader.getAssignableClasses(Job.class));
+        classes.addAll(Play.classloader.getAnnotatedClasses(RequireInjection.class));
         for (Class<?> clazz : classes) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {

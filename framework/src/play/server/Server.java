@@ -63,11 +63,13 @@ public class Server {
             Logger.error(e, "Could not understand https.address");
             Play.fatalServerErrorOccurred();
         }
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
+
         try {
             if (httpPort != -1) {
+                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+                );
+
                 bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
 
                 bootstrap.bind(new InetSocketAddress(address, httpPort));
@@ -94,12 +96,12 @@ public class Server {
             Play.fatalServerErrorOccurred();
         }
 
-        bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
-
         try {
             if (httpsPort != -1) {
+                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+                );
+
                 bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
                 bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort));
                 bootstrap.setOption("child.tcpNoDelay", true);
@@ -124,7 +126,7 @@ public class Server {
             Logger.error("Could not bind on port " + httpsPort, e);
             Play.fatalServerErrorOccurred();
         }
-        if (Play.mode == Mode.DEV || Play.runingInTestMode()) {
+        if (Play.mode == Mode.DEV || Play.runningInTestMode()) {
            // print this line to STDOUT - not using logger, so auto test runner will not block if logger is misconfigured (see #1222)     
            System.out.println("~ Server is up and running");
         }

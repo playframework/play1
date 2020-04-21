@@ -1,0 +1,9 @@
+h1. Play 1.4.6 -- Release notes
+
+Play 1.4.6 has been released of the 1.4.x maintenance branch.
+The changes in this release are listed in the "Play 1.4.6 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/237004-146 on Lighthouse and "1.4.6 on github":https://github.com/playframework/play1/milestone/9 including 1 resolved tickets.
+
+
+h2. What's fixed in Play 1.4.6
+
+* "#1300:https://github.com/playframework/play1/issues/1300 : Define allowed methods used in 'X-HTTP-Method-Override

@@ -1,0 +1,225 @@
+diff --git a/pom.xml b/pom.xml
+index fcb9ba3..00269d3 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -123,7 +123,7 @@
+     <maven.compile.target>1.6</maven.compile.target>
+     <commons.componentid>javaflow</commons.componentid>
+     <commons.jira.componentid>12311186</commons.jira.componentid>
+-    <asm.version>4.0</asm.version>
++    <asm.version>7.0</asm.version>
+   </properties> 
+ 
+   <build>
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/BytecodeClassLoader.java b/src/main/java/org/apache/commons/javaflow/bytecode/BytecodeClassLoader.java
+index fe06d06..09e32cc 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/BytecodeClassLoader.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/BytecodeClassLoader.java
+@@ -26,7 +26,7 @@ public class BytecodeClassLoader extends ClassLoader {
+         private String className;
+ 
+         public NameClassAdapter() {
+-            super(Opcodes.ASM4);
++            super(Opcodes.ASM7);
+         }
+         
+         public void visit( int version, int access, String name, String signature, String superName, String[] interfaces ) {
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationClassAdapter.java b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationClassAdapter.java
+index 41fcb5d..7699597 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationClassAdapter.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationClassAdapter.java
+@@ -26,8 +26,8 @@ public final class ContinuationClassAdapter extends ClassVisitor {
+ 
+     private String className;
+ 
+-    public ContinuationClassAdapter(ClassVisitor cv) {
+-        super(Opcodes.ASM4, cv);
++    public ContinuationClassAdapter(final ClassVisitor cv) {
++        super(Opcodes.ASM7, cv);
+     }
+ 
+     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAdapter.java b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAdapter.java
+index 126ccc5..d8eef5b 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAdapter.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAdapter.java
+@@ -48,7 +48,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+ 
+ 
+     public ContinuationMethodAdapter(ContinuationMethodAnalyzer a) {
+-        super(Opcodes.ASM4, a.mv);
++        super(Opcodes.ASM7, a.mv);
+         this.canalyzer = a;
+         this.analyzer = a.analyzer;
+         this.labels = a.labels;
+@@ -71,7 +71,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+         Label l0 = new Label();
+ 
+         // PC: StackRecorder stackRecorder = StackRecorder.get();
+-        mv.visitMethodInsn(INVOKESTATIC, STACK_RECORDER, "get", "()L" + STACK_RECORDER + ";");
++        mv.visitMethodInsn(INVOKESTATIC, STACK_RECORDER, "get", "()L" + STACK_RECORDER + ";", false);
+         mv.visitInsn(DUP);
+         mv.visitVarInsn(ASTORE, stackRecorderVar);
+         mv.visitLabel(startLabel);
+@@ -84,7 +84,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+ 
+         mv.visitVarInsn(ALOAD, stackRecorderVar);
+         // PC:    stackRecorder.popInt();
+-        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Int", "()I");
++        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Int", "()I", false);
+         mv.visitTableSwitchInsn(0, fsize - 1, l0, restoreLabels);
+ 
+         // switch cases
+@@ -111,7 +111,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+                     Type type = value.getType();
+                     if (value.isReference()) {
+-                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Object", "()Ljava/lang/Object;");
++                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Object", "()Ljava/lang/Object;", false);
+                         Type t = value.getType();
+                         String desc = t.getDescriptor();
+                         if (desc.charAt(0) == '[') {
+@@ -122,7 +122,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                         mv.visitVarInsn(ASTORE, j);
+ 
+                     } else {
+-                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPopMethod(type), "()" + type.getDescriptor());
++                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPopMethod(type), "()" + type.getDescriptor(), false);
+                         mv.visitVarInsn(type.getOpcode(ISTORE), j);
+                     }
+                 }
+@@ -153,12 +153,12 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                     // TODO ??
+                 } else if (value.isReference()) {
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+-                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Object", "()Ljava/lang/Object;");
++                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Object", "()Ljava/lang/Object;", false);
+                     mv.visitTypeInsn(CHECKCAST, value.getType().getInternalName());
+                 } else {
+                     Type type = value.getType();
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+-                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPopMethod(type), "()" + type.getDescriptor());
++                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPopMethod(type), "()" + type.getDescriptor(), false);
+                 }
+             }
+ 
+@@ -170,7 +170,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                   mv.visitInsn(ACONST_NULL);
+                 } else {
+                   mv.visitVarInsn(ALOAD, stackRecorderVar);
+-                  mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Reference", "()Ljava/lang/Object;");
++                  mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, POP_METHOD + "Reference", "()Ljava/lang/Object;", false);
+                   mv.visitTypeInsn(CHECKCAST, value.getType().getInternalName());
+                 }
+             }
+@@ -197,8 +197,8 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+         mv.visitLabel(label);
+     }
+ 
+-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+-        mv.visitMethodInsn(opcode, owner, name, desc);
++    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
++        mv.visitMethodInsn(opcode, owner, name, desc, itf);
+ 
+         if (currentFrame != null) {
+             Label fl = new Label();
+@@ -229,7 +229,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                 } else if (value.isReference()) {
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+                     mv.visitInsn(SWAP);
+-                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Object", "(Ljava/lang/Object;)V");
++                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Object", "(Ljava/lang/Object;)V", false);
+                 } else {
+                     Type type = value.getType();
+                     if (type.getSize() > 1) {
+@@ -237,12 +237,12 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                         mv.visitVarInsn(ALOAD, stackRecorderVar);
+                         mv.visitInsn(DUP2_X2);  // swap2 for long/double
+                         mv.visitInsn(POP2);
+-                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V");
++                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V", false);
+                         mv.visitInsn(POP);  // remove dummy stack entry
+                     } else {
+                         mv.visitVarInsn(ALOAD, stackRecorderVar);
+                         mv.visitInsn(SWAP);
+-                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V");
++                        mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V", false);
+                     }
+                 }
+             }
+@@ -250,7 +250,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+             if (!isStatic) {
+                 mv.visitVarInsn(ALOAD, stackRecorderVar);
+                 mv.visitVarInsn(ALOAD, 0);
+-                mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Reference", "(Ljava/lang/Object;)V");
++                mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Reference", "(Ljava/lang/Object;)V", false);
+             }
+ 
+             // save locals
+@@ -264,12 +264,12 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+                 } else if (value.isReference()) {
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+                     mv.visitVarInsn(ALOAD, j);
+-                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Object", "(Ljava/lang/Object;)V");
++                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, PUSH_METHOD + "Object", "(Ljava/lang/Object;)V", false);
+                 } else {
+                     mv.visitVarInsn(ALOAD, stackRecorderVar);
+                     Type type = value.getType();
+                     mv.visitVarInsn(type.getOpcode(ILOAD), j);
+-                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V");
++                    mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, getPushMethod(type), "(" + type.getDescriptor() + ")V", false);
+                 }
+             }
+ 
+@@ -281,7 +281,7 @@ public final class ContinuationMethodAdapter extends MethodVisitor implements Op
+               // TODO optimize to iconst_0...
+               mv.visitIntInsn(BIPUSH, currentIndex);  
+             }
+-            mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V");
++            mv.visitMethodInsn(INVOKEVIRTUAL, STACK_RECORDER, "pushInt", "(I)V", false);
+ 
+             if (currentFrame instanceof MonitoringFrame) {
+                 int[] monitoredLocals = ((MonitoringFrame) currentFrame).getMonitored();
+diff --git a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
+index 2d480b9..c23e900 100644
+--- a/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
++++ b/src/main/java/org/apache/commons/javaflow/bytecode/transformation/asm/ContinuationMethodAnalyzer.java
+@@ -30,6 +30,7 @@ import org.objectweb.asm.Type;
+ import org.objectweb.asm.tree.AbstractInsnNode;
+ import org.objectweb.asm.tree.InsnNode;
+ import org.objectweb.asm.tree.InsnList;
++import org.objectweb.asm.tree.LabelNode;
+ import org.objectweb.asm.tree.MethodInsnNode;
+ import org.objectweb.asm.tree.MethodNode;
+ import org.objectweb.asm.tree.VarInsnNode;
+@@ -54,7 +55,7 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
+     public int stackRecorderVar;
+ 
+     public ContinuationMethodAnalyzer(String className, ClassVisitor cv, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
+-        super(Opcodes.ASM4, access, name, desc, signature, exceptions);
++        super(Opcodes.ASM7, access, name, desc, signature, exceptions);
+         this.className = className;
+         this.cv = cv;
+         this.mv = mv;
+@@ -64,14 +65,16 @@ public class ContinuationMethodAnalyzer extends MethodNode implements Opcodes {
+         return instructions.indexOf(node);
+     }
+ 
+-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+-        MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc);
++    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
++        MethodInsnNode mnode = new MethodInsnNode(opcode, owner, name, desc, itf);
+         if (opcode == INVOKESPECIAL || "<init>".equals(name)) {
+             methods.add(mnode);
+         }
+         if (needsFrameGuard(opcode, owner, name, desc) /* && transformer.inScope(owner, name)*/) {
+             Label label = new Label();
+             super.visitLabel(label);
++            LabelNode labelNode = new LabelNode(label);
++            instructions.add(labelNode);
+             labels.add(label);
+             nodes.add(mnode);
+         }
+-- 
+1.9.0.msysgit.0
+

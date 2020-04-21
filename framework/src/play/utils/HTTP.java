@@ -1,14 +1,14 @@
 package play.utils;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
-
+import play.Logger;
 import play.libs.IO;
+
+import java.io.InputStream;
+import java.text.ParseException;
+import java.util.*;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class HTTP {
 
@@ -71,7 +71,7 @@ public class HTTP {
     /**
      * Use this method to make sure you have the correct casing of a http header name. eg: fixes 'content-type' to
      * 'Content-Type'
-     * 
+     *
      * @param headerName
      *            The given header name to check
      * @return The correct header name
@@ -86,5 +86,31 @@ public class HTTP {
         }
         // Didn't find it - return it as it is
         return headerName;
+    }
+
+    /**
+     * <p>Checks if an entity was modified or not</p>
+     *
+     * @param etag            the entity tag
+     * @param last            a Last-Modified value
+     * @param browserEtag     an entity tag from request header
+     * @param ifModifiedSince a Last-Modified value from request header 'If-Modified-Since'
+     * @return <code>true</code> if the entity was modified
+     * @see <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616 - Hypertext Transfer Protocol - Section 14.26</a>
+     */
+    public static boolean isModified(String etag, long last, String browserEtag, String ifModifiedSince) {
+        if (browserEtag != null && !browserEtag.equals(etag)) {
+            return true;
+        }
+
+        if (!isEmpty(ifModifiedSince)) {
+            try {
+                Date browserDate = Utils.getHttpDateFormatter().parse(ifModifiedSince);
+                return browserDate.getTime() < last;
+            } catch (ParseException ex) {
+                Logger.warn("Can't parse 'If-Modified-Since' header date: %s", ex.getMessage());
+            }
+        }
+        return true;
     }
 }

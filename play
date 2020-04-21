@@ -81,8 +81,16 @@ try:
             application_path = os.getcwd()
             remaining_args = sys.argv[2:]
         else:
-            application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
-            remaining_args = sys.argv[3:]
+            if sys.argv[1].lower() == 'help':
+                application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
+                exists = os.path.exists(application_path)
+                if exists:
+                    remaining_args = sys.argv[3:]
+                else:
+                    remaining_args = sys.argv[2:]
+            else:
+                application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
+                remaining_args = sys.argv[3:]
 
     ignoreMissing = False
     if remaining_args.count('--force') == 1:

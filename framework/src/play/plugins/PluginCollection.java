@@ -2,13 +2,16 @@ package play.plugins;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Stream;
 
 import play.Logger;
 import play.Play;
@@ -18,6 +21,7 @@ import play.classloading.ApplicationClassloader;
 import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
+import play.inject.Injector;
 import play.libs.F;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -30,6 +34,7 @@ import play.vfs.VirtualFile;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.hash;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Class handling all plugins used by Play.
@@ -165,7 +170,7 @@ public class PluginCollection {
         for (LoadingPluginInfo info : pluginsToLoad) {
             Logger.trace("Loading plugin %s", info.name);
             try {
-                PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(info.name).newInstance();
+                PlayPlugin plugin = (PlayPlugin) Injector.getBeanOfType(Play.classloader.loadClass(info.name));
                 plugin.index = info.index;
                 if (addPlugin(plugin)) {
                     Logger.trace("Plugin %s loaded", plugin);
@@ -194,15 +199,26 @@ public class PluginCollection {
 
     List<URL> loadPlayPluginDescriptors() {
         try {
-            String playPluginsDescriptor = Play.configuration.getProperty("play.plugins.descriptor");
-            if (playPluginsDescriptor != null) {
-                return Collections.singletonList(new File(Play.applicationPath, playPluginsDescriptor).toURI().toURL());
+            String playPluginsDescriptors = Play.configuration.getProperty("play.plugins.descriptor");
+            if (playPluginsDescriptors != null) {
+                return Stream.of(playPluginsDescriptors.split(","))
+                    .map(playPluginsDescriptor -> fileToUrl(playPluginsDescriptor))
+                    .collect(toList());
             }
             return Collections.list(Play.classloader.getResources(play_plugins_resourceName));
         }
-        catch (Exception e) {
+        catch (IOException e) {
             Logger.error(e, "Error loading play.plugins");
             return emptyList();
+        }
+    }
+
+    private URL fileToUrl(String fileName) {
+        try {
+            return new File(Play.applicationPath, fileName).toURI().toURL();
+        }
+        catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Error loading file " + fileName, e);
         }
     }
 
@@ -220,21 +236,8 @@ public class PluginCollection {
             // Is this plugin an application-supplied-plugin?
             if (isLoadedByApplicationClassloader(plugin)) {
                 // This plugin is application-supplied - Must reload it
-                String pluginClassName = plugin.getClass().getName();
-                Class pluginClazz = Play.classloader.loadClass(pluginClassName);
-
-                // First look for constructors the old way
-                Constructor<?>[] constructors = pluginClazz.getConstructors();
-
-                if (constructors.length == 0) {
-                    // No constructors in plugin
-                    // using getDeclaredConstructors() instead of
-                    // getConstructors() to make it work for plugins without
-                    // constructor
-                    constructors = pluginClazz.getDeclaredConstructors();
-                }
-
-                PlayPlugin newPlugin = (PlayPlugin) constructors[0].newInstance();
+                Class pluginClazz = Play.classloader.loadClass(plugin.getClass().getName());
+                PlayPlugin newPlugin = (PlayPlugin) Injector.getBeanOfType(pluginClazz);
                 newPlugin.index = plugin.index;
                 // Replace this plugin
                 replacePlugin(plugin, newPlugin);

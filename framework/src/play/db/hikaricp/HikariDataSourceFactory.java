@@ -36,6 +36,10 @@ public class HikariDataSourceFactory implements DataSourceFactory {
     ds.setLoginTimeout(parseInt(dbConfig.getProperty("db.pool.loginTimeout", "0"))); // in seconds
     ds.setMaxLifetime(parseLong(dbConfig.getProperty("db.pool.maxConnectionAge", "0"))); // in ms
 
+    if (dbConfig.getProperty("db.pool.connectionInitSql") != null) {
+      ds.setConnectionInitSql(dbConfig.getProperty("db.pool.connectionInitSql"));
+    }
+    
     // not used in HikariCP:
     // db.pool.initialSize
     // db.pool.idleConnectionTestPeriod

@@ -67,10 +67,12 @@ public class DependenciesManager {
             System.out.println("~");
             System.out.println("~ Some dependencies are still missing.");
             System.out.println("~");
+            System.exit(1);
         } else {
             System.out.println("~");
             System.out.println("~ Done!");
             System.out.println("~");
+            System.exit(0);
         }
     }
 

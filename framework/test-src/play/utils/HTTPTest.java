@@ -2,7 +2,13 @@ package play.utils;
 
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.util.Date;
+
+import static org.apache.commons.lang.time.DateUtils.addDays;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HTTPTest {
 
@@ -37,5 +43,28 @@ public class HTTPTest {
         HTTP.ContentTypeWithEncoding defaultContentType = HTTP.parseContentType(null);
         assertThat(defaultContentType.encoding).isEqualTo(null);
         assertThat(defaultContentType.contentType).isEqualTo("text/html");
+    }
+
+    @Test
+    public void testIsModifiedMethod() throws ParseException {
+        String etag = "6d82cbb050ddc7fa9cgb6590s4546d59";
+        Date date = Utils.getHttpDateFormatter().parse("Thu, 16 Jan 2018 12:13:14 GMT");
+        String unknown = "unknown";
+        long lastModified = date.getTime();
+        String ifModifiedSince = Utils.getHttpDateFormatter().format(date);
+        String ifModifiedSinceOld = Utils.getHttpDateFormatter().format(addDays(date, -1));
+
+        assertFalse(HTTP.isModified(etag, lastModified, etag, ifModifiedSince));
+        assertFalse(HTTP.isModified(etag, 0, etag, ifModifiedSince));
+        assertFalse(HTTP.isModified(etag, lastModified, null, ifModifiedSince));
+
+        assertTrue(HTTP.isModified(etag, lastModified, unknown, ifModifiedSince));
+        assertTrue(HTTP.isModified(etag, lastModified, "", ifModifiedSince));
+        assertTrue(HTTP.isModified(etag, lastModified, null, null));
+
+        assertTrue(HTTP.isModified(etag, lastModified, null, ifModifiedSinceOld));
+        assertTrue(HTTP.isModified(etag, lastModified, null, ""));
+        assertTrue(HTTP.isModified(etag, lastModified, null, null));
+        assertTrue(HTTP.isModified(etag, lastModified, null, unknown));
     }
 }

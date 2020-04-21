@@ -49,8 +49,13 @@ import play.Logger;
 public class XML {
 
     public static DocumentBuilderFactory newDocumentBuilderFactory() {
+        return newDocumentBuilderFactory(false);
+    }
+
+    public static DocumentBuilderFactory newDocumentBuilderFactory(boolean namespaceAware) {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(namespaceAware);
             dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
             dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             dbf.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
@@ -62,8 +67,12 @@ public class XML {
     }
 
     public static DocumentBuilder newDocumentBuilder() {
+        return newDocumentBuilder(false);
+    }
+
+    public static DocumentBuilder newDocumentBuilder(boolean namespaceAware) {
         try {
-            return newDocumentBuilderFactory().newDocumentBuilder();
+            return newDocumentBuilderFactory(namespaceAware).newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -92,15 +101,30 @@ public class XML {
 
     /**
      * Parse an XML file to DOM
-     * 
+     *
      * @param file
      *            The XML file
      * @return null if an error occurs during parsing.
      *
      */
     public static Document getDocument(File file) {
+        return getDocument(file, false);
+    }
+
+    /**
+     * Parse an XML file to DOM
+     * 
+     * @param file
+     *            The XML file
+     * @param namespaceAware
+     *            whether to output XML namespace information in the returned document
+     *
+     * @return null if an error occurs during parsing.
+     *
+     */
+    public static Document getDocument(File file, boolean namespaceAware) {
         try {
-            return newDocumentBuilder().parse(file);
+            return newDocumentBuilder(namespaceAware).parse(file);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml file '" + file + "'.", e);
         } catch (IOException e) {
@@ -111,15 +135,28 @@ public class XML {
 
     /**
      * Parse an XML string content to DOM
-     * 
+     *
      * @param xml
      *            The XML string
      * @return null if an error occurs during parsing.
      */
     public static Document getDocument(String xml) {
+        return getDocument(xml, false);
+    }
+
+    /**
+     * Parse an XML string content to DOM
+     * 
+     * @param xml
+     *            The XML string
+     * @param namespaceAware
+     *            whether to output XML namespace information in the returned document
+     * @return null if an error occurs during parsing.
+     */
+    public static Document getDocument(String xml, boolean namespaceAware) {
         InputSource source = new InputSource(new StringReader(xml));
         try {
-            return newDocumentBuilder().parse(source);
+            return newDocumentBuilder(namespaceAware).parse(source);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml data.", e);
         } catch (IOException e) {
@@ -130,14 +167,27 @@ public class XML {
 
     /**
      * Parse an XML coming from an input stream to DOM
-     * 
+     *
      * @param stream
      *            The XML stream
      * @return null if an error occurs during parsing.
      */
     public static Document getDocument(InputStream stream) {
+        return getDocument(stream, false);
+    }
+
+    /**
+     * Parse an XML coming from an input stream to DOM
+     * 
+     * @param stream
+     *            The XML stream
+     * @param namespaceAware
+     *            whether to output XML namespace information in the returned document
+     * @return null if an error occurs during parsing.
+     */
+    public static Document getDocument(InputStream stream, boolean namespaceAware) {
         try {
-            return newDocumentBuilder().parse(stream);
+            return newDocumentBuilder(namespaceAware).parse(stream);
         } catch (SAXException e) {
             Logger.warn("Parsing error when building Document object from xml data.", e);
         } catch (IOException e) {

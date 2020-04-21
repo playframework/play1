@@ -83,5 +83,11 @@ GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLa
 
 GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
 
+GET   /status/ok/             StatusCodes.justOkay
+GET   /status/not-found/      StatusCodes.rendersNotFound
+GET   /status/unauthorized/   StatusCodes.rendersUnauthorized
+POST  /status/job/            StatusCodes.usesContinuation
+GET   /status/failure/        StatusCodes.throwsException
+
 # module
 *         /               module:secure

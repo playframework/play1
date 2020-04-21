@@ -126,6 +126,16 @@ bc. application.session.cookie=PLAY
 Default: sessions are written to the transient @PLAY_SESSION@ cookie.
 
 
+h3(#application.session.storeClass). application.session.storeClass
+
+Session storage implementation. By default Play! stores session in cookie. 
+It can be overridden with this setting. For example:
+
+bc. application.session.storeClass=com.company.CacheSessionStore
+
+Default: sessions are stored in cookie (see `play.mvc.CookieSessionStore` for implementation)
+
+
 h3(#application.session.httpOnly). application.session.httpOnly
 
 Enables the ‘HTTP only’ flag on cookies, which mitigates some XSS attacks. For example:
@@ -517,6 +527,12 @@ c3p0 is very asynchronous. Slow JDBC operations are generally performed by helpe
 Default: @3@
 
 
+h3(#db.pool.connectionInitSql). db.pool.connectionInitSql
+
+Sets the SQL string that will be executed on all new connections when they are created, before they are added to the pool (HikariCP only).
+
+Default: none
+
 h2(#evolutions). Database evolutions
 
 
@@ -614,6 +630,15 @@ HTTP Response headers control for static files: sets the default max-age in seco
 bc. http.cacheControl=0
 
 Default: @3600@ - set cache expiry to one hour.
+
+
+h3(#http.allowed.method.override). http.allowed.method.override
+
+Define allowed methods that will be handled when defined in X-HTTP-Method-Override
+
+bc. http.allowed.method.override=POST
+
+Default: none
 
 
 h3(#http.exposePlayServer). http.exposePlayServer
@@ -722,7 +747,7 @@ Java source level, which overrides the @java.version@ system property. For examp
 
 bc. java.source=1.8
 
-Values:  @1.7@ (No longer supported since 1.5.0), @1.8@.
+Values:  @1.7@ (No longer supported since 1.5.0), @1.8@, @9@, @10@.
 
 Default: @1.8@
 
@@ -1000,11 +1025,13 @@ h2(#play). Play run-time
 
 h3(#play.plugins.descriptor). play.plugins.descriptor
 
-File to load play plugins from. 
+File(s) to load play plugins from.
 * If given, play with load plugins ONLY from this file. @since play 1.5
+  * May contain multiple filenames (separated by comma). @since play 1.5.1
 * If not given, play will find ALL files "play.plugins" from classpath and load plugins from them (this is the default behaviour).
 
 bc. play.plugins.descriptor=conf/my-play-app.plugins
+bc. play.plugins.descriptor=conf/prod.plugins,conf/test.plugins
 
 Default: none.
 

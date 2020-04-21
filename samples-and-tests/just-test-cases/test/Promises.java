@@ -1,10 +1,10 @@
 import org.junit.*;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 
+import play.*;
 import play.test.*;
 import play.jobs.*;
 import play.libs.*;
@@ -268,4 +268,107 @@ public class Promises extends UnitTest {
     new DoSomething2(200).now().get(100, TimeUnit.MILLISECONDS);
   }
 
+    /**
+     * This is a regression test for Lighthouse #2086, whose root cause was race condition in Promise such
+     * that, if a new "onRedeem" callback is registered at about the same time that the Promise is invoked,
+     * the "onRedeem" callback could be called multiple times.
+     * <p>
+     * This broke assumptions in the Controllers.await() subsystem and caused a continuation to be resumed
+     * multiple times.
+     * </p>
+     *
+     * @throws InterruptedException
+     *             if the test thread is interrupted while waiting.
+     * @throws ExecutionException
+     *             if the test thread is interrupted while waiting.
+     */
+    @Test
+    public void promiseOnRedeemIsInvokedExactlyOnce() throws InterruptedException, ExecutionException {
+        Thread testThread = Thread.currentThread();
+
+        // Set up a pair of atomic longs to track the number of times that the onRedeem
+        // callback is called from the invoker thread and the number of times it's called
+        // from the callback registration thread.
+        final AtomicLong hitsFromTestThread = new AtomicLong(0);
+        final AtomicLong hitsFromExecutorService = new AtomicLong(0);
+
+        // Create a thread pool executor on which we will invoke our promises.
+        // This is a separate executor than the job pool to reduce execution
+        // overhead and make it more likely that that we'll see the race condition.
+        final ExecutorService executor = Executors.newFixedThreadPool(1);
+
+        // The number of times to call Promise.onRedeem().
+        final int totalCallbacksRegisteredOnPromise = 500;
+
+        // Since we are testing for a race condition, we run the same test multiple times.
+        // If, on any iteration of the loop, we find a promise that exhibits the bug,
+        // we fail the test.  To guarantee that the test runs in a reasonable amount
+        // of time regardless of the hardware, we run the test for a fixed amount
+        // of time, rather than a fixed number of iterations.
+        long totalNumberOfSecondsToExecuteTests = 2;
+        long targetEndTimeNs = System.nanoTime() + totalNumberOfSecondsToExecuteTests * 1000 * 1000 * 1000;
+        long i = 0;
+        while (System.nanoTime() - targetEndTimeNs < 0) {
+            // Create an action that, when invoked, increments an atomic integer.
+            // This action should be invoked exactly as many times as it is passed to
+            // Promise.onRedeem().
+            AtomicInteger totalTimesPromiseIsInvoked = new AtomicInteger(0);
+            F.Action<Promise> callback = new F.Action() {
+                @Override
+                public void invoke(Object result) {
+                    // Note that the "onRedeem" action was invoked.
+                    totalTimesPromiseIsInvoked.addAndGet(1);
+
+                    // Note whether the promise was redeemed from the test thread
+                    // or one of the executor service's threads to get some measurement
+                    // on how likely it is that the race condition was exercised.
+                    if (Thread.currentThread().equals(testThread)) {
+                        hitsFromTestThread.incrementAndGet();
+                    } else {
+                        hitsFromExecutorService.incrementAndGet();
+                    }
+                }
+            };
+
+            // Create the unit under test.
+            Promise smartPromise = new Promise();
+
+            Thread.sleep(0); // surrender the rest of our time slice.
+
+            // Invoke the promise from a different thread.
+            Future executorFuture = executor.submit(new Callable() {
+                @Override
+                public Object call() throws InterruptedException {
+                    smartPromise.invoke(null);
+                    return null;
+                }
+            });
+
+            // On this thread, register the "onRedeem" action.
+            // We hope to do this at about the time that it's invoked from
+            // the executor service's thread.  We do this many times to
+            // make that more likely.
+            for (int j = 0; j < totalCallbacksRegisteredOnPromise; j++) {
+                smartPromise.onRedeem(callback);
+            }
+
+            // Wait for the promise to be invoked.
+            executorFuture.get();
+
+            // The onRedeem action should have been invoked exactly once for each time
+            // it was registered.
+            assertEquals(String.format("The %dth iteration failed", i), totalCallbacksRegisteredOnPromise,
+                totalTimesPromiseIsInvoked.get());
+            i++;
+        }
+
+        // We made it through all iterations without seeing the race condition.
+        // This could be because no race condition exists, or it could be that the timing
+        // of the test happens to make the race condition very unlikely.
+        // The following info message is to help a test developer tune the test parameters to
+        // maximize the chance of finding the race.  A well-tuned test will have called the
+        // onRedeem callback about as many times from this thread as from the executor service.
+        Logger.info("Hits from test thread: %d, hits from executor service: %d", hitsFromTestThread.get(),
+            hitsFromExecutorService.get());
+    }
 }
