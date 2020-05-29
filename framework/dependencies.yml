@@ -33,7 +33,7 @@ require:    &allDependencies
     - com.sun.mail -> javax.mail 1.6.2
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
-    - jaxen 1.1.6
+    - jaxen 1.2.0
     - joda-time 2.10
     - org.hamcrest -> hamcrest-all 1.3
     - junit 4.12
