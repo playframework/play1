@@ -37,14 +37,14 @@ public class ApplicationCompiler {
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
     private static final String JAVA_SOURCE_DEFAULT_VERSION = "1.8";
-    static final Map<String, String> compatibleJavaVersions = new HashMap<>();
-    
-    static {
-    	compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
-    	compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
-    	compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
-    	compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
-	}
+    static final Map<String, String> compatibleJavaVersions = Map.of( //
+    		"1.8", CompilerOptions.VERSION_1_8, //
+    		"9", CompilerOptions.VERSION_9, //
+    		"10", CompilerOptions.VERSION_10, //
+    		"11", CompilerOptions.VERSION_11, //
+    		"12", CompilerOptions.VERSION_12, //
+    		"13", CompilerOptions.VERSION_13 //
+    		);
 
     /**
      * Try to guess the magic configuration options
