@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -144,7 +145,7 @@ public class GroovyTemplate extends BaseTemplate {
 
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
-                LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
+                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
                 LinkedList<GroovyClassOperation> output = new LinkedList<>();
                 phases[Phases.OUTPUT] = output;
                 output.add(new GroovyClassOperation() {

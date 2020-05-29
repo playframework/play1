@@ -49,8 +49,8 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.4.0
     - org.bouncycastle -> bcprov-jdk15on 1.61
     - org.bouncycastle -> bcpkix-jdk15on 1.61
-    - org.codehaus.groovy -> groovy 2.5.3
-    - org.codehaus.groovy -> groovy-xml 2.5.3
+    - org.codehaus.groovy -> groovy 3.0.3
+    - org.codehaus.groovy -> groovy-xml 3.0.3
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.16.0
     - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
@@ -66,7 +66,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-c3p0 5.4.1.Final
     - org.hibernate -> hibernate-ehcache 5.4.1.Final
     - com.mchange -> mchange-commons-java 0.2.12
-    - org.javassist -> javassist 3.24.0-GA
+    - org.javassist -> javassist 3.27.0-GA
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.2.4
     - org.slf4j -> slf4j-api 1.7.22
