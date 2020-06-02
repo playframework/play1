@@ -49,8 +49,8 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.4.0
     - org.bouncycastle -> bcprov-jdk15on 1.61
     - org.bouncycastle -> bcpkix-jdk15on 1.61
-    - org.codehaus.groovy -> groovy 3.0.3
-    - org.codehaus.groovy -> groovy-xml 3.0.3
+    - org.codehaus.groovy -> groovy 3.0.4
+    - org.codehaus.groovy -> groovy-xml 3.0.4
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.21.0
     - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
