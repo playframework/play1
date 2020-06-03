@@ -42,8 +42,7 @@ public class ApplicationCompiler {
     		"9", CompilerOptions.VERSION_9, //
     		"10", CompilerOptions.VERSION_10, //
     		"11", CompilerOptions.VERSION_11, //
-    		"12", CompilerOptions.VERSION_12, //
-    		"13", CompilerOptions.VERSION_13 //
+    		"12", CompilerOptions.VERSION_12 //
     		);
 
     /**
