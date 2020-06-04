@@ -37,7 +37,7 @@ public class ApplicationCompiler {
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
     private static final String JAVA_SOURCE_DEFAULT_VERSION = "1.8";
-    static final Map<String, String> compatibleJavaVersions = Map.of( //
+    static final Map<String, String> compatibleJavaVersions =  org.apache.groovy.util.Maps.of( //
     		"1.8", CompilerOptions.VERSION_1_8, //
     		"9", CompilerOptions.VERSION_9, //
     		"10", CompilerOptions.VERSION_10, //
