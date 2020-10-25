@@ -30,7 +30,7 @@ public class Scope {
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase()
             .equals("true");
-    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
+    public static boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
     public static SessionStore sessionStore = createSessionStore();

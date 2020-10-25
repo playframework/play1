@@ -1,6 +1,5 @@
 package play.mvc;
 
-import java.lang.reflect.*;
 import org.junit.*;
 
 import play.Play;
@@ -23,21 +22,7 @@ public class SessionTest {
     }
 
     public static void setSendOnlyIfChangedConstant(boolean value) {
-        try {
-            /*
-             * Set the final static value Scope.SESSION_SEND_ONLY_IF_CHANGED using reflection.
-             */
-            Field field = Scope.class.getField("SESSION_SEND_ONLY_IF_CHANGED");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-
-            // Set the new value
-            field.setBoolean(null, value);
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
+        Scope.SESSION_SEND_ONLY_IF_CHANGED = value;
     }
 
     @Test

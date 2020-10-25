@@ -10,12 +10,12 @@ require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.9.5.2
     - com.zaxxer -> HikariCP 3.2.0
-    - org.ow2.asm -> asm 7.0
-    - org.ow2.asm -> asm-commons 7.0
-    - org.ow2.asm -> asm-util 7.0
-    - org.ow2.asm -> asm-tree 7.0
-    - org.ow2.asm -> asm-analysis 7.0
-    - cglib -> cglib 3.2.7
+    - org.ow2.asm -> asm 9.0
+    - org.ow2.asm -> asm-commons 9.0
+    - org.ow2.asm -> asm-util 9.0
+    - org.ow2.asm -> asm-tree 9.0
+    - org.ow2.asm -> asm-analysis 9.0
+    - cglib -> cglib 3.3.0
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
     - com.ning -> async-http-client 1.9.40
@@ -33,7 +33,7 @@ require:    &allDependencies
     - com.sun.mail -> javax.mail 1.6.2
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
-    - jaxen 1.1.6
+    - jaxen 1.2.0
     - joda-time 2.10
     - org.hamcrest -> hamcrest-all 1.3
     - junit 4.12
@@ -49,9 +49,9 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.4.0
     - org.bouncycastle -> bcprov-jdk15on 1.61
     - org.bouncycastle -> bcpkix-jdk15on 1.61
-    - org.codehaus.groovy -> groovy 2.5.3
-    - org.codehaus.groovy -> groovy-xml 2.5.3
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.16.0
+    - org.codehaus.groovy -> groovy 2.5.13
+    - org.codehaus.groovy -> groovy-xml 2.5.13
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.23.0
     - org.hibernate -> hibernate-core 5.4.1.Final.patched
     - net.bytebuddy -> byte-buddy 1.9.5
     - javax.persistence -> javax.persistence-api 2.2
@@ -66,7 +66,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-c3p0 5.4.1.Final
     - org.hibernate -> hibernate-ehcache 5.4.1.Final
     - com.mchange -> mchange-commons-java 0.2.12
-    - org.javassist -> javassist 3.24.0-GA
+    - org.javassist -> javassist 3.27.0-GA
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.2.4
     - org.slf4j -> slf4j-api 1.7.22
