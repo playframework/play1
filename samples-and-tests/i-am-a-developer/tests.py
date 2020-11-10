@@ -526,9 +526,9 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(browser.title() == 'Application error')
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
-            self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
+            self.assert_(html.count('The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
+            self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
         
         # Refresh again
@@ -542,9 +542,9 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(browser.title() == 'Application error')
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
-            self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
+            self.assert_(html.count('The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
+            self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
         # Try a template runtime exception  
