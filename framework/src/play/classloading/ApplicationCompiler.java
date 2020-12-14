@@ -38,19 +38,20 @@ public class ApplicationCompiler {
     Map<String, String> settings;
     private static final String JAVA_SOURCE_DEFAULT_VERSION = "1.8";
     static final Map<String, String> compatibleJavaVersions = new HashMap<>();
-    
+
     static {
-    	compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
-    	compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
-    	compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
-    	compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
-    	compatibleJavaVersions.put("12", CompilerOptions.VERSION_12);
-    	compatibleJavaVersions.put("13", CompilerOptions.VERSION_13);
-    	compatibleJavaVersions.put("14", CompilerOptions.VERSION_14);
+        compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
+        compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
+        compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
+        compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
+        compatibleJavaVersions.put("12", CompilerOptions.VERSION_12);
+        compatibleJavaVersions.put("13", CompilerOptions.VERSION_13);
+        compatibleJavaVersions.put("14", CompilerOptions.VERSION_14);
+    }
 
     /**
      * Try to guess the magic configuration options
-     * 
+     *
      * @param applicationClasses
      *            The application classes container
      */
@@ -64,7 +65,7 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_ReportUnusedImport, CompilerOptions.IGNORE);
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
-        
+
         final String runningJavaVersion = System.getProperty("java.version");
 		if (runningJavaVersion.startsWith("1.5") || runningJavaVersion.startsWith("1.6") || runningJavaVersion.startsWith("1.7")) {
             throw new CompilationException("JDK version prior to 1.8 are not supported to run the application");
@@ -72,7 +73,7 @@ public class ApplicationCompiler {
         final String configSourceVersion = Play.configuration.getProperty("java.source", JAVA_SOURCE_DEFAULT_VERSION);
         final String jdtVersion = compatibleJavaVersions.get(configSourceVersion);
         if (jdtVersion == null) {
-            throw new CompilationException(String.format("Incompatible Java version specified (%s). Compatible versions are: %s", 
+            throw new CompilationException(String.format("Incompatible Java version specified (%s). Compatible versions are: %s",
             		configSourceVersion, compatibleJavaVersions.keySet()));
         }
 
@@ -140,7 +141,7 @@ public class ApplicationCompiler {
 
     /**
      * Please compile this className
-     * 
+     *
      * @param classNames
      *            Arrays of the class name to compile
      */
