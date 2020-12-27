@@ -49,14 +49,18 @@ public class Application extends Controller {
     
     @Youhou
     public static void some2() {
-        renderText(Invoker.InvocationContext.current());
+    	String value = Invoker.InvocationContext.current().toString();
+    	Logger.info("InvocationContext is '%s'", value);
+        renderText(value);
     }
     
     @Youhou
     public static void some3() throws Exception {
         JobWithContext job = new JobWithContext();
         Future<String> future = job.now();
-        renderText(future.get());
+        String value = future.get();
+        Logger.info("InvocationContext is '%s'", value);
+        renderText(value);
     }
     
 
@@ -159,8 +163,17 @@ public class Application extends Controller {
     
     public static void book(Date at) {
         java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
-        df.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
-        renderText("Booked at %s !!", df.format(at));
+        
+		// The below statement to set the timezone to UTC breaks the test if the default
+		// JVM time zone sees this date in daylight savings.
+		// e.g. for London/Europe the "at" is 5/4/61 00:00:00 BST and when formatted to UTC is
+		// adjusted back an hour to 4/4/61 23:00:00
+//        df.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
+       
+        String value = String.format("Booked at %s !!", df.format(at));
+        Logger.info("Date '%s' formatted to '%s' with system default TimeZone '%s'", at, value, TimeZone.getDefault());
+        
+        renderText(value);
     }
 
     public static void escapeData() {
