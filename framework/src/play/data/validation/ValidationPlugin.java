@@ -112,7 +112,6 @@ public class ValidationPlugin extends PlayPlugin {
     static class Validator extends Guard {
 
         public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
-            List<ConstraintViolation> violations = new ArrayList<>();
             Object instance = null;
             // Patch for scala defaults
             if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
@@ -123,9 +122,10 @@ public class ValidationPlugin extends PlayPlugin {
                 }
             }
             Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod, instance);
-            validateMethodParameters(null, actionMethod, rArgs, violations);
-            validateMethodPre(null, actionMethod, rArgs, violations);
-            return violations;
+            ValidationCycle validationCycle = new ValidationCycle(new String[0]);
+            validateMethodParameters(null, actionMethod, rArgs, validationCycle);
+            validateMethodPre(null, actionMethod, rArgs, validationCycle);
+            return validationCycle.violations;
         }
     }
     static Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
