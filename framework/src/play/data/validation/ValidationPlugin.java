@@ -122,7 +122,7 @@ public class ValidationPlugin extends PlayPlugin {
                 }
             }
             Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod, instance);
-            ValidationCycle validationCycle = new ValidationCycle(new String[0]);
+            ValidationCycle validationCycle = new ValidationCycle(new String[]{"default"});
             validateMethodParameters(null, actionMethod, rArgs, validationCycle);
             validateMethodPre(null, actionMethod, rArgs, validationCycle);
             return validationCycle.violations;
