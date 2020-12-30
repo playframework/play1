@@ -48,8 +48,8 @@ def junit(app, args):
     if os.path.exists(test_result):
         shutil.rmtree(test_result)
     sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
-    args.append('-Dplay.junit')
-    java_cmd = app.java_cmd(args)
+    args.append('-Dplay.autotest')
+    java_cmd = app.java_cmd(args, className='play.test.Runner')
     try:
         play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
     except OSError:
