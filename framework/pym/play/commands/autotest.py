@@ -23,9 +23,9 @@ def execute(**kargs):
     args = kargs.get("args")
     env = kargs.get("env")
     cmdloader = kargs.get("cmdloader")
-    
+
     autotest(app, args)
-        
+
 def autotest(app, args):
     app.check()
     print "~ Running in test mode"
@@ -57,41 +57,41 @@ def autotest(app, args):
     if protocol == 'https' and not keystore:
       print "https without keystore configured. play auto-test will fail. Exiting now."
       sys.exit(-1)
-      
+
     # read parameters
     add_options = []
     if args.count('--unit'):
         args.remove('--unit')
         add_options.append('-DrunUnitTests')
-            
+
     if args.count('--functional'):
         args.remove('--functional')
         add_options.append('-DrunFunctionalTests')
-            
+
     if args.count('--selenium'):
         args.remove('--selenium')
         add_options.append('-DrunSeleniumTests')
-      
+
     # Handle timeout parameter
     weblcient_timeout = -1
     if app.readConf('webclient.timeout'):
         weblcient_timeout = app.readConf('webclient.timeout')
-    
+
     for arg in args:
         if arg.startswith('--timeout='):
             args.remove(arg)
             weblcient_timeout = arg[10:]
-          
-    if weblcient_timeout >= 0:  
+
+    if weblcient_timeout >= 0:
         add_options.append('-DwebclientTimeout=' + weblcient_timeout)
-            
+
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
         shutil.rmtree(test_result)
     sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
     args.append('-Dplay.autotest')
-    java_cmd = app.java_cmd(args)
+    java_cmd = app.java_cmd(args, className='play.test.Runner')
     try:
         play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
     except OSError:
@@ -140,7 +140,7 @@ def autotest(app, args):
 
     print "~"
     time.sleep(1)
-    
+
     # Kill if exists
     try:
         proxy_handler = urllib2.ProxyHandler({})
@@ -148,7 +148,7 @@ def autotest(app, args):
         opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception, e:
         pass
- 
+
     if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
         print "~ All tests passed"
         print "~"
