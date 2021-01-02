@@ -4,6 +4,7 @@ import sys
 import os, os.path
 import shutil
 import subprocess
+import signal
 
 from play.utils import *
 
@@ -12,6 +13,29 @@ COMMANDS = ['junit']
 HELP = {
     'junit': "Automatically run all application tests (via Junit directly)"
 }
+
+process = None
+
+def handle_sigterm(signum, frame):
+    global process
+    if 'process' in globals():
+        process.terminate()
+        sys.exit(0)
+
+first_sigint = True
+
+def handle_sigint(signum, frame):
+    global process
+    global first_sigint
+    if 'process' in globals():
+        if first_sigint:
+            # Prefix with new line because ^C usually appears on the terminal
+            print "\nTerminating Java process"
+            process.terminate()
+            first_sigint = False
+        else:
+            print "\nKilling Java process"
+            process.kill()
 
 def execute(**kargs):
     command = kargs.get("command")
@@ -47,27 +71,18 @@ def junit(app, args):
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
         shutil.rmtree(test_result)
-    sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
     args.append('-Dplay.autotest')
     java_cmd = app.java_cmd(args, className='play.test.Runner')
     try:
-        play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
+        process = subprocess.Popen (java_cmd, env=os.environ)
+        signal.signal(signal.SIGTERM, handle_sigterm)
+        signal.signal(signal.SIGINT, handle_sigint)
+        return_code = process.wait()
+        if 0 != return_code:
+            sys.exit(return_code)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
-    soutint = open(os.path.join(app.log_path(), 'system.out'), 'r')
-    while True:
-        if play_process.poll():
-            print "~"
-            print "~ Oops, application has not started?"
-            print "~"
-            sys.exit(-1)
-        line = soutint.readline().strip()
-        if line:
-            print line
-            if line.find('Server is up and running') > -1: # This line is written out by Server.java to system.out and is not log file dependent
-                soutint.close()
-                break
 
     if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
         print "~ All tests passed"

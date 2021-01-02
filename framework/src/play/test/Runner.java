@@ -23,10 +23,11 @@ public class Runner extends JUnitCore {
 
         TestRun testRun = TestRun.parse();
         runner.addListener(LoggingListener.INSTANCE);
+        new File("test-result").mkdirs();
         runner.addListener(new XMLReportListener(new XMLJUnitResultFormatter()) {
             @Override
             public void testStarted(Description description) throws Exception {
-                formatter.setOutput(new FileOutputStream(new File("test-result", "TEST-" + description.getClassName() + ".xml")));
+                formatter.setOutput(new FileOutputStream(new File("test-result", "TEST-" + description.getClassName() + "-" + description.getMethodName() + ".xml")));
                 super.testStarted(description);
             }
         });
