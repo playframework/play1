@@ -48,7 +48,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Run a test class
-     * 
+     *
      * @param clazz
      *            the class to run
      * @return : tests results
@@ -59,7 +59,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Use method using RootParamNode instead
-     * 
+     *
      * @param name
      *            the name of the object
      * @param clazz
@@ -71,7 +71,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param params
      *            parameters to bind
      * @return binding object
-     * 
+     *
      * @deprecated use {@link #bind(RootParamNode, String, Class, Type, Annotation[])}
      */
     @Deprecated
@@ -84,7 +84,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      *
      * When overriding this method, do not call super impl.. super impl is calling old bind method to be backward
      * compatible.
-     * 
+     *
      * @param rootParamNode
      *            parameters to bind
      * @param name
@@ -120,7 +120,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Called when play need to bind an existing Java object from HTTP params. When overriding this method, DO NOT call
      * the super method, since its default impl is to call the old bind method to be backward compatible.
-     * 
+     *
      * @param rootParamNode
      *            parameters to bind
      * @param name
@@ -136,7 +136,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Unbind an object
-     * 
+     *
      * @param src
      *            object to unbind
      * @param name
@@ -150,7 +150,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Translate the given key for the given locale and arguments. If null is returned, Play's normal message
      * translation mechanism will be used.
-     * 
+     *
      * @param locale
      *            the locale we want
      * @param key
@@ -165,7 +165,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Return the plugin status
-     * 
+     *
      * @return the plugin status
      */
     public String getStatus() {
@@ -174,7 +174,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Return the plugin status in JSON format
-     * 
+     *
      * @return the plugin status in JSON format
      */
     public JsonObject getJsonStatus() {
@@ -183,7 +183,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Enhance this class
-     * 
+     *
      * @param applicationClass
      *            the class to enhance
      * @throws java.lang.Exception
@@ -194,7 +194,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * This hook is not plugged, don't implement it
-     * 
+     *
      * @param template
      *            the template to compile
      * @deprecated
@@ -205,7 +205,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Give a chance to this plugin to fully manage this request
-     * 
+     *
      * @param request
      *            The Play request
      * @param response
@@ -220,7 +220,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Let a chance to this plugin to manage a static resource
-     * 
+     *
      * @param file
      *            The requested file
      * @param request
@@ -253,7 +253,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * It's time for the plugin to detect changes. Throw an exception is the application must be reloaded.
-     * 
+     *
      * @return false si no change detected
      */
     public boolean detectClassesChange() {
@@ -292,7 +292,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called if an exception occurred during the invocation.
-     * 
+     *
      * @param e
      *            The caught exception.
      */
@@ -307,7 +307,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called before an 'action' invocation, ie an HTTP request processing.
-     * 
+     *
      * @param actionMethod
      *            name of the method
      */
@@ -316,7 +316,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called when the action method has thrown a result.
-     * 
+     *
      * @param result
      *            The result object for the request.
      */
@@ -328,7 +328,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called when the request has been routed.
-     * 
+     *
      * @param route
      *            The route selected.
      */
@@ -361,7 +361,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Event may be sent by plugins or other components
-     * 
+     *
      * @param message
      *            convention: pluginClassShortName.message
      * @param context
@@ -389,7 +389,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Override to provide additional mime types from your plugin. These mimetypes get priority over the default
      * framework mimetypes but not over the application's configuration.
-     * 
+     *
      * @return a Map from extensions (without dot) to mimetypes
      */
     public Map<String, String> addMimeTypes() {
@@ -398,7 +398,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Let a chance to the plugin to compile it owns classes. Must be added to the mutable list.
-     * 
+     *
      * @param classes
      *            list of class to compile
      * @deprecated
@@ -409,7 +409,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Let some plugins route themself
-     * 
+     *
      * @param request
      *            the current request
      */
@@ -430,7 +430,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Inter-plugin communication.
-     * 
+     *
      * @param message
      *            the message to post
      * @param context
@@ -477,6 +477,19 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
+     * Implement to allow filtering/deciding whether a test should be run or not. This method is invoked for
+     * every test that is to be run including the ones provided from {@link PlayPlugin#getUnitTests()} and the
+     * {@link PlayPlugin#getFunctionalTests()} ()}.
+     *
+     * Keep in mind that if any plugin returns a false, the test will be excluded.
+     *
+     * @return whether the test should be run or not
+     */
+    public boolean shouldRunTest(Class<?> clazz) {
+        return true;
+    }
+
+    /**
      * Implement to add some classes that should be considered unit tests but do not extend {@link org.junit.Assert} to
      * tests that can be executed by test runner (will be visible in test UI).
      * <p>
@@ -485,7 +498,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * <p>
      * Keep in mind that this method can only add tests to currently loaded ones. You cannot disable tests this way. You
      * should also make sure you do not duplicate already loaded tests.
-     * 
+     *
      * @return list of plugin supported unit test classes (empty list in default implementation)
      */
     public Collection<Class> getUnitTests() {
@@ -524,7 +537,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
         /**
          * Surround innerFilter with this. (innerFilter after this)
-         * 
+         *
          * @param innerFilter
          *            filter to be wrapped.
          * @return a new Filter object. newFilter.withinFilter(x) is
@@ -542,7 +555,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
         /**
          * Compose two second order functions whose input is a zero param function that returns type T...
-         * 
+         *
          * @param outer
          *            Function that will wrap inner -- ("outer after inner")
          * @param inner
@@ -593,7 +606,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Return the filter implementation for this plugin.
-     * 
+     *
      * @return filter object of this plugin
      */
     public Filter getFilter() {

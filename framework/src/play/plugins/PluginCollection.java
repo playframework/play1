@@ -88,7 +88,7 @@ public class PluginCollection {
 
     /**
      * Using readonly list to crash if someone tries to modify the copy.
-     * 
+     *
      * @param list
      *            The list of plugins
      * @return Read only list of plugins
@@ -224,7 +224,7 @@ public class PluginCollection {
 
     /**
      * Reloads all loaded plugins that is application-supplied.
-     * 
+     *
      * @throws Exception
      *             If problem occurred during reload
      */
@@ -261,7 +261,7 @@ public class PluginCollection {
     /**
      * Calls plugin.onLoad but detects if plugin removes other plugins from Play.plugins-list to detect if plugins
      * disables a plugin the old hacked way..
-     * 
+     *
      * @param plugin
      *            The given plugin
      */
@@ -287,7 +287,7 @@ public class PluginCollection {
 
     /**
      * Adds one plugin and enables it
-     * 
+     *
      * @param plugin
      *            The given plugin
      * @return true if plugin was new and was added
@@ -357,10 +357,10 @@ public class PluginCollection {
 
     /**
      * enable plugin of specified type
-     * 
+     *
      * @param pluginClazz
      *            The plugin class
-     * 
+     *
      * @return true if plugin was enabled
      */
     public boolean enablePlugin(Class<? extends PlayPlugin> pluginClazz) {
@@ -369,7 +369,7 @@ public class PluginCollection {
 
     /**
      * Returns the first instance of a loaded plugin of specified type
-     * 
+     *
      * @param pluginClazz
      *            The plugin class
      * @return PlayPlugin
@@ -385,7 +385,7 @@ public class PluginCollection {
 
     /**
      * disable plugin
-     * 
+     *
      * @param plugin
      *            The given plugin
      * @return true if plugin was enabled and now is disabled
@@ -409,10 +409,10 @@ public class PluginCollection {
 
     /**
      * Disable plugin of specified type
-     * 
+     *
      * @param pluginClazz
      *            The plugin class
-     * 
+     *
      * @return true if plugin was enabled and now is disabled
      */
     public boolean disablePlugin(Class<? extends PlayPlugin> pluginClazz) {
@@ -429,7 +429,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all enabled plugins
-     * 
+     *
      * @return List of plugins
      */
     public List<PlayPlugin> getEnabledPlugins() {
@@ -438,7 +438,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all enabled plugins that define filters.
-     * 
+     *
      * @return List of plugins
      */
     public List<PlayPlugin> getEnabledPluginsWithFilters() {
@@ -466,7 +466,7 @@ public class PluginCollection {
 
     /**
      * Returns readonly view of all enabled plugins in reversed order
-     * 
+     *
      * @return Collection of plugins
      */
     public Collection<PlayPlugin> getReversedEnabledPlugins() {
@@ -504,7 +504,7 @@ public class PluginCollection {
 
     /**
      * Returns new readonly list of all plugins
-     * 
+     *
      * @return List of plugins
      */
     public List<PlayPlugin> getAllPlugins() {
@@ -513,7 +513,7 @@ public class PluginCollection {
 
     /**
      * Indicate if a plugin is enabled
-     * 
+     *
      * @param plugin
      *            The given plugin
      * @return true if plugin is enabled
@@ -813,6 +813,16 @@ public class PluginCollection {
         for (PlayPlugin plugin : getEnabledPlugins()) {
             plugin.afterFixtureLoad();
         }
+    }
+
+    public boolean shouldRunTest(Class<?> clazz) {
+        for (PlayPlugin plugin : getEnabledPlugins()) {
+            boolean shouldRunTest = plugin.shouldRunTest(clazz);
+            if (!shouldRunTest) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public TestEngine.TestResults runTest(Class<BaseTest> clazz) {

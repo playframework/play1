@@ -20,10 +20,10 @@ public class Runner extends JUnitCore {
         File root = new File(System.getProperty("application.path", "."));
         Play.init(root, System.getProperty("play.id", ""));
         Play.start();
+        new File("test-result").mkdirs();
 
         TestRun testRun = TestRun.parse();
         runner.addListener(LoggingListener.INSTANCE);
-        new File("test-result").mkdirs();
         runner.addListener(new XMLReportListener(new XMLJUnitResultFormatter()) {
             @Override
             public void testStarted(Description description) throws Exception {
