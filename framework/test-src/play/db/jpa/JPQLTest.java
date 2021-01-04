@@ -17,7 +17,7 @@ public class JPQLTest {
 
 	@BeforeClass
 	public static void setup(){
-		jpql = new JPQL(null);
+		jpql = new JPQL();
 	}
 
     @Test
