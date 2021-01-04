@@ -248,11 +248,7 @@ public class JPQL {
     public String findByToJPQL(String dbName, String findBy) {
         findBy = findBy.substring(2);
         StringBuilder jpql = new StringBuilder();
-        String subRequest;
-        if (findBy.contains("OrderBy"))
-            subRequest = findBy.split("OrderBy")[0];
-        else subRequest = findBy;
-        String[] parts = subRequest.split("And");
+        String[] parts = findBy.split("And");
         int index = 1;
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
