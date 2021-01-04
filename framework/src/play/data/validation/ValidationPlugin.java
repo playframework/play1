@@ -1,5 +1,17 @@
 package play.data.validation;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.sf.oval.ConstraintViolation;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.guard.Guard;
@@ -12,18 +24,6 @@ import play.mvc.Http.Cookie;
 import play.mvc.Scope;
 import play.mvc.results.Result;
 import play.utils.Java;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ValidationPlugin extends PlayPlugin {
 
@@ -122,7 +122,7 @@ public class ValidationPlugin extends PlayPlugin {
                 }
             }
             Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod, instance);
-            ValidationCycle validationCycle = new ValidationCycle(new String[]{"default"});
+            InternalValidationCycle validationCycle = new InternalValidationCycle(null, new String[]{"default"});
             validateMethodParameters(null, actionMethod, rArgs, validationCycle);
             validateMethodPre(null, actionMethod, rArgs, validationCycle);
             return validationCycle.violations;
