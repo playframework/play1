@@ -286,6 +286,11 @@ You can then access this database from your application’s Java by using this n
 
 bc. EntityManager em = JPA.em("student");
 
+You can also assign a specific database within each @model@ by using the name with @@PersistenceUnit@ like this:
+
+bc. @Entity
+@PersistenceUnit(name="student")
+public class [MODEL_name] extends Model {
 
 h3(#db). db
 
