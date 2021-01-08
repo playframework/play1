@@ -10,8 +10,7 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
-import junit.framework.Test;
-import junit.framework.TestResult;
+import play.test.junit.listeners.xmlout.DescriptionAsTest;
 
 
 /**
@@ -35,10 +34,12 @@ public class XMLReportListener extends RunListener {
 
     @Override
     public void testRunStarted(Description description) {
+
     }
 
     @Override
     public void testRunFinished(Result result) {
+
     }
 
     @Override
@@ -85,46 +86,5 @@ public class XMLReportListener extends RunListener {
     @Override
     public void testIgnored(Description description) throws Exception {
         super.testIgnored(description);
-    }
-
-    /**
-     * Wraps {@link Description} into {@link Test} enough to fake {@link JUnitResultFormatter}.
-     */
-    public static class DescriptionAsTest implements Test {
-        private final Description description;
-
-        public DescriptionAsTest(Description description) {
-            this.description = description;
-        }
-
-        public int countTestCases() {
-            return 1;
-        }
-
-        public void run(TestResult result) {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * {@link JUnitResultFormatter} determines the test name by reflection.
-         */
-        public String getName() {
-            return description.getDisplayName();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            DescriptionAsTest that = (DescriptionAsTest) o;
-
-            return description.equals(that.description);
-        }
-
-        @Override
-        public int hashCode() {
-            return description.hashCode();
-        }
     }
 }

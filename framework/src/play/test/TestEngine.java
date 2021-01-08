@@ -73,7 +73,7 @@ public class TestEngine {
             if (!Play.pluginCollection.shouldRunTest(c)) {
                 it.remove();
             } else {
-                if (Modifier.isAbstract(it.next().getModifiers())) {
+                if (Modifier.isAbstract(c.getModifiers())) {
                     it.remove();
                 }
             }
