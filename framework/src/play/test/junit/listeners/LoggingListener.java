@@ -1,12 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2018 Nosto Solutions Ltd All Rights Reserved.
- * <p>
- * This software is the confidential and proprietary information of
- * Nosto Solutions Ltd ("Confidential Information"). You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the agreement you entered into with
- * Nosto Solutions Ltd.
- ******************************************************************************/
 package play.test.junit.listeners;
 
 import java.text.NumberFormat;
@@ -21,9 +12,7 @@ import play.Logger;
 
 public class LoggingListener extends RunListener {
 
-    public static final LoggingListener INSTANCE = new LoggingListener();
-
-    private LoggingListener() {
+    public LoggingListener() {
         //
     }
 
@@ -51,7 +40,7 @@ public class LoggingListener extends RunListener {
 
     protected void printHeader(long runTime) {
         Logger.info("");
-        Logger.info("Time: %d" + elapsedTimeAsString(runTime));
+        Logger.debug("Time: %d" + elapsedTimeAsString(runTime));
     }
 
     protected void printFailures(Result result) {
@@ -60,22 +49,20 @@ public class LoggingListener extends RunListener {
             return;
         }
         if (failures.size() == 1) {
-            Logger.info("There was " + failures.size() + " failure:");
+            Logger.info("There was %d failure:", failures.size());
         } else {
-            Logger.info("There were " + failures.size() + " failures:");
+            Logger.info("There were %d failures:", failures.size());
         }
     }
 
     protected void printFooter(Result result) {
         if (result.wasSuccessful()) {
-            Logger.info("");
-            Logger.info("OK");
-            Logger.info(" (" + result.getRunCount() + " test" + (result.getRunCount() == 1 ? "" : "s") + ")");
+            Logger.info("All tests passed");
+            Logger.info(" (%d test%s)", result.getRunCount(), result.getRunCount() == 1 ? "" : "s");
 
         } else {
-            Logger.error("");
-            Logger.error("FAILURES!!!");
-            Logger.error("Tests run: " + result.getRunCount() + ",  Failures: " + result.getFailureCount());
+            Logger.error("One or more tests failed");
+            Logger.error("Tests run: %d, Failures: %d", result.getRunCount(), result.getFailureCount());
         }
     }
 

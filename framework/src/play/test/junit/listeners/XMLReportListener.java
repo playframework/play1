@@ -1,15 +1,19 @@
 package play.test.junit.listeners;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
+import org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
+import junit.framework.JUnit4TestAdapterCache;
 import play.test.junit.listeners.xmlout.DescriptionAsTest;
 
 
@@ -28,6 +32,10 @@ public class XMLReportListener extends RunListener {
     private int problem;
     private long startTime;
 
+    public XMLReportListener() {
+        this(new XMLJUnitResultFormatter());
+    }
+
     public XMLReportListener(JUnitResultFormatter formatter) {
         this.formatter = formatter;
     }
@@ -44,8 +52,9 @@ public class XMLReportListener extends RunListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
+        formatter.setOutput(new FileOutputStream(new File("test-result", "TEST-" + description.getClassName() + "-" + description.getMethodName() + ".xml")));
         formatter.startTestSuite(new JUnitTest(description.getDisplayName()));
-        formatter.startTest(new DescriptionAsTest(description));
+        formatter.startTest(JUnit4TestAdapterCache.getDefault().asTest(description));
         problem = 0;
         startTime = System.currentTimeMillis();
 
@@ -64,7 +73,7 @@ public class XMLReportListener extends RunListener {
 
         formatter.setSystemOutput(stdout.toString());
         formatter.setSystemError(stderr.toString());
-        formatter.endTest(new DescriptionAsTest(description));
+        formatter.endTest(JUnit4TestAdapterCache.getDefault().asTest(description));
 
         JUnitTest suite = new JUnitTest(description.getDisplayName());
         suite.setCounts(1, problem, 0);
