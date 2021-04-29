@@ -79,7 +79,7 @@ def execute(**kargs):
         # pointers to source jars produced by 'play deps'
         src_file = os.path.join(lib_src, os.path.basename(el) + '.src')
         if os.path.exists(src_file):
-            f = file(src_file)
+            f = open(src_file, 'r')
             cpJarToSource[el] = f.readline().rstrip()
             f.close()
 
