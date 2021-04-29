@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, os.path
 import shutil
 import subprocess
@@ -26,6 +27,6 @@ def execute(**kargs):
     try:
         return subprocess.call(java_cmd, env=os.environ)
     except OSError:
-        print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
-        print "~ "
+        print("~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
+        print("~ ")
         sys.exit(-1)

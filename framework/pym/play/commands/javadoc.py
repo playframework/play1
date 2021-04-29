@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, os.path
 import shutil
 import subprocess
@@ -19,7 +20,7 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
-    if not os.environ.has_key('JAVA_HOME'):
+    if 'JAVA_HOME' not in os.environ:
         javadoc_path = "javadoc"
     else:
         javadoc_path = os.path.normpath("%s/bin/javadoc" % os.environ['JAVA_HOME'])
@@ -38,7 +39,7 @@ def execute(**kargs):
     defineJavadocFiles(app, outdir)
     javadoc_cmd = [javadoc_path, '@'+os.path.join(outdir,'javadocOptions'), '@'+os.path.join(outdir,'javadocFiles')]
     
-    print "Generating Javadoc in " + outdir + "..."
+    print("Generating Javadoc in " + outdir + "...")
     return_code = subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
 
     # Remove configuration file
@@ -47,10 +48,10 @@ def execute(**kargs):
     
     # Display the status
     if return_code != 0:
-        print "Unable to create Javadocs.  See " + os.path.join(app.log_path(), 'javadoc.err') + " for errors."
+        print("Unable to create Javadocs.  See " + os.path.join(app.log_path(), 'javadoc.err') + " for errors.")
         sys.exit(return_code)
 
-    print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
+    print("Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser.")
 
 
 
@@ -69,21 +70,21 @@ def defineJavadocOptions(app, outdir, args):
         f.write(' -footer "<b>' +  app.readConf('application.name') + '</b>"')
   
     if args.count('--links'):
-        print "~ Build project Javadoc with links to :"
+        print("~ Build project Javadoc with links to :")
         args.remove('--links')
         # Add link to JavaDoc of JAVA
         
         javaVersion = getJavaVersion()
-        print "~ using java version \"%s\"" % javaVersion
+        print("~ using java version \"%s\"" % javaVersion)
         if javaVersion.startswith("1.5"):
-            print "~    Java(TM) Platform, Platform Standard Edition 5.0"        
-            print "~    Java(TM) EE 5 Specification APIs"
+            print("~    Java(TM) Platform, Platform Standard Edition 5.0")        
+            print("~    Java(TM) EE 5 Specification APIs")
             f.write(' -link http://docs.oracle.com/javase/1.5.0/docs/api/')
             f.write(' -link http://docs.oracle.com/javaee/5/api/')   
         else:
             urlVersion = javaVersion[2:3]
-            print "~    Java(TM) Platform, Standard Edition " + urlVersion + " API Specification"        
-            print "~    Java(TM) EE " + urlVersion + " Specification APIs"
+            print("~    Java(TM) Platform, Standard Edition " + urlVersion + " API Specification")        
+            print("~    Java(TM) EE " + urlVersion + " Specification APIs")
             f.write(' -link http://docs.oracle.com/javase/' + urlVersion + '/docs/api/')
             f.write(' -link http://docs.oracle.com/javaee/' + urlVersion + '/api/')         
      
@@ -91,10 +92,10 @@ def defineJavadocOptions(app, outdir, args):
         # Add link to JavaDoc of Play Framework
         playVersion = app.play_env['version']
         if "localbuild" in playVersion:
-            print "~    API documentation to Play! Framework V" + playVersion + " doesn't exist => link to V" + DEFAULT_API_VERSION
+            print("~    API documentation to Play! Framework V" + playVersion + " doesn't exist => link to V" + DEFAULT_API_VERSION)
             playVersion = DEFAULT_API_VERSION
 
-        print "~    Play Framework V" + playVersion + " API documentation"     
+        print("~    Play Framework V" + playVersion + " API documentation")     
         f.write(' -link https://www.playframework.com/documentation/' + playVersion + '/api/')
 
    
