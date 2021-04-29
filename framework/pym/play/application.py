@@ -351,7 +351,7 @@ class PlayConfParser(object):
             self.entries['jvm_version'] = env['jvm_version']
 
     def readFile(self, confFolder, filename):
-        f = file(confFolder + filename)
+        f = open(confFolder + filename, 'r')
         result = dict()
         for line in f:
             linedef = line.strip()
