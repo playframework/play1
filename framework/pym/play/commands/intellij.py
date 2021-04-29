@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, os.path
 import shutil
 
@@ -62,7 +63,7 @@ def execute(**kargs):
         replaceAll(iprFile, r'%PROJECT_NAME%', application_name)
     
 
-    print "~ OK, the application is ready for Intellij Idea"
-    print "~ Use File, Open Project... to open \"" + application_name + ".ipr\""
-    print "~"
+    print("~ OK, the application is ready for Intellij Idea")
+    print("~ Use File, Open Project... to open \"" + application_name + ".ipr\"")
+    print("~")
 

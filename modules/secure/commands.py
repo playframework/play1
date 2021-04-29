@@ -1,5 +1,7 @@
+from __future__ import print_function
 # Secure
 
+from builtins import str
 import getopt
 from play.utils import *
 
@@ -19,10 +21,10 @@ def execute(**kargs):
     env = kargs.get("env")
 
     if command == 'secure:':
-        print "~ Use: --css to override the Secure css" 
-        print "~      --login to override the login page" 
-        print "~      --layout to override the login layout page" 
-        print "~ "
+        print("~ Use: --css to override the Secure css") 
+        print("~      --login to override the login page") 
+        print("~      --layout to override the login layout page") 
+        print("~ ")
         return
 
     try:
@@ -30,18 +32,18 @@ def execute(**kargs):
         for o, a in optlist:
             if o == '--css':
                 app.override('public/stylesheets/secure.css', 'public/stylesheets/secure.css')
-                print "~ "
+                print("~ ")
                 return
             if o == '--login':
                 app.override('app/views/Secure/login.html', 'app/views/Secure/login.html')
-                print "~ "
+                print("~ ")
                 return
             if o == '--layout':
                 app.override('app/views/Secure/layout.html', 'app/views/Secure/layout.html')
-                print "~ "
+                print("~ ")
                 return
 
-    except getopt.GetoptError, err:
-        print "~ %s" % str(err)
-        print "~ "
+    except getopt.GetoptError as err:
+        print("~ %s" % str(err))
+        print("~ ")
         sys.exit(-1)
