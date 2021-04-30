@@ -3,9 +3,7 @@ from __future__ import division
 from builtins import str
 from builtins import input
 from builtins import range
-from past.builtins import basestring
 from builtins import object
-from past.utils import old_div
 import os
 import subprocess
 import sys
@@ -86,12 +84,12 @@ class Downloader(object):
     before = .0
     history = []
     cycles = 0
-    average = lambda self: old_div(sum(self.history), (len(self.history) or 1))
+    average = lambda self: sum(self.history) // (len(self.history) or 1)
 
     def __init__(self, width=55):
         self.width = width
-        self.kibi = lambda bits: old_div(bits, 2 ** 10)
-        self.proc = lambda a, b: old_div(a, (b * 0.01))
+        self.kibi = lambda bits: bits // (2 ** 10)
+        self.proc = lambda a, b: a // (b * 0.01)
 
     def retrieve(self, url, destination, callback=None):
         self.size = 0
@@ -159,11 +157,11 @@ class Downloader(object):
             now = time.clock()
             elapsed = now-self.before
             if elapsed:
-                speed = self.kibi(old_div(blocksize * 3, elapsed))
+                speed = self.kibi(blocksize * 3 // elapsed)
                 self.history.append(speed)
                 self.history = self.history[-4:]
             self.before = now
-        average = round(old_div(sum(self.history[-4:]), 4), 1)
+        average = round(sum(self.history[-4:]) // 4, 1)
         self.size = self.kibi(bits)
         print('\r~ [%s] %s KiB/s  ' % (bar, str(average)), end=' ')
 
@@ -186,14 +184,14 @@ class Unzip(object):
         self._createstructure(file, dir)
         num_files = len(zf.namelist())
         percent = self.percent
-        divisions = old_div(100, percent)
-        perc = int(old_div(num_files, divisions))
+        divisions = 100 // percent
+        perc = int( num_files / divisions)
         # extract files to directory structure
         for i, name in enumerate(zf.namelist()):
             if self.verbose == True:
                 print("Extracting %s" % name)
             elif perc > 0 and (i % perc) == 0 and i > 0:
-                complete = int (old_div(i, perc)) * percent
+                complete = int (i / perc) * percent
             if not name.endswith('/'):
                 outfile = open(os.path.join(dir, name), 'wb')
                 try:
@@ -332,7 +330,7 @@ def build(app, args, env):
                        version = splitted.pop()
                        name = splitted.pop()
             for dep in deps["require"]:
-                if isinstance(dep, basestring):
+                if isinstance(dep, str):
                     splitted = dep.split(" ")
                     if len(splitted) == 2 and splitted[0] == "play":
                         fwkMatch = splitted[1]
