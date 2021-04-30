@@ -1,8 +1,6 @@
 from __future__ import print_function
 # Command related to creation and execution: run, new, clean
 
-from future import standard_library
-standard_library.install_aliases()
 from builtins import input
 from builtins import str
 import sys
