@@ -4,6 +4,7 @@ from builtins import object
 import imp
 import os
 import warnings
+import traceback
 
 def play_formatwarning(msg, *a):
     # ignore everything except the message
@@ -28,6 +29,7 @@ class CommandLoader(object):
                     self._load_cmd_from(mod)
                 except Exception as e:
                     print (e)
+                    traceback.print_exc()
                     warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
