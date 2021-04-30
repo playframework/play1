@@ -1,8 +1,6 @@
 from __future__ import print_function
 # Command related to execution: auto-test
 
-from future import standard_library
-standard_library.install_aliases()
 import sys
 import os, os.path
 import shutil
