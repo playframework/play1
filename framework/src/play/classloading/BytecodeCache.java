@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 
@@ -15,6 +16,8 @@ import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
  * Used to speed up compilation time
  */
 public class BytecodeCache {
+
+    private static final Pattern REPLACED_CHARS = Pattern.compile("[/{}:]");
 
     /**
      * Delete the bytecode
@@ -25,7 +28,7 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             if (f.exists()) {
                 f.delete();
             }
@@ -45,7 +48,7 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return null;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             if (f.exists()) {
                 FileInputStream fis = new FileInputStream(f);
                 // Read hash
@@ -90,7 +93,7 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             try (FileOutputStream fos = new FileOutputStream(f)) {
                 fos.write(hash(source).getBytes("utf-8"));
                 fos.write(0);
