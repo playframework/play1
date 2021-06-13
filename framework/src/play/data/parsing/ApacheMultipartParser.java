@@ -635,9 +635,7 @@ public class ApacheMultipartParser extends DataParser {
         if (boundaryStr == null) {
             return null;
         }
-        byte[] boundary;
-        boundary = boundaryStr.getBytes(ISO_8859_1);
-        return boundary;
+        return boundaryStr.getBytes(ISO_8859_1);
     }
 
     /**
