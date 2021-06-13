@@ -99,7 +99,7 @@ public class BytecodeCache {
 
             // emit bytecode to standard class layout as well
             if (!name.contains("/") && !name.contains("{")) {
-                f = new File(Play.tmpDir, "classes/" + name.replace(".", "/") + ".class");
+                f = new File(Play.tmpDir, "classes/" + name.replace('.', '/') + ".class");
                 f.getParentFile().mkdirs();
                 writeByteArrayToFile(f, byteCode);
             }

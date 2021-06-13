@@ -110,7 +110,7 @@ public class ApplicationClassloader extends ClassLoader {
 
         if (Play.usePrecompiled) {
             try {
-                File file = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
+                File file = Play.getFile("precompiled/java/" + name.replace('.', '/') + ".class");
                 if (!file.exists()) {
                     return null;
                 }
@@ -216,7 +216,7 @@ public class ApplicationClassloader extends ClassLoader {
      * Search for the byte code of the given class.
      */
     byte[] getClassDefinition(String name) {
-        name = name.replace(".", "/") + ".class";
+        name = name.replace('.', '/') + ".class";
         InputStream is = this.getResourceAsStream(name);
         if (is == null) {
             return null;

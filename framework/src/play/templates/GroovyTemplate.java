@@ -193,7 +193,7 @@ public class GroovyTemplate extends BaseTemplate {
                     try {
                         // emit bytecode to standard class layout as well
                         File f = Play.getFile("precompiled/templates/"
-                                + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
+                                + name.replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent"));
                         f.getParentFile().mkdirs();
                         FileUtils.write(f, sb.toString(), "utf-8");
                     } catch (Exception e) {
@@ -415,7 +415,7 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure body) {
-            String templateName = tag.replace(".", "/");
+            String templateName = tag.replace('.', '/');
             String callerExtension = (extension != null) ? extension : "tag";
 
             BaseTemplate tagTemplate = null;
