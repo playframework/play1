@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 
 /**
@@ -95,7 +96,7 @@ public class BytecodeCache {
             }
             File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             try (FileOutputStream fos = new FileOutputStream(f)) {
-                fos.write(hash(source).getBytes("utf-8"));
+                fos.write(hash(source).getBytes(UTF_8));
                 fos.write(0);
                 fos.write(byteCode);
             }
@@ -127,7 +128,7 @@ public class BytecodeCache {
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((Play.version + plugins + text).getBytes("utf-8"));
+            messageDigest.update((Play.version + plugins + text).getBytes(UTF_8));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

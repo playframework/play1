@@ -61,6 +61,8 @@ import play.templates.types.SafeXMLFormatter;
 import play.utils.HTML;
 import play.utils.Java;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class GroovyTemplate extends BaseTemplate {
 
     static final Map<String, SafeFormatter> safeFormatters = new HashMap<>();
@@ -187,7 +189,7 @@ public class GroovyTemplate extends BaseTemplate {
                     sb.append("\n");
                 }
                 // Cache
-                BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, source);
+                BytecodeCache.cacheBytecode(sb.toString().getBytes(UTF_8), name, source);
                 compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
                 if (System.getProperty("precompile") != null) {
                     try {
