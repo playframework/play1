@@ -8,6 +8,7 @@
 	assertTextPresent('ÆØÅ')
 	
 	// 500
+	// FIXME: Does not fail but an error is recorded which stops further testing
 	open('@{HasErrors.willThrowError()}')
 	assertTextPresent('Execution exception')
 	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
@@ -15,16 +16,19 @@
 	assertTextPresent('ÆØÅ')
 	
 	// 500
+	// FIXME: Does not fail but an error is recorded which stops further testing
 	open('@{HasErrors.willThrowErrorToo()}')
 	assertTextPresent('Template compilation error')
 	assertTextPresent(' is not opened.')
 	
 	// 404
+	// FIXME: Does not fail but an error is recorded which stops further testing
 	open('/nimp')
 	assertTextPresent('Not found')
 	assertTextPresent('GET /nimp')
     
 	// 404
+	// FIXME: Does not fail but an error is recorded which stops further testing
 	open('/application/nimp')
 	assertTextPresent('Not found')
 	assertTextPresent('application.nimp action not found')
