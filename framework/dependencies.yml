@@ -47,13 +47,13 @@ require:    &allDependencies
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.0
-    - org.bouncycastle -> bcprov-jdk15on 1.69
-    - org.bouncycastle -> bcpkix-jdk15on 1.69
+    - org.bouncycastle -> bcprov-jdk15on 1.70
+    - org.bouncycastle -> bcpkix-jdk15on 1.70
     - org.codehaus.groovy -> groovy 3.0.9
     - org.codehaus.groovy -> groovy-xml 3.0.9
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.27.0
     - org.hibernate -> hibernate-core 5.4.30.Final.patched
-    - net.bytebuddy -> byte-buddy 1.12.2
+    - net.bytebuddy -> byte-buddy 1.12.3
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
     - org.hibernate -> hibernate-validator 5.4.1.Final
