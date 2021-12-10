@@ -51,7 +51,7 @@ require:    &allDependencies
     - org.bouncycastle -> bcpkix-jdk15on 1.70
     - org.codehaus.groovy -> groovy 3.0.9
     - org.codehaus.groovy -> groovy-xml 3.0.9
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.27.0
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.28.0
     - org.hibernate -> hibernate-core 5.4.30.Final.patched
     - net.bytebuddy -> byte-buddy 1.12.3
     - javax.persistence -> javax.persistence-api 2.2

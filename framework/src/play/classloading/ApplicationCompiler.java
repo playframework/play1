@@ -49,6 +49,7 @@ public class ApplicationCompiler {
         compatibleJavaVersions.put("14", CompilerOptions.VERSION_14);
         compatibleJavaVersions.put("15", CompilerOptions.VERSION_15);
         compatibleJavaVersions.put("16", CompilerOptions.VERSION_16);
+        compatibleJavaVersions.put("16", CompilerOptions.VERSION_17);
     }
 
     /**
