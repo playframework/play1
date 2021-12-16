@@ -19,7 +19,7 @@ require:    &allDependencies
     - com.google.code.gson -> gson 2.8.5
     - com.jamonapi -> jamon 2.81
     - com.ning -> async-http-client 1.9.40
-    - commons-beanutils 1.9.2 
+    - commons-beanutils 1.9.2
     - commons-codec 1.10
     - org.apache.commons -> commons-email 1.4
     - commons-fileupload 1.3.2
@@ -58,7 +58,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-validator 5.4.1.Final
     - org.jboss.logging -> jboss-logging 3.3.0.Final
     - org.jboss.spec.javax.transaction -> jboss-transaction-api_1.2_spec 1.0.1.Final
-    - javax.persistence -> javax.persistence-api 2.2 
+    - javax.persistence -> javax.persistence-api 2.2
     - javax.xml.bind -> jaxb-api 2.3.1
     - org.glassfish.jaxb -> jaxb-runtime 2.3.1
     - com.fasterxml -> classmate 1.3.4
@@ -75,6 +75,7 @@ require:    &allDependencies
     - org.apache.logging.log4j -> log4j-core 2.16.0
     - org.apache.logging.log4j -> log4j-api 2.16.0
     - org.apache.logging.log4j -> log4j-slf4j-impl 2.16.0
+    - org.apache.logging.log4j -> log4j-web 2.16.0
     - org.slf4j -> slf4j-api 1.7.24
 
 # Default repositories, used for all projects
@@ -91,7 +92,7 @@ repositories:
         type:       local
         artifact:   "${play.path}/framework/lib/[artifact]-[revision].jar"
         contains:   *allDependencies
-        
+
     - playCoreCrud:
         type:       local
         artifact:   "${play.path}/modules/crud"
@@ -103,16 +104,16 @@ repositories:
         artifact:   "${play.path}/modules/secure"
         contains:
             - play -> secure $version
-            
+
     - playCoreDocviewer:
         type:       local
         artifact:   "${play.path}/modules/docviewer"
         contains:
             - play -> docviewer $version
 
-    - playModules:  
+    - playModules:
         type:       chain
-        using:            
+        using:
             - playLocalModules:
                 type:       local
                 descriptor: "${play.path}/modules/[module]-[revision]/conf/dependencies.yml"
@@ -122,7 +123,7 @@ repositories:
                 type:       http
                 descriptor: "https://www.playframework.com/modules/repo/[module]/[revision]/dependencies.yml"
                 artifact:   "https://www.playframework.com/modules/[module]-[revision].zip"
-                
+
         contains:
             - play -> *
 

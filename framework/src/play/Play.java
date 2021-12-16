@@ -22,6 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -616,6 +618,7 @@ public class Play {
             Invoker.resetClassloaders();
             long duration = (System.currentTimeMillis() - start) / 1000;
             Logger.info("Play stopped (%s s)", duration);
+            LogManager.shutdown();
         }
     }
 
@@ -742,7 +745,7 @@ public class Play {
     /**
      * Load all modules. You can even specify the list using the MODULES environment
      * variable.
-     * 
+     *
      * @param appRoot
      *            the application path virtual file
      */
@@ -892,7 +895,7 @@ public class Play {
      *
      * Your app is running in test-mode if the framework id (Play.id) is 'test' or
      * 'test-?.*'
-     * 
+     *
      * @return true if test mode
      */
     public static boolean runningInTestMode() {
