@@ -140,6 +140,11 @@ public class GroovyTemplate extends BaseTemplate {
                 compilationUnit.addSource(
                         new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
 
+                // Play needs to handle writing the generated Groovy class to the file system but the Groovy
+                // compilation unit by default adds it's own output phase operation to do this that cannot
+                // be replaced using the available public methods. Until Groovy provides this capability
+                // it's necessary to access the compilation unit directly using reflection to replace the
+                // default output operation with the Play Groovy class handler.
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
                 Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
