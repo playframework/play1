@@ -87,7 +87,7 @@ public class Logger {
             }
             ConfigurationSource source = null;
             try {
-                Configurator.initialize(Play.classloader, new ConfigurationSource(new FileInputStream(log4jConf.getFile())));
+                Configurator.initialize(Play.classloader, new ConfigurationSource(log4jConf.openStream(), log4jConf, 0L));
             } catch (IOException e) {
                 e.printStackTrace();
             }

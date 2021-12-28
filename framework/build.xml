@@ -280,30 +280,37 @@
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
             <param name="play.user.language" value="-Duser.language=en"/>
             <param name="play.user.country" value="-Duser.country=US"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/forum"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/zencontact"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/jobboard"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/yabe"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/nonstatic-app"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/fast-tag"/>
+            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>
 
         <antcall target="test-success" />
@@ -337,6 +344,7 @@
             <arg value="${testAppPath}"/>
             <arg value="${play.user.language}" if:set="play.user.language"/>
             <arg value="${play.user.country}" if:set="play.user.country"/>
+            <arg value="${play.enhancement}" if:set="play.enhancement"/>
         </exec>
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
