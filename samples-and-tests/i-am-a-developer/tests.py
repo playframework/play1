@@ -221,24 +221,23 @@ class IamADeveloper(unittest.TestCase):
         step('Writing log4j config file')
         
         create(app, 'conf/log4j.xml')
-        
+
+
         insert(app, "conf/log4j.xml", 1, '<?xml version="1.0" encoding="UTF-8" ?>')
-        insert(app, "conf/log4j.xml", 2, '<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">')
-        insert(app, "conf/log4j.xml", 3, '<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">')
-        insert(app, "conf/log4j.xml", 4, '  <appender name="console" class="org.apache.log4j.ConsoleAppender">')
-        insert(app, "conf/log4j.xml", 5, '      <param name="Target" value="System.out"/>')
-        insert(app, "conf/log4j.xml", 6, '      <layout class="org.apache.log4j.PatternLayout">')
-        insert(app, "conf/log4j.xml", 7, '          <param name="ConversionPattern" value="%m%n"/>')
-        insert(app, "conf/log4j.xml", 8, '      </layout>')
-        insert(app, "conf/log4j.xml", 9, '  </appender>')
-        insert(app, "conf/log4j.xml", 10, ' <logger name="play">')
-        insert(app, "conf/log4j.xml", 11, '     <level value="debug"/>')
-        insert(app, "conf/log4j.xml", 12, ' </logger>')
-        insert(app, "conf/log4j.xml", 13, ' <root>')
-        insert(app, "conf/log4j.xml", 14, '     <priority value="info"/>')
-        insert(app, "conf/log4j.xml", 15, '     <appender-ref ref="console"/>')
-        insert(app, "conf/log4j.xml", 16, ' </root>')
-        insert(app, "conf/log4j.xml", 17, '</log4j:configuration>')
+        insert(app, "conf/log4j.xml", 2, '<Configuration status="INFO">')
+        insert(app, "conf/log4j.xml", 3, '  <Appenders>')
+        insert(app, "conf/log4j.xml", 4, '      <Console name="Console" target="SYSTEM_OUT">')
+        insert(app, "conf/log4j.xml", 5, '         <PatternLayout pattern="%m%n"/>')
+        insert(app, "conf/log4j.xml", 6, '      </Console>')
+        insert(app, "conf/log4j.xml", 7, '  </Appenders>')
+        insert(app, "conf/log4j.xml", 8, ' <Loggers>')
+        insert(app, "conf/log4j.xml", 9, '    <Root level="INFO">')
+        insert(app, "conf/log4j.xml", 10, '      <AppenderRef ref="Console"/>')
+        insert(app, "conf/log4j.xml", 11, '    </Root>')
+        insert(app, "conf/log4j.xml", 12, '    <Logger name="play" level="DEBUG"/>')
+        insert(app, "conf/log4j.xml", 13, '  </Loggers>')
+        insert(app, "conf/log4j.xml", 14, '</Configuration>')
+
 
         # Run the newly created application
         step('re-run our logger-application')
@@ -450,7 +449,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('insert ";" to complete BlockStatements'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -469,7 +468,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('insert ";" to complete BlockStatements'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -493,9 +492,16 @@ class IamADeveloper(unittest.TestCase):
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
         
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+
         # Let's code hello world
         step('Let\'s code hello world')
-        time.sleep(1)
+    
+        self.play = callPlay(self, ['run', app])
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
         
         edit(app, 'app/controllers/Application.java', 12, '  public static void index(String name) {')
         edit(app, 'app/controllers/Application.java', 13, '        render(name);')
@@ -513,11 +519,22 @@ class IamADeveloper(unittest.TestCase):
         html = response.get_data()
         self.assert_(html.count('Hello Guillaume !!'))
         
+
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+
         # Make a mistake in the template
         step('Make a mistake in the template')
         time.sleep(1)
         
         edit(app, 'app/views/Application/index.html', 4, "Hello ${name !!")
+    
+        self.play = callPlay(self, ['run', app])
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+        
+
         try:
             response = browser.reload()
             self.fail()
@@ -527,7 +544,7 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
         
@@ -543,7 +560,7 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines()) 
             self.assert_(html.count('Template compilation error'))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
@@ -562,7 +579,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Template execution error '))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
             self.assert_(html.count('Cannot get property \'name\' on null object'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -582,7 +599,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Template execution error '))
             self.assert_(html.count('In /app/views/Application/index.html (around line 4)'))
             self.assert_(html.count('Cannot get property \'name\' on null object'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assert_(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
@@ -600,10 +617,23 @@ class IamADeveloper(unittest.TestCase):
         html = response.get_data()
         self.assert_(html.count('Hello Guillaume !!'))
 
+        step("stop play")
+        killPlay()
+        self.play.wait()
+
+    
+
         # Make a Java runtime exception
         step('Make a Java runtime exception')  
         
-        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')     
+
+
+        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')
+
+        self.play = callPlay(self, ['run', app])
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+
+
         try:
             response = browser.reload()
             self.fail()
@@ -614,7 +644,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -633,7 +663,7 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'ERROR'))
             self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -717,7 +747,7 @@ class IamADeveloper(unittest.TestCase):
 
         # Correct the routes file
         step('Correct the routes file')
-        time.sleep(1)
+        
 
         edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
 
@@ -734,48 +764,23 @@ class IamADeveloper(unittest.TestCase):
         html = response.get_data()
         self.assert_(html.count('Hello'))
         
+
+
         # Rename again
-        step('Rename again')
-        time.sleep(1)
+        #step("stop play")
+        #killPlay()
+        #self.play.wait()
+
+
+        step('Rename again & fix class name')
         
         rename(app, 'app/controllers/Hello2.java', 'app/controllers/Hello3.java')
         edit(app, 'conf/routes', 7, "GET      /hello          Hello3.hello")
-        
-        try:
-            browser.reload()
-            self.fail()
-        except urllib2.HTTPError, error:
-            self.assert_(browser.viewing_html())
-            self.assert_(browser.title() == 'Application error')
-            html = ''.join(error.readlines())
-            self.assert_(html.count('Compilation error'))
-            self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
-            self.assert_(html.count('The public type Hello2 must be defined in its own file'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-            
-        # Refresh again
-        step('Refresh again')
-
-        try:
-            browser.reload()
-            self.fail()
-        except urllib2.HTTPError, error:
-            self.assert_(browser.viewing_html())
-            self.assert_(browser.title() == 'Application error')
-            html = ''.join(error.readlines())
-            self.assert_(html.count('Compilation error'))
-            self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
-            self.assert_(html.count('The public type Hello2 must be defined in its own file'))
-            self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-            
-        # Fix it
-        step('Fix it')
-        
         edit(app, 'app/controllers/Hello3.java', 3, "public class Hello3 extends Application {")
+    
+        #self.play = callPlay(self, ['run', app])
+        #self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+        
         browser.reload()
         self.assert_(not browser.viewing_html())   
         html = response.get_data()

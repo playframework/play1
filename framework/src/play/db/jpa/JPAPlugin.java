@@ -110,19 +110,14 @@ public class JPAPlugin extends PlayPlugin {
      * Reads the configuration file and initialises required JPA EntityManagerFactories.
      */
     @Override
-    public void onApplicationStart() {  
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig("org.hibernate.SQL");
-        loggerConfig.setLevel(Level.OFF);
-        ctx.updateLoggers();
-
+    public void onApplicationStart() {
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
             Configuration dbConfig = new Configuration(dbName);
-            
+
             if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
-                ctx = (LoggerContext) LogManager.getContext(false);
-                loggerConfig = ctx.getConfiguration().getLoggerConfig("org.hibernate.SQL");
+                LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+                LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig("org.hibernate.SQL");
                 loggerConfig.setLevel(Level.ALL);
                 ctx.updateLoggers();
             }
