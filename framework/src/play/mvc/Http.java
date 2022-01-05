@@ -163,6 +163,10 @@ public class Http {
          * See http://www.owasp.org/index.php/HttpOnly
          */
         public boolean httpOnly = false;
+        /**
+         * See https://owasp.org/www-community/SameSite
+         */
+        public String sameSite;
     }
 
     /**
@@ -707,8 +711,8 @@ public class Http {
          * @param value
          *            Cookie value
          */
-        public void setCookie(String name, String value) {
-            setCookie(name, value, null, "/", null, false);
+        public void setCookie(String name, String value, String sameSite) {
+            setCookie(name, value, null, "/", null, false, sameSite);
         }
 
         /**
@@ -730,7 +734,7 @@ public class Http {
          *            cookie path
          */
         public void removeCookie(String name, String path) {
-            setCookie(name, "", null, path, 0, false);
+            setCookie(name, "", null, path, 0, false, null);
         }
 
         /**
@@ -743,15 +747,15 @@ public class Http {
          * @param duration
          *            the cookie duration (Ex: 3d)
          */
-        public void setCookie(String name, String value, String duration) {
-            setCookie(name, value, null, "/", Time.parseDuration(duration), false);
+        public void setCookie(String name, String value, String duration, String sameSite) {
+            setCookie(name, value, null, "/", Time.parseDuration(duration), false, sameSite);
         }
 
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure) {
-            setCookie(name, value, domain, path, maxAge, secure, false);
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, String sameSite) {
+            setCookie(name, value, domain, path, maxAge, secure, false, sameSite);
         }
 
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly, String sameSite) {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path)
                     && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
@@ -765,6 +769,7 @@ public class Http {
                 cookie.path = path;
                 cookie.secure = secure;
                 cookie.httpOnly = httpOnly;
+                cookie.sameSite = sameSite;
                 if (domain != null) {
                     cookie.domain = domain;
                 } else {

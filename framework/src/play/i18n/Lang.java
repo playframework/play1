@@ -82,7 +82,7 @@ public class Lang {
             Response response = Response.current();
             if (response != null) {
                 // We have a current response in scope - set the language-cookie to store the selected language for the next requests
-                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, null, "/", null, Scope.COOKIE_SECURE);
+                response.setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale, null, "/", null, Scope.COOKIE_SECURE, Scope.SESSION_SAMESITE);
             }
         }
 
@@ -155,7 +155,7 @@ public class Lang {
                     return;
                 }
                 // could not use locale from cookie - clear the locale-cookie
-                Response.current().setCookie(cn, "", null, "/", null, Scope.COOKIE_SECURE);
+                Response.current().setCookie(cn, "", null, "/", null, Scope.COOKIE_SECURE, Scope.SESSION_SAMESITE);
 
             }
 

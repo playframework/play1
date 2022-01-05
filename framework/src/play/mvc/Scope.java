@@ -32,6 +32,7 @@ public class Scope {
             .equals("true");
     public static boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
+    public static final String SESSION_SAMESITE = Play.configuration.getProperty("application.session.sameSite");
 
     public static SessionStore sessionStore = createSessionStore();
 
@@ -78,13 +79,13 @@ public class Scope {
             }
             if (out.isEmpty()) {
                 if (Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH") || !SESSION_SEND_ONLY_IF_CHANGED) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY, SESSION_SAMESITE);
                 }
                 return;
             }
             try {
                 String flashData = CookieDataCodec.encode(out);
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY, SESSION_SAMESITE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
