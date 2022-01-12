@@ -1,21 +1,23 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<Configuration name="ConfigTest" status="ERROR" monitorInterval="5">
+    <Appenders>
 
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+        <SystemPropertyArbiter propertyName="env" propertyValue="dev">
+            <Console name="Out">
+                <PatternLayout pattern="%m%n"/>
+            </Console>
+        </SystemPropertyArbiter>
+        <SystemPropertyArbiter propertyName="env" propertyValue="prod">
+            <List name="Out">
+            </List>
+        </SystemPropertyArbiter>
 
-  <appender name="XmlConsoleAppender" class="org.apache.log4j.ConsoleAppender">
-    <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d{ISO8601} %-5p [%t] %c: %m%n" />
-    </layout>
-  </appender>
-
-  <logger name="logtest.xml">
-    <level value="ERROR"/>
-  </logger>
-
-  <root>
-    <priority value="DEBUG" />
-    <appender-ref ref="XmlConsoleAppender" />
-  </root>
-
-</log4j:configuration>
+    </Appenders>
+    <Loggers>
+        <Logger name="logtest.xml" level="trace" >
+            <AppenderRef ref="Out"/>
+        </Logger>
+        <Root level="debug">
+            <AppenderRef ref="Out"/>
+        </Root>
+    </Loggers>
+</Configuration>
