@@ -852,13 +852,13 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
     protected static String template() {
         Request theRequest = Request.current();
         String format = theRequest.format;
-        String templateName = theRequest.action.replace(".", "/") + "." + (format == null ? "html" : format);
+        String templateName = theRequest.action.replace('.', '/') + "." + (format == null ? "html" : format);
         if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if (!templateName.contains(".")) {
                 templateName = theRequest.controller + "." + templateName;
             }
-            templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
+            templateName = templateName.replace('.', '/') + "." + (format == null ? "html" : format);
         }
         return null == templateNameResolver ? templateName : templateNameResolver.resolveTemplateName(templateName);
     }
@@ -879,7 +879,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
             if (!templateName.contains(".")) {
                 templateName = theRequest.controller + "." + templateName;
             }
-            templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
+            templateName = templateName.replace('.', '/') + "." + (format == null ? "html" : format);
         }
         return templateName;
     }

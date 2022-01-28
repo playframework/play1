@@ -70,7 +70,7 @@ public class TemplateLoader {
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
                 BaseTemplate template = new GroovyTemplate(
-                        fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");
+                        fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent"), "");
                 try {
                     template.loadPrecompiled();
                     templates.put(key, template);
@@ -187,7 +187,7 @@ public class TemplateLoader {
             VirtualFile tf = vf.child(path);
             boolean templateExists = tf.exists();
             if (!templateExists && Play.usePrecompiled) {
-                String name = tf.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent");
+                String name = tf.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent");
                 templateExists = Play.getFile("precompiled/templates/" + name).exists();
             }
             if (templateExists) {

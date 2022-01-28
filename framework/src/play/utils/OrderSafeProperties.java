@@ -1,6 +1,5 @@
 package play.utils;
 
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -9,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * Custom impl of java.util.properties that preserves the key-order from the file
@@ -39,7 +40,7 @@ public class OrderSafeProperties extends java.util.Properties {
             String escapedLine = StringEscapeUtils.escapeJava( line ) + "\n";
             // remove escaped backslashes
             escapedLine = escapedLine.replaceAll("\\\\\\\\","\\\\");
-            out.write( escapedLine.getBytes("iso-8859-1"));
+            out.write( escapedLine.getBytes(ISO_8859_1));
         }
 
         // read properties-file with regular java.util.Properties impl

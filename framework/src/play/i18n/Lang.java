@@ -102,7 +102,7 @@ public class Lang {
         ArrayList<String> cleanLocales = new ArrayList<>(desiredLocales.size());
         //look for an exact match
         for (String a : desiredLocales) {
-            a = a.replace("-", "_");
+            a = a.replace('-', '_');
             cleanLocales.add(a);
             for (String locale : Play.langs) {
                 if (locale.equalsIgnoreCase(a)) {

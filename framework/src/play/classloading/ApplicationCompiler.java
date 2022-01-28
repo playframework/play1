@@ -274,7 +274,7 @@ public class ApplicationCompiler {
                 // If error
                 if (result.hasErrors()) {
                     for (IProblem problem : result.getErrors()) {
-                        String className = new String(problem.getOriginatingFileName()).replace("/", ".");
+                        String className = new String(problem.getOriginatingFileName()).replace('/', '.');
                         className = className.substring(0, className.length() - 5);
                         String message = problem.getMessage();
                         if (problem.getID() == IProblem.CannotImportPackage) {

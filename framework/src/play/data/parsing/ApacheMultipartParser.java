@@ -1,5 +1,6 @@
 package play.data.parsing;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.apache.commons.io.FileUtils.readFileToByteArray;
 
 import java.io.ByteArrayInputStream;
@@ -634,13 +635,7 @@ public class ApacheMultipartParser extends DataParser {
         if (boundaryStr == null) {
             return null;
         }
-        byte[] boundary;
-        try {
-            boundary = boundaryStr.getBytes("ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            boundary = boundaryStr.getBytes();
-        }
-        return boundary;
+        return boundaryStr.getBytes(ISO_8859_1);
     }
 
     /**

@@ -270,7 +270,7 @@ public class ApplicationClasses {
             if (System.getProperty("precompile") != null) {
                 try {
                     // emit bytecode to standard class layout as well
-                    File f = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
+                    File f = Play.getFile("precompiled/java/" + name.replace('.', '/') + ".class");
                     f.getParentFile().mkdirs();
                     try (FileOutputStream fos = new FileOutputStream(f)) {
                         fos.write(this.enhancedByteCode);
@@ -361,7 +361,7 @@ public class ApplicationClasses {
             fileName = fileName.substring(0, fileName.indexOf("$"));
         }
         // the local variable fileOrDir is important!
-        String fileOrDir = fileName.replace(".", "/");
+        String fileOrDir = fileName.replace('.', '/');
         fileName = fileOrDir + ".java";
         for (VirtualFile path : Play.javaPath) {
             // 1. check if there is a folder (without extension)

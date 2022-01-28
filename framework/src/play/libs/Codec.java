@@ -10,6 +10,8 @@ import org.apache.commons.codec.binary.Hex;
 
 import play.exceptions.UnexpectedException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Codec utils
  */
@@ -32,11 +34,7 @@ public class Codec {
      * @return The base64 encoded String
      */
     public static String encodeBASE64(String value) {
-        try {
-            return new String(Base64.encodeBase64(value.getBytes("utf-8")));
-        } catch (UnsupportedEncodingException ex) {
-            throw new UnexpectedException(ex);
-        }
+        return new String(Base64.encodeBase64(value.getBytes(UTF_8)));
     }
 
     /**
@@ -58,11 +56,7 @@ public class Codec {
      * @return decoded binary data
      */
     public static byte[] decodeBASE64(String value) {
-        try {
-            return Base64.decodeBase64(value.getBytes("utf-8"));
-        } catch (UnsupportedEncodingException ex) {
-            throw new UnexpectedException(ex);
-        }
+        return Base64.decodeBase64(value.getBytes(UTF_8));
     }
 
     /**
@@ -76,7 +70,7 @@ public class Codec {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update(value.getBytes("utf-8"));
+            messageDigest.update(value.getBytes(UTF_8));
             byte[] digest = messageDigest.digest();
             return byteToHexString(digest);
         } catch (Exception ex) {
@@ -95,7 +89,7 @@ public class Codec {
         try {
             MessageDigest md;
             md = MessageDigest.getInstance("SHA-1");
-            md.update(value.getBytes("utf-8"));
+            md.update(value.getBytes(UTF_8));
             byte[] digest = md.digest();
             return byteToHexString(digest);
         } catch (Exception ex) {

@@ -594,7 +594,7 @@ public class Logger {
                 } else {
                     errorOut.println(playException.getErrorTitle());
                 }
-                errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
+                errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace('\n', ' '));
             } else {
                 sw.append(format(message, args));
             }
