@@ -159,7 +159,7 @@ public class GroovyTemplate extends BaseTemplate {
                         groovyClassesForThisTemplate.add(gclass);
                     }
                 });
-                
+
                 compilationUnit.compile();
                 // ouf
 

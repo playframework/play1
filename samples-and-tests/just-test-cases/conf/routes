@@ -13,12 +13,12 @@ GET         /re/{<[a-z]+>re}                Application.ok
 GET         /re/{<[0-9]{5}>re}              Application.ok
 GET         /re/{<[A-Z]{2,4}>re}            Application.ok
 GET         /re/{<[0-9]%2F[0-9]>re}/rev     Application.revRoute
-GET         /re/{<[a-z0-9]+%2F[a-z,0-9]+>re}/rev     Application.revRoute
-GET         /re/{<[A-Za-z0-9\/%]+>re}/rev            Application.revRoute
-GET         /re/urlWithArgumentInRoutesNoSpace  Application.ressourceWithoutSpecialCharacters(appId:'param1',verId:'param2')
+GET         /re/{<[a-z0-9]+%2F[a-z,0-9]+>re}/rev  Application.revRoute
+GET         /re/{<[A-Za-z0-9\/%]+>re}/rev         Application.revRoute
+GET         /re/urlWithArgumentInRoutesNoSpace    Application.ressourceWithoutSpecialCharacters(appId:'param1',verId:'param2')
 GET         /re/urlWithArgumentInRoutesWithSpace  Application.ressourceWithoutSpecialCharacters( appId:'param1',  verId:'param2' )
-GET         /re/{appId}/{verId}                      Application.ressourceWithoutSpecialCharacters
-GET         /re/{<[a-z0-9]+[\/]??(%2F)??[a-z,0-9]+>appId}/{<[a-z0-9\/%F]+>verId}             Application.ressourceWithSpecialCharacters
+GET         /re/{appId}/{verId}                   Application.ressourceWithoutSpecialCharacters
+GET         /re/{<[a-z0-9]+[\/]??(%2F)??[a-z,0-9]+>appId}/{<[a-z0-9\/%F]+>verId}  Application.ressourceWithSpecialCharacters
 
 GET         /{lucky}/doIt                   Application.showIt
 GET         /withQueryParam                 Application.withQueryParam
@@ -50,44 +50,44 @@ POST        /needAuthenticity               WithAuthenticity.needAuthenticity
 GET         /needAuthenticity               WithAuthenticity.needAuthenticity
 
 # Import the default CRUD routes
-*           /admin                           module:crud
+*           /admin                          module:crud
 
 # Map static resources from the /app/public folder to the /public path
-GET         /public/                         staticDir:public
-GET         static.foo.com/assets/           staticDir:public2/assets1
-GET         static2.foo.com/x                staticDir:public2/assets2
+GET         /public/                        staticDir:public
+GET         static.foo.com/assets/          staticDir:public2/assets1
+GET         static2.foo.com/x               staticDir:public2/assets2
 
 #bug in router.reverse
-GET         /notmatch/{name}/{action}        Application.{action}
-GET         /index2                          Application.index2
-GET         /xsstest                         security.XssAttempts.testUrlParam
+GET         /notmatch/{name}/{action}       Application.{action}
+GET         /index2                         Application.index2
+GET         /xsstest                        security.XssAttempts.testUrlParam
 
 # Catch all
 *           /async/{controller}/{action}    async.{controller}.{action}
-*           /sample/{controller}/{action}      sample.{controller}.{action}
-*           /tagDemos/{controller}/{action}    tagDemos.{controller}.{action}
-*           /security/{controller}/{action}    security.{controller}.{action}
-*           /{controller}/{action}           {controller}.{action}
+*           /sample/{controller}/{action}   sample.{controller}.{action}
+*           /tagDemos/{controller}/{action} tagDemos.{controller}.{action}
+*           /security/{controller}/{action} security.{controller}.{action}
+*           /{controller}/{action}          {controller}.{action}
 
 # Data binding
 
-GET     /databinding/showDefaultDateFormat/{date}/?         DataBinding.showDefaultDateFormat
-GET     /databinding/showLocaleDateFormat/{date}/?          DataBinding.showLocaleDateFormat
-GET     /databinding/showDefaultLocaleDateFormat/{date}/?   DataBinding.showDefaultLocaleDateFormat
-GET     /databinding/showDateFormat/{date}/?                DataBinding.showDateFormat
-GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
-GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
-GET     /databinding/showCalendar2/{cal}/?               DataBinding.showCalendar2
-GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage
+GET         /databinding/showDefaultDateFormat/{date}/?        DataBinding.showDefaultDateFormat
+GET         /databinding/showLocaleDateFormat/{date}/?         DataBinding.showLocaleDateFormat
+GET         /databinding/showDefaultLocaleDateFormat/{date}/?  DataBinding.showDefaultLocaleDateFormat
+GET         /databinding/showDateFormat/{date}/?               DataBinding.showDateFormat
+GET         /databinding/showList/{<.*>mailboxes}/?            DataBinding.showList
+GET         /databinding/showCalendar/{cal}/?                  DataBinding.showCalendar
+GET         /databinding/showCalendar2/{cal}/?                 DataBinding.showCalendar2
+GET         /databinding/changeLanguage/{lang}/?               DataBinding.changeLanguage
 
 
-GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
+GET		      /useAwaitViaOtherClass  WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
 
-GET   /status/ok/             StatusCodes.justOkay
-GET   /status/not-found/      StatusCodes.rendersNotFound
-GET   /status/unauthorized/   StatusCodes.rendersUnauthorized
-POST  /status/job/            StatusCodes.usesContinuation
-GET   /status/failure/        StatusCodes.throwsException
+GET         /status/ok/             StatusCodes.justOkay
+GET         /status/not-found/      StatusCodes.rendersNotFound
+GET         /status/unauthorized/   StatusCodes.rendersUnauthorized
+POST        /status/job/            StatusCodes.usesContinuation
+GET         /status/failure/        StatusCodes.throwsException
 
 # module
-*         /               module:secure
+*           /                       module:secure
