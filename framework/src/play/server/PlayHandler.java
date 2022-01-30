@@ -375,8 +375,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
             c.setHttpOnly(cookie.httpOnly);
             String encodedCookie = ServerCookieEncoder.STRICT.encode(c);
-            if(cookie.sameSite != null) {
-                encodedCookie += "; SameSite=" + cookie.sameSite;
+            if (cookie.sameSite != null) {
+                encodedCookie += "; SameSite=" + cookie.sameSite.getValue();
             }
             nettyResponse.headers().add(SET_COOKIE, encodedCookie);
         }
@@ -796,8 +796,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     }
                     c.setHttpOnly(cookie.httpOnly);
                     String encodedCookie = ServerCookieEncoder.STRICT.encode(c);
-                    if(cookie.sameSite != null) {
-                        encodedCookie += "; SameSite=" + cookie.sameSite;
+                    if (cookie.sameSite != null) {
+                        encodedCookie += "; SameSite=" + cookie.sameSite.getValue();
                     }
                     nettyResponse.headers().add(SET_COOKIE, encodedCookie);
                 }

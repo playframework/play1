@@ -27,12 +27,12 @@ public class HttpResponseTest {
 
         Http.Cookie.defaultDomain = ".abc.com";
         response = new Http.Response();
-        response.setCookie("testCookie", "testValue", "lax");
-        assertThat(response.cookies.get("testCookie").sameSite).isEqualTo("lax");
+        response.setCookie("testCookie", "testValue", Http.SAMESITE.LAX);
+        assertThat(response.cookies.get("testCookie").sameSite).isEqualTo(Http.SAMESITE.LAX);
 
         Http.Cookie.defaultDomain = ".abc.com";
         response = new Http.Response();
-        response.setCookie("testCookie", "testValue", "strict");
-        assertThat(response.cookies.get("testCookie").sameSite).isEqualTo("strict");
+        response.setCookie("testCookie", "testValue", Http.SAMESITE.STRICT);
+        assertThat(response.cookies.get("testCookie").sameSite).isEqualTo(Http.SAMESITE.STRICT);
     }
 }
