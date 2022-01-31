@@ -1,6 +1,6 @@
-h1. Welcome to Play framework  
+h1. Welcome to Play framework
 
-!https://travis-ci.org/playframework/play1.svg?branch=1.4.x!:https://travis-ci.org/playframework/play1 !https://badges.gitter.im/playframework/play1.svg(Join the chat at https://gitter.im/playframework/play1)!:https://gitter.im/playframework/play1?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+!https://github.com/playframework/play1/actions/workflows/build-test.yml/badge.svg!:https://github.com/playframework/play1/actions/workflows/build-test.yml/badge.svg !https://badges.gitter.im/playframework/play1.svg(Join the chat at https://gitter.im/playframework/play1)!:https://gitter.im/playframework/play1?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 Play framework makes it easier to build Web applications with Java. It is a clean alternative to bloated Enterprise Java stacks. It focuses on developer productivity and targets RESTful architectures. Play is a perfect companion to agile software development.
 
