@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """The Tab Nanny despises ambiguous indentation.  She knows no mercy.
 
@@ -22,7 +22,6 @@ __version__ = "6"
 
 import os
 import sys
-import getopt
 import tokenize
 if not hasattr(tokenize, 'NL'):
     raise ValueError("tokenize.NL doesn't exist -- tokenize module too old")
@@ -40,10 +39,12 @@ def errprint(*args):
     sys.stderr.write("\n")
 
 def main():
+    import getopt
+
     global verbose, filename_only
     try:
         opts, args = getopt.getopt(sys.argv[1:], "qv")
-    except getopt.error, msg:
+    except getopt.error as msg:
         errprint(msg)
         return
     for o, a in opts:
@@ -59,7 +60,7 @@ def main():
 
 class NannyNag(Exception):
     """
-    Raised by tokeneater() if detecting an ambiguous indent.
+    Raised by process_tokens() if detecting an ambiguous indent.
     Captured and handled in check().
     """
     def __init__(self, lineno, msg, line):
@@ -83,7 +84,7 @@ def check(file):
 
     if os.path.isdir(file) and not os.path.islink(file):
         if verbose:
-            print "%r: listing directory" % (file,)
+            print("%r: listing directory" % (file,))
         names = os.listdir(file)
         for name in names:
             fullname = os.path.join(file, name)
@@ -94,40 +95,43 @@ def check(file):
         return
 
     try:
-        f = open(file)
-    except IOError, msg:
+        f = tokenize.open(file)
+    except OSError as msg:
         errprint("%r: I/O Error: %s" % (file, msg))
         return
 
     if verbose > 1:
-        print "checking %r ..." % file
+        print("checking %r ..." % file)
 
     try:
         process_tokens(tokenize.generate_tokens(f.readline))
 
-    except tokenize.TokenError, msg:
+    except tokenize.TokenError as msg:
         errprint("%r: Token Error: %s" % (file, msg))
         return
 
-    except IndentationError, msg:
+    except IndentationError as msg:
         errprint("%r: Indentation Error: %s" % (file, msg))
         return
 
-    except NannyNag, nag:
+    except NannyNag as nag:
         badline = nag.get_lineno()
         line = nag.get_line()
         if verbose:
-            print "%r: *** Line %d: trouble in tab city! ***" % (file, badline)
-            print "offending line: %r" % (line,)
-            print nag.get_msg()
+            print("%r: *** Line %d: trouble in tab city! ***" % (file, badline))
+            print("offending line: %r" % (line,))
+            print(nag.get_msg())
         else:
             if ' ' in file: file = '"' + file + '"'
-            if filename_only: print file
-            else: print file, badline, repr(line)
+            if filename_only: print(file)
+            else: print(file, badline, repr(line))
         return
 
+    finally:
+        f.close()
+
     if verbose:
-        print "%r: Clean bill of health." % (file,)
+        print("%r: Clean bill of health." % (file,))
 
 class Whitespace:
     # the characters used for space and tab
@@ -185,21 +189,21 @@ class Whitespace:
         # count, il = self.norm
         # for i in range(len(count)):
         #    if count[i]:
-        #        il = il + (i/tabsize + 1)*tabsize * count[i]
+        #        il = il + (i//tabsize + 1)*tabsize * count[i]
         # return il
 
         # quicker:
-        # il = trailing + sum (i/ts + 1)*ts*count[i] =
-        # trailing + ts * sum (i/ts + 1)*count[i] =
-        # trailing + ts * sum i/ts*count[i] + count[i] =
-        # trailing + ts * [(sum i/ts*count[i]) + (sum count[i])] =
-        # trailing + ts * [(sum i/ts*count[i]) + num_tabs]
-        # and note that i/ts*count[i] is 0 when i < ts
+        # il = trailing + sum (i//ts + 1)*ts*count[i] =
+        # trailing + ts * sum (i//ts + 1)*count[i] =
+        # trailing + ts * sum i//ts*count[i] + count[i] =
+        # trailing + ts * [(sum i//ts*count[i]) + (sum count[i])] =
+        # trailing + ts * [(sum i//ts*count[i]) + num_tabs]
+        # and note that i//ts*count[i] is 0 when i < ts
 
         count, trailing = self.norm
         il = 0
         for i in range(tabsize, len(count)):
-            il = il + i/tabsize * count[i]
+            il = il + i//tabsize * count[i]
         return trailing + tabsize * (il + self.nt)
 
     # return true iff self.indent_level(t) == other.indent_level(t)
@@ -264,7 +268,7 @@ class Whitespace:
         return a
 
 def format_witnesses(w):
-    firsts = map(lambda tup: str(tup[0]), w)
+    firsts = (str(tup[0]) for tup in w)
     prefix = "at tab size"
     if len(w) > 1:
         prefix = prefix + "s"

@@ -16,11 +16,10 @@ import calendar
 from re import compile as re_compile
 from re import IGNORECASE
 from re import escape as re_escape
-from datetime import date as datetime_date
-try:
-    from thread import allocate_lock as _thread_allocate_lock
-except:
-    from dummy_thread import allocate_lock as _thread_allocate_lock
+from datetime import (date as datetime_date,
+                      timedelta as datetime_timedelta,
+                      timezone as datetime_timezone)
+from _thread import allocate_lock as _thread_allocate_lock
 
 __all__ = []
 
@@ -78,15 +77,6 @@ class LocaleTime(object):
         if time.tzname != self.tzname or time.daylight != self.daylight:
             raise ValueError("timezone changed during initialization")
 
-    def __pad(self, seq, front):
-        # Add '' to seq to either the front (is True), else the back.
-        seq = list(seq)
-        if front:
-            seq.insert(0, '')
-        else:
-            seq.append('')
-        return seq
-
     def __calc_weekday(self):
         # Set self.a_weekday and self.f_weekday using the calendar
         # module.
@@ -109,7 +99,7 @@ class LocaleTime(object):
         # magical; just happened to have used it everywhere else where a
         # static date was needed.
         am_pm = []
-        for hour in (01,22):
+        for hour in (1, 22):
             time_tuple = time.struct_time((1999,3,17,hour,44,55,2,76,0))
             am_pm.append(time.strftime("%p", time_tuple).lower())
         self.am_pm = am_pm
@@ -169,9 +159,9 @@ class LocaleTime(object):
             pass
         self.tzname = time.tzname
         self.daylight = time.daylight
-        no_saving = frozenset(["utc", "gmt", self.tzname[0].lower()])
+        no_saving = frozenset({"utc", "gmt", self.tzname[0].lower()})
         if self.daylight:
-            has_saving = frozenset([self.tzname[1].lower()])
+            has_saving = frozenset({self.tzname[1].lower()})
         else:
             has_saving = frozenset()
         self.timezone = (no_saving, has_saving)
@@ -190,24 +180,28 @@ class TimeRE(dict):
             self.locale_time = locale_time
         else:
             self.locale_time = LocaleTime()
-        base = super(TimeRE, self)
+        base = super()
         base.__init__({
-            # The " \d" part of the regex is to make %c from ANSI C work
+            # The " [1-9]" part of the regex is to make %c from ANSI C work
             'd': r"(?P<d>3[0-1]|[1-2]\d|0[1-9]|[1-9]| [1-9])",
             'f': r"(?P<f>[0-9]{1,6})",
             'H': r"(?P<H>2[0-3]|[0-1]\d|\d)",
             'I': r"(?P<I>1[0-2]|0[1-9]|[1-9])",
+            'G': r"(?P<G>\d\d\d\d)",
             'j': r"(?P<j>36[0-6]|3[0-5]\d|[1-2]\d\d|0[1-9]\d|00[1-9]|[1-9]\d|0[1-9]|[1-9])",
             'm': r"(?P<m>1[0-2]|0[1-9]|[1-9])",
             'M': r"(?P<M>[0-5]\d|\d)",
             'S': r"(?P<S>6[0-1]|[0-5]\d|\d)",
             'U': r"(?P<U>5[0-3]|[0-4]\d|\d)",
             'w': r"(?P<w>[0-6])",
+            'u': r"(?P<u>[1-7])",
+            'V': r"(?P<V>5[0-3]|0[1-9]|[1-4]\d|\d)",
             # W is set below by using 'U'
             'y': r"(?P<y>\d\d)",
             #XXX: Does 'Y' need to worry about having less or more than
             #     4 digits?
             'Y': r"(?P<Y>\d\d\d\d)",
+            'z': r"(?P<z>[+-]\d\d:?[0-5]\d(:?[0-5]\d(\.\d{1,6})?)?|(?-i:Z))",
             'A': self.__seqToRE(self.locale_time.f_weekday, 'A'),
             'a': self.__seqToRE(self.locale_time.a_weekday, 'a'),
             'B': self.__seqToRE(self.locale_time.f_month[1:], 'B'),
@@ -254,8 +248,8 @@ class TimeRE(dict):
         # format directives (%m, etc.).
         regex_chars = re_compile(r"([\\.^$*+?\(\){}\[\]|])")
         format = regex_chars.sub(r"\\\1", format)
-        whitespace_replacement = re_compile('\s+')
-        format = whitespace_replacement.sub('\s+', format)
+        whitespace_replacement = re_compile(r'\s+')
+        format = whitespace_replacement.sub(r'\\s+', format)
         while '%' in format:
             directive_index = format.index('%')+1
             processed_format = "%s%s%s" % (processed_format,
@@ -296,8 +290,32 @@ def _calc_julian_from_U_or_W(year, week_of_year, day_of_week, week_starts_Mon):
         return 1 + days_to_week + day_of_week
 
 
+def _calc_julian_from_V(iso_year, iso_week, iso_weekday):
+    """Calculate the Julian day based on the ISO 8601 year, week, and weekday.
+    ISO weeks start on Mondays, with week 01 being the week containing 4 Jan.
+    ISO week days range from 1 (Monday) to 7 (Sunday).
+    """
+    correction = datetime_date(iso_year, 1, 4).isoweekday() + 3
+    ordinal = (iso_week * 7) + iso_weekday - correction
+    # ordinal may be negative or 0 now, which means the date is in the previous
+    # calendar year
+    if ordinal < 1:
+        ordinal += datetime_date(iso_year, 1, 1).toordinal()
+        iso_year -= 1
+        ordinal -= datetime_date(iso_year, 1, 1).toordinal()
+    return iso_year, ordinal
+
+
 def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
-    """Return a time struct based on the input string and the format string."""
+    """Return a 2-tuple consisting of a time struct and an int containing
+    the number of microseconds based on the input string and the
+    format string."""
+
+    for index, arg in enumerate([data_string, format]):
+        if not isinstance(arg, str):
+            msg = "strptime() argument {} must be str, not {}"
+            raise TypeError(msg.format(index, type(arg)))
+
     global _TimeRE_cache, _regex_cache
     with _cache_lock:
         locale_time = _TimeRE_cache.locale_time
@@ -315,16 +333,16 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
                 format_regex = _TimeRE_cache.compile(format)
             # KeyError raised when a bad format is found; can be specified as
             # \\, in which case it was a stray % but with a space after it
-            except KeyError, err:
+            except KeyError as err:
                 bad_directive = err.args[0]
                 if bad_directive == "\\":
                     bad_directive = "%"
                 del err
                 raise ValueError("'%s' is a bad directive in format '%s'" %
-                                    (bad_directive, format))
+                                    (bad_directive, format)) from None
             # IndexError only occurs when the format string is "%"
             except IndexError:
-                raise ValueError("stray %% in format '%s'" % format)
+                raise ValueError("stray %% in format '%s'" % format) from None
             _regex_cache[format] = format_regex
     found = format_regex.match(data_string)
     if not found:
@@ -334,19 +352,21 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
         raise ValueError("unconverted data remains: %s" %
                           data_string[found.end():])
 
-    year = None
+    iso_year = year = None
     month = day = 1
     hour = minute = second = fraction = 0
     tz = -1
+    gmtoff = None
+    gmtoff_fraction = 0
     # Default to -1 to signify that values not known; not critical to have,
     # though
-    week_of_year = -1
-    week_of_year_start = -1
+    iso_week = week_of_year = None
+    week_of_year_start = None
     # weekday and julian defaulted to None so as to signal need to calculate
     # values
     weekday = julian = None
     found_dict = found.groupdict()
-    for group_key in found_dict.iterkeys():
+    for group_key in found_dict.keys():
         # Directives not explicitly handled below:
         #   c, x, X
         #      handled by making out of other directives
@@ -363,6 +383,8 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
                 year += 1900
         elif group_key == 'Y':
             year = int(found_dict['Y'])
+        elif group_key == 'G':
+            iso_year = int(found_dict['G'])
         elif group_key == 'm':
             month = int(found_dict['m'])
         elif group_key == 'B':
@@ -408,6 +430,9 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
                 weekday = 6
             else:
                 weekday -= 1
+        elif group_key == 'u':
+            weekday = int(found_dict['u'])
+            weekday -= 1
         elif group_key == 'j':
             julian = int(found_dict['j'])
         elif group_key in ('U', 'W'):
@@ -418,6 +443,31 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
             else:
                 # W starts week on Monday.
                 week_of_year_start = 0
+        elif group_key == 'V':
+            iso_week = int(found_dict['V'])
+        elif group_key == 'z':
+            z = found_dict['z']
+            if z == 'Z':
+                gmtoff = 0
+            else:
+                if z[3] == ':':
+                    z = z[:3] + z[4:]
+                    if len(z) > 5:
+                        if z[5] != ':':
+                            msg = f"Inconsistent use of : in {found_dict['z']}"
+                            raise ValueError(msg)
+                        z = z[:5] + z[6:]
+                hours = int(z[1:3])
+                minutes = int(z[3:5])
+                seconds = int(z[5:7] or 0)
+                gmtoff = (hours * 60 * 60) + (minutes * 60) + seconds
+                gmtoff_remainder = z[8:]
+                # Pad to always return microseconds.
+                gmtoff_remainder_padding = "0" * (6 - len(gmtoff_remainder))
+                gmtoff_fraction = int(gmtoff_remainder + gmtoff_remainder_padding)
+                if z.startswith("-"):
+                    gmtoff = -gmtoff
+                    gmtoff_fraction = -gmtoff_fraction
         elif group_key == 'Z':
             # Since -1 is default value only need to worry about setting tz if
             # it can be something other than -1.
@@ -433,46 +483,97 @@ def _strptime(data_string, format="%a %b %d %H:%M:%S %Y"):
                     else:
                         tz = value
                         break
+    # Deal with the cases where ambiguities arize
+    # don't assume default values for ISO week/year
+    if year is None and iso_year is not None:
+        if iso_week is None or weekday is None:
+            raise ValueError("ISO year directive '%G' must be used with "
+                             "the ISO week directive '%V' and a weekday "
+                             "directive ('%A', '%a', '%w', or '%u').")
+        if julian is not None:
+            raise ValueError("Day of the year directive '%j' is not "
+                             "compatible with ISO year directive '%G'. "
+                             "Use '%Y' instead.")
+    elif week_of_year is None and iso_week is not None:
+        if weekday is None:
+            raise ValueError("ISO week directive '%V' must be used with "
+                             "the ISO year directive '%G' and a weekday "
+                             "directive ('%A', '%a', '%w', or '%u').")
+        else:
+            raise ValueError("ISO week directive '%V' is incompatible with "
+                             "the year directive '%Y'. Use the ISO year '%G' "
+                             "instead.")
+
     leap_year_fix = False
     if year is None and month == 2 and day == 29:
         year = 1904  # 1904 is first leap year of 20th century
         leap_year_fix = True
     elif year is None:
         year = 1900
+
+
     # If we know the week of the year and what day of that week, we can figure
     # out the Julian day of the year.
-    if julian is None and week_of_year != -1 and weekday is not None:
-        week_starts_Mon = True if week_of_year_start == 0 else False
-        julian = _calc_julian_from_U_or_W(year, week_of_year, weekday,
-                                            week_starts_Mon)
-        if julian <= 0:
+    if julian is None and weekday is not None:
+        if week_of_year is not None:
+            week_starts_Mon = True if week_of_year_start == 0 else False
+            julian = _calc_julian_from_U_or_W(year, week_of_year, weekday,
+                                                week_starts_Mon)
+        elif iso_year is not None and iso_week is not None:
+            year, julian = _calc_julian_from_V(iso_year, iso_week, weekday + 1)
+        if julian is not None and julian <= 0:
             year -= 1
             yday = 366 if calendar.isleap(year) else 365
             julian += yday
-    # Cannot pre-calculate datetime_date() since can change in Julian
-    # calculation and thus could have different value for the day of the week
-    # calculation.
+
     if julian is None:
+        # Cannot pre-calculate datetime_date() since can change in Julian
+        # calculation and thus could have different value for the day of
+        # the week calculation.
         # Need to add 1 to result since first day of the year is 1, not 0.
         julian = datetime_date(year, month, day).toordinal() - \
                   datetime_date(year, 1, 1).toordinal() + 1
-    else:  # Assume that if they bothered to include Julian day it will
-           # be accurate.
-        datetime_result = datetime_date.fromordinal((julian - 1) + datetime_date(year, 1, 1).toordinal())
+    else:  # Assume that if they bothered to include Julian day (or if it was
+           # calculated above with year/week/weekday) it will be accurate.
+        datetime_result = datetime_date.fromordinal(
+                            (julian - 1) +
+                            datetime_date(year, 1, 1).toordinal())
         year = datetime_result.year
         month = datetime_result.month
         day = datetime_result.day
     if weekday is None:
         weekday = datetime_date(year, month, day).weekday()
+    # Add timezone info
+    tzname = found_dict.get("Z")
+
     if leap_year_fix:
         # the caller didn't supply a year but asked for Feb 29th. We couldn't
         # use the default of 1900 for computations. We set it back to ensure
         # that February 29th is smaller than March 1st.
         year = 1900
 
-    return (time.struct_time((year, month, day,
-                              hour, minute, second,
-                              weekday, julian, tz)), fraction)
+    return (year, month, day,
+            hour, minute, second,
+            weekday, julian, tz, tzname, gmtoff), fraction, gmtoff_fraction
 
 def _strptime_time(data_string, format="%a %b %d %H:%M:%S %Y"):
-    return _strptime(data_string, format)[0]
+    """Return a time struct based on the input string and the
+    format string."""
+    tt = _strptime(data_string, format)[0]
+    return time.struct_time(tt[:time._STRUCT_TM_ITEMS])
+
+def _strptime_datetime(cls, data_string, format="%a %b %d %H:%M:%S %Y"):
+    """Return a class cls instance based on the input string and the
+    format string."""
+    tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+    tzname, gmtoff = tt[-2:]
+    args = tt[:6] + (fraction,)
+    if gmtoff is not None:
+        tzdelta = datetime_timedelta(seconds=gmtoff, microseconds=gmtoff_fraction)
+        if tzname:
+            tz = datetime_timezone(tzdelta, tzname)
+        else:
+            tz = datetime_timezone(tzdelta)
+        args += (tz,)
+
+    return cls(*args)

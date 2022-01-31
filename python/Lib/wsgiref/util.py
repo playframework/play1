@@ -18,6 +18,13 @@ class FileWrapper:
             self.close = filelike.close
 
     def __getitem__(self,key):
+        import warnings
+        warnings.warn(
+            "FileWrapper's __getitem__ method ignores 'key' parameter. "
+            "Use iterator protocol instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         data = self.filelike.read(self.blksize)
         if data:
             return data
@@ -26,7 +33,7 @@ class FileWrapper:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         data = self.filelike.read(self.blksize)
         if data:
             return data
@@ -43,7 +50,7 @@ def guess_scheme(environ):
 def application_uri(environ):
     """Return the application's base URI (no PATH_INFO or QUERY_STRING)"""
     url = environ['wsgi.url_scheme']+'://'
-    from urllib import quote
+    from urllib.parse import quote
 
     if environ.get('HTTP_HOST'):
         url += environ['HTTP_HOST']
@@ -57,14 +64,14 @@ def application_uri(environ):
             if environ['SERVER_PORT'] != '80':
                 url += ':' + environ['SERVER_PORT']
 
-    url += quote(environ.get('SCRIPT_NAME') or '/')
+    url += quote(environ.get('SCRIPT_NAME') or '/', encoding='latin1')
     return url
 
-def request_uri(environ, include_query=1):
+def request_uri(environ, include_query=True):
     """Return the full request URI, optionally including the query string"""
     url = application_uri(environ)
-    from urllib import quote
-    path_info = quote(environ.get('PATH_INFO',''),safe='/;=,')
+    from urllib.parse import quote
+    path_info = quote(environ.get('PATH_INFO',''), safe='/;=,', encoding='latin1')
     if not environ.get('SCRIPT_NAME'):
         url += path_info[1:]
     else:
@@ -142,8 +149,8 @@ def setup_testing_defaults(environ):
     environ.setdefault('wsgi.multithread', 0)
     environ.setdefault('wsgi.multiprocess', 0)
 
-    from StringIO import StringIO
-    environ.setdefault('wsgi.input', StringIO(""))
+    from io import StringIO, BytesIO
+    environ.setdefault('wsgi.input', BytesIO())
     environ.setdefault('wsgi.errors', StringIO())
     environ.setdefault('wsgi.url_scheme',guess_scheme(environ))
 
@@ -155,9 +162,9 @@ def setup_testing_defaults(environ):
 
 
 _hoppish = {
-    'connection':1, 'keep-alive':1, 'proxy-authenticate':1,
-    'proxy-authorization':1, 'te':1, 'trailers':1, 'transfer-encoding':1,
-    'upgrade':1
+    'connection', 'keep-alive', 'proxy-authenticate',
+    'proxy-authorization', 'te', 'trailers', 'transfer-encoding',
+    'upgrade'
 }.__contains__
 
 def is_hop_by_hop(header_name):

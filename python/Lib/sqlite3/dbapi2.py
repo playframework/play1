@@ -1,7 +1,6 @@
-# -*- coding: iso-8859-1 -*-
 # pysqlite2/dbapi2.py: the DB-API 2.0 interface
 #
-# Copyright (C) 2004-2005 Gerhard Häring <gh@ghaering.de>
+# Copyright (C) 2004-2005 Gerhard HÃ¤ring <gh@ghaering.de>
 #
 # This file is part of pysqlite.
 #
@@ -21,9 +20,9 @@
 #    misrepresented as being the original software.
 # 3. This notice may not be removed or altered from any source distribution.
 
-import collections
 import datetime
 import time
+import collections.abc
 
 from _sqlite3 import *
 
@@ -51,8 +50,8 @@ def TimestampFromTicks(ticks):
 version_info = tuple([int(x) for x in version.split(".")])
 sqlite_version_info = tuple([int(x) for x in sqlite_version.split(".")])
 
-Binary = buffer
-collections.Sequence.register(Row)
+Binary = memoryview
+collections.abc.Sequence.register(Row)
 
 def register_adapters_and_converters():
     def adapt_date(val):
@@ -62,13 +61,13 @@ def register_adapters_and_converters():
         return val.isoformat(" ")
 
     def convert_date(val):
-        return datetime.date(*map(int, val.split("-")))
+        return datetime.date(*map(int, val.split(b"-")))
 
     def convert_timestamp(val):
-        datepart, timepart = val.split(" ")
-        year, month, day = map(int, datepart.split("-"))
-        timepart_full = timepart.split(".")
-        hours, minutes, seconds = map(int, timepart_full[0].split(":"))
+        datepart, timepart = val.split(b" ")
+        year, month, day = map(int, datepart.split(b"-"))
+        timepart_full = timepart.split(b".")
+        hours, minutes, seconds = map(int, timepart_full[0].split(b":"))
         if len(timepart_full) == 2:
             microseconds = int('{:0<6.6}'.format(timepart_full[1].decode()))
         else:
@@ -84,6 +83,20 @@ def register_adapters_and_converters():
     register_converter("timestamp", convert_timestamp)
 
 register_adapters_and_converters()
+
+# bpo-24464: enable_shared_cache was deprecated in Python 3.10.  It's
+# scheduled for removal in Python 3.12.
+def enable_shared_cache(enable):
+    from _sqlite3 import enable_shared_cache as _old_enable_shared_cache
+    import warnings
+    msg = (
+        "enable_shared_cache is deprecated and will be removed in Python 3.12. "
+        "Shared cache is strongly discouraged by the SQLite 3 documentation. "
+        "If shared cache must be used, open the database in URI mode using"
+        "the cache=shared query parameter."
+    )
+    warnings.warn(msg, DeprecationWarning, stacklevel=2)
+    return _old_enable_shared_cache(enable)
 
 # Clean up namespace
 

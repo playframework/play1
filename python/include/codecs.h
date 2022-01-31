@@ -27,7 +27,15 @@ PyAPI_FUNC(int) PyCodec_Register(
        PyObject *search_function
        );
 
-/* Codec register lookup API.
+/* Unregister a codec search function and clear the registry's cache.
+   If the search function is not registered, do nothing.
+   Return 0 on success. Raise an exception and return -1 on error. */
+
+PyAPI_FUNC(int) PyCodec_Unregister(
+       PyObject *search_function
+       );
+
+/* Codec registry lookup API.
 
    Looks up the given encoding and returns a CodecInfo object with
    function attributes which implement the different aspects of
@@ -45,7 +53,24 @@ PyAPI_FUNC(int) PyCodec_Register(
 
  */
 
+#ifndef Py_LIMITED_API
 PyAPI_FUNC(PyObject *) _PyCodec_Lookup(
+       const char *encoding
+       );
+
+PyAPI_FUNC(int) _PyCodec_Forget(
+       const char *encoding
+       );
+#endif
+
+/* Codec registry encoding check API.
+
+   Returns 1/0 depending on whether there is a registered codec for
+   the given encoding.
+
+*/
+
+PyAPI_FUNC(int) PyCodec_KnownEncoding(
        const char *encoding
        );
 
@@ -54,7 +79,7 @@ PyAPI_FUNC(PyObject *) _PyCodec_Lookup(
    object is passed through the encoder function found for the given
    encoding using the error handling method defined by errors. errors
    may be NULL to use the default method defined for the codec.
-   
+
    Raises a LookupError in case no encoder can be found.
 
  */
@@ -70,7 +95,7 @@ PyAPI_FUNC(PyObject *) PyCodec_Encode(
    object is passed through the decoder function found for the given
    encoding using the error handling method defined by errors. errors
    may be NULL to use the default method defined for the codec.
-   
+
    Raises a LookupError in case no encoder can be found.
 
  */
@@ -81,10 +106,11 @@ PyAPI_FUNC(PyObject *) PyCodec_Decode(
        const char *errors
        );
 
+#ifndef Py_LIMITED_API
 /* Text codec specific encoding and decoding API.
 
    Checks the encoding against a list of codecs which do not
-   implement a unicode<->bytes encoding before attempting the
+   implement a str<->bytes encoding before attempting the
    operation.
 
    Please note that these APIs are internal and should not
@@ -123,10 +149,11 @@ PyAPI_FUNC(PyObject *) _PyCodecInfo_GetIncrementalEncoder(
        PyObject *codec_info,
        const char *errors
        );
+#endif
 
 
 
-/* --- Codec Lookup APIs -------------------------------------------------- 
+/* --- Codec Lookup APIs --------------------------------------------------
 
    All APIs return a codec object with incremented refcount and are
    based on _PyCodec_Lookup().  The same comments w/r to the encoding
@@ -205,6 +232,15 @@ PyAPI_FUNC(PyObject *) PyCodec_XMLCharRefReplaceErrors(PyObject *exc);
 
 /* replace the unicode encode error with backslash escapes (\x, \u and \U) */
 PyAPI_FUNC(PyObject *) PyCodec_BackslashReplaceErrors(PyObject *exc);
+
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03050000
+/* replace the unicode encode error with backslash escapes (\N, \x, \u and \U) */
+PyAPI_FUNC(PyObject *) PyCodec_NameReplaceErrors(PyObject *exc);
+#endif
+
+#ifndef Py_LIMITED_API
+PyAPI_DATA(const char *) Py_hexdigits;
+#endif
 
 #ifdef __cplusplus
 }

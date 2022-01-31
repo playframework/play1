@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # Copyright 1994 by Lance Ellinghouse
 # Cathedral City, California Republic, United States of America.
@@ -26,8 +26,8 @@
 
 """Implementation of the UUencode and UUdecode functions.
 
-encode(in_file, out_file [,name, mode])
-decode(in_file [, out_file, mode])
+encode(in_file, out_file [,name, mode], *, backtick=False)
+decode(in_file [, out_file, mode, quiet])
 """
 
 import binascii
@@ -39,7 +39,7 @@ __all__ = ["Error", "encode", "decode"]
 class Error(Exception):
     pass
 
-def encode(in_file, out_file, name=None, mode=None):
+def encode(in_file, out_file, name=None, mode=None, *, backtick=False):
     """Uuencode file"""
     #
     # If in_file is a pathname open it and change defaults
@@ -47,8 +47,8 @@ def encode(in_file, out_file, name=None, mode=None):
     opened_files = []
     try:
         if in_file == '-':
-            in_file = sys.stdin
-        elif isinstance(in_file, basestring):
+            in_file = sys.stdin.buffer
+        elif isinstance(in_file, str):
             if name is None:
                 name = os.path.basename(in_file)
             if mode is None:
@@ -62,8 +62,8 @@ def encode(in_file, out_file, name=None, mode=None):
         # Open out_file if it is a pathname
         #
         if out_file == '-':
-            out_file = sys.stdout
-        elif isinstance(out_file, basestring):
+            out_file = sys.stdout.buffer
+        elif isinstance(out_file, str):
             out_file = open(out_file, 'wb')
             opened_files.append(out_file)
         #
@@ -72,32 +72,43 @@ def encode(in_file, out_file, name=None, mode=None):
         if name is None:
             name = '-'
         if mode is None:
-            mode = 0666
+            mode = 0o666
+
+        #
+        # Remove newline chars from name
+        #
+        name = name.replace('\n','\\n')
+        name = name.replace('\r','\\r')
+
         #
         # Write the data
         #
-        out_file.write('begin %o %s\n' % ((mode&0777),name))
+        out_file.write(('begin %o %s\n' % ((mode & 0o777), name)).encode("ascii"))
         data = in_file.read(45)
         while len(data) > 0:
-            out_file.write(binascii.b2a_uu(data))
+            out_file.write(binascii.b2a_uu(data, backtick=backtick))
             data = in_file.read(45)
-        out_file.write(' \nend\n')
+        if backtick:
+            out_file.write(b'`\nend\n')
+        else:
+            out_file.write(b' \nend\n')
     finally:
         for f in opened_files:
             f.close()
 
 
-def decode(in_file, out_file=None, mode=None, quiet=0):
+def decode(in_file, out_file=None, mode=None, quiet=False):
     """Decode uuencoded file"""
     #
     # Open the input file, if needed.
     #
     opened_files = []
     if in_file == '-':
-        in_file = sys.stdin
-    elif isinstance(in_file, basestring):
-        in_file = open(in_file)
+        in_file = sys.stdin.buffer
+    elif isinstance(in_file, str):
+        in_file = open(in_file, 'rb')
         opened_files.append(in_file)
+
     try:
         #
         # Read until a begin is encountered or we've exhausted the file
@@ -106,17 +117,18 @@ def decode(in_file, out_file=None, mode=None, quiet=0):
             hdr = in_file.readline()
             if not hdr:
                 raise Error('No valid begin line found in input file')
-            if not hdr.startswith('begin'):
+            if not hdr.startswith(b'begin'):
                 continue
-            hdrfields = hdr.split(' ', 2)
-            if len(hdrfields) == 3 and hdrfields[0] == 'begin':
+            hdrfields = hdr.split(b' ', 2)
+            if len(hdrfields) == 3 and hdrfields[0] == b'begin':
                 try:
                     int(hdrfields[1], 8)
                     break
                 except ValueError:
                     pass
         if out_file is None:
-            out_file = hdrfields[2].rstrip()
+            # If the filename isn't ASCII, what's up with that?!?
+            out_file = hdrfields[2].rstrip(b' \t\r\n\f').decode("ascii")
             if os.path.exists(out_file):
                 raise Error('Cannot overwrite existing file: %s' % out_file)
         if mode is None:
@@ -125,25 +137,22 @@ def decode(in_file, out_file=None, mode=None, quiet=0):
         # Open the output file
         #
         if out_file == '-':
-            out_file = sys.stdout
-        elif isinstance(out_file, basestring):
+            out_file = sys.stdout.buffer
+        elif isinstance(out_file, str):
             fp = open(out_file, 'wb')
-            try:
-                os.path.chmod(out_file, mode)
-            except AttributeError:
-                pass
+            os.chmod(out_file, mode)
             out_file = fp
             opened_files.append(out_file)
         #
         # Main decoding loop
         #
         s = in_file.readline()
-        while s and s.strip() != 'end':
+        while s and s.strip(b' \t\r\n\f') != b'end':
             try:
                 data = binascii.a2b_uu(s)
-            except binascii.Error, v:
+            except binascii.Error as v:
                 # Workaround for broken uuencoders by /Fredrik Lundh
-                nbytes = (((ord(s[0])-32) & 63) * 4 + 5) // 3
+                nbytes = (((s[0]-32) & 63) * 4 + 5) // 3
                 data = binascii.a2b_uu(s[:nbytes])
                 if not quiet:
                     sys.stderr.write("Warning: %s\n" % v)
@@ -168,8 +177,9 @@ def test():
         parser.error('incorrect number of arguments')
         sys.exit(1)
 
-    input = sys.stdin
-    output = sys.stdout
+    # Use the binary streams underlying stdin/stdout
+    input = sys.stdin.buffer
+    output = sys.stdout.buffer
     if len(args) > 0:
         input = args[0]
     if len(args) > 1:
@@ -177,18 +187,18 @@ def test():
 
     if options.decode:
         if options.text:
-            if isinstance(output, basestring):
-                output = open(output, 'w')
+            if isinstance(output, str):
+                output = open(output, 'wb')
             else:
-                print sys.argv[0], ': cannot do -t to stdout'
+                print(sys.argv[0], ': cannot do -t to stdout')
                 sys.exit(1)
         decode(input, output)
     else:
         if options.text:
-            if isinstance(input, basestring):
-                input = open(input, 'r')
+            if isinstance(input, str):
+                input = open(input, 'rb')
             else:
-                print sys.argv[0], ': cannot do -t from stdin'
+                print(sys.argv[0], ': cannot do -t from stdin')
                 sys.exit(1)
         encode(input, output)
 

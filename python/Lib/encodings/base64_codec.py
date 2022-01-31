@@ -1,69 +1,44 @@
-""" Python 'base64_codec' Codec - base64 content transfer encoding
+"""Python 'base64_codec' Codec - base64 content transfer encoding.
 
-    Unlike most of the other codecs which target Unicode, this codec
-    will return Python string objects for both encode and decode.
+This codec de/encodes from bytes to bytes.
 
-    Written by Marc-Andre Lemburg (mal@lemburg.com).
-
+Written by Marc-Andre Lemburg (mal@lemburg.com).
 """
-import codecs, base64
+
+import codecs
+import base64
 
 ### Codec APIs
 
-def base64_encode(input,errors='strict'):
-
-    """ Encodes the object input and returns a tuple (output
-        object, length consumed).
-
-        errors defines the error handling to apply. It defaults to
-        'strict' handling which is the only currently supported
-        error handling for this codec.
-
-    """
+def base64_encode(input, errors='strict'):
     assert errors == 'strict'
-    output = base64.encodestring(input)
-    return (output, len(input))
+    return (base64.encodebytes(input), len(input))
 
-def base64_decode(input,errors='strict'):
-
-    """ Decodes the object input and returns a tuple (output
-        object, length consumed).
-
-        input must be an object which provides the bf_getreadbuf
-        buffer slot. Python strings, buffer objects and memory
-        mapped files are examples of objects providing this slot.
-
-        errors defines the error handling to apply. It defaults to
-        'strict' handling which is the only currently supported
-        error handling for this codec.
-
-    """
+def base64_decode(input, errors='strict'):
     assert errors == 'strict'
-    output = base64.decodestring(input)
-    return (output, len(input))
+    return (base64.decodebytes(input), len(input))
 
 class Codec(codecs.Codec):
-
-    def encode(self, input,errors='strict'):
-        return base64_encode(input,errors)
-    def decode(self, input,errors='strict'):
-        return base64_decode(input,errors)
+    def encode(self, input, errors='strict'):
+        return base64_encode(input, errors)
+    def decode(self, input, errors='strict'):
+        return base64_decode(input, errors)
 
 class IncrementalEncoder(codecs.IncrementalEncoder):
     def encode(self, input, final=False):
         assert self.errors == 'strict'
-        return base64.encodestring(input)
+        return base64.encodebytes(input)
 
 class IncrementalDecoder(codecs.IncrementalDecoder):
     def decode(self, input, final=False):
         assert self.errors == 'strict'
-        return base64.decodestring(input)
+        return base64.decodebytes(input)
 
-class StreamWriter(Codec,codecs.StreamWriter):
-    pass
+class StreamWriter(Codec, codecs.StreamWriter):
+    charbuffertype = bytes
 
-class StreamReader(Codec,codecs.StreamReader):
-    pass
+class StreamReader(Codec, codecs.StreamReader):
+    charbuffertype = bytes
 
 ### encodings module API
 

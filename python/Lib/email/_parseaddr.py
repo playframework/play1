@@ -47,7 +47,28 @@ def parsedate_tz(data):
 
     Accounts for military timezones.
     """
+    res = _parsedate_tz(data)
+    if not res:
+        return
+    if res[9] is None:
+        res[9] = 0
+    return tuple(res)
+
+def _parsedate_tz(data):
+    """Convert date to extended time tuple.
+
+    The last (additional) element is the time zone offset in seconds, except if
+    the timezone was specified as -0000.  In that case the last element is
+    None.  This indicates a UTC timestamp that explicitly declaims knowledge of
+    the source timezone, as opposed to a +0000 timestamp that indicates the
+    source timezone really was UTC.
+
+    """
+    if not data:
+        return None
     data = data.split()
+    if not data:  # This happens for whitespace-only input.
+        return None
     # The FWS after the comma after the day-of-week is optional, so search and
     # adjust for this.
     if data[0].endswith(',') or data[0].lower() in _daynames:
@@ -64,8 +85,10 @@ def parsedate_tz(data):
     if len(data) == 4:
         s = data[3]
         i = s.find('+')
+        if i == -1:
+            i = s.find('-')
         if i > 0:
-            data[3:] = [s[:i], s[i+1:]]
+            data[3:] = [s[:i], s[i:]]
         else:
             data.append('') # Dummy tz
     if len(data) < 5:
@@ -97,6 +120,16 @@ def parsedate_tz(data):
         tss = '0'
     elif len(tm) == 3:
         [thh, tmm, tss] = tm
+    elif len(tm) == 1 and '.' in tm[0]:
+        # Some non-compliant MUAs use '.' to separate time elements.
+        tm = tm[0].split('.')
+        if len(tm) == 2:
+            [thh, tmm] = tm
+            tss = 0
+        elif len(tm) == 3:
+            [thh, tmm, tss] = tm
+        else:
+            return None
     else:
         return None
     try:
@@ -128,6 +161,8 @@ def parsedate_tz(data):
             tzoffset = int(tz)
         except ValueError:
             pass
+        if tzoffset==0 and tz.startswith('-'):
+            tzoffset = None
     # Convert a timezone offset into seconds ; -0500 -> -18000
     if tzoffset:
         if tzoffset < 0:
@@ -137,7 +172,7 @@ def parsedate_tz(data):
             tzsign = 1
         tzoffset = tzsign * ( (tzoffset//100)*3600 + (tzoffset % 100)*60)
     # Daylight Saving Time flag is set to -1, since DST is unknown.
-    return yy, mm, dd, thh, tmm, tss, 0, 1, -1, tzoffset
+    return [yy, mm, dd, thh, tmm, tss, 0, 1, -1, tzoffset]
 
 
 def parsedate(data):
@@ -176,7 +211,7 @@ class AddrlistClass:
     front of you.
 
     Note: this class interface is deprecated and may be removed in the future.
-    Use rfc822.AddressList instead.
+    Use email.utils.AddressList instead.
     """
 
     def __init__(self, field):
@@ -199,14 +234,18 @@ class AddrlistClass:
         self.commentlist = []
 
     def gotonext(self):
-        """Parse up to the start of the next address."""
+        """Skip white space and extract comments."""
+        wslist = []
         while self.pos < len(self.field):
             if self.field[self.pos] in self.LWS + '\n\r':
+                if self.field[self.pos] not in '\n\r':
+                    wslist.append(self.field[self.pos])
                 self.pos += 1
             elif self.field[self.pos] == '(':
                 self.commentlist.append(self.getcomment())
             else:
                 break
+        return EMPTYSTRING.join(wslist)
 
     def getaddrlist(self):
         """Parse all addresses.
@@ -319,16 +358,24 @@ class AddrlistClass:
 
         self.gotonext()
         while self.pos < len(self.field):
+            preserve_ws = True
             if self.field[self.pos] == '.':
+                if aslist and not aslist[-1].strip():
+                    aslist.pop()
                 aslist.append('.')
                 self.pos += 1
+                preserve_ws = False
             elif self.field[self.pos] == '"':
                 aslist.append('"%s"' % quote(self.getquote()))
             elif self.field[self.pos] in self.atomends:
+                if aslist and not aslist[-1].strip():
+                    aslist.pop()
                 break
             else:
                 aslist.append(self.getatom())
-            self.gotonext()
+            ws = self.gotonext()
+            if preserve_ws and ws:
+                aslist.append(ws)
 
         if self.pos >= len(self.field) or self.field[self.pos] != '@':
             return EMPTYSTRING.join(aslist)
@@ -336,7 +383,12 @@ class AddrlistClass:
         aslist.append('@')
         self.pos += 1
         self.gotonext()
-        return EMPTYSTRING.join(aslist) + self.getdomain()
+        domain = self.getdomain()
+        if not domain:
+            # Invalid domain, return an empty address instead of returning a
+            # local part to denote failed parsing.
+            return EMPTYSTRING
+        return EMPTYSTRING.join(aslist) + domain
 
     def getdomain(self):
         """Get the complete domain name from an address."""
@@ -351,6 +403,10 @@ class AddrlistClass:
             elif self.field[self.pos] == '.':
                 self.pos += 1
                 sdlist.append('.')
+            elif self.field[self.pos] == '@':
+                # bpo-34155: Don't parse domains with two `@` like
+                # `a@malicious.org@important.com`.
+                return EMPTYSTRING
             elif self.field[self.pos] in self.atomends:
                 break
             else:

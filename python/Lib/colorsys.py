@@ -33,17 +33,25 @@ TWO_THIRD = 2.0/3.0
 # YIQ: used by composite video signals (linear combinations of RGB)
 # Y: perceived grey level (0.0 == black, 1.0 == white)
 # I, Q: color components
+#
+# There are a great many versions of the constants used in these formulae.
+# The ones in this library uses constants from the FCC version of NTSC.
 
 def rgb_to_yiq(r, g, b):
     y = 0.30*r + 0.59*g + 0.11*b
-    i = 0.60*r - 0.28*g - 0.32*b
-    q = 0.21*r - 0.52*g + 0.31*b
+    i = 0.74*(r-y) - 0.27*(b-y)
+    q = 0.48*(r-y) + 0.41*(b-y)
     return (y, i, q)
 
 def yiq_to_rgb(y, i, q):
-    r = y + 0.948262*i + 0.624013*q
-    g = y - 0.276066*i - 0.639810*q
-    b = y - 1.105450*i + 1.729860*q
+    # r = y + (0.27*q + 0.41*i) / (0.74*0.41 + 0.27*0.48)
+    # b = y + (0.74*q - 0.48*i) / (0.74*0.41 + 0.27*0.48)
+    # g = y - (0.30*(r-y) + 0.11*(b-y)) / 0.59
+
+    r = y + 0.9468822170900693*i + 0.6235565819861433*q
+    g = y - 0.27478764629897834*i - 0.6356910791873801*q
+    b = y - 1.1085450346420322*i + 1.7090069284064666*q
+
     if r < 0.0:
         r = 0.0
     if g < 0.0:
@@ -67,17 +75,18 @@ def yiq_to_rgb(y, i, q):
 def rgb_to_hls(r, g, b):
     maxc = max(r, g, b)
     minc = min(r, g, b)
-    # XXX Can optimize (maxc+minc) and (maxc-minc)
-    l = (minc+maxc)/2.0
+    sumc = (maxc+minc)
+    rangec = (maxc-minc)
+    l = sumc/2.0
     if minc == maxc:
         return 0.0, l, 0.0
     if l <= 0.5:
-        s = (maxc-minc) / (maxc+minc)
+        s = rangec / sumc
     else:
-        s = (maxc-minc) / (2.0-maxc-minc)
-    rc = (maxc-r) / (maxc-minc)
-    gc = (maxc-g) / (maxc-minc)
-    bc = (maxc-b) / (maxc-minc)
+        s = rangec / (2.0-sumc)
+    rc = (maxc-r) / rangec
+    gc = (maxc-g) / rangec
+    bc = (maxc-b) / rangec
     if r == maxc:
         h = bc-gc
     elif g == maxc:

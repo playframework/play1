@@ -1,74 +1,35 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """Python interface for the 'lsprof' profiler.
    Compatible with the 'profile' module.
 """
 
-__all__ = ["run", "runctx", "help", "Profile"]
+__all__ = ["run", "runctx", "Profile"]
 
 import _lsprof
+import profile as _pyprofile
 
 # ____________________________________________________________
 # Simple interface
 
 def run(statement, filename=None, sort=-1):
-    """Run statement under profiler optionally saving results in filename
-
-    This function takes a single argument that can be passed to the
-    "exec" statement, and an optional file name.  In all cases this
-    routine attempts to "exec" its first argument and gather profiling
-    statistics from the execution. If no file name is present, then this
-    function automatically prints a simple profiling report, sorted by the
-    standard name string (file/line/function-name) that is presented in
-    each line.
-    """
-    prof = Profile()
-    result = None
-    try:
-        try:
-            prof = prof.run(statement)
-        except SystemExit:
-            pass
-    finally:
-        if filename is not None:
-            prof.dump_stats(filename)
-        else:
-            result = prof.print_stats(sort)
-    return result
+    return _pyprofile._Utils(Profile).run(statement, filename, sort)
 
 def runctx(statement, globals, locals, filename=None, sort=-1):
-    """Run statement under profiler, supplying your own globals and locals,
-    optionally saving results in filename.
+    return _pyprofile._Utils(Profile).runctx(statement, globals, locals,
+                                             filename, sort)
 
-    statement and filename have the same semantics as profile.run
-    """
-    prof = Profile()
-    result = None
-    try:
-        try:
-            prof = prof.runctx(statement, globals, locals)
-        except SystemExit:
-            pass
-    finally:
-        if filename is not None:
-            prof.dump_stats(filename)
-        else:
-            result = prof.print_stats(sort)
-    return result
-
-# Backwards compatibility.
-def help():
-    print "Documentation for the profile/cProfile modules can be found "
-    print "in the Python Library Reference, section 'The Python Profiler'."
+run.__doc__ = _pyprofile.run.__doc__
+runctx.__doc__ = _pyprofile.runctx.__doc__
 
 # ____________________________________________________________
 
 class Profile(_lsprof.Profiler):
-    """Profile(custom_timer=None, time_unit=None, subcalls=True, builtins=True)
+    """Profile(timer=None, timeunit=None, subcalls=True, builtins=True)
 
     Builds a profiler object using the specified timer function.
     The default timer is a fast built-in one based on real time.
-    For custom timer functions returning integers, time_unit can
+    For custom timer functions returning integers, timeunit can
     be a float specifying a scale (i.e. how long each integer unit
     is, in seconds).
     """
@@ -82,10 +43,9 @@ class Profile(_lsprof.Profiler):
 
     def dump_stats(self, file):
         import marshal
-        f = open(file, 'wb')
-        self.create_stats()
-        marshal.dump(self.stats, f)
-        f.close()
+        with open(file, 'wb') as f:
+            self.create_stats()
+            marshal.dump(self.stats, f)
 
     def create_stats(self):
         self.disable()
@@ -137,18 +97,25 @@ class Profile(_lsprof.Profiler):
     def runctx(self, cmd, globals, locals):
         self.enable()
         try:
-            exec cmd in globals, locals
+            exec(cmd, globals, locals)
         finally:
             self.disable()
         return self
 
     # This method is more useful to profile a single function call.
-    def runcall(self, func, *args, **kw):
+    def runcall(self, func, /, *args, **kw):
         self.enable()
         try:
             return func(*args, **kw)
         finally:
             self.disable()
+
+    def __enter__(self):
+        self.enable()
+        return self
+
+    def __exit__(self, *exc_info):
+        self.disable()
 
 # ____________________________________________________________
 
@@ -161,16 +128,22 @@ def label(code):
 # ____________________________________________________________
 
 def main():
-    import os, sys
+    import os
+    import sys
+    import runpy
+    import pstats
     from optparse import OptionParser
-    usage = "cProfile.py [-o output_file_path] [-s sort] scriptfile [arg] ..."
+    usage = "cProfile.py [-o output_file_path] [-s sort] [-m module | scriptfile] [arg] ..."
     parser = OptionParser(usage=usage)
     parser.allow_interspersed_args = False
     parser.add_option('-o', '--outfile', dest="outfile",
         help="Save stats to <outfile>", default=None)
     parser.add_option('-s', '--sort', dest="sort",
         help="Sort order when printing to stdout, based on pstats.Stats class",
-        default=-1)
+        default=-1,
+        choices=sorted(pstats.Stats.sort_arg_dict_default))
+    parser.add_option('-m', dest="module", action="store_true",
+        help="Profile a library module", default=False)
 
     if not sys.argv[1:]:
         parser.print_usage()
@@ -179,17 +152,35 @@ def main():
     (options, args) = parser.parse_args()
     sys.argv[:] = args
 
+    # The script that we're profiling may chdir, so capture the absolute path
+    # to the output file at startup.
+    if options.outfile is not None:
+        options.outfile = os.path.abspath(options.outfile)
+
     if len(args) > 0:
-        progname = args[0]
-        sys.path.insert(0, os.path.dirname(progname))
-        with open(progname, 'rb') as fp:
-            code = compile(fp.read(), progname, 'exec')
-        globs = {
-            '__file__': progname,
-            '__name__': '__main__',
-            '__package__': None,
-        }
-        runctx(code, globs, None, options.outfile, options.sort)
+        if options.module:
+            code = "run_module(modname, run_name='__main__')"
+            globs = {
+                'run_module': runpy.run_module,
+                'modname': args[0]
+            }
+        else:
+            progname = args[0]
+            sys.path.insert(0, os.path.dirname(progname))
+            with open(progname, 'rb') as fp:
+                code = compile(fp.read(), progname, 'exec')
+            globs = {
+                '__file__': progname,
+                '__name__': '__main__',
+                '__package__': None,
+                '__cached__': None,
+            }
+        try:
+            runctx(code, globs, None, options.outfile, options.sort)
+        except BrokenPipeError as exc:
+            # Prevent "Exception ignored" during interpreter shutdown.
+            sys.stdout = None
+            sys.exit(exc.errno)
     else:
         parser.print_usage()
     return parser

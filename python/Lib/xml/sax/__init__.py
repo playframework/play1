@@ -19,9 +19,9 @@ xmlreader -- Base classes and constants which define the SAX 2 API for
 expatreader -- Driver that allows use of the Expat parser with SAX.
 """
 
-from xmlreader import InputSource
-from handler import ContentHandler, ErrorHandler
-from _exceptions import SAXException, SAXNotRecognizedException, \
+from .xmlreader import InputSource
+from .handler import ContentHandler, ErrorHandler
+from ._exceptions import SAXException, SAXNotRecognizedException, \
                         SAXParseException, SAXNotSupportedException, \
                         SAXReaderNotAvailable
 
@@ -33,11 +33,7 @@ def parse(source, handler, errorHandler=ErrorHandler()):
     parser.parse(source)
 
 def parseString(string, handler, errorHandler=ErrorHandler()):
-    try:
-        from cStringIO import StringIO
-    except ImportError:
-        from StringIO import StringIO
-
+    import io
     if errorHandler is None:
         errorHandler = ErrorHandler()
     parser = make_parser()
@@ -45,7 +41,10 @@ def parseString(string, handler, errorHandler=ErrorHandler()):
     parser.setErrorHandler(errorHandler)
 
     inpsrc = InputSource()
-    inpsrc.setByteStream(StringIO(string))
+    if isinstance(string, str):
+        inpsrc.setCharacterStream(io.StringIO(string))
+    else:
+        inpsrc.setByteStream(io.BytesIO(string))
     parser.parse(inpsrc)
 
 # this is the parser list used by the make_parser function if no
@@ -59,7 +58,7 @@ if _false:
     import xml.sax.expatreader
 
 import os, sys
-if "PY_SAX_PARSER" in os.environ:
+if not sys.flags.ignore_environment and "PY_SAX_PARSER" in os.environ:
     default_parser_list = os.environ["PY_SAX_PARSER"].split(",")
 del os
 
@@ -68,18 +67,18 @@ if sys.platform[:4] == "java" and sys.registry.containsKey(_key):
     default_parser_list = sys.registry.getProperty(_key).split(",")
 
 
-def make_parser(parser_list = []):
+def make_parser(parser_list=()):
     """Creates and returns a SAX parser.
 
     Creates the first parser it is able to instantiate of the ones
-    given in the list created by doing parser_list +
-    default_parser_list.  The lists must contain the names of Python
+    given in the iterable created by chaining parser_list and
+    default_parser_list.  The iterables must contain the names of Python
     modules containing both a SAX parser and a create_parser function."""
 
-    for parser_name in parser_list + default_parser_list:
+    for parser_name in list(parser_list) + default_parser_list:
         try:
             return _create_parser(parser_name)
-        except ImportError,e:
+        except ImportError:
             import sys
             if parser_name in sys.modules:
                 # The parser module was found, but importing it

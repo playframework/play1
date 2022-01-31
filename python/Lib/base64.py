@@ -1,22 +1,24 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-"""RFC 3548: Base16, Base32, Base64 Data Encodings"""
+"""Base16, Base32, Base64 (RFC 3548), Base85 and Ascii85 data encodings"""
 
 # Modified 04-Oct-1995 by Jack Jansen to use binascii module
 # Modified 30-Dec-2003 by Barry Warsaw to add full RFC 3548 support
+# Modified 22-May-2007 by Guido van Rossum to use bytes everywhere
 
 import re
 import struct
-import string
 import binascii
 
 
 __all__ = [
-    # Legacy interface exports traditional RFC 1521 Base64 encodings
-    'encode', 'decode', 'encodestring', 'decodestring',
+    # Legacy interface exports traditional RFC 2045 Base64 encodings
+    'encode', 'decode', 'encodebytes', 'decodebytes',
     # Generalized interface for other encodings
     'b64encode', 'b64decode', 'b32encode', 'b32decode',
-    'b16encode', 'b16decode',
+    'b32hexencode', 'b32hexdecode', 'b16encode', 'b16decode',
+    # Base85 and Ascii85 encodings
+    'b85encode', 'b85decode', 'a85encode', 'a85decode',
     # Standard Base64 encoding
     'standard_b64encode', 'standard_b64decode',
     # Some common Base64 alternatives.  As referenced by RFC 3458, see thread
@@ -26,271 +28,485 @@ __all__ = [
     'urlsafe_b64encode', 'urlsafe_b64decode',
     ]
 
-_translation = [chr(_x) for _x in range(256)]
-EMPTYSTRING = ''
+
+bytes_types = (bytes, bytearray)  # Types acceptable as binary data
+
+def _bytes_from_decode_data(s):
+    if isinstance(s, str):
+        try:
+            return s.encode('ascii')
+        except UnicodeEncodeError:
+            raise ValueError('string argument should contain only ASCII characters')
+    if isinstance(s, bytes_types):
+        return s
+    try:
+        return memoryview(s).tobytes()
+    except TypeError:
+        raise TypeError("argument should be a bytes-like object or ASCII "
+                        "string, not %r" % s.__class__.__name__) from None
 
 
-def _translate(s, altchars):
-    translation = _translation[:]
-    for k, v in altchars.items():
-        translation[ord(k)] = v
-    return s.translate(''.join(translation))
-
-
-
 # Base64 encoding/decoding uses binascii
 
 def b64encode(s, altchars=None):
-    """Encode a string using Base64.
+    """Encode the bytes-like object s using Base64 and return a bytes object.
 
-    s is the string to encode.  Optional altchars must be a string of at least
-    length 2 (additional characters are ignored) which specifies an
+    Optional altchars should be a byte string of length 2 which specifies an
     alternative alphabet for the '+' and '/' characters.  This allows an
     application to e.g. generate url or filesystem safe Base64 strings.
-
-    The encoded string is returned.
     """
-    # Strip off the trailing newline
-    encoded = binascii.b2a_base64(s)[:-1]
+    encoded = binascii.b2a_base64(s, newline=False)
     if altchars is not None:
-        return encoded.translate(string.maketrans(b'+/', altchars[:2]))
+        assert len(altchars) == 2, repr(altchars)
+        return encoded.translate(bytes.maketrans(b'+/', altchars))
     return encoded
 
 
-def b64decode(s, altchars=None):
-    """Decode a Base64 encoded string.
+def b64decode(s, altchars=None, validate=False):
+    """Decode the Base64 encoded bytes-like object or ASCII string s.
 
-    s is the string to decode.  Optional altchars must be a string of at least
-    length 2 (additional characters are ignored) which specifies the
-    alternative alphabet used instead of the '+' and '/' characters.
+    Optional altchars must be a bytes-like object or ASCII string of length 2
+    which specifies the alternative alphabet used instead of the '+' and '/'
+    characters.
 
-    The decoded string is returned.  A TypeError is raised if s is
-    incorrectly padded.  Characters that are neither in the normal base-64
-    alphabet nor the alternative alphabet are discarded prior to the padding
-    check.
+    The result is returned as a bytes object.  A binascii.Error is raised if
+    s is incorrectly padded.
+
+    If validate is False (the default), characters that are neither in the
+    normal base-64 alphabet nor the alternative alphabet are discarded prior
+    to the padding check.  If validate is True, these non-alphabet characters
+    in the input result in a binascii.Error.
     """
+    s = _bytes_from_decode_data(s)
     if altchars is not None:
-        s = s.translate(string.maketrans(altchars[:2], '+/'))
-    try:
-        return binascii.a2b_base64(s)
-    except binascii.Error, msg:
-        # Transform this exception for consistency
-        raise TypeError(msg)
+        altchars = _bytes_from_decode_data(altchars)
+        assert len(altchars) == 2, repr(altchars)
+        s = s.translate(bytes.maketrans(altchars, b'+/'))
+    if validate and not re.fullmatch(b'[A-Za-z0-9+/]*={0,2}', s):
+        raise binascii.Error('Non-base64 digit found')
+    return binascii.a2b_base64(s)
 
 
 def standard_b64encode(s):
-    """Encode a string using the standard Base64 alphabet.
+    """Encode bytes-like object s using the standard Base64 alphabet.
 
-    s is the string to encode.  The encoded string is returned.
+    The result is returned as a bytes object.
     """
     return b64encode(s)
 
 def standard_b64decode(s):
-    """Decode a string encoded with the standard Base64 alphabet.
+    """Decode bytes encoded with the standard Base64 alphabet.
 
-    Argument s is the string to decode.  The decoded string is returned.  A
-    TypeError is raised if the string is incorrectly padded.  Characters that
-    are not in the standard alphabet are discarded prior to the padding
-    check.
+    Argument s is a bytes-like object or ASCII string to decode.  The result
+    is returned as a bytes object.  A binascii.Error is raised if the input
+    is incorrectly padded.  Characters that are not in the standard alphabet
+    are discarded prior to the padding check.
     """
     return b64decode(s)
 
-_urlsafe_encode_translation = string.maketrans(b'+/', b'-_')
-_urlsafe_decode_translation = string.maketrans(b'-_', b'+/')
+
+_urlsafe_encode_translation = bytes.maketrans(b'+/', b'-_')
+_urlsafe_decode_translation = bytes.maketrans(b'-_', b'+/')
 
 def urlsafe_b64encode(s):
-    """Encode a string using the URL- and filesystem-safe Base64 alphabet.
+    """Encode bytes using the URL- and filesystem-safe Base64 alphabet.
 
-    Argument s is the string to encode.  The encoded string is returned.  The
-    alphabet uses '-' instead of '+' and '_' instead of '/'.
+    Argument s is a bytes-like object to encode.  The result is returned as a
+    bytes object.  The alphabet uses '-' instead of '+' and '_' instead of
+    '/'.
     """
     return b64encode(s).translate(_urlsafe_encode_translation)
 
 def urlsafe_b64decode(s):
-    """Decode a string using the URL- and filesystem-safe Base64 alphabet.
+    """Decode bytes using the URL- and filesystem-safe Base64 alphabet.
 
-    Argument s is the string to decode.  The decoded string is returned.  A
-    TypeError is raised if the string is incorrectly padded.  Characters that
-    are not in the URL-safe base-64 alphabet, and are not a plus '+' or slash
-    '/', are discarded prior to the padding check.
+    Argument s is a bytes-like object or ASCII string to decode.  The result
+    is returned as a bytes object.  A binascii.Error is raised if the input
+    is incorrectly padded.  Characters that are not in the URL-safe base-64
+    alphabet, and are not a plus '+' or slash '/', are discarded prior to the
+    padding check.
 
     The alphabet uses '-' instead of '+' and '_' instead of '/'.
     """
-    return b64decode(s.translate(_urlsafe_decode_translation))
+    s = _bytes_from_decode_data(s)
+    s = s.translate(_urlsafe_decode_translation)
+    return b64decode(s)
 
 
-
+
 # Base32 encoding/decoding must be done in Python
-_b32alphabet = {
-    0: 'A',  9: 'J', 18: 'S', 27: '3',
-    1: 'B', 10: 'K', 19: 'T', 28: '4',
-    2: 'C', 11: 'L', 20: 'U', 29: '5',
-    3: 'D', 12: 'M', 21: 'V', 30: '6',
-    4: 'E', 13: 'N', 22: 'W', 31: '7',
-    5: 'F', 14: 'O', 23: 'X',
-    6: 'G', 15: 'P', 24: 'Y',
-    7: 'H', 16: 'Q', 25: 'Z',
-    8: 'I', 17: 'R', 26: '2',
-    }
+_B32_ENCODE_DOCSTRING = '''
+Encode the bytes-like objects using {encoding} and return a bytes object.
+'''
+_B32_DECODE_DOCSTRING = '''
+Decode the {encoding} encoded bytes-like object or ASCII string s.
 
-_b32tab = _b32alphabet.items()
-_b32tab.sort()
-_b32tab = [v for k, v in _b32tab]
-_b32rev = dict([(v, long(k)) for k, v in _b32alphabet.items()])
+Optional casefold is a flag specifying whether a lowercase alphabet is
+acceptable as input.  For security purposes, the default is False.
+{extra_args}
+The result is returned as a bytes object.  A binascii.Error is raised if
+the input is incorrectly padded or if there are non-alphabet
+characters present in the input.
+'''
+_B32_DECODE_MAP01_DOCSTRING = '''
+RFC 3548 allows for optional mapping of the digit 0 (zero) to the
+letter O (oh), and for optional mapping of the digit 1 (one) to
+either the letter I (eye) or letter L (el).  The optional argument
+map01 when not None, specifies which letter the digit 1 should be
+mapped to (when map01 is not None, the digit 0 is always mapped to
+the letter O).  For security purposes the default is None, so that
+0 and 1 are not allowed in the input.
+'''
+_b32alphabet = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+_b32hexalphabet = b'0123456789ABCDEFGHIJKLMNOPQRSTUV'
+_b32tab2 = {}
+_b32rev = {}
 
+def _b32encode(alphabet, s):
+    global _b32tab2
+    # Delay the initialization of the table to not waste memory
+    # if the function is never called
+    if alphabet not in _b32tab2:
+        b32tab = [bytes((i,)) for i in alphabet]
+        _b32tab2[alphabet] = [a + b for a in b32tab for b in b32tab]
+        b32tab = None
 
-def b32encode(s):
-    """Encode a string using Base32.
-
-    s is the string to encode.  The encoded string is returned.
-    """
-    parts = []
-    quanta, leftover = divmod(len(s), 5)
+    if not isinstance(s, bytes_types):
+        s = memoryview(s).tobytes()
+    leftover = len(s) % 5
     # Pad the last quantum with zero bits if necessary
     if leftover:
-        s += ('\0' * (5 - leftover))
-        quanta += 1
-    for i in range(quanta):
-        # c1 and c2 are 16 bits wide, c3 is 8 bits wide.  The intent of this
-        # code is to process the 40 bits in units of 5 bits.  So we take the 1
-        # leftover bit of c1 and tack it onto c2.  Then we take the 2 leftover
-        # bits of c2 and tack them onto c3.  The shifts and masks are intended
-        # to give us values of exactly 5 bits in width.
-        c1, c2, c3 = struct.unpack('!HHB', s[i*5:(i+1)*5])
-        c2 += (c1 & 1) << 16 # 17 bits wide
-        c3 += (c2 & 3) << 8  # 10 bits wide
-        parts.extend([_b32tab[c1 >> 11],         # bits 1 - 5
-                      _b32tab[(c1 >> 6) & 0x1f], # bits 6 - 10
-                      _b32tab[(c1 >> 1) & 0x1f], # bits 11 - 15
-                      _b32tab[c2 >> 12],         # bits 16 - 20 (1 - 5)
-                      _b32tab[(c2 >> 7) & 0x1f], # bits 21 - 25 (6 - 10)
-                      _b32tab[(c2 >> 2) & 0x1f], # bits 26 - 30 (11 - 15)
-                      _b32tab[c3 >> 5],          # bits 31 - 35 (1 - 5)
-                      _b32tab[c3 & 0x1f],        # bits 36 - 40 (1 - 5)
-                      ])
-    encoded = EMPTYSTRING.join(parts)
+        s = s + b'\0' * (5 - leftover)  # Don't use += !
+    encoded = bytearray()
+    from_bytes = int.from_bytes
+    b32tab2 = _b32tab2[alphabet]
+    for i in range(0, len(s), 5):
+        c = from_bytes(s[i: i + 5], 'big')
+        encoded += (b32tab2[c >> 30] +           # bits 1 - 10
+                    b32tab2[(c >> 20) & 0x3ff] + # bits 11 - 20
+                    b32tab2[(c >> 10) & 0x3ff] + # bits 21 - 30
+                    b32tab2[c & 0x3ff]           # bits 31 - 40
+                   )
     # Adjust for any leftover partial quanta
     if leftover == 1:
-        return encoded[:-6] + '======'
+        encoded[-6:] = b'======'
     elif leftover == 2:
-        return encoded[:-4] + '===='
+        encoded[-4:] = b'===='
     elif leftover == 3:
-        return encoded[:-3] + '==='
+        encoded[-3:] = b'==='
     elif leftover == 4:
-        return encoded[:-1] + '='
-    return encoded
+        encoded[-1:] = b'='
+    return bytes(encoded)
 
-
-def b32decode(s, casefold=False, map01=None):
-    """Decode a Base32 encoded string.
-
-    s is the string to decode.  Optional casefold is a flag specifying whether
-    a lowercase alphabet is acceptable as input.  For security purposes, the
-    default is False.
-
-    RFC 3548 allows for optional mapping of the digit 0 (zero) to the letter O
-    (oh), and for optional mapping of the digit 1 (one) to either the letter I
-    (eye) or letter L (el).  The optional argument map01 when not None,
-    specifies which letter the digit 1 should be mapped to (when map01 is not
-    None, the digit 0 is always mapped to the letter O).  For security
-    purposes the default is None, so that 0 and 1 are not allowed in the
-    input.
-
-    The decoded string is returned.  A TypeError is raised if s were
-    incorrectly padded or if there are non-alphabet characters present in the
-    string.
-    """
-    quanta, leftover = divmod(len(s), 8)
-    if leftover:
-        raise TypeError('Incorrect padding')
+def _b32decode(alphabet, s, casefold=False, map01=None):
+    global _b32rev
+    # Delay the initialization of the table to not waste memory
+    # if the function is never called
+    if alphabet not in _b32rev:
+        _b32rev[alphabet] = {v: k for k, v in enumerate(alphabet)}
+    s = _bytes_from_decode_data(s)
+    if len(s) % 8:
+        raise binascii.Error('Incorrect padding')
     # Handle section 2.4 zero and one mapping.  The flag map01 will be either
     # False, or the character to map the digit 1 (one) to.  It should be
     # either L (el) or I (eye).
-    if map01:
-        s = s.translate(string.maketrans(b'01', b'O' + map01))
+    if map01 is not None:
+        map01 = _bytes_from_decode_data(map01)
+        assert len(map01) == 1, repr(map01)
+        s = s.translate(bytes.maketrans(b'01', b'O' + map01))
     if casefold:
         s = s.upper()
     # Strip off pad characters from the right.  We need to count the pad
     # characters because this will tell us how many null bytes to remove from
     # the end of the decoded string.
-    padchars = 0
-    mo = re.search('(?P<pad>[=]*)$', s)
-    if mo:
-        padchars = len(mo.group('pad'))
-        if padchars > 0:
-            s = s[:-padchars]
+    l = len(s)
+    s = s.rstrip(b'=')
+    padchars = l - len(s)
     # Now decode the full quanta
-    parts = []
-    acc = 0
-    shift = 35
-    for c in s:
-        val = _b32rev.get(c)
-        if val is None:
-            raise TypeError('Non-base32 digit found')
-        acc += _b32rev[c] << shift
-        shift -= 5
-        if shift < 0:
-            parts.append(binascii.unhexlify('%010x' % acc))
-            acc = 0
-            shift = 35
+    decoded = bytearray()
+    b32rev = _b32rev[alphabet]
+    for i in range(0, len(s), 8):
+        quanta = s[i: i + 8]
+        acc = 0
+        try:
+            for c in quanta:
+                acc = (acc << 5) + b32rev[c]
+        except KeyError:
+            raise binascii.Error('Non-base32 digit found') from None
+        decoded += acc.to_bytes(5, 'big')
     # Process the last, partial quanta
-    last = binascii.unhexlify('%010x' % acc)
-    if padchars == 0:
-        last = ''                       # No characters
-    elif padchars == 1:
-        last = last[:-1]
-    elif padchars == 3:
-        last = last[:-2]
-    elif padchars == 4:
-        last = last[:-3]
-    elif padchars == 6:
-        last = last[:-4]
-    else:
-        raise TypeError('Incorrect padding')
-    parts.append(last)
-    return EMPTYSTRING.join(parts)
+    if l % 8 or padchars not in {0, 1, 3, 4, 6}:
+        raise binascii.Error('Incorrect padding')
+    if padchars and decoded:
+        acc <<= 5 * padchars
+        last = acc.to_bytes(5, 'big')
+        leftover = (43 - 5 * padchars) // 8  # 1: 4, 3: 3, 4: 2, 6: 1
+        decoded[-5:] = last[:leftover]
+    return bytes(decoded)
 
 
-
+def b32encode(s):
+    return _b32encode(_b32alphabet, s)
+b32encode.__doc__ = _B32_ENCODE_DOCSTRING.format(encoding='base32')
+
+def b32decode(s, casefold=False, map01=None):
+    return _b32decode(_b32alphabet, s, casefold, map01)
+b32decode.__doc__ = _B32_DECODE_DOCSTRING.format(encoding='base32',
+                                        extra_args=_B32_DECODE_MAP01_DOCSTRING)
+
+def b32hexencode(s):
+    return _b32encode(_b32hexalphabet, s)
+b32hexencode.__doc__ = _B32_ENCODE_DOCSTRING.format(encoding='base32hex')
+
+def b32hexdecode(s, casefold=False):
+    # base32hex does not have the 01 mapping
+    return _b32decode(_b32hexalphabet, s, casefold)
+b32hexdecode.__doc__ = _B32_DECODE_DOCSTRING.format(encoding='base32hex',
+                                                    extra_args='')
+
+
 # RFC 3548, Base 16 Alphabet specifies uppercase, but hexlify() returns
 # lowercase.  The RFC also recommends against accepting input case
 # insensitively.
 def b16encode(s):
-    """Encode a string using Base16.
-
-    s is the string to encode.  The encoded string is returned.
+    """Encode the bytes-like object s using Base16 and return a bytes object.
     """
     return binascii.hexlify(s).upper()
 
 
 def b16decode(s, casefold=False):
-    """Decode a Base16 encoded string.
+    """Decode the Base16 encoded bytes-like object or ASCII string s.
 
-    s is the string to decode.  Optional casefold is a flag specifying whether
-    a lowercase alphabet is acceptable as input.  For security purposes, the
-    default is False.
+    Optional casefold is a flag specifying whether a lowercase alphabet is
+    acceptable as input.  For security purposes, the default is False.
 
-    The decoded string is returned.  A TypeError is raised if s is
-    incorrectly padded or if there are non-alphabet characters present in the
-    string.
+    The result is returned as a bytes object.  A binascii.Error is raised if
+    s is incorrectly padded or if there are non-alphabet characters present
+    in the input.
     """
+    s = _bytes_from_decode_data(s)
     if casefold:
         s = s.upper()
-    if re.search('[^0-9A-F]', s):
-        raise TypeError('Non-base16 digit found')
+    if re.search(b'[^0-9A-F]', s):
+        raise binascii.Error('Non-base16 digit found')
     return binascii.unhexlify(s)
 
+#
+# Ascii85 encoding/decoding
+#
 
-
+_a85chars = None
+_a85chars2 = None
+_A85START = b"<~"
+_A85END = b"~>"
+
+def _85encode(b, chars, chars2, pad=False, foldnuls=False, foldspaces=False):
+    # Helper function for a85encode and b85encode
+    if not isinstance(b, bytes_types):
+        b = memoryview(b).tobytes()
+
+    padding = (-len(b)) % 4
+    if padding:
+        b = b + b'\0' * padding
+    words = struct.Struct('!%dI' % (len(b) // 4)).unpack(b)
+
+    chunks = [b'z' if foldnuls and not word else
+              b'y' if foldspaces and word == 0x20202020 else
+              (chars2[word // 614125] +
+               chars2[word // 85 % 7225] +
+               chars[word % 85])
+              for word in words]
+
+    if padding and not pad:
+        if chunks[-1] == b'z':
+            chunks[-1] = chars[0] * 5
+        chunks[-1] = chunks[-1][:-padding]
+
+    return b''.join(chunks)
+
+def a85encode(b, *, foldspaces=False, wrapcol=0, pad=False, adobe=False):
+    """Encode bytes-like object b using Ascii85 and return a bytes object.
+
+    foldspaces is an optional flag that uses the special short sequence 'y'
+    instead of 4 consecutive spaces (ASCII 0x20) as supported by 'btoa'. This
+    feature is not supported by the "standard" Adobe encoding.
+
+    wrapcol controls whether the output should have newline (b'\\n') characters
+    added to it. If this is non-zero, each output line will be at most this
+    many characters long.
+
+    pad controls whether the input is padded to a multiple of 4 before
+    encoding. Note that the btoa implementation always pads.
+
+    adobe controls whether the encoded byte sequence is framed with <~ and ~>,
+    which is used by the Adobe implementation.
+    """
+    global _a85chars, _a85chars2
+    # Delay the initialization of tables to not waste memory
+    # if the function is never called
+    if _a85chars2 is None:
+        _a85chars = [bytes((i,)) for i in range(33, 118)]
+        _a85chars2 = [(a + b) for a in _a85chars for b in _a85chars]
+
+    result = _85encode(b, _a85chars, _a85chars2, pad, True, foldspaces)
+
+    if adobe:
+        result = _A85START + result
+    if wrapcol:
+        wrapcol = max(2 if adobe else 1, wrapcol)
+        chunks = [result[i: i + wrapcol]
+                  for i in range(0, len(result), wrapcol)]
+        if adobe:
+            if len(chunks[-1]) + 2 > wrapcol:
+                chunks.append(b'')
+        result = b'\n'.join(chunks)
+    if adobe:
+        result += _A85END
+
+    return result
+
+def a85decode(b, *, foldspaces=False, adobe=False, ignorechars=b' \t\n\r\v'):
+    """Decode the Ascii85 encoded bytes-like object or ASCII string b.
+
+    foldspaces is a flag that specifies whether the 'y' short sequence should be
+    accepted as shorthand for 4 consecutive spaces (ASCII 0x20). This feature is
+    not supported by the "standard" Adobe encoding.
+
+    adobe controls whether the input sequence is in Adobe Ascii85 format (i.e.
+    is framed with <~ and ~>).
+
+    ignorechars should be a byte string containing characters to ignore from the
+    input. This should only contain whitespace characters, and by default
+    contains all whitespace characters in ASCII.
+
+    The result is returned as a bytes object.
+    """
+    b = _bytes_from_decode_data(b)
+    if adobe:
+        if not b.endswith(_A85END):
+            raise ValueError(
+                "Ascii85 encoded byte sequences must end "
+                "with {!r}".format(_A85END)
+                )
+        if b.startswith(_A85START):
+            b = b[2:-2]  # Strip off start/end markers
+        else:
+            b = b[:-2]
+    #
+    # We have to go through this stepwise, so as to ignore spaces and handle
+    # special short sequences
+    #
+    packI = struct.Struct('!I').pack
+    decoded = []
+    decoded_append = decoded.append
+    curr = []
+    curr_append = curr.append
+    curr_clear = curr.clear
+    for x in b + b'u' * 4:
+        if b'!'[0] <= x <= b'u'[0]:
+            curr_append(x)
+            if len(curr) == 5:
+                acc = 0
+                for x in curr:
+                    acc = 85 * acc + (x - 33)
+                try:
+                    decoded_append(packI(acc))
+                except struct.error:
+                    raise ValueError('Ascii85 overflow') from None
+                curr_clear()
+        elif x == b'z'[0]:
+            if curr:
+                raise ValueError('z inside Ascii85 5-tuple')
+            decoded_append(b'\0\0\0\0')
+        elif foldspaces and x == b'y'[0]:
+            if curr:
+                raise ValueError('y inside Ascii85 5-tuple')
+            decoded_append(b'\x20\x20\x20\x20')
+        elif x in ignorechars:
+            # Skip whitespace
+            continue
+        else:
+            raise ValueError('Non-Ascii85 digit found: %c' % x)
+
+    result = b''.join(decoded)
+    padding = 4 - len(curr)
+    if padding:
+        # Throw away the extra padding
+        result = result[:-padding]
+    return result
+
+# The following code is originally taken (with permission) from Mercurial
+
+_b85alphabet = (b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                b"abcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~")
+_b85chars = None
+_b85chars2 = None
+_b85dec = None
+
+def b85encode(b, pad=False):
+    """Encode bytes-like object b in base85 format and return a bytes object.
+
+    If pad is true, the input is padded with b'\\0' so its length is a multiple of
+    4 bytes before encoding.
+    """
+    global _b85chars, _b85chars2
+    # Delay the initialization of tables to not waste memory
+    # if the function is never called
+    if _b85chars2 is None:
+        _b85chars = [bytes((i,)) for i in _b85alphabet]
+        _b85chars2 = [(a + b) for a in _b85chars for b in _b85chars]
+    return _85encode(b, _b85chars, _b85chars2, pad)
+
+def b85decode(b):
+    """Decode the base85-encoded bytes-like object or ASCII string b
+
+    The result is returned as a bytes object.
+    """
+    global _b85dec
+    # Delay the initialization of tables to not waste memory
+    # if the function is never called
+    if _b85dec is None:
+        _b85dec = [None] * 256
+        for i, c in enumerate(_b85alphabet):
+            _b85dec[c] = i
+
+    b = _bytes_from_decode_data(b)
+    padding = (-len(b)) % 5
+    b = b + b'~' * padding
+    out = []
+    packI = struct.Struct('!I').pack
+    for i in range(0, len(b), 5):
+        chunk = b[i:i + 5]
+        acc = 0
+        try:
+            for c in chunk:
+                acc = acc * 85 + _b85dec[c]
+        except TypeError:
+            for j, c in enumerate(chunk):
+                if _b85dec[c] is None:
+                    raise ValueError('bad base85 character at position %d'
+                                    % (i + j)) from None
+            raise
+        try:
+            out.append(packI(acc))
+        except struct.error:
+            raise ValueError('base85 overflow in hunk starting at byte %d'
+                             % i) from None
+
+    result = b''.join(out)
+    if padding:
+        result = result[:-padding]
+    return result
+
 # Legacy interface.  This code could be cleaned up since I don't believe
 # binascii has any line length limitations.  It just doesn't seem worth it
-# though.
+# though.  The files should be opened in binary mode.
 
 MAXLINESIZE = 76 # Excluding the CRLF
 MAXBINSIZE = (MAXLINESIZE//4)*3
 
 def encode(input, output):
-    """Encode a file."""
+    """Encode a file; input and output are binary files."""
     while True:
         s = input.read(MAXBINSIZE)
         if not s:
@@ -305,7 +521,7 @@ def encode(input, output):
 
 
 def decode(input, output):
-    """Decode a file."""
+    """Decode a file; input and output are binary files."""
     while True:
         line = input.readline()
         if not line:
@@ -313,55 +529,75 @@ def decode(input, output):
         s = binascii.a2b_base64(line)
         output.write(s)
 
+def _input_type_check(s):
+    try:
+        m = memoryview(s)
+    except TypeError as err:
+        msg = "expected bytes-like object, not %s" % s.__class__.__name__
+        raise TypeError(msg) from err
+    if m.format not in ('c', 'b', 'B'):
+        msg = ("expected single byte elements, not %r from %s" %
+                                          (m.format, s.__class__.__name__))
+        raise TypeError(msg)
+    if m.ndim != 1:
+        msg = ("expected 1-D data, not %d-D data from %s" %
+                                          (m.ndim, s.__class__.__name__))
+        raise TypeError(msg)
 
-def encodestring(s):
-    """Encode a string into multiple lines of base-64 data."""
+
+def encodebytes(s):
+    """Encode a bytestring into a bytes object containing multiple lines
+    of base-64 data."""
+    _input_type_check(s)
     pieces = []
     for i in range(0, len(s), MAXBINSIZE):
         chunk = s[i : i + MAXBINSIZE]
         pieces.append(binascii.b2a_base64(chunk))
-    return "".join(pieces)
+    return b"".join(pieces)
 
 
-def decodestring(s):
-    """Decode a string."""
+def decodebytes(s):
+    """Decode a bytestring of base-64 data into a bytes object."""
+    _input_type_check(s)
     return binascii.a2b_base64(s)
 
 
-
-# Useable as a script...
-def test():
-    """Small test program"""
+# Usable as a script...
+def main():
+    """Small main program"""
     import sys, getopt
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'deut')
-    except getopt.error, msg:
+    except getopt.error as msg:
         sys.stdout = sys.stderr
-        print msg
-        print """usage: %s [-d|-e|-u|-t] [file|-]
+        print(msg)
+        print("""usage: %s [-d|-e|-u|-t] [file|-]
         -d, -u: decode
         -e: encode (default)
-        -t: encode and decode string 'Aladdin:open sesame'"""%sys.argv[0]
+        -t: encode and decode string 'Aladdin:open sesame'"""%sys.argv[0])
         sys.exit(2)
     func = encode
     for o, a in opts:
         if o == '-e': func = encode
         if o == '-d': func = decode
         if o == '-u': func = decode
-        if o == '-t': test1(); return
+        if o == '-t': test(); return
     if args and args[0] != '-':
         with open(args[0], 'rb') as f:
-            func(f, sys.stdout)
+            func(f, sys.stdout.buffer)
     else:
-        func(sys.stdin, sys.stdout)
+        func(sys.stdin.buffer, sys.stdout.buffer)
 
 
-def test1():
-    s0 = "Aladdin:open sesame"
-    s1 = encodestring(s0)
-    s2 = decodestring(s1)
-    print s0, repr(s1), s2
+def test():
+    s0 = b"Aladdin:open sesame"
+    print(repr(s0))
+    s1 = encodebytes(s0)
+    print(repr(s1))
+    s2 = decodebytes(s1)
+    print(repr(s2))
+    assert s0 == s2
 
 
 if __name__ == '__main__':
-    test()
+    main()

@@ -1,4 +1,4 @@
-# Copyright (C) 2001-2006 Python Software Foundation
+# Copyright (C) 2001-2007 Python Software Foundation
 # Author: Ben Gertzfield, Barry Warsaw
 # Contact: email-sig@python.org
 
@@ -9,7 +9,8 @@ __all__ = [
     'add_codec',
     ]
 
-import codecs
+from functools import partial
+
 import email.base64mime
 import email.quoprimime
 
@@ -24,9 +25,11 @@ BASE64      = 2 # Base64
 SHORTEST    = 3 # the shorter of QP and base64, but only for headers
 
 # In "=?charset?q?hello_world?=", the =?, ?q?, and ?= add up to 7
-MISC_LEN = 7
+RFC2047_CHROME_LEN = 7
 
 DEFAULT_CHARSET = 'us-ascii'
+UNKNOWN8BIT = 'unknown-8bit'
+EMPTYSTRING = ''
 
 
 
@@ -58,8 +61,6 @@ CHARSETS = {
     'iso-2022-jp': (BASE64,    None,    None),
     'koi8-r':      (BASE64,    BASE64,  None),
     'utf-8':       (SHORTEST,  BASE64, 'utf-8'),
-    # We're making this one up to represent raw unencoded 8-bit
-    '8bit':        (None,      BASE64, 'utf-8'),
     }
 
 # Aliases for other commonly-used names for character sets.  Map
@@ -153,6 +154,16 @@ def add_codec(charset, codecname):
 
 
 
+# Convenience function for encoding strings, taking into account
+# that they might be unknown-8bit (ie: have surrogate-escaped bytes)
+def _encode(string, codec):
+    if codec == UNKNOWN8BIT:
+        return string.encode('ascii', 'surrogateescape')
+    else:
+        return string.encode(codec)
+
+
+
 class Charset:
     """Map character sets to their email properties.
 
@@ -203,19 +214,14 @@ class Charset:
         # is already a unicode, we leave it at that, but ensure that the
         # charset is ASCII, as the standard (RFC XXX) requires.
         try:
-            if isinstance(input_charset, unicode):
+            if isinstance(input_charset, str):
                 input_charset.encode('ascii')
             else:
-                input_charset = unicode(input_charset, 'ascii')
+                input_charset = str(input_charset, 'ascii')
         except UnicodeError:
             raise errors.CharsetError(input_charset)
-        input_charset = input_charset.lower().encode('ascii')
-        # Set the input charset after filtering through the aliases and/or codecs
-        if not (input_charset in ALIASES or input_charset in CHARSETS):
-            try:
-                input_charset = codecs.lookup(input_charset).name
-            except LookupError:
-                pass
+        input_charset = input_charset.lower()
+        # Set the input charset after filtering through the aliases
         self.input_charset = ALIASES.get(input_charset, input_charset)
         # We can try to guess which encoding and conversion to use by the
         # charset_map dictionary.  Try that first, but let the user override
@@ -235,16 +241,11 @@ class Charset:
         self.output_codec = CODEC_MAP.get(self.output_charset,
                                           self.output_charset)
 
-    def __str__(self):
+    def __repr__(self):
         return self.input_charset.lower()
-
-    __repr__ = __str__
 
     def __eq__(self, other):
         return str(self) == str(other).lower()
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def get_body_encoding(self):
         """Return the content-transfer-encoding used for body encoding.
@@ -257,7 +258,7 @@ class Charset:
 
         Returns "quoted-printable" if self.body_encoding is QP.
         Returns "base64" if self.body_encoding is BASE64.
-        Returns "7bit" otherwise.
+        Returns conversion function otherwise.
         """
         assert self.body_encoding != SHORTEST
         if self.body_encoding == QP:
@@ -267,60 +268,6 @@ class Charset:
         else:
             return encode_7or8bit
 
-    def convert(self, s):
-        """Convert a string from the input_codec to the output_codec."""
-        if self.input_codec != self.output_codec:
-            return unicode(s, self.input_codec).encode(self.output_codec)
-        else:
-            return s
-
-    def to_splittable(self, s):
-        """Convert a possibly multibyte string to a safely splittable format.
-
-        Uses the input_codec to try and convert the string to Unicode, so it
-        can be safely split on character boundaries (even for multibyte
-        characters).
-
-        Returns the string as-is if it isn't known how to convert it to
-        Unicode with the input_charset.
-
-        Characters that could not be converted to Unicode will be replaced
-        with the Unicode replacement character U+FFFD.
-        """
-        if isinstance(s, unicode) or self.input_codec is None:
-            return s
-        try:
-            return unicode(s, self.input_codec, 'replace')
-        except LookupError:
-            # Input codec not installed on system, so return the original
-            # string unchanged.
-            return s
-
-    def from_splittable(self, ustr, to_output=True):
-        """Convert a splittable string back into an encoded string.
-
-        Uses the proper codec to try and convert the string from Unicode back
-        into an encoded format.  Return the string as-is if it is not Unicode,
-        or if it could not be converted from Unicode.
-
-        Characters that could not be converted from Unicode will be replaced
-        with an appropriate character (usually '?').
-
-        If to_output is True (the default), uses output_codec to convert to an
-        encoded format.  If to_output is False, uses input_codec.
-        """
-        if to_output:
-            codec = self.output_codec
-        else:
-            codec = self.input_codec
-        if not isinstance(ustr, unicode) or codec is None:
-            return ustr
-        try:
-            return ustr.encode(codec, 'replace')
-        except LookupError:
-            # Output codec not installed
-            return ustr
-
     def get_output_charset(self):
         """Return the output character set.
 
@@ -329,69 +276,129 @@ class Charset:
         """
         return self.output_charset or self.input_charset
 
-    def encoded_header_len(self, s):
-        """Return the length of the encoded header string."""
-        cset = self.get_output_charset()
-        # The len(s) of a 7bit encoding is len(s)
-        if self.header_encoding == BASE64:
-            return email.base64mime.base64_len(s) + len(cset) + MISC_LEN
-        elif self.header_encoding == QP:
-            return email.quoprimime.header_quopri_len(s) + len(cset) + MISC_LEN
-        elif self.header_encoding == SHORTEST:
-            lenb64 = email.base64mime.base64_len(s)
-            lenqp = email.quoprimime.header_quopri_len(s)
-            return min(lenb64, lenqp) + len(cset) + MISC_LEN
-        else:
-            return len(s)
-
-    def header_encode(self, s, convert=False):
-        """Header-encode a string, optionally converting it to output_charset.
-
-        If convert is True, the string will be converted from the input
-        charset to the output charset automatically.  This is not useful for
-        multibyte character sets, which have line length issues (multibyte
-        characters must be split on a character, not a byte boundary); use the
-        high-level Header class to deal with these issues.  convert defaults
-        to False.
+    def header_encode(self, string):
+        """Header-encode a string by converting it first to bytes.
 
         The type of encoding (base64 or quoted-printable) will be based on
-        self.header_encoding.
+        this charset's `header_encoding`.
+
+        :param string: A unicode string for the header.  It must be possible
+            to encode this string to bytes using the character set's
+            output codec.
+        :return: The encoded string, with RFC 2047 chrome.
         """
-        cset = self.get_output_charset()
-        if convert:
-            s = self.convert(s)
+        codec = self.output_codec or 'us-ascii'
+        header_bytes = _encode(string, codec)
         # 7bit/8bit encodings return the string unchanged (modulo conversions)
+        encoder_module = self._get_encoder(header_bytes)
+        if encoder_module is None:
+            return string
+        return encoder_module.header_encode(header_bytes, codec)
+
+    def header_encode_lines(self, string, maxlengths):
+        """Header-encode a string by converting it first to bytes.
+
+        This is similar to `header_encode()` except that the string is fit
+        into maximum line lengths as given by the argument.
+
+        :param string: A unicode string for the header.  It must be possible
+            to encode this string to bytes using the character set's
+            output codec.
+        :param maxlengths: Maximum line length iterator.  Each element
+            returned from this iterator will provide the next maximum line
+            length.  This parameter is used as an argument to built-in next()
+            and should never be exhausted.  The maximum line lengths should
+            not count the RFC 2047 chrome.  These line lengths are only a
+            hint; the splitter does the best it can.
+        :return: Lines of encoded strings, each with RFC 2047 chrome.
+        """
+        # See which encoding we should use.
+        codec = self.output_codec or 'us-ascii'
+        header_bytes = _encode(string, codec)
+        encoder_module = self._get_encoder(header_bytes)
+        encoder = partial(encoder_module.header_encode, charset=codec)
+        # Calculate the number of characters that the RFC 2047 chrome will
+        # contribute to each line.
+        charset = self.get_output_charset()
+        extra = len(charset) + RFC2047_CHROME_LEN
+        # Now comes the hard part.  We must encode bytes but we can't split on
+        # bytes because some character sets are variable length and each
+        # encoded word must stand on its own.  So the problem is you have to
+        # encode to bytes to figure out this word's length, but you must split
+        # on characters.  This causes two problems: first, we don't know how
+        # many octets a specific substring of unicode characters will get
+        # encoded to, and second, we don't know how many ASCII characters
+        # those octets will get encoded to.  Unless we try it.  Which seems
+        # inefficient.  In the interest of being correct rather than fast (and
+        # in the hope that there will be few encoded headers in any such
+        # message), brute force it. :(
+        lines = []
+        current_line = []
+        maxlen = next(maxlengths) - extra
+        for character in string:
+            current_line.append(character)
+            this_line = EMPTYSTRING.join(current_line)
+            length = encoder_module.header_length(_encode(this_line, charset))
+            if length > maxlen:
+                # This last character doesn't fit so pop it off.
+                current_line.pop()
+                # Does nothing fit on the first line?
+                if not lines and not current_line:
+                    lines.append(None)
+                else:
+                    separator = (' ' if lines else '')
+                    joined_line = EMPTYSTRING.join(current_line)
+                    header_bytes = _encode(joined_line, codec)
+                    lines.append(encoder(header_bytes))
+                current_line = [character]
+                maxlen = next(maxlengths) - extra
+        joined_line = EMPTYSTRING.join(current_line)
+        header_bytes = _encode(joined_line, codec)
+        lines.append(encoder(header_bytes))
+        return lines
+
+    def _get_encoder(self, header_bytes):
         if self.header_encoding == BASE64:
-            return email.base64mime.header_encode(s, cset)
+            return email.base64mime
         elif self.header_encoding == QP:
-            return email.quoprimime.header_encode(s, cset, maxlinelen=None)
+            return email.quoprimime
         elif self.header_encoding == SHORTEST:
-            lenb64 = email.base64mime.base64_len(s)
-            lenqp = email.quoprimime.header_quopri_len(s)
-            if lenb64 < lenqp:
-                return email.base64mime.header_encode(s, cset)
+            len64 = email.base64mime.header_length(header_bytes)
+            lenqp = email.quoprimime.header_length(header_bytes)
+            if len64 < lenqp:
+                return email.base64mime
             else:
-                return email.quoprimime.header_encode(s, cset, maxlinelen=None)
+                return email.quoprimime
         else:
-            return s
+            return None
 
-    def body_encode(self, s, convert=True):
-        """Body-encode a string and convert it to output_charset.
-
-        If convert is True (the default), the string will be converted from
-        the input charset to output charset automatically.  Unlike
-        header_encode(), there are no issues with byte boundaries and
-        multibyte charsets in email bodies, so this is usually pretty safe.
+    def body_encode(self, string):
+        """Body-encode a string by converting it first to bytes.
 
         The type of encoding (base64 or quoted-printable) will be based on
-        self.body_encoding.
+        self.body_encoding.  If body_encoding is None, we assume the
+        output charset is a 7bit encoding, so re-encoding the decoded
+        string using the ascii codec produces the correct string version
+        of the content.
         """
-        if convert:
-            s = self.convert(s)
-        # 7bit/8bit encodings return the string unchanged (module conversions)
+        if not string:
+            return string
         if self.body_encoding is BASE64:
-            return email.base64mime.body_encode(s)
+            if isinstance(string, str):
+                string = string.encode(self.output_charset)
+            return email.base64mime.body_encode(string)
         elif self.body_encoding is QP:
-            return email.quoprimime.body_encode(s)
+            # quopromime.body_encode takes a string, but operates on it as if
+            # it were a list of byte codes.  For a (minimal) history on why
+            # this is so, see changeset 0cf700464177.  To correctly encode a
+            # character set, then, we must turn it into pseudo bytes via the
+            # latin1 charset, which will encode any byte as a single code point
+            # between 0 and 255, which is what body_encode is expecting.
+            if isinstance(string, str):
+                string = string.encode(self.output_charset)
+            string = string.decode('latin1')
+            return email.quoprimime.body_encode(string)
         else:
-            return s
+            if isinstance(string, str):
+                string = string.encode(self.output_charset).decode('ascii')
+            return string

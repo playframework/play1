@@ -4,7 +4,7 @@ builtin open function is defined in this module.
 At the top of the I/O hierarchy is the abstract base class IOBase. It
 defines the basic interface to a stream. Note, however, that there is no
 separation between reading and writing to streams; implementations are
-allowed to raise an IOError if they do not support a given operation.
+allowed to raise an OSError if they do not support a given operation.
 
 Extending IOBase is RawIOBase which deals simply with the reading and
 writing of raw bytes to a stream. FileIO subclasses RawIOBase to provide
@@ -41,8 +41,8 @@ __author__ = ("Guido van Rossum <guido@python.org>, "
               "Amaury Forgeot d'Arc <amauryfa@gmail.com>, "
               "Benjamin Peterson <benjamin@python.org>")
 
-__all__ = ["BlockingIOError", "open", "IOBase", "RawIOBase", "FileIO",
-           "BytesIO", "StringIO", "BufferedIOBase",
+__all__ = ["BlockingIOError", "open", "open_code", "IOBase", "RawIOBase",
+           "FileIO", "BytesIO", "StringIO", "BufferedIOBase",
            "BufferedReader", "BufferedWriter", "BufferedRWPair",
            "BufferedRandom", "TextIOBase", "TextIOWrapper",
            "UnsupportedOperation", "SEEK_SET", "SEEK_CUR", "SEEK_END"]
@@ -52,11 +52,29 @@ import _io
 import abc
 
 from _io import (DEFAULT_BUFFER_SIZE, BlockingIOError, UnsupportedOperation,
-                 open, FileIO, BytesIO, StringIO, BufferedReader,
+                 open, open_code, FileIO, BytesIO, StringIO, BufferedReader,
                  BufferedWriter, BufferedRWPair, BufferedRandom,
-                 IncrementalNewlineDecoder, TextIOWrapper)
+                 IncrementalNewlineDecoder, text_encoding, TextIOWrapper)
 
-OpenWrapper = _io.open # for compatibility with _pyio
+
+def __getattr__(name):
+    if name == "OpenWrapper":
+        # bpo-43680: Until Python 3.9, _pyio.open was not a static method and
+        # builtins.open was set to OpenWrapper to not become a bound method
+        # when set to a class variable. _io.open is a built-in function whereas
+        # _pyio.open is a Python function. In Python 3.10, _pyio.open() is now
+        # a static method, and builtins.open() is now io.open().
+        import warnings
+        warnings.warn('OpenWrapper is deprecated, use open instead',
+                      DeprecationWarning, stacklevel=2)
+        global OpenWrapper
+        OpenWrapper = open
+        return OpenWrapper
+    raise AttributeError(name)
+
+
+# Pretend this exception was created here.
+UnsupportedOperation.__module__ = "io"
 
 # for seek()
 SEEK_SET = 0
@@ -66,8 +84,7 @@ SEEK_END = 2
 # Declaring ABCs in C is tricky so we do it here.
 # Method descriptions and default implementations are inherited from the C
 # version however.
-class IOBase(_io._IOBase):
-    __metaclass__ = abc.ABCMeta
+class IOBase(_io._IOBase, metaclass=abc.ABCMeta):
     __doc__ = _io._IOBase.__doc__
 
 class RawIOBase(_io._RawIOBase, IOBase):
@@ -88,3 +105,10 @@ for klass in (BytesIO, BufferedReader, BufferedWriter, BufferedRandom,
 for klass in (StringIO, TextIOWrapper):
     TextIOBase.register(klass)
 del klass
+
+try:
+    from _io import _WindowsConsoleIO
+except ImportError:
+    pass
+else:
+    RawIOBase.register(_WindowsConsoleIO)

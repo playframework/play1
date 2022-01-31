@@ -4,49 +4,25 @@
 # multiprocessing/util.py
 #
 # Copyright (c) 2006-2008, R Oudkerk
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of author nor the names of any contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
+# Licensed to PSF under a Contributor Agreement.
 #
 
 import os
 import itertools
+import sys
 import weakref
 import atexit
 import threading        # we want threading to install it's
                         # cleanup function before multiprocessing does
 from subprocess import _args_from_interpreter_flags
 
-from multiprocessing.process import current_process, active_children
+from . import process
 
 __all__ = [
     'sub_debug', 'debug', 'info', 'sub_warning', 'get_logger',
     'log_to_stderr', 'get_temp_dir', 'register_after_fork',
     'is_exiting', 'Finalize', 'ForkAwareThreadLock', 'ForkAwareLocal',
-    'SUBDEBUG', 'SUBWARNING',
+    'close_all_fds_except', 'SUBDEBUG', 'SUBWARNING',
     ]
 
 #
@@ -86,7 +62,7 @@ def get_logger():
     Returns logger used by multiprocessing
     '''
     global _logger
-    import logging, atexit
+    import logging
 
     logging._acquireLock()
     try:
@@ -94,8 +70,6 @@ def get_logger():
 
             _logger = logging.getLogger(LOGGER_NAME)
             _logger.propagate = 0
-            logging.addLevelName(SUBDEBUG, 'SUBDEBUG')
-            logging.addLevelName(SUBWARNING, 'SUBWARNING')
 
             # XXX multiprocessing should cleanup before logging
             if hasattr(atexit, 'unregister'):
@@ -128,19 +102,55 @@ def log_to_stderr(level=None):
     _log_to_stderr = True
     return _logger
 
+
+# Abstract socket support
+
+def _platform_supports_abstract_sockets():
+    if sys.platform == "linux":
+        return True
+    if hasattr(sys, 'getandroidapilevel'):
+        return True
+    return False
+
+
+def is_abstract_socket_namespace(address):
+    if not address:
+        return False
+    if isinstance(address, bytes):
+        return address[0] == 0
+    elif isinstance(address, str):
+        return address[0] == "\0"
+    raise TypeError('address type of {address!r} unrecognized')
+
+
+abstract_sockets_supported = _platform_supports_abstract_sockets()
+
 #
 # Function returning a temp directory which will be removed on exit
 #
 
+def _remove_temp_dir(rmtree, tempdir):
+    rmtree(tempdir)
+
+    current_process = process.current_process()
+    # current_process() can be None if the finalizer is called
+    # late during Python finalization
+    if current_process is not None:
+        current_process._config['tempdir'] = None
+
 def get_temp_dir():
     # get name of a temp directory which will be automatically cleaned up
-    if current_process()._tempdir is None:
+    tempdir = process.current_process()._config.get('tempdir')
+    if tempdir is None:
         import shutil, tempfile
         tempdir = tempfile.mkdtemp(prefix='pymp-')
         info('created temp directory %s', tempdir)
-        Finalize(None, shutil.rmtree, args=[tempdir], exitpriority=-100)
-        current_process()._tempdir = tempdir
-    return current_process()._tempdir
+        # keep a strong reference to shutil.rmtree(), since the finalizer
+        # can be called late during Python shutdown
+        Finalize(None, _remove_temp_dir, args=(shutil.rmtree, tempdir),
+                 exitpriority=-100)
+        process.current_process()._config['tempdir'] = tempdir
+    return tempdir
 
 #
 # Support for reinitialization of objects when bootstrapping a child process
@@ -155,11 +165,11 @@ def _run_after_forkers():
     for (index, ident, func), obj in items:
         try:
             func(obj)
-        except Exception, e:
+        except Exception as e:
             info('after forker raised exception %s', e)
 
 def register_after_fork(obj, func):
-    _afterfork_registry[(_afterfork_counter.next(), id(obj), func)] = obj
+    _afterfork_registry[(next(_afterfork_counter), id(obj), func)] = obj
 
 #
 # Finalization using weakrefs
@@ -174,22 +184,29 @@ class Finalize(object):
     Class which supports object finalization using weakrefs
     '''
     def __init__(self, obj, callback, args=(), kwargs=None, exitpriority=None):
-        assert exitpriority is None or type(exitpriority) is int
+        if (exitpriority is not None) and not isinstance(exitpriority,int):
+            raise TypeError(
+                "Exitpriority ({0!r}) must be None or int, not {1!s}".format(
+                    exitpriority, type(exitpriority)))
 
         if obj is not None:
             self._weakref = weakref.ref(obj, self)
-        else:
-            assert exitpriority is not None
+        elif exitpriority is None:
+            raise ValueError("Without object, exitpriority cannot be None")
 
         self._callback = callback
         self._args = args
         self._kwargs = kwargs or {}
-        self._key = (exitpriority, _finalizer_counter.next())
+        self._key = (exitpriority, next(_finalizer_counter))
         self._pid = os.getpid()
 
         _finalizer_registry[self._key] = self
 
-    def __call__(self, wr=None):
+    def __call__(self, wr=None,
+                 # Need to bind these locally because the globals can have
+                 # been cleared at shutdown
+                 _finalizer_registry=_finalizer_registry,
+                 sub_debug=sub_debug, getpid=os.getpid):
         '''
         Run the callback unless it has already been called or cancelled
         '''
@@ -198,7 +215,7 @@ class Finalize(object):
         except KeyError:
             sub_debug('finalizer no longer registered')
         else:
-            if self._pid != os.getpid():
+            if self._pid != getpid():
                 sub_debug('finalizer ignored because different process')
                 res = None
             else:
@@ -234,16 +251,17 @@ class Finalize(object):
             obj = None
 
         if obj is None:
-            return '<Finalize object, dead>'
+            return '<%s object, dead>' % self.__class__.__name__
 
-        x = '<Finalize object, callback=%s' % \
-            getattr(self._callback, '__name__', self._callback)
+        x = '<%s object, callback=%s' % (
+                self.__class__.__name__,
+                getattr(self._callback, '__name__', self._callback))
         if self._args:
             x += ', args=' + str(self._args)
         if self._kwargs:
             x += ', kwargs=' + str(self._kwargs)
         if self._key[0] is not None:
-            x += ', exitprority=' + str(self._key[0])
+            x += ', exitpriority=' + str(self._key[0])
         return x + '>'
 
 
@@ -261,20 +279,28 @@ def _run_finalizers(minpriority=None):
         return
 
     if minpriority is None:
-        f = lambda p : p[0][0] is not None
+        f = lambda p : p[0] is not None
     else:
-        f = lambda p : p[0][0] is not None and p[0][0] >= minpriority
+        f = lambda p : p[0] is not None and p[0] >= minpriority
 
-    items = [x for x in _finalizer_registry.items() if f(x)]
-    items.sort(reverse=True)
+    # Careful: _finalizer_registry may be mutated while this function
+    # is running (either by a GC run or by another thread).
 
-    for key, finalizer in items:
-        sub_debug('calling %s', finalizer)
-        try:
-            finalizer()
-        except Exception:
-            import traceback
-            traceback.print_exc()
+    # list(_finalizer_registry) should be atomic, while
+    # list(_finalizer_registry.items()) is not.
+    keys = [key for key in list(_finalizer_registry) if f(key)]
+    keys.sort(reverse=True)
+
+    for key in keys:
+        finalizer = _finalizer_registry.get(key)
+        # key may have been removed from the registry
+        if finalizer is not None:
+            sub_debug('calling %s', finalizer)
+            try:
+                finalizer()
+            except Exception:
+                import traceback
+                traceback.print_exc()
 
     if minpriority is None:
         _finalizer_registry.clear()
@@ -292,40 +318,46 @@ def is_exiting():
 _exiting = False
 
 def _exit_function(info=info, debug=debug, _run_finalizers=_run_finalizers,
-                   active_children=active_children,
-                   current_process=current_process):
-    # NB: we hold on to references to functions in the arglist due to the
+                   active_children=process.active_children,
+                   current_process=process.current_process):
+    # We hold on to references to functions in the arglist due to the
     # situation described below, where this function is called after this
     # module's globals are destroyed.
 
     global _exiting
 
-    info('process shutting down')
-    debug('running all "atexit" finalizers with priority >= 0')
-    _run_finalizers(0)
+    if not _exiting:
+        _exiting = True
 
-    if current_process() is not None:
-        # NB: we check if the current process is None here because if
-        # it's None, any call to ``active_children()`` will throw an
-        # AttributeError (active_children winds up trying to get
-        # attributes from util._current_process).  This happens in a
-        # variety of shutdown circumstances that are not well-understood
-        # because module-scope variables are not apparently supposed to
-        # be destroyed until after this function is called.  However,
-        # they are indeed destroyed before this function is called.  See
-        # issues 9775 and 15881.  Also related: 4106, 9205, and 9207.
+        info('process shutting down')
+        debug('running all "atexit" finalizers with priority >= 0')
+        _run_finalizers(0)
 
-        for p in active_children():
-            if p._daemonic:
-                info('calling terminate() for daemon %s', p.name)
-                p._popen.terminate()
+        if current_process() is not None:
+            # We check if the current process is None here because if
+            # it's None, any call to ``active_children()`` will raise
+            # an AttributeError (active_children winds up trying to
+            # get attributes from util._current_process).  One
+            # situation where this can happen is if someone has
+            # manipulated sys.modules, causing this module to be
+            # garbage collected.  The destructor for the module type
+            # then replaces all values in the module dict with None.
+            # For instance, after setuptools runs a test it replaces
+            # sys.modules with a copy created earlier.  See issues
+            # #9775 and #15881.  Also related: #4106, #9205, and
+            # #9207.
 
-        for p in active_children():
-            info('calling join() for process %s', p.name)
-            p.join()
+            for p in active_children():
+                if p.daemon:
+                    info('calling terminate() for daemon %s', p.name)
+                    p._popen.terminate()
 
-    debug('running the remaining "atexit" finalizers')
-    _run_finalizers()
+            for p in active_children():
+                info('calling join() for process %s', p.name)
+                p.join()
+
+        debug('running the remaining "atexit" finalizers')
+        _run_finalizers()
 
 atexit.register(_exit_function)
 
@@ -335,16 +367,123 @@ atexit.register(_exit_function)
 
 class ForkAwareThreadLock(object):
     def __init__(self):
-        self._reset()
-        register_after_fork(self, ForkAwareThreadLock._reset)
-
-    def _reset(self):
         self._lock = threading.Lock()
         self.acquire = self._lock.acquire
         self.release = self._lock.release
+        register_after_fork(self, ForkAwareThreadLock._at_fork_reinit)
+
+    def _at_fork_reinit(self):
+        self._lock._at_fork_reinit()
+
+    def __enter__(self):
+        return self._lock.__enter__()
+
+    def __exit__(self, *args):
+        return self._lock.__exit__(*args)
+
 
 class ForkAwareLocal(threading.local):
     def __init__(self):
         register_after_fork(self, lambda obj : obj.__dict__.clear())
     def __reduce__(self):
         return type(self), ()
+
+#
+# Close fds except those specified
+#
+
+try:
+    MAXFD = os.sysconf("SC_OPEN_MAX")
+except Exception:
+    MAXFD = 256
+
+def close_all_fds_except(fds):
+    fds = list(fds) + [-1, MAXFD]
+    fds.sort()
+    assert fds[-1] == MAXFD, 'fd too large'
+    for i in range(len(fds) - 1):
+        os.closerange(fds[i]+1, fds[i+1])
+#
+# Close sys.stdin and replace stdin with os.devnull
+#
+
+def _close_stdin():
+    if sys.stdin is None:
+        return
+
+    try:
+        sys.stdin.close()
+    except (OSError, ValueError):
+        pass
+
+    try:
+        fd = os.open(os.devnull, os.O_RDONLY)
+        try:
+            sys.stdin = open(fd, encoding="utf-8", closefd=False)
+        except:
+            os.close(fd)
+            raise
+    except (OSError, ValueError):
+        pass
+
+#
+# Flush standard streams, if any
+#
+
+def _flush_std_streams():
+    try:
+        sys.stdout.flush()
+    except (AttributeError, ValueError):
+        pass
+    try:
+        sys.stderr.flush()
+    except (AttributeError, ValueError):
+        pass
+
+#
+# Start a program with only specified fds kept open
+#
+
+def spawnv_passfds(path, args, passfds):
+    import _posixsubprocess
+    passfds = tuple(sorted(map(int, passfds)))
+    errpipe_read, errpipe_write = os.pipe()
+    try:
+        return _posixsubprocess.fork_exec(
+            args, [os.fsencode(path)], True, passfds, None, None,
+            -1, -1, -1, -1, -1, -1, errpipe_read, errpipe_write,
+            False, False, None, None, None, -1, None)
+    finally:
+        os.close(errpipe_read)
+        os.close(errpipe_write)
+
+
+def close_fds(*fds):
+    """Close each file descriptor given as an argument"""
+    for fd in fds:
+        os.close(fd)
+
+
+def _cleanup_tests():
+    """Cleanup multiprocessing resources when multiprocessing tests
+    completed."""
+
+    from test import support
+
+    # cleanup multiprocessing
+    process._cleanup()
+
+    # Stop the ForkServer process if it's running
+    from multiprocessing import forkserver
+    forkserver._forkserver._stop()
+
+    # Stop the ResourceTracker process if it's running
+    from multiprocessing import resource_tracker
+    resource_tracker._resource_tracker._stop()
+
+    # bpo-37421: Explicitly call _run_finalizers() to remove immediately
+    # temporary directories created by multiprocessing.util.get_temp_dir().
+    _run_finalizers()
+    support.gc_collect()
+
+    support.reap_children()

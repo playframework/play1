@@ -1,16 +1,15 @@
-# -*- coding: iso-8859-1 -*-
-# Copyright (C) 2005 Martin v. Löwis
+# Copyright (C) 2005 Martin v. LÃ¶wis
 # Licensed to PSF under a Contributor Agreement.
 from _msi import *
-import glob
+import fnmatch
 import os
 import re
 import string
 import sys
 
 AMD64 = "AMD64" in sys.version
-Itanium = "Itanium" in sys.version
-Win64 = AMD64 or Itanium
+# Keep msilib.Win64 around to preserve backwards compatibility.
+Win64 = AMD64
 
 # Partially taken from Wine
 datasizemask=      0x00ff
@@ -46,7 +45,7 @@ class Table:
             index -= 1
             unk = type & ~knownbits
             if unk:
-                print "%s.%s unknown bits %x" % (self.name, name, unk)
+                print("%s.%s unknown bits %x" % (self.name, name, unk))
             size = type & datasizemask
             dtype = type & typemask
             if dtype == type_string:
@@ -65,7 +64,7 @@ class Table:
                 tname="OBJECT"
             else:
                 tname="unknown"
-                print "%s.%sunknown integer type %d" % (self.name, name, size)
+                print("%s.%sunknown integer type %d" % (self.name, name, size))
             if type & type_nullable:
                 flags = ""
             else:
@@ -95,7 +94,7 @@ def change_sequence(seq, action, seqno=_Unspecified, cond = _Unspecified):
                 seqno = seq[i][2]
             seq[i] = (action, cond, seqno)
             return
-    raise ValueError, "Action not found in sequence"
+    raise ValueError("Action not found in sequence")
 
 def add_data(db, table, values):
     v = db.OpenView("SELECT * FROM `%s`" % table)
@@ -105,19 +104,19 @@ def add_data(db, table, values):
         assert len(value) == count, value
         for i in range(count):
             field = value[i]
-            if isinstance(field, (int, long)):
+            if isinstance(field, int):
                 r.SetInteger(i+1,field)
-            elif isinstance(field, basestring):
+            elif isinstance(field, str):
                 r.SetString(i+1,field)
             elif field is None:
                 pass
             elif isinstance(field, Binary):
                 r.SetStream(i+1, field.name)
             else:
-                raise TypeError, "Unsupported type %s" % field.__class__.__name__
+                raise TypeError("Unsupported type %s" % field.__class__.__name__)
         try:
             v.Modify(MSIMODIFY_INSERT, r)
-        except Exception, e:
+        except Exception:
             raise MSIError("Could not insert "+repr(values)+" into "+table)
 
         r.ClearData()
@@ -151,9 +150,7 @@ def init_database(name, schema,
     si.SetProperty(PID_TITLE, "Installation Database")
     si.SetProperty(PID_SUBJECT, ProductName)
     si.SetProperty(PID_AUTHOR, Manufacturer)
-    if Itanium:
-        si.SetProperty(PID_TEMPLATE, "Intel64;1033")
-    elif AMD64:
+    if AMD64:
         si.SetProperty(PID_TEMPLATE, "x64;1033")
     else:
         si.SetProperty(PID_TEMPLATE, "Intel;1033")
@@ -273,10 +270,10 @@ class Directory:
         if component is None:
             component = self.logical
         self.component = component
-        if Win64:
+        if AMD64:
             flags |= 256
         if keyfile:
-            keyid = self.cab.gen_id(self.absolute, keyfile)
+            keyid = self.cab.gen_id(keyfile)
             self.keyfiles[keyfile] = keyid
         else:
             keyid = None
@@ -290,7 +287,7 @@ class Directory:
     def make_short(self, file):
         oldfile = file
         file = file.replace('+', '_')
-        file = ''.join(c for c in file if not c in ' "/\[]:;=,')
+        file = ''.join(c for c in file if not c in r' "/\[]:;=,')
         parts = file.split(".")
         if len(parts) > 1:
             prefix = "".join(parts[:-1]).upper()
@@ -366,7 +363,7 @@ class Directory:
         #             [(logical, 0, filehash.IntegerData(1),
         #               filehash.IntegerData(2), filehash.IntegerData(3),
         #               filehash.IntegerData(4))])
-        # Automatically remove .pyc/.pyo files on uninstall (2)
+        # Automatically remove .pyc files on uninstall (2)
         # XXX: adding so many RemoveFile entries makes installer unbelievably
         # slow. So instead, we have to use wildcard remove entries
         if file.endswith(".py"):
@@ -380,17 +377,22 @@ class Directory:
     def glob(self, pattern, exclude = None):
         """Add a list of files to the current component as specified in the
         glob pattern. Individual files can be excluded in the exclude list."""
-        files = glob.glob1(self.absolute, pattern)
+        try:
+            files = os.listdir(self.absolute)
+        except OSError:
+            return []
+        if pattern[:1] != '.':
+            files = (f for f in files if f[0] != '.')
+        files = fnmatch.filter(files, pattern)
         for f in files:
             if exclude and f in exclude: continue
             self.add_file(f)
         return files
 
     def remove_pyc(self):
-        "Remove .pyc/.pyo files on uninstall"
+        "Remove .pyc files on uninstall"
         add_data(self.db, "RemoveFile",
-                 [(self.component+"c", self.component, "*.pyc", self.logical, 2),
-                  (self.component+"o", self.component, "*.pyo", self.logical, 2)])
+                 [(self.component+"c", self.component, "*.pyc", self.logical, 2)])
 
 class Binary:
     def __init__(self, fname):

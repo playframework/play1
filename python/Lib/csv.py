@@ -4,7 +4,6 @@ csv.py - read/write/investigate CSV files
 """
 
 import re
-from functools import reduce
 from _csv import Error, __version__, writer, reader, register_dialect, \
                  unregister_dialect, get_dialect, list_dialects, \
                  field_size_limit, \
@@ -12,19 +11,17 @@ from _csv import Error, __version__, writer, reader, register_dialect, \
                  __doc__
 from _csv import Dialect as _Dialect
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import StringIO
 
-__all__ = [ "QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
-            "Error", "Dialect", "__doc__", "excel", "excel_tab",
-            "field_size_limit", "reader", "writer",
-            "register_dialect", "get_dialect", "list_dialects", "Sniffer",
-            "unregister_dialect", "__version__", "DictReader", "DictWriter" ]
+__all__ = ["QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
+           "Error", "Dialect", "__doc__", "excel", "excel_tab",
+           "field_size_limit", "reader", "writer",
+           "register_dialect", "get_dialect", "list_dialects", "Sniffer",
+           "unregister_dialect", "__version__", "DictReader", "DictWriter",
+           "unix_dialect"]
 
 class Dialect:
-    """Describe an Excel dialect.
+    """Describe a CSV dialect.
 
     This must be subclassed (see csv.excel).  Valid attributes are:
     delimiter, quotechar, escapechar, doublequote, skipinitialspace,
@@ -50,7 +47,7 @@ class Dialect:
     def _validate(self):
         try:
             _Dialect(self)
-        except TypeError, e:
+        except TypeError as e:
             # We do this for compatibility with py2.3
             raise Error(str(e))
 
@@ -68,6 +65,16 @@ class excel_tab(excel):
     """Describe the usual properties of Excel-generated TAB-delimited files."""
     delimiter = '\t'
 register_dialect("excel-tab", excel_tab)
+
+class unix_dialect(Dialect):
+    """Describe the usual properties of Unix-generated CSV files."""
+    delimiter = ','
+    quotechar = '"'
+    doublequote = True
+    skipinitialspace = False
+    lineterminator = '\n'
+    quoting = QUOTE_ALL
+register_dialect("unix", unix_dialect)
 
 
 class DictReader:
@@ -87,32 +94,28 @@ class DictReader:
     def fieldnames(self):
         if self._fieldnames is None:
             try:
-                self._fieldnames = self.reader.next()
+                self._fieldnames = next(self.reader)
             except StopIteration:
                 pass
         self.line_num = self.reader.line_num
         return self._fieldnames
 
-    # Issue 20004: Because DictReader is a classic class, this setter is
-    # ignored.  At this point in 2.7's lifecycle, it is too late to change the
-    # base class for fear of breaking working code.  If you want to change
-    # fieldnames without overwriting the getter, set _fieldnames directly.
     @fieldnames.setter
     def fieldnames(self, value):
         self._fieldnames = value
 
-    def next(self):
+    def __next__(self):
         if self.line_num == 0:
             # Used only for its side effect.
             self.fieldnames
-        row = self.reader.next()
+        row = next(self.reader)
         self.line_num = self.reader.line_num
 
         # unlike the basic reader, we prefer not to return blanks,
         # because we will typically wind up with a dict full of None
         # values
         while row == []:
-            row = self.reader.next()
+            row = next(self.reader)
         d = dict(zip(self.fieldnames, row))
         lf = len(self.fieldnames)
         lr = len(row)
@@ -130,32 +133,28 @@ class DictWriter:
         self.fieldnames = fieldnames    # list of keys for the dict
         self.restval = restval          # for writing short dicts
         if extrasaction.lower() not in ("raise", "ignore"):
-            raise ValueError, \
-                  ("extrasaction (%s) must be 'raise' or 'ignore'" %
-                   extrasaction)
+            raise ValueError("extrasaction (%s) must be 'raise' or 'ignore'"
+                             % extrasaction)
         self.extrasaction = extrasaction
         self.writer = writer(f, dialect, *args, **kwds)
 
     def writeheader(self):
         header = dict(zip(self.fieldnames, self.fieldnames))
-        self.writerow(header)
+        return self.writerow(header)
 
     def _dict_to_list(self, rowdict):
         if self.extrasaction == "raise":
-            wrong_fields = [k for k in rowdict if k not in self.fieldnames]
+            wrong_fields = rowdict.keys() - self.fieldnames
             if wrong_fields:
                 raise ValueError("dict contains fields not in fieldnames: "
                                  + ", ".join([repr(x) for x in wrong_fields]))
-        return [rowdict.get(key, self.restval) for key in self.fieldnames]
+        return (rowdict.get(key, self.restval) for key in self.fieldnames)
 
     def writerow(self, rowdict):
         return self.writer.writerow(self._dict_to_list(rowdict))
 
     def writerows(self, rowdicts):
-        rows = []
-        for rowdict in rowdicts:
-            rows.append(self._dict_to_list(rowdict))
-        return self.writer.writerows(rows)
+        return self.writer.writerows(map(self._dict_to_list, rowdicts))
 
 # Guard Sniffer's type checking against builds that exclude complex()
 try:
@@ -185,7 +184,7 @@ class Sniffer:
                                                                 delimiters)
 
         if not delimiter:
-            raise Error, "Could not determine delimiter"
+            raise Error("Could not determine delimiter")
 
         class dialect(Dialect):
             _name = "sniffed"
@@ -215,10 +214,10 @@ class Sniffer:
         """
 
         matches = []
-        for restr in ('(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?P=delim)', # ,".*?",
-                      '(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?P<delim>[^\w\n"\'])(?P<space> ?)',   #  ".*?",
-                      '(?P<delim>>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?:$|\n)',  # ,".*?"
-                      '(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?:$|\n)'):                            #  ".*?" (no delim, no space)
+        for restr in (r'(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?P=delim)', # ,".*?",
+                      r'(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?P<delim>[^\w\n"\'])(?P<space> ?)',   #  ".*?",
+                      r'(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?:$|\n)',   # ,".*?"
+                      r'(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?:$|\n)'):                            #  ".*?" (no delim, no space)
             regexp = re.compile(restr, re.DOTALL | re.MULTILINE)
             matches = regexp.findall(data)
             if matches:
@@ -230,31 +229,30 @@ class Sniffer:
         quotes = {}
         delims = {}
         spaces = 0
+        groupindex = regexp.groupindex
         for m in matches:
-            n = regexp.groupindex['quote'] - 1
+            n = groupindex['quote'] - 1
             key = m[n]
             if key:
                 quotes[key] = quotes.get(key, 0) + 1
             try:
-                n = regexp.groupindex['delim'] - 1
+                n = groupindex['delim'] - 1
                 key = m[n]
             except KeyError:
                 continue
             if key and (delimiters is None or key in delimiters):
                 delims[key] = delims.get(key, 0) + 1
             try:
-                n = regexp.groupindex['space'] - 1
+                n = groupindex['space'] - 1
             except KeyError:
                 continue
             if m[n]:
                 spaces += 1
 
-        quotechar = reduce(lambda a, b, quotes = quotes:
-                           (quotes[a] > quotes[b]) and a or b, quotes.keys())
+        quotechar = max(quotes, key=quotes.get)
 
         if delims:
-            delim = reduce(lambda a, b, delims = delims:
-                           (delims[a] > delims[b]) and a or b, delims.keys())
+            delim = max(delims, key=delims.get)
             skipinitialspace = delims[delim] == spaces
             if delim == '\n': # most likely a file with a single column
                 delim = ''
@@ -298,7 +296,7 @@ class Sniffer:
         additional chunks as necessary.
         """
 
-        data = filter(None, data.split('\n'))
+        data = list(filter(None, data.split('\n')))
 
         ascii = [chr(c) for c in range(127)] # 7-bit ASCII
 
@@ -308,7 +306,7 @@ class Sniffer:
         charFrequency = {}
         modes = {}
         delims = {}
-        start, end = 0, min(chunkLength, len(data))
+        start, end = 0, chunkLength
         while start < len(data):
             iteration += 1
             for line in data[start:end]:
@@ -321,25 +319,23 @@ class Sniffer:
                     charFrequency[char] = metaFrequency
 
             for char in charFrequency.keys():
-                items = charFrequency[char].items()
+                items = list(charFrequency[char].items())
                 if len(items) == 1 and items[0][0] == 0:
                     continue
                 # get the mode of the frequencies
                 if len(items) > 1:
-                    modes[char] = reduce(lambda a, b: a[1] > b[1] and a or b,
-                                         items)
+                    modes[char] = max(items, key=lambda x: x[1])
                     # adjust the mode - subtract the sum of all
                     # other frequencies
                     items.remove(modes[char])
                     modes[char] = (modes[char][0], modes[char][1]
-                                   - reduce(lambda a, b: (0, a[1] + b[1]),
-                                            items)[1])
+                                   - sum(item[1] for item in items))
                 else:
                     modes[char] = items[0]
 
             # build a list of possible delimiters
             modeList = modes.items()
-            total = float(chunkLength * iteration)
+            total = float(min(chunkLength * iteration, len(data)))
             # (rows of consistent data) / (number of rows) = 100%
             consistency = 1.0
             # minimum consistency threshold
@@ -353,7 +349,7 @@ class Sniffer:
                 consistency -= 0.01
 
             if len(delims) == 1:
-                delim = delims.keys()[0]
+                delim = list(delims.keys())[0]
                 skipinitialspace = (data[0].count(delim) ==
                                     data[0].count("%c " % delim))
                 return (delim, skipinitialspace)
@@ -396,7 +392,7 @@ class Sniffer:
 
         rdr = reader(StringIO(sample), self.sniff(sample))
 
-        header = rdr.next() # assume first row is header
+        header = next(rdr) # assume first row is header
 
         columns = len(header)
         columnTypes = {}
@@ -412,21 +408,13 @@ class Sniffer:
             if len(row) != columns:
                 continue # skip rows that have irregular number of columns
 
-            for col in columnTypes.keys():
-
-                for thisType in [int, long, float, complex]:
-                    try:
-                        thisType(row[col])
-                        break
-                    except (ValueError, OverflowError):
-                        pass
-                else:
+            for col in list(columnTypes.keys()):
+                thisType = complex
+                try:
+                    thisType(row[col])
+                except (ValueError, OverflowError):
                     # fallback to length of string
                     thisType = len(row[col])
-
-                # treat longs as ints
-                if thisType == long:
-                    thisType = int
 
                 if thisType != columnTypes[col]:
                     if columnTypes[col] is None: # add new column type

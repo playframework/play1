@@ -72,6 +72,35 @@ class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
         codecs.BufferedIncrementalDecoder.reset(self)
         self.decoder = None
 
+    def getstate(self):
+        # additional state info from the base class must be None here,
+        # as it isn't passed along to the caller
+        state = codecs.BufferedIncrementalDecoder.getstate(self)[0]
+        # additional state info we pass to the caller:
+        # 0: stream is in natural order for this platform
+        # 1: stream is in unnatural order
+        # 2: endianness hasn't been determined yet
+        if self.decoder is None:
+            return (state, 2)
+        addstate = int((sys.byteorder == "big") !=
+                       (self.decoder is codecs.utf_16_be_decode))
+        return (state, addstate)
+
+    def setstate(self, state):
+        # state[1] will be ignored by BufferedIncrementalDecoder.setstate()
+        codecs.BufferedIncrementalDecoder.setstate(self, state)
+        state = state[1]
+        if state == 0:
+            self.decoder = (codecs.utf_16_be_decode
+                            if sys.byteorder == "big"
+                            else codecs.utf_16_le_decode)
+        elif state == 1:
+            self.decoder = (codecs.utf_16_le_decode
+                            if sys.byteorder == "big"
+                            else codecs.utf_16_be_decode)
+        else:
+            self.decoder = None
+
 class StreamWriter(codecs.StreamWriter):
     def __init__(self, stream, errors='strict'):
         codecs.StreamWriter.__init__(self, stream, errors)
@@ -109,7 +138,7 @@ class StreamReader(codecs.StreamReader):
         elif byteorder == 1:
             self.decode = codecs.utf_16_be_decode
         elif consumed>=2:
-            raise UnicodeError,"UTF-16 stream does not start with BOM"
+            raise UnicodeError("UTF-16 stream does not start with BOM")
         return (object, consumed)
 
 ### encodings module API

@@ -1,9 +1,12 @@
 """Tokenization help for Python programs.
 
-generate_tokens(readline) is a generator that breaks a stream of
-text into Python tokens.  It accepts a readline-like method which is called
-repeatedly to get the next line of input (or "" for EOF).  It generates
-5-tuples with these members:
+tokenize(readline) is a generator that breaks a stream of bytes into
+Python tokens.  It decodes the bytes according to PEP-0263 for
+determining source file encoding.
+
+It accepts a readline-like method which is called repeatedly to get the
+next line of input (or b"" for EOF).  It generates 5-tuples with these
+members:
 
     the token type (see token.py)
     the token (a string)
@@ -13,55 +16,93 @@ repeatedly to get the next line of input (or "" for EOF).  It generates
 
 It is designed to match the working of the Python tokenizer exactly, except
 that it produces COMMENT tokens for comments and gives type OP for all
-operators
-
-Older entry points
-    tokenize_loop(readline, tokeneater)
-    tokenize(readline, tokeneater=printtoken)
-are the same, except instead of generating tokens, tokeneater is a callback
-function to which the 5 fields described above are passed as 5 arguments,
-each time a new token is found."""
+operators.  Additionally, all token lists start with an ENCODING token
+which tells you which encoding was used to decode the bytes stream.
+"""
 
 __author__ = 'Ka-Ping Yee <ping@lfw.org>'
 __credits__ = ('GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, '
-               'Skip Montanaro, Raymond Hettinger')
-
-from itertools import chain
-import string, re
+               'Skip Montanaro, Raymond Hettinger, Trent Nelson, '
+               'Michael Foord')
+from builtins import open as _builtin_open
+from codecs import lookup, BOM_UTF8
+import collections
+import functools
+from io import TextIOWrapper
+import itertools as _itertools
+import re
+import sys
 from token import *
+from token import EXACT_TOKEN_TYPES
+
+cookie_re = re.compile(r'^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)', re.ASCII)
+blank_re = re.compile(br'^[ \t\f]*(?:[#\r\n]|$)', re.ASCII)
 
 import token
-__all__ = [x for x in dir(token) if not x.startswith("_")]
-__all__ += ["COMMENT", "tokenize", "generate_tokens", "NL", "untokenize"]
-del x
+__all__ = token.__all__ + ["tokenize", "generate_tokens", "detect_encoding",
+                           "untokenize", "TokenInfo"]
 del token
 
-COMMENT = N_TOKENS
-tok_name[COMMENT] = 'COMMENT'
-NL = N_TOKENS + 1
-tok_name[NL] = 'NL'
-N_TOKENS += 2
+class TokenInfo(collections.namedtuple('TokenInfo', 'type string start end line')):
+    def __repr__(self):
+        annotated_type = '%d (%s)' % (self.type, tok_name[self.type])
+        return ('TokenInfo(type=%s, string=%r, start=%r, end=%r, line=%r)' %
+                self._replace(type=annotated_type))
+
+    @property
+    def exact_type(self):
+        if self.type == OP and self.string in EXACT_TOKEN_TYPES:
+            return EXACT_TOKEN_TYPES[self.string]
+        else:
+            return self.type
 
 def group(*choices): return '(' + '|'.join(choices) + ')'
 def any(*choices): return group(*choices) + '*'
 def maybe(*choices): return group(*choices) + '?'
 
+# Note: we use unicode matching for names ("\w") but ascii matching for
+# number literals.
 Whitespace = r'[ \f\t]*'
 Comment = r'#[^\r\n]*'
 Ignore = Whitespace + any(r'\\\r?\n' + Whitespace) + maybe(Comment)
-Name = r'[a-zA-Z_]\w*'
+Name = r'\w+'
 
-Hexnumber = r'0[xX][\da-fA-F]+[lL]?'
-Octnumber = r'(0[oO][0-7]+)|(0[0-7]*)[lL]?'
-Binnumber = r'0[bB][01]+[lL]?'
-Decnumber = r'[1-9]\d*[lL]?'
+Hexnumber = r'0[xX](?:_?[0-9a-fA-F])+'
+Binnumber = r'0[bB](?:_?[01])+'
+Octnumber = r'0[oO](?:_?[0-7])+'
+Decnumber = r'(?:0(?:_?0)*|[1-9](?:_?[0-9])*)'
 Intnumber = group(Hexnumber, Binnumber, Octnumber, Decnumber)
-Exponent = r'[eE][-+]?\d+'
-Pointfloat = group(r'\d+\.\d*', r'\.\d+') + maybe(Exponent)
-Expfloat = r'\d+' + Exponent
+Exponent = r'[eE][-+]?[0-9](?:_?[0-9])*'
+Pointfloat = group(r'[0-9](?:_?[0-9])*\.(?:[0-9](?:_?[0-9])*)?',
+                   r'\.[0-9](?:_?[0-9])*') + maybe(Exponent)
+Expfloat = r'[0-9](?:_?[0-9])*' + Exponent
 Floatnumber = group(Pointfloat, Expfloat)
-Imagnumber = group(r'\d+[jJ]', Floatnumber + r'[jJ]')
+Imagnumber = group(r'[0-9](?:_?[0-9])*[jJ]', Floatnumber + r'[jJ]')
 Number = group(Imagnumber, Floatnumber, Intnumber)
+
+# Return the empty string, plus all of the valid string prefixes.
+def _all_string_prefixes():
+    # The valid string prefixes. Only contain the lower case versions,
+    #  and don't contain any permutations (include 'fr', but not
+    #  'rf'). The various permutations will be generated.
+    _valid_string_prefixes = ['b', 'r', 'u', 'f', 'br', 'fr']
+    # if we add binary f-strings, add: ['fb', 'fbr']
+    result = {''}
+    for prefix in _valid_string_prefixes:
+        for t in _itertools.permutations(prefix):
+            # create a list with upper and lower versions of each
+            #  character
+            for u in _itertools.product(*[(c, c.upper()) for c in t]):
+                result.add(''.join(u))
+    return result
+
+@functools.lru_cache
+def _compile(expr):
+    return re.compile(expr, re.UNICODE)
+
+# Note that since _all_string_prefixes includes the empty string,
+#  StringPrefix can be the empty string (making it optional).
+StringPrefix = group(*_all_string_prefixes())
 
 # Tail end of ' string.
 Single = r"[^'\\]*(?:\\.[^'\\]*)*'"
@@ -71,75 +112,47 @@ Double = r'[^"\\]*(?:\\.[^"\\]*)*"'
 Single3 = r"[^'\\]*(?:(?:\\.|'(?!''))[^'\\]*)*'''"
 # Tail end of """ string.
 Double3 = r'[^"\\]*(?:(?:\\.|"(?!""))[^"\\]*)*"""'
-Triple = group("[uUbB]?[rR]?'''", '[uUbB]?[rR]?"""')
+Triple = group(StringPrefix + "'''", StringPrefix + '"""')
 # Single-line ' or " string.
-String = group(r"[uUbB]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*'",
-               r'[uUbB]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
+String = group(StringPrefix + r"'[^\n'\\]*(?:\\.[^\n'\\]*)*'",
+               StringPrefix + r'"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
 
-# Because of leftmost-then-longest match semantics, be sure to put the
-# longest operators first (e.g., if = came before ==, == would get
-# recognized as two instances of =).
-Operator = group(r"\*\*=?", r">>=?", r"<<=?", r"<>", r"!=",
-                 r"//=?",
-                 r"[+\-*/%&|^=<>]=?",
-                 r"~")
-
-Bracket = '[][(){}]'
-Special = group(r'\r?\n', r'[:;.,`@]')
-Funny = group(Operator, Bracket, Special)
+# Sorting in reverse order puts the long operators before their prefixes.
+# Otherwise if = came before ==, == would get recognized as two instances
+# of =.
+Special = group(*map(re.escape, sorted(EXACT_TOKEN_TYPES, reverse=True)))
+Funny = group(r'\r?\n', Special)
 
 PlainToken = group(Number, Funny, String, Name)
 Token = Ignore + PlainToken
 
 # First (or only) line of ' or " string.
-ContStr = group(r"[uUbB]?[rR]?'[^\n'\\]*(?:\\.[^\n'\\]*)*" +
+ContStr = group(StringPrefix + r"'[^\n'\\]*(?:\\.[^\n'\\]*)*" +
                 group("'", r'\\\r?\n'),
-                r'[uUbB]?[rR]?"[^\n"\\]*(?:\\.[^\n"\\]*)*' +
+                StringPrefix + r'"[^\n"\\]*(?:\\.[^\n"\\]*)*' +
                 group('"', r'\\\r?\n'))
 PseudoExtras = group(r'\\\r?\n|\Z', Comment, Triple)
 PseudoToken = Whitespace + group(PseudoExtras, Number, Funny, ContStr, Name)
 
-tokenprog, pseudoprog, single3prog, double3prog = map(
-    re.compile, (Token, PseudoToken, Single3, Double3))
-endprogs = {"'": re.compile(Single), '"': re.compile(Double),
-            "'''": single3prog, '"""': double3prog,
-            "r'''": single3prog, 'r"""': double3prog,
-            "u'''": single3prog, 'u"""': double3prog,
-            "ur'''": single3prog, 'ur"""': double3prog,
-            "R'''": single3prog, 'R"""': double3prog,
-            "U'''": single3prog, 'U"""': double3prog,
-            "uR'''": single3prog, 'uR"""': double3prog,
-            "Ur'''": single3prog, 'Ur"""': double3prog,
-            "UR'''": single3prog, 'UR"""': double3prog,
-            "b'''": single3prog, 'b"""': double3prog,
-            "br'''": single3prog, 'br"""': double3prog,
-            "B'''": single3prog, 'B"""': double3prog,
-            "bR'''": single3prog, 'bR"""': double3prog,
-            "Br'''": single3prog, 'Br"""': double3prog,
-            "BR'''": single3prog, 'BR"""': double3prog,
-            'r': None, 'R': None, 'u': None, 'U': None,
-            'b': None, 'B': None}
+# For a given string prefix plus quotes, endpats maps it to a regex
+#  to match the remainder of that string. _prefix can be empty, for
+#  a normal single or triple quoted string (with no prefix).
+endpats = {}
+for _prefix in _all_string_prefixes():
+    endpats[_prefix + "'"] = Single
+    endpats[_prefix + '"'] = Double
+    endpats[_prefix + "'''"] = Single3
+    endpats[_prefix + '"""'] = Double3
 
-triple_quoted = {}
-for t in ("'''", '"""',
-          "r'''", 'r"""', "R'''", 'R"""',
-          "u'''", 'u"""', "U'''", 'U"""',
-          "ur'''", 'ur"""', "Ur'''", 'Ur"""',
-          "uR'''", 'uR"""', "UR'''", 'UR"""',
-          "b'''", 'b"""', "B'''", 'B"""',
-          "br'''", 'br"""', "Br'''", 'Br"""',
-          "bR'''", 'bR"""', "BR'''", 'BR"""'):
-    triple_quoted[t] = t
-single_quoted = {}
-for t in ("'", '"',
-          "r'", 'r"', "R'", 'R"',
-          "u'", 'u"', "U'", 'U"',
-          "ur'", 'ur"', "Ur'", 'Ur"',
-          "uR'", 'uR"', "UR'", 'UR"',
-          "b'", 'b"', "B'", 'B"',
-          "br'", 'br"', "Br'", 'Br"',
-          "bR'", 'bR"', "BR'", 'BR"' ):
-    single_quoted[t] = t
+# A set of all of the single and triple quoted string prefixes,
+#  including the opening quotes.
+single_quoted = set()
+triple_quoted = set()
+for t in _all_string_prefixes():
+    for u in (t + '"', t + "'"):
+        single_quoted.add(u)
+    for u in (t + '"""', t + "'''"):
+        triple_quoted.add(u)
 
 tabsize = 8
 
@@ -147,34 +160,6 @@ class TokenError(Exception): pass
 
 class StopTokenizing(Exception): pass
 
-def printtoken(type, token, srow_scol, erow_ecol, line): # for testing
-    srow, scol = srow_scol
-    erow, ecol = erow_ecol
-    print "%d,%d-%d,%d:\t%s\t%s" % \
-        (srow, scol, erow, ecol, tok_name[type], repr(token))
-
-def tokenize(readline, tokeneater=printtoken):
-    """
-    The tokenize() function accepts two parameters: one representing the
-    input stream, and one providing an output mechanism for tokenize().
-
-    The first parameter, readline, must be a callable object which provides
-    the same interface as the readline() method of built-in file objects.
-    Each call to the function should return one line of input as a string.
-
-    The second parameter, tokeneater, must also be a callable object. It is
-    called once for each token, with five arguments, corresponding to the
-    tuples generated by generate_tokens().
-    """
-    try:
-        tokenize_loop(readline, tokeneater)
-    except StopTokenizing:
-        pass
-
-# backwards compatible interface
-def tokenize_loop(readline, tokeneater):
-    for token_info in generate_tokens(readline):
-        tokeneater(*token_info)
 
 class Untokenizer:
 
@@ -182,6 +167,7 @@ class Untokenizer:
         self.tokens = []
         self.prev_row = 1
         self.prev_col = 0
+        self.encoding = None
 
     def add_whitespace(self, start):
         row, col = start
@@ -205,6 +191,9 @@ class Untokenizer:
                 self.compat(t, it)
                 break
             tok_type, token, start, end, line = t
+            if tok_type == ENCODING:
+                self.encoding = token
+                continue
             if tok_type == ENDMARKER:
                 break
             if tok_type == INDENT:
@@ -236,8 +225,11 @@ class Untokenizer:
         startline = token[0] in (NEWLINE, NL)
         prevstring = False
 
-        for tok in chain([token], iterable):
+        for tok in _itertools.chain([token], iterable):
             toknum, tokval = tok[:2]
+            if toknum == ENCODING:
+                self.encoding = tokval
+                continue
 
             if toknum in (NAME, NUMBER):
                 tokval += ' '
@@ -263,8 +255,11 @@ class Untokenizer:
                 startline = False
             toks_append(tokval)
 
+
 def untokenize(iterable):
     """Transform tokens back into Python source code.
+    It returns a bytes object, encoded using the ENCODING
+    token, which is the first token sequence output by tokenize.
 
     Each element returned by the iterable must be a token sequence
     with at least two elements, a token number and token value.  If
@@ -273,59 +268,208 @@ def untokenize(iterable):
     Round-trip invariant for full input:
         Untokenized source will match input source exactly
 
-    Round-trip invariant for limited intput:
-        # Output text will tokenize the back to the input
-        t1 = [tok[:2] for tok in generate_tokens(f.readline)]
+    Round-trip invariant for limited input:
+        # Output bytes will tokenize back to the input
+        t1 = [tok[:2] for tok in tokenize(f.readline)]
         newcode = untokenize(t1)
-        readline = iter(newcode.splitlines(1)).next
-        t2 = [tok[:2] for tok in generate_tokens(readline)]
+        readline = BytesIO(newcode).readline
+        t2 = [tok[:2] for tok in tokenize(readline)]
         assert t1 == t2
     """
     ut = Untokenizer()
-    return ut.untokenize(iterable)
+    out = ut.untokenize(iterable)
+    if ut.encoding is not None:
+        out = out.encode(ut.encoding)
+    return out
 
-def generate_tokens(readline):
+
+def _get_normal_name(orig_enc):
+    """Imitates get_normal_name in tokenizer.c."""
+    # Only care about the first 12 characters.
+    enc = orig_enc[:12].lower().replace("_", "-")
+    if enc == "utf-8" or enc.startswith("utf-8-"):
+        return "utf-8"
+    if enc in ("latin-1", "iso-8859-1", "iso-latin-1") or \
+       enc.startswith(("latin-1-", "iso-8859-1-", "iso-latin-1-")):
+        return "iso-8859-1"
+    return orig_enc
+
+def detect_encoding(readline):
     """
-    The generate_tokens() generator requires one argument, readline, which
+    The detect_encoding() function is used to detect the encoding that should
+    be used to decode a Python source file.  It requires one argument, readline,
+    in the same way as the tokenize() generator.
+
+    It will call readline a maximum of twice, and return the encoding used
+    (as a string) and a list of any lines (left as bytes) it has read in.
+
+    It detects the encoding from the presence of a utf-8 bom or an encoding
+    cookie as specified in pep-0263.  If both a bom and a cookie are present,
+    but disagree, a SyntaxError will be raised.  If the encoding cookie is an
+    invalid charset, raise a SyntaxError.  Note that if a utf-8 bom is found,
+    'utf-8-sig' is returned.
+
+    If no encoding is specified, then the default of 'utf-8' will be returned.
+    """
+    try:
+        filename = readline.__self__.name
+    except AttributeError:
+        filename = None
+    bom_found = False
+    encoding = None
+    default = 'utf-8'
+    def read_or_stop():
+        try:
+            return readline()
+        except StopIteration:
+            return b''
+
+    def find_cookie(line):
+        try:
+            # Decode as UTF-8. Either the line is an encoding declaration,
+            # in which case it should be pure ASCII, or it must be UTF-8
+            # per default encoding.
+            line_string = line.decode('utf-8')
+        except UnicodeDecodeError:
+            msg = "invalid or missing encoding declaration"
+            if filename is not None:
+                msg = '{} for {!r}'.format(msg, filename)
+            raise SyntaxError(msg)
+
+        match = cookie_re.match(line_string)
+        if not match:
+            return None
+        encoding = _get_normal_name(match.group(1))
+        try:
+            codec = lookup(encoding)
+        except LookupError:
+            # This behaviour mimics the Python interpreter
+            if filename is None:
+                msg = "unknown encoding: " + encoding
+            else:
+                msg = "unknown encoding for {!r}: {}".format(filename,
+                        encoding)
+            raise SyntaxError(msg)
+
+        if bom_found:
+            if encoding != 'utf-8':
+                # This behaviour mimics the Python interpreter
+                if filename is None:
+                    msg = 'encoding problem: utf-8'
+                else:
+                    msg = 'encoding problem for {!r}: utf-8'.format(filename)
+                raise SyntaxError(msg)
+            encoding += '-sig'
+        return encoding
+
+    first = read_or_stop()
+    if first.startswith(BOM_UTF8):
+        bom_found = True
+        first = first[3:]
+        default = 'utf-8-sig'
+    if not first:
+        return default, []
+
+    encoding = find_cookie(first)
+    if encoding:
+        return encoding, [first]
+    if not blank_re.match(first):
+        return default, [first]
+
+    second = read_or_stop()
+    if not second:
+        return default, [first]
+
+    encoding = find_cookie(second)
+    if encoding:
+        return encoding, [first, second]
+
+    return default, [first, second]
+
+
+def open(filename):
+    """Open a file in read only mode using the encoding detected by
+    detect_encoding().
+    """
+    buffer = _builtin_open(filename, 'rb')
+    try:
+        encoding, lines = detect_encoding(buffer.readline)
+        buffer.seek(0)
+        text = TextIOWrapper(buffer, encoding, line_buffering=True)
+        text.mode = 'r'
+        return text
+    except:
+        buffer.close()
+        raise
+
+
+def tokenize(readline):
+    """
+    The tokenize() generator requires one argument, readline, which
     must be a callable object which provides the same interface as the
-    readline() method of built-in file objects. Each call to the function
-    should return one line of input as a string.  Alternately, readline
+    readline() method of built-in file objects.  Each call to the function
+    should return one line of input as bytes.  Alternatively, readline
     can be a callable function terminating with StopIteration:
-        readline = open(myfile).next    # Example of alternate readline
+        readline = open(myfile, 'rb').__next__  # Example of alternate readline
 
     The generator produces 5-tuples with these members: the token type; the
     token string; a 2-tuple (srow, scol) of ints specifying the row and
     column where the token begins in the source; a 2-tuple (erow, ecol) of
     ints specifying the row and column where the token ends in the source;
-    and the line on which the token was found. The line passed is the
-    logical line; continuation lines are included.
+    and the line on which the token was found.  The line passed is the
+    physical line.
+
+    The first token sequence will always be an ENCODING token
+    which tells you which encoding was used to decode the bytes stream.
     """
+    encoding, consumed = detect_encoding(readline)
+    empty = _itertools.repeat(b"")
+    rl_gen = _itertools.chain(consumed, iter(readline, b""), empty)
+    return _tokenize(rl_gen.__next__, encoding)
+
+
+def _tokenize(readline, encoding):
     lnum = parenlev = continued = 0
-    namechars, numchars = string.ascii_letters + '_', '0123456789'
+    numchars = '0123456789'
     contstr, needcont = '', 0
     contline = None
     indents = [0]
 
-    while 1:                                   # loop over lines in stream
+    if encoding is not None:
+        if encoding == "utf-8-sig":
+            # BOM will already have been stripped.
+            encoding = "utf-8"
+        yield TokenInfo(ENCODING, encoding, (0, 0), (0, 0), '')
+    last_line = b''
+    line = b''
+    while True:                                # loop over lines in stream
         try:
+            # We capture the value of the line variable here because
+            # readline uses the empty string '' to signal end of input,
+            # hence `line` itself will always be overwritten at the end
+            # of this loop.
+            last_line = line
             line = readline()
         except StopIteration:
-            line = ''
+            line = b''
+
+        if encoding is not None:
+            line = line.decode(encoding)
         lnum += 1
         pos, max = 0, len(line)
 
         if contstr:                            # continued string
             if not line:
-                raise TokenError, ("EOF in multi-line string", strstart)
+                raise TokenError("EOF in multi-line string", strstart)
             endmatch = endprog.match(line)
             if endmatch:
                 pos = end = endmatch.end(0)
-                yield (STRING, contstr + line[:end],
+                yield TokenInfo(STRING, contstr + line[:end],
                        strstart, (lnum, end), contline + line)
                 contstr, needcont = '', 0
                 contline = None
             elif needcont and line[-2:] != '\\\n' and line[-3:] != '\\\r\n':
-                yield (ERRORTOKEN, contstr + line,
+                yield TokenInfo(ERRORTOKEN, contstr + line,
                            strstart, (lnum, len(line)), contline)
                 contstr = ''
                 contline = None
@@ -354,34 +498,33 @@ def generate_tokens(readline):
             if line[pos] in '#\r\n':           # skip comments or blank lines
                 if line[pos] == '#':
                     comment_token = line[pos:].rstrip('\r\n')
-                    nl_pos = pos + len(comment_token)
-                    yield (COMMENT, comment_token,
+                    yield TokenInfo(COMMENT, comment_token,
                            (lnum, pos), (lnum, pos + len(comment_token)), line)
-                    yield (NL, line[nl_pos:],
-                           (lnum, nl_pos), (lnum, len(line)), line)
-                else:
-                    yield ((NL, COMMENT)[line[pos] == '#'], line[pos:],
+                    pos += len(comment_token)
+
+                yield TokenInfo(NL, line[pos:],
                            (lnum, pos), (lnum, len(line)), line)
                 continue
 
             if column > indents[-1]:           # count indents or dedents
                 indents.append(column)
-                yield (INDENT, line[:pos], (lnum, 0), (lnum, pos), line)
+                yield TokenInfo(INDENT, line[:pos], (lnum, 0), (lnum, pos), line)
             while column < indents[-1]:
                 if column not in indents:
                     raise IndentationError(
                         "unindent does not match any outer indentation level",
                         ("<tokenize>", lnum, pos, line))
                 indents = indents[:-1]
-                yield (DEDENT, '', (lnum, pos), (lnum, pos), line)
+
+                yield TokenInfo(DEDENT, '', (lnum, pos), (lnum, pos), line)
 
         else:                                  # continued statement
             if not line:
-                raise TokenError, ("EOF in multi-line statement", (lnum, 0))
+                raise TokenError("EOF in multi-line statement", (lnum, 0))
             continued = 0
 
         while pos < max:
-            pseudomatch = pseudoprog.match(line, pos)
+            pseudomatch = _compile(PseudoToken).match(line, pos)
             if pseudomatch:                                # scan for tokens
                 start, end = pseudomatch.span(1)
                 spos, epos, pos = (lnum, start), (lnum, end), end
@@ -389,41 +532,64 @@ def generate_tokens(readline):
                     continue
                 token, initial = line[start:end], line[start]
 
-                if initial in numchars or \
-                   (initial == '.' and token != '.'):      # ordinary number
-                    yield (NUMBER, token, spos, epos, line)
+                if (initial in numchars or                 # ordinary number
+                    (initial == '.' and token != '.' and token != '...')):
+                    yield TokenInfo(NUMBER, token, spos, epos, line)
                 elif initial in '\r\n':
-                    yield (NL if parenlev > 0 else NEWLINE,
-                           token, spos, epos, line)
+                    if parenlev > 0:
+                        yield TokenInfo(NL, token, spos, epos, line)
+                    else:
+                        yield TokenInfo(NEWLINE, token, spos, epos, line)
+
                 elif initial == '#':
                     assert not token.endswith("\n")
-                    yield (COMMENT, token, spos, epos, line)
+                    yield TokenInfo(COMMENT, token, spos, epos, line)
+
                 elif token in triple_quoted:
-                    endprog = endprogs[token]
+                    endprog = _compile(endpats[token])
                     endmatch = endprog.match(line, pos)
                     if endmatch:                           # all on one line
                         pos = endmatch.end(0)
                         token = line[start:pos]
-                        yield (STRING, token, spos, (lnum, pos), line)
+                        yield TokenInfo(STRING, token, spos, (lnum, pos), line)
                     else:
                         strstart = (lnum, start)           # multiple lines
                         contstr = line[start:]
                         contline = line
                         break
-                elif initial in single_quoted or \
-                    token[:2] in single_quoted or \
-                    token[:3] in single_quoted:
+
+                # Check up to the first 3 chars of the token to see if
+                #  they're in the single_quoted set. If so, they start
+                #  a string.
+                # We're using the first 3, because we're looking for
+                #  "rb'" (for example) at the start of the token. If
+                #  we switch to longer prefixes, this needs to be
+                #  adjusted.
+                # Note that initial == token[:1].
+                # Also note that single quote checking must come after
+                #  triple quote checking (above).
+                elif (initial in single_quoted or
+                      token[:2] in single_quoted or
+                      token[:3] in single_quoted):
                     if token[-1] == '\n':                  # continued string
                         strstart = (lnum, start)
-                        endprog = (endprogs[initial] or endprogs[token[1]] or
-                                   endprogs[token[2]])
+                        # Again, using the first 3 chars of the
+                        #  token. This is looking for the matching end
+                        #  regex for the correct type of quote
+                        #  character. So it's really looking for
+                        #  endpats["'"] or endpats['"'], by trying to
+                        #  skip string prefix characters, if any.
+                        endprog = _compile(endpats.get(initial) or
+                                           endpats.get(token[1]) or
+                                           endpats.get(token[2]))
                         contstr, needcont = line[start:], 1
                         contline = line
                         break
                     else:                                  # ordinary string
-                        yield (STRING, token, spos, epos, line)
-                elif initial in namechars:                 # ordinary name
-                    yield (NAME, token, spos, epos, line)
+                        yield TokenInfo(STRING, token, spos, epos, line)
+
+                elif initial.isidentifier():               # ordinary name
+                    yield TokenInfo(NAME, token, spos, epos, line)
                 elif initial == '\\':                      # continued stmt
                     continued = 1
                 else:
@@ -431,19 +597,88 @@ def generate_tokens(readline):
                         parenlev += 1
                     elif initial in ')]}':
                         parenlev -= 1
-                    yield (OP, token, spos, epos, line)
+                    yield TokenInfo(OP, token, spos, epos, line)
             else:
-                yield (ERRORTOKEN, line[pos],
+                yield TokenInfo(ERRORTOKEN, line[pos],
                            (lnum, pos), (lnum, pos+1), line)
                 pos += 1
 
+    # Add an implicit NEWLINE if the input doesn't end in one
+    if last_line and last_line[-1] not in '\r\n' and not last_line.strip().startswith("#"):
+        yield TokenInfo(NEWLINE, '', (lnum - 1, len(last_line)), (lnum - 1, len(last_line) + 1), '')
     for indent in indents[1:]:                 # pop remaining indent levels
-        yield (DEDENT, '', (lnum, 0), (lnum, 0), '')
-    yield (ENDMARKER, '', (lnum, 0), (lnum, 0), '')
+        yield TokenInfo(DEDENT, '', (lnum, 0), (lnum, 0), '')
+    yield TokenInfo(ENDMARKER, '', (lnum, 0), (lnum, 0), '')
 
-if __name__ == '__main__':                     # testing
-    import sys
-    if len(sys.argv) > 1:
-        tokenize(open(sys.argv[1]).readline)
-    else:
-        tokenize(sys.stdin.readline)
+
+def generate_tokens(readline):
+    """Tokenize a source reading Python code as unicode strings.
+
+    This has the same API as tokenize(), except that it expects the *readline*
+    callable to return str objects instead of bytes.
+    """
+    return _tokenize(readline, None)
+
+def main():
+    import argparse
+
+    # Helper error handling routines
+    def perror(message):
+        sys.stderr.write(message)
+        sys.stderr.write('\n')
+
+    def error(message, filename=None, location=None):
+        if location:
+            args = (filename,) + location + (message,)
+            perror("%s:%d:%d: error: %s" % args)
+        elif filename:
+            perror("%s: error: %s" % (filename, message))
+        else:
+            perror("error: %s" % message)
+        sys.exit(1)
+
+    # Parse the arguments and options
+    parser = argparse.ArgumentParser(prog='python -m tokenize')
+    parser.add_argument(dest='filename', nargs='?',
+                        metavar='filename.py',
+                        help='the file to tokenize; defaults to stdin')
+    parser.add_argument('-e', '--exact', dest='exact', action='store_true',
+                        help='display token names using the exact type')
+    args = parser.parse_args()
+
+    try:
+        # Tokenize the input
+        if args.filename:
+            filename = args.filename
+            with _builtin_open(filename, 'rb') as f:
+                tokens = list(tokenize(f.readline))
+        else:
+            filename = "<stdin>"
+            tokens = _tokenize(sys.stdin.readline, None)
+
+        # Output the tokenization
+        for token in tokens:
+            token_type = token.type
+            if args.exact:
+                token_type = token.exact_type
+            token_range = "%d,%d-%d,%d:" % (token.start + token.end)
+            print("%-20s%-15s%-15r" %
+                  (token_range, tok_name[token_type], token.string))
+    except IndentationError as err:
+        line, column = err.args[1][1:3]
+        error(err.args[0], filename, (line, column))
+    except TokenError as err:
+        line, column = err.args[1]
+        error(err.args[0], filename, (line, column))
+    except SyntaxError as err:
+        error(err, filename)
+    except OSError as err:
+        error(err)
+    except KeyboardInterrupt:
+        print("interrupted\n")
+    except Exception as err:
+        perror("unexpected error: %s" % err)
+        raise
+
+if __name__ == "__main__":
+    main()

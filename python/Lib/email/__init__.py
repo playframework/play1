@@ -1,42 +1,23 @@
-# Copyright (C) 2001-2006 Python Software Foundation
+# Copyright (C) 2001-2007 Python Software Foundation
 # Author: Barry Warsaw
 # Contact: email-sig@python.org
 
 """A package for parsing, handling, and generating email messages."""
 
-__version__ = '4.0.3'
-
 __all__ = [
-    # Old names
-    'base64MIME',
-    'Charset',
-    'Encoders',
-    'Errors',
-    'Generator',
-    'Header',
-    'Iterators',
-    'Message',
-    'MIMEAudio',
-    'MIMEBase',
-    'MIMEImage',
-    'MIMEMessage',
-    'MIMEMultipart',
-    'MIMENonMultipart',
-    'MIMEText',
-    'Parser',
-    'quopriMIME',
-    'Utils',
-    'message_from_string',
-    'message_from_file',
-    # new names
     'base64mime',
     'charset',
     'encoders',
     'errors',
+    'feedparser',
     'generator',
     'header',
     'iterators',
     'message',
+    'message_from_file',
+    'message_from_binary_file',
+    'message_from_string',
+    'message_from_bytes',
     'mime',
     'parser',
     'quoprimime',
@@ -56,6 +37,13 @@ def message_from_string(s, *args, **kws):
     from email.parser import Parser
     return Parser(*args, **kws).parsestr(s)
 
+def message_from_bytes(s, *args, **kws):
+    """Parse a bytes string into a Message object model.
+
+    Optional _class and strict are passed to the Parser constructor.
+    """
+    from email.parser import BytesParser
+    return BytesParser(*args, **kws).parsebytes(s)
 
 def message_from_file(fp, *args, **kws):
     """Read a file and parse its contents into a Message object model.
@@ -65,59 +53,10 @@ def message_from_file(fp, *args, **kws):
     from email.parser import Parser
     return Parser(*args, **kws).parse(fp)
 
+def message_from_binary_file(fp, *args, **kws):
+    """Read a binary file and parse its contents into a Message object model.
 
-
-# Lazy loading to provide name mapping from new-style names (PEP 8 compatible
-# email 4.0 module names), to old-style names (email 3.0 module names).
-import sys
-
-class LazyImporter(object):
-    def __init__(self, module_name):
-        self.__name__ = 'email.' + module_name
-
-    def __getattr__(self, name):
-        __import__(self.__name__)
-        mod = sys.modules[self.__name__]
-        self.__dict__.update(mod.__dict__)
-        return getattr(mod, name)
-
-
-_LOWERNAMES = [
-    # email.<old name> -> email.<new name is lowercased old name>
-    'Charset',
-    'Encoders',
-    'Errors',
-    'FeedParser',
-    'Generator',
-    'Header',
-    'Iterators',
-    'Message',
-    'Parser',
-    'Utils',
-    'base64MIME',
-    'quopriMIME',
-    ]
-
-_MIMENAMES = [
-    # email.MIME<old name> -> email.mime.<new name is lowercased old name>
-    'Audio',
-    'Base',
-    'Image',
-    'Message',
-    'Multipart',
-    'NonMultipart',
-    'Text',
-    ]
-
-for _name in _LOWERNAMES:
-    importer = LazyImporter(_name.lower())
-    sys.modules['email.' + _name] = importer
-    setattr(sys.modules['email'], _name, importer)
-
-
-import email.mime
-for _name in _MIMENAMES:
-    importer = LazyImporter('mime.' + _name.lower())
-    sys.modules['email.MIME' + _name] = importer
-    setattr(sys.modules['email'], 'MIME' + _name, importer)
-    setattr(sys.modules['email.mime'], _name, importer)
+    Optional _class and strict are passed to the Parser constructor.
+    """
+    from email.parser import BytesParser
+    return BytesParser(*args, **kws).parse(fp)

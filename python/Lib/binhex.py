@@ -21,10 +21,16 @@ hexbin(inputfilename, outputfilename)
 # input. The resulting code (xx 90 90) would appear to be interpreted as an
 # escaped *value* of 0x90. All coders I've seen appear to ignore this nicety...
 #
-import sys
+import binascii
+import contextlib
+import io
 import os
 import struct
-import binascii
+import warnings
+
+warnings.warn('the binhex module is deprecated', DeprecationWarning,
+              stacklevel=2)
+
 
 __all__ = ["binhex","hexbin","Error"]
 
@@ -36,114 +42,92 @@ _DID_HEADER = 0
 _DID_DATA = 1
 
 # Various constants
-REASONABLY_LARGE=32768  # Minimal amount we pass the rle-coder
-LINELEN=64
-RUNCHAR=chr(0x90)   # run-length introducer
+REASONABLY_LARGE = 32768  # Minimal amount we pass the rle-coder
+LINELEN = 64
+RUNCHAR = b"\x90"
 
 #
 # This code is no longer byte-order dependent
 
-#
-# Workarounds for non-mac machines.
-try:
-    from Carbon.File import FSSpec, FInfo
-    from MacOS import openrf
 
-    def getfileinfo(name):
-        finfo = FSSpec(name).FSpGetFInfo()
-        dir, file = os.path.split(name)
-        # XXX Get resource/data sizes
-        fp = open(name, 'rb')
-        fp.seek(0, 2)
-        dlen = fp.tell()
-        fp = openrf(name, '*rb')
-        fp.seek(0, 2)
-        rlen = fp.tell()
-        return file, finfo, dlen, rlen
+class FInfo:
+    def __init__(self):
+        self.Type = '????'
+        self.Creator = '????'
+        self.Flags = 0
 
-    def openrsrc(name, *mode):
-        if not mode:
-            mode = '*rb'
-        else:
-            mode = '*' + mode[0]
-        return openrf(name, mode)
-
-except ImportError:
-    #
-    # Glue code for non-macintosh usage
-    #
-
-    class FInfo:
-        def __init__(self):
-            self.Type = '????'
-            self.Creator = '????'
-            self.Flags = 0
-
-    def getfileinfo(name):
-        finfo = FInfo()
+def getfileinfo(name):
+    finfo = FInfo()
+    with io.open(name, 'rb') as fp:
         # Quick check for textfile
-        fp = open(name)
-        data = open(name).read(256)
-        for c in data:
-            if not c.isspace() and (c<' ' or ord(c) > 0x7f):
-                break
-        else:
+        data = fp.read(512)
+        if 0 not in data:
             finfo.Type = 'TEXT'
         fp.seek(0, 2)
         dsize = fp.tell()
-        fp.close()
-        dir, file = os.path.split(name)
-        file = file.replace(':', '-', 1)
-        return file, finfo, dsize, 0
+    dir, file = os.path.split(name)
+    file = file.replace(':', '-', 1)
+    return file, finfo, dsize, 0
 
-    class openrsrc:
-        def __init__(self, *args):
-            pass
+class openrsrc:
+    def __init__(self, *args):
+        pass
 
-        def read(self, *args):
-            return ''
+    def read(self, *args):
+        return b''
 
-        def write(self, *args):
-            pass
+    def write(self, *args):
+        pass
 
-        def close(self):
-            pass
+    def close(self):
+        pass
+
+
+# DeprecationWarning is already emitted on "import binhex". There is no need
+# to repeat the warning at each call to deprecated binascii functions.
+@contextlib.contextmanager
+def _ignore_deprecation_warning():
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', '', DeprecationWarning)
+        yield
+
 
 class _Hqxcoderengine:
     """Write data to the coder in 3-byte chunks"""
 
     def __init__(self, ofp):
         self.ofp = ofp
-        self.data = ''
-        self.hqxdata = ''
-        self.linelen = LINELEN-1
+        self.data = b''
+        self.hqxdata = b''
+        self.linelen = LINELEN - 1
 
     def write(self, data):
         self.data = self.data + data
         datalen = len(self.data)
-        todo = (datalen//3)*3
+        todo = (datalen // 3) * 3
         data = self.data[:todo]
         self.data = self.data[todo:]
         if not data:
             return
-        self.hqxdata = self.hqxdata + binascii.b2a_hqx(data)
+        with _ignore_deprecation_warning():
+            self.hqxdata = self.hqxdata + binascii.b2a_hqx(data)
         self._flush(0)
 
     def _flush(self, force):
         first = 0
-        while first <= len(self.hqxdata)-self.linelen:
+        while first <= len(self.hqxdata) - self.linelen:
             last = first + self.linelen
-            self.ofp.write(self.hqxdata[first:last]+'\n')
+            self.ofp.write(self.hqxdata[first:last] + b'\r')
             self.linelen = LINELEN
             first = last
         self.hqxdata = self.hqxdata[first:]
         if force:
-            self.ofp.write(self.hqxdata + ':\n')
+            self.ofp.write(self.hqxdata + b':\r')
 
     def close(self):
         if self.data:
-            self.hqxdata = \
-                 self.hqxdata + binascii.b2a_hqx(self.data)
+            with _ignore_deprecation_warning():
+                self.hqxdata = self.hqxdata + binascii.b2a_hqx(self.data)
         self._flush(1)
         self.ofp.close()
         del self.ofp
@@ -153,19 +137,21 @@ class _Rlecoderengine:
 
     def __init__(self, ofp):
         self.ofp = ofp
-        self.data = ''
+        self.data = b''
 
     def write(self, data):
         self.data = self.data + data
         if len(self.data) < REASONABLY_LARGE:
             return
-        rledata = binascii.rlecode_hqx(self.data)
+        with _ignore_deprecation_warning():
+            rledata = binascii.rlecode_hqx(self.data)
         self.ofp.write(rledata)
-        self.data = ''
+        self.data = b''
 
     def close(self):
         if self.data:
-            rledata = binascii.rlecode_hqx(self.data)
+            with _ignore_deprecation_warning():
+                rledata = binascii.rlecode_hqx(self.data)
             self.ofp.write(rledata)
         self.ofp.close()
         del self.ofp
@@ -173,26 +159,38 @@ class _Rlecoderengine:
 class BinHex:
     def __init__(self, name_finfo_dlen_rlen, ofp):
         name, finfo, dlen, rlen = name_finfo_dlen_rlen
-        if type(ofp) == type(''):
+        close_on_error = False
+        if isinstance(ofp, str):
             ofname = ofp
-            ofp = open(ofname, 'w')
-        ofp.write('(This file must be converted with BinHex 4.0)\n\n:')
-        hqxer = _Hqxcoderengine(ofp)
-        self.ofp = _Rlecoderengine(hqxer)
-        self.crc = 0
-        if finfo is None:
-            finfo = FInfo()
-        self.dlen = dlen
-        self.rlen = rlen
-        self._writeinfo(name, finfo)
-        self.state = _DID_HEADER
+            ofp = io.open(ofname, 'wb')
+            close_on_error = True
+        try:
+            ofp.write(b'(This file must be converted with BinHex 4.0)\r\r:')
+            hqxer = _Hqxcoderengine(ofp)
+            self.ofp = _Rlecoderengine(hqxer)
+            self.crc = 0
+            if finfo is None:
+                finfo = FInfo()
+            self.dlen = dlen
+            self.rlen = rlen
+            self._writeinfo(name, finfo)
+            self.state = _DID_HEADER
+        except:
+            if close_on_error:
+                ofp.close()
+            raise
 
     def _writeinfo(self, name, finfo):
         nl = len(name)
         if nl > 63:
-            raise Error, 'Filename too long'
-        d = chr(nl) + name + '\0'
-        d2 = finfo.Type + finfo.Creator
+            raise Error('Filename too long')
+        d = bytes([nl]) + name.encode("latin-1") + b'\0'
+        tp, cr = finfo.Type, finfo.Creator
+        if isinstance(tp, str):
+            tp = tp.encode("latin-1")
+        if isinstance(cr, str):
+            cr = cr.encode("latin-1")
+        d2 = tp + cr
 
         # Force all structs to be packed with big-endian
         d3 = struct.pack('>h', finfo.Flags)
@@ -217,13 +215,13 @@ class BinHex:
 
     def write(self, data):
         if self.state != _DID_HEADER:
-            raise Error, 'Writing data at the wrong time'
+            raise Error('Writing data at the wrong time')
         self.dlen = self.dlen - len(data)
         self._write(data)
 
     def close_data(self):
         if self.dlen != 0:
-            raise Error, 'Incorrect data size, diff=%r' % (self.rlen,)
+            raise Error('Incorrect data size, diff=%r' % (self.rlen,))
         self._writecrc()
         self.state = _DID_DATA
 
@@ -231,7 +229,7 @@ class BinHex:
         if self.state < _DID_DATA:
             self.close_data()
         if self.state != _DID_DATA:
-            raise Error, 'Writing resource data at the wrong time'
+            raise Error('Writing resource data at the wrong time')
         self.rlen = self.rlen - len(data)
         self._write(data)
 
@@ -242,10 +240,9 @@ class BinHex:
             if self.state < _DID_DATA:
                 self.close_data()
             if self.state != _DID_DATA:
-                raise Error, 'Close at the wrong time'
+                raise Error('Close at the wrong time')
             if self.rlen != 0:
-                raise Error, \
-                    "Incorrect resource-datasize, diff=%r" % (self.rlen,)
+                raise Error("Incorrect resource-datasize, diff=%r" % (self.rlen,))
             self._writecrc()
         finally:
             self.state = None
@@ -254,21 +251,20 @@ class BinHex:
             ofp.close()
 
 def binhex(inp, out):
-    """(infilename, outfilename) - Create binhex-encoded copy of a file"""
+    """binhex(infilename, outfilename): create binhex-encoded copy of a file"""
     finfo = getfileinfo(inp)
     ofp = BinHex(finfo, out)
 
-    ifp = open(inp, 'rb')
-    # XXXX Do textfile translation on non-mac systems
-    while 1:
-        d = ifp.read(128000)
-        if not d: break
-        ofp.write(d)
-    ofp.close_data()
-    ifp.close()
+    with io.open(inp, 'rb') as ifp:
+        # XXXX Do textfile translation on non-mac systems
+        while True:
+            d = ifp.read(128000)
+            if not d: break
+            ofp.write(d)
+        ofp.close_data()
 
     ifp = openrsrc(inp, 'rb')
-    while 1:
+    while True:
         d = ifp.read(128000)
         if not d: break
         ofp.write_rsrc(d)
@@ -284,36 +280,35 @@ class _Hqxdecoderengine:
 
     def read(self, totalwtd):
         """Read at least wtd bytes (or until EOF)"""
-        decdata = ''
+        decdata = b''
         wtd = totalwtd
         #
         # The loop here is convoluted, since we don't really now how
         # much to decode: there may be newlines in the incoming data.
         while wtd > 0:
             if self.eof: return decdata
-            wtd = ((wtd+2)//3)*4
+            wtd = ((wtd + 2) // 3) * 4
             data = self.ifp.read(wtd)
             #
             # Next problem: there may not be a complete number of
             # bytes in what we pass to a2b. Solve by yet another
             # loop.
             #
-            while 1:
+            while True:
                 try:
-                    decdatacur, self.eof = \
-                            binascii.a2b_hqx(data)
+                    with _ignore_deprecation_warning():
+                        decdatacur, self.eof = binascii.a2b_hqx(data)
                     break
                 except binascii.Incomplete:
                     pass
                 newdata = self.ifp.read(1)
                 if not newdata:
-                    raise Error, \
-                          'Premature EOF on binhex file'
+                    raise Error('Premature EOF on binhex file')
                 data = data + newdata
             decdata = decdata + decdatacur
             wtd = totalwtd - len(decdata)
             if not decdata and not self.eof:
-                raise Error, 'Premature EOF on binhex file'
+                raise Error('Premature EOF on binhex file')
         return decdata
 
     def close(self):
@@ -324,23 +319,24 @@ class _Rledecoderengine:
 
     def __init__(self, ifp):
         self.ifp = ifp
-        self.pre_buffer = ''
-        self.post_buffer = ''
+        self.pre_buffer = b''
+        self.post_buffer = b''
         self.eof = 0
 
     def read(self, wtd):
         if wtd > len(self.post_buffer):
-            self._fill(wtd-len(self.post_buffer))
+            self._fill(wtd - len(self.post_buffer))
         rv = self.post_buffer[:wtd]
         self.post_buffer = self.post_buffer[wtd:]
         return rv
 
     def _fill(self, wtd):
-        self.pre_buffer = self.pre_buffer + self.ifp.read(wtd+4)
+        self.pre_buffer = self.pre_buffer + self.ifp.read(wtd + 4)
         if self.ifp.eof:
-            self.post_buffer = self.post_buffer + \
-                binascii.rledecode_hqx(self.pre_buffer)
-            self.pre_buffer = ''
+            with _ignore_deprecation_warning():
+                self.post_buffer = self.post_buffer + \
+                    binascii.rledecode_hqx(self.pre_buffer)
+            self.pre_buffer = b''
             return
 
         #
@@ -355,19 +351,20 @@ class _Rledecoderengine:
         # otherwise: keep 1 byte.
         #
         mark = len(self.pre_buffer)
-        if self.pre_buffer[-3:] == RUNCHAR + '\0' + RUNCHAR:
+        if self.pre_buffer[-3:] == RUNCHAR + b'\0' + RUNCHAR:
             mark = mark - 3
-        elif self.pre_buffer[-1] == RUNCHAR:
+        elif self.pre_buffer[-1:] == RUNCHAR:
             mark = mark - 2
-        elif self.pre_buffer[-2:] == RUNCHAR + '\0':
+        elif self.pre_buffer[-2:] == RUNCHAR + b'\0':
             mark = mark - 2
-        elif self.pre_buffer[-2] == RUNCHAR:
+        elif self.pre_buffer[-2:-1] == RUNCHAR:
             pass # Decode all
         else:
             mark = mark - 1
 
-        self.post_buffer = self.post_buffer + \
-            binascii.rledecode_hqx(self.pre_buffer[:mark])
+        with _ignore_deprecation_warning():
+            self.post_buffer = self.post_buffer + \
+                binascii.rledecode_hqx(self.pre_buffer[:mark])
         self.pre_buffer = self.pre_buffer[mark:]
 
     def close(self):
@@ -375,23 +372,21 @@ class _Rledecoderengine:
 
 class HexBin:
     def __init__(self, ifp):
-        if type(ifp) == type(''):
-            ifp = open(ifp)
+        if isinstance(ifp, str):
+            ifp = io.open(ifp, 'rb')
         #
         # Find initial colon.
         #
-        while 1:
+        while True:
             ch = ifp.read(1)
             if not ch:
-                raise Error, "No binhex data found"
+                raise Error("No binhex data found")
             # Cater for \r\n terminated lines (which show up as \n\r, hence
             # all lines start with \r)
-            if ch == '\r':
+            if ch == b'\r':
                 continue
-            if ch == ':':
+            if ch == b':':
                 break
-            if ch != '\n':
-                dummy = ifp.readline()
 
         hqxifp = _Hqxdecoderengine(ifp)
         self.ifp = _Rledecoderengine(hqxifp)
@@ -409,14 +404,14 @@ class HexBin:
         # XXXX Is this needed??
         self.crc = self.crc & 0xffff
         if filecrc != self.crc:
-            raise Error, 'CRC error, computed %x, read %x' \
-                  %(self.crc, filecrc)
+            raise Error('CRC error, computed %x, read %x'
+                        % (self.crc, filecrc))
         self.crc = 0
 
     def _readheader(self):
         len = self._read(1)
         fname = self._read(ord(len))
-        rest = self._read(1+4+4+2+4+4)
+        rest = self._read(1 + 4 + 4 + 2 + 4 + 4)
         self._checkcrc()
 
         type = rest[1:5]
@@ -435,13 +430,13 @@ class HexBin:
 
     def read(self, *n):
         if self.state != _DID_HEADER:
-            raise Error, 'Read data at wrong time'
+            raise Error('Read data at wrong time')
         if n:
             n = n[0]
             n = min(n, self.dlen)
         else:
             n = self.dlen
-        rv = ''
+        rv = b''
         while len(rv) < n:
             rv = rv + self._read(n-len(rv))
         self.dlen = self.dlen - n
@@ -449,7 +444,7 @@ class HexBin:
 
     def close_data(self):
         if self.state != _DID_HEADER:
-            raise Error, 'close_data at wrong time'
+            raise Error('close_data at wrong time')
         if self.dlen:
             dummy = self._read(self.dlen)
         self._checkcrc()
@@ -459,7 +454,7 @@ class HexBin:
         if self.state == _DID_HEADER:
             self.close_data()
         if self.state != _DID_DATA:
-            raise Error, 'Read resource data at wrong time'
+            raise Error('Read resource data at wrong time')
         if n:
             n = n[0]
             n = min(n, self.rlen)
@@ -480,39 +475,28 @@ class HexBin:
             self.ifp.close()
 
 def hexbin(inp, out):
-    """(infilename, outfilename) - Decode binhexed file"""
+    """hexbin(infilename, outfilename) - Decode binhexed file"""
     ifp = HexBin(inp)
     finfo = ifp.FInfo
     if not out:
         out = ifp.FName
 
-    ofp = open(out, 'wb')
-    # XXXX Do translation on non-mac systems
-    while 1:
-        d = ifp.read(128000)
-        if not d: break
-        ofp.write(d)
-    ofp.close()
+    with io.open(out, 'wb') as ofp:
+        # XXXX Do translation on non-mac systems
+        while True:
+            d = ifp.read(128000)
+            if not d: break
+            ofp.write(d)
     ifp.close_data()
 
     d = ifp.read_rsrc(128000)
     if d:
         ofp = openrsrc(out, 'wb')
         ofp.write(d)
-        while 1:
+        while True:
             d = ifp.read_rsrc(128000)
             if not d: break
             ofp.write(d)
         ofp.close()
 
     ifp.close()
-
-def _test():
-    fname = sys.argv[1]
-    binhex(fname, fname+'.hqx')
-    hexbin(fname+'.hqx', fname+'.viahqx')
-    #hexbin(fname, fname+'.unpacked')
-    sys.exit(1)
-
-if __name__ == '__main__':
-    _test()

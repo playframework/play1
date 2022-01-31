@@ -24,18 +24,14 @@ Notes:
   feature, I consider this an acceptable risk.  More complicated expressions
   (e.g. function calls or indexing operations) are *not* evaluated.
 
-- GNU readline is also used by the built-in functions input() and
-raw_input(), and thus these also benefit/suffer from the completer
-features.  Clearly an interactive application can benefit by
-specifying its own completer function and using raw_input() for all
-its input.
-
 - When the original stdin is not a tty device, GNU readline is never
   used, and this module (and the readline module) are silently inactive.
 
 """
 
-import __builtin__
+import atexit
+import builtins
+import inspect
 import __main__
 
 __all__ = ["Completer"]
@@ -57,7 +53,7 @@ class Completer:
         """
 
         if namespace and not isinstance(namespace, dict):
-            raise TypeError,'namespace must be a dictionary'
+            raise TypeError('namespace must be a dictionary')
 
         # Don't bind to namespace quite yet, but flag whether the user wants a
         # specific namespace or to use __main__.__dict__. This will allow us
@@ -78,6 +74,17 @@ class Completer:
         if self.use_main_ns:
             self.namespace = __main__.__dict__
 
+        if not text.strip():
+            if state == 0:
+                if _readline_available:
+                    readline.insert_text('\t')
+                    readline.redisplay()
+                    return ''
+                else:
+                    return '\t'
+            else:
+                return None
+
         if state == 0:
             if "." in text:
                 self.matches = self.attr_matches(text)
@@ -89,8 +96,14 @@ class Completer:
             return None
 
     def _callable_postfix(self, val, word):
-        if hasattr(val, '__call__'):
-            word = word + "("
+        if callable(val):
+            word += "("
+            try:
+                if not inspect.signature(val).parameters:
+                    word += ")"
+            except ValueError:
+                pass
+
         return word
 
     def global_matches(self, text):
@@ -107,8 +120,14 @@ class Completer:
         for word in keyword.kwlist:
             if word[:n] == text:
                 seen.add(word)
+                if word in {'finally', 'try'}:
+                    word = word + ':'
+                elif word not in {'False', 'None', 'True',
+                                  'break', 'continue', 'pass',
+                                  'else'}:
+                    word = word + ' '
                 matches.append(word)
-        for nspace in [self.namespace, __builtin__.__dict__]:
+        for nspace in [self.namespace, builtins.__dict__]:
             for word, val in nspace.items():
                 if word[:n] == text and word not in seen:
                     seen.add(word)
@@ -146,14 +165,37 @@ class Completer:
             words.update(get_class_members(thisobject.__class__))
         matches = []
         n = len(attr)
-        for word in words:
-            if word[:n] == attr:
-                try:
-                    val = getattr(thisobject, word)
-                except Exception:
-                    continue  # Exclude properties that are not set
-                word = self._callable_postfix(val, "%s.%s" % (expr, word))
-                matches.append(word)
+        if attr == '':
+            noprefix = '_'
+        elif attr == '_':
+            noprefix = '__'
+        else:
+            noprefix = None
+        while True:
+            for word in words:
+                if (word[:n] == attr and
+                    not (noprefix and word[:n+1] == noprefix)):
+                    match = "%s.%s" % (expr, word)
+                    if isinstance(getattr(type(thisobject), word, None),
+                                  property):
+                        # bpo-44752: thisobject.word is a method decorated by
+                        # `@property`. What follows applies a postfix if
+                        # thisobject.word is callable, but know we know that
+                        # this is not callable (because it is a property).
+                        # Also, getattr(thisobject, word) will evaluate the
+                        # property method, which is not desirable.
+                        matches.append(match)
+                        continue
+                    if (value := getattr(thisobject, word, None)) is not None:
+                        matches.append(self._callable_postfix(value, match))
+                    else:
+                        matches.append(match)
+            if matches or not noprefix:
+                break
+            if noprefix == '_':
+                noprefix = '__'
+            else:
+                noprefix = None
         matches.sort()
         return matches
 
@@ -167,6 +209,11 @@ def get_class_members(klass):
 try:
     import readline
 except ImportError:
-    pass
+    _readline_available = False
 else:
     readline.set_completer(Completer().complete)
+    # Release references early at shutdown (the readline module's
+    # contents are quasi-immortal, and the completer function holds a
+    # reference to globals).
+    atexit.register(lambda: readline.set_completer(None))
+    _readline_available = True

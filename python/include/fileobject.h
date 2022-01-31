@@ -1,5 +1,4 @@
-
-/* File object interface */
+/* File object interface (what's left of it -- see io.py) */
 
 #ifndef Py_FILEOBJECT_H
 #define Py_FILEOBJECT_H
@@ -7,49 +6,13 @@
 extern "C" {
 #endif
 
-typedef struct {
-    PyObject_HEAD
-    FILE *f_fp;
-    PyObject *f_name;
-    PyObject *f_mode;
-    int (*f_close)(FILE *);
-    int f_softspace;            /* Flag used by 'print' command */
-    int f_binary;               /* Flag which indicates whether the file is
-                               open in binary (1) or text (0) mode */
-    char* f_buf;                /* Allocated readahead buffer */
-    char* f_bufend;             /* Points after last occupied position */
-    char* f_bufptr;             /* Current buffer position */
-    char *f_setbuf;             /* Buffer for setbuf(3) and setvbuf(3) */
-    int f_univ_newline;         /* Handle any newline convention */
-    int f_newlinetypes;         /* Types of newlines seen */
-    int f_skipnextlf;           /* Skip next \n */
-    PyObject *f_encoding;
-    PyObject *f_errors;
-    PyObject *weakreflist; /* List of weak references */
-    int unlocked_count;         /* Num. currently running sections of code
-                               using f_fp with the GIL released. */
-    int readable;
-    int writable;
-} PyFileObject;
+#define PY_STDIOTEXTMODE "b"
 
-PyAPI_DATA(PyTypeObject) PyFile_Type;
-
-#define PyFile_Check(op) PyObject_TypeCheck(op, &PyFile_Type)
-#define PyFile_CheckExact(op) (Py_TYPE(op) == &PyFile_Type)
-
-PyAPI_FUNC(PyObject *) PyFile_FromString(char *, char *);
-PyAPI_FUNC(void) PyFile_SetBufSize(PyObject *, int);
-PyAPI_FUNC(int) PyFile_SetEncoding(PyObject *, const char *);
-PyAPI_FUNC(int) PyFile_SetEncodingAndErrors(PyObject *, const char *, char *errors);
-PyAPI_FUNC(PyObject *) PyFile_FromFile(FILE *, char *, char *,
-                                             int (*)(FILE *));
-PyAPI_FUNC(FILE *) PyFile_AsFile(PyObject *);
-PyAPI_FUNC(void) PyFile_IncUseCount(PyFileObject *);
-PyAPI_FUNC(void) PyFile_DecUseCount(PyFileObject *);
-PyAPI_FUNC(PyObject *) PyFile_Name(PyObject *);
+PyAPI_FUNC(PyObject *) PyFile_FromFd(int, const char *, const char *, int,
+                                     const char *, const char *,
+                                     const char *, int);
 PyAPI_FUNC(PyObject *) PyFile_GetLine(PyObject *, int);
 PyAPI_FUNC(int) PyFile_WriteObject(PyObject *, PyObject *, int);
-PyAPI_FUNC(int) PyFile_SoftSpace(PyObject *, int);
 PyAPI_FUNC(int) PyFile_WriteString(const char *, PyObject *);
 PyAPI_FUNC(int) PyObject_AsFileDescriptor(PyObject *);
 
@@ -57,39 +20,28 @@ PyAPI_FUNC(int) PyObject_AsFileDescriptor(PyObject *);
    If non-NULL, this is different than the default encoding for strings
 */
 PyAPI_DATA(const char *) Py_FileSystemDefaultEncoding;
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03060000
+PyAPI_DATA(const char *) Py_FileSystemDefaultEncodeErrors;
+#endif
+PyAPI_DATA(int) Py_HasFileSystemDefaultEncoding;
 
-/* Routines to replace fread() and fgets() which accept any of \r, \n
-   or \r\n as line terminators.
-*/
-#define PY_STDIOTEXTMODE "b"
-char *Py_UniversalNewlineFgets(char *, int, FILE*, PyObject *);
-size_t Py_UniversalNewlineFread(char *, size_t, FILE *, PyObject *);
-
-/* A routine to do sanity checking on the file mode string.  returns
-   non-zero on if an exception occurred
-*/
-int _PyFile_SanitizeMode(char *mode);
-
-#if defined _MSC_VER && _MSC_VER >= 1400
-/* A routine to check if a file descriptor is valid on Windows.  Returns 0
- * and sets errno to EBADF if it isn't.  This is to avoid Assertions
- * from various functions in the Windows CRT beginning with
- * Visual Studio 2005
- */
-int _PyVerify_fd(int fd);
-#elif defined _MSC_VER && _MSC_VER >= 1200
-/* fdopen doesn't set errno EBADF and crashes for large fd on debug build */
-#define _PyVerify_fd(fd) (_get_osfhandle(fd) >= 0)
-#else
-#define _PyVerify_fd(A) (1) /* dummy */
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API+0 >= 0x03070000
+PyAPI_DATA(int) Py_UTF8Mode;
 #endif
 
 /* A routine to check if a file descriptor can be select()-ed. */
-#ifdef HAVE_SELECT
- #define _PyIsSelectable_fd(FD) (((FD) >= 0) && ((FD) < FD_SETSIZE))
+#ifdef _MSC_VER
+    /* On Windows, any socket fd can be select()-ed, no matter how high */
+    #define _PyIsSelectable_fd(FD) (1)
 #else
- #define _PyIsSelectable_fd(FD) (1)
-#endif /* HAVE_SELECT */
+    #define _PyIsSelectable_fd(FD) ((unsigned int)(FD) < (unsigned int)FD_SETSIZE)
+#endif
+
+#ifndef Py_LIMITED_API
+#  define Py_CPYTHON_FILEOBJECT_H
+#  include  "cpython/fileobject.h"
+#  undef Py_CPYTHON_FILEOBJECT_H
+#endif
 
 #ifdef __cplusplus
 }

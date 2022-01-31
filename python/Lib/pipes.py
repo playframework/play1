@@ -60,7 +60,9 @@ To create a new template object initialized to a given one:
 import re
 import os
 import tempfile
-import string
+# we import the quote function rather than the module for backward compat
+# (quote used to be an undocumented but used function in pipes)
+from shlex import quote
 
 __all__ = ["Template"]
 
@@ -107,46 +109,34 @@ class Template:
 
     def append(self, cmd, kind):
         """t.append(cmd, kind) adds a new step at the end."""
-        if type(cmd) is not type(''):
-            raise TypeError, \
-                  'Template.append: cmd must be a string'
+        if not isinstance(cmd, str):
+            raise TypeError('Template.append: cmd must be a string')
         if kind not in stepkinds:
-            raise ValueError, \
-                  'Template.append: bad kind %r' % (kind,)
+            raise ValueError('Template.append: bad kind %r' % (kind,))
         if kind == SOURCE:
-            raise ValueError, \
-                  'Template.append: SOURCE can only be prepended'
+            raise ValueError('Template.append: SOURCE can only be prepended')
         if self.steps and self.steps[-1][1] == SINK:
-            raise ValueError, \
-                  'Template.append: already ends with SINK'
+            raise ValueError('Template.append: already ends with SINK')
         if kind[0] == 'f' and not re.search(r'\$IN\b', cmd):
-            raise ValueError, \
-                  'Template.append: missing $IN in cmd'
+            raise ValueError('Template.append: missing $IN in cmd')
         if kind[1] == 'f' and not re.search(r'\$OUT\b', cmd):
-            raise ValueError, \
-                  'Template.append: missing $OUT in cmd'
+            raise ValueError('Template.append: missing $OUT in cmd')
         self.steps.append((cmd, kind))
 
     def prepend(self, cmd, kind):
         """t.prepend(cmd, kind) adds a new step at the front."""
-        if type(cmd) is not type(''):
-            raise TypeError, \
-                  'Template.prepend: cmd must be a string'
+        if not isinstance(cmd, str):
+            raise TypeError('Template.prepend: cmd must be a string')
         if kind not in stepkinds:
-            raise ValueError, \
-                  'Template.prepend: bad kind %r' % (kind,)
+            raise ValueError('Template.prepend: bad kind %r' % (kind,))
         if kind == SINK:
-            raise ValueError, \
-                  'Template.prepend: SINK can only be appended'
+            raise ValueError('Template.prepend: SINK can only be appended')
         if self.steps and self.steps[0][1] == SOURCE:
-            raise ValueError, \
-                  'Template.prepend: already begins with SOURCE'
+            raise ValueError('Template.prepend: already begins with SOURCE')
         if kind[0] == 'f' and not re.search(r'\$IN\b', cmd):
-            raise ValueError, \
-                  'Template.prepend: missing $IN in cmd'
+            raise ValueError('Template.prepend: missing $IN in cmd')
         if kind[1] == 'f' and not re.search(r'\$OUT\b', cmd):
-            raise ValueError, \
-                  'Template.prepend: missing $OUT in cmd'
+            raise ValueError('Template.prepend: missing $OUT in cmd')
         self.steps.insert(0, (cmd, kind))
 
     def open(self, file, rw):
@@ -156,8 +146,8 @@ class Template:
             return self.open_r(file)
         if rw == 'w':
             return self.open_w(file)
-        raise ValueError, \
-              'Template.open: rw must be \'r\' or \'w\', not %r' % (rw,)
+        raise ValueError('Template.open: rw must be \'r\' or \'w\', not %r'
+                         % (rw,))
 
     def open_r(self, file):
         """t.open_r(file) and t.open_w(file) implement
@@ -165,8 +155,7 @@ class Template:
         if not self.steps:
             return open(file, 'r')
         if self.steps[-1][1] == SINK:
-            raise ValueError, \
-                  'Template.open_r: pipeline ends width SINK'
+            raise ValueError('Template.open_r: pipeline ends width SINK')
         cmd = self.makepipeline(file, '')
         return os.popen(cmd, 'r')
 
@@ -174,8 +163,7 @@ class Template:
         if not self.steps:
             return open(file, 'w')
         if self.steps[0][1] == SOURCE:
-            raise ValueError, \
-                  'Template.open_w: pipeline begins with SOURCE'
+            raise ValueError('Template.open_w: pipeline begins with SOURCE')
         cmd = self.makepipeline('', file)
         return os.popen(cmd, 'w')
 
@@ -185,7 +173,7 @@ class Template:
     def makepipeline(self, infile, outfile):
         cmd = makepipeline(infile, self.steps, outfile)
         if self.debugging:
-            print cmd
+            print(cmd)
             cmd = 'set -x; ' + cmd
         return cmd
 
@@ -257,22 +245,3 @@ def makepipeline(infile, steps, outfile):
         cmdlist = trapcmd + '\n' + cmdlist + '\n' + rmcmd
     #
     return cmdlist
-
-
-# Reliably quote a string as a single argument for /bin/sh
-
-# Safe unquoted
-_safechars = frozenset(string.ascii_letters + string.digits + '@%_-+=:,./')
-
-def quote(file):
-    """Return a shell-escaped version of the file string."""
-    for c in file:
-        if c not in _safechars:
-            break
-    else:
-        if not file:
-            return "''"
-        return file
-    # use single quotes, and put single quotes into double quotes
-    # the string $'b is then quoted as '$'"'"'b'
-    return "'" + file.replace("'", "'\"'\"'") + "'"

@@ -6,12 +6,6 @@ extern "C" {
 #endif
 
 
-PyAPI_FUNC(double) PyOS_ascii_strtod(const char *str, char **ptr);
-PyAPI_FUNC(double) PyOS_ascii_atof(const char *str);
-
-/* Deprecated in 2.7 and 3.1. Will disappear in 2.8 (if it exists) and 3.2 */
-PyAPI_FUNC(char *) PyOS_ascii_formatd(char *buffer, size_t buf_len,
-                                      const char *format, double d);
 PyAPI_FUNC(double) PyOS_string_to_double(const char *str,
                                          char **endptr,
                                          PyObject *overflow_exception);
@@ -24,7 +18,13 @@ PyAPI_FUNC(char *) PyOS_double_to_string(double val,
                                          int flags,
                                          int *type);
 
+#ifndef Py_LIMITED_API
+PyAPI_FUNC(PyObject *) _Py_string_to_number_with_underscores(
+    const char *str, Py_ssize_t len, const char *what, PyObject *obj, void *arg,
+    PyObject *(*innerfunc)(const char *, Py_ssize_t, void *));
+
 PyAPI_FUNC(double) _Py_parse_inf_or_nan(const char *p, char **endptr);
+#endif
 
 
 /* PyOS_double_to_string's "flags" parameter can be set to 0 or more of: */

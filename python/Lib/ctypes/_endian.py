@@ -30,7 +30,7 @@ class _swapped_meta(type(Structure)):
                 rest = desc[2:]
                 fields.append((name, _other_endian(typ)) + rest)
             value = fields
-        super(_swapped_meta, self).__setattr__(attrname, value)
+        super().__setattr__(attrname, value)
 
 ################################################################
 
@@ -43,18 +43,18 @@ if sys.byteorder == "little":
 
     LittleEndianStructure = Structure
 
-    class BigEndianStructure(Structure):
+    class BigEndianStructure(Structure, metaclass=_swapped_meta):
         """Structure with big endian byte order"""
-        __metaclass__ = _swapped_meta
+        __slots__ = ()
         _swappedbytes_ = None
 
 elif sys.byteorder == "big":
     _OTHER_ENDIAN = "__ctype_le__"
 
     BigEndianStructure = Structure
-    class LittleEndianStructure(Structure):
+    class LittleEndianStructure(Structure, metaclass=_swapped_meta):
         """Structure with little endian byte order"""
-        __metaclass__ = _swapped_meta
+        __slots__ = ()
         _swappedbytes_ = None
 
 else:

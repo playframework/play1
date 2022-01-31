@@ -3,11 +3,12 @@
 # by abc.py to load everything else at startup.
 
 from _weakref import ref
+from types import GenericAlias
 
 __all__ = ['WeakSet']
 
 
-class _IterationGuard(object):
+class _IterationGuard:
     # This context manager registers itself in the current iterators of the
     # weak container, such as to delay all removals until the context manager
     # exits.
@@ -32,7 +33,7 @@ class _IterationGuard(object):
                 w._commit_removals()
 
 
-class WeakSet(object):
+class WeakSet:
     def __init__(self, data=None):
         self.data = set()
         def _remove(item, selfref=ref(self)):
@@ -50,10 +51,14 @@ class WeakSet(object):
             self.update(data)
 
     def _commit_removals(self):
-        l = self._pending_removals
+        pop = self._pending_removals.pop
         discard = self.data.discard
-        while l:
-            discard(l.pop())
+        while True:
+            try:
+                item = pop()
+            except IndexError:
+                return
+            discard(item)
 
     def __iter__(self):
         with _IterationGuard(self):
@@ -78,8 +83,6 @@ class WeakSet(object):
         return (self.__class__, (list(self),),
                 getattr(self, '__dict__', None))
 
-    __hash__ = None
-
     def add(self, item):
         if self._pending_removals:
             self._commit_removals()
@@ -100,7 +103,7 @@ class WeakSet(object):
             try:
                 itemref = self.data.pop()
             except KeyError:
-                raise KeyError('pop from empty WeakSet')
+                raise KeyError('pop from empty WeakSet') from None
             item = itemref()
             if item is not None:
                 return item
@@ -159,25 +162,19 @@ class WeakSet(object):
     __le__ = issubset
 
     def __lt__(self, other):
-        return self.data < set(ref(item) for item in other)
+        return self.data < set(map(ref, other))
 
     def issuperset(self, other):
         return self.data.issuperset(ref(item) for item in other)
     __ge__ = issuperset
 
     def __gt__(self, other):
-        return self.data > set(ref(item) for item in other)
+        return self.data > set(map(ref, other))
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self.data == set(ref(item) for item in other)
-
-    def __ne__(self, other):
-        opposite = self.__eq__(other)
-        if opposite is NotImplemented:
-            return NotImplemented
-        return not opposite
+        return self.data == set(map(ref, other))
 
     def symmetric_difference(self, other):
         newset = self.copy()
@@ -202,3 +199,8 @@ class WeakSet(object):
 
     def isdisjoint(self, other):
         return len(self.intersection(other)) == 0
+
+    def __repr__(self):
+        return repr(self.data)
+
+    __class_getitem__ = classmethod(GenericAlias)

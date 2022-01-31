@@ -62,15 +62,15 @@ class Chunk:
         if len(self.chunkname) < 4:
             raise EOFError
         try:
-            self.chunksize = struct.unpack(strflag+'L', file.read(4))[0]
+            self.chunksize = struct.unpack_from(strflag+'L', file.read(4))[0]
         except struct.error:
-            raise EOFError
+            raise EOFError from None
         if inclheader:
             self.chunksize = self.chunksize - 8 # subtract header
         self.size_read = 0
         try:
             self.offset = self.file.tell()
-        except (AttributeError, IOError):
+        except (AttributeError, OSError):
             self.seekable = False
         else:
             self.seekable = True
@@ -92,7 +92,7 @@ class Chunk:
 
     def isatty(self):
         if self.closed:
-            raise ValueError, "I/O operation on closed file"
+            raise ValueError("I/O operation on closed file")
         return False
 
     def seek(self, pos, whence=0):
@@ -102,9 +102,9 @@ class Chunk:
         """
 
         if self.closed:
-            raise ValueError, "I/O operation on closed file"
+            raise ValueError("I/O operation on closed file")
         if not self.seekable:
-            raise IOError, "cannot seek"
+            raise OSError("cannot seek")
         if whence == 1:
             pos = pos + self.size_read
         elif whence == 2:
@@ -116,7 +116,7 @@ class Chunk:
 
     def tell(self):
         if self.closed:
-            raise ValueError, "I/O operation on closed file"
+            raise ValueError("I/O operation on closed file")
         return self.size_read
 
     def read(self, size=-1):
@@ -126,9 +126,9 @@ class Chunk:
         """
 
         if self.closed:
-            raise ValueError, "I/O operation on closed file"
+            raise ValueError("I/O operation on closed file")
         if self.size_read >= self.chunksize:
-            return ''
+            return b''
         if size < 0:
             size = self.chunksize - self.size_read
         if size > self.chunksize - self.size_read:
@@ -150,7 +150,7 @@ class Chunk:
         """
 
         if self.closed:
-            raise ValueError, "I/O operation on closed file"
+            raise ValueError("I/O operation on closed file")
         if self.seekable:
             try:
                 n = self.chunksize - self.size_read
@@ -160,7 +160,7 @@ class Chunk:
                 self.file.seek(n, 1)
                 self.size_read = self.size_read + n
                 return
-            except IOError:
+            except OSError:
                 pass
         while self.size_read < self.chunksize:
             n = min(8192, self.chunksize - self.size_read)

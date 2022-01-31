@@ -1,51 +1,26 @@
-""" Python 'bz2_codec' Codec - bz2 compression encoding
+"""Python 'bz2_codec' Codec - bz2 compression encoding.
 
-    Unlike most of the other codecs which target Unicode, this codec
-    will return Python string objects for both encode and decode.
+This codec de/encodes from bytes to bytes and is therefore usable with
+bytes.transform() and bytes.untransform().
 
-    Adapted by Raymond Hettinger from zlib_codec.py which was written
-    by Marc-Andre Lemburg (mal@lemburg.com).
-
+Adapted by Raymond Hettinger from zlib_codec.py which was written
+by Marc-Andre Lemburg (mal@lemburg.com).
 """
+
 import codecs
 import bz2 # this codec needs the optional bz2 module !
 
 ### Codec APIs
 
-def bz2_encode(input,errors='strict'):
-
-    """ Encodes the object input and returns a tuple (output
-        object, length consumed).
-
-        errors defines the error handling to apply. It defaults to
-        'strict' handling which is the only currently supported
-        error handling for this codec.
-
-    """
+def bz2_encode(input, errors='strict'):
     assert errors == 'strict'
-    output = bz2.compress(input)
-    return (output, len(input))
+    return (bz2.compress(input), len(input))
 
-def bz2_decode(input,errors='strict'):
-
-    """ Decodes the object input and returns a tuple (output
-        object, length consumed).
-
-        input must be an object which provides the bf_getreadbuf
-        buffer slot. Python strings, buffer objects and memory
-        mapped files are examples of objects providing this slot.
-
-        errors defines the error handling to apply. It defaults to
-        'strict' handling which is the only currently supported
-        error handling for this codec.
-
-    """
+def bz2_decode(input, errors='strict'):
     assert errors == 'strict'
-    output = bz2.decompress(input)
-    return (output, len(input))
+    return (bz2.decompress(input), len(input))
 
 class Codec(codecs.Codec):
-
     def encode(self, input, errors='strict'):
         return bz2_encode(input, errors)
     def decode(self, input, errors='strict'):
@@ -82,11 +57,11 @@ class IncrementalDecoder(codecs.IncrementalDecoder):
     def reset(self):
         self.decompressobj = bz2.BZ2Decompressor()
 
-class StreamWriter(Codec,codecs.StreamWriter):
-    pass
+class StreamWriter(Codec, codecs.StreamWriter):
+    charbuffertype = bytes
 
-class StreamReader(Codec,codecs.StreamReader):
-    pass
+class StreamReader(Codec, codecs.StreamReader):
+    charbuffertype = bytes
 
 ### encodings module API
 

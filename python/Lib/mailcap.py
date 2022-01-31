@@ -1,8 +1,18 @@
 """Mailcap file handling.  See RFC 1524."""
 
 import os
+import warnings
 
 __all__ = ["getcaps","findmatch"]
+
+
+def lineno_sort_key(entry):
+    # Sort in ascending order, with unspecified entries at the end
+    if 'lineno' in entry:
+        return 0, entry['lineno']
+    else:
+        return 1, 0
+
 
 # Part 1: top-level interface.
 
@@ -17,14 +27,15 @@ def getcaps():
 
     """
     caps = {}
+    lineno = 0
     for mailcap in listmailcapfiles():
         try:
             fp = open(mailcap, 'r')
-        except IOError:
+        except OSError:
             continue
         with fp:
-            morecaps = readmailcapfile(fp)
-        for key, value in morecaps.iteritems():
+            morecaps, lineno = _readmailcapfile(fp, lineno)
+        for key, value in morecaps.items():
             if not key in caps:
                 caps[key] = value
             else:
@@ -33,10 +44,10 @@ def getcaps():
 
 def listmailcapfiles():
     """Return a list of all mailcap files found on the system."""
-    # XXX Actually, this is Unix-specific
+    # This is mostly a Unix thing, but we use the OS path separator anyway
     if 'MAILCAPS' in os.environ:
-        str = os.environ['MAILCAPS']
-        mailcaps = str.split(':')
+        pathstr = os.environ['MAILCAPS']
+        mailcaps = pathstr.split(os.pathsep)
     else:
         if 'HOME' in os.environ:
             home = os.environ['HOME']
@@ -49,8 +60,15 @@ def listmailcapfiles():
 
 
 # Part 2: the parser.
-
 def readmailcapfile(fp):
+    """Read a mailcap file and return a dictionary keyed by MIME type."""
+    warnings.warn('readmailcapfile is deprecated, use getcaps instead',
+                  DeprecationWarning, 2)
+    caps, _ = _readmailcapfile(fp, None)
+    return caps
+
+
+def _readmailcapfile(fp, lineno):
     """Read a mailcap file and return a dictionary keyed by MIME type.
 
     Each MIME type is mapped to an entry consisting of a list of
@@ -76,6 +94,9 @@ def readmailcapfile(fp):
         key, fields = parseline(line)
         if not (key and fields):
             continue
+        if lineno is not None:
+            fields['lineno'] = lineno
+            lineno += 1
         # Normalize the key
         types = key.split('/')
         for j in range(len(types)):
@@ -86,7 +107,7 @@ def readmailcapfile(fp):
             caps[key].append(fields)
         else:
             caps[key] = [fields]
-    return caps
+    return caps, lineno
 
 def parseline(line):
     """Parse one entry in a mailcap file and return a dictionary.
@@ -164,7 +185,8 @@ def lookup(caps, MIMEtype, key=None):
     if MIMEtype in caps:
         entries = entries + caps[MIMEtype]
     if key is not None:
-        entries = filter(lambda e, key=key: key in e, entries)
+        entries = [e for e in entries if key in e]
+    entries = sorted(entries, key=lineno_sort_key)
     return entries
 
 def subst(field, MIMEtype, filename, plist=[]):
@@ -219,37 +241,36 @@ def test():
     for i in range(1, len(sys.argv), 2):
         args = sys.argv[i:i+2]
         if len(args) < 2:
-            print "usage: mailcap [MIMEtype file] ..."
+            print("usage: mailcap [MIMEtype file] ...")
             return
         MIMEtype = args[0]
         file = args[1]
         command, e = findmatch(caps, MIMEtype, 'view', file)
         if not command:
-            print "No viewer found for", type
+            print("No viewer found for", type)
         else:
-            print "Executing:", command
+            print("Executing:", command)
             sts = os.system(command)
+            sts = os.waitstatus_to_exitcode(sts)
             if sts:
-                print "Exit status:", sts
+                print("Exit status:", sts)
 
 def show(caps):
-    print "Mailcap files:"
-    for fn in listmailcapfiles(): print "\t" + fn
-    print
+    print("Mailcap files:")
+    for fn in listmailcapfiles(): print("\t" + fn)
+    print()
     if not caps: caps = getcaps()
-    print "Mailcap entries:"
-    print
-    ckeys = caps.keys()
-    ckeys.sort()
+    print("Mailcap entries:")
+    print()
+    ckeys = sorted(caps)
     for type in ckeys:
-        print type
+        print(type)
         entries = caps[type]
         for e in entries:
-            keys = e.keys()
-            keys.sort()
+            keys = sorted(e)
             for k in keys:
-                print "  %-15s" % k, e[k]
-            print
+                print("  %-15s" % k, e[k])
+            print()
 
 if __name__ == '__main__':
     test()

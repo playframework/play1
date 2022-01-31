@@ -63,6 +63,12 @@ aliases = {
     'csibm1026'          : 'cp1026',
     'ibm1026'            : 'cp1026',
 
+    # cp1125 codec
+    '1125'                : 'cp1125',
+    'ibm1125'             : 'cp1125',
+    'cp866u'              : 'cp1125',
+    'ruscii'              : 'cp1125',
+
     # cp1140 codec
     '1140'               : 'cp1140',
     'ibm1140'            : 'cp1140',
@@ -102,6 +108,11 @@ aliases = {
     # cp1258 codec
     '1258'               : 'cp1258',
     'windows_1258'       : 'cp1258',
+
+    # cp273 codec
+    '273'                : 'cp273',
+    'ibm273'             : 'cp273',
+    'csibm273'           : 'cp273',
 
     # cp424 codec
     '424'                : 'cp424',
@@ -255,6 +266,8 @@ aliases = {
     'roman8'             : 'hp_roman8',
     'r8'                 : 'hp_roman8',
     'csHPRoman8'         : 'hp_roman8',
+    'cp1051'             : 'hp_roman8',
+    'ibm1051'            : 'hp_roman8',
 
     # hz codec
     'hzgb'               : 'hz',
@@ -401,6 +414,11 @@ aliases = {
     # koi8_r codec
     'cskoi8r'            : 'koi8_r',
 
+    # kz1048 codec
+    'kz_1048'           : 'kz1048',
+    'rk1048'            : 'kz1048',
+    'strk1048_2002'     : 'kz1048',
+
     # latin_1 codec
     #
     # Note that the latin_1 codec is implemented internally in C and a
@@ -432,15 +450,18 @@ aliases = {
 
     # mac_latin2 codec
     'maccentraleurope'   : 'mac_latin2',
+    'mac_centeuro'       : 'mac_latin2',
     'maclatin2'          : 'mac_latin2',
 
     # mac_roman codec
+    'macintosh'          : 'mac_roman',
     'macroman'           : 'mac_roman',
 
     # mac_turkish codec
     'macturkish'         : 'mac_turkish',
 
     # mbcs codec
+    'ansi'               : 'mbcs',
     'dbcs'               : 'mbcs',
 
     # ptcp154 codec
@@ -472,9 +493,6 @@ aliases = {
     'shiftjisx0213'      : 'shift_jisx0213',
     'sjisx0213'          : 'shift_jisx0213',
     's_jisx0213'         : 'shift_jisx0213',
-
-    # tactis codec
-    'tis260'             : 'tactis',
 
     # tis_620 codec
     'tis620'             : 'tis_620',
@@ -516,6 +534,7 @@ aliases = {
     'utf8'               : 'utf_8',
     'utf8_ucs2'          : 'utf_8',
     'utf8_ucs4'          : 'utf_8',
+    'cp65001'            : 'utf_8',
 
     # uu_codec codec
     'uu'                 : 'uu_codec',
@@ -524,4 +543,9 @@ aliases = {
     'zip'                : 'zlib_codec',
     'zlib'               : 'zlib_codec',
 
+    # temporary mac CJK aliases, will be replaced by proper codecs in 3.1
+    'x_mac_japanese'      : 'shift_jis',
+    'x_mac_korean'        : 'euc_kr',
+    'x_mac_simp_chinese'  : 'gb2312',
+    'x_mac_trad_chinese'  : 'big5',
 }

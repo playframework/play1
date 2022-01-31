@@ -1,4 +1,4 @@
-# Copyright (C) 2001-2006 Python Software Foundation
+# Copyright (C) 2001-2007 Python Software Foundation
 # Author: Anthony Baxter
 # Contact: email-sig@python.org
 
@@ -8,7 +8,7 @@ __all__ = ['MIMEAudio']
 
 import sndhdr
 
-from cStringIO import StringIO
+from io import BytesIO
 from email import encoders
 from email.mime.nonmultipart import MIMENonMultipart
 
@@ -30,7 +30,7 @@ def _whatsnd(data):
     command and use the standard 'magic' file, as shipped with a modern Unix.
     """
     hdr = data[:512]
-    fakefile = StringIO(hdr)
+    fakefile = BytesIO(hdr)
     for testfn in sndhdr.tests:
         res = testfn(hdr, fakefile)
         if res is not None:
@@ -43,7 +43,7 @@ class MIMEAudio(MIMENonMultipart):
     """Class for generating audio/* MIME documents."""
 
     def __init__(self, _audiodata, _subtype=None,
-                 _encoder=encoders.encode_base64, **_params):
+                 _encoder=encoders.encode_base64, *, policy=None, **_params):
         """Create an audio/* type MIME document.
 
         _audiodata is a string containing the raw audio data.  If this data
@@ -68,6 +68,7 @@ class MIMEAudio(MIMENonMultipart):
             _subtype = _whatsnd(_audiodata)
         if _subtype is None:
             raise TypeError('Could not find audio MIME subtype')
-        MIMENonMultipart.__init__(self, 'audio', _subtype, **_params)
+        MIMENonMultipart.__init__(self, 'audio', _subtype, policy=policy,
+                                  **_params)
         self.set_payload(_audiodata)
         _encoder(self)
