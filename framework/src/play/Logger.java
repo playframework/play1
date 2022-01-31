@@ -60,12 +60,12 @@ public class Logger {
      */
     public static void init() {
         String log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.xml");
-        URL log4jConf = Thread.currentThread().getContextClassLoader().getResource(log4jPath);
+        URL log4jConf = Logger.class.getResource(log4jPath);
         boolean isXMLConfig = log4jPath.endsWith(".xml");
         if (log4jConf == null) { // try again with the .properties
             isXMLConfig = false;
             log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.properties");
-            log4jConf = Thread.currentThread().getContextClassLoader().getResource(log4jPath);
+            log4jConf = Logger.class.getResource(log4jPath);
         }
         if (log4jConf == null) {
             Properties shutUp = new Properties();
