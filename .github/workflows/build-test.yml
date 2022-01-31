@@ -1,12 +1,13 @@
 name: Pull Requests
 
 on:
+  push:
   pull_request:
-  
+
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
   group: ci-${{ github.ref }}
-  cancel-in-progress: true  
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -15,25 +16,25 @@ jobs:
     strategy:
       matrix:
         jdk: [ 11, 17 ]
-    name: Check / Tests (JDK ${{ matrix.jdk }})    
+    name: Check / Tests (JDK ${{ matrix.jdk }})
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           # we don't know what commit the last tag was it's safer to get entire repo so previousStableVersion resolves
           fetch-depth: 0
-          
+
       - name: Set up python 2
         uses: actions/setup-python@v2
         with:
           python-version: '2.x'
           architecture: 'x64'
-          
+
       - name: Set up JDK ${{ matrix.jdk }}
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.jdk }}
           distribution: 'adopt'
-          
+
       - name: Build with Ant
         run: ant -buildfile ./framework/build.xml test
