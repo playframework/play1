@@ -50,7 +50,7 @@ def isExcluded(path, exclusion_list = None):
     if exclusion_list is None:
         return False
     for exclusion in exclusion_list:
-        if isParentOf(exclusion, path):
+        if isParentOf(exclusion, path) or exclusion == path:
             return True
     return False
 
