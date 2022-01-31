@@ -19,7 +19,7 @@ require:    &allDependencies
     - com.google.code.gson -> gson 2.8.9
     - com.jamonapi -> jamon 2.82
     - com.ning -> async-http-client 1.9.40
-    - commons-beanutils 1.9.4 
+    - commons-beanutils 1.9.4
     - commons-codec 1.15
     - org.apache.commons -> commons-email 1.5
     - commons-fileupload 1.4
@@ -71,7 +71,6 @@ require:    &allDependencies
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.3.1
     - org.slf4j -> slf4j-api 1.7.33
-    - org.slf4j -> slf4j-log4j12 1.7.33
     - org.apache.logging.log4j -> log4j-slf4j-impl 2.17.1
     - org.yaml -> snakeyaml 1.30
     - net.spy -> spymemcached 2.12.3
@@ -92,7 +91,7 @@ repositories:
         type:       local
         artifact:   "${play.path}/framework/lib/[artifact]-[revision].jar"
         contains:   *allDependencies
-        
+
     - playCoreCrud:
         type:       local
         artifact:   "${play.path}/modules/crud"
@@ -104,16 +103,16 @@ repositories:
         artifact:   "${play.path}/modules/secure"
         contains:
             - play -> secure $version
-            
+
     - playCoreDocviewer:
         type:       local
         artifact:   "${play.path}/modules/docviewer"
         contains:
             - play -> docviewer $version
 
-    - playModules:  
+    - playModules:
         type:       chain
-        using:            
+        using:
             - playLocalModules:
                 type:       local
                 descriptor: "${play.path}/modules/[module]-[revision]/conf/dependencies.yml"
@@ -123,7 +122,7 @@ repositories:
                 type:       http
                 descriptor: "https://www.playframework.com/modules/repo/[module]/[revision]/dependencies.yml"
                 artifact:   "https://www.playframework.com/modules/[module]-[revision].zip"
-                
+
         contains:
             - play -> *
 

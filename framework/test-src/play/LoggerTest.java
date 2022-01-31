@@ -1,4 +1,5 @@
 package play;
+
 /**
  *
  */
@@ -7,6 +8,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Properties;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Test the Logger class. At the moment only a few methods.
+ * 
  * @author niels
  *
  */
@@ -37,6 +40,7 @@ public class LoggerTest {
 
     /**
      * Safes the original configuration and log.
+     * 
      * @throws java.lang.Exception
      */
     @BeforeClass
@@ -44,11 +48,12 @@ public class LoggerTest {
         playConfig = Play.configuration;
         applicationPath = Play.applicationPath;
         id = Play.id;
-        log4j = Logger.log4j;
+        log4j = Logger.log4j;  
     }
 
     /**
-     * Restore  the original configuration and log.
+     * Restore the original configuration and log.
+     * 
      * @throws java.lang.Exception
      */
     @AfterClass
@@ -64,9 +69,11 @@ public class LoggerTest {
 
     @Before
     public void setUp() throws Exception {
-        Play.configuration = new Properties();
-        Play.applicationPath = new File(".");
-        Play.id = "test";
+        new PlayBuilder().build();    
+        String className = LoggerTest.class.getSimpleName() + ".class";
+        URL url = LoggerTest.class.getResource(className);
+        File file = Paths.get(url.toURI()).toFile().getParentFile();
+        Play.applicationPath = file;
     }
 
     @After
@@ -78,13 +85,15 @@ public class LoggerTest {
      */
     @Test
     public void testInitWithPropertiesForDefaultRoot() {
-        //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        // given
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME,
+                new File(Play.applicationPath, "testlog4j.properties").getAbsolutePath());
+
         Logger.log4j = null;
         init();
-        //when
+        // when
         org.apache.logging.log4j.Logger log4jLoggerDefault = LogManager.getLogger("testAPP");
-        //then
+        // then
         assertEquals(Level.DEBUG, log4jLoggerDefault.getLevel());
     }
 
@@ -93,13 +102,14 @@ public class LoggerTest {
      */
     @Test
     public void testInitWithPropertiesForCustom() {
-        //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        // given
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME,
+                new File(Play.applicationPath, "testlog4j.properties").getAbsolutePath());
         Logger.log4j = null;
         init();
-        //when
+        // when
         org.apache.logging.log4j.Logger log4jLoggerCustom = LogManager.getLogger("logtest.properties");
-        //then
+        // then
         assertEquals(Level.WARN, log4jLoggerCustom.getLevel());
     }
 
@@ -108,14 +118,15 @@ public class LoggerTest {
      */
     @Test
     public void testInitWithPropertiesForPlay() {
-        //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        // given
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME,
+                new File(Play.applicationPath, "testlog4j.properties").getAbsolutePath());
         Logger.log4j = null;
         init();
-        //when
+        // when
         org.apache.logging.log4j.Logger log4jLogger = LogManager.getLogger("play");
         org.apache.logging.log4j.Logger log4jLoggerPlay = Logger.log4j;
-        //then
+        // then
         assertEquals(Level.INFO, log4jLogger.getLevel());
         assertEquals(Level.INFO, log4jLoggerPlay.getLevel());
     }
@@ -125,13 +136,14 @@ public class LoggerTest {
      */
     @Test
     public void testInitWithXMLForCustom() {
-        //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.xml");
+        // given
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME,
+                new File(Play.applicationPath, "testlog4j.xml").getAbsolutePath());
         Logger.log4j = null;
         init();
-        //when
+        // when
         org.apache.logging.log4j.Logger log4jLogger = LogManager.getLogger("logtest.xml");
-        //then
+        // then
         assertEquals(Level.TRACE, log4jLogger.getLevel());
     }
 
@@ -140,13 +152,14 @@ public class LoggerTest {
      */
     @Test
     public void testInitWithXMLForPlay() {
-        //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.xml");
+        // given
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME,
+                new File(Play.applicationPath, "testlog4j.xml").getAbsolutePath());
         Logger.log4j = null;
         init();
-        //when
+        // when
         org.apache.logging.log4j.Logger log4jLogger = Logger.log4j;
-        //then
+        // then
         assertEquals(Level.DEBUG, log4jLogger.getLevel());
     }
 
@@ -157,7 +170,6 @@ public class LoggerTest {
                 try {
                     return new File(Play.configuration.getProperty(APPLICATION_LOG_PATH_PROPERTYNAME)).toURI().toURL();
                 } catch (MalformedURLException ignored) {
-
                 }
                 return super.getLog4jConf();
             }
