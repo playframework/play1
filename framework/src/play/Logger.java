@@ -75,14 +75,18 @@ public class Logger {
         } else if (Logger.log4j == null) {
             try {
                 if (init.access()) {
-                    Configurator.reconfigure(log4jConf.toURI());
                     configuredManually = true;
-                    Logger.log4j = LogManager.getLogger("play");
+
                 }
+
+                Configurator.reconfigure(log4jConf.toURI());
             } catch (IllegalArgumentException | FileSystemNotFoundException | SecurityException
                     | URISyntaxException ignored) {
                 ignored.printStackTrace();
             }
+
+            Logger.log4j = LogManager.getLogger("play");
+
             // In test mode, append logs to test-result/application.log
             if (Play.runningInTestMode()) {
                 try {
