@@ -78,6 +78,10 @@ public class Logger {
                 }
             } catch (IllegalArgumentException | FileSystemNotFoundException | SecurityException | URISyntaxException ignored) {
             }
+            if (Logger.log4j == null) {
+                Logger.warn("auto configuration log4j2");
+                Logger.log4j = LogManager.getLogger("play");
+            }
             // In test mode, append logs to test-result/application.log
             if (Play.runningInTestMode()) {
                 try {
