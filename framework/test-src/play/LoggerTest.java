@@ -79,7 +79,7 @@ public class LoggerTest {
     @Test
     public void testInitWithPropertiesForDefaultRoot() {
         //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsolutePath() + "/test-src/play/testlog4j.properties");
         Logger.log4j = null;
         init();
         //when
@@ -94,7 +94,7 @@ public class LoggerTest {
     @Test
     public void testInitWithPropertiesForCustom() {
         //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsolutePath() + "/test-src/play/testlog4j.properties");
         Logger.log4j = null;
         init();
         //when
@@ -109,7 +109,7 @@ public class LoggerTest {
     @Test
     public void testInitWithPropertiesForPlay() {
         //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.properties");
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsolutePath() + "/test-src/play/testlog4j.properties");
         Logger.log4j = null;
         init();
         //when
@@ -126,7 +126,7 @@ public class LoggerTest {
     @Test
     public void testInitWithXMLForCustom() {
         //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.xml");
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsolutePath() + "/test-src/play/testlog4j.xml");
         Logger.log4j = null;
         init();
         //when
@@ -141,7 +141,7 @@ public class LoggerTest {
     @Test
     public void testInitWithXMLForPlay() {
         //given
-        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsoluteFile() + "/test-src/play/testlog4j.xml");
+        Play.configuration.put(APPLICATION_LOG_PATH_PROPERTYNAME, Play.applicationPath.getAbsolutePath() + "/test-src/play/testlog4j.xml");
         Logger.log4j = null;
         init();
         //when
@@ -163,7 +163,7 @@ public class LoggerTest {
             }
 
             @Override
-            public boolean access() throws URISyntaxException {
+            public boolean access() {
                 return new File(Play.configuration.getProperty(APPLICATION_LOG_PATH_PROPERTYNAME)).isFile();
             }
         });
