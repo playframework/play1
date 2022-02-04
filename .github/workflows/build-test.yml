@@ -37,4 +37,5 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Ant
-        run: ant -buildfile ./framework/build.xml test
+        working-directory: ./framework
+        run: ant test

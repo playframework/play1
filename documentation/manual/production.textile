@@ -46,17 +46,26 @@ For production it’s a good idea to use rolling log files. Do not send logging 
 
 Create a custom @log4j.properties@ in the @conf/@ directory:
 
-bc. log4j.rootLogger=ERROR, Rolling
- 
-log4j.logger.play=INFO
- 
-# Rolling files
-log4j.appender.Rolling=org.apache.log4j.RollingFileAppender
-log4j.appender.Rolling.File=application.log
-log4j.appender.Rolling.MaxFileSize=1MB
-log4j.appender.Rolling.MaxBackupIndex=100
-log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
-log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
+bc. # appender Console
+appender.fileLogger.type = RollingFile
+appender.fileLogger.name = fileLogger
+appender.fileLogger.fileName= logs/application.log
+appender.fileLogger.filePattern= logs/application%i.log
+appender.fileLogger.layout.type = PatternLayout
+appender.fileLogger.layout.pattern = %d [%t] %p %c - %m%n
+appender.fileLogger.policies.type = Policies
+appender.fileLogger.policies.size.type = SizeBasedTriggeringPolicy
+appender.fileLogger.policies.size.size = 1MB
+appender.fileLogger.strategy.type = DefaultRolloverStrategy
+appender.fileLogger.strategy.max = 100
+appender.fileLogger.filter.threshold.type = ThresholdFilter
+appender.fileLogger.filter.threshold.level = ERROR
+# play logger
+logger.app.name = play
+logger.app.level = ERROR
+# root logger
+rootLogger.level = ERROR
+rootLogger.appenderRef.fileLogger.ref = fileLogger
 
 h2. <a name="server">Front-end HTTP server</a>
 
