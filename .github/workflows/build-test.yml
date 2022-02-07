@@ -10,13 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  testing:
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         jdk: [ 11, 17 ]
-    name: Check / Tests (JDK ${{ matrix.jdk }})
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - os: windows-latest
+            jdk: 11
+
+    name: Check / Tests (JDK ${{ matrix.jdk }} - ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
