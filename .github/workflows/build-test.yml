@@ -73,7 +73,7 @@ jobs:
         working-directory: ./framework
         run: ant artifact
 
-      - name: ziping
+      - name: ziping artifact
         uses: actions/upload-artifact@v2
         with:
           name: play-${{ github.sha }}
