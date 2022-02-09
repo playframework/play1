@@ -21,7 +21,7 @@ jobs:
           - os: windows-latest
             jdk: 11
 
-    name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ runner.os }}
+    name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
