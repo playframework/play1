@@ -24,9 +24,9 @@ class PlayApplication(object):
 
     def __init__(self, application_path, env, ignoreMissingModules = False):
         self.path = application_path
-        # only parse conf it is exists - if it should be there, it will be caught later 
+        # only parse conf it is exists - if it should be there, it will be caught later
         # (depends on command)
-        confExists = os.path.exists(os.path.join(self.path, 'conf', 'application.conf')); 
+        confExists = os.path.exists(os.path.join(self.path, 'conf', 'application.conf'));
         if application_path != None and confExists:
             confFolder = os.path.join(application_path, 'conf/')
             try:
@@ -43,7 +43,7 @@ class PlayApplication(object):
         else:
             self.jpda_port = self.readConf('jpda.port')
 
-        if env.has_key('jpda.address'):
+        if 'jpda.address' in env:
             self.jpda_address = env['jpda.address']
         else:
             self.jpda_address = self.readConf('jpda.address')
@@ -82,7 +82,7 @@ class PlayApplication(object):
         if application_mode == 'dev':
             #Load docviewer module
 	        modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/docviewer')))
-			
+
         for m in self.readConfs('module.'):
             if '${play.path}' in m:
                 m = m.replace('${play.path}', self.play_env["basedir"])
@@ -244,21 +244,21 @@ class PlayApplication(object):
 
     def java_args_memory(self, java_args):
         args_memory = []
-        memory_in_args=False    
+        memory_in_args=False
         for arg in java_args:
             if arg.startswith('-Xm'):
                 memory_in_args=True
                 args_memory.append(arg)
-            
+
         if not memory_in_args:
             memory = self.readConf('jvm.memory')
             if memory:
                 args_memory = args_memory + memory.split(' ')
             elif 'JAVA_OPTS' in os.environ:
                 args_memory = args_memory + os.environ['JAVA_OPTS'].split(' ')
-                
-        return args_memory        
-    
+
+        return args_memory
+
     def java_cmd(self, java_args, cp_args=None, className='play.server.Server', args = None):
         if args is None:
             args = ['']
@@ -278,7 +278,7 @@ class PlayApplication(object):
         if 'jpda.port' in self.play_env:
             self.jpda_port = self.play_env['jpda.port']
 
-        if self.play_env.has_key('jpda.address'):
+        if 'jpda.address' in self.play_env:
             self.jpda_address = self.play_env['jpda.address']
 
         application_mode = self.readConf('application.mode').lower()
@@ -293,12 +293,12 @@ class PlayApplication(object):
         if 'jvm_version' in self.play_env:
             javaVersion = self.play_env['jvm_version']
         else:
-            javaVersion = getJavaVersion() 
+            javaVersion = getJavaVersion()
         print("~ using java version \"%s\"" % javaVersion)
-        
+
         if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
             print("~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion)
-            
+
         java_args.append('-noverify')
 
         java_policy = self.readConf('java.policy')
@@ -313,7 +313,7 @@ class PlayApplication(object):
             args += ["--http.port=%s" % self.play_env['http.port']]
         if 'https.port' in self.play_env:
             args += ["--https.port=%s" % self.play_env['https.port']]
-            
+
         java_args.append('-Dfile.encoding=utf-8')
 
         if application_mode == 'dev':
@@ -325,7 +325,7 @@ class PlayApplication(object):
                 jpda_bind = self.jpda_port
             java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_bind)
             java_args.append('-Dplay.debug=yes')
-        
+
         java_cmd = [java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
 
@@ -380,10 +380,10 @@ class PlayConfParser(object):
             value = linedef[(linedef.find('=')+1):].strip()
             result[key] = value
         f.close()
-        
+
         # minimize the result based on frameworkId
         washedResult = dict()
-        
+
         # first get all keys with correct framework id
         for (key, value) in list(result.items()):
             if key.startswith('%' + self.id + '.'):
@@ -396,25 +396,25 @@ class PlayConfParser(object):
                 if not (key in washedResult):
                     # add it
                     washedResult[key]=value
-                    
+
         # find all @include
         includeFiles = []
         for (key, value) in list(washedResult.items()):
             if key.startswith('@include.'):
                 includeFiles.append(value)
-                
+
         # process all include files
         for includeFile in includeFiles:
             # read include file
             try:
                 fromIncludeFile = self.readFile(confFolder, self._expandValue(includeFile))
 
-                # add everything from include file 
+                # add everything from include file
                 for (key, value) in list(fromIncludeFile.items()):
                     washedResult[key]=value
             except Exception as err:
                 print("~ Failed to load included configuration %s: %s" % (includeFile, err))
-        
+
         return washedResult
 
     def get(self, key):
@@ -446,7 +446,7 @@ class PlayConfParser(object):
                 return '${%s}' % key
 
         return re.sub('\${([a-z.]+)}', expandvar, value)
-        
+
 def hasKey(arr, elt):
     try:
         i = arr.index(elt)
