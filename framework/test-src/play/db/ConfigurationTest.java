@@ -302,6 +302,7 @@ public class ConfigurationTest {
         Play.configuration.put("db.test.pool.maxSize", "20");
         Play.configuration.put("db.test.pool.minSize", "1");
         Play.configuration.put("db.test.pool.maxIdleTimeExcessConnections", "60");
+        Play.configuration.put("db.test.evolutions.enabled", "false");
         //javax.persistence
         Play.configuration.put("javax.persistence.test.lock.scope", "EXTENDED");
         Play.configuration.put("javax.persistence.test.lock.timeout", "1000");
@@ -327,6 +328,7 @@ public class ConfigurationTest {
         assertEquals("20", properties.get("db.pool.maxSize"));
         assertEquals("1", properties.get("db.pool.minSize"));
         assertEquals("60", properties.get("db.pool.maxIdleTimeExcessConnections"));
+        assertEquals("false", properties.get("db.evolutions.enabled"));
         //javax.persistence
         assertEquals("EXTENDED", properties.get("javax.persistence.lock.scope"));
         assertEquals("1000", properties.get("javax.persistence.lock.timeout"));
