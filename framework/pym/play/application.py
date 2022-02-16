@@ -40,6 +40,11 @@ class PlayApplication(object):
         else:
             self.jpda_port = self.readConf('jpda.port')
 
+        if env.has_key('jpda.address'):
+            self.jpda_address = env['jpda.address']
+        else:
+            self.jpda_address = self.readConf('jpda.address')
+
         self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
@@ -221,7 +226,10 @@ class PlayApplication(object):
     def check_jpda(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('', int(self.jpda_port)))
+            if not self.jpda_address or self.jpda_address == '*':
+                s.bind(('', int(self.jpda_port)))
+            else:
+                s.bind((self.jpda_address, int(self.jpda_port)))
             s.close()
         except socket.error, e:
             if "disable_random_jpda" in self.play_env and self.play_env["disable_random_jpda"]:
@@ -267,6 +275,9 @@ class PlayApplication(object):
         if self.play_env.has_key('jpda.port'):
             self.jpda_port = self.play_env['jpda.port']
 
+        if self.play_env.has_key('jpda.address'):
+            self.jpda_address = self.play_env['jpda.address']
+
         application_mode = self.readConf('application.mode').lower()
         if not application_mode:
             print "~ Warning: no application.mode defined in you conf/application.conf. Using DEV mode."
@@ -305,7 +316,11 @@ class PlayApplication(object):
         if application_mode == 'dev':
             self.check_jpda()
             java_args.append('-Xdebug')
-            java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
+            if self.jpda_address:
+                jpda_bind = self.jpda_address + ':' + self.jpda_port
+            else:
+                jpda_bind = self.jpda_port
+            java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_bind)
             java_args.append('-Dplay.debug=yes')
         
         java_cmd = [java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
