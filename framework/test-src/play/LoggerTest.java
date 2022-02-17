@@ -5,7 +5,6 @@ package play;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.logging.log4j.Level;
