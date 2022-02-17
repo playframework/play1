@@ -194,19 +194,15 @@ public class Mail {
      */
     public static Future<Boolean> sendMessage(final Email msg) {
         if (asynchronousSend) {
-            return executor.submit(new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() {
-                    try {
-                        msg.setSentDate(new Date());
-                        msg.send();
-                        return true;
-                    } catch (Throwable e) {
-                        MailException me = new MailException("Error while sending email", e);
-                        Logger.error(me, "The email has not been sent");
-                        return false;
-                    }
+            return executor.submit(() -> {
+                try {
+                    msg.setSentDate(new Date());
+                    msg.send();
+                    return true;
+                } catch (Throwable e) {
+                    MailException me = new MailException("Error while sending email", e);
+                    Logger.error(me, "The email has not been sent");
+                    return false;
                 }
             });
         } else {

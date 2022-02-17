@@ -482,12 +482,7 @@ public class Play {
                     // our plugins that we're going down when some calls ctrl+c or just kills our
                     // process..
                     shutdownHookEnabled = true;
-                    Thread hook = new Thread() {
-                        @Override
-                        public void run() {
-                            Play.stop();
-                        }
-                    };
+                    Thread hook = new Thread(Play::stop);
                     hook.setContextClassLoader(ClassLoader.getSystemClassLoader());
                     Runtime.getRuntime().addShutdownHook(hook);
                 }

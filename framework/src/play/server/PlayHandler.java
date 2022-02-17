@@ -138,13 +138,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 response.direct = null;
 
                 // Streamed output (using response.writeChunk)
-                response.onWriteChunk(new Action<Object>() {
-
-                    @Override
-                    public void invoke(Object result) {
-                        writeChunk(request, response, ctx, nettyRequest, result);
-                    }
-                });
+                response.onWriteChunk(result -> writeChunk(request, response, ctx, nettyRequest, result));
 
                 // Raw invocation
                 boolean raw = Play.pluginCollection.rawInvocation(request, response);
@@ -1142,13 +1136,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             synchronized void writeAndClose(ChannelFuture writeFuture) {
                 if (!writeFuture.isDone()) {
                     writeFutures.add(writeFuture);
-                    writeFuture.addListener(new ChannelFutureListener() {
-
-                        @Override
-                        public void operationComplete(ChannelFuture cf) throws Exception {
-                            writeFutures.remove(cf);
-                            futureClose();
-                        }
+                    writeFuture.addListener(cf -> {
+                        writeFutures.remove(cf);
+                        futureClose();
                     });
                 }
             }
@@ -1184,14 +1174,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             @Override
             public synchronized void close() {
                 closeTask = new Promise<>();
-                closeTask.onRedeem(new Action<Promise<Void>>() {
-
-                    @Override
-                    public void invoke(Promise<Void> completed) {
-                        writeFutures.clear();
-                        ctx.getChannel().disconnect();
-                        closeTask = null;
-                    }
+                closeTask.onRedeem(completed -> {
+                    writeFutures.clear();
+                    ctx.getChannel().disconnect();
+                    closeTask = null;
                 });
                 futureClose();
             }

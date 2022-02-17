@@ -446,13 +446,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
 
-                Collections.sort(result, new Comparator<Class>() {
-
-                    @Override
-                    public int compare(Class o1, Class o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
+                Collections.sort(result, Comparator.comparing(Class::getName));
             }
 
             Map<String, ApplicationClass> byNormalizedName = new HashMap<>(result.size());

@@ -578,22 +578,18 @@ public class Http {
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, new Comparator<String>() {
-
-                @Override
-                public int compare(String lang1, String lang2) {
-                    double q1 = 1.0;
-                    double q2 = 1.0;
-                    Matcher m1 = qpattern.matcher(lang1);
-                    Matcher m2 = qpattern.matcher(lang2);
-                    if (m1.find()) {
-                        q1 = Double.parseDouble(m1.group(1));
-                    }
-                    if (m2.find()) {
-                        q2 = Double.parseDouble(m2.group(1));
-                    }
-                    return (int) (q2 - q1);
+            Collections.sort(languages, (lang1, lang2) -> {
+                double q1 = 1.0;
+                double q2 = 1.0;
+                Matcher m1 = qpattern.matcher(lang1);
+                Matcher m2 = qpattern.matcher(lang2);
+                if (m1.find()) {
+                    q1 = Double.parseDouble(m1.group(1));
                 }
+                if (m2.find()) {
+                    q2 = Double.parseDouble(m2.group(1));
+                }
+                return (int) (q2 - q1);
             });
             List<String> result = new ArrayList<>(10);
             for (String lang : languages) {

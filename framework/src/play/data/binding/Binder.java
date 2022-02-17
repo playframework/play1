@@ -548,14 +548,11 @@ public abstract class Binder {
             List l = (List) r;
 
             // must get all indexes and sort them so we add items in correct order.
-            Set<String> indexes = new TreeSet<>(new Comparator<String>() {
-                @Override
-                public int compare(String arg0, String arg1) {
-                    try {
-                        return Integer.parseInt(arg0) - Integer.parseInt(arg1);
-                    } catch (NumberFormatException e) {
-                        return arg0.compareTo(arg1);
-                    }
+            Set<String> indexes = new TreeSet<>((arg0, arg1) -> {
+                try {
+                    return Integer.parseInt(arg0) - Integer.parseInt(arg1);
+                } catch (NumberFormatException e) {
+                    return arg0.compareTo(arg1);
                 }
             });
             indexes.addAll(paramNode.getAllChildrenKeys());

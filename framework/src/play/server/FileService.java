@@ -251,12 +251,7 @@ public class FileService  {
             if (chunks.length == 0)
                 return new long[0][];
             long[][] sortedChunks = Arrays.copyOf(chunks, chunks.length);
-            Arrays.sort(sortedChunks, new Comparator<long[]>() {
-                @Override
-                public int compare(long[] t1, long[] t2) {
-                    return new Long(t1[0]).compareTo(t2[0]);
-                }
-            });
+            Arrays.sort(sortedChunks, Comparator.comparingLong(t -> t[0]));
             ArrayList<long[]> result = new ArrayList<>();
             result.add(sortedChunks[0]);
             for (int i = 1; i < sortedChunks.length; i++) {

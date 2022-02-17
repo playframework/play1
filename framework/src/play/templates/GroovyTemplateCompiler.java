@@ -80,12 +80,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 originalNames.put(name, clazz.getName());
             }
         }
-        Collections.sort(names, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o2.length() - o1.length();
-            }
-        });
+        Collections.sort(names, (o1, o2) -> o2.length() - o1.length());
 
         // We're about to do many many String.replaceAll() so we do some
         // checking first
