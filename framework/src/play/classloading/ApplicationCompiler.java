@@ -36,7 +36,7 @@ public class ApplicationCompiler {
     Map<String, Boolean> packagesCache = new HashMap<>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
-    private static final String JAVA_SOURCE_DEFAULT_VERSION = "1.8";
+    private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
     static final Map<String, String> compatibleJavaVersions = new HashMap<>();
 
     static {
