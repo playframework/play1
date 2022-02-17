@@ -106,7 +106,7 @@ public class GroovyTemplate extends BaseTemplate {
     @Override
     void directLoad(byte[] code) throws Exception {
         try (TClassLoader tClassLoader = new TClassLoader()) {
-	        String[] lines = new String(code, "utf-8").split("\n");
+	        String[] lines = new String(code, UTF_8).split("\n");
 	        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
 	        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
 	        for (int i = 4; i < lines.length; i = i + 2) {

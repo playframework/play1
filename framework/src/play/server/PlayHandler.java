@@ -42,6 +42,7 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -331,7 +332,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         && request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value != null) {
                     error.append(request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value);
                 }
-                String errorData = URLEncoder.encode(error.toString(), "utf-8");
+                String errorData = URLEncoder.encode(error.toString(), StandardCharsets.UTF_8);
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";

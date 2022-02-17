@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -152,7 +153,7 @@ public class PluginCollection {
         SortedSet<LoadingPluginInfo> pluginsToLoad = new TreeSet<>();
         for (URL url : urls) {
             Logger.trace("Found one plugins descriptor, %s", url);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (line.trim().length() == 0) {

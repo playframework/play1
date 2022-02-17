@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -697,7 +698,7 @@ public class Play {
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     try {
