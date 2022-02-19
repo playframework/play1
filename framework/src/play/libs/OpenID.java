@@ -141,14 +141,14 @@ public class OpenID {
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, StandardCharsets.UTF_8);
 
             if (returnAction != null && (returnAction.startsWith("http://") || returnAction.startsWith("https://"))) {
-                url += "&openid.return_to=" + URLEncoder.encode(returnAction, "utf8");
+                url += "&openid.return_to=" + URLEncoder.encode(returnAction, StandardCharsets.UTF_8);
             } else {
-                url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
+                url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), StandardCharsets.UTF_8);
             }
             if (realmAction != null && (realmAction.startsWith("http://") || realmAction.startsWith("https://"))) {
                 url += "&openid.realm=" + URLEncoder.encode(realmAction, StandardCharsets.UTF_8);
             } else {
-                url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
+                url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), StandardCharsets.UTF_8);
             }
 
             if (!sregOptional.isEmpty() || !sregRequired.isEmpty()) {
