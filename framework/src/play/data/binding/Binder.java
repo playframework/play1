@@ -739,7 +739,7 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? 0 : null;
             }
 
-            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // long or Long binding
@@ -748,7 +748,7 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? 0l : null;
             }
 
-            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // byte or Byte binding
@@ -757,7 +757,7 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? (byte) 0 : null;
             }
 
-            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // short or Short binding
@@ -766,7 +766,7 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? (short) 0 : null;
             }
 
-            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // float or Float binding

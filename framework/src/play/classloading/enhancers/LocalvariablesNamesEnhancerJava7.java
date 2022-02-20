@@ -80,8 +80,9 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                 for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     iv.append("\"");
                     String aliasedName = i.next();
-                    if (aliasedName.contains("$")) {
-                        aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                    int dollarIndex = aliasedName.indexOf('$');
+                    if (dollarIndex >= 0) {
+                        aliasedName = aliasedName.substring(0, dollarIndex);
                     }
                     iv.append(aliasedName);
                     iv.append("\"");
@@ -116,8 +117,9 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                 // Normalize the variable name
                 // For several reasons, both variables name and name$1 will be aliased to name
                 String aliasedName = name;
-                if (aliasedName.contains("$")) {
-                    aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                int dollarIndex = aliasedName.indexOf('$');
+                if (dollarIndex >= 0) {
+                    aliasedName = aliasedName.substring(0, dollarIndex);
                 }
 
 

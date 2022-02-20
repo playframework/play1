@@ -379,7 +379,7 @@ public class Router {
                 if (args.containsKey("format")) {
                     request.format = args.get("format");
                 }
-                if (request.action.indexOf("{") > -1) { // more optimization ?
+                if (request.action.indexOf('{') > -1) { // more optimization ?
                     for (String arg : request.routeArgs.keySet()) {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
                     }
@@ -469,7 +469,7 @@ public class Router {
             throw new NoRouteFoundException("File not found (" + file + ")");
         }
         String path = file.relativePath();
-        path = path.substring(path.indexOf("}") + 1);
+        path = path.substring(path.indexOf('}') + 1);
         for (Route route : routes) {
             String staticDir = route.staticDir;
             if (staticDir != null) {
@@ -839,8 +839,9 @@ public class Router {
                 // Is there is a host argument, append it.
                 if (!path.startsWith("/")) {
                     String p = this.path;
-                    this.path = p.substring(p.indexOf("/"));
-                    this.host = p.substring(0, p.indexOf("/"));
+                    int slashIndex = p.indexOf('/');
+                    this.path = p.substring(slashIndex);
+                    this.host = p.substring(0, slashIndex);
                     if (this.host.contains("{")) {
                         Logger.warn("Static route cannot have a dynamic host name");
                         return;
@@ -869,8 +870,9 @@ public class Router {
                 // Is there is a host argument, append it.
                 if (!path.startsWith("/")) {
                     String p = this.path;
-                    this.path = p.substring(p.indexOf("/"));
-                    this.host = p.substring(0, p.indexOf("/"));
+                    int slashIndex = p.indexOf('/');
+                    this.path = p.substring(slashIndex);
+                    this.host = p.substring(0, slashIndex);
                     String pattern = host.replaceAll("\\.", "\\\\.").replaceAll("\\{.*\\}", "(.*)");
 
                     if (Logger.isTraceEnabled()) {

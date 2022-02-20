@@ -98,7 +98,7 @@ public class ApplicationCompiler {
         CompilationUnit(String pClazzName) {
             clazzName = pClazzName;
             if (pClazzName.contains("$")) {
-                pClazzName = pClazzName.substring(0, pClazzName.indexOf("$"));
+                pClazzName = pClazzName.substring(0, pClazzName.indexOf('$'));
             }
             fileName = pClazzName.replace('.', '/') + ".java";
             int dot = pClazzName.lastIndexOf('.');

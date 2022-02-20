@@ -107,9 +107,10 @@ public abstract class FunctionalTest extends BaseTest {
         String path;
         String queryString = "";
         String turl = url.toString();
-        if (turl.contains("?")) {
-            path = turl.substring(0, turl.indexOf("?"));
-            queryString = turl.substring(turl.indexOf("?") + 1);
+        int questionIndex = turl.indexOf('?');
+        if (questionIndex >= 0) {
+            path = turl.substring(0, questionIndex);
+            queryString = turl.substring(questionIndex + 1);
         } else {
             path = turl;
         }
@@ -161,9 +162,10 @@ public abstract class FunctionalTest extends BaseTest {
         String path;
         String queryString = "";
         String turl = url.toString();
-        if (turl.contains("?")) {
-            path = turl.substring(0, turl.indexOf("?"));
-            queryString = turl.substring(turl.indexOf("?") + 1);
+        int questionIndex = turl.indexOf('?');
+        if (questionIndex >= 0) {
+            path = turl.substring(0, questionIndex);
+            queryString = turl.substring(questionIndex + 1);
         } else {
             path = turl;
         }
@@ -260,9 +262,10 @@ public abstract class FunctionalTest extends BaseTest {
         String path;
         String queryString = "";
         String turl = url.toString();
-        if (turl.contains("?")) {
-            path = turl.substring(0, turl.indexOf("?"));
-            queryString = turl.substring(turl.indexOf("?") + 1);
+        int questionIndex = turl.indexOf('?');
+        if (questionIndex >= 0) {
+            path = turl.substring(0, questionIndex);
+            queryString = turl.substring(questionIndex + 1);
         } else {
             path = turl;
         }
@@ -294,9 +297,10 @@ public abstract class FunctionalTest extends BaseTest {
         String path;
         String queryString = "";
         String turl = url.toString();
-        if (turl.contains("?")) {
-            path = turl.substring(0, turl.indexOf("?"));
-            queryString = turl.substring(turl.indexOf("?") + 1);
+        int questionIndex = turl.indexOf('?');
+        if (questionIndex >= 0) {
+            path = turl.substring(0, questionIndex);
+            queryString = turl.substring(questionIndex + 1);
         } else {
             path = turl;
         }

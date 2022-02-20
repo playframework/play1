@@ -358,7 +358,7 @@ public class ApplicationClasses {
     public static VirtualFile getJava(String name) {
         String fileName = name;
         if (fileName.contains("$")) {
-            fileName = fileName.substring(0, fileName.indexOf("$"));
+            fileName = fileName.substring(0, fileName.indexOf('$'));
         }
         // the local variable fileOrDir is important!
         String fileOrDir = fileName.replace('.', '/');

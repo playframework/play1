@@ -428,7 +428,7 @@ public class Mailer implements LocalVariablesSupport {
             if (templateName.startsWith("controllers.")) {
                 templateName = templateName.substring("controllers.".length());
             }
-            templateName = templateName.substring(0, templateName.indexOf("("));
+            templateName = templateName.substring(0, templateName.indexOf('('));
             templateName = templateName.replace('.', '/');
 
             // overrides Template name

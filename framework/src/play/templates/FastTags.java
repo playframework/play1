@@ -199,7 +199,7 @@ public class FastTags {
         if (obj != null) {
             if (pieces.length > 1) {
                 try {
-                    String path = _arg.substring(_arg.indexOf(".") + 1);
+                    String path = _arg.substring(_arg.indexOf('.') + 1);
                     Object value = PropertyUtils.getProperty(obj, path);
                     field.put("value", value);
                 } catch (Exception e) {
@@ -386,9 +386,9 @@ public class FastTags {
             if (name.startsWith("./")) {
                 String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
-                    ct = ct.substring(ct.indexOf("/", 5));
+                    ct = ct.substring(ct.indexOf('/', 5));
                 }
-                ct = ct.substring(0, ct.lastIndexOf("/"));
+                ct = ct.substring(0, ct.lastIndexOf('/'));
                 name = ct + name.substring(1);
             }
             BaseTemplate.layout.set((BaseTemplate) TemplateLoader.load(name));
@@ -408,9 +408,9 @@ public class FastTags {
             if (name.startsWith("./")) {
                 String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
-                    ct = ct.substring(ct.indexOf("/", 5));
+                    ct = ct.substring(ct.indexOf('/', 5));
                 }
-                ct = ct.substring(0, ct.lastIndexOf("/"));
+                ct = ct.substring(0, ct.lastIndexOf('/'));
                 name = ct + name.substring(1);
             }
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
@@ -434,9 +434,9 @@ public class FastTags {
             if (name.startsWith("./")) {
                 String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
-                    ct = ct.substring(ct.indexOf("/", 5));
+                    ct = ct.substring(ct.indexOf('/', 5));
                 }
-                ct = ct.substring(0, ct.lastIndexOf("/"));
+                ct = ct.substring(0, ct.lastIndexOf('/'));
                 name = ct + name.substring(1);
             }
             args.remove("arg");

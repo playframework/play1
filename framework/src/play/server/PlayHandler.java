@@ -516,9 +516,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String fullAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress().getHostAddress();
         if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf(':'));
         } else if (fullAddress.matches(".*[%].*")) {
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf('%'));
         }
         return fullAddress;
     }
@@ -554,7 +554,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
 
-        int i = uri.indexOf("?");
+        int i = uri.indexOf('?');
         String querystring = "";
         String path = uri;
         if (i != -1) {

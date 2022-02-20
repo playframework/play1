@@ -197,11 +197,11 @@ public class ApplicationClassloader extends ClassLoader {
 
     private void loadPackage(String className) {
         // find the package class name
-        int symbol = className.indexOf("$");
+        int symbol = className.indexOf('$');
         if (symbol > -1) {
             className = className.substring(0, symbol);
         }
-        symbol = className.lastIndexOf(".");
+        symbol = className.lastIndexOf('.');
         if (symbol > -1) {
             className = className.substring(0, symbol) + ".package-info";
         } else {

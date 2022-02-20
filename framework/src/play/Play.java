@@ -349,7 +349,7 @@ public class Play {
             if (frameworkPath == null || !frameworkPath.exists()) {
                 if (uri.getScheme().equals("jar")) {
                     String jarPath = uri.getSchemeSpecificPart().substring(5,
-                            uri.getSchemeSpecificPart().lastIndexOf("!"));
+                            uri.getSchemeSpecificPart().lastIndexOf('!'));
                     frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
                 } else if (uri.getScheme().equals("file")) {
                     frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
@@ -741,7 +741,7 @@ public class Play {
                     } else {
                         String modulePathName = modulePath.getName();
                         String moduleName = modulePathName.contains("-")
-                                ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
+                                ? modulePathName.substring(0, modulePathName.lastIndexOf('-'))
                                 : modulePathName;
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -778,7 +778,7 @@ public class Play {
                 File module = new File(localModules, moduleName);
 
                 if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+                    moduleName = moduleName.substring(0, moduleName.indexOf('-'));
                 }
 
                 if (module == null || !module.exists()) {

@@ -263,9 +263,10 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String tagName;
         String tagArgs;
         boolean hasBody = !parser.checkNext().endsWith("/");
-        if (tagText.indexOf(" ") > 0) {
-            tagName = tagText.substring(0, tagText.indexOf(" "));
-            tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
+        int spaceIndex = tagText.indexOf(' ');
+        if (spaceIndex > 0) {
+            tagName = tagText.substring(0, spaceIndex);
+            tagArgs = tagText.substring(spaceIndex + 1).trim();
             if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                 tagArgs = "arg:" + tagArgs;
             }
@@ -362,9 +363,10 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 Method m = null;
                 String tName = tag.name;
                 String tSpace = "";
-                if (tName.indexOf(".") > 0) {
-                    tSpace = tName.substring(0, tName.lastIndexOf("."));
-                    tName = tName.substring(tName.lastIndexOf(".") + 1);
+                if (tName.indexOf('.') > 0) {
+                    int dotIndex = tName.lastIndexOf('.');
+                    tSpace = tName.substring(0, dotIndex);
+                    tName = tName.substring(dotIndex + 1);
                 }
                 for (Class<?> c : fastClasses) {
                     if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {

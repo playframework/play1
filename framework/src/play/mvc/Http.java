@@ -462,7 +462,7 @@ public class Http {
                 String decoded = new String(Codec.decodeBASE64(data));
                 // splitting on ONLY first : allows user's password to contain a
                 // :
-                int indexOf = decoded.indexOf(":");
+                int indexOf = decoded.indexOf(':');
                 if (indexOf < 0)
                     return;
 

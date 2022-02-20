@@ -60,8 +60,9 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
     }
 
     protected String getName(String name) {
-        if (name.lastIndexOf(".") > 0)
-            return name.substring(name.lastIndexOf(".") + 1);
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex > 0)
+            return name.substring(dotIndex + 1);
         return name;
     }
 

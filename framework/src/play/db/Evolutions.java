@@ -322,8 +322,8 @@ public class Evolutions extends PlayPlugin {
             int index = request.url.lastIndexOf("/@evolutions/force/") + "/@evolutions/force/".length();
 
             String dbName = DB.DEFAULT;
-            String moduleKey = request.url.substring(index, request.url.lastIndexOf("/"));
-            int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf("/") + 1));
+            String moduleKey = request.url.substring(index, request.url.lastIndexOf('/'));
+            int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf('/') + 1));
 
             resolve(dbName, moduleKey, revision);
             new Redirect("/").apply(request, response);
@@ -596,9 +596,9 @@ public class Evolutions extends PlayPlugin {
                     int version = 0;
                     if (evolution.getName().contains(dBName)) {
                         version = Integer.parseInt(
-                                evolution.getName().substring(evolution.getName().indexOf(".") + 1, evolution.getName().lastIndexOf(".")));
+                                evolution.getName().substring(evolution.getName().indexOf('.') + 1, evolution.getName().lastIndexOf('.')));
                     } else {
-                        version = Integer.parseInt(evolution.getName().substring(0, evolution.getName().indexOf(".")));
+                        version = Integer.parseInt(evolution.getName().substring(0, evolution.getName().indexOf('.')));
                     }
 
                     String sql = IO.readContentAsString(evolution);
