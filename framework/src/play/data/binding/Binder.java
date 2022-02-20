@@ -734,7 +734,7 @@ public abstract class Binder {
         }
 
         // int or Integer binding
-        if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+        if (clazz.equals(int.class) || clazz.equals(Integer.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0 : null;
             }
@@ -743,7 +743,7 @@ public abstract class Binder {
         }
 
         // long or Long binding
-        if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+        if (clazz.equals(long.class) || clazz.equals(Long.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0l : null;
             }
@@ -752,7 +752,7 @@ public abstract class Binder {
         }
 
         // byte or Byte binding
-        if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
+        if (clazz.equals(byte.class) || clazz.equals(Byte.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (byte) 0 : null;
             }
@@ -761,7 +761,7 @@ public abstract class Binder {
         }
 
         // short or Short binding
-        if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+        if (clazz.equals(short.class) || clazz.equals(Short.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (short) 0 : null;
             }
@@ -770,7 +770,7 @@ public abstract class Binder {
         }
 
         // float or Float binding
-        if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+        if (clazz.equals(float.class) || clazz.equals(Float.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0f : null;
             }
@@ -779,7 +779,7 @@ public abstract class Binder {
         }
 
         // double or Double binding
-        if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+        if (clazz.equals(double.class) || clazz.equals(Double.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0d : null;
             }
@@ -798,7 +798,7 @@ public abstract class Binder {
         }
 
         // boolean or Boolean binding
-        if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+        if (clazz.equals(boolean.class) || clazz.equals(Boolean.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? false : null;
             }
