@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -40,9 +41,6 @@ public class ApplicationCompiler {
     static final Map<String, String> compatibleJavaVersions = new HashMap<>();
 
     static {
-        compatibleJavaVersions.put("1.8", CompilerOptions.VERSION_1_8);
-        compatibleJavaVersions.put("9", CompilerOptions.VERSION_9);
-        compatibleJavaVersions.put("10", CompilerOptions.VERSION_10);
         compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
         compatibleJavaVersions.put("12", CompilerOptions.VERSION_12);
         compatibleJavaVersions.put("13", CompilerOptions.VERSION_13);
@@ -70,8 +68,8 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
 
         final String runningJavaVersion = System.getProperty("java.version");
-		if (runningJavaVersion.startsWith("1.5") || runningJavaVersion.startsWith("1.6") || runningJavaVersion.startsWith("1.7")) {
-            throw new CompilationException("JDK version prior to 1.8 are not supported to run the application");
+		if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10").anyMatch(runningJavaVersion::startsWith)) {
+            throw new CompilationException("JDK version prior to 11 are not supported to run the application");
         }
         final String configSourceVersion = Play.configuration.getProperty("java.source", JAVA_SOURCE_DEFAULT_VERSION);
         final String jdtVersion = compatibleJavaVersions.get(configSourceVersion);
