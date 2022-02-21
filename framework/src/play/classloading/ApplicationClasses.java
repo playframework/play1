@@ -47,9 +47,9 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        return classes.computeIfAbsent(name, key -> {
-            VirtualFile javaFile = getJava(name);
-            return javaFile == null ? null : new ApplicationClass(name, javaFile);
+        return classes.computeIfAbsent(name, className -> {
+            VirtualFile javaFile = getJava(className);
+            return javaFile == null ? null : new ApplicationClass(className, javaFile);
         });
     }
 
