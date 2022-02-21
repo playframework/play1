@@ -289,8 +289,8 @@ public class Router {
                         newPrefix = newPrefix.substring(0, newPrefix.length() - 1);
                     }
                     if (moduleName.equals("*")) {
-                        for (String p : Play.modulesRoutes.keySet()) {
-                            parse(Play.modulesRoutes.get(p), newPrefix + p);
+                        for (Map.Entry<String, VirtualFile> routeEntry : Play.modulesRoutes.entrySet()) {
+                            parse(routeEntry.getValue(), newPrefix + routeEntry.getKey());
                         }
                     } else if (Play.modulesRoutes.containsKey(moduleName)) {
                         parse(Play.modulesRoutes.get(moduleName), newPrefix);
