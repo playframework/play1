@@ -392,6 +392,10 @@ public class Evolutions extends PlayPlugin {
         return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
     }
 
+    private static boolean isDatabaseEvolutionDisabled(String dbName) {
+        return "false".equals(Play.configuration.getProperty("db." + dbName + ".evolutions.enabled", "true"));
+    }
+
     private static boolean isModuleEvolutionDisabled() {
         return "false".equals(Play.configuration.getProperty("modules.evolutions.enabled", "true"));
     }
@@ -501,7 +505,9 @@ public class Evolutions extends PlayPlugin {
         // Look over all the DB
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
-            checkEvolutionsState(dbName);
+            if (!isDatabaseEvolutionDisabled(dbName)) {
+                checkEvolutionsState(dbName);
+            }
         }
     }
 
