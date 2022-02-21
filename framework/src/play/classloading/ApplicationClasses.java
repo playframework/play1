@@ -47,13 +47,10 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        if (!classes.containsKey(name)) {
+        return classes.computeIfAbsent(name, key -> {
             VirtualFile javaFile = getJava(name);
-            if (javaFile != null) {
-                classes.put(name, new ApplicationClass(name, javaFile));
-            }
-        }
-        return classes.get(name);
+            return javaFile == null ? null : new ApplicationClass(name, javaFile);
+        });
     }
 
     /**

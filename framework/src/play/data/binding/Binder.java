@@ -84,11 +84,7 @@ public abstract class Binder {
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
-        if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = new BeanWrapper(clazz);
-            beanwrappers.put(clazz, beanwrapper);
-        }
-        return beanwrappers.get(clazz);
+        return beanwrappers.computeIfAbsent(clazz, BeanWrapper::new);
     }
 
     public static class MethodAndParamInfo {

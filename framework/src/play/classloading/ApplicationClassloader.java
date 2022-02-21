@@ -478,18 +478,14 @@ public class ApplicationClassloader extends ClassLoader {
             return Collections.emptyList();
         }
         getAllClasses();
-        List<Class> results = assignableClassesByName.get(clazz.getName());
-        if (results != null) {
-            return results;
-        } else {
-            results = new ArrayList<>();
-            for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
-                results.add(c.javaClass);
+        return assignableClassesByName.computeIfAbsent(clazz.getName(), className -> {
+            List<ApplicationClass> assignableClasses = Play.classes.getAssignableClasses(clazz);
+            List<Class<?>> results = new ArrayList<>(assignableClasses.size());
+            for (ApplicationClass assignableClass : assignableClasses) {
+                results.add(assignableClass.javaClass);
             }
-            // cache assignable classes
-            assignableClassesByName.put(clazz.getName(), unmodifiableList(results));
-        }
-        return results;
+            return unmodifiableList(results);
+        });
     }
 
     // assignable classes cache
