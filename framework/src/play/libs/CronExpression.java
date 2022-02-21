@@ -665,8 +665,7 @@ public class CronExpression implements Serializable, Cloneable {
             c = s.charAt(i);
             if (c >= '0' && c <= '9') {
                 ValueSet vs = getValue(v, s, i);
-                int v1 = vs.value;
-                end = v1;
+                end = vs.value;
                 i = vs.pos;
             }
             if (i < s.length() && ((c = s.charAt(i)) == '/')) {
