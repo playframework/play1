@@ -202,8 +202,7 @@ public class FileService  {
                 String headerValue = request.headers().get("range").trim().substring("bytes=".length());
                 String[] rangesValues = headerValue.split(",");
                 ArrayList<long[]> ranges = new ArrayList<>(rangesValues.length);
-                for(int i = 0; i < rangesValues.length; i++) {
-                    String rangeValue = rangesValues[i];
+                for (String rangeValue : rangesValues) {
                     long start, end;
                     if(rangeValue.startsWith("-")) {
                         end = fileLength - 1;

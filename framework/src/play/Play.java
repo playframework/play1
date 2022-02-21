@@ -772,16 +772,14 @@ public class Play {
                 modules.addAll(Arrays.asList(localModules.list()));
             }
 
-            for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
-                String moduleName = iter.next();
-
+            for (String moduleName : modules) {
                 File module = new File(localModules, moduleName);
 
                 if (moduleName.contains("-")) {
                     moduleName = moduleName.substring(0, moduleName.indexOf('-'));
                 }
 
-                if (module == null || !module.exists()) {
+                if (!module.exists()) {
                     Logger.error("Module %s will not be loaded because %s does not exist", moduleName,
                             module.getAbsolutePath());
                 } else if (module.isDirectory()) {

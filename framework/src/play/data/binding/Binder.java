@@ -521,9 +521,9 @@ public abstract class Binder {
                 l = (Collection) createNewInstance(clazz);
             }
             boolean hasMissing = false;
-            for (int i = 0; i < values.length; i++) {
+            for (String paramNodeValue : values) {
                 try {
-                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass,
+                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, paramNodeValue, componentClass,
                             componentType);
                     if (value == DIRECTBINDING_NO_RESULT) {
                         hasMissing = true;

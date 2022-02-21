@@ -28,12 +28,12 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
                 return false;
             }
 
-            for (int i = 0; i < parts.length; i++) {
+            for (String part : parts) {
                 // Check that we don't have empty part or (+-) sign
-                if (parts[i].isEmpty() || !parts[i].matches("[0-9]{1,3}")) {
+                if (part.isEmpty() || !part.matches("[0-9]{1,3}")) {
                     return false;
                 }
-                int p = Integer.valueOf(parts[i]);
+                int p = Integer.parseInt(part);
                 if (p < 0 || p > 255) {
                     return false;
                 }
