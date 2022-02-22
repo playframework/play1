@@ -838,6 +838,13 @@ Defines which port is used by JPDA when application is in debug mode. For exampl
 
 Default: @8000@
 
+h3(#jpda.address). jpda.address
+
+Defines which address is used by JPDA when application is in debug mode. For example:
+jpda.address=0.0.0.0
+jpda.address=* # Special value only for JDK >= 9, will bind to 0.0.0.0.
+
+Default: none, in that case the listening address will be 127.0.0.1 only for JDK >= 9
 
 h2(#keystore). keystore
 
