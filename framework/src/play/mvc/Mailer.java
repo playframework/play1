@@ -68,7 +68,6 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-    @SuppressWarnings("unchecked")
     public static void addRecipient(String... recipients) {
         List<String> recipientsParam = Arrays.asList(recipients);
         addRecipients(recipientsParam);

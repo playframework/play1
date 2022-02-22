@@ -680,7 +680,6 @@ public class Play {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends PlayPlugin> T plugin(Class<T> clazz) {
         return pluginCollection.getPluginInstance(clazz);
     }
