@@ -36,7 +36,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected long lastRun = 0;
     protected boolean wasError = false;
     protected Throwable lastException = null;
-
+    protected boolean propagateException = false;
+    
     Date nextPlannedExecution = null;
 
     @Override
@@ -128,6 +129,9 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     }
 
     private Callable<V> getJobCallingCallable(final Promise<V> smartFuture) {
+        // Propogate exceptions thrown by Job.call() to smartFuture.
+        propagateException = true; 
+        
         return new Callable<V>() {
             @Override
             public V call() throws Exception {
@@ -177,7 +181,9 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             super.onException(e);
         } catch (Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
-            throw new UnexpectedException(unwrap(e));
+            if (propagateException) {
+                throw new UnexpectedException(unwrap(e));
+            }
         }
     }
 
