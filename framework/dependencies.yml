@@ -53,7 +53,7 @@ require:    &allDependencies
     - org.codehaus.groovy -> groovy 3.0.9
     - org.codehaus.groovy -> groovy-xml 3.0.9
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.28.0
-    - org.hibernate -> hibernate-core 5.4.30.Final.patched
+    - org.hibernate -> hibernate-core 5.6.5.Final.patched
     - net.bytebuddy -> byte-buddy 1.12.7
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
@@ -64,8 +64,8 @@ require:    &allDependencies
     - javax.xml.bind -> jaxb-api 2.3.1
     - org.glassfish.jaxb -> jaxb-runtime 2.3.6
     - com.fasterxml -> classmate 1.5.1
-    - org.hibernate -> hibernate-c3p0 5.4.30.Final
-    - org.hibernate -> hibernate-ehcache 5.4.30.Final
+    - org.hibernate -> hibernate-c3p0 5.6.5.Final
+    - org.hibernate -> hibernate-ehcache 5.6.5.Final
     - com.mchange -> mchange-commons-java 0.2.20
     - org.javassist -> javassist 3.28.0-GA
     - io.netty -> netty 3.10.6.Final
