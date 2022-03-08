@@ -24,7 +24,6 @@ import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
-import play.libs.F.Action;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.mvc.*;
@@ -42,10 +41,10 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -138,13 +137,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 response.direct = null;
 
                 // Streamed output (using response.writeChunk)
-                response.onWriteChunk(new Action<Object>() {
-
-                    @Override
-                    public void invoke(Object result) {
-                        writeChunk(request, response, ctx, nettyRequest, result);
-                    }
-                });
+                response.onWriteChunk(result -> writeChunk(request, response, ctx, nettyRequest, result));
 
                 // Raw invocation
                 boolean raw = Play.pluginCollection.rawInvocation(request, response);
@@ -337,7 +330,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         && request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value != null) {
                     error.append(request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value);
                 }
-                String errorData = URLEncoder.encode(error.toString(), "utf-8");
+                String errorData = URLEncoder.encode(error.toString(), StandardCharsets.UTF_8);
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";
@@ -523,9 +516,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String fullAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress().getHostAddress();
         if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf(':'));
         } else if (fullAddress.matches(".*[%].*")) {
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf('%'));
         }
         return fullAddress;
     }
@@ -561,7 +554,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
 
-        int i = uri.indexOf("?");
+        int i = uri.indexOf('?');
         String querystring = "";
         String path = uri;
         if (i != -1) {
@@ -1142,13 +1135,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             synchronized void writeAndClose(ChannelFuture writeFuture) {
                 if (!writeFuture.isDone()) {
                     writeFutures.add(writeFuture);
-                    writeFuture.addListener(new ChannelFutureListener() {
-
-                        @Override
-                        public void operationComplete(ChannelFuture cf) throws Exception {
-                            writeFutures.remove(cf);
-                            futureClose();
-                        }
+                    writeFuture.addListener(cf -> {
+                        writeFutures.remove(cf);
+                        futureClose();
                     });
                 }
             }
@@ -1184,14 +1173,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             @Override
             public synchronized void close() {
                 closeTask = new Promise<>();
-                closeTask.onRedeem(new Action<Promise<Void>>() {
-
-                    @Override
-                    public void invoke(Promise<Void> completed) {
-                        writeFutures.clear();
-                        ctx.getChannel().disconnect();
-                        closeTask = null;
-                    }
+                closeTask.onRedeem(completed -> {
+                    writeFutures.clear();
+                    ctx.getChannel().disconnect();
+                    closeTask = null;
                 });
                 futureClose();
             }

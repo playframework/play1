@@ -106,7 +106,7 @@ public class GroovyTemplate extends BaseTemplate {
     @Override
     void directLoad(byte[] code) throws Exception {
         try (TClassLoader tClassLoader = new TClassLoader()) {
-	        String[] lines = new String(code, "utf-8").split("\n");
+	        String[] lines = new String(code, UTF_8).split("\n");
 	        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
 	        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
 	        for (int i = 4; i < lines.length; i = i + 2) {
@@ -211,8 +211,8 @@ public class GroovyTemplate extends BaseTemplate {
                             line = 0;
                         }
                         String message = syntaxException.getMessage();
-                        if (message.indexOf("@") > 0) {
-                            message = message.substring(0, message.lastIndexOf("@"));
+                        if (message.indexOf('@') > 0) {
+                            message = message.substring(0, message.lastIndexOf('@'));
                         }
                         throw new TemplateCompilationException(this, line, message);
                     } else {
@@ -352,17 +352,19 @@ public class GroovyTemplate extends BaseTemplate {
             // See GroovyTemplateCompiler.head() for more info.
             if (se.getClassName().startsWith("Template_")) {
                 String tn = se.getClassName().substring(9);
-                if (tn.indexOf("$") > -1) {
-                    tn = tn.substring(0, tn.indexOf("$"));
+                int charIndex = tn.indexOf('$');
+                if (charIndex > -1) {
+                    tn = tn.substring(0, charIndex);
                 }
                 BaseTemplate template = TemplateLoader.templates.get(tn);
                 if (template != null) {
                     Integer line = template.linesMatrix.get(se.getLineNumber());
                     if (line != null) {
                         String ext = "";
-                        if (tn.indexOf(".") > -1) {
-                            ext = tn.substring(tn.indexOf(".") + 1);
-                            tn = tn.substring(0, tn.indexOf("."));
+                        charIndex = tn.indexOf('.');
+                        if (charIndex > -1) {
+                            ext = tn.substring(charIndex + 1);
+                            tn = tn.substring(0, charIndex);
                         }
                         StackTraceElement nse = new StackTraceElement(TemplateLoader.templates.get(tn).name, ext, "line", line);
                         cleanTrace.add(nse);
@@ -390,7 +392,7 @@ public class GroovyTemplate extends BaseTemplate {
 
         public void init(GroovyTemplate t) {
             template = t;
-            int index = template.name.lastIndexOf(".");
+            int index = template.name.lastIndexOf('.');
             if (index > 0) {
                 extension = template.name.substring(index + 1);
             }

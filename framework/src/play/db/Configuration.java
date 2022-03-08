@@ -110,10 +110,9 @@ public class Configuration {
             if (matcher.matches()) {
                 final String key_prefix_for_db_related_setting = matcher.group(1);
                 if (keyName.startsWith(key_prefix_for_db_related_setting + "." + this.configName)) {
-                    String type = key_prefix_for_db_related_setting;
-                    String newKey = type;
-                    if (keyName.length() > (type + "." + this.configName).length()) {
-                        newKey += "." + keyName.substring((type + "." + this.configName).length() + 1);
+                    String newKey = key_prefix_for_db_related_setting;
+                    if (keyName.length() > (key_prefix_for_db_related_setting + "." + this.configName).length()) {
+                        newKey += "." + keyName.substring((key_prefix_for_db_related_setting + "." + this.configName).length() + 1);
                     }
                     properties.put(newKey, props.get(key).toString());
                 } else if (this.isDefault()) {

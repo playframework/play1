@@ -581,8 +581,8 @@ public class ActionInvoker {
             if (!fullAction.startsWith("controllers.")) {
                 fullAction = "controllers." + fullAction;
             }
-            String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
-            String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
+            String controller = fullAction.substring(0, fullAction.lastIndexOf('.'));
+            String action = fullAction.substring(fullAction.lastIndexOf('.') + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
             if (controllerClass == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("Controller " + controller + " not found"));

@@ -98,7 +98,7 @@ public class ApplicationCompiler {
         CompilationUnit(String pClazzName) {
             clazzName = pClazzName;
             if (pClazzName.contains("$")) {
-                pClazzName = pClazzName.substring(0, pClazzName.indexOf("$"));
+                pClazzName = pClazzName.substring(0, pClazzName.indexOf('$'));
             }
             fileName = pClazzName.replace('.', '/') + ".java";
             int dot = pClazzName.lastIndexOf('.');
@@ -265,42 +265,38 @@ public class ApplicationCompiler {
         /**
          * Compilation result
          */
-        ICompilerRequestor compilerRequestor = new ICompilerRequestor() {
-
-            @Override
-            public void acceptResult(CompilationResult result) {
-                // If error
-                if (result.hasErrors()) {
-                    for (IProblem problem : result.getErrors()) {
-                        String className = new String(problem.getOriginatingFileName()).replace('/', '.');
-                        className = className.substring(0, className.length() - 5);
-                        String message = problem.getMessage();
-                        if (problem.getID() == IProblem.CannotImportPackage) {
-                            // Non sense !
-                            message = problem.getArguments()[0] + " cannot be resolved";
-                        }
-                        throw new CompilationException(Play.classes.getApplicationClass(className).javaFile, message,
-                                problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
+        ICompilerRequestor compilerRequestor = result -> {
+            // If error
+            if (result.hasErrors()) {
+                for (IProblem problem : result.getErrors()) {
+                    String className = new String(problem.getOriginatingFileName()).replace('/', '.');
+                    className = className.substring(0, className.length() - 5);
+                    String message = problem.getMessage();
+                    if (problem.getID() == IProblem.CannotImportPackage) {
+                        // Non sense !
+                        message = problem.getArguments()[0] + " cannot be resolved";
                     }
+                    throw new CompilationException(Play.classes.getApplicationClass(className).javaFile, message,
+                            problem.getSourceLineNumber(), problem.getSourceStart(), problem.getSourceEnd());
                 }
-                // Something has been compiled
-                ClassFile[] clazzFiles = result.getClassFiles();
-                for (final ClassFile clazzFile : clazzFiles) {
-                    char[][] compoundName = clazzFile.getCompoundName();
-                    StringBuilder clazzName = new StringBuilder();
-                    for (int j = 0; j < compoundName.length; j++) {
-                        if (j != 0) {
-                            clazzName.append('.');
-                        }
-                        clazzName.append(compoundName[j]);
+            }
+            // Something has been compiled
+            ClassFile[] clazzFiles = result.getClassFiles();
+            for (final ClassFile clazzFile : clazzFiles) {
+                char[][] compoundName = clazzFile.getCompoundName();
+                StringBuilder clazzName = new StringBuilder();
+                for (int j = 0; j < compoundName.length; j++) {
+                    if (j != 0) {
+                        clazzName.append('.');
                     }
-
-                    if (Logger.isTraceEnabled()) {
-                        Logger.trace("Compiled %s", clazzName);
-                    }
-
-                    applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
+                    clazzName.append(compoundName[j]);
                 }
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("Compiled %s", clazzName);
+                }
+
+                applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
             }
         };
 

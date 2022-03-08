@@ -3,6 +3,7 @@ package play.mvc;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +34,7 @@ public class CookieDataCodec {
         // support old Play 1.2.5 session data encoding so that the cookie data doesn't become invalid when
         // applications are upgraded to a newer version of Play
         if (data.startsWith("%00") && data.contains("%3A") && data.endsWith("%00")) {
-            String sessionData = URLDecoder.decode(data, "utf-8");
+            String sessionData = URLDecoder.decode(data, StandardCharsets.UTF_8);
             Matcher matcher = oldCookieSessionParser.matcher(sessionData);
             while (matcher.find()) {
                 map.put(matcher.group(1), matcher.group(2));
@@ -45,7 +46,7 @@ public class CookieDataCodec {
         for (String keyValue : keyValues) {
             String[] split = keyValue.split("=", 2);
             if (split.length == 2) {
-                map.put(URLDecoder.decode(split[0], "utf-8"), URLDecoder.decode(split[1], "utf-8"));
+                map.put(URLDecoder.decode(split[0], StandardCharsets.UTF_8), URLDecoder.decode(split[1], StandardCharsets.UTF_8));
             }
         }
     }
@@ -62,8 +63,8 @@ public class CookieDataCodec {
         String separator = "";
         for (Map.Entry<String, String> entry : map.entrySet()) {
             if (entry.getValue() != null) {
-                data.append(separator).append(URLEncoder.encode(entry.getKey(), "utf-8")).append("=")
-                        .append(URLEncoder.encode(entry.getValue(), "utf-8"));
+                data.append(separator).append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8)).append("=")
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
                 separator = "&";
             }
         }

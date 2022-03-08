@@ -197,11 +197,11 @@ public class ApplicationClassloader extends ClassLoader {
 
     private void loadPackage(String className) {
         // find the package class name
-        int symbol = className.indexOf("$");
+        int symbol = className.indexOf('$');
         if (symbol > -1) {
             className = className.substring(0, symbol);
         }
-        symbol = className.lastIndexOf(".");
+        symbol = className.lastIndexOf('.');
         if (symbol > -1) {
             className = className.substring(0, symbol) + ".package-info";
         } else {
@@ -446,13 +446,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
 
-                Collections.sort(result, new Comparator<Class>() {
-
-                    @Override
-                    public int compare(Class o1, Class o2) {
-                        return o1.getName().compareTo(o2.getName());
-                    }
-                });
+                Collections.sort(result, Comparator.comparing(Class::getName));
             }
 
             Map<String, ApplicationClass> byNormalizedName = new HashMap<>(result.size());
@@ -484,18 +478,14 @@ public class ApplicationClassloader extends ClassLoader {
             return Collections.emptyList();
         }
         getAllClasses();
-        List<Class> results = assignableClassesByName.get(clazz.getName());
-        if (results != null) {
-            return results;
-        } else {
-            results = new ArrayList<>();
-            for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
-                results.add(c.javaClass);
+        return assignableClassesByName.computeIfAbsent(clazz.getName(), className -> {
+            List<ApplicationClass> assignableClasses = Play.classes.getAssignableClasses(clazz);
+            List<Class<?>> results = new ArrayList<>(assignableClasses.size());
+            for (ApplicationClass assignableClass : assignableClasses) {
+                results.add(assignableClass.javaClass);
             }
-            // cache assignable classes
-            assignableClassesByName.put(clazz.getName(), unmodifiableList(results));
-        }
-        return results;
+            return unmodifiableList(results);
+        });
     }
 
     // assignable classes cache

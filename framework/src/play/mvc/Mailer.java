@@ -68,7 +68,6 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-    @SuppressWarnings("unchecked")
     public static void addRecipient(String... recipients) {
         List<String> recipientsParam = Arrays.asList(recipients);
         addRecipients(recipientsParam);
@@ -428,7 +427,7 @@ public class Mailer implements LocalVariablesSupport {
             if (templateName.startsWith("controllers.")) {
                 templateName = templateName.substring("controllers.".length());
             }
-            templateName = templateName.substring(0, templateName.indexOf("("));
+            templateName = templateName.substring(0, templateName.indexOf('('));
             templateName = templateName.replace('.', '/');
 
             // overrides Template name

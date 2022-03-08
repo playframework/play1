@@ -478,7 +478,6 @@ public class MultipartStream {
         byte[] b = new byte[1];
         // to support multi-byte characters
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int sizeMax = HEADER_PART_SIZE_MAX;
         int size = 0;
         while (i < HEADER_SEPARATOR.length) {
             try {
@@ -492,7 +491,7 @@ public class MultipartStream {
             } else {
                 i = 0;
             }
-            if (size <= sizeMax) {
+            if (size <= HEADER_PART_SIZE_MAX) {
                 baos.write(b[0]);
             }
         }

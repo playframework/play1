@@ -47,13 +47,10 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        if (!classes.containsKey(name)) {
-            VirtualFile javaFile = getJava(name);
-            if (javaFile != null) {
-                classes.put(name, new ApplicationClass(name, javaFile));
-            }
-        }
-        return classes.get(name);
+        return classes.computeIfAbsent(name, className -> {
+            VirtualFile javaFile = getJava(className);
+            return javaFile == null ? null : new ApplicationClass(className, javaFile);
+        });
     }
 
     /**
@@ -358,7 +355,7 @@ public class ApplicationClasses {
     public static VirtualFile getJava(String name) {
         String fileName = name;
         if (fileName.contains("$")) {
-            fileName = fileName.substring(0, fileName.indexOf("$"));
+            fileName = fileName.substring(0, fileName.indexOf('$'));
         }
         // the local variable fileOrDir is important!
         String fileOrDir = fileName.replace('.', '/');

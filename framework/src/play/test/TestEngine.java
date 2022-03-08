@@ -209,7 +209,7 @@ public class TestEngine {
         @Override
         public void testStarted(Description description) throws Exception {
             current = new TestResult();
-            current.name = description.getDisplayName().substring(0, description.getDisplayName().indexOf("("));
+            current.name = description.getDisplayName().substring(0, description.getDisplayName().indexOf('('));
             current.time = System.currentTimeMillis();
         }
 
