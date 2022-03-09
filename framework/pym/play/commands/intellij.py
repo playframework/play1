@@ -24,7 +24,9 @@ def execute(**kargs):
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/idea/imlTemplate.xml'), imlFile)
     cpXML = ""
 
-    playHome = play_env["basedir"].replace('\\', '/')
+    playHomeAlternative = app.toRelative(playHome).replace('\\', '/')
+    if playHomeAlternative[0:2] == "..":
+        playHome = "$MODULE_DIR$/" + playHomeAlternative
 
     if os.name == 'nt':
         # On Windows, IntelliJ needs uppercase driveletter
@@ -44,7 +46,9 @@ def execute(**kargs):
         for i, module in enumerate(modules):
             libpath = os.path.join(module, 'lib')
             srcpath = os.path.join(module, 'src')
-            lXML += '        <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
+            path = app.toRelative(module).replace('\\', '/')
+            modulePath =  "$MODULE_DIR$/" + path if path[0:2]==".."  else module
+            lXML += '        <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (modulePath, os.path.join(modulePath, 'app').replace('\\', '/'))
             if os.path.exists(srcpath):
                 msXML += '                    <root url="file://$MODULE_DIR$/%s"/>\n' % (app.toRelative(srcpath).replace('\\', '/'))
             if os.path.exists(libpath):
@@ -54,13 +58,13 @@ def execute(**kargs):
     replaceAll(imlFile, r'%MODULE_LINKS%', mlXML)
     replaceAll(imlFile, r'%MODULE_SOURCES%', msXML)
     replaceAll(imlFile, r'%MODULE_LIBRARIES%', jdXML)
-    
+
     iprFile = os.path.join(app.path, application_name + '.ipr')
     # Only copy/create if missing to avoid overwriting customizations
     if not os.path.exists(iprFile):
         shutil.copyfile(os.path.join(play_env["basedir"], 'resources/idea/iprTemplate.xml'), iprFile)
         replaceAll(iprFile, r'%PROJECT_NAME%', application_name)
-    
+
 
     print "~ OK, the application is ready for Intellij Idea"
     print "~ Use File, Open Project... to open \"" + application_name + ".ipr\""
