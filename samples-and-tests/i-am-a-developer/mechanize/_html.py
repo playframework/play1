@@ -186,9 +186,9 @@ def content_parser(data,
     if not is_html:
         return
     try:
-        from .html5lib.html5parser import parse
+        from html5lib.html5parser import parse
     except Exception:
-        from .html5lib import parse
+        from html5lib import parse
         kw = {'namespaceHTMLElements': False}
         if transport_encoding and isinstance(data, bytes):
             kw['transport_encoding'] = transport_encoding
