@@ -39,7 +39,6 @@ public class ApplicationCompiler {
     Map<String, String> settings;
     private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
     static final Map<String, String> compatibleJavaVersions = new HashMap<>();
-
     static {
         compatibleJavaVersions.put("11", CompilerOptions.VERSION_11);
         compatibleJavaVersions.put("12", CompilerOptions.VERSION_12);
