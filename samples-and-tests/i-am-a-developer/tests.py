@@ -421,20 +421,7 @@ class IamADeveloper(unittest.TestCase):
         try:
             browser.reload()
             self.fail()
-<<<<<<< HEAD
-        except urllib2.HTTPError, error:
-            self.assert_(browser.viewing_html())
-            self.assert_(browser.title() == 'Application error')
-            html = ''.join(error.readlines())
-            self.assert_(html.count('Compilation error'))
-            self.assert_(html.count('insert ";" to complete BlockStatements'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR play -'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
-            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-=======
+
         except urllib.error.URLError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
@@ -447,7 +434,6 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
->>>>>>> e45b9ff6 (upgraded python tests to Python 3)
 
         # Refresh again
         step('Refresh again')
@@ -455,20 +441,7 @@ class IamADeveloper(unittest.TestCase):
         try:
             browser.reload()
             self.fail()
-<<<<<<< HEAD
-        except urllib2.HTTPError, error:
-            self.assert_(browser.viewing_html())
-            self.assert_(browser.title() == 'Application error')
-            html = ''.join(error.readlines())
-            self.assert_(html.count('Compilation error'))
-            self.assert_(html.count('insert ";" to complete BlockStatements'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
-            self.assert_(html.count('       render()'))            
-            self.assert_(waitFor(self.play, 'ERROR play -'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
-            self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
-            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-=======
+
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
@@ -481,7 +454,6 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
->>>>>>> e45b9ff6 (upgraded python tests to Python 3)
         
         # Correct the error
         step('Correct the error')
