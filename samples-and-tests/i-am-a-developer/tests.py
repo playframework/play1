@@ -540,7 +540,6 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(waitFor(self.play, 'ERROR ~'))
             self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
             self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-
         
         # Refresh again
         step('Refresh again')
@@ -558,7 +557,6 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(waitFor(self.play, 'ERROR ~'))
             self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
             self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
-
             
         # Try a template runtime exception  
         step('Try a template runtime exception ')  
