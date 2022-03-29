@@ -787,7 +787,7 @@ def callPlay(self, args):
         
     process_args = [play_script] + args
     # encode subprocess output with system default codec
-    play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE, text=True)
+    play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE, universal_newlines=True)
     return play_process
 
 #returns true when pattern is seen
