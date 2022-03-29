@@ -18,6 +18,14 @@ require:    &allDependencies
     - cglib -> cglib 3.3.0
     - com.google.code.gson -> gson 2.8.9
     - com.jamonapi -> jamon 2.82
+    - com.zaxxer -> HikariCP 3.4.5
+    - org.ow2.asm -> asm 9.0
+    - org.ow2.asm -> asm-commons 9.0
+    - org.ow2.asm -> asm-util 9.0
+    - org.ow2.asm -> asm-tree 9.0
+    - org.ow2.asm -> asm-analysis 9.0
+    - cglib -> cglib 3.3.0
+    - com.google.code.gson -> gson 2.8.6
     - com.ning -> async-http-client 1.9.40
     - commons-beanutils 1.9.4
     - commons-codec 1.15

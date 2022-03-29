@@ -22,7 +22,7 @@ public class SessionTest {
     }
 
     public static void setSendOnlyIfChangedConstant(boolean value) {
-        Scope.SESSION_SEND_ONLY_IF_CHANGED = value;
+    	Scope.SESSION_SEND_ONLY_IF_CHANGED = value;
     }
 
     @Test
