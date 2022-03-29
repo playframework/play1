@@ -403,8 +403,8 @@ class IamADeveloper(unittest.TestCase):
         step('Go back to home')
         
         response = browser.back()
-        self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Your application is ready !')
+        self.assertTrue(browser.viewing_html())
+        self.assertTrue(browser.title() == 'Your application is ready !')
         
         # Refresh
         step('Refresh home')        
@@ -430,10 +430,9 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
             self.assertTrue(html.count(b'       render()'))            
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
 
         # Refresh again
         step('Refresh again')
@@ -450,10 +449,9 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
             self.assertTrue(html.count(b'       render()'))            
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
         
         # Correct the error
         step('Correct the error')
@@ -509,9 +507,8 @@ class IamADeveloper(unittest.TestCase):
             html = b''.join(error.readlines()) 
             self.assertTrue(html.count(b'Template compilation error'))
             self.assertTrue(html.count(b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
 
         
         # Refresh again
@@ -527,9 +524,8 @@ class IamADeveloper(unittest.TestCase):
             html = b''.join(error.readlines()) 
             self.assertTrue(html.count(b'Template compilation error'))
             self.assertTrue(html.count(b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
 
             
         # Try a template runtime exception  
@@ -548,10 +544,9 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Template execution error '))
             self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
             self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assertTrue(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assertTrue(waitFor(self.play, '...'))
 
@@ -569,10 +564,9 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Template execution error '))
             self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
             self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
             self.assertTrue(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assertTrue(waitFor(self.play, '...'))
 
@@ -602,7 +596,7 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Execution exception'))
             self.assertTrue(html.count(b'/ by zero'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -622,7 +616,7 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Execution exception'))
             self.assertTrue(html.count(b'/ by zero'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
@@ -741,9 +735,8 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Compilation error'))
             self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
             self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
         # Refresh again
         step('Refresh again')
@@ -758,9 +751,8 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Compilation error'))
             self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
             self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
-            self.assertTrue(waitFor(self.play, 'ERROR ~'))
+            self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            self.assertTrue(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
             
         # Fix it
         step('Fix it')

@@ -43,7 +43,7 @@ class PlayApplication(object):
         else:
             self.jpda_port = self.readConf('jpda.port')
 
-        if env.has_key('jpda.address'):
+        if 'jpda.address' in env:
             self.jpda_address = env['jpda.address']
         else:
             self.jpda_address = self.readConf('jpda.address')
@@ -278,7 +278,7 @@ class PlayApplication(object):
         if 'jpda.port' in self.play_env:
             self.jpda_port = self.play_env['jpda.port']
 
-        if self.play_env.has_key('jpda.address'):
+        if 'jpda.address' in self.play_env:
             self.jpda_address = self.play_env['jpda.address']
 
         application_mode = self.readConf('application.mode').lower()
