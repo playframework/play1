@@ -13,16 +13,22 @@ import static org.junit.Assert.*;
 
 public class JPQLTest {
 
-	static JPQL jpql;
+    static JPQL jpql;
 
-	@BeforeClass
-	public static void setup(){
-		jpql = new JPQL();
-	}
+    @BeforeClass
+    public static void setup(){
+        jpql = new JPQL();
+    }
+
+    @Test
+    public void testFindBy() {
+        String query = "ByName";
+        String result = jpql.findByToJPQL(query);
+        assertTrue(result.equals("name = ?1"));
+    }
 
     @Test
     public void testOrder() {
-
         String query = "ByNameOrderByName";
         String result = jpql.findByToJPQL(query);
         assertTrue(result.endsWith(" ORDER BY name"));
@@ -48,5 +54,5 @@ public class JPQLTest {
         assertTrue(result.endsWith(" ORDER BY name DESC, age DESC"));
 
     }
-	
+
 }
