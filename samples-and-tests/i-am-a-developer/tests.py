@@ -11,14 +11,20 @@ import time
 import unittest
 import urllib
 
-from signal import SIGTERM
+from signal import SIGTERM, CTRL_C_EVENT
 import mechanize
 
 
 # --- TESTS
 
 class IamADeveloper(unittest.TestCase):
+    DEFAULTS = {
+        'host': '127.0.0.1',
+        'http.port': '9001',
 
+    }
+
+    @unittest.skip
     def testSSLConfig(self):
 
         # Testing ssl config
@@ -41,20 +47,20 @@ class IamADeveloper(unittest.TestCase):
         step('Add config and files')
         insert(app, "app/controllers/Application.java", 13, '        Logger.info("I am ssl secured!");')
 
-        edit(app, "conf/application.conf",  32, 'http.port=-1')
-        edit(app, "conf/application.conf",  33, 'https.port=9000')
+        edit(app, "conf/application.conf", 32, 'http.port=-1')
+        edit(app, "conf/application.conf", 33, 'https.port=' + self.DEFAULTS['http.port'])
         edit(app, "conf/application.conf", 232,
              'play.ssl.netty.pipeline = play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.codec.http.HttpContentCompressor,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler')
         create(app, 'conf/host.key')
-        insert(app, "conf/host.key",  1, '-----BEGIN RSA PRIVATE KEY-----')
-        insert(app, "conf/host.key",  2, 'MIIEpQIBAAKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj4TkXZTZwEnh/fWyuiH2O')
-        insert(app, "conf/host.key",  3, 'Paj/dTw60Jvll4jshlnRHfJ6yfc/o7YlDUanLrQJm7I3/t3YNgqYg3WXeUTl+GrN')
-        insert(app, "conf/host.key",  4, 'Hn/3QgFGYqKobu8kfrwP4IapQRqlq4ZSdlR/bWpxnYSCZoXeeoimoSUcLlqD5dw7')
-        insert(app, "conf/host.key",  5, '7v2BlG2gqL5+lr5Fx4mDC12vczoUMRg88+VuA1ezU4cuXDe2MbpJMd7rqGN0xK4b')
-        insert(app, "conf/host.key",  6, 'CwkFtSJqBM1TH/Czr1S52hKrDTTys9PVw+eZSKO7BCk+PDq5jjx337XOWiO0kSHf')
-        insert(app, "conf/host.key",  7, 'V64x68xTojfzTzF304byr2Ytq6DjNbpZKwdYBwIDAQABAoIBAQCc6z7w6mp3uIWq')
-        insert(app, "conf/host.key",  8, '0P6K+ISdT7/aliCCJIu9tEHAoSOgiHQAwH4NflfsV9j6RqqxA2Gw+LBDxYkanDDA')
-        insert(app, "conf/host.key",  9, 'UQL8WSL5FbIw0q5rpqQIvnhN6ELWi+q8PFjcHuhawqeB0x7vXd52fqf0xxsQUw2t')
+        insert(app, "conf/host.key", 1, '-----BEGIN RSA PRIVATE KEY-----')
+        insert(app, "conf/host.key", 2, 'MIIEpQIBAAKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj4TkXZTZwEnh/fWyuiH2O')
+        insert(app, "conf/host.key", 3, 'Paj/dTw60Jvll4jshlnRHfJ6yfc/o7YlDUanLrQJm7I3/t3YNgqYg3WXeUTl+GrN')
+        insert(app, "conf/host.key", 4, 'Hn/3QgFGYqKobu8kfrwP4IapQRqlq4ZSdlR/bWpxnYSCZoXeeoimoSUcLlqD5dw7')
+        insert(app, "conf/host.key", 5, '7v2BlG2gqL5+lr5Fx4mDC12vczoUMRg88+VuA1ezU4cuXDe2MbpJMd7rqGN0xK4b')
+        insert(app, "conf/host.key", 6, 'CwkFtSJqBM1TH/Czr1S52hKrDTTys9PVw+eZSKO7BCk+PDq5jjx337XOWiO0kSHf')
+        insert(app, "conf/host.key", 7, 'V64x68xTojfzTzF304byr2Ytq6DjNbpZKwdYBwIDAQABAoIBAQCc6z7w6mp3uIWq')
+        insert(app, "conf/host.key", 8, '0P6K+ISdT7/aliCCJIu9tEHAoSOgiHQAwH4NflfsV9j6RqqxA2Gw+LBDxYkanDDA')
+        insert(app, "conf/host.key", 9, 'UQL8WSL5FbIw0q5rpqQIvnhN6ELWi+q8PFjcHuhawqeB0x7vXd52fqf0xxsQUw2t')
         insert(app, "conf/host.key", 10, 'noOWw3qmlR9I/Eez9WImlk314RwDzc/bUsfBQhMKbNVHxstR8Q9YQQMp+xb9dqbL')
         insert(app, "conf/host.key", 11, '3lfz3O70Q/Xc/JxXIOkqcfyoIT9CvpJf2MT1tkd1xolAV+4UJQwKQURlMKqcp7Yi')
         insert(app, "conf/host.key", 12, 'NIxqv27ZGuhdzPCSFy3zcCIYMxXVvU+oSncGMlBpyf8ONDH2wZ7/nOtaz4Kf9tNZ')
@@ -74,15 +80,15 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "conf/host.key", 26, 'mxX+1gneJnzA2cBminkc28ohIQegHEqKKif5gRsc2md+LsvDNR93io4=')
         insert(app, "conf/host.key", 27, '-----END RSA PRIVATE KEY-----')
         create(app, 'conf/host.pass.key')
-        insert(app, "conf/host.pass.key",  1, '-----BEGIN RSA PRIVATE KEY-----')
-        insert(app, "conf/host.pass.key",  2, 'Proc-Type: 4,ENCRYPTED')
-        insert(app, "conf/host.pass.key",  3, 'DEK-Info: DES-EDE3-CBC,FC6F4AA83014298F')
-        insert(app, "conf/host.pass.key",  4, '')
-        insert(app, "conf/host.pass.key",  5, 'ZxpC4NYQsMYCOfpMg3iRbQ5UQDBp50NGnT+wBgHnhTqXVUsIZ0x4eFvFKmIoGFne')
-        insert(app, "conf/host.pass.key",  6, 'hX2pnIMFpOJs4tRIItFyvjcwAARRZxg9KCkjL8cPBhNL4LNExYOTKE8QfTzTb9/l')
-        insert(app, "conf/host.pass.key",  7, 'DoF5EJraNwvXKlVNh9wrROW7oMJFqhkVRQN+lMnczTGPznnjbBvOr69ypU8/NWX/')
-        insert(app, "conf/host.pass.key",  8, 'JFgLYqBUnOPUKCaqxEuNzP632jOkhSdXmtl4ft1JFx/uoJG4rCGw5zOVHnTsCMbs')
-        insert(app, "conf/host.pass.key",  9, 'aWfzfYgnreKvSmwk+5J/0aHR14sXoJpPOk1KvJ3U347cJ/RB1hnnShAdEmYxqPmc')
+        insert(app, "conf/host.pass.key", 1, '-----BEGIN RSA PRIVATE KEY-----')
+        insert(app, "conf/host.pass.key", 2, 'Proc-Type: 4,ENCRYPTED')
+        insert(app, "conf/host.pass.key", 3, 'DEK-Info: DES-EDE3-CBC,FC6F4AA83014298F')
+        insert(app, "conf/host.pass.key", 4, '')
+        insert(app, "conf/host.pass.key", 5, 'ZxpC4NYQsMYCOfpMg3iRbQ5UQDBp50NGnT+wBgHnhTqXVUsIZ0x4eFvFKmIoGFne')
+        insert(app, "conf/host.pass.key", 6, 'hX2pnIMFpOJs4tRIItFyvjcwAARRZxg9KCkjL8cPBhNL4LNExYOTKE8QfTzTb9/l')
+        insert(app, "conf/host.pass.key", 7, 'DoF5EJraNwvXKlVNh9wrROW7oMJFqhkVRQN+lMnczTGPznnjbBvOr69ypU8/NWX/')
+        insert(app, "conf/host.pass.key", 8, 'JFgLYqBUnOPUKCaqxEuNzP632jOkhSdXmtl4ft1JFx/uoJG4rCGw5zOVHnTsCMbs')
+        insert(app, "conf/host.pass.key", 9, 'aWfzfYgnreKvSmwk+5J/0aHR14sXoJpPOk1KvJ3U347cJ/RB1hnnShAdEmYxqPmc')
         insert(app, "conf/host.pass.key", 10, '7Hp2BXt86qlFs9SEBwptPtGmF+YAW7HdcgU0M1ONJ0/GysT4RWFJr5VO4QQWpQT/')
         insert(app, "conf/host.pass.key", 11, 'DrX8odwKVSQHekmsJz4hD0CXj2v8KU7crbEtTemj3koxnbEn7gcZoGtTMmz37hZS')
         insert(app, "conf/host.pass.key", 12, 'qJOolpPqHFV7WtheZ/+5ztSJ91eUgRqKTt1gLgQ6wbaCFfgsPIIRAjuklWnAyKxM')
@@ -105,15 +111,15 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "conf/host.pass.key", 29, 'PDd5V4m+ahdfaPsM9DMr1mWGSN/hoLDJtMFPOiZP5R6OSTi99Tj5KJiglSdjmb6u')
         insert(app, "conf/host.pass.key", 30, '-----END RSA PRIVATE KEY-----')
         create(app, 'conf/host.cert')
-        insert(app, "conf/host.cert",  1, '-----BEGIN CERTIFICATE-----')
-        insert(app, "conf/host.cert",  2, 'MIID4DCCAsgCCQCdj5qAy7MGoTANBgkqhkiG9w0BAQsFADCBsTEfMB0GA1UECAwW')
-        insert(app, "conf/host.cert",  3, 'VGVzdCBTdGF0ZSBvciBQcm92aW5jZTEWMBQGA1UEBwwNVGVzdCBMb2NhbGl0eTEa')
-        insert(app, "conf/host.cert",  4, 'MBgGA1UECgwRT3JnYW5pemF0aW9uIE5hbWUxITAfBgNVBAsMGE9yZ2FuaXphdGlv')
-        insert(app, "conf/host.cert",  5, 'bmFsIFVuaXQgTmFtZTEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0B')
-        insert(app, "conf/host.cert",  6, 'CQEWEnRlc3RAZW1haWwuYWRkcmVzczAeFw0xNzA1MjkxMjUyMDVaFw0yNzA1Mjcx')
-        insert(app, "conf/host.cert",  7, 'MjUyMDVaMIGxMR8wHQYDVQQIDBZUZXN0IFN0YXRlIG9yIFByb3ZpbmNlMRYwFAYD')
-        insert(app, "conf/host.cert",  8, 'VQQHDA1UZXN0IExvY2FsaXR5MRowGAYDVQQKDBFPcmdhbml6YXRpb24gTmFtZTEh')
-        insert(app, "conf/host.cert",  9, 'MB8GA1UECwwYT3JnYW5pemF0aW9uYWwgVW5pdCBOYW1lMRQwEgYDVQQDDAtDb21t')
+        insert(app, "conf/host.cert", 1, '-----BEGIN CERTIFICATE-----')
+        insert(app, "conf/host.cert", 2, 'MIID4DCCAsgCCQCdj5qAy7MGoTANBgkqhkiG9w0BAQsFADCBsTEfMB0GA1UECAwW')
+        insert(app, "conf/host.cert", 3, 'VGVzdCBTdGF0ZSBvciBQcm92aW5jZTEWMBQGA1UEBwwNVGVzdCBMb2NhbGl0eTEa')
+        insert(app, "conf/host.cert", 4, 'MBgGA1UECgwRT3JnYW5pemF0aW9uIE5hbWUxITAfBgNVBAsMGE9yZ2FuaXphdGlv')
+        insert(app, "conf/host.cert", 5, 'bmFsIFVuaXQgTmFtZTEUMBIGA1UEAwwLQ29tbW9uIE5hbWUxITAfBgkqhkiG9w0B')
+        insert(app, "conf/host.cert", 6, 'CQEWEnRlc3RAZW1haWwuYWRkcmVzczAeFw0xNzA1MjkxMjUyMDVaFw0yNzA1Mjcx')
+        insert(app, "conf/host.cert", 7, 'MjUyMDVaMIGxMR8wHQYDVQQIDBZUZXN0IFN0YXRlIG9yIFByb3ZpbmNlMRYwFAYD')
+        insert(app, "conf/host.cert", 8, 'VQQHDA1UZXN0IExvY2FsaXR5MRowGAYDVQQKDBFPcmdhbml6YXRpb24gTmFtZTEh')
+        insert(app, "conf/host.cert", 9, 'MB8GA1UECwwYT3JnYW5pemF0aW9uYWwgVW5pdCBOYW1lMRQwEgYDVQQDDAtDb21t')
         insert(app, "conf/host.cert", 10, 'b24gTmFtZTEhMB8GCSqGSIb3DQEJARYSdGVzdEBlbWFpbC5hZGRyZXNzMIIBIjAN')
         insert(app, "conf/host.cert", 11, 'BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj')
         insert(app, "conf/host.cert", 12, '4TkXZTZwEnh/fWyuiH2OPaj/dTw60Jvll4jshlnRHfJ6yfc/o7YlDUanLrQJm7I3')
@@ -129,18 +135,17 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "conf/host.cert", 22, 'rGPQp900aMtDjORTe2ZP2EP/rMSm7w/PL8djNVMtgFKzY2Tc')
         insert(app, "conf/host.cert", 23, '-----END CERTIFICATE-----')
 
-
         # Run the newly created application
         step('Run our ssl-application')
 
         self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
+        # wait for play to be ready
         self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
 
         step("Send request to https")
 
         browser = mechanize.Browser()
-        response = browser.open('https://localhost:9000/')
+        response = browser.open('https://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
 
         step("check that ssl message is logged")
         self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
@@ -149,76 +154,82 @@ class IamADeveloper(unittest.TestCase):
         killPlay(self.play, 'https')
         self.play.wait()
 
-        #now we're going to manually configure log4j to log debug messages
+        # now we're going to manually configure log4j to log debug messages
         step('using key file with password')
 
         insert(app, "conf/application.conf", 236,
-             'certificate.key.file = conf/host.pass.key')
+               'certificate.key.file = conf/host.pass.key')
 
         # re-run the application with new setting
         step('re-run our ssl-application')
 
         self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
+        # wait for play to be ready
         self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
 
         step("Send request to https")
 
         browser = mechanize.Browser()
-        response = browser.open('https://localhost:9000/')
+        response = browser.open('https://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
 
         step("check that ssl message is logged")
         self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
 
-        step("done testing ssl config")        
+        step("done testing ssl config")
 
+   # @unittest.skip
     def testLogLevelsAndLog4jConfig(self):
 
         # Testing job developing
         step('Hello, I am testing loglevels')
 
         self.working_directory = bootstrapWorkingDirectory('i-am-testing-log-levels-here')
-    
+
         # play new job-app
         step('Create a new project')
-        self.play = callPlay(self, ['new', '%s/loglevelsapp' % self.working_directory, '--name=LOGLEVELSAPP'])
-        self.assertTrue(waitFor(self.play, 'The new application will be created'))
-        self.assertTrue(waitFor(self.play, 'OK, the application is created'))
-        self.assertTrue(waitFor(self.play, 'Have fun!'))
-        
-        self.play.wait()
-    
-        app = '%s/loglevelsapp' % self.working_directory
-            
-        #inserting some log-statements in our controller
-        insert(app, "app/controllers/Application.java", 13, '        Logger.debug("I am a debug message");')
-        insert(app, "app/controllers/Application.java", 14, '        Logger.info("I am an info message");')            
-    
+
+        with callPlay(self, ['new', '%s/loglevelsapp' % self.working_directory, '--name=LOGLEVELSAPP']) as self.play:
+            self.assertTrue(waitFor(self.play, 'The new application will be created'))
+            self.assertTrue(waitFor(self.play, 'OK, the application is created'))
+            self.assertTrue(waitFor(self.play, 'Have fun!'))
+
+            self.play.wait()
+
+            app = '%s/loglevelsapp' % self.working_directory
+            edit(app, "conf/application.conf", 32, 'http.port=' + self.DEFAULTS['http.port'])
+
+            # inserting some log-statements in our controller
+            insert(app, "app/controllers/Application.java", 13, '        Logger.debug("I am a debug message");')
+            insert(app, "app/controllers/Application.java", 14, '        Logger.info("I am an info message");')
+
+            # killPlay(self.play)
+            self.play = None
+
         # Run the newly created application
         step('Run our logger-application')
-    
-        killPlay(self.play)
-        self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port 9000'))
-    
-        step("Send request to trigger some logging")
 
-        browser = mechanize.Browser()
-        response = browser.open('http://localhost:9000/')
+        with callPlay(self, ['run', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
 
-    
-        step("check that only info log message is logged")
-        self.assertTrue(waitForWithFail(self.play, 'I am an info message', 'I am a debug message'))
+            step("Send request to trigger some logging")
 
-        step("stop play")
-        killPlay(self.play)
+            browser = mechanize.Browser()
+            browser.set_handle_robots(False)
 
-        #now we're going to manually configure log4j to log debug messages
+            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+
+            step("check that only info log message is logged")
+            self.assertTrue(waitForWithFail(self.play, 'I am an info message', 'I am a debug message'))
+
+            step("stop play")
+            killPlay(self.play)
+
+        # now we're going to manually configure log4j to log debug messages
         step('Writing log4j config file')
-        
+
         create(app, 'conf/log4j.xml')
-        
+
         insert(app, "conf/log4j.xml", 1, '<?xml version="1.0" encoding="UTF-8" ?>')
         insert(app, "conf/log4j.xml", 2, '<Configuration name="ConfigTest" status="ERROR" monitorInterval="5">')
         insert(app, "conf/log4j.xml", 3, '    <Appenders>')
@@ -235,44 +246,44 @@ class IamADeveloper(unittest.TestCase):
 
         # Run the newly created application
         step('re-run our logger-application')
-    
-        self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port 9000'))
-    
-        step("Send request to trigger some logging")
 
-        browser = mechanize.Browser()
-        response = browser.open('http://localhost:9000/')
+        with callPlay(self, ['run', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
 
-    
-        step("check that both debug and info message is logged")
-        self.assertTrue(waitFor(self.play, 'I am a debug message'))        
-        self.assertTrue(waitFor(self.play, 'I am an info message'))
+            step("Send request to trigger some logging")
+
+            browser = mechanize.Browser()
+            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+
+            step("check that both debug and info message is logged")
+            self.assertTrue(waitFor(self.play, 'I am a debug message'))
+            self.assertTrue(waitFor(self.play, 'I am an info message'))
 
         step("done testing logging")
 
-
+    @unittest.skip
     def testCreateAndRunForJobProject(self):
 
         # Testing job developing
         step('Hello, I am a job-developer')
 
         self.working_directory = bootstrapWorkingDirectory('i-am-creating-jobs-here')
-    
+
         # play new job-app
         step('Create a new project')
-    
+
         self.play = callPlay(self, ['new', '%s/jobapp' % self.working_directory, '--name=JOBAPP'])
         self.assertTrue(waitFor(self.play, 'The new application will be created'))
         self.assertTrue(waitFor(self.play, 'OK, the application is created'))
         self.assertTrue(waitFor(self.play, 'Have fun!'))
-        self.play.wait()    
+        self.play.wait()
         app = '%s/jobapp' % self.working_directory
-            
-        #create our first job - which is executed sync on startup with @OnApplicationStart
-    
-        createDir( app, 'app/jobs')
+
+        edit(app, "conf/application.conf", 32, 'https.port=' + self.DEFAULTS['http.port'])
+        # create our first job - which is executed sync on startup with @OnApplicationStart
+
+        createDir(app, 'app/jobs')
         create(app, 'app/jobs/Job1.java')
         insert(app, 'app/jobs/Job1.java', 1, "package jobs;")
         insert(app, 'app/jobs/Job1.java', 2, "import play.jobs.*;")
@@ -285,70 +296,67 @@ class IamADeveloper(unittest.TestCase):
         insert(app, 'app/jobs/Job1.java', 9, '      Logger.info("Job done");')
         insert(app, 'app/jobs/Job1.java', 10, '  }')
         insert(app, 'app/jobs/Job1.java', 11, '}')
-    
-        #modify our controller to log when exeuted
+
+        # modify our controller to log when exeuted
         insert(app, "app/controllers/Application.java", 13, '        Logger.info("Processing request");')
-    
-    
+
         # Run the newly created application
         step('Run the newly created job-application')
-    
+
         self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port 9000'))
-    
+        # wait for play to be ready
+        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+
         step("Send request to start app")
 
         browser = mechanize.Browser()
-        response = browser.open('http://localhost:9000/')
+        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
 
-    
         step("check that job completed before processing request")
         self.assertTrue(waitFor(self.play, 'Job done'))
         self.assertTrue(waitFor(self.play, 'Processing request'))
 
         step("stop play")
         killPlay(self.play)
-        self.play.wait()            
-        #now we change the job to be async
+        self.play.wait()
+        # now we change the job to be async
         step("Change job to async")
-    
-        edit(app, 'app/jobs/Job1.java', 4, "@OnApplicationStart(async=true)")        
+
+        edit(app, 'app/jobs/Job1.java', 4, "@OnApplicationStart(async=true)")
 
         # start play again
         step('Run the job-application again')
-    
+
         self.play = callPlay(self, ['run', app])
-        #wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port 9000'))
-    
+        # wait for play to be ready
+        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+
         step("Send request to start app")
 
         browser = mechanize.Browser()
-        response = browser.open('http://localhost:9000/')
+        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
 
-    
         step("check that the request is processed before the job finishes")
         self.assertTrue(waitFor(self.play, 'Processing request'))
         self.assertTrue(waitFor(self.play, 'Job done'))
-    
 
+    @unittest.skip
     def testSimpleProjectCreation(self):
 
         # Well
         step('Hello, I\'m a developer')
-        
+
         self.working_directory = bootstrapWorkingDirectory('i-am-working-here')
-        
+
         # play new yop
         step('Create a new project')
-        
+
         self.play = callPlay(self, ['new', '%s/yop' % self.working_directory, '--name=YOP'])
         self.assertTrue(waitFor(self.play, 'The new application will be created'))
         self.assertTrue(waitFor(self.play, 'OK, the application is created'))
         self.assertTrue(waitFor(self.play, 'Have fun!'))
         self.play.wait()
-        
+
         self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'yop')))
         self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'yop/app')))
         self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'yop/app/controllers')))
@@ -369,55 +377,56 @@ class IamADeveloper(unittest.TestCase):
 
         # Run the newly created application
         step('Run the newly created application')
-        
+
         self.play = callPlay(self, ['run', app])
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port 9000'))
-        
+        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+
         # Start a browser
         step('Start a browser')
-        
+
         browser = mechanize.Browser()
-        
+
         # Open the home page
         step('Open the home page')
-        
-        response = browser.open('http://localhost:9000/')
+
+        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
         self.assertTrue(waitFor(self.play, "Application 'YOP' is now started !"))
         self.assertTrue(browser.viewing_html())
         self.assertTrue(browser.title() == 'Your application is ready !')
-        
+
         html = response.get_data()
         self.assertTrue(html.count(b'Your application is ready !'))
-        
+
         # Open the documentation
         step('Open the documentation')
-    
+
         browser.addheaders = [("Accept-Language", "en")]
-        response = browser.open('http://localhost:9000/@documentation')
+        response = browser.open(
+            'http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/@documentation')
         self.assertTrue(browser.viewing_html())
         self.assertTrue(browser.title() == 'Play manual - Documentation')
         html = response.get_data()
         self.assertTrue(html.count(b'Getting started'))
-        
+
         # Go back to home
         step('Go back to home')
-        
+
         response = browser.back()
         self.assertTrue(browser.viewing_html())
         self.assertTrue(browser.title() == 'Your application is ready !')
-        
+
         # Refresh
-        step('Refresh home')        
+        step('Refresh home')
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')        
+        self.assertTrue(browser.title() == 'Your application is ready !')
         html = response.get_data()
         self.assertTrue(html.count(b'Your application is ready !'))
-        
+
         # Make a mistake in Application.java and refresh
         step('Make a mistake in Application.java')
-        
-        edit(app, 'app/controllers/Application.java', 13, '        render()')        
+
+        edit(app, 'app/controllers/Application.java', 13, '        render()')
         try:
             browser.reload()
             self.fail()
@@ -429,9 +438,10 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Compilation error'))
             self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(html.count(b'       render()'))            
+            self.assertTrue(html.count(b'       render()'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
+            self.assertTrue(
+                waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
 
         # Refresh again
@@ -448,54 +458,56 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'Compilation error'))
             self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(html.count(b'       render()'))            
+            self.assertTrue(html.count(b'       render()'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
+            self.assertTrue(
+                waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
-        
+
         # Correct the error
         step('Correct the error')
-        
+
         edit(app, 'app/controllers/Application.java', 13, '        render();')
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')        
+        self.assertTrue(browser.title() == 'Your application is ready !')
         html = response.get_data()
         self.assertTrue(html.count(b'Your application is ready !'))
 
         # Refresh again
         step('Refresh again')
-        
+
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')        
+        self.assertTrue(browser.title() == 'Your application is ready !')
         html = response.get_data()
         self.assertTrue(html.count(b'Your application is ready !'))
-        
+
         # Let's code hello world
         step('Let\'s code hello world')
         time.sleep(1)
-        
+
         edit(app, 'app/controllers/Application.java', 12, '  public static void index(String name) {')
         edit(app, 'app/controllers/Application.java', 13, '        render(name);')
         edit(app, 'app/views/Application/index.html', 2, "#{set title:'Hello world app' /}")
         edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')        
+        self.assertTrue(browser.title() == 'Hello world app')
         html = response.get_data()
         self.assertTrue(html.count(b'Hello  !!'))
-        
-        response = browser.open('http://localhost:9000/?name=Guillaume')
+
+        response = browser.open(
+            'http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/?name=Guillaume')
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')        
+        self.assertTrue(browser.title() == 'Hello world app')
         html = response.get_data()
         self.assertTrue(html.count(b'Hello Guillaume !!'))
-        
+
         # Make a mistake in the template
         step('Make a mistake in the template')
         time.sleep(1)
-        
+
         edit(app, 'app/views/Application/index.html', 4, "Hello ${name !!")
         try:
             response = browser.reload()
@@ -504,16 +516,17 @@ class IamADeveloper(unittest.TestCase):
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines()) 
+            html = b''.join(error.readlines())
             self.assertTrue(html.count(b'Template compilation error'))
-            self.assertTrue(html.count(b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
+            self.assertTrue(html.count(
+                b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+            self.assertTrue(
+                waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
 
-        
         # Refresh again
         step('Refresh again')
-        
+
         try:
             response = browser.reload()
             self.fail()
@@ -521,17 +534,18 @@ class IamADeveloper(unittest.TestCase):
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines()) 
+            html = b''.join(error.readlines())
             self.assertTrue(html.count(b'Template compilation error'))
-            self.assertTrue(html.count(b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
+            self.assertTrue(html.count(
+                b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+            self.assertTrue(
+                waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
 
-            
-        # Try a template runtime exception  
-        step('Try a template runtime exception ')  
+        # Try a template runtime exception
+        step('Try a template runtime exception ')
         time.sleep(1)
-        
+
         edit(app, 'app/views/Application/index.html', 4, "Hello ${user.name}")
         try:
             response = browser.reload()
@@ -540,19 +554,21 @@ class IamADeveloper(unittest.TestCase):
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines()) 
+            html = b''.join(error.readlines())
             self.assertTrue(html.count(b'Template execution error '))
             self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
             self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assertTrue(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
+            self.assertTrue(
+                waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
+            self.assertTrue(
+                waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assertTrue(waitFor(self.play, '...'))
 
         # Refresh again
         step('Refresh again')
-        
+
         try:
             response = browser.reload()
             self.fail()
@@ -560,31 +576,33 @@ class IamADeveloper(unittest.TestCase):
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines()) 
+            html = b''.join(error.readlines())
             self.assertTrue(html.count(b'Template execution error '))
             self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
             self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assertTrue(waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
+            self.assertTrue(
+                waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
+            self.assertTrue(
+                waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
             self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
             self.assertTrue(waitFor(self.play, '...'))
 
         # Fix it
-        step('Fix it')        
+        step('Fix it')
         time.sleep(1)
-        
+
         edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')        
+        self.assertTrue(browser.title() == 'Hello world app')
         html = response.get_data()
         self.assertTrue(html.count(b'Hello Guillaume !!'))
 
         # Make a Java runtime exception
-        step('Make a Java runtime exception')  
-        
-        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')     
+        step('Make a Java runtime exception')
+
+        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')
         try:
             response = browser.reload()
             self.fail()
@@ -597,14 +615,15 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'/ by zero'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
+            self.assertTrue(
+                waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assertTrue(waitFor(self.play, '...'))
 
         # Refresh again
         step('Refresh again')
-        
+
         try:
             response = browser.reload()
             self.fail()
@@ -617,46 +636,47 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'/ by zero'))
             self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
+            self.assertTrue(
+                waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
             self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assertTrue(waitFor(self.play, '...'))
 
         # Fix it
-        step('Fix it')        
+        step('Fix it')
         time.sleep(1)
-        
-        delete(app, 'app/controllers/Application.java', 13)    
+
+        delete(app, 'app/controllers/Application.java', 13)
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')        
+        self.assertTrue(browser.title() == 'Hello world app')
         html = response.get_data()
         self.assertTrue(html.count(b'Hello Guillaume !!'))
 
         # Refresh again
         step('Refresh again')
-        
+
         response = browser.reload()
         self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')        
+        self.assertTrue(browser.title() == 'Hello world app')
         html = response.get_data()
         self.assertTrue(html.count(b'Hello Guillaume !!'))
 
         # Create a new route
         step('Create a new route')
-        
+
         insert(app, 'conf/routes', 7, "GET      /hello          Hello.hello")
         try:
-            response = browser.open('http://localhost:9000/hello')
+            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/hello')
             self.fail()
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
             self.assertTrue(browser.title() == 'Not found')
-        
+
         # Create the new controller
         step('Create the new controller')
         time.sleep(1)
-        
+
         create(app, 'app/controllers/Hello.java')
         insert(app, 'app/controllers/Hello.java', 1, "package controllers;")
         insert(app, 'app/controllers/Hello.java', 2, "import play.mvc.*;")
@@ -665,22 +685,22 @@ class IamADeveloper(unittest.TestCase):
         insert(app, 'app/controllers/Hello.java', 5, '      renderText("Hello");')
         insert(app, 'app/controllers/Hello.java', 6, '  }')
         insert(app, 'app/controllers/Hello.java', 7, '}')
-        
+
         # Retry
         step('Retry')
-        
+
         browser.reload()
-        self.assertTrue(not browser.viewing_html())   
+        self.assertTrue(not browser.viewing_html())
         html = response.get_data()
         self.assertTrue(html.count(b'Hello'))
-        
+
         # Rename the Hello controller
         step('Rename the Hello controller')
         time.sleep(1)
-        
+
         rename(app, 'app/controllers/Hello.java', 'app/controllers/Hello2.java')
         edit(app, 'app/controllers/Hello2.java', 3, "public class Hello2 extends Application {")
-        
+
         try:
             browser.reload()
             self.fail()
@@ -690,13 +710,13 @@ class IamADeveloper(unittest.TestCase):
 
         # Refresh again
         step('Refresh again')
-            
+
         try:
             browser.reload()
             self.fail()
         except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Not found')            
+            self.assertTrue(browser.title() == 'Not found')
 
         # Correct the routes file
         step('Correct the routes file')
@@ -705,25 +725,25 @@ class IamADeveloper(unittest.TestCase):
         edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
 
         browser.reload()
-        self.assertTrue(not browser.viewing_html())   
+        self.assertTrue(not browser.viewing_html())
         html = response.get_data()
-        self.assertTrue(html.count(b'Hello'))        
+        self.assertTrue(html.count(b'Hello'))
 
         # Retry
         step('Retry')
-        
+
         browser.reload()
-        self.assertTrue(not browser.viewing_html())   
+        self.assertTrue(not browser.viewing_html())
         html = response.get_data()
         self.assertTrue(html.count(b'Hello'))
-        
+
         # Rename again
         step('Rename again')
         time.sleep(1)
-        
+
         rename(app, 'app/controllers/Hello2.java', 'app/controllers/Hello3.java')
         edit(app, 'conf/routes', 7, "GET      /hello          Hello3.hello")
-        
+
         try:
             browser.reload()
             self.fail()
@@ -737,7 +757,7 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            
+
         # Refresh again
         step('Refresh again')
 
@@ -753,49 +773,57 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
             self.assertTrue(waitFor(self.play, 'ERROR play'))
             self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
-            
+
         # Fix it
         step('Fix it')
-        
+
         edit(app, 'app/controllers/Hello3.java', 3, "public class Hello3 extends Application {")
         browser.reload()
-        self.assertTrue(not browser.viewing_html())   
+        self.assertTrue(not browser.viewing_html())
         html = response.get_data()
         self.assertTrue(html.count(b'Hello'))
 
-
-
     def tearDown(self):
-        killPlay(self.play)
-
+        if self.play:
+            killPlay(self.play)
 
 
 # --- UTILS
 
-def bootstrapWorkingDirectory( folder ):
+def bootstrapWorkingDirectory(folder):
     test_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    working_directory = os.path.join(test_base, folder )
-    if(os.path.exists(working_directory)):
+    working_directory = os.path.join(test_base, folder)
+    if (os.path.exists(working_directory)):
         shutil.rmtree(working_directory)
     os.mkdir(working_directory)
     return working_directory
+
 
 def callPlay(self, args):
     play_script = os.path.join(self.working_directory, '../../../play')
     if sys.platform.startswith('win32'):
         play_script += "".join('.bat')
-        
+
     process_args = [play_script] + args
+
+    print('RUN  %s' % process_args)
+
     # encode subprocess output with system default codec
-    play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE, universal_newlines=True)
+    play_process = subprocess.Popen(process_args,
+                                    shell=False,
+                                    stdout=subprocess.PIPE,
+                                    universal_newlines=True)
+
+    print('RUNNING  %s' % play_process.pid)
     return play_process
 
-#returns true when pattern is seen
+
+# returns true when pattern is seen
 def waitFor(process, pattern):
     return waitForWithFail(process, pattern, "")
-    
 
-#returns true when pattern is seen, but false if failPattern is not seen or if timeout
+
+# returns true when pattern is seen, but false if failPattern is not seen or if timeout
 def waitForWithFail(process, pattern, failPattern):
     timer = threading.Timer(90, timeout, [process])
     timer.start()
@@ -803,7 +831,7 @@ def waitForWithFail(process, pattern, failPattern):
         sys.stdout.flush()
         line = process.stdout.readline().strip()
         sys.stdout.flush()
-        #print timeoutOccurred
+        # print timeoutOccurred
         if timeoutOccurred:
             return False
         if line == '@KILLED':
@@ -816,52 +844,91 @@ def waitForWithFail(process, pattern, failPattern):
             timer.cancel()
             return True
 
+
 timeoutOccurred = False
 
+
 def timeout(process):
-    global timeoutOccurred 
+    global timeoutOccurred
     print('@@@@ TIMEOUT !')
     killPlay(process)
     timeoutOccurred = True
 
-def killPlay(process, http = 'http'):
-    process.stdout.close()
-    
+
+def killPlay(process, http='http'):
+    print("kill %s" % process.pid)
+#    urllib.request.urlopen(f"{http}://" + 'localhost' + ':' + '9001' + '/@kill')
+
+    print("terminate" )
+    process.terminate()
+
+    print("process 1 (thread): kill process 2 (pid %s)" % process.pid)
+    process.kill()
+    print("process 1 (thread): close process 2 stdout pipe (fd %s)" % process.stdout.fileno())
+
+    print("stdout" )
+    if process.stdout:
+        process.stdout.close()
+
+    if process.stderr:
+        process.stderr.close()
+
+    if process.stdin:
+        process.stdin.close()
+
+
+    print("wait" )
+    process.wait(10)
+    print("wait" )
+    process.wait()
+#
+    id = process.pid
+
+    print("os.kill %s" % id )
+
+#    os.kill(id, SIGTERM)
+
+    print("KILLED")
     # kill subprocess tree, because calling urllib.urlopen(f"{http}://localhost:9000/@kill") is not enough
     while True:
         if process.poll() is None:
-            print ("Kill Play subprocess")
+            print("Kill Play subprocess")
             os.kill(process.pid, SIGTERM)
             process.wait(3)
         else:
+            print("KILLED")
             return
+
 
 def step(msg):
     print()
     print('# --- %s' % msg)
     print()
 
+
 def edit(app, file, line, text):
     fname = os.path.join(app, file)
     source = open(fname, 'r')
     lines = source.readlines()
-    lines[line-1] = '%s\n' % text
+    lines[line - 1] = '%s\n' % text
     source.close()
     source = open(fname, 'w')
     source.write(''.join(lines))
     source.close()
     os.utime(fname, None)
 
+
 def insert(app, file, line, text):
     fname = os.path.join(app, file)
     source = open(fname, 'r')
     lines = source.readlines()
-    lines[line-1:line-1] = '%s\n' % text
+    lines[line - 1:line - 1] = '%s\n' % text
     source.close()
     source = open(fname, 'w')
     source.write(''.join(lines))
     source.close()
     os.utime(fname, None)
+
 
 def create(app, file):
     fname = os.path.join(app, file)
@@ -869,24 +936,27 @@ def create(app, file):
     source.close()
     os.utime(fname, None)
 
+
 def createDir(app, file):
     fname = os.path.join(app, file)
-    os.mkdir( fname )
+    os.mkdir(fname)
 
 
 def delete(app, file, line):
     fname = os.path.join(app, file)
     source = open(fname, 'r')
     lines = source.readlines()
-    del lines[line-1]
+    del lines[line - 1]
     source.close()
     source = open(fname, 'w')
     source.write(''.join(lines))
     source.close()
-    os.utime(fname, None)    
+    os.utime(fname, None)
+
 
 def rename(app, fro, to):
     os.rename(os.path.join(app, fro), os.path.join(app, to))
+
 
 if __name__ == '__main__':
     # thanks to: https://stackoverflow.com/a/35960702/3221476
