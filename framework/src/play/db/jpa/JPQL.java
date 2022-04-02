@@ -240,7 +240,7 @@ public class JPQL {
         }
         return q;
     }
-    
+
     public String findByToJPQL(String findBy) {
         return findByToJPQL(JPA.DEFAULT, findBy);
     }
@@ -307,6 +307,22 @@ public class JPQL {
             }
             if (i < parts.length - 1) {
                 jpql.append(" AND ");
+            }
+        }
+        // ORDER BY clause
+        if (findBy.contains("OrderBy")) {
+            jpql.append(" ORDER BY ");
+            String orderQuery = findBy.split("OrderBy")[1];
+            parts = orderQuery.split("And");
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                String orderProp;
+                if (part.endsWith("Desc"))
+                    orderProp = extractProp(part, "Desc") + " DESC";
+                else orderProp = part.toLowerCase();
+                if (i > 0)
+                    jpql.append(", ");
+                jpql.append(orderProp);
             }
         }
         return jpql.toString();
