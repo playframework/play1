@@ -11,7 +11,7 @@ import time
 import unittest
 import urllib
 
-from signal import SIGTERM, CTRL_C_EVENT
+from signal import SIGTERM
 import mechanize
 
 
@@ -857,47 +857,51 @@ def timeout(process):
 
 def killPlay(process, http='http'):
     print("kill %s" % process.pid)
+    try:
+        urllib.request.urlopen('%s://localhost:9000/@kill' % http)
+    except:
+        pass
 #    urllib.request.urlopen(f"{http}://" + 'localhost' + ':' + '9001' + '/@kill')
 
-    print("terminate" )
-    process.terminate()
-
-    print("process 1 (thread): kill process 2 (pid %s)" % process.pid)
-    process.kill()
-    print("process 1 (thread): close process 2 stdout pipe (fd %s)" % process.stdout.fileno())
-
-    print("stdout" )
-    if process.stdout:
-        process.stdout.close()
-
-    if process.stderr:
-        process.stderr.close()
-
-    if process.stdin:
-        process.stdin.close()
-
-
-    print("wait" )
-    process.wait(10)
-    print("wait" )
-    process.wait()
+#     print("terminate" )
+#     process.terminate()
 #
-    id = process.pid
-
-    print("os.kill %s" % id )
-
-#    os.kill(id, SIGTERM)
-
-    print("KILLED")
-    # kill subprocess tree, because calling urllib.urlopen(f"{http}://localhost:9000/@kill") is not enough
-    while True:
-        if process.poll() is None:
-            print("Kill Play subprocess")
-            os.kill(process.pid, SIGTERM)
-            process.wait(3)
-        else:
-            print("KILLED")
-            return
+#     print("process 1 (thread): kill process 2 (pid %s)" % process.pid)
+#     process.kill()
+#     print("process 1 (thread): close process 2 stdout pipe (fd %s)" % process.stdout.fileno())
+#
+#     print("stdout" )
+#     if process.stdout:
+#         process.stdout.close()
+#
+#     if process.stderr:
+#         process.stderr.close()
+#
+#     if process.stdin:
+#         process.stdin.close()
+#
+#
+#     print("wait" )
+#     process.wait(10)
+#     print("wait" )
+#     process.wait()
+# #
+#     id = process.pid
+#
+#     print("os.kill %s" % id )
+#
+# #    os.kill(id, SIGTERM)
+#
+#     print("KILLED")
+#     # kill subprocess tree, because calling urllib.urlopen(f"{http}://localhost:9000/@kill") is not enough
+#     while True:
+#         if process.poll() is None:
+#             print("Kill Play subprocess")
+#             os.kill(process.pid, SIGTERM)
+#             process.wait(3)
+#         else:
+#             print("KILLED")
+#             return
 
 
 def step(msg):
