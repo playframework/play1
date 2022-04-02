@@ -77,7 +77,7 @@ def new(app, args, env, cmdloader=None):
                 if os.path.isdir(os.path.join(env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
                     dirname = f
                     break
-        
+
         if not dirname:
             print("~ Oops. No module %s found" % m)
             print("~ Try to install it using 'play install %s'" % m)
@@ -99,7 +99,7 @@ def new(app, args, env, cmdloader=None):
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
     print("~")
 
-    # Configure modules 
+    # Configure modules
     for m in md:
         # Check dependencies.yml of the module
         depsYaml = os.path.join(env["basedir"], 'modules/%s/conf/dependencies.yml' % m)
@@ -110,7 +110,7 @@ def new(app, args, env, cmdloader=None):
                 replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'- play\n', '- play\n    - %s\n' % moduleDefinition )
             except Exception:
                 pass
-                
+
     cmdloader.commands['dependencies'].execute(command='dependencies', app=app, args=['--sync'], env=env, cmdloader=cmdloader)
 
     print("~ OK, the application is created.")
@@ -140,11 +140,11 @@ def handle_sigint(signum, frame):
         else:
             print("\nKilling Java process")
             process.kill()
-        
+
 def run(app, args):
     global process
     app.check()
-    
+
     print("~ Ctrl+C to stop")
     print("~ ")
     java_cmd = app.java_cmd(args)
@@ -158,7 +158,7 @@ def run(app, args):
     except OSError:
         print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
-    print()
+    print("~")
 
 def clean(app):
     app.check()
@@ -180,7 +180,7 @@ def show_modules(app, args):
             print("~ %s" % module)
     else:
         print("~ No modules installed in this application")
-    print("~ ")
+    print("~")
     sys.exit(0)
 
 def id(play_env):

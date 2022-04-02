@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from __future__ import print_function
+
 import os
 import shutil
 import ssl
@@ -10,19 +11,19 @@ import threading
 import time
 import unittest
 import urllib
-
 from signal import SIGTERM
+
 import mechanize
 
-
 # --- TESTS
+DEFAULTS = {
+    'host': '127.0.0.1',
+    'http.port': '9001',
+}
+
 
 class IamADeveloper(unittest.TestCase):
-    DEFAULTS = {
-        'host': '127.0.0.1',
-        'http.port': '9001',
-
-    }
+    play = None
 
     @unittest.skip
     def testSSLConfig(self):
@@ -35,12 +36,14 @@ class IamADeveloper(unittest.TestCase):
         # play new job-app
         step('Create a new project')
 
-        self.play = callPlay(self, ['new', '%s/sslconfigapp' % self.working_directory, '--name=SSLCONFIGAPP'])
-        self.assertTrue(waitFor(self.play, 'The new application will be created'))
-        self.assertTrue(waitFor(self.play, 'OK, the application is created'))
-        self.assertTrue(waitFor(self.play, 'Have fun!'))
+        with callPlay(self, ['new', '%s/sslconfigapp' % self.working_directory, '--name=SSLCONFIGAPP']) as self.play:
+            self.assertTrue(waitFor(self.play, 'The new application will be created'))
+            self.assertTrue(waitFor(self.play, 'OK, the application is created'))
+            self.assertTrue(waitFor(self.play, 'Have fun!'))
 
-        self.play.wait()
+            self.play.wait()
+            step("stop play")
+            killPlay(self.play, 'https')
 
         app = '%s/sslconfigapp' % self.working_directory
 
@@ -48,7 +51,7 @@ class IamADeveloper(unittest.TestCase):
         insert(app, "app/controllers/Application.java", 13, '        Logger.info("I am ssl secured!");')
 
         edit(app, "conf/application.conf", 32, 'http.port=-1')
-        edit(app, "conf/application.conf", 33, 'https.port=' + self.DEFAULTS['http.port'])
+        edit(app, "conf/application.conf", 33, 'https.port=' + DEFAULTS['http.port'])
         edit(app, "conf/application.conf", 232,
              'play.ssl.netty.pipeline = play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.codec.http.HttpContentCompressor,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler')
         create(app, 'conf/host.key')
@@ -138,21 +141,20 @@ class IamADeveloper(unittest.TestCase):
         # Run the newly created application
         step('Run our ssl-application')
 
-        self.play = callPlay(self, ['run', app])
-        # wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
+        with callPlay(self, ['run', app]) as  self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port ' + DEFAULTS['http.port']))
 
-        step("Send request to https")
+            step("Send request to https")
 
-        browser = mechanize.Browser()
-        response = browser.open('https://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            browser = mechanize.Browser()
+            response = browser.open('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
-        step("check that ssl message is logged")
-        self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
+            step("check that ssl message is logged")
+            self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
 
-        step("stop play")
-        killPlay(self.play, 'https')
-        self.play.wait()
+            step("stop play")
+            killPlay(self.play, 'https')
 
         # now we're going to manually configure log4j to log debug messages
         step('using key file with password')
@@ -163,21 +165,22 @@ class IamADeveloper(unittest.TestCase):
         # re-run the application with new setting
         step('re-run our ssl-application')
 
-        self.play = callPlay(self, ['run', app])
-        # wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
+        with callPlay(self, ['run', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
 
-        step("Send request to https")
+            step("Send request to https")
 
-        browser = mechanize.Browser()
-        response = browser.open('https://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            browserOpen('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
-        step("check that ssl message is logged")
-        self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
+            step("check that ssl message is logged")
+            self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
+
+            step("stop play")
+            killPlay(self.play, 'https')
 
         step("done testing ssl config")
 
-   # @unittest.skip
     def testLogLevelsAndLog4jConfig(self):
 
         # Testing job developing
@@ -196,7 +199,7 @@ class IamADeveloper(unittest.TestCase):
             self.play.wait()
 
             app = '%s/loglevelsapp' % self.working_directory
-            edit(app, "conf/application.conf", 32, 'http.port=' + self.DEFAULTS['http.port'])
+            edit(app, "conf/application.conf", 32, 'http.port=' + DEFAULTS['http.port'])
 
             # inserting some log-statements in our controller
             insert(app, "app/controllers/Application.java", 13, '        Logger.debug("I am a debug message");')
@@ -210,14 +213,11 @@ class IamADeveloper(unittest.TestCase):
 
         with callPlay(self, ['run', app]) as self.play:
             # wait for play to be ready
-            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + DEFAULTS['http.port']))
 
             step("Send request to trigger some logging")
 
-            browser = mechanize.Browser()
-            browser.set_handle_robots(False)
-
-            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            response = browserOpen('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
             step("check that only info log message is logged")
             self.assertTrue(waitForWithFail(self.play, 'I am an info message', 'I am a debug message'))
@@ -249,20 +249,20 @@ class IamADeveloper(unittest.TestCase):
 
         with callPlay(self, ['run', app]) as self.play:
             # wait for play to be ready
-            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + DEFAULTS['http.port']))
 
             step("Send request to trigger some logging")
 
-            browser = mechanize.Browser()
-            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            response = browserOpen('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
             step("check that both debug and info message is logged")
             self.assertTrue(waitFor(self.play, 'I am a debug message'))
             self.assertTrue(waitFor(self.play, 'I am an info message'))
+            step("stop play")
+            killPlay(self.play)
 
         step("done testing logging")
 
-    @unittest.skip
     def testCreateAndRunForJobProject(self):
 
         # Testing job developing
@@ -273,14 +273,15 @@ class IamADeveloper(unittest.TestCase):
         # play new job-app
         step('Create a new project')
 
-        self.play = callPlay(self, ['new', '%s/jobapp' % self.working_directory, '--name=JOBAPP'])
-        self.assertTrue(waitFor(self.play, 'The new application will be created'))
-        self.assertTrue(waitFor(self.play, 'OK, the application is created'))
-        self.assertTrue(waitFor(self.play, 'Have fun!'))
-        self.play.wait()
+        with callPlay(self, ['new', '%s/jobapp' % self.working_directory, '--name=JOBAPP']) as self.play:
+            self.assertTrue(waitFor(self.play, 'The new application will be created'))
+            self.assertTrue(waitFor(self.play, 'OK, the application is created'))
+            self.assertTrue(waitFor(self.play, 'Have fun!'))
+            self.play.wait()
+
         app = '%s/jobapp' % self.working_directory
 
-        edit(app, "conf/application.conf", 32, 'https.port=' + self.DEFAULTS['http.port'])
+        edit(app, "conf/application.conf", 32, 'http.port=' + DEFAULTS['http.port'])
         # create our first job - which is executed sync on startup with @OnApplicationStart
 
         createDir(app, 'app/jobs')
@@ -303,22 +304,21 @@ class IamADeveloper(unittest.TestCase):
         # Run the newly created application
         step('Run the newly created job-application')
 
-        self.play = callPlay(self, ['run', app])
-        # wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+        with callPlay(self, ['run', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + DEFAULTS['http.port']))
 
-        step("Send request to start app")
+            step("Send request to start app")
 
-        browser = mechanize.Browser()
-        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            response = browserOpen('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
-        step("check that job completed before processing request")
-        self.assertTrue(waitFor(self.play, 'Job done'))
-        self.assertTrue(waitFor(self.play, 'Processing request'))
+            step("check that job completed before processing request")
+            self.assertTrue(waitFor(self.play, 'Job done'))
+            self.assertTrue(waitFor(self.play, 'Processing request'))
 
-        step("stop play")
-        killPlay(self.play)
-        self.play.wait()
+            step("stop play")
+            killPlay(self.play)
+
         # now we change the job to be async
         step("Change job to async")
 
@@ -327,20 +327,21 @@ class IamADeveloper(unittest.TestCase):
         # start play again
         step('Run the job-application again')
 
-        self.play = callPlay(self, ['run', app])
-        # wait for play to be ready
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+        with callPlay(self, ['run', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + DEFAULTS['http.port']))
 
-        step("Send request to start app")
+            step("Send request to start app")
+            response = browserOpen('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
-        browser = mechanize.Browser()
-        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
+            step("check that the request is processed before the job finishes")
+            self.assertTrue(waitFor(self.play, 'Processing request'))
+            self.assertTrue(waitFor(self.play, 'Job done'))
+            step("stop play")
+            killPlay(self.play)
 
-        step("check that the request is processed before the job finishes")
-        self.assertTrue(waitFor(self.play, 'Processing request'))
-        self.assertTrue(waitFor(self.play, 'Job done'))
+        step('Done testing testCreateAndRunForJobProject')
 
-    @unittest.skip
     def testSimpleProjectCreation(self):
 
         # Well
@@ -351,11 +352,11 @@ class IamADeveloper(unittest.TestCase):
         # play new yop
         step('Create a new project')
 
-        self.play = callPlay(self, ['new', '%s/yop' % self.working_directory, '--name=YOP'])
-        self.assertTrue(waitFor(self.play, 'The new application will be created'))
-        self.assertTrue(waitFor(self.play, 'OK, the application is created'))
-        self.assertTrue(waitFor(self.play, 'Have fun!'))
-        self.play.wait()
+        with callPlay(self, ['new', '%s/yop' % self.working_directory, '--name=YOP']) as self.play:
+            self.assertTrue(waitFor(self.play, 'The new application will be created'))
+            self.assertTrue(waitFor(self.play, 'OK, the application is created'))
+            self.assertTrue(waitFor(self.play, 'Have fun!'))
+            self.play.wait()
 
         self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'yop')))
         self.assertTrue(os.path.exists(os.path.join(self.working_directory, 'yop/app')))
@@ -375,413 +376,420 @@ class IamADeveloper(unittest.TestCase):
 
         app = '%s/yop' % self.working_directory
 
+        edit(app, "conf/application.conf", 32, 'http.port=' + DEFAULTS['http.port'])
+
         # Run the newly created application
         step('Run the newly created application')
 
-        self.play = callPlay(self, ['run', app])
-        self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + self.DEFAULTS['http.port']))
+        with callPlay(self, ['run', app]) as  self.play:
+            self.assertTrue(waitFor(self.play, 'Listening for HTTP on port ' + DEFAULTS['http.port']))
 
-        # Start a browser
-        step('Start a browser')
+            # Start a browser
+            step('Start a browser')
 
-        browser = mechanize.Browser()
+            browser = mechanize.Browser()
 
-        # Open the home page
-        step('Open the home page')
+            # Open the home page
+            step('Open the home page')
 
-        response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'])
-        self.assertTrue(waitFor(self.play, "Application 'YOP' is now started !"))
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')
-
-        html = response.get_data()
-        self.assertTrue(html.count(b'Your application is ready !'))
-
-        # Open the documentation
-        step('Open the documentation')
-
-        browser.addheaders = [("Accept-Language", "en")]
-        response = browser.open(
-            'http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/@documentation')
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Play manual - Documentation')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Getting started'))
-
-        # Go back to home
-        step('Go back to home')
-
-        response = browser.back()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')
-
-        # Refresh
-        step('Refresh home')
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Your application is ready !'))
-
-        # Make a mistake in Application.java and refresh
-        step('Make a mistake in Application.java')
-
-        edit(app, 'app/controllers/Application.java', 13, '        render()')
-        try:
-            browser.reload()
-            self.fail()
-
-        except urllib.error.URLError as error:
+            response = browser.open('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
+            self.assertTrue(waitFor(self.play, "Application 'YOP' is now started !"))
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Compilation error'))
-            self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
-            self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(html.count(b'       render()'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
-            self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
+            self.assertTrue(browser.title() == 'Your application is ready !')
 
-        # Refresh again
-        step('Refresh again')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Your application is ready !'))
 
-        try:
-            browser.reload()
-            self.fail()
+            # Open the documentation
+            step('Open the documentation')
 
-        except urllib.error.HTTPError as error:
+            browser.addheaders = [("Accept-Language", "en")]
+            response = browser.open(
+                'http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'] + '/@documentation')
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Compilation error'))
-            self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
-            self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(html.count(b'       render()'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
-            self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
+            self.assertTrue(browser.title() == 'Play manual - Documentation')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Getting started'))
 
-        # Correct the error
-        step('Correct the error')
+            # Go back to home
+            step('Go back to home')
 
-        edit(app, 'app/controllers/Application.java', 13, '        render();')
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Your application is ready !'))
+            response = browser.back()
+            self.assertTrue(browser.viewing_html())
+            self.assertTrue(browser.title() == 'Your application is ready !')
 
-        # Refresh again
-        step('Refresh again')
-
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Your application is ready !')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Your application is ready !'))
-
-        # Let's code hello world
-        step('Let\'s code hello world')
-        time.sleep(1)
-
-        edit(app, 'app/controllers/Application.java', 12, '  public static void index(String name) {')
-        edit(app, 'app/controllers/Application.java', 13, '        render(name);')
-        edit(app, 'app/views/Application/index.html', 2, "#{set title:'Hello world app' /}")
-        edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello  !!'))
-
-        response = browser.open(
-            'http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/?name=Guillaume')
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello Guillaume !!'))
-
-        # Make a mistake in the template
-        step('Make a mistake in the template')
-        time.sleep(1)
-
-        edit(app, 'app/views/Application/index.html', 4, "Hello ${name !!")
-        try:
+            # Refresh
+            step('Refresh home')
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Template compilation error'))
-            self.assertTrue(html.count(
-                b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+            self.assertTrue(browser.title() == 'Your application is ready !')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Your application is ready !'))
 
-        # Refresh again
-        step('Refresh again')
+            # Make a mistake in Application.java and refresh
+            step('Make a mistake in Application.java')
 
-        try:
+            edit(app, 'app/controllers/Application.java', 13, '        render()')
+            try:
+                browser.reload()
+                self.fail()
+
+            except urllib.error.URLError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Compilation error'))
+                self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
+                self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
+                self.assertTrue(html.count(b'       render()'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
+                self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Compilation error'))
+                self.assertTrue(html.count(b'insert ";" to complete BlockStatements'))
+                self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
+                self.assertTrue(html.count(b'       render()'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
+                self.assertTrue(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
+
+            # Correct the error
+            step('Correct the error')
+
+            edit(app, 'app/controllers/Application.java', 13, '        render();')
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Template compilation error'))
-            self.assertTrue(html.count(
-                b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+            self.assertTrue(browser.title() == 'Your application is ready !')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Your application is ready !'))
 
-        # Try a template runtime exception
-        step('Try a template runtime exception ')
-        time.sleep(1)
+            # Refresh again
+            step('Refresh again')
 
-        edit(app, 'app/views/Application/index.html', 4, "Hello ${user.name}")
-        try:
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Template execution error '))
-            self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
-            self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assertTrue(
-                waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
-            self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
-            self.assertTrue(waitFor(self.play, '...'))
+            self.assertTrue(browser.title() == 'Your application is ready !')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Your application is ready !'))
 
-        # Refresh again
-        step('Refresh again')
+            # Let's code hello world
+            step('Let\'s code hello world')
+            time.sleep(1)
 
-        try:
+            edit(app, 'app/controllers/Application.java', 12, '  public static void index(String name) {')
+            edit(app, 'app/controllers/Application.java', 13, '        render(name);')
+            edit(app, 'app/views/Application/index.html', 2, "#{set title:'Hello world app' /}")
+            edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Template execution error '))
-            self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
-            self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
-            self.assertTrue(
-                waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
-            self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
-            self.assertTrue(waitFor(self.play, '...'))
+            self.assertTrue(browser.title() == 'Hello world app')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello  !!'))
 
-        # Fix it
-        step('Fix it')
-        time.sleep(1)
+            response = browser.open(
+                'http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'] + '/?name=Guillaume')
+            self.assertTrue(browser.viewing_html())
+            self.assertTrue(browser.title() == 'Hello world app')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello Guillaume !!'))
 
-        edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello Guillaume !!'))
+            # Make a mistake in the template
+            step('Make a mistake in the template')
+            time.sleep(1)
 
-        # Make a Java runtime exception
-        step('Make a Java runtime exception')
+            edit(app, 'app/views/Application/index.html', 4, "Hello ${name !!")
+            try:
+                response = browser.reload()
+                self.fail()
 
-        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')
-        try:
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Template compilation error'))
+                self.assertTrue(html.count(
+                    b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                response = browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Template compilation error'))
+                self.assertTrue(html.count(
+                    b'The template <strong>/app/views/Application/index.html</strong> does not compile : <strong>Unexpected input: \'{\' </strong>'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Template compilation error (In /app/views/Application/index.html around line 0)'))
+
+            # Try a template runtime exception
+            step('Try a template runtime exception ')
+            time.sleep(1)
+
+            edit(app, 'app/views/Application/index.html', 4, "Hello ${user.name}")
+            try:
+                response = browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Template execution error '))
+                self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
+                self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
+                self.assertTrue(
+                    waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
+                self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
+                self.assertTrue(waitFor(self.play, '...'))
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                response = browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Template execution error '))
+                self.assertTrue(html.count(b'In /app/views/Application/index.html (around line 4)'))
+                self.assertTrue(html.count(b'Cannot get property \'name\' on null object'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Template execution error (In /app/views/Application/index.html around line 4)'))
+                self.assertTrue(
+                    waitFor(self.play, 'Execution error occurred in template /app/views/Application/index.html.'))
+                self.assertTrue(waitFor(self.play, 'at /app/views/Application/index.html.(line:4)'))
+                self.assertTrue(waitFor(self.play, '...'))
+
+            # Fix it
+            step('Fix it')
+            time.sleep(1)
+
+            edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Execution exception'))
-            self.assertTrue(html.count(b'/ by zero'))
-            self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
-            self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
-            self.assertTrue(waitFor(self.play, '...'))
+            self.assertTrue(browser.title() == 'Hello world app')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello Guillaume !!'))
 
-        # Refresh again
-        step('Refresh again')
+            # Make a Java runtime exception
+            step('Make a Java runtime exception')
 
-        try:
+            insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')
+            try:
+                response = browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Execution exception'))
+                self.assertTrue(html.count(b'/ by zero'))
+                self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
+                self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
+                self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
+                self.assertTrue(waitFor(self.play, '...'))
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                response = browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Execution exception'))
+                self.assertTrue(html.count(b'/ by zero'))
+                self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(
+                    waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
+                self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
+                self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
+                self.assertTrue(waitFor(self.play, '...'))
+
+            # Fix it
+            step('Fix it')
+            time.sleep(1)
+
+            delete(app, 'app/controllers/Application.java', 13)
             response = browser.reload()
-            self.fail()
-
-        except urllib.error.HTTPError as error:
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Execution exception'))
-            self.assertTrue(html.count(b'/ by zero'))
-            self.assertTrue(html.count(b'In /app/controllers/Application.java (around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(
-                waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
-            self.assertTrue(waitFor(self.play, 'ArithmeticException occurred : / by zero'))
-            self.assertTrue(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
-            self.assertTrue(waitFor(self.play, '...'))
+            self.assertTrue(browser.title() == 'Hello world app')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello Guillaume !!'))
 
-        # Fix it
-        step('Fix it')
-        time.sleep(1)
+            # Refresh again
+            step('Refresh again')
 
-        delete(app, 'app/controllers/Application.java', 13)
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello Guillaume !!'))
-
-        # Refresh again
-        step('Refresh again')
-
-        response = browser.reload()
-        self.assertTrue(browser.viewing_html())
-        self.assertTrue(browser.title() == 'Hello world app')
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello Guillaume !!'))
-
-        # Create a new route
-        step('Create a new route')
-
-        insert(app, 'conf/routes', 7, "GET      /hello          Hello.hello")
-        try:
-            response = browser.open('http://' + self.DEFAULTS['host'] + ':' + self.DEFAULTS['http.port'] + '/hello')
-            self.fail()
-        except urllib.error.HTTPError as error:
+            response = browser.reload()
             self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Not found')
+            self.assertTrue(browser.title() == 'Hello world app')
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello Guillaume !!'))
 
-        # Create the new controller
-        step('Create the new controller')
-        time.sleep(1)
+            # Create a new route
+            step('Create a new route')
 
-        create(app, 'app/controllers/Hello.java')
-        insert(app, 'app/controllers/Hello.java', 1, "package controllers;")
-        insert(app, 'app/controllers/Hello.java', 2, "import play.mvc.*;")
-        insert(app, 'app/controllers/Hello.java', 3, "public class Hello extends Application {")
-        insert(app, 'app/controllers/Hello.java', 4, "  public static void hello() {")
-        insert(app, 'app/controllers/Hello.java', 5, '      renderText("Hello");')
-        insert(app, 'app/controllers/Hello.java', 6, '  }')
-        insert(app, 'app/controllers/Hello.java', 7, '}')
+            insert(app, 'conf/routes', 7, "GET      /hello          Hello.hello")
+            try:
+                response = browser.open('http://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'] + '/hello')
+                self.fail()
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Not found')
 
-        # Retry
-        step('Retry')
+            # Create the new controller
+            step('Create the new controller')
+            time.sleep(1)
 
-        browser.reload()
-        self.assertTrue(not browser.viewing_html())
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello'))
+            create(app, 'app/controllers/Hello.java')
+            insert(app, 'app/controllers/Hello.java', 1, "package controllers;")
+            insert(app, 'app/controllers/Hello.java', 2, "import play.mvc.*;")
+            insert(app, 'app/controllers/Hello.java', 3, "public class Hello extends Application {")
+            insert(app, 'app/controllers/Hello.java', 4, "  public static void hello() {")
+            insert(app, 'app/controllers/Hello.java', 5, '      renderText("Hello");')
+            insert(app, 'app/controllers/Hello.java', 6, '  }')
+            insert(app, 'app/controllers/Hello.java', 7, '}')
 
-        # Rename the Hello controller
-        step('Rename the Hello controller')
-        time.sleep(1)
+            # Retry
+            step('Retry')
 
-        rename(app, 'app/controllers/Hello.java', 'app/controllers/Hello2.java')
-        edit(app, 'app/controllers/Hello2.java', 3, "public class Hello2 extends Application {")
-
-        try:
             browser.reload()
-            self.fail()
-        except urllib.error.HTTPError as error:
-            self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Not found')
+            self.assertTrue(not browser.viewing_html())
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello'))
 
-        # Refresh again
-        step('Refresh again')
+            # Rename the Hello controller
+            step('Rename the Hello controller')
+            time.sleep(1)
 
-        try:
+            rename(app, 'app/controllers/Hello.java', 'app/controllers/Hello2.java')
+            edit(app, 'app/controllers/Hello2.java', 3, "public class Hello2 extends Application {")
+
+            try:
+                browser.reload()
+                self.fail()
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Not found')
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                browser.reload()
+                self.fail()
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Not found')
+
+            # Correct the routes file
+            step('Correct the routes file')
+            time.sleep(1)
+
+            edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
+
             browser.reload()
-            self.fail()
-        except urllib.error.HTTPError as error:
-            self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Not found')
+            self.assertTrue(not browser.viewing_html())
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello'))
 
-        # Correct the routes file
-        step('Correct the routes file')
-        time.sleep(1)
+            # Retry
+            step('Retry')
 
-        edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
-
-        browser.reload()
-        self.assertTrue(not browser.viewing_html())
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello'))
-
-        # Retry
-        step('Retry')
-
-        browser.reload()
-        self.assertTrue(not browser.viewing_html())
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello'))
-
-        # Rename again
-        step('Rename again')
-        time.sleep(1)
-
-        rename(app, 'app/controllers/Hello2.java', 'app/controllers/Hello3.java')
-        edit(app, 'conf/routes', 7, "GET      /hello          Hello3.hello")
-
-        try:
             browser.reload()
-            self.fail()
+            self.assertTrue(not browser.viewing_html())
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello'))
 
-        except urllib.error.HTTPError as error:
-            self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Compilation error'))
-            self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
-            self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+            # Rename again
+            step('Rename again')
+            time.sleep(1)
 
-        # Refresh again
-        step('Refresh again')
+            rename(app, 'app/controllers/Hello2.java', 'app/controllers/Hello3.java')
+            edit(app, 'conf/routes', 7, "GET      /hello          Hello3.hello")
 
-        try:
+            try:
+                browser.reload()
+                self.fail()
+
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Compilation error'))
+                self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
+                self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+
+            # Refresh again
+            step('Refresh again')
+
+            try:
+                browser.reload()
+                self.fail()
+            except urllib.error.HTTPError as error:
+                self.assertTrue(browser.viewing_html())
+                self.assertTrue(browser.title() == 'Application error')
+                html = b''.join(error.readlines())
+                self.assertTrue(html.count(b'Compilation error'))
+                self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
+                self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
+                self.assertTrue(waitFor(self.play, 'ERROR play'))
+                self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+
+            # Fix it
+            step('Fix it')
+
+            edit(app, 'app/controllers/Hello3.java', 3, "public class Hello3 extends Application {")
             browser.reload()
-            self.fail()
-        except urllib.error.HTTPError as error:
-            self.assertTrue(browser.viewing_html())
-            self.assertTrue(browser.title() == 'Application error')
-            html = b''.join(error.readlines())
-            self.assertTrue(html.count(b'Compilation error'))
-            self.assertTrue(html.count(b'/app/controllers/Hello3.java</strong> could not be compiled'))
-            self.assertTrue(html.count(b'The public type Hello2 must be defined in its own file'))
-            self.assertTrue(waitFor(self.play, 'ERROR play'))
-            self.assertTrue(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+            self.assertTrue(not browser.viewing_html())
+            html = response.get_data()
+            self.assertTrue(html.count(b'Hello'))
 
-        # Fix it
-        step('Fix it')
+            step('Kill play')
+            killPlay(self.play)
 
-        edit(app, 'app/controllers/Hello3.java', 3, "public class Hello3 extends Application {")
-        browser.reload()
-        self.assertTrue(not browser.viewing_html())
-        html = response.get_data()
-        self.assertTrue(html.count(b'Hello'))
+        step('Done testing testSimpleProjectCreation')
 
     def tearDown(self):
         if self.play:
@@ -833,8 +841,10 @@ def waitForWithFail(process, pattern, failPattern):
         sys.stdout.flush()
         # print timeoutOccurred
         if timeoutOccurred:
+            timer.cancel()
             return False
         if line == '@KILLED':
+            timer.cancel()
             return False
         if line: print(line)
         if failPattern != "" and line.count(failPattern):
@@ -855,53 +865,41 @@ def timeout(process):
     timeoutOccurred = True
 
 
-def killPlay(process, http='http'):
+def killPlay(process, http='http', host=DEFAULTS['host'], port=DEFAULTS['http.port'], ):
     print("kill %s" % process.pid)
     try:
-        urllib.request.urlopen('%s://localhost:9000/@kill' % http)
+        urllib.request.urlopen("{}://{}:{}/@kill".format(http, host, port))
+
+        print("terminate")
+        process.terminate()
+
+        print("process 1 (thread): kill process 2 (pid %s)" % process.pid)
+        process.kill()
+        print("process 1 (thread): close process 2 stdout pipe (fd %s)" % process.stdout.fileno())
+
+        if process.stdout:
+            process.stdout.close()
+
+        if process.stderr:
+            process.stderr.close()
+
+        if process.stdin:
+            process.stdin.close()
+
+        print("wait")
+        process.wait(10)
+        # kill subprocess tree, because calling urllib.urlopen(f"{http}://localhost:9000/@kill") is not enough
+        while True:
+            if process.poll() is None:
+                print("Kill Play subprocess")
+                os.kill(process.pid, SIGTERM)
+                process.wait(3)
+                print("play is KILLED")
+            else:
+                print("play is KILLED")
+                return
     except:
         pass
-#    urllib.request.urlopen(f"{http}://" + 'localhost' + ':' + '9001' + '/@kill')
-
-#     print("terminate" )
-#     process.terminate()
-#
-#     print("process 1 (thread): kill process 2 (pid %s)" % process.pid)
-#     process.kill()
-#     print("process 1 (thread): close process 2 stdout pipe (fd %s)" % process.stdout.fileno())
-#
-#     print("stdout" )
-#     if process.stdout:
-#         process.stdout.close()
-#
-#     if process.stderr:
-#         process.stderr.close()
-#
-#     if process.stdin:
-#         process.stdin.close()
-#
-#
-#     print("wait" )
-#     process.wait(10)
-#     print("wait" )
-#     process.wait()
-# #
-#     id = process.pid
-#
-#     print("os.kill %s" % id )
-#
-# #    os.kill(id, SIGTERM)
-#
-#     print("KILLED")
-#     # kill subprocess tree, because calling urllib.urlopen(f"{http}://localhost:9000/@kill") is not enough
-#     while True:
-#         if process.poll() is None:
-#             print("Kill Play subprocess")
-#             os.kill(process.pid, SIGTERM)
-#             process.wait(3)
-#         else:
-#             print("KILLED")
-#             return
 
 
 def step(msg):
@@ -960,6 +958,13 @@ def delete(app, file, line):
 
 def rename(app, fro, to):
     os.rename(os.path.join(app, fro), os.path.join(app, to))
+
+
+def browserOpen(url):
+    browser = mechanize.Browser()
+    browser.set_handle_robots(False)
+    response = browser.open(url)
+    return response
 
 
 if __name__ == '__main__':
