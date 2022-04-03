@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
 import sys
 import os, os.path
 import re
@@ -75,8 +78,8 @@ def getWithModules(args, env):
                     dirname = os.path.join(env["basedir"], 'modules/%s' % f)
                     break
         if not dirname:
-            print "~ Oops. Module " + m + " not found (try running `play install " + m + "`)"
-            print "~"
+            print("~ Oops. Module " + m + " not found (try running `play install " + m + "`)")
+            print("~")
             sys.exit(-1)
         
         md.append(dirname)
@@ -91,23 +94,23 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
     classpath = app.getClasspath()
 
     if not war_path:
-        print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
-        print "~"
+        print("~ Oops. Please specify a path where to generate the WAR, using the -o or --output option")
+        print("~")
         sys.exit(-1)
 
     if os.path.exists(war_path) and not os.path.exists(os.path.join(war_path, 'WEB-INF')):
-        print "~ Oops. The destination path already exists but does not seem to host a valid WAR structure"
-        print "~"
+        print("~ Oops. The destination path already exists but does not seem to host a valid WAR structure")
+        print("~")
         sys.exit(-1)
 
     if isParentOf(app.path, war_path) and not isExcluded(war_path, war_exclusion_list):
-        print "~ Oops. Please specify a destination directory outside of the application"
-        print "~ or exclude war destination directory using the --exclude option and ':'-separator "
-        print "~ (eg: --exclude .svn:target:logs:tmp)."
-        print "~"
+        print("~ Oops. Please specify a destination directory outside of the application")
+        print("~ or exclude war destination directory using the --exclude option and ':'-separator ")
+        print("~ (eg: --exclude .svn:target:logs:tmp).")
+        print("~")
         sys.exit(-1)
 
-    print "~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path))
+    print("~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path)))
     if os.path.exists(war_path): shutil.rmtree(war_path)
     if os.path.exists(os.path.join(app.path, 'war')):
         copy_directory(os.path.join(app.path, 'war'), war_path)
@@ -118,7 +121,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
         shutil.copyfile(os.path.join(env["basedir"], 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
     application_name = app.readConf('application.name')
     replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
-    if env["id"] is not "":
+    if env["id"] != "":
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', env["id"])
     else:
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
@@ -167,7 +170,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
     shutil.copyfile(os.path.join(env["basedir"], 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
 
     if war_zip_path:
-        print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
+        print("~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path)))
         if os.path.exists(war_zip_path):
             os.remove(war_zip_path)
         zip = zipfile.ZipFile(war_zip_path, 'w', zipfile.ZIP_STORED)
@@ -242,7 +245,7 @@ def isTestFrameworkId( framework_id ):
     return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
 
 def java_path():
-    if not os.environ.has_key('JAVA_HOME'):
+    if 'JAVA_HOME' not in os.environ:
         return "java"
     else:
         return os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
@@ -257,5 +260,5 @@ def getJavaVersion():
     if result:
         return result.group(1)
     else:
-        print "Unable to retrieve java version from " + javaVersion
+        print("Unable to retrieve java version from " + javaVersion)
         return ""

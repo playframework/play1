@@ -1,6 +1,7 @@
+from __future__ import print_function
 import os, os.path
 import shutil
-import urllib, urllib2
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import subprocess
 import simplejson as json
 
@@ -57,14 +58,14 @@ def execute(**kargs):
         add_options.append('-Dclearcache')
     if args.count('--jpda'):
         args.remove('--jpda')
-        print "~ Waiting for JPDA client to continue"
+        print("~ Waiting for JPDA client to continue")
         add_options.append('-Xdebug')
         add_options.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=y' % app.jpda_port)
     for arg in args:
         if arg.startswith("-D"):
             add_options.append(arg)
         elif not arg.startswith('-Xm'):
-            print "~ WARNING: " + arg + " argument will be skipped"    
+            print("~ WARNING: " + arg + " argument will be skipped")    
 
     java_cmd = [java_path()] + add_options + args_memory + ['-classpath', app.fw_cp_args(), 'play.deps.DependenciesManager']
     try:
@@ -72,5 +73,5 @@ def execute(**kargs):
         if 0 != return_code:
             sys.exit(return_code);
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)

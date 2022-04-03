@@ -1,6 +1,10 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
+from builtins import object
 import os, os.path
 import shutil
-import urllib, urllib2
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import simplejson as json
 
 from play.utils import *
@@ -27,23 +31,23 @@ def execute(**kargs):
     releases = allreleases()
 
     if len(releases) == 0:
-        print "~ No release found."
+        print("~ No release found.")
     elif current == max(releases):
-        print "~ You are using the latest version."
+        print("~ You are using the latest version.")
     else:
-        print "~  \tLatest release: " + str(max(releases))
-        print "~  \tYour version  : " + str(current)
-        print "~"
-        print "~ Latest release download: " + max(releases).url()
+        print("~  \tLatest release: " + str(max(releases)))
+        print("~  \tYour version  : " + str(current))
+        print("~")
+        print("~ Latest release download: " + max(releases).url())
 
-    print "~"
+    print("~")
 
 
 def allreleases():
     try:
-        req = urllib2.Request(TAGS_URL)
+        req = urllib.request.Request(TAGS_URL)
         req.add_header('Accept', 'application/json')
-        opener = urllib2.build_opener()
+        opener = urllib.request.build_opener()
         result = opener.open(req)  
         jsonObject = json.loads(result.read())    
         releases = []
@@ -51,18 +55,18 @@ def allreleases():
             releases.append(Release(tagObj["name"]))
         
         return releases
-    except urllib2.HTTPError, e:
-        print "~ Oops,"
-        print "~ Cannot contact github..."
-        print "~"
+    except urllib.error.HTTPError as e:
+        print("~ Oops,")
+        print("~ Cannot contact github...")
+        print("~")
         sys.exit(-1)
-    except urllib2.URLError, e:
-        print "~ Oops,"
-        print "~ Cannot contact github..."
-        print "~"
+    except urllib.error.URLError as e:
+        print("~ Oops,")
+        print("~ Cannot contact github...")
+        print("~")
         sys.exit(-1)
 
-class Release:
+class Release(object):
 
     # TODO: Be smarter at analysing the rest (ex: RC1 vs RC2)
     def __init__(self, strversion):
@@ -73,7 +77,7 @@ class Release:
             self.numpart = ''
         self.rest = strversion.replace(self.numpart, "")
         try:
-            self.versions = map(lambda x: int(x), self.numpart.split("."))
+            self.versions = [int(x) for x in self.numpart.split(".")]
         except:
             self.versions = [0,0]
         if not self.rest: self.rest = "Z"

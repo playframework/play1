@@ -1,5 +1,7 @@
+from __future__ import print_function
 # CRUD
 
+from builtins import str
 import getopt
 from play.utils import *
 
@@ -22,26 +24,26 @@ def execute(**kargs):
                 c = a.split('/')[0]
                 t = a.split('/')[1]
                 app.override('app/views/CRUD/%s.html' % t, 'app/views/%s/%s.html' % (c, t))
-                print "~ "
+                print("~ ")
                 return
 
             if o == '--layout':
                 app.override('app/views/CRUD/layout.html', 'app/views/CRUD/layout.html')
-                print "~ "
+                print("~ ")
                 return
 
             if o == '--css':
                 app.override('public/stylesheets/crud.css', 'public/stylesheets/crud.css')
-                print "~ "
+                print("~ ")
                 return
 
-    except getopt.GetoptError, err:
-        print "~ %s" % str(err)
-        print "~ "
+    except getopt.GetoptError as err:
+        print("~ %s" % str(err))
+        print("~ ")
         sys.exit(-1)
 
-    print "~ Specify the template to override, ex : -t Users/list" 
-    print "~ "
-    print "~ Use --css to override the CRUD css" 
-    print "~ Use --layout to override the CRUD layout" 
-    print "~ "
+    print("~ Specify the template to override, ex : -t Users/list") 
+    print("~ ")
+    print("~ Use --css to override the CRUD css") 
+    print("~ Use --layout to override the CRUD layout") 
+    print("~ ")

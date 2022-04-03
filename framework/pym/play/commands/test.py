@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import subprocess
 
@@ -21,17 +22,17 @@ def execute(**kargs):
 def test(app, args):
     app.check()
     java_cmd = app.java_cmd(args)
-    print "~ Running in test mode"
-    print "~ Ctrl+C to stop"
-    print "~ "
+    print("~ Running in test mode")
+    print("~ Ctrl+C to stop")
+    print("~ ")
 
     try:
         return_code = subprocess.call(java_cmd, env=os.environ)
         if 0 != return_code:
             sys.exit(return_code)
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
-    print "~ "
+    print("~ ")
 
 
