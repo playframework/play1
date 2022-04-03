@@ -17,7 +17,7 @@ import mechanize
 
 # --- TESTS
 DEFAULTS = {
-    'host': '127.0.0.1',
+    'host': 'localhost',
     'http.port': '9001',
 }
 
@@ -25,7 +25,6 @@ DEFAULTS = {
 class IamADeveloper(unittest.TestCase):
     play = None
 
-    @unittest.skip
     def testSSLConfig(self):
 
         # Testing ssl config
@@ -146,9 +145,7 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port ' + DEFAULTS['http.port']))
 
             step("Send request to https")
-
-            browser = mechanize.Browser()
-            response = browser.open('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
+            response = browserOpen('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
             step("check that ssl message is logged")
             self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
@@ -167,11 +164,11 @@ class IamADeveloper(unittest.TestCase):
 
         with callPlay(self, ['run', app]) as self.play:
             # wait for play to be ready
-            self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port 9000'))
+            self.assertTrue(waitFor(self.play, 'Listening for HTTPS on port ' + DEFAULTS['http.port']))
 
             step("Send request to https")
 
-            browserOpen('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
+            response = browserOpen('https://' + DEFAULTS['host'] + ':' + DEFAULTS['http.port'])
 
             step("check that ssl message is logged")
             self.assertTrue(waitFor(self.play, 'I am ssl secured!'))
@@ -865,10 +862,11 @@ def timeout(process):
     timeoutOccurred = True
 
 
-def killPlay(process, http='http', host=DEFAULTS['host'], port=DEFAULTS['http.port'], ):
-    print("kill %s" % process.pid)
+def killPlay(process, http='http', host=DEFAULTS['host'], port=DEFAULTS['http.port']):
+    print("kill play PID=%s" % process.pid)
     try:
-        urllib.request.urlopen("{}://{}:{}/@kill".format(http, host, port))
+        print("Call %s" % "{}://{}:{}/@kill".format(http, host, port))
+        urllib.request.urlopen("{}://{}:{}/@kill".format(http, host, port), timeout=5)
 
         print("terminate")
         process.terminate()
@@ -899,6 +897,7 @@ def killPlay(process, http='http', host=DEFAULTS['host'], port=DEFAULTS['http.po
                 print("play is KILLED")
                 return
     except:
+        print("play is KILLED with exception")
         pass
 
 
