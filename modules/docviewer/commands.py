@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Here you can create play commands that are specific to the module, and extend existing commands
 import os, os.path
 import getopt
@@ -17,15 +18,15 @@ def execute(**kargs):
     env = kargs.get("env")
 
     if command == "doc:export":
-        print "~ Generating project documentation"
-        print "~ "
+        print("~ Generating project documentation")
+        print("~ ")
         java_cmd = app.java_cmd([], None, "play.modules.docviewer.ExportDocumentationGenerator", args)
         try:
             subprocess.call(java_cmd, env=os.environ)
         except OSError:
-            print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+            print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
             sys.exit(-1)
-        print
+        print()
 
 # This will be executed before any command (new, run...)
 def before(**kargs):

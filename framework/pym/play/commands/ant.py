@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, os.path
 import shutil
 import time
@@ -20,6 +21,6 @@ def execute(**kargs):
     
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/build.xml'), os.path.join(app.path, 'build.xml'))
     
-    print "~ OK, a build.xml file has been created"
-    print "~ Define the PLAY_PATH env property, and use it with ant run|start|stop"
-    print "~"
+    print("~ OK, a build.xml file has been created")
+    print("~ Define the PLAY_PATH env property, and use it with ant run|start|stop")
+    print("~")

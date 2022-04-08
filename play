@@ -1,7 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Play command line script www.playframework.com/
 
+from __future__ import print_function
 import sys
 import os
 import os.path
@@ -47,26 +48,26 @@ try:
 
     if showLogo:
         # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
-        print r"~        _            _ "
-        print r"~  _ __ | | __ _ _  _| |"
-        print r"~ | '_ \| |/ _' | || |_|"
-        print r"~ |  __/|_|\____|\__ (_)"
-        print r"~ |_|            |__/   "
-        print r"~"
+        print(r"~        _            _ ")
+        print(r"~  _ __ | | __ _ _  _| |")
+        print(r"~ | '_ \| |/ _' | || |_|")
+        print(r"~ |  __/|_|\____|\__ (_)")
+        print(r"~ |_|            |__/   ")
+        print(r"~")
     else:
         sys.argv.remove("--silent")
 
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
     if not os.path.exists(play_version_file):
-        print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version'))
-        print "~ Is the framework compiled? "
-        print "~"
+        print("~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')))
+        print("~ Is the framework compiled? ")
+        print("~")
         sys.exit(-1)
 
     play_env["version"] = open(play_version_file).readline().strip()
 
     if showLogo:
-        print "~ play! %s, https://www.playframework.com" % (play_env["version"])
+        print("~ play! %s, https://www.playframework.com" % (play_env["version"]))
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
     application_path = None
@@ -127,9 +128,9 @@ try:
             play_env["id"] = 'test'
 
     if showLogo:
-        if play_env["id"] is not '':
-            print "~ framework ID is %s" % play_env["id"]
-        print "~"
+        if play_env["id"] != '':
+            print("~ framework ID is %s" % play_env["id"])
+        print("~")
 
     # ~~~~~~~~~~~~~~~~~ Checking for disable_random_jpda
     disable_random_jpda = False
@@ -172,17 +173,17 @@ try:
         sys.exit(status)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
-    print "~ Usage: play cmd [app_path] [--options]"
-    print "~ "
-    print "~ with,  new      Create a new application"
-    print "~        run      Run the application in the current shell"
-    print "~        help     Show play help"
-    print "~"
+    print("~ Usage: play cmd [app_path] [--options]")
+    print("~ ")
+    print("~ with,  new      Create a new application")
+    print("~        run      Run the application in the current shell")
+    print("~        help     Show play help")
+    print("~")
     if len(sys.argv) > 1:
-        print "~ Invalid command: %s" % sys.argv[1]
-        print "~"
+        print("~ Invalid command: %s" % sys.argv[1])
+        print("~")
     sys.exit(-1)
 
 except KeyboardInterrupt:
-    print '~ ...'
+    print('~ ...')
     sys.exit(0)

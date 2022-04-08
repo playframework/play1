@@ -4,9 +4,26 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.PersistenceUnit;
+import javax.persistence.Query;
+import javax.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -19,12 +36,6 @@ import play.db.DB;
 import play.db.Model;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
-
-import javax.persistence.*;
-import javax.persistence.spi.PersistenceUnitInfo;
-
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -138,7 +149,7 @@ public class JPAPlugin extends PlayPlugin {
         }
         JPQL.instance = new JPQL();
     }
-    
+
     private List<Class> entityClasses(String dbName) {
         List<Class> entityClasses = new ArrayList<>();
         
@@ -228,6 +239,8 @@ public class JPAPlugin extends PlayPlugin {
             return "org.hibernate.dialect.H2Dialect";
         } else if ("org.hsqldb.jdbcDriver".equals(driver)) {
             return "org.hibernate.dialect.HSQLDialect";
+        } else if ("com.mysql.cj.jdbc.Driver".equals(driver)) {
+            return "org.hibernate.dialect.MySQL8Dialect";
         } else if ("com.mysql.jdbc.Driver".equals(driver)) {
             return "play.db.jpa.MySQLDialect";
         } else if ("org.postgresql.Driver".equals(driver)) {

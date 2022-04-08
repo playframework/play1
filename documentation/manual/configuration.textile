@@ -286,6 +286,11 @@ You can then access this database from your application’s Java by using this n
 
 bc. EntityManager em = JPA.em("student");
 
+You can also assign a specific database within each @model@ by using the name with @@PersistenceUnit@ like this:
+
+bc. @Entity
+@PersistenceUnit(name="student")
+public class [MODEL_name] extends Model {
 
 h3(#db). db
 
@@ -358,11 +363,17 @@ Valid values are @NONE@, @READ_UNCOMMITTED@, @READ_COMMITTED@, @REPEATABLE_READ@
 
 Default: database dependent, usually @READ_COMMITTED@
 
+h3(#db.evolutions.enabled). db.[DB_name].evolutions.enabled
+
+Allows to disable database evolutions on a specific database.
+
+Default: true.
+
 h3(#db.pass). db.pass
 
 Database connection password, used with "db.url":#db.url.
 
-Default: no value, or an empty string when "db":#db is set to @mem@ or @fs@. 
+Default: no value, or an empty string when "db":#db is set to @mem@ or @fs@.
 
 h3(#db.pool.acquireIncrement). db.pool.acquireIncrement
 
@@ -745,11 +756,11 @@ h3(#java.source). java.source
 
 Java source level, which overrides the @java.version@ system property. For example:
 
-bc. java.source=1.8
+bc. java.source=11
 
-Values:  @1.7@ (No longer supported since 1.5.0), @1.8@, @9@, @10@.
+Values:  @1.7@ (No longer supported since 1.5.0), @1.8@ (No longer supported since 1.7.0), @9@ (No longer supported since 1.7.0), @10@ (No longer supported since 1.7.0), @11@, @12@, @13@, @14@, @15@, @17@.
 
-Default: @1.8@
+Default: @11@
 
 
 h2(#jpa). JPA
@@ -832,6 +843,13 @@ Defines which port is used by JPDA when application is in debug mode. For exampl
 
 Default: @8000@
 
+h3(#jpda.address). jpda.address
+
+Defines which address is used by JPDA when application is in debug mode. For example:
+jpda.address=0.0.0.0
+jpda.address=* # Special value only for JDK >= 9, will bind to 0.0.0.0.
+
+Default: none, in that case the listening address will be 127.0.0.1 only for JDK >= 9
 
 h2(#keystore). keystore
 

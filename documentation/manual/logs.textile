@@ -1,6 +1,6 @@
 h1. Logging configuration
 
-The Play logger is built on "Log4j":http://logging.apache.org/log4j/1.2/index.html. Since most Java libraries use Log4j or a wrapper able to use Log4j as a backend, you can easily configure logging that is well-suited to your application.
+The Play logger is built on "Log4j":https://logging.apache.org/log4j/2.x. Since most Java libraries use Log4j or a wrapper able to use Log4j as a backend, you can easily configure logging that is well-suited to your application.
 
 
 h2. <a name="logging">Logging from your application</a>
@@ -30,14 +30,19 @@ If you need to fully configure Log4j, create a @log4j.properties@ file in the @c
 
 The default Log4j configuration is the following:
 
-bc. log4j.rootLogger=ERROR, Console
- 
-log4j.logger.play=INFO
- 
-# Console
-log4j.appender.Console=org.apache.log4j.ConsoleAppender
-log4j.appender.Console.layout=org.apache.log4j.PatternLayout
-log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
+bc. # appender Console
+appender.console.type = Console
+appender.console.name = STDOUT
+appender.console.layout.type = PatternLayout
+appender.console.layout.pattern = %d [%t] %p %c - %m%n
+appender.console.filter.threshold.type = ThresholdFilter
+appender.console.filter.threshold.level = INFO
+# play logger
+logger.app.name = play
+logger.app.level = INFO
+# root logger
+rootLogger.level = INFO
+rootLogger.appenderRef.console.ref = STDOUT
 
 Copy this file and update it for your specifics needs!
 

@@ -1,3 +1,6 @@
+from __future__ import print_function
+from builtins import str
+from builtins import range
 import errno
 import os
 import os.path
@@ -44,12 +47,12 @@ def start(app, args):
     if os.path.exists(app.pid_path()):
         pid = open(app.pid_path()).readline().strip()
         if process_running(pid):
-            print "~ Oops. %s is already started (pid:%s)! (or delete %s)" % (
-                os.path.normpath(app.path), pid, os.path.normpath(app.pid_path()))
-            print "~"
+            print("~ Oops. %s is already started (pid:%s)! (or delete %s)" % (
+                os.path.normpath(app.path), pid, os.path.normpath(app.pid_path())))
+            print("~")
             sys.exit(1)
         else:
-            print "~ removing pid file %s for not running pid %s" % (os.path.normpath(app.pid_path()), pid)
+            print("~ removing pid file %s for not running pid %s" % (os.path.normpath(app.pid_path()), pid))
             os.remove(app.pid_path())
 
     sysout = app.readConf('application.log.system.out')
@@ -61,35 +64,35 @@ def start(app, args):
     try:
         pid = subprocess.Popen(app.java_cmd(args), stdout=sout, env=os.environ).pid
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
-    print "~ OK, %s is started" % os.path.normpath(app.path)
+    print("~ OK, %s is started" % os.path.normpath(app.path))
     if sysout:
-        print "~ output is redirected to %s" % os.path.normpath(os.path.join(app.log_path(), 'system.out'))
+        print("~ output is redirected to %s" % os.path.normpath(os.path.join(app.log_path(), 'system.out')))
     pid_file = open(app.pid_path(), 'w')
     pid_file.write(str(pid))
-    print "~ pid is %s" % pid
-    print "~"
+    print("~ pid is %s" % pid)
+    print("~")
 
 
 def stop(app):
     app.check()
     if not os.path.exists(app.pid_path()):
-        print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path)
-        print "~"
+        print("~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path))
+        print("~")
         sys.exit(-1)
     pid = open(app.pid_path()).readline().strip()
     kill(pid)
     os.remove(app.pid_path())
-    print "~ OK, %s is stopped" % app.path
-    print "~"
+    print("~ OK, %s is stopped" % app.path)
+    print("~")
 
 
 def restart(app, args):
     app.check()
     if not os.path.exists(app.pid_path()):
-        print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path)
-        print "~"
+        print("~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path))
+        print("~")
     else:
         pid = open(app.pid_path()).readline().strip()
         os.remove(app.pid_path())
@@ -105,34 +108,34 @@ def restart(app, args):
     try:
         pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
-    print "~ OK, %s is restarted" % os.path.normpath(app.path)
+    print("~ OK, %s is restarted" % os.path.normpath(app.path))
     if sysout:
-        print "~ output is redirected to %s" % os.path.normpath(os.path.join(app.log_path(), 'system.out'))
+        print("~ output is redirected to %s" % os.path.normpath(os.path.join(app.log_path(), 'system.out')))
     pid_file = open(app.pid_path(), 'w')
     pid_file.write(str(pid))
-    print "~ New pid is %s" % pid
-    print "~"
+    print("~ New pid is %s" % pid)
+    print("~")
     sys.exit(0)
 
 
 def pid(app):
     app.check()
     if not os.path.exists(app.pid_path()):
-        print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path)
-        print "~"
+        print("~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path))
+        print("~")
         sys.exit(-1)
     pid = open(app.pid_path()).readline().strip()
-    print "~ PID of the running applications is %s" % pid
-    print "~ "
+    print("~ PID of the running applications is %s" % pid)
+    print("~ ")
 
 
 def out(app):
     app.check()
     if not os.path.exists(os.path.join(app.log_path(), 'system.out')):
-        print "~ Oops! %s not found" % os.path.normpath(os.path.join(app.log_path(), 'system.out'))
-        print "~"
+        print("~ Oops! %s not found" % os.path.normpath(os.path.join(app.log_path(), 'system.out')))
+        print("~")
         sys.exit(-1)
     sout = open(os.path.join(app.log_path(), 'system.out'), 'r')
     try:
@@ -146,7 +149,7 @@ def out(app):
             time.sleep(1)
             sout.seek(where)
         else:
-            print line
+            print(line)
 
 
 def kill(pid):
@@ -156,16 +159,16 @@ def kill(pid):
         process = ctypes.windll.kernel32.TerminateProcess(handle, 0)
         ctypes.windll.kernel32.CloseHandle(handle)
         if not process:
-            print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
-            print "~ "
+            print("~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError()))
+            print("~ ")
             sys.exit(-1)
-        print "~ Process with PID %s terminated" % pid
+        print("~ Process with PID %s terminated" % pid)
     else:
         try:
             _terminate_unix_process_if_exists(int(pid))
         except OSError:
-            print "~ Play was not running (Process id %s not found)" % pid
-            print "~"
+            print("~ Play was not running (Process id %s not found)" % pid)
+            print("~")
             sys.exit(-1)
 
 
@@ -211,8 +214,8 @@ def process_list_nt():
         else:
             proc_dict[instance] = 0
     idProcessLocalizedName = win32pdhutil.find_pdh_counter_localized_name("ID Process")
-    for instance, max_instances in proc_dict.items():
-        for inum in xrange(max_instances + 1):
+    for instance, max_instances in list(proc_dict.items()):
+        for inum in range(max_instances + 1):
             hq = win32pdh.OpenQuery()  # initializes the query handle
             path = win32pdh.MakeCounterPath((None, processLocalizedName, instance, None, inum, idProcessLocalizedName))
             counter_handle = win32pdh.AddCounter(hq, path)

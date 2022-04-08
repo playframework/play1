@@ -30,7 +30,7 @@ public class Scope {
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase()
             .equals("true");
-    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
+    public static boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
     public static final String COOKIE_SAME_SITE = COOKIE_SECURE ? "None" : "Lax";
 
@@ -476,13 +476,13 @@ public class Scope {
                 for (String key : all().keySet()) {
                     if (data.get(key).length > 1) {
                         StringBuilder sb = new StringBuilder();
-                        boolean coma = false;
+                        boolean comma = false;
                         for (String d : data.get(key)) {
-                            if (coma) {
+                            if (comma) {
                                 sb.append(",");
                             }
                             sb.append(d);
-                            coma = true;
+                            comma = true;
                         }
                         Flash.current().put(key, sb.toString());
                     } else {
@@ -493,13 +493,13 @@ public class Scope {
                 for (String key : params) {
                     if (data.get(key).length > 1) {
                         StringBuilder sb = new StringBuilder();
-                        boolean coma = false;
+                        boolean comma = false;
                         for (String d : data.get(key)) {
-                            if (coma) {
+                            if (comma) {
                                 sb.append(",");
                             }
                             sb.append(d);
-                            coma = true;
+                            comma = true;
                         }
                         Flash.current().put(key, sb.toString());
                     } else {

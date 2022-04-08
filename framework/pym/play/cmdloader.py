@@ -1,6 +1,8 @@
+from __future__ import print_function
 import imp
 import os
 import warnings
+import traceback
 
 def play_formatwarning(msg, *a):
     # ignore everything except the message
@@ -9,7 +11,7 @@ def play_formatwarning(msg, *a):
 
 warnings.formatwarning = play_formatwarning
 
-class CommandLoader:
+class CommandLoader(object):
     def __init__(self, play_path):
         self.path = os.path.join(play_path, 'framework', 'pym', 'play', 'commands')
         self.commands = {}
@@ -23,7 +25,9 @@ class CommandLoader:
                     name = filename.replace(".py", "")
                     mod = load_python_module(name, self.path)
                     self._load_cmd_from(mod)
-                except:
+                except Exception as e:
+                    print (e)
+                    traceback.print_exc()
                     warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
@@ -33,10 +37,10 @@ class CommandLoader:
                 leafname = os.path.basename(modname).split('.')[0]
                 mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
                 self._load_cmd_from(mod)
-            except Exception, e:
-                print '~'
-                print '~ !! Error while loading %s: %s' % (commands, e)
-                print '~'
+            except Exception as e:
+                print('~')
+                print('~ !! Error while loading %s: %s' % (commands, e))
+                print('~')
                 pass # No command to load in this module
 
     def _load_cmd_from(self, mod):
@@ -57,6 +61,6 @@ def load_python_module(name, location):
     try:
         return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
     finally:
-        if mod_file is not None and not mod_file.closed:
+        if mod_file != None and not mod_file.closed:
             mod_file.close()
 
