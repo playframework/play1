@@ -85,10 +85,8 @@ public class DB {
     static final ThreadLocal<Map<String, Connection>> localConnection = new ThreadLocal<>();
 
     public static DataSource getDataSource(String name) {
-        if (datasources.get(name) != null) {
-            return datasources.get(name).getDataSource();
-        }
-        return null;
+        ExtendedDatasource datasource = datasources.get(name);
+        return datasource == null ? null : datasource.getDataSource();
     }
 
     public static DataSource getDataSource() {
@@ -109,8 +107,7 @@ public class DB {
     private static Connection getLocalConnection(String name) {
         Map<String, Connection> map = localConnection.get();
         if (map != null) {
-            Connection connection = map.get(name);
-            return connection;
+            return map.get(name);
         }
         return null;
     }
@@ -119,9 +116,9 @@ public class DB {
         Map<String, Connection> map = localConnection.get();
         if (map == null) {
             map = new HashMap<>();
+            localConnection.set(map);
         }
         map.put(name, connection);
-        localConnection.set(map);
     }
 
     /**
@@ -145,7 +142,7 @@ public class DB {
     }
 
     /**
-     * Close an given open connections for the current thread
+     * Close a given open connections for the current thread
      * 
      * @param name
      *            Name of the DB
@@ -153,10 +150,8 @@ public class DB {
     public static void close(String name) {
         Map<String, Connection> map = localConnection.get();
         if (map != null) {
-            Connection connection = map.get(name);
+            Connection connection = map.remove(name);
             if (connection != null) {
-                map.remove(name);
-                localConnection.set(map);
                 try {
                     connection.close();
                 } catch (Exception e) {
@@ -176,7 +171,7 @@ public class DB {
     public static Connection getConnection(String name) {
         try {
             if (JPA.isEnabled()) {
-                return ((SessionImpl) ((org.hibernate.Session) JPA.em(name)).getSession()).connection();
+                return JPA.em(name).unwrap(SessionImpl.class).getSession().connection();
             }
 
             Connection localConnection = getLocalConnection(name);
@@ -185,14 +180,13 @@ public class DB {
             }
 
             // We have no connection
-            Connection connection = getDataSource(name).getConnection();
+            DataSource ds = getDataSource(name);
+            if (ds == null) {
+                throw new DatabaseException("No database found. Check the configuration of your application.");
+            }
+            Connection connection = ds.getConnection();
             registerLocalConnection(name, connection);
             return connection;
-        } catch (NullPointerException e) {
-            if (getDataSource(name) == null) {
-                throw new DatabaseException("No database found. Check the configuration of your application.", e);
-            }
-            throw e;
         } catch (Exception e) {
             // Exception
             throw new DatabaseException(e.getMessage());
