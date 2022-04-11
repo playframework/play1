@@ -30,11 +30,11 @@ def handle_sigint(signum, frame):
     if 'process' in globals():
         if first_sigint:
             # Prefix with new line because ^C usually appears on the terminal
-            print "\nTerminating Java process"
+            print("\nTerminating Java process")
             process.terminate()
             first_sigint = False
         else:
-            print "\nKilling Java process"
+            print("\nKilling Java process")
             process.kill()
 
 def execute(**kargs):
@@ -48,14 +48,14 @@ def execute(**kargs):
 
 def junit(app, args):
     app.check()
-    print "~ Running in test mode"
-    print "~ Ctrl+C to stop"
-    print "~ "
+    print("~ Running in test mode")
+    print("~ Ctrl+C to stop")
+    print("~ ")
 
-    print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
+    print("~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp')))
     if os.path.exists(os.path.join(app.path, 'tmp')):
         shutil.rmtree(os.path.join(app.path, 'tmp'))
-    print "~"
+    print("~")
 
     # read parameters
     add_options = []
@@ -81,14 +81,14 @@ def junit(app, args):
         if 0 != return_code:
             sys.exit(return_code)
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
 
     if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
-        print "~ All tests passed"
-        print "~"
+        print("~ All tests passed")
+        print("~")
         testspassed = True
     if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
-        print "~ Some tests have failed. See file://%s for results" % test_result
-        print "~"
+        print("~ Some tests have failed. See file://%s for results" % test_result)
+        print("~")
         sys.exit(1)

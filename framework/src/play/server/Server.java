@@ -63,11 +63,13 @@ public class Server {
             Logger.error(e, "Could not understand https.address");
             Play.fatalServerErrorOccurred();
         }
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
+
         try {
             if (httpPort != -1) {
+                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+                );
+
                 bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
 
                 bootstrap.bind(new InetSocketAddress(address, httpPort));
@@ -94,12 +96,12 @@ public class Server {
             Play.fatalServerErrorOccurred();
         }
 
-        bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-        );
-
         try {
             if (httpsPort != -1) {
+                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+                );
+
                 bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
                 bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort));
                 bootstrap.setOption("child.tcpNoDelay", true);

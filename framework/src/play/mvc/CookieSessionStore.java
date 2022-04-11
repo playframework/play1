@@ -23,7 +23,7 @@ public class CookieSessionStore implements SessionStore {
 
             if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                 String value = cookie.value;
-                int firstDashIndex = value.indexOf("-");
+                int firstDashIndex = value.indexOf('-');
                 if (firstDashIndex > -1) {
                     String sign = value.substring(0, firstDashIndex);
                     String data = value.substring(firstDashIndex + 1);

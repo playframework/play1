@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -355,7 +356,7 @@ public class Play {
             if (frameworkPath == null || !frameworkPath.exists()) {
                 if (uri.getScheme().equals("jar")) {
                     String jarPath = uri.getSchemeSpecificPart().substring(5,
-                            uri.getSchemeSpecificPart().lastIndexOf("!"));
+                            uri.getSchemeSpecificPart().lastIndexOf('!'));
                     frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
                 } else if (uri.getScheme().equals("file")) {
                     frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
@@ -490,12 +491,7 @@ public class Play {
                     // our plugins that we're going down when some calls ctrl+c or just kills our
                     // process..
                     shutdownHookEnabled = true;
-                    Thread hook = new Thread() {
-                        @Override
-                        public void run() {
-                            Play.stop();
-                        }
-                    };
+                    Thread hook = new Thread(Play::stop);
                     hook.setContextClassLoader(ClassLoader.getSystemClassLoader());
                     Runtime.getRuntime().addShutdownHook(hook);
                 }
@@ -701,7 +697,6 @@ public class Play {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends PlayPlugin> T plugin(Class<T> clazz) {
         return pluginCollection.getPluginInstance(clazz);
     }
@@ -719,7 +714,7 @@ public class Play {
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     try {
@@ -762,7 +757,7 @@ public class Play {
                     } else {
                         String modulePathName = modulePath.getName();
                         String moduleName = modulePathName.contains("-")
-                                ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
+                                ? modulePathName.substring(0, modulePathName.lastIndexOf('-'))
                                 : modulePathName;
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -793,16 +788,14 @@ public class Play {
                 modules.addAll(Arrays.asList(localModules.list()));
             }
 
-            for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
-                String moduleName = iter.next();
-
+            for (String moduleName : modules) {
                 File module = new File(localModules, moduleName);
 
                 if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+                    moduleName = moduleName.substring(0, moduleName.indexOf('-'));
                 }
 
-                if (module == null || !module.exists()) {
+                if (!module.exists()) {
                     Logger.error("Module %s will not be loaded because %s does not exist", moduleName,
                             module.getAbsolutePath());
                 } else if (module.isDirectory()) {

@@ -13,48 +13,48 @@
     assertTextPresent('Not found')
 
     open('/re/TITI')
-    assertTextPresent('OK: TITI')   
+    assertTextPresent('OK: TITI')
     
     open('/re/TITITOTO')
     assertTextPresent('Not found')
 
     open('re/version%2F01%2F25/rev')
-    assertTextPresent('OK[revRoute]: version/01/25')   
+    assertTextPresent('OK[revRoute]: version/01/25')
     
     open('re/version%2F01%2F25/rev2')
     assertTextNotPresent('OK[revRoute]')
-    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=version/01/25 verId=rev2')  
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=version/01/25 verId=rev2')
     
     open('re/version/01/25/rev')
-    assertTextPresent('OK[revRoute]: version/01/25') 
+    assertTextPresent('OK[revRoute]: version/01/25')
     
     open('re/version/01/25/rev2')
     assertTextNotPresent('OK[revRoute]')
-    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=version/01 verId=25/rev2')  
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=version/01 verId=25/rev2')
     
-    open('/re/api01/01')   
-    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01 verId=01')  
-    assertTextPresent('URL: /re/api01/01') 
-        
-    open('/re/api01/02/01/01')   
-    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=api01/02 verId=01/01')  
-    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
-     
-    open('/re/api01%2F02/01%2F01')   
-    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01/02 verId=01/01')  
-    assertTextPresent('URL: /re/api01%2F02/01%2F01') 
+    open('/re/api01/01')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01 verId=01')
+    assertTextPresent('URL: /re/api01/01')
+
+    open('/re/api01/02/01/01')
+    assertTextPresent('OK[ressourceWithSpecialCharacters]: appId=api01/02 verId=01/01')
+    assertTextPresent('URL: /re/api01%2F02/01%2F01')
+
+    open('/re/api01%2F02/01%2F01')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=api01/02 verId=01/01')
+    assertTextPresent('URL: /re/api01%2F02/01%2F01')
     
-    open('/re/urlWithArgumentInRoutesNoSpace')   
-    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2') 
-    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace') 
+    open('/re/urlWithArgumentInRoutesNoSpace')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2')
+    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace')
     
-    open('/re/urlWithArgumentInRoutesWithSpace')   
-    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2')  
-    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace') 
+    open('/re/urlWithArgumentInRoutesWithSpace')
+    assertTextPresent('OK[ressourceWithoutSpecialCharacters]: appId=param1 verId=param2')
+    assertTextPresent('URL: /re/urlWithArgumentInRoutesNoSpace')
     
     // [#1685] - show (reverse routing of param with '/' in it)
     open('/re/1%2F2/rev')
-    assertTextPresent('OK[revRoute]: 1/2')   
+    assertTextPresent('OK[revRoute]: 1/2')
 
     open('/')
     
@@ -137,7 +137,7 @@
     // Alternative URL
     open('/index')
     assertTextPresent('It works !')
-    
+
     // Reverse
     open('@{Application.reverserouting()}')
     assertText('a', '/')
@@ -158,7 +158,7 @@
 
     // Reverse
     open('@{Application.reverserouting3()}')
-    assertTextPresent('/jpabinding/save?project.name=COLCOZ')   
+    assertTextPresent('/jpabinding/save?project.name=COLCOZ')
 
     // Host
     open('/')
@@ -189,7 +189,6 @@
     open('/client')
     assertTextPresent('localhost')
 
-
     // jsRoute tag
     open('@{Application.jsRoute()}')
     assertText('a-url', '/')
@@ -197,6 +196,8 @@
     assertText('b-url', '/sayHello')
     assertText('b-method', 'PUT')
     assertText('c', '/ressource/foo')
-
+    // FIXME: This passes but an error is recorded that stops further testing!
+//    open('@{Application.jsRouteError()}')
+//    assertTextPresent('Wrong parameter type')
 
 #{/selenium}    

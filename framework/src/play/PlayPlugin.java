@@ -565,25 +565,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         private static <T> Function1<F.Function0<T>, T> compose(final Function1<F.Function0<T>, T> outer,
                 final Function1<F.Function0<T>, T> inner) {
 
-            return new Function1<F.Function0<T>, T>() {
-                @Override
-                public T apply(final F.Function0<T> arg) throws Throwable {
-                    return outer.apply(new F.Function0<T>() {
-                        @Override
-                        public T apply() throws Throwable {
-                            return inner.apply(arg);
-                        }
-                    });
-                }
-            };
+            return arg -> outer.apply(() -> inner.apply(arg));
         }
 
-        private final Function1<play.libs.F.Function0<T>, T> _asFunction = new Function1<F.Function0<T>, T>() {
-            @Override
-            public T apply(F.Function0<T> arg) throws Throwable {
-                return withinFilter(arg);
-            }
-        };
+        private final Function1<play.libs.F.Function0<T>, T> _asFunction = this::withinFilter;
 
         public Function1<play.libs.F.Function0<T>, T> asFunction() {
             return _asFunction;

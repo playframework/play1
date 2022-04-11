@@ -108,7 +108,7 @@ public class JdbcResultFactories {
         @Override
         public T create(ResultSet result) throws SQLException {
             Object value = result.getObject(columnIndex);
-            if (value instanceof BigDecimal) value = new Long(((BigDecimal)value).longValue());
+            if (value instanceof BigDecimal) value = ((BigDecimal) value).longValue();
             if (!objectClass.isInstance(value)) throw new IllegalArgumentException();
             return (T) value;
         }
@@ -144,7 +144,7 @@ public class JdbcResultFactories {
                 T obj = objectClass.newInstance();
                 for (String field : fields) {
                     Object value = result.getObject(field);
-                    if (value instanceof BigDecimal) value = new Long(((BigDecimal)value).longValue());
+                    if (value instanceof BigDecimal) value = ((BigDecimal) value).longValue();
                     objectClass.getDeclaredField(field).set(obj, value);
                 }
                 return obj;

@@ -38,7 +38,7 @@ public class DataBindingUnitTest extends UnitTest {
     
     @Test
     public void testByteBinding() throws Exception{
-        File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
+        File fileToSend = new File(URLDecoder.decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
         assertEquals("b.ba.length=749", WS.url("http://localhost:9003/DataBinding/bindBeanWithByteArray").files(new FileParam(fileToSend, "b.ba")).post().getString());  
     }
     

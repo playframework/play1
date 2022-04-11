@@ -823,7 +823,7 @@ public class WS extends PlayPlugin {
             Map<String, String> result = new HashMap<>();
             String body = getString();
             for (String entry : body.split("&")) {
-                int pos = entry.indexOf("=");
+                int pos = entry.indexOf('=');
                 if (pos > -1) {
                     result.put(entry.substring(0, pos), entry.substring(pos + 1));
                 } else {

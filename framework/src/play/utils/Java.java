@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -544,17 +543,14 @@ class JavaWithCaching {
     private void sortByPriority(List<Method> methods, final Class<? extends Annotation> annotationType) {
         try {
             final Method priority = annotationType.getMethod("priority");
-            sort(methods, new Comparator<Method>() {
-                @Override
-                public int compare(Method m1, Method m2) {
-                    try {
-                        Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
-                        Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));
-                        return priority1.compareTo(priority2);
-                    } catch (Exception e) {
-                        // should not happen
-                        throw new RuntimeException(e);
-                    }
+            sort(methods, (m1, m2) -> {
+                try {
+                    Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
+                    Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));
+                    return priority1.compareTo(priority2);
+                } catch (Exception e) {
+                    // should not happen
+                    throw new RuntimeException(e);
                 }
             });
         } catch (NoSuchMethodException e) {

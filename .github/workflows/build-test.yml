@@ -1,0 +1,85 @@
+name: Pull Requests
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  # Only run once for latest commit per ref and cancel other (previous) runs.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testing:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        jdk: [ 11, 17 ]
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - os: windows-latest
+            jdk: 11
+
+    name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # we don't know what commit the last tag was it's safer to get entire repo so previousStableVersion resolves
+          fetch-depth: 0
+
+      - name: Set up python 3
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+          cache: 'pip'
+          cache-dependency-path: '**/requirements.txt'
+      - run: pip install -r python/requirements.txt
+
+      - name: Set up JDK ${{ matrix.jdk }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.jdk }}
+          distribution: 'adopt'
+
+      - name: Build with Ant
+        working-directory: ./framework
+        run: ant test
+
+  build:
+    needs:
+      - testing
+    runs-on: ubuntu-latest
+    name: BUILD ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # we don't know what commit the last tag was it's safer to get entire repo so previousStableVersion resolves
+          fetch-depth: 0
+
+      - name: Set up python 2
+        uses: actions/setup-python@v2
+        with:
+          python-version: '2.x'
+          architecture: 'x64'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: 17
+          distribution: 'adopt'
+
+      - name: Build with Ant
+        working-directory: ./framework
+        run: ant artifact
+
+      - name: ziping artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: play-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            ./framework/dist/*

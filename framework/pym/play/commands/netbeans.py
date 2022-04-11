@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os, os.path
 import shutil
 import time
@@ -43,8 +44,8 @@ def execute(**kargs):
             if not re.search("\.[svn|git|hg|scc|vssscc]", dir):
                 mr = '<source-folder style="tree"><label>%s</label><location>%s</location></source-folder>' % (dir, dir)
     replaceAll(os.path.join(nbproject, 'project.xml'), r'%MORE%', mr)
-    print "~ OK, the application is ready for netbeans"
-    print "~ Just open %s as a netbeans project" % os.path.normpath(app.path)
-    print "~"
-    print "~ Use netbeansify again when you want to update netbeans configuration files, then close and open you project again."
-    print "~"
+    print("~ OK, the application is ready for netbeans")
+    print("~ Just open %s as a netbeans project" % os.path.normpath(app.path))
+    print("~")
+    print("~ Use netbeansify again when you want to update netbeans configuration files, then close and open you project again.")
+    print("~")

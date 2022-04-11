@@ -102,8 +102,8 @@ public class ParamNode {
 
     private ParamNode getChild(String[] nestedNames) {
         ParamNode currentChildNode = this;
-        for (int i=0; i<nestedNames.length; i++) {
-            currentChildNode = currentChildNode._children.get(nestedNames[i]);
+        for (String nestedName : nestedNames) {
+            currentChildNode = currentChildNode._children.get(nestedName);
             if (currentChildNode == null) {
                 return null;
             }

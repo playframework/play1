@@ -1,7 +1,9 @@
+from __future__ import print_function
+from builtins import str
 import os, os.path
 import shutil
 import getopt
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from play.utils import *
 
@@ -29,9 +31,9 @@ def execute(**kargs):
                     url = a + '/@status'
             if o in ('--secret'):
                 secret_key = a
-    except getopt.GetoptError, err:
-        print "~ %s" % str(err)
-        print "~ "
+    except getopt.GetoptError as err:
+        print("~ %s" % str(err))
+        print("~ ")
         sys.exit(-1)
 
     if not url or not secret_key:
@@ -43,21 +45,21 @@ def execute(**kargs):
             secret_key = app.readConf('application.statusKey')
 
     try:
-        proxy_handler = urllib2.ProxyHandler({})
-        req = urllib2.Request(url)
+        proxy_handler = urllib.request.ProxyHandler({})
+        req = urllib.request.Request(url)
         req.add_header('Authorization', secret_key)
-        opener = urllib2.build_opener(proxy_handler)
+        opener = urllib.request.build_opener(proxy_handler)
         status = opener.open(req)
-        print '~ Status from %s,' % url
-        print '~'
-        print status.read()
-        print '~'
-    except urllib2.HTTPError, e:
-        print "~ Cannot retrieve the application status... (%s)" % (e.code)
-        print "~"
+        print('~ Status from %s,' % url)
+        print('~')
+        print(status.read())
+        print('~')
+    except urllib.error.HTTPError as e:
+        print("~ Cannot retrieve the application status... (%s)" % (e.code))
+        print("~")
         sys.exit(-1)
-    except urllib2.URLError, e:
-        print "~ Cannot contact the application..."
-        print "~"
+    except urllib.error.URLError as e:
+        print("~ Cannot contact the application...")
+        print("~")
         sys.exit(-1)
-    print
+    print()
