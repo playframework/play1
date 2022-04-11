@@ -263,7 +263,7 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void afterInvocation() {
         List<Callable<?>> currentActions = afterInvocationActions.get();
-        afterInvocationActions.set(null);
+        afterInvocationActions.remove();
         for (Callable<?> callable : currentActions) {
             executor.submit(callable);
         }

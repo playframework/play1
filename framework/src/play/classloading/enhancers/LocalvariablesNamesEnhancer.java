@@ -181,9 +181,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static void clear() {
-            if (localVariables.get() != null) {
-                localVariables.set(null);
-            }
+            localVariables.remove();
         }
 
         public static void enter() {

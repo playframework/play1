@@ -197,10 +197,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Response.current.set(response);
 
             Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(null);
-            Scope.RouteArgs.current.set(null);
-            Scope.Session.current.set(null);
-            Scope.Flash.current.set(null);
+            Scope.RenderArgs.current.remove();
+            Scope.RouteArgs.current.remove();
+            Scope.Session.current.remove();
+            Scope.Flash.current.remove();
             CachedBoundActionMethodArgs.init();
 
             try {
