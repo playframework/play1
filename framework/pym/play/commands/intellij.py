@@ -25,6 +25,7 @@ def execute(**kargs):
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/idea/imlTemplate.xml'), imlFile)
     cpXML = ""
 
+    playHome = play_env["basedir"].replace('\\', '/')
     playHomeAlternative = app.toRelative(playHome).replace('\\', '/')
     if playHomeAlternative[0:2] == "..":
         playHome = "$MODULE_DIR$/" + playHomeAlternative
