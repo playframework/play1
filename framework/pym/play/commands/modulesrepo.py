@@ -239,7 +239,7 @@ def new(app, args, play_env):
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
-    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
+    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', application_name.lower())
     os.mkdir(os.path.join(app.path, 'app'))
     os.mkdir(os.path.join(app.path, 'app/controllers'))
     os.mkdir(os.path.join(app.path, 'app/controllers/%s' % application_name))
