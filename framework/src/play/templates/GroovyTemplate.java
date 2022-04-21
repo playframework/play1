@@ -3,11 +3,13 @@ package play.templates;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +18,11 @@ import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.IGroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.ExceptionMessage;
 import org.codehaus.groovy.control.messages.Message;
+import org.codehaus.groovy.control.messages.SimpleMessage;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
@@ -150,25 +154,25 @@ public class GroovyTemplate extends BaseTemplate {
 				// 1. It does NOT guarantee an empty list of OUTPUT phases operations to begin with.
 				// 2. The new phase operation is added to the start and not the end.
                 // See https://github.com/apache/groovy/blob/GROOVY_3_0_6/src/main/java/org/codehaus/groovy/control/CompilationUnit.java#L349
-                compilationUnit.addPhaseOperation(new IGroovyClassOperation() {
-                    @Override
-                    public void call(GroovyClass gclass) {
-                        groovyClassesForThisTemplate.add(gclass);
-                    }
-                });
-
-                // TOOD: Remove once the above replacement logic has been confirmed.
-//                Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
-//                phasesF.setAccessible(true);
-//                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
-//                LinkedList<IGroovyClassOperation> output = new LinkedList<>();
-//                phases[Phases.OUTPUT] = output;
-//                output.add(new IGroovyClassOperation() {
+//                compilationUnit.addPhaseOperation(new IGroovyClassOperation() {
 //                    @Override
 //                    public void call(GroovyClass gclass) {
 //                        groovyClassesForThisTemplate.add(gclass);
 //                    }
 //                });
+
+                // TOOD: Remove once the above replacement logic has been confirmed.
+                Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
+                phasesF.setAccessible(true);
+                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
+                LinkedList<IGroovyClassOperation> output = new LinkedList<>();
+                phases[Phases.OUTPUT] = output;
+                output.add(new IGroovyClassOperation() {
+                    @Override
+                    public void call(GroovyClass gclass) {
+                        groovyClassesForThisTemplate.add(gclass);
+                    }
+                });
                 
                 compilationUnit.compile();
                 // ouf
@@ -223,12 +227,15 @@ public class GroovyTemplate extends BaseTemplate {
                             message = message.substring(0, message.lastIndexOf('@'));
                         }
                         throw new TemplateCompilationException(this, line, message);
-                    } else {
-                        ExceptionMessage errorMessage = (ExceptionMessage) e.getErrorCollector().getLastError();
+                    } else if (errorMsg instanceof ExceptionMessage) {
+                        ExceptionMessage errorMessage = ExceptionMessage.class.cast(errorMsg);
                         Exception exception = errorMessage.getCause();
                         Integer line = 0;
                         String message = exception.getMessage();
                         throw new TemplateCompilationException(this, line, message);
+                    } else if (errorMsg instanceof SimpleMessage) {
+                        SimpleMessage errorMessage = SimpleMessage.class.cast(errorMsg);
+                        throw new TemplateCompilationException(this, null, errorMessage.getMessage());
                     }
                 }
                 throw new UnexpectedException(e);
