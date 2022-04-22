@@ -307,13 +307,11 @@ public class DB {
         try {
             ExtendedDatasource extDatasource = datasources.get(name);
             if (extDatasource != null && extDatasource.getDestroyMethod() != null) {
-                Method close = extDatasource.datasource.getClass().getMethod(extDatasource.getDestroyMethod(), new Class[] {});
-                if (close != null) {
-                    close.invoke(extDatasource.getDataSource(), new Object[] {});
-                    datasources.remove(name);
-                    DB.datasource = null;
-                    Logger.trace("Datasource destroyed");
-                }
+                Method close = extDatasource.datasource.getClass().getMethod(extDatasource.getDestroyMethod());
+                close.invoke(extDatasource.getDataSource());
+                datasources.remove(name);
+                DB.datasource = null;
+                Logger.trace("Datasource destroyed");
             }
         } catch (Throwable t) {
             Logger.error("Couldn't destroy the datasource", t);

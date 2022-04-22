@@ -198,7 +198,7 @@ public class JPAPlugin extends PlayPlugin {
     protected PersistenceUnitInfoImpl persistenceUnitInfo(String dbName, Configuration dbConfig) {
         final List<Class> managedClasses = entityClasses(dbName);
         final Properties properties = properties(dbName, dbConfig);
-        properties.put(org.hibernate.jpa.AvailableSettings.LOADED_CLASSES,managedClasses);
+        properties.put(org.hibernate.cfg.AvailableSettings.LOADED_CLASSES,managedClasses);
         return new PersistenceUnitInfoImpl(dbName,
                 managedClasses, mappingFiles(dbConfig), properties);
     }

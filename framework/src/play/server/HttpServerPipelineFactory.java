@@ -5,6 +5,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelHandler;
 import play.Play;
 import play.Logger;
+import play.exceptions.UnexpectedException;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -51,11 +53,9 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
             }
         }
                
-        if (playHandler != null) {
-            pipeline.addLast("handler", playHandler);
-            playHandler.pipelines.put("handler", playHandler);
-        } 
-       
+        pipeline.addLast("handler", playHandler);
+        playHandler.pipelines.put("handler", playHandler);
+
         return pipeline;
     }
 
@@ -68,11 +68,13 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
     protected ChannelHandler getInstance(String name) throws Exception {
 
-        Class clazz = classes.get(name);
-        if (clazz == null) {
-            clazz = Class.forName(name);
-            classes.put(name, clazz);
-        }
+        Class clazz = classes.computeIfAbsent(name, className -> {
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new UnexpectedException(e);
+            }
+        });
         if (ChannelHandler.class.isAssignableFrom(clazz))
             return (ChannelHandler)clazz.newInstance(); 
         return null;
