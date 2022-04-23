@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -176,31 +175,30 @@ public class CronExpression implements Serializable, Cloneable {
     protected static final int NO_SPEC_INT = 98; // '?'
     protected static final Integer ALL_SPEC = ALL_SPEC_INT;
     protected static final Integer NO_SPEC = NO_SPEC_INT;
-    protected static Map<String, Integer> monthMap = new HashMap<>(20);
-    protected static Map<String, Integer> dayMap = new HashMap<>(60);
+    protected static final Map<String, Integer> monthMap = Map.ofEntries(
+        Map.entry("JAN", 0),
+        Map.entry("FEB", 1),
+        Map.entry("MAR", 2),
+        Map.entry("APR", 3),
+        Map.entry("MAY", 4),
+        Map.entry("JUN", 5),
+        Map.entry("JUL", 6),
+        Map.entry("AUG", 7),
+        Map.entry("SEP", 8),
+        Map.entry("OCT", 9),
+        Map.entry("NOV", 10),
+        Map.entry("DEC", 11)
+    );
+    protected static final Map<String, Integer> dayMap = Map.of(
+        "SUN", 1,
+        "MON", 2,
+        "TUE", 3,
+        "WED", 4,
+        "THU", 5,
+        "FRI", 6,
+        "SAT", 7
+    );
 
-    static {
-        monthMap.put("JAN", 0);
-        monthMap.put("FEB", 1);
-        monthMap.put("MAR", 2);
-        monthMap.put("APR", 3);
-        monthMap.put("MAY", 4);
-        monthMap.put("JUN", 5);
-        monthMap.put("JUL", 6);
-        monthMap.put("AUG", 7);
-        monthMap.put("SEP", 8);
-        monthMap.put("OCT", 9);
-        monthMap.put("NOV", 10);
-        monthMap.put("DEC", 11);
-
-        dayMap.put("SUN", 1);
-        dayMap.put("MON", 2);
-        dayMap.put("TUE", 3);
-        dayMap.put("WED", 4);
-        dayMap.put("THU", 5);
-        dayMap.put("FRI", 6);
-        dayMap.put("SAT", 7);
-    }
     private String cronExpression = null;
     private TimeZone timeZone = null;
     protected transient TreeSet<Integer> seconds;
