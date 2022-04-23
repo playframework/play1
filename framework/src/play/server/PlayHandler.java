@@ -40,10 +40,7 @@ import play.vfs.VirtualFile;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,10 +66,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     private static final String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     private static final boolean exposePlayServer;
 
-    private static final String ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    private static final Charset ASCII = Charset.forName("ASCII");
-    private static final MessageDigest SHA_1;
-
     /**
      * The Pipeline is given for a PlayHandler
      */
@@ -86,14 +79,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      * application.conf: <code>http.allowed.method.override=POST,PUT</code>
      */
     private static final Set<String> allowedHttpMethodOverride;
-
-    static {
-        try {
-            SHA_1 = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-1 not supported on this platform", e);
-        }
-    }
 
     static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
