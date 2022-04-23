@@ -108,10 +108,6 @@ public class ApacheMultipartParser extends DataParser {
          * HTTP.
          */
         public static final String DEFAULT_CHARSET = "ISO-8859-1";
-        /**
-         * Size of buffer to use when writing an item to disk.
-         */
-        private static final int WRITE_BUFFER_SIZE = 2048;
 
         // ----------------------------------------------------------- Data members
         /**

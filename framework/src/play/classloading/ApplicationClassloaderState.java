@@ -24,9 +24,7 @@ public class ApplicationClassloaderState {
 
         ApplicationClassloaderState that = (ApplicationClassloaderState) o;
 
-        if (currentStateValue != that.currentStateValue) return false;
-
-        return true;
+        return this.currentStateValue == that.currentStateValue;
     }
 
     @Override
