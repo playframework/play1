@@ -14,8 +14,6 @@ nbproject/private
 framework/tests-results
 framework/src/version
 framework/src/play/version
-framework/src/play/version
-framework/src/play/version
 framework/tests/test-application/db
 framework/play-*.jar
 framework/docs
@@ -33,7 +31,6 @@ eclipse
 .project
 id
 framework/tests-tmp
-framework/docs
 dist
 modules/bespin/lib/bespin.jar
 modules/ecss/lib/ecss.jar
@@ -42,7 +39,6 @@ resources/catalog.xml
 resources/nbproject/private
 modules/gae/lib/gae.jar
 catalog.xml
-modules/gae/lib/gae.jar
 play-*.jar
 modules/gae/bin
 modules/gwt/lib/play-gwt.jar
@@ -51,7 +47,6 @@ test-result
 logs
 db
 *.pyc
-test-result
 samples-and-tests/with-gwt/nbproject
 samples-and-tests/jobboard/db
 samples-and-tests/jobboard/tmp
@@ -133,11 +128,7 @@ atlassian-ide-plugin.xml
 modules/*
 build.classes
 modules/crud/nbproject
-nbproject
-samples-and-tests/jobboard/attachments
 samples-and-tests/jobboard/logs
-samples-and-tests/jobboard/test-result
-samples-and-tests/jobboard/tmp
 samples-and-tests/validation/logs
 samples-and-tests/zencontact/precompiled
 !modules/docviewer
@@ -148,4 +139,3 @@ samples-and-tests/zencontact/precompiled
 !modules/testrunner
 !framework/src/play/db
 !framework/test-src/play/db
-*~
