@@ -9,7 +9,7 @@ import net.sf.oval.context.OValContext;
 public class URLCheck extends AbstractAnnotationCheck<URL> {
 
     static final String mes = "validation.url";
-    static Pattern urlPattern = Pattern.compile("^(http|https|ftp)\\://[a-zA-Z0-9\\-\\.]+\\.[a-z" +
+    static final Pattern urlPattern = Pattern.compile("^(http|https|ftp)\\://[a-zA-Z0-9\\-\\.]+\\.[a-z" +
             "A-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\\-\\._\\?\\,\\'/\\\\\\+&amp;%\\$#\\=~\\!])*$");
 
     @Override

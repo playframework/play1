@@ -514,7 +514,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * transaction around an action. The filter applies a transaction to the current Action.
      */
     public abstract static class Filter<T> {
-        String name;
+        final String name;
 
         public Filter(String name) {
             this.name = name;

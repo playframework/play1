@@ -56,7 +56,7 @@ public class PluginCollection {
     /**
      * List that holds all loaded plugins, enabled or disabled
      */
-    protected List<PlayPlugin> allPlugins = new ArrayList<>();
+    protected final List<PlayPlugin> allPlugins = new ArrayList<>();
 
     /**
      * Readonly copy of allPlugins - updated each time allPlugins is updated. Using this cached copy so we don't have to
@@ -67,7 +67,7 @@ public class PluginCollection {
     /**
      * List of all enabled plugins
      */
-    protected List<PlayPlugin> enabledPlugins = new ArrayList<>();
+    protected final List<PlayPlugin> enabledPlugins = new ArrayList<>();
 
     /**
      * Readonly copy of enabledPlugins - updated each time enabledPlugins is updated. Using this cached copy so we don't
@@ -78,7 +78,7 @@ public class PluginCollection {
     /**
      * List of all enabled plugins with filters
      */
-    protected List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<>();
+    protected final List<PlayPlugin> enabledPluginsWithFilters = new ArrayList<>();
 
     /**
      * Readonly copy of enabledPluginsWithFilters - updated each time enabledPluginsWithFilters is updated. Using this

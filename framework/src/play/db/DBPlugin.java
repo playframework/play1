@@ -250,7 +250,7 @@ public class DBPlugin extends PlayPlugin {
      */
     public static class ProxyDriver implements Driver {
 
-        private Driver driver;
+        private final Driver driver;
 
         ProxyDriver(Driver d) {
             this.driver = d;

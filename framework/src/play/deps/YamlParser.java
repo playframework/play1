@@ -367,7 +367,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     }
     private static class ModuleFilter implements FilenameFilter {
 
-        private ModuleRevisionId moduleRevision;
+        private final ModuleRevisionId moduleRevision;
 
         public ModuleFilter(ModuleRevisionId moduleRevision) {
             this.moduleRevision = moduleRevision;

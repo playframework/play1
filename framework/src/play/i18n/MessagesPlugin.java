@@ -23,7 +23,7 @@ public class MessagesPlugin extends PlayPlugin {
 
     static Long lastLoading = 0L;
 
-    private static List<String> includeMessageFilenames = new ArrayList<>();
+    private static final List<String> includeMessageFilenames = new ArrayList<>();
 
     @Override
     public void onApplicationStart() {

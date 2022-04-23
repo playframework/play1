@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
-    public static List<Job> scheduledJobs = new ArrayList<>();
+    public static final List<Job> scheduledJobs = new ArrayList<>();
     private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override

@@ -9,8 +9,8 @@ import play.templates.Template;
  */
 public abstract class TemplateException extends PlayException implements SourceAttachment {
 
-    private Template template;
-    private Integer lineNumber;
+    private final Template template;
+    private final Integer lineNumber;
 
     public TemplateException(Template template, Integer lineNumber, String message) {
         super(message);

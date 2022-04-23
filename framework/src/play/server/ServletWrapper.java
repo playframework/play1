@@ -510,10 +510,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     public class ServletInvocation extends Invoker.DirectInvocation {
 
-        private Request request;
-        private Response response;
-        private HttpServletRequest httpServletRequest;
-        private HttpServletResponse httpServletResponse;
+        private final Request request;
+        private final Response response;
+        private final HttpServletRequest httpServletRequest;
+        private final HttpServletResponse httpServletResponse;
 
         public ServletInvocation(Request request, Response response, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
             this.httpServletRequest = httpServletRequest;

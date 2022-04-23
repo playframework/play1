@@ -17,7 +17,7 @@ import play.templates.GroovyInlineTags.CALL;
 
 public class GroovyTemplateCompiler extends TemplateCompiler {
 
-    protected List<String> extensionsClassnames = new ArrayList<>();
+    protected final List<String> extensionsClassnames = new ArrayList<>();
 
     // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
     // Have to split it if it is really that big

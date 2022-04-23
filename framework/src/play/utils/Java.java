@@ -316,7 +316,7 @@ public class Java {
     }
 
     /** cache */
-    private static Map<Field, FieldWrapper> wrappers = new HashMap<>();
+    private static final Map<Field, FieldWrapper> wrappers = new HashMap<>();
 
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {

@@ -268,7 +268,7 @@ public class Http {
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap<>(16);
+        public final Map<String, Object> args = new HashMap<>(16);
         /**
          * When the request has been received
          */
@@ -621,11 +621,11 @@ public class Http {
         /**
          * Response headers
          */
-        public Map<String, Http.Header> headers = new HashMap<>(16);
+        public final Map<String, Http.Header> headers = new HashMap<>(16);
         /**
          * Response cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<>(16);
+        public final Map<String, Http.Cookie> cookies = new HashMap<>(16);
         /**
          * Response body stream
          */

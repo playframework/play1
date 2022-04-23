@@ -20,10 +20,10 @@ public class OAuth2 {
     private static final String CLIENT_ID_NAME = "client_id";
     private static final String REDIRECT_URI = "redirect_uri";
 
-    public String authorizationURL;
-    public String accessTokenURL;
-    public String clientid;
-    public String secret;
+    public final String authorizationURL;
+    public final String accessTokenURL;
+    public final String clientid;
+    public final String secret;
 
     public OAuth2(String authorizationURL, String accessTokenURL, String clientid, String secret) {
         this.accessTokenURL = accessTokenURL;

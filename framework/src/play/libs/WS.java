@@ -667,8 +667,8 @@ public class WS extends PlayPlugin {
     }
 
     public static class FileParam {
-        public File file;
-        public String paramName;
+        public final File file;
+        public final String paramName;
 
         public FileParam(File file, String name) {
             this.file = file;

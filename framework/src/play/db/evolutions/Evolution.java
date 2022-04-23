@@ -4,13 +4,13 @@ import play.libs.Codec;
 
 
 public class Evolution implements Comparable<Evolution> {
-    public int revision;
-    public String sql_up;
-    public String sql_down;
-    public String hash;
-    public boolean applyUp;
+    public final int revision;
+    public final String sql_up;
+    public final String sql_down;
+    public final String hash;
+    public final boolean applyUp;
     
-    public String moduleKey;
+    public final String moduleKey;
 
     public Evolution(String moduleKey, int revision, String sql_up, String sql_down, boolean applyUp) {
         this.moduleKey = moduleKey;

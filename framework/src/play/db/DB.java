@@ -39,12 +39,12 @@ public class DB {
         /**
          * Connection to the physical data source
          */
-        private DataSource datasource;
+        private final DataSource datasource;
 
         /**
          * The method used to destroy the data source
          */
-        private String destroyMethod;
+        private final String destroyMethod;
 
         public ExtendedDatasource(DataSource ds, String destroyMethod) {
             this.datasource = ds;

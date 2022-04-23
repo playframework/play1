@@ -39,7 +39,7 @@ public class TestEngine {
 
     private static final ClassNameComparator classNameComparator = new ClassNameComparator();
 
-    public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
+    public static final ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
     public static List<Class> allUnitTests() {
         List<Class> classes = new ArrayList<>();
@@ -197,9 +197,9 @@ public class TestEngine {
     // ~~~~~~ Run listener
     static class Listener extends RunListener {
 
-        TestResults results;
+        final TestResults results;
+        final String className;
         TestResult current;
-        String className;
 
         public Listener(String className, TestResults results) {
             this.results = results;

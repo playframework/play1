@@ -11,8 +11,8 @@ public class TagContext {
     
     private static final ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<>();
     
-    public String tagName;
-    public Map<String, Object> data = new HashMap<>();
+    public final String tagName;
+    public final Map<String, Object> data = new HashMap<>();
 
     public TagContext(String tagName) {
         this.tagName = tagName;

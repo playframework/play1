@@ -76,7 +76,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     /**
      * The Pipeline is given for a PlayHandler
      */
-    public Map<String, ChannelHandler> pipelines = new HashMap<>();
+    public final Map<String, ChannelHandler> pipelines = new HashMap<>();
 
     private WebSocketServerHandshaker handshaker;
     
@@ -965,8 +965,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
+        private final ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
         private boolean closed = false;
-        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
 
         @Override
         public boolean hasNextChunk() throws Exception {

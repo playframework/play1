@@ -60,9 +60,9 @@ public class Fixtures {
      */
     public static final String PROFILE_NAME = "Fixtures";
 
-    static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
+    static final Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
     // Allows people to clear the cache, so Fixture is not stateful
-    public static Map<String, Object> idCache = new HashMap<>();
+    public static final Map<String, Object> idCache = new HashMap<>();
 
     public static void executeSQL(String sqlScript) {
         for (CharSequence sql : new SQLSplitter(sqlScript)) {
@@ -138,7 +138,7 @@ public class Fixtures {
         deleteDatabase();
     }
 
-    static String[] dontDeleteTheseTables = new String[] { "play_evolutions" };
+    static final String[] dontDeleteTheseTables = { "play_evolutions" };
 
     /**
      * Flush the entire JDBC database

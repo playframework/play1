@@ -11,7 +11,7 @@ public class CachedBoundActionMethodArgs {
 
     private static final ThreadLocal<CachedBoundActionMethodArgs> current = new ThreadLocal<>();
 
-    private Map<Method, Object[]> preBoundActionMethodArgs = new HashMap<>(1);
+    private final Map<Method, Object[]> preBoundActionMethodArgs = new HashMap<>(1);
 
     public static void init() {
         current.set( new CachedBoundActionMethodArgs());

@@ -21,7 +21,7 @@ public class Configuration {
     /** compiled regex as a pattern for reuse to filter all db related settings. */
     final java.util.regex.Pattern compiledRegexDbRelatedSettings = java.util.regex.Pattern.compile(regexDbRelatedSettings +".*");
 
-    public String configName;
+    public final String configName;
 
     public boolean isDefault() {
         return DB.DEFAULT.equals(this.configName);

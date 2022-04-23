@@ -18,12 +18,12 @@ import play.libs.IO;
 
 public abstract class BaseTemplate extends Template {
 
+    public final Long timestamp = System.currentTimeMillis();
     public String compiledSource;
     public Map<Integer, Integer> linesMatrix = new HashMap<>();
     public Set<Integer> doBodyLines = new HashSet<>();
     public Class compiledTemplate;
     public String compiledTemplateName;
-    public Long timestamp = System.currentTimeMillis();
 
     public BaseTemplate(String name, String source) {
         this.name = name;
@@ -97,7 +97,7 @@ public abstract class BaseTemplate extends Template {
 
     public static final class RawData {
 
-        public String data;
+        public final String data;
 
         public RawData(Object val) {
             if (val == null) {

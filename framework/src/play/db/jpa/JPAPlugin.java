@@ -319,7 +319,7 @@ public class JPAPlugin extends PlayPlugin {
       }
     }
 
-    private TransactionalFilter txFilter = new TransactionalFilter("TransactionalFilter");
+    private final TransactionalFilter txFilter = new TransactionalFilter("TransactionalFilter");
 
     @Override
     public Filter<Object> getFilter() {
