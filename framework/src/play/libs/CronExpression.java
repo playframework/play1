@@ -507,7 +507,7 @@ public class CronExpression implements Serializable, Cloneable {
                 throw new ParseException("'?' can only be specfied for Day-of-Month or Day-of-Week.", i);
             }
             if (type == DAY_OF_WEEK && !lastdayOfMonth) {
-                int val = daysOfMonth.last().intValue();
+                int val = daysOfMonth.last();
                 if (val == NO_SPEC_INT) {
                     throw new ParseException("'?' can only be specfied for Day-of-Month -OR- Day-of-Week.", i);
                 }
@@ -967,23 +967,11 @@ public class CronExpression implements Serializable, Cloneable {
     }
 
     protected int getMonthNumber(String s) {
-        Integer integer = monthMap.get(s);
-
-        if (integer == null) {
-            return -1;
-        }
-
-        return integer.intValue();
+        return monthMap.getOrDefault(s, -1);
     }
 
     protected int getDayOfWeekNumber(String s) {
-        Integer integer = dayMap.get(s);
-
-        if (integer == null) {
-            return -1;
-        }
-
-        return integer.intValue();
+        return dayMap.getOrDefault(s, -1);
     }
 
     // //////////////////////////////////////////////////////////////////////////
@@ -1124,7 +1112,7 @@ public class CronExpression implements Serializable, Cloneable {
                     }
                 } else if (nearestWeekday) {
                     t = day;
-                    day = daysOfMonth.first().intValue();
+                    day = daysOfMonth.first();
 
                     java.util.Calendar tcal = java.util.Calendar.getInstance();
                     tcal.set(Calendar.SECOND, 0);
@@ -1154,14 +1142,14 @@ public class CronExpression implements Serializable, Cloneable {
                     tcal.set(Calendar.MONTH, mon - 1);
                     Date nTime = tcal.getTime();
                     if (nTime.before(afterTime)) {
-                        day = daysOfMonth.first().intValue();
+                        day = daysOfMonth.first();
                         mon++;
                     }
-                } else if (st != null && st.size() != 0) {
+                } else if (st.size() != 0) {
                     t = day;
-                    day = st.first().intValue();
+                    day = st.first();
                 } else {
-                    day = daysOfMonth.first().intValue();
+                    day = daysOfMonth.first();
                     mon++;
                 }
 
@@ -1180,7 +1168,7 @@ public class CronExpression implements Serializable, Cloneable {
                                                     // week rule
                 if (lastdayOfWeek) {
                     // are we looking for the last day of the month?
-                    int dow = daysOfWeek.first().intValue(); // desired
+                    int dow = daysOfWeek.first(); // desired
                     // d-o-w
                     int cDow = cl.get(Calendar.DAY_OF_WEEK); // current
                                                              // d-o-w
@@ -1225,7 +1213,7 @@ public class CronExpression implements Serializable, Cloneable {
 
                 } else if (nthdayOfWeek != 0) {
                     // are we looking for the Nth day in the month?
-                    int dow = daysOfWeek.first().intValue(); // desired
+                    int dow = daysOfWeek.first(); // desired
                     // d-o-w
                     int cDow = cl.get(Calendar.DAY_OF_WEEK); // current
                                                              // d-o-w
