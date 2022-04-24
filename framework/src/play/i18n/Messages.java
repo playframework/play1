@@ -125,7 +125,7 @@ public class Messages {
         String message = String.format(locale, value, coolStuff(value, args));
 
         Matcher matcher = recursive.matcher(message);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, get(matcher.group(1)));
         }

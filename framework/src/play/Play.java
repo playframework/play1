@@ -426,7 +426,7 @@ public class Play {
         for (Object key : propsFromFile.keySet()) {
             String value = propsFromFile.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
-            StringBuffer newValue = new StringBuffer(100);
+            StringBuilder newValue = new StringBuilder(100);
             while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r;
