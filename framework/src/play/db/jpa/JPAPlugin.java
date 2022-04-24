@@ -309,7 +309,7 @@ public class JPAPlugin extends PlayPlugin {
        }
     }
 
-    public class TransactionalFilter extends Filter<Object> {
+    public static class TransactionalFilter extends Filter<Object> {
       public TransactionalFilter(String name) {
         super(name);
       }
