@@ -540,8 +540,7 @@ public class Fixtures {
 
         // Contains all the fields (object properties) we should look up
         Set<Field> fields = new HashSet<>();
-        Map<String, String[]> resolvedYml = new HashMap<>();
-        resolvedYml.putAll(yml);
+        Map<String, String[]> resolvedYml = new HashMap<>(yml);
 
         // Look up the super classes
         Class<?> clazz = type;

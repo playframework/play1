@@ -323,8 +323,7 @@ public class ApplicationClassloader extends ClassLoader {
                 modifieds.add(applicationClass);
             }
         }
-        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>();
-        modifiedWithDependencies.addAll(modifieds);
+        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>(modifieds);
         if (!modifieds.isEmpty()) {
             modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }

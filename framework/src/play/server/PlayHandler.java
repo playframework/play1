@@ -632,10 +632,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         for (String key : nettyRequest.headers().names()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
-            hd.values = new ArrayList<>();
-            for (String next : nettyRequest.headers().getAll(key)) {
-                hd.values.add(next);
-            }
+            hd.values = new ArrayList<>(nettyRequest.headers().getAll(key));
             headers.put(hd.name, hd);
         }
 
