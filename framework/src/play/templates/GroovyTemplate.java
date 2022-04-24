@@ -156,12 +156,7 @@ public class GroovyTemplate extends BaseTemplate {
                 Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
                 LinkedList<IGroovyClassOperation> output = new LinkedList<>();
                 phases[Phases.OUTPUT] = output;
-                output.add(new IGroovyClassOperation() {
-                    @Override
-                    public void call(GroovyClass gclass) {
-                        groovyClassesForThisTemplate.add(gclass);
-                    }
-                });
+                output.add(groovyClassesForThisTemplate::add);
                 
                 compilationUnit.compile();
                 // ouf
