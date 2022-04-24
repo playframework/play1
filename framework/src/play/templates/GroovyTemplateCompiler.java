@@ -79,7 +79,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 originalNames.put(name, clazz.getName());
             }
         }
-        Collections.sort(names, (o1, o2) -> o2.length() - o1.length());
+        names.sort((o1, o2) -> o2.length() - o1.length());
 
         // We're about to do many many String.replaceAll() so we do some
         // checking first

@@ -94,7 +94,7 @@ public class PluginCollection {
      * @return Read only list of plugins
      */
     protected List<PlayPlugin> createReadonlyCopy(List<PlayPlugin> list) {
-        return Collections.unmodifiableList(new ArrayList<>(list));
+        return List.copyOf(list);
     }
 
     private static class LoadingPluginInfo implements Comparable<LoadingPluginInfo> {
@@ -202,7 +202,7 @@ public class PluginCollection {
             String playPluginsDescriptors = Play.configuration.getProperty("play.plugins.descriptor");
             if (playPluginsDescriptors != null) {
                 return Stream.of(playPluginsDescriptors.split(","))
-                    .map(playPluginsDescriptor -> fileToUrl(playPluginsDescriptor))
+                    .map(this::fileToUrl)
                     .collect(toList());
             }
             return Collections.list(Play.classloader.getResources(play_plugins_resourceName));

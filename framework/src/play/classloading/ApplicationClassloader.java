@@ -446,7 +446,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
 
-                Collections.sort(result, Comparator.comparing(Class::getName));
+                result.sort(Comparator.comparing(Class::getName));
             }
 
             Map<String, ApplicationClass> byNormalizedName = new HashMap<>(result.size());

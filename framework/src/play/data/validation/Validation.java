@@ -97,13 +97,7 @@ public class Validation {
      public static void removeErrors(String field, String message) {
          Validation validation = current.get();
          if (validation != null) {
-             Iterator<Error> it = validation.errors.iterator();
-             while (it.hasNext()) {
-                 Error error = it.next();
-                 if (error.key != null && error.key.equals(field) && error.message.equals(message)) {
-                     it.remove();
-                 }
-             }
+             validation.errors.removeIf(error -> error.key != null && error.key.equals(field) && error.message.equals(message));
          }
      }
      
@@ -114,13 +108,7 @@ public class Validation {
     public static void removeErrors(String field) {
         Validation validation = current.get();
         if (validation != null) {
-            Iterator<Error> it = validation.errors.iterator();
-            while (it.hasNext()) {
-                Error error = it.next();
-                if (error.key != null && error.key.equals(field)) {
-                    it.remove();
-                }
-            }
+            validation.errors.removeIf(error -> error.key != null && error.key.equals(field));
         }
     }
     

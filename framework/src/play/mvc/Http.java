@@ -576,7 +576,7 @@ public class Http {
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, (lang1, lang2) -> {
+            languages.sort((lang1, lang2) -> {
                 double q1 = 1.0;
                 double q2 = 1.0;
                 Matcher m1 = qpattern.matcher(lang1);

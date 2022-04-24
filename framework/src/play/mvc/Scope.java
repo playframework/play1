@@ -356,13 +356,7 @@ public class Scope {
 
         public void removeStartWith(String prefix) {
             checkAndParse();
-            Iterator<Map.Entry<String, String[]>> iterator = data.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String[]> entry = iterator.next();
-                if (entry.getKey().startsWith(prefix)) {
-                    iterator.remove();
-                }
-            }
+            data.entrySet().removeIf(entry -> entry.getKey().startsWith(prefix));
             // make sure rootsParamsNode is regenerated if needed
             rootParamsNodeIsGenerated = false;
         }

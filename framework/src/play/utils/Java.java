@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
 
@@ -473,12 +474,7 @@ class JavaWithCaching {
 
             ClassAndAnnotation that = (ClassAndAnnotation) o;
 
-            if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null)
-                return false;
-            if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null)
-                return false;
-
-            return true;
+            return Objects.equals(annotation, that.annotation) && Objects.equals(clazz, that.clazz);
         }
 
         @Override
@@ -543,7 +539,7 @@ class JavaWithCaching {
     private void sortByPriority(List<Method> methods, final Class<? extends Annotation> annotationType) {
         try {
             final Method priority = annotationType.getMethod("priority");
-            sort(methods, (m1, m2) -> {
+            methods.sort((m1, m2) -> {
                 try {
                     Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
                     Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));

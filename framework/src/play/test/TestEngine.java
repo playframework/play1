@@ -55,7 +55,7 @@ public class TestEngine {
                 }
             }
         }
-        Collections.sort(classes, classNameComparator);
+        classes.sort(classNameComparator);
         return classes;
     }
 
@@ -63,13 +63,9 @@ public class TestEngine {
         List<Class> classes = new ArrayList<>();
         classes.addAll(Play.classloader.getAssignableClasses(FunctionalTest.class));
         classes.addAll(Play.pluginCollection.getFunctionalTests());
-        
-        for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
-            if (Modifier.isAbstract(it.next().getModifiers())) {
-                it.remove();
-            }
-        }
-        Collections.sort(classes, classNameComparator);
+
+        classes.removeIf(aClass -> Modifier.isAbstract(aClass.getModifiers()));
+        classes.sort(classNameComparator);
         return classes;
     }
 
