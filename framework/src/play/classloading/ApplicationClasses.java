@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -30,13 +30,13 @@ public class ApplicationClasses {
     /**
      * Cache of all compiled classes
      */
-    Map<String, ApplicationClass> classes = new HashMap<>();
+    Map<String, ApplicationClass> classes = new ConcurrentHashMap<>();
 
     /**
      * Clear the classes cache
      */
     public void clear() {
-        classes = new HashMap<>();
+        classes = new ConcurrentHashMap<>();
     }
 
     /**
