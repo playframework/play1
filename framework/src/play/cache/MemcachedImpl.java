@@ -92,7 +92,7 @@ public class MemcachedImpl implements CacheImpl {
     public void initClient() throws IOException {
         String loggerImpl = System.getProperty("net.spy.log.LoggerImpl");
         if (loggerImpl == null) {
-            System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.Log4JLogger");
+            System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.SLF4JLogger");
         }        
         
         List<InetSocketAddress> addrs;
