@@ -149,7 +149,7 @@ public class FirePhoque {
             }
         });
         firephoque.setPromptHandler(new PromptHandler() {
-        	@Override
+            @Override
             public String handlePrompt(Page page, String message, String defaultValue) {
                 try {
                     ScriptableObject window = page.getEnclosingWindow().getScriptableObject();
