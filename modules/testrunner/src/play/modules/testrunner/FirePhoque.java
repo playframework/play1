@@ -84,7 +84,7 @@ public class FirePhoque {
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
-        } else if ("FIREFOX_38".equals(headlessBrowser)) {
+        } else if ("FIREFOX".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.FIREFOX;  
         }    else if ("INTERNET_EXPLORER".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER;
