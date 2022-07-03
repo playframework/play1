@@ -17,5 +17,17 @@ import net.sf.oval.configuration.annotation.Constraint;
 public @interface URL {
 
     String message() default URLCheck.mes;
+
+    /**
+     * TLDs have been made mandatory so single names like "localhost" fails'
+     * The default regex was built to match URLs having a real domain name (at least 2 labels separated by a dot).
+     * see: https://gist.github.com/dperini/729294
+     */
+    boolean tldMandatory() default true;
+
+    /**
+     * exclude loopback address space
+     */
+    boolean excludeLoopback() default true;
 }
 

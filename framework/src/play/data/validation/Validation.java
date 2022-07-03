@@ -400,14 +400,25 @@ public class Validation {
         return Validation.email(key, o);
     }
 
-    public static ValidationResult url(String key, Object o) {
+    public static ValidationResult url(String key, Object o, boolean tldMandatory, boolean excludeLoopback) {
         URLCheck check = new URLCheck();
+        check.tldMandatory = tldMandatory;
+        check.excludeLoopback = excludeLoopback;
         return applyCheck(check, key, o);
+    }
+
+    public static ValidationResult url(String key, Object o) {
+        return url(key, o, true, true);
+    }
+
+    public ValidationResult url(Object o, boolean tldMandatory, boolean excludeLoopback ) {
+        String key = getLocalName(o);
+        return Validation.url(key, o, tldMandatory, excludeLoopback);
     }
 
     public ValidationResult url(Object o) {
         String key = getLocalName(o);
-        return Validation.url(key, o);
+        return Validation.url(key, o, true, true);
     }
 
     public static ValidationResult phone(String key, Object o) {
