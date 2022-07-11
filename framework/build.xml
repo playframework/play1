@@ -2,7 +2,7 @@
 
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
-    <property name="baseversion" value="1.5.x" />
+    <property name="baseversion" value="1.7.x" />
 
     <path id="project.classpath">
         <fileset dir=".">
@@ -25,7 +25,7 @@
     </path>
 
     <target name="clean" description="clean resources">
-        <delete dir="classes" /> 
+        <delete dir="classes" />
         <delete dir="dist" />
         <delete dir="tests-results" />
         <delete dir="tests-tmp" />
@@ -46,7 +46,7 @@
                 <include name="**/data/**"/>
                 <include name="**/logs/**"/>
                 <include name="**/i-am-working-here/**"/>
-            </fileset> 
+            </fileset>
         </delete>
         <antcall target="clean-unittest"/>
     </target>
@@ -65,7 +65,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="1.8" target="1.8">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="11" target="11">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -98,7 +98,7 @@
             <tag name="play.todo" scope="all" description="To do:"/>
         	  <tag name="todo" scope="all" description="To do:"/>
             <group title="Libs" packages="play.libs.*"/>
-            <link offline="false" href="https://docs.oracle.com/javase/" />      
+            <link offline="false" href="https://docs.oracle.com/javase/" />
             <link offline="false" href="http://commons.apache.org/proper/commons-fileupload/apidocs/" />
             <link offline="false" href="https://www.javadoc.io/doc/com.google.code.gson/gson" />
             <link offline="false" href="https://docs.jboss.org/hibernate/orm/4.2/javadocs/" />
@@ -163,7 +163,7 @@
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
             <jvmarg value="${profiler.info.jvmargs.agent}"/>
             <jvmarg value="${jvm.memory}"/>
-        </java>	
+        </java>
     </target>
 
     <target name="nb-run-application">
@@ -190,7 +190,7 @@
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
             <jvmarg value="${jvm.memory}"/>
-        </java>	
+        </java>
     </target>
 
     <target name="nb-debug">
@@ -224,7 +224,7 @@
             <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
-        </java>	
+        </java>
     </target>
 
     <target name="test-in-nb" depends="test">
@@ -238,7 +238,7 @@
             <include name="**/*.java"/>
         </javac>
     </target>
-    
+
     <target name="build-test-modules">
         <ant antfile="build.xml" target="build" dir="../samples-and-tests/modules/testModule" >
             <property name="play.path" value="../../../"/>
@@ -254,7 +254,7 @@
         <condition property="playExtension" value="">
             <and><os family="unix"/></and>
         </condition>
-        <condition property="pythonExecutable" value="${basedir}/../python/python.exe">
+        <condition property="pythonExecutable" value="python">
             <and><os family="windows"/></and>
         </condition>
         <condition property="pythonExecutable" value="python">
@@ -264,7 +264,7 @@
         <echo message="Testing unittests" />
 
         <antcall target="unittest" />
-        
+
         <echo message="Testing development lifecycle (wait ...)" />
 
         <exec executable="${pythonExecutable}" failonerror="true">
@@ -389,7 +389,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="1.8" target="1.8">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="11" target="11">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">
@@ -421,12 +421,11 @@
         <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
     </target>
 
-    <target name="package" depends="clean,version,jar,javadoc">
-        <mkdir dir="dist" /> 
+    <target name="package" depends="artifact">
+        <mkdir dir="dist" />
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />
-            <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
-            <zipfileset prefix="play-${version}" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
+            <zipfileset prefix="play-${version}" dir="dist/play-${version}" includes="**/*" excludes="play" />
+            <zipfileset prefix="play-${version}" dir="dist/play-${version}" includes="play" filemode="777" />
         </zip>
     </target>
 
@@ -437,6 +436,15 @@
             <tarfileset prefix=".play" dir=".." includes="play" filemode="777" />
             <tarfileset prefix=".play" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
         </tar>
+    </target>
+
+    <target name="artifact" depends="clean,version,jar,javadoc">
+        <mkdir dir="dist" />
+        <mkdir dir="dist/play-${version}" />
+        <copy todir="dist/play-${version}">
+            <fileset dir=".." excludes=".github,**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />
+            <fileset dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
+        </copy>
     </target>
 
 </project>

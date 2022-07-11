@@ -102,7 +102,7 @@ public class Lang {
         ArrayList<String> cleanLocales = new ArrayList<>(desiredLocales.size());
         //look for an exact match
         for (String a : desiredLocales) {
-            a = a.replace("-", "_");
+            a = a.replace('-', '_');
             cleanLocales.add(a);
             for (String locale : Play.langs) {
                 if (locale.equalsIgnoreCase(a)) {
@@ -112,13 +112,13 @@ public class Lang {
         }
         // Exact match not found, try language-only match.
         for (String a : cleanLocales) {
-            int splitPos = a.indexOf("_");
+            int splitPos = a.indexOf('_');
             if (splitPos > 0) {
                 a = a.substring(0, splitPos);
             }
             for (String locale : Play.langs) {
                 String langOnlyLocale;
-                int localeSplitPos = locale.indexOf("_");
+                int localeSplitPos = locale.indexOf('_');
                 if (localeSplitPos > 0) {
                     langOnlyLocale = locale.substring(0, localeSplitPos);
                 } else {
@@ -211,7 +211,7 @@ public class Lang {
 
     private static Locale findLocale(String localeStr) {
         String lang = localeStr;
-        int splitPos = lang.indexOf("_");
+        int splitPos = lang.indexOf('_');
         if (splitPos > 0) {
             lang = lang.substring(0, splitPos);
         }

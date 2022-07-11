@@ -1,0 +1,33 @@
+# Play 1.6.0 -- Release notes
+
+Play 1.6.0 has been released of the master branch.
+
+The changes in this release are listed in the "Play 1.6.0 milestone":https://play.lighthouseapp.com/projects/57987-play-framework/milestones/_XXXXX on Lighthouse and "1.6.0 on github":https://github.com/playframework/play1/milestone/4209833 including 21 resolved tickets.
+
+
+## What's new in Play 1.6.0
+
+* "#1308":https://github.com/playframework/play1/issues/1308 : Adds exit codes to play deps command
+* "#1313":https://github.com/playframework/play1/issues/1313 : #1313 upgrade deprecated MySQL driver
+* "#1314":https://github.com/playframework/play1/issues/1314 : #1313 upgrade deprecated MySQL driver
+* "#1320":https://github.com/playframework/play1/issues/1320 : * Java8 Date/Time Binder Support
+* "#1324":https://github.com/playframework/play1/issues/1324 : JDK 13/14 support
+* "#1325":https://github.com/playframework/play1/issues/1325 : JDK 13 support
+
+## What's fixed in Play 1.6.0
+
+* "#1181":https://github.com/playframework/play1/issues/1181 : Avoid restoring of flash and session multiple times per request
+* "#1297":https://github.com/playframework/play1/issues/1297 : Custom SessionStore throws ClassNotFoundException
+* "#1306":https://github.com/playframework/play1/issues/1306 : update document url
+* "#1309":https://github.com/playframework/play1/issues/1309 : Upgrade java mail and commons email
+* "#1310":https://github.com/playframework/play1/issues/1310 : #1309: Upgrade java mail and commons email
+* "#1311":https://github.com/playframework/play1/issues/1311 : #1297 load session store using Play.classloader
+* "#1312":https://github.com/playframework/play1/issues/1312 : [#1312] stylesheet.tag missing trailing slash in documentation
+* "#1317":https://github.com/playframework/play1/issues/1317 : [#1316] Replace coma with comma
+* "#1322":https://github.com/playframework/play1/issues/1322 : [#4098] Make "play javadoc" fail if javadoc fails
+* "#1327":https://github.com/playframework/play1/issues/1327 : [#1935] Don't create CPU*2 "New I/O worker" threads for unused ports
+* "#1332":https://github.com/playframework/play1/issues/1332 : Compatibility with JDK 13 and 14
+* "#1338":https://github.com/playframework/play1/issues/1338 : Update to latest Eclipse JDT Core v3.23 to enable JDK 14 source
+* "#1339":https://github.com/playframework/play1/issues/1339 : Bump junit from 4.11 to 4.13.1 in /samples-and-tests/customJars/example
+* "#1340":https://github.com/playframework/play1/issues/1340 : Update junit dependencies
+* "#1341":https://github.com/playframework/play1/issues/1341 : [31340] update jnit form 4.11 to 4.13.1

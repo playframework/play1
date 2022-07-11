@@ -535,10 +535,11 @@ h2. <a name="stylesheet">stylesheet</a>
 
 テンプレートに @link@ タグを挿入します。利便性のため、このタグは @/public/stylesheets@ 内の CSS ファイルを参照します。
 
-* @src@ (必須) - @/public/stylesheets@ パスを含まないファイル名
+* @src@ (必須) - @/public/stylesheets/@ パスを含まないファイル名
 * @id@ (オプション) - 生成された @link@ タグの @id@ 属性の値
 * @media@ (オプション) - @media@ 属性の値: screen, print, aural, projection…
 * @title@ (オプション) - @title@ 属性の値 (または説明)
+* @path@ (オプション)
 
 @src@ パラメータはデフォルトの @arg@ 引数に置き換えることもできます。
 

@@ -7,21 +7,21 @@ public class OS {
 
     public static boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
-        return os != null && os.indexOf("win") >= 0;
+        return os.contains("win");
     }
 
     public static boolean isMac() {
         String os = System.getProperty("os.name").toLowerCase();
-        return os != null && (os.toLowerCase().indexOf("mac") >= 0);
+        return os.contains("mac");
     }
 
     public static boolean isUnix() {
         String os = System.getProperty("os.name").toLowerCase();
-        return os != null && (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("aix") > 0);
+        return os.contains("nix") || os.contains("nux") || os.contains("aix");
     }
 
     public static boolean isSolaris() {
         String os = System.getProperty("os.name").toLowerCase();
-        return (os != null && os.indexOf("sunos") >= 0);
+        return os.contains("sunos");
     }
 }

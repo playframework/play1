@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import str
 import os, os.path
 import shutil
 import time
@@ -30,9 +32,9 @@ def execute(**kargs):
     
     javaVersion = getJavaVersion()
     
-    print "~ using java version \"%s\"" % javaVersion
+    print("~ using java version \"%s\"" % javaVersion)
     if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
-        print "~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion
+        print("~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion)
             
     vm_arguments = vm_arguments +' -noverify'
 
@@ -77,7 +79,7 @@ def execute(**kargs):
         # pointers to source jars produced by 'play deps'
         src_file = os.path.join(lib_src, os.path.basename(el) + '.src')
         if os.path.exists(src_file):
-            f = file(src_file)
+            f = open(src_file, 'r')
             cpJarToSource[el] = f.readline().rstrip()
             f.close()
 
@@ -93,10 +95,10 @@ def execute(**kargs):
             if el == playJarPath:
                 cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s" />\n\t' % (os.path.normpath(el) , playSourcePath)
             else:
-                if cpJarToSource.has_key(el):
+                if el in cpJarToSource:
                     cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s"/>\n\t' % (os.path.normpath(el), cpJarToSource[el])
                 else:
-                    if javadocLocation.has_key(el):
+                    if el in javadocLocation:
                         cpXML += '<classpathentry kind="lib" path="%s">\n\t\t' % os.path.normpath(el)
                         cpXML += '<attributes>\n\t\t\t'
                         f = file(javadocLocation[el])
@@ -156,11 +158,11 @@ def execute(**kargs):
         os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
    
     if is_application:
-        print "~ OK, the application \"%s\" is ready for eclipse" % application_name
+        print("~ OK, the application \"%s\" is ready for eclipse" % application_name)
     else:
-        print "~ OK, the module \"%s\" is ready for eclipse" % application_name
-    print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path)
-    print "~"
-    print "~ Use eclipsify again when you want to update eclipse configuration files."
-    print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches..."
-    print "~"
+        print("~ OK, the module \"%s\" is ready for eclipse" % application_name)
+    print("~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path))
+    print("~")
+    print("~ Use eclipsify again when you want to update eclipse configuration files.")
+    print("~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches...")
+    print("~")

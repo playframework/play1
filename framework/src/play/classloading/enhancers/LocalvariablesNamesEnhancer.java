@@ -64,8 +64,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 // Normalize the variable name
                 // For several reasons, both variables name and name$1 will be aliased to name
                 String aliasedName = name;
-                if (aliasedName.contains("$")) {
-                    aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                int dollarIndex = aliasedName.indexOf('$');
+                if (dollarIndex >= 0) {
+                    aliasedName = aliasedName.substring(0, dollarIndex);
                 }
 
                 if ("this".equals(name)) {

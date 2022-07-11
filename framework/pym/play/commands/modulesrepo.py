@@ -1,14 +1,20 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from builtins import input
+from builtins import range
+from builtins import object
 import os
 import subprocess
 import sys
 import re
 import zipfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import shutil
 import string
 import imp
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import yaml
 
 from play.utils import *
@@ -78,12 +84,12 @@ class Downloader(object):
     before = .0
     history = []
     cycles = 0
-    average = lambda self: sum(self.history) / (len(self.history) or 1)
+    average = lambda self: sum(self.history) // (len(self.history) or 1)
 
     def __init__(self, width=55):
         self.width = width
-        self.kibi = lambda bits: bits / 2 ** 10
-        self.proc = lambda a, b: a / (b * 0.01)
+        self.kibi = lambda bits: bits // (2 ** 10)
+        self.proc = lambda a, b: a // (b * 0.01)
 
     def retrieve(self, url, destination, callback=None):
         self.size = 0
@@ -92,12 +98,12 @@ class Downloader(object):
           headers={'User-Agent':DEFAULT_USER_AGENT,
                   'Accept': 'application/json'
           } 
-          req = urllib2.Request(url, headers=headers)
-          result = urllib2.urlopen(req)
+          req = urllib.request.Request(url, headers=headers)
+          result = urllib.request.urlopen(req)
           self.chunk_read(result, destination, report_hook=self.chunk_report)        
         except KeyboardInterrupt:
-            print '\n~ Download cancelled'
-            print '~'
+            print('\n~ Download cancelled')
+            print('~')
             for i in range(5):
                 try:
                     os.remove(destination)
@@ -107,7 +113,7 @@ class Downloader(object):
             else: raise
             if callback: callback()
             sys.exit()
-        print ''
+        print('')
         return self.size
 
     def chunk_read(self, response, destination, chunk_size=8192, report_hook=None):
@@ -151,13 +157,13 @@ class Downloader(object):
             now = time.clock()
             elapsed = now-self.before
             if elapsed:
-                speed = self.kibi(blocksize * 3 / elapsed)
+                speed = self.kibi(blocksize * 3 // elapsed)
                 self.history.append(speed)
                 self.history = self.history[-4:]
             self.before = now
-        average = round(sum(self.history[-4:]) / 4, 1)
+        average = round(sum(self.history[-4:]) // 4, 1)
         self.size = self.kibi(bits)
-        print '\r~ [%s] %s KiB/s  ' % (bar, str(average)),
+        print('\r~ [%s] %s KiB/s  ' % (bar, str(average)), end=' ')
 
     def bar(self, bytes_so_far, filesize, done):
         span = self.width * done * 0.01
@@ -165,7 +171,7 @@ class Downloader(object):
         result = ('%s of %s KiB (%d%%)' % (self.kibi(bytes_so_far), self.kibi(filesize), done,)).center(self.width)
         return result.replace(' ', '-', int(span - offset))
 
-class Unzip:
+class Unzip(object):
     def __init__(self, verbose = False, percent = 10):
         self.verbose = verbose
         self.percent = percent
@@ -178,12 +184,12 @@ class Unzip:
         self._createstructure(file, dir)
         num_files = len(zf.namelist())
         percent = self.percent
-        divisions = 100 / percent
-        perc = int(num_files / divisions)
+        divisions = 100 // percent
+        perc = int( num_files / divisions)
         # extract files to directory structure
         for i, name in enumerate(zf.namelist()):
             if self.verbose == True:
-                print "Extracting %s" % name
+                print("Extracting %s" % name)
             elif perc > 0 and (i % perc) == 0 and i > 0:
                 complete = int (i / perc) * percent
             if not name.endswith('/'):
@@ -219,12 +225,12 @@ class Unzip:
 
 def new(app, args, play_env):
     if os.path.exists(app.path):
-        print "~ Oops. %s already exists" % app.path
-        print "~"
+        print("~ Oops. %s already exists" % app.path)
+        print("~")
         sys.exit(-1)
 
-    print "~ The new module will be created in %s" % os.path.normpath(app.path)
-    print "~"
+    print("~ The new module will be created in %s" % os.path.normpath(app.path))
+    print("~")
     application_name = os.path.basename(app.path)
     copy_directory(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
     # check_application()
@@ -233,7 +239,7 @@ def new(app, args, play_env):
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
-    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
+    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', application_name.lower())
     os.mkdir(os.path.join(app.path, 'app'))
     os.mkdir(os.path.join(app.path, 'app/controllers'))
     os.mkdir(os.path.join(app.path, 'app/controllers/%s' % application_name))
@@ -247,25 +253,25 @@ def new(app, args, play_env):
     os.mkdir(os.path.join(app.path, 'src/play/modules'))
     os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
 
-    print "~ OK, the module is created."
-    print "~ Start using it by adding it to the dependencies.yml of your project, as decribed in the documentation."
-    print "~"
-    print "~ Have fun!"
-    print "~"
+    print("~ OK, the module is created.")
+    print("~ Start using it by adding it to the dependencies.yml of your project, as decribed in the documentation.")
+    print("~")
+    print("~ Have fun!")
+    print("~")
 
 
 def list(app, args):
-    print "~ You can also browse this list online at:"
+    print("~ You can also browse this list online at:")
     for repo in repositories:
-        print "~    %s/modules" % repo
-    print "~"
+        print("~    %s/modules" % repo)
+    print("~")
 
     modules_list = load_module_list()
 
     for mod in modules_list:
-        print "~ [%s]" % mod['name']
-        print "~   %s" % mod['fullname']
-        print "~   %s/modules/%s" % (mod['server'], mod['name'])
+        print("~ [%s]" % mod['name'])
+        print("~   %s" % mod['fullname'])
+        print("~   %s/modules/%s" % (mod['server'], mod['name']))
 
         vl = ''
         i = 0
@@ -276,17 +282,17 @@ def list(app, args):
                 vl += ', '
 
         if vl:
-            print "~   Versions: %s" % vl
+            print("~   Versions: %s" % vl)
         else:
-            print "~   (No versions released yet)"
-        print "~"
+            print("~   (No versions released yet)")
+        print("~")
 
-    print "~ To install one of these modules use:"
-    print "~ play install module-version (eg: play install scala-1.0)"
-    print "~"
-    print "~ Or you can just install the default release of a module using:"
-    print "~ play install module (eg: play install scala)"
-    print "~"
+    print("~ To install one of these modules use:")
+    print("~ play install module-version (eg: play install scala-1.0)")
+    print("~")
+    print("~ Or you can just install the default release of a module using:")
+    print("~ play install module (eg: play install scala)")
+    print("~")
 
 
 def build(app, args, env):
@@ -305,9 +311,9 @@ def build(app, args, env):
                 version = a
             if o in ('--require'):
                 fwkMatch = a
-    except getopt.GetoptError, err:
-        print "~ %s" % str(err)
-        print "~ "
+    except getopt.GetoptError as err:
+        print("~ %s" % str(err))
+        print("~ ")
         sys.exit(-1)
 
     deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
@@ -324,7 +330,7 @@ def build(app, args, env):
                        version = splitted.pop()
                        name = splitted.pop()
             for dep in deps["require"]:
-                if isinstance(dep, basestring):
+                if isinstance(dep, str):
                     splitted = dep.split(" ")
                     if len(splitted) == 2 and splitted[0] == "play":
                         fwkMatch = splitted[1]
@@ -334,9 +340,9 @@ def build(app, args, env):
     if name is None:
         name = os.path.basename(app.path)
     if version is None:
-        version = raw_input("~ What is the module version number? ")
+        version = input("~ What is the module version number? ")
     if fwkMatch is None:
-        fwkMatch = raw_input("~ What are the playframework versions required? ")
+        fwkMatch = input("~ What are the playframework versions required? ")
 
     if os.path.exists(deps_file):
         f = open(deps_file)
@@ -358,11 +364,11 @@ def build(app, args, env):
 
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
-        print "~"
-        print "~ Building..."
-        print "~"
+        print("~")
+        print("~ Building...")
+        print("~")
         status = subprocess.call('ant -f %s -Dplay.path=%s' % (build_file, ftb), shell=True)
-        print "~"
+        print("~")
         if status:
             sys.exit(status)
 
@@ -404,16 +410,16 @@ def build(app, args, env):
         except:
             pass
 
-    print "~"
-    print "~ Done!"
-    print "~ Package is available at %s" % os.path.join(dist_dir, '%s.zip' % mv)
-    print "~"
+    print("~")
+    print("~ Done!")
+    print("~ Package is available at %s" % os.path.join(dist_dir, '%s.zip' % mv))
+    print("~")
 
 
 def install(app, args, env):
     if len(sys.argv) < 3:
         help_file = os.path.join(env["basedir"], 'documentation/commands/cmd-install.txt')
-        print open(help_file, 'r').read()
+        print(open(help_file, 'r').read())
         sys.exit(0)
 
     name = cmd = sys.argv[2]
@@ -422,7 +428,7 @@ def install(app, args, env):
     version = groups.group(3)
 
     server = None
-    if args is not None:
+    if args != None:
         for param in args:
             if param.startswith("--force-server="):
                 server = param[15:]
@@ -433,48 +439,48 @@ def install(app, args, env):
         if mod['name'] == module:
             for v in mod['versions']:
                 if version is None and v['isDefault']:
-                    print '~ Will install %s-%s' % (module, v['version'])
-                    print '~ This module is compatible with: %s' % v['matches']
-                    ok = raw_input('~ Do you want to install this version (y/n)? ')
+                    print('~ Will install %s-%s' % (module, v['version']))
+                    print('~ This module is compatible with: %s' % v['matches'])
+                    ok = input('~ Do you want to install this version (y/n)? ')
                     if not ok == 'y':
-                        print '~'
+                        print('~')
                         sys.exit(-1)
-                    print '~ Installing module %s-%s...' % (module, v['version'])
+                    print('~ Installing module %s-%s...' % (module, v['version']))
                     fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
                 if version  == v['version']:
-                    print '~ Will install %s-%s' % (module, v['version'])
-                    print '~ This module is compatible with: %s' % v['matches']
-                    ok = raw_input('~ Do you want to install this version (y/n)? ')
+                    print('~ Will install %s-%s' % (module, v['version']))
+                    print('~ This module is compatible with: %s' % v['matches'])
+                    ok = input('~ Do you want to install this version (y/n)? ')
                     if not ok == 'y':
-                        print '~'
+                        print('~')
                         sys.exit(-1)
 
-                    print '~ Installing module %s-%s...' % (module, v['version'])
+                    print('~ Installing module %s-%s...' % (module, v['version']))
                     fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
 
     if fetch is None:
-        print '~ No module found \'%s\'' % name
-        print '~ Try play list-modules to get the modules list'
-        print '~'
+        print('~ No module found \'%s\'' % name)
+        print('~ Try play list-modules to get the modules list')
+        print('~')
         sys.exit(-1)
 
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
 
-    print '~'
-    print '~ Fetching %s' % fetch
+    print('~')
+    print('~ Fetching %s' % fetch)
 
     Downloader().retrieve(fetch, archive)
 
     if not os.path.exists(archive):
-        print '~ Oops, file does not exist'
-        print '~'
+        print('~ Oops, file does not exist')
+        print('~')
         sys.exist(-1)
 
-    print '~ Unzipping...'
+    print('~ Unzipping...')
 
     if os.path.exists(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version']))):
         shutil.rmtree(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
@@ -482,13 +488,13 @@ def install(app, args, env):
 
     Unzip().extract(archive, os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.remove(archive)
-    print '~'
-    print '~ Module %s-%s is installed!' % (module, v['version'])
-    print '~ You can now use it by adding it to the dependencies.yml file:'
-    print '~'
-    print '~ require:'
-    print '~     play -> %s %s' % (module, v['version'])
-    print '~'
+    print('~')
+    print('~ Module %s-%s is installed!' % (module, v['version']))
+    print('~ You can now use it by adding it to the dependencies.yml file:')
+    print('~')
+    print('~ require:')
+    print('~     play -> %s %s' % (module, v['version']))
+    print('~')
     sys.exit(0)
 
 
@@ -501,20 +507,20 @@ def add(app, args, env):
         for o, a in optlist:
             if o in ('--module'):
                 m = a
-    except getopt.GetoptError, err:
-        print "~ %s" % str(err)
-        print "~ "
+    except getopt.GetoptError as err:
+        print("~ %s" % str(err))
+        print("~ ")
         sys.exit(-1)
 
     if m is None:
-        print "~ Usage: play add --module=<modulename>"
-        print "~ "
+        print("~ Usage: play add --module=<modulename>")
+        print("~ ")
         sys.exit(-1)
 
     appConf = os.path.join(app.path, 'conf/application.conf')
     if not fileHas(appConf, '# ---- MODULES ----'):
-        print "~ Line '---- MODULES ----' missing in your application.conf. Add it to use this command."
-        print "~ "
+        print("~ Line '---- MODULES ----' missing in your application.conf. Add it to use this command.")
+        print("~ ")
         sys.exit(-1)
 
     mn = m
@@ -522,13 +528,13 @@ def add(app, args, env):
         mn = mn[:mn.find('-')]
 
     if mn in app.module_names():
-        print "~ Module %s already declared in application.conf, not doing anything." % mn
-        print "~ "
+        print("~ Module %s already declared in application.conf, not doing anything." % mn)
+        print("~ ")
         sys.exit(-1)
 
     replaceAll(appConf, r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
-    print "~ Module %s add to application %s." % (mn, app.name())
-    print "~ "
+    print("~ Module %s add to application %s." % (mn, app.name()))
+    print("~ ")
 
 
 def load_module_list(custom_server=None):
@@ -543,7 +549,7 @@ def load_module_list(custom_server=None):
         return False
 
     modules = None
-    if custom_server is not None:
+    if custom_server != None:
         rev = [custom_server]
     else:
         rev = repositories[:] # clone
@@ -552,7 +558,7 @@ def load_module_list(custom_server=None):
     for repo in rev:
         result = load_modules_from(repo)
         if modules is None:
-            modules = map(lambda m: addServer(m, repo), result['modules'])
+            modules = [addServer(m, repo) for m in result['modules']]
         else:
             for module in result['modules']:
                 if not any(modules, lambda m: m['name'] == module['name']):
@@ -566,17 +572,17 @@ def load_modules_from(modules_server):
         headers={'User-Agent':DEFAULT_USER_AGENT,
                 'Accept': 'application/json'
         } 
-        req = urllib2.Request(url, headers=headers)
-        result = urllib2.urlopen(req)
+        req = urllib.request.Request(url, headers=headers)
+        result = urllib.request.urlopen(req)
         return json.loads(result.read())
-    except urllib2.HTTPError, e:
-        print "~ Oops,"
-        print "~ Cannot fetch the modules list from %s (%s)..." % (url, e.code)
-        print e.reason
-        print "~"
+    except urllib.error.HTTPError as e:
+        print("~ Oops,")
+        print("~ Cannot fetch the modules list from %s (%s)..." % (url, e.code))
+        print(e.reason)
+        print("~")
         sys.exit(-1)
-    except urllib2.URLError, e:
-        print "~ Oops,"
-        print "~ Cannot fetch the modules list from %s ..." % (url)
-        print "~"
+    except urllib.error.URLError as e:
+        print("~ Oops,")
+        print("~ Cannot fetch the modules list from %s ..." % (url))
+        print("~")
         sys.exit(-1)
