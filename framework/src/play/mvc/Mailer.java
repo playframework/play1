@@ -483,12 +483,6 @@ public class Mailer implements LocalVariablesSupport {
                 }
             }
 
-            // Recipients
-            List<String> recipientList = (List<String>) infos.get().get("recipients");
-            // From
-            String from = (String) infos.get().get("from");
-            String replyTo = (String) infos.get().get("replyTo");
-
             Email email;
             if (infos.get().get("attachments") == null && infos.get().get("datasources") == null
                     && infos.get().get("inlineEmbeds") == null) {
@@ -542,64 +536,7 @@ public class Mailer implements LocalVariablesSupport {
                 }
             }
             email.setCharset("utf-8");
-
-            if (from != null) {
-                try {
-                    InternetAddress iAddress = new InternetAddress(from);
-                    email.setFrom(iAddress.getAddress(), iAddress.getPersonal());
-                } catch (Exception e) {
-                    email.setFrom(from);
-                }
-
-            }
-
-            if (replyTo != null) {
-                try {
-                    InternetAddress iAddress = new InternetAddress(replyTo);
-                    email.addReplyTo(iAddress.getAddress(), iAddress.getPersonal());
-                } catch (Exception e) {
-                    email.addReplyTo(replyTo);
-                }
-
-            }
-
-            if (recipientList != null) {
-                for (String recipient : recipientList) {
-                    try {
-                        InternetAddress iAddress = new InternetAddress(recipient);
-                        email.addTo(iAddress.getAddress(), iAddress.getPersonal());
-                    } catch (Exception e) {
-                        email.addTo(recipient);
-                    }
-                }
-            } else {
-                throw new MailException("You must specify at least one recipient.");
-            }
-
-            List<String> ccsList = (List<String>) infos.get().get("ccs");
-            if (ccsList != null) {
-                for (String cc : ccsList) {
-                    try {
-                        InternetAddress iAddress = new InternetAddress(cc);
-                        email.addCc(iAddress.getAddress(), iAddress.getPersonal());
-                    } catch (Exception e) {
-                        email.addCc(cc);
-                    }
-                }
-            }
-
-            List<String> bccsList = (List<String>) infos.get().get("bccs");
-            if (bccsList != null) {
-
-                for (String bcc : bccsList) {
-                    try {
-                        InternetAddress iAddress = new InternetAddress(bcc);
-                        email.addBcc(iAddress.getAddress(), iAddress.getPersonal());
-                    } catch (Exception e) {
-                        email.addBcc(bcc);
-                    }
-                }
-            }
+            setAddresses(email);
             if (!StringUtils.isEmpty(charset)) {
                 email.setCharset(charset);
             }
@@ -616,6 +553,66 @@ public class Mailer implements LocalVariablesSupport {
             return Mail.send(email);
         } catch (EmailException ex) {
             throw new MailException("Cannot send email", ex);
+        }
+    }
+
+    public static void setAddresses(Email email) throws EmailException {
+        String from = (String) infos.get().get("from");
+        if (from != null) {
+            try {
+                InternetAddress iAddress = new InternetAddress(from);
+                email.setFrom(iAddress.getAddress(), iAddress.getPersonal());
+            } catch (Exception e) {
+                email.setFrom(from);
+            }
+        }
+
+        String replyTo = (String) infos.get().get("replyTo");
+        if (replyTo != null) {
+            try {
+                InternetAddress iAddress = new InternetAddress(replyTo);
+                email.addReplyTo(iAddress.getAddress(), iAddress.getPersonal());
+            } catch (Exception e) {
+                email.addReplyTo(replyTo);
+            }
+        }
+
+        List<String> recipientList = (List<String>) infos.get().get("recipients");
+        if (recipientList != null) {
+            for (String recipient : recipientList) {
+                try {
+                    InternetAddress iAddress = new InternetAddress(recipient);
+                    email.addTo(iAddress.getAddress(), iAddress.getPersonal());
+                } catch (Exception e) {
+                    email.addTo(recipient);
+                }
+            }
+        } else {
+            throw new MailException("You must specify at least one recipient.");
+        }
+
+        List<String> ccsList = (List<String>) infos.get().get("ccs");
+        if (ccsList != null) {
+            for (final String cc : ccsList) {
+                try {
+                    final InternetAddress iAddress = new InternetAddress(cc);
+                    email.addCc(iAddress.getAddress(), iAddress.getPersonal());
+                } catch (final Exception e) {
+                    email.addCc(cc);
+                }
+            }
+        }
+
+        List<String> bccsList = (List<String>) infos.get().get("bccs");
+        if (bccsList != null) {
+            for (String bcc : bccsList) {
+                try {
+                    InternetAddress iAddress = new InternetAddress(bcc);
+                    email.addBcc(iAddress.getAddress(), iAddress.getPersonal());
+                } catch (Exception e) {
+                    email.addBcc(bcc);
+                }
+            }
         }
     }
 
