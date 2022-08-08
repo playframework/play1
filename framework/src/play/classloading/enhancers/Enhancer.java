@@ -76,7 +76,7 @@ public abstract class Enhancer {
 
             if (Play.usePrecompiled) {
                 try {
-                    File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
+                    File file = Play.getFile("precompiled/java/" + className.replace('.', '/') + ".class");
                     return new FileInputStream(file);
                 } catch (Exception e) {
                     Logger.error("Missing class %s", className);

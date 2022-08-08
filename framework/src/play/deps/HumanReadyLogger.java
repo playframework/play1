@@ -88,7 +88,7 @@ public class HumanReadyLogger implements MessageLogger, TransferListener {
             }
 
             if (msg.startsWith("[SUCCESSFUL")) {
-                msg = msg.substring(msg.indexOf("("));
+                msg = msg.substring(msg.indexOf('('));
                 System.out.println("\r~ \t" + (downloading + "                    ").replace("(jar)", "").replace("downloading", "downloaded").replace("...", "   "));
             }
 

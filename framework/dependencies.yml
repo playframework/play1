@@ -8,72 +8,73 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.7
-    - com.mchange -> c3p0 0.9.5.2
-    - com.zaxxer -> HikariCP 3.2.0
-    - org.ow2.asm -> asm 7.0
-    - org.ow2.asm -> asm-commons 7.0
-    - org.ow2.asm -> asm-util 7.0
-    - org.ow2.asm -> asm-tree 7.0
-    - org.ow2.asm -> asm-analysis 7.0
-    - cglib -> cglib 3.2.7
-    - com.google.code.gson -> gson 2.8.5
-    - com.jamonapi -> jamon 2.81
+    - com.mchange -> c3p0 0.9.5.5
+    - com.zaxxer -> HikariCP 5.0.1
+    - org.ow2.asm -> asm 9.3
+    - org.ow2.asm -> asm-commons 9.3
+    - org.ow2.asm -> asm-util 9.3
+    - org.ow2.asm -> asm-tree 9.3
+    - org.ow2.asm -> asm-analysis 9.3
+    - cglib -> cglib 3.3.0
+    - com.google.code.gson -> gson 2.9.0
+    - com.jamonapi -> jamon 2.82
     - com.ning -> async-http-client 1.9.40
-    - commons-beanutils 1.9.2 
-    - commons-codec 1.10
+    - commons-beanutils 1.9.4
+    - commons-codec 1.15
     - org.apache.commons -> commons-email 1.5
-    - commons-fileupload 1.3.2
-    - commons-io 2.5
+    - commons-fileupload 1.4
+    - commons-io 2.11.0
     - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
     - commons-lang 2.6
     - commons-logging 1.2
-    - dom4j 1.6.1
-    - com.h2database -> h2 1.4.196
-    - javax.activation -> activation 1.1.1
+    - org.dom4j -> dom4j 2.1.3
+    - com.h2database -> h2 1.4.200
+    - javax.activation -> javax.activation-api 1.2.0
     - com.sun.mail -> javax.mail 1.6.2
     - javax.inject 1.0
     - javax.validation -> validation-api 1.1.0.Final
-    - jaxen 1.1.6
-    - joda-time 2.10
+    - jaxen 1.2.0
+    - joda-time 2.10.14
     - org.hamcrest -> hamcrest-all 1.3
-    - junit 4.12
+    - junit 4.13.2
     - jregex 1.2_01
-    - log4j 1.2.17
-    - net.sf.ehcache -> ehcache 2.10.6
+    - log4j-api 2.17.2
+    - log4j-core 2.17.2
+    - net.sf.ehcache -> ehcache 2.10.9.2
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.1
-    - net.sf.oval -> oval 1.86
-    - mysql -> mysql-connector-java 8.0.17
+    - net.sf.oval -> oval 1.90
+    - mysql -> mysql-connector-java 8.0.29
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
-    - org.apache.ivy -> ivy 2.4.0
-    - org.bouncycastle -> bcprov-jdk15on 1.61
-    - org.bouncycastle -> bcpkix-jdk15on 1.61
-    - org.codehaus.groovy -> groovy 2.5.3
-    - org.codehaus.groovy -> groovy-xml 2.5.3
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.16.0
-    - org.hibernate -> hibernate-core 5.4.1.Final.patched
-    - net.bytebuddy -> byte-buddy 1.9.5
+    - org.apache.ivy -> ivy 2.5.0
+    - org.bouncycastle -> bcprov-jdk18on 1.71
+    - org.bouncycastle -> bcpkix-jdk18on 1.71
+    - org.codehaus.groovy -> groovy 3.0.11
+    - org.codehaus.groovy -> groovy-xml 3.0.11
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.30.0
+    - org.hibernate -> hibernate-core 5.6.5.Final.patched
+    - net.bytebuddy -> byte-buddy 1.12.10
     - javax.persistence -> javax.persistence-api 2.2
-    - org.hibernate.common -> hibernate-commons-annotations 5.0.1.Final
+    - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
     - org.hibernate -> hibernate-validator 5.4.1.Final
-    - org.jboss.logging -> jboss-logging 3.3.0.Final 
-    - org.jboss.spec.javax.transaction -> jboss-transaction-api_1.2_spec 1.0.1.Final
-    - javax.persistence -> javax.persistence-api 2.2 
+    - org.jboss -> jandex 2.4.2.Final
+    - org.jboss.logging -> jboss-logging 3.5.0.Final
+    - org.jboss.spec.javax.transaction -> jboss-transaction-api_1.2_spec 1.1.1.Final
     - javax.xml.bind -> jaxb-api 2.3.1
-    - org.glassfish.jaxb -> jaxb-runtime 2.3.1
-    - com.fasterxml -> classmate 1.3.4
-    - org.hibernate -> hibernate-c3p0 5.4.1.Final
-    - org.hibernate -> hibernate-ehcache 5.4.1.Final
-    - com.mchange -> mchange-commons-java 0.2.12
-    - org.javassist -> javassist 3.24.0-GA
+    - org.glassfish.jaxb -> jaxb-runtime 2.3.6
+    - com.fasterxml -> classmate 1.5.1
+    - org.hibernate -> hibernate-c3p0 5.6.5.Final
+    - org.hibernate -> hibernate-ehcache 5.6.5.Final
+    - com.mchange -> mchange-commons-java 0.2.20
+    - org.javassist -> javassist 3.29.0-GA
     - io.netty -> netty 3.10.6.Final
-    - org.postgresql -> postgresql 42.2.4
-    - org.slf4j -> slf4j-api 1.7.22
-    - org.slf4j -> slf4j-log4j12 1.7.22
-    - org.yaml -> snakeyaml 1.17
-    - net.spy -> spymemcached 2.12.1
-    - com.thoughtworks.xstream -> xstream 1.4.9
+    - org.postgresql -> postgresql 42.4.0
+    - org.slf4j -> slf4j-api 1.7.36
+    - org.apache.logging.log4j -> log4j-slf4j-impl 2.17.2
+    - org.yaml -> snakeyaml 1.30
+    - net.spy -> spymemcached 2.12.3
+    - com.thoughtworks.xstream -> xstream 1.4.19
     - xmlpull 1.1.3.4d_b4_min
 
 # Default repositories, used for all projects

@@ -128,21 +128,18 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     }
 
     private Callable<V> getJobCallingCallable(final Promise<V> smartFuture) {
-        return new Callable<V>() {
-            @Override
-            public V call() throws Exception {
-                try {
-                    V result = Job.this.call();
-                    if (smartFuture != null) {
-                        smartFuture.invoke(result);
-                    }
-                    return result;
-                } catch (Exception e) {
-                    if (smartFuture != null) {
-                        smartFuture.invokeWithException(e);
-                    }
-                    return null;
+        return () -> {
+            try {
+                V result = Job.this.call();
+                if (smartFuture != null) {
+                    smartFuture.invoke(result);
                 }
+                return result;
+            } catch (Exception e) {
+                if (smartFuture != null) {
+                    smartFuture.invokeWithException(e);
+                }
+                return null;
             }
         };
     }
@@ -217,12 +214,9 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
                     // If we have a plugin, get him to execute the job within the filter.
                     final AtomicBoolean executed = new AtomicBoolean(false);
-                    result = this.withinFilter(new play.libs.F.Function0<V>() {
-                        @Override
-                        public V apply() throws Throwable {
-                            executed.set(true);
-                            return doJobWithResult();
-                        }
+                    result = this.withinFilter(() -> {
+                        executed.set(true);
+                        return doJobWithResult();
                     });
 
                     // No filter function found => we need to execute anyway( as before the use of withinFilter )

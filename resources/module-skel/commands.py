@@ -13,7 +13,7 @@ def execute(**kargs):
     env = kargs.get("env")
 
     if command == "%MODULE%:hello":
-        print "~ Hello"
+        print("~ Hello")
 
 
 # This will be executed before any command (new, run...)

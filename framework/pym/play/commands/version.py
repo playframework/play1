@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 COMMANDS = ['version']
 
@@ -11,4 +12,4 @@ def execute(**kargs):
 
     # If we've shown the logo, then the version has already been printed
     if not showLogo:
-        print env["version"]
+        print(env["version"])

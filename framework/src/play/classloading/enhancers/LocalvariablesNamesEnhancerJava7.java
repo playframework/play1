@@ -56,13 +56,7 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                         parameterNames.add(new T2<>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
                     }
                 }
-                Collections.sort(parameterNames, new Comparator<T2<Integer,String>>() {
-                    @Override
-                    public int compare(T2<Integer, String> o1, T2<Integer, String> o2) {
-                        return o1._1.compareTo(o2._1);
-                    }
-
-                });
+                Collections.sort(parameterNames, Comparator.comparing(o -> o._1));
             }
             List<String> names = new ArrayList<>();
             for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {
@@ -86,8 +80,9 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                 for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     iv.append("\"");
                     String aliasedName = i.next();
-                    if (aliasedName.contains("$")) {
-                        aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                    int dollarIndex = aliasedName.indexOf('$');
+                    if (dollarIndex >= 0) {
+                        aliasedName = aliasedName.substring(0, dollarIndex);
                     }
                     iv.append(aliasedName);
                     iv.append("\"");
@@ -122,8 +117,9 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                 // Normalize the variable name
                 // For several reasons, both variables name and name$1 will be aliased to name
                 String aliasedName = name;
-                if (aliasedName.contains("$")) {
-                    aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                int dollarIndex = aliasedName.indexOf('$');
+                if (dollarIndex >= 0) {
+                    aliasedName = aliasedName.substring(0, dollarIndex);
                 }
 
 

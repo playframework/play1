@@ -2,12 +2,12 @@
 
 require:
     - play
-    - play-codeborne -> guice 1.9
-    - com.google.guava -> guava 23.0
+    - play-tazmaniax -> guice 1.11.1
+    - com.google.guava -> guava 31.0.1-jre
 
 repositories:
-    - codeborne:
+    - tazmaniax:
         type: http
-        artifact: https://repo.codeborne.com/play-[module]/[module]-[revision].zip
+        artifact: https://github.com/tazmaniax/play-[module]/releases/download/v[revision]/[module]-[revision].zip
         contains:
-            - play-codeborne -> *
+            - play-tazmaniax -> *

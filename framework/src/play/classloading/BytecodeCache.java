@@ -8,13 +8,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 
 /**
  * Used to speed up compilation time
  */
 public class BytecodeCache {
+
+    private static final Pattern REPLACED_CHARS = Pattern.compile("[/{}:]");
 
     /**
      * Delete the bytecode
@@ -25,7 +29,7 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             if (f.exists()) {
                 f.delete();
             }
@@ -45,7 +49,7 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return null;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             if (f.exists()) {
                 FileInputStream fis = new FileInputStream(f);
                 // Read hash
@@ -90,16 +94,16 @@ public class BytecodeCache {
             if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
+            File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             try (FileOutputStream fos = new FileOutputStream(f)) {
-                fos.write(hash(source).getBytes("utf-8"));
+                fos.write(hash(source).getBytes(UTF_8));
                 fos.write(0);
                 fos.write(byteCode);
             }
 
             // emit bytecode to standard class layout as well
             if (!name.contains("/") && !name.contains("{")) {
-                f = new File(Play.tmpDir, "classes/" + name.replace(".", "/") + ".class");
+                f = new File(Play.tmpDir, "classes/" + name.replace('.', '/') + ".class");
                 f.getParentFile().mkdirs();
                 writeByteArrayToFile(f, byteCode);
             }
@@ -124,7 +128,7 @@ public class BytecodeCache {
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((Play.version + plugins + text).getBytes("utf-8"));
+            messageDigest.update((Play.version + plugins + text).getBytes(UTF_8));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

@@ -10,27 +10,32 @@ Usage::
     Expecting property name: line 1 column 2 (char 2)
 
 """
+from __future__ import with_statement
 import sys
-import simplejson
+import simplejson as json
 
 def main():
     if len(sys.argv) == 1:
         infile = sys.stdin
         outfile = sys.stdout
     elif len(sys.argv) == 2:
-        infile = open(sys.argv[1], 'rb')
+        infile = open(sys.argv[1], 'r')
         outfile = sys.stdout
     elif len(sys.argv) == 3:
-        infile = open(sys.argv[1], 'rb')
-        outfile = open(sys.argv[2], 'wb')
+        infile = open(sys.argv[1], 'r')
+        outfile = open(sys.argv[2], 'w')
     else:
         raise SystemExit(sys.argv[0] + " [infile [outfile]]")
-    try:
-        obj = simplejson.load(infile)
-    except ValueError, e:
-        raise SystemExit(e)
-    simplejson.dump(obj, outfile, sort_keys=True, indent=4)
-    outfile.write('\n')
+    with infile:
+        try:
+            obj = json.load(infile,
+                            object_pairs_hook=json.OrderedDict,
+                            use_decimal=True)
+        except ValueError:
+            raise SystemExit(sys.exc_info()[1])
+    with outfile:
+        json.dump(obj, outfile, sort_keys=True, indent='    ', use_decimal=True)
+        outfile.write('\n')
 
 
 if __name__ == '__main__':

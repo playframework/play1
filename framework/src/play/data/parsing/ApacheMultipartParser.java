@@ -1,5 +1,6 @@
 package play.data.parsing;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.apache.commons.io.FileUtils.readFileToByteArray;
 
 import java.io.ByteArrayInputStream;
@@ -47,17 +48,17 @@ import play.utils.HTTP;
 public class ApacheMultipartParser extends DataParser {
 
     private static void putMapEntry(Map<String, String[]> map, String name, String value) {
-        String[] newValues;
-        String[] oldValues = map.get(name);
-        if (oldValues == null) {
-            newValues = new String[1];
-            newValues[0] = value;
-        } else {
-            newValues = new String[oldValues.length + 1];
+        map.compute(name, (key, oldValues) -> {
+            if (oldValues == null) {
+                return new String[] { value };
+            }
+
+            String[] newValues = new String[oldValues.length + 1];
             System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
             newValues[oldValues.length] = value;
-        }
-        map.put(name, newValues);
+
+            return newValues;
+        });
     }
 
     /*
@@ -546,11 +547,7 @@ public class ApacheMultipartParser extends DataParser {
                         putMapEntry(result, fileItem.getFieldName(), fileItem.getString(_encoding));
                     } else {
                         @SuppressWarnings("unchecked")
-                        List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-                        if (uploads == null) {
-                            uploads = new ArrayList<>();
-                            Request.current().args.put("__UPLOADS", uploads);
-                        }
+                        List<Upload> uploads = (List<Upload>) Request.current().args.computeIfAbsent("__UPLOADS", k -> new ArrayList<>());
                         try {
                             uploads.add(new FileUpload(fileItem));
                         } catch (Exception e) {
@@ -634,13 +631,7 @@ public class ApacheMultipartParser extends DataParser {
         if (boundaryStr == null) {
             return null;
         }
-        byte[] boundary;
-        try {
-            boundary = boundaryStr.getBytes("ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            boundary = boundaryStr.getBytes();
-        }
-        return boundary;
+        return boundaryStr.getBytes(ISO_8859_1);
     }
 
     /**

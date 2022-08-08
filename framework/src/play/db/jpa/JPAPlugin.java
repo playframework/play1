@@ -1,9 +1,27 @@
 package play.db.jpa;
 
-import org.apache.log4j.Level;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.PersistenceUnit;
+import javax.persistence.Query;
+import javax.persistence.spi.PersistenceUnitInfo;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -16,12 +34,6 @@ import play.db.DB;
 import play.db.Model;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
-
-import javax.persistence.*;
-import javax.persistence.spi.PersistenceUnitInfo;
-
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -107,15 +119,15 @@ public class JPAPlugin extends PlayPlugin {
      * Reads the configuration file and initialises required JPA EntityManagerFactories.
      */
     @Override
-    public void onApplicationStart() {  
-        org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+    public void onApplicationStart() {
+        Configurator.setLevel("org.hibernate.SQL", Level.OFF);
 
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
             Configuration dbConfig = new Configuration(dbName);
             
             if (dbConfig.getProperty("jpa.debugSQL", "false").equals("true")) {
-                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
+                Configurator.setLevel("org.hibernate.SQL", Level.ALL);
             }
 
             Thread thread = Thread.currentThread();
@@ -134,7 +146,7 @@ public class JPAPlugin extends PlayPlugin {
         }
         JPQL.instance = new JPQL();
     }
-    
+
     private List<Class> entityClasses(String dbName) {
         List<Class> entityClasses = new ArrayList<>();
         

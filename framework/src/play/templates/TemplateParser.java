@@ -41,7 +41,7 @@ public class TemplateParser {
 
     public Integer getLine() {
         String token = pageSource.substring(0, begin2);
-        if (token.indexOf("\n") == -1) {
+        if (token.indexOf('\n') == -1) {
             return 1;
         } else {
             return token.split("\n").length;

@@ -1,6 +1,6 @@
 h1. ログの設定
 
-Play のロガーは組み込みの "Log4j":http://logging.apache.org/log4j/1.2/index.html です。ほとんどの Java ライブラリが Log4j か、または Log4j をバックエンドとして使えるラッパを使用するので、アプリケーションに適合するよう、容易にロギングを設定することができます。
+Play のロガーは組み込みの "Log4j":https://logging.apache.org/log4j/2.x/ です。ほとんどの Java ライブラリが Log4j か、または Log4j をバックエンドとして使えるラッパを使用するので、アプリケーションに適合するよう、容易にロギングを設定することができます。
 
 h2. <a name="logging">アプリケーションからのロギング</a>
 

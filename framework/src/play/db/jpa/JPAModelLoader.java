@@ -404,26 +404,14 @@ public class JPAModelLoader implements Model.Factory {
                     modelProperty.isRelation = true;
                     modelProperty.relationType = field.getType();
                     final String modelDbName = JPA.getDBName(modelProperty.relationType);
-                    modelProperty.choices = new Model.Choices() {
-                        @SuppressWarnings("unchecked")
-                        @Override
-                        public List<Object> list() {
-                            return JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
-                        }
-                    };
+                    modelProperty.choices = () -> JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
                 }
             }
             if (field.isAnnotationPresent(ManyToOne.class)) {
                 modelProperty.isRelation = true;
                 modelProperty.relationType = field.getType();
                 final String modelDbName = JPA.getDBName(modelProperty.relationType);
-                modelProperty.choices = new Model.Choices() {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public List<Object> list() {
-                        return JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
-                    }
-                };
+                modelProperty.choices = () -> JPA.em(modelDbName).createQuery("from " + field.getType().getName()).getResultList();
             }
         }
         if (Collection.class.isAssignableFrom(field.getType())) {
@@ -434,13 +422,7 @@ public class JPAModelLoader implements Model.Factory {
                     modelProperty.isMultiple = true;
                     modelProperty.relationType = fieldType;
                     final String modelDbName = JPA.getDBName(modelProperty.relationType);
-                    modelProperty.choices = new Model.Choices() {
-                        @SuppressWarnings("unchecked")
-                        @Override
-                        public List<Object> list() {
-                            return JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
-                        }
-                    };
+                    modelProperty.choices = () -> JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
                 }
             }
             if (field.isAnnotationPresent(ManyToMany.class)) {
@@ -449,26 +431,12 @@ public class JPAModelLoader implements Model.Factory {
                     modelProperty.isMultiple = true;
                     modelProperty.relationType = fieldType;
                     final String modelDbName = JPA.getDBName(field.getType());
-                    modelProperty.choices = new Model.Choices() {
-
-                        @SuppressWarnings("unchecked")
-                        @Override
-                        public List<Object> list() {
-                            return JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
-                        }
-                    };
+                    modelProperty.choices = () -> JPA.em(modelDbName).createQuery("from " + fieldType.getName()).getResultList();
                 }
             }
         }
         if (field.getType().isEnum()) {
-            modelProperty.choices = new Model.Choices() {
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public List<Object> list() {
-                    return (List<Object>) Arrays.asList(field.getType().getEnumConstants());
-                }
-            };
+            modelProperty.choices = () -> (List<Object>) Arrays.asList(field.getType().getEnumConstants());
         }
         modelProperty.name = field.getName();
         if (field.getType().equals(String.class)) {

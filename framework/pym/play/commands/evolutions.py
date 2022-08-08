@@ -1,6 +1,7 @@
+from __future__ import print_function
 import os, os.path
 import shutil
-import urllib, urllib2
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import subprocess
 import simplejson as json
 
@@ -36,7 +37,7 @@ def execute(**kargs):
 
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
     if args.count('--jpda'):
-        print "~ Waiting for JPDA client to continue"
+        print("~ Waiting for JPDA client to continue")
         args.remove('--jpda')
         add_options.append('-Xdebug')
         add_options.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=y' % app.jpda_port)
@@ -52,5 +53,5 @@ def execute(**kargs):
         if 0 != return_code:
             sys.exit(return_code);
     except OSError:
-        print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+        print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)

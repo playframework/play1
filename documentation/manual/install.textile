@@ -3,7 +3,7 @@ h1. Installation guide
 
 h2. <a name="prerequisites">Prerequisites</a>
 
-To run the Play framework, you need "Java 8 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
+To run the Play framework, you need "Java 11 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
 
 Be sure to have Java in the current path (enter @java -version@ to check). Play will use the default Java or the one available at the @$JAVA_HOME@ path if defined.
 
@@ -17,7 +17,7 @@ h3. Generic instructions
 In general, the installation instructions are as follows.
 
 # Install Java.
-# Download the latest "Play binary package":http://download.playframework.com/ and extract the archive.
+# Download the latest "Play binary package":https://www.playframework.com/releases and extract the archive.
 # Add the ‘play’ command to your system path and make sure it is executable.
 
 
@@ -25,7 +25,7 @@ h3. Mac OS X
 
 Java is built-in, or installed automatically, so you can skip the first step.
 
-# Download the latest "Play binary package":http://download.playframework.com/ and extract it in @/Applications@.
+# Download the latest "Play binary package":https://www.playframework.com/releases and extract it in @/Applications@.
 # Edit @/etc/paths@ and add the line @/Applications/play-1.2.5@ (for example).
 
 An alternative on OS X is:
