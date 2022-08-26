@@ -534,7 +534,6 @@ public class Mailer implements LocalVariablesSupport {
                     }
                 }
             }
-            email.setCharset("utf-8");
             setAddresses(email);
             if (!StringUtils.isEmpty(charset)) {
                 email.setCharset(charset);
@@ -555,7 +554,8 @@ public class Mailer implements LocalVariablesSupport {
         }
     }
 
-    public static void setAddresses(Email email) throws EmailException {
+    static void setAddresses(Email email) throws EmailException {
+        email.setCharset("utf-8");
         String from = (String) infos.get().get("from");
         if (from != null) {
             try {
