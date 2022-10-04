@@ -20,7 +20,7 @@ public class CookieDataCodec {
      * applications are upgraded to a newer version of Play
      * </p>
      */
-    public static Pattern oldCookieSessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+    public static final Pattern oldCookieSessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
     /**
      * @param map

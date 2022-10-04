@@ -175,11 +175,10 @@ public class Utils {
 
     public static class AlternativeDateFormat {
 
-        Locale locale;
-        List<SimpleDateFormat> formats = new ArrayList<>();
+        final List<SimpleDateFormat> formats = new ArrayList<>();
+        final Locale locale;
 
         public AlternativeDateFormat(Locale locale, String... alternativeFormats) {
-            super();
             this.locale = locale;
             setFormats(alternativeFormats);
         }

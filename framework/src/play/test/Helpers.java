@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class Helpers {
 
-    static Pattern pattern = Pattern.compile("^(\\w+)\\(\\s*(?:('(?:\\\\'|[^'])*'|[^.]+?)\\s*(?:,\\s*('(?:\\\\'|[^'])*'|[^.]+?)\\s*)?)?\\)$");
+    static final Pattern pattern = Pattern.compile("^(\\w+)\\(\\s*(?:('(?:\\\\'|[^'])*'|[^.]+?)\\s*(?:,\\s*('(?:\\\\'|[^'])*'|[^.]+?)\\s*)?)?\\)$");
 
     public static String[] seleniumCommand(String command) {
         Matcher matcher = pattern.matcher(command.trim());

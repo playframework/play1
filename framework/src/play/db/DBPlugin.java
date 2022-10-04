@@ -48,9 +48,8 @@ public class DBPlugin extends PlayPlugin {
                 }
                 
                 Set<String> dbNames = Configuration.getDbNames();
-                Iterator<String> it = dbNames.iterator();
-                while (it.hasNext()) {
-                    dbName = it.next();
+                for (String name : dbNames) {
+                    dbName = name;
                     Configuration dbConfig = new Configuration(dbName);
                     
                     boolean isJndiDatasource = false;
@@ -251,7 +250,7 @@ public class DBPlugin extends PlayPlugin {
      */
     public static class ProxyDriver implements Driver {
 
-        private Driver driver;
+        private final Driver driver;
 
         ProxyDriver(Driver d) {
             this.driver = d;
@@ -287,16 +286,9 @@ public class DBPlugin extends PlayPlugin {
             return this.driver.jdbcCompliant();
         }
       
-        // Method not annotated with @Override since getParentLogger() is a new method
-        // in the CommonDataSource interface starting with JDK7 and this annotation
-        // would cause compilation errors with JDK6.
         @Override
         public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-            try {
-                return (java.util.logging.Logger) Driver.class.getDeclaredMethod("getParentLogger").invoke(this.driver);
-            } catch (Throwable e) {
-                return null;
-            }
+            return this.driver.getParentLogger();
         }
     }
 }

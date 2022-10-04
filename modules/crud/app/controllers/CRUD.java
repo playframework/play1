@@ -79,7 +79,7 @@ public abstract class CRUD extends Controller {
         Object att = object.getClass().getField(field).get(object);
         if(att instanceof Model.BinaryField) {
             Model.BinaryField attachment = (Model.BinaryField)att;
-            if (attachment == null || !attachment.exists()) {
+            if (!attachment.exists()) {
                 notFound();
             }
             response.contentType = attachment.type();
@@ -88,7 +88,7 @@ public abstract class CRUD extends Controller {
         // DEPRECATED
         if(att instanceof play.db.jpa.FileAttachment) {
             play.db.jpa.FileAttachment attachment = (play.db.jpa.FileAttachment)att;
-            if (attachment == null || !attachment.exists()) {
+            if (!attachment.exists()) {
                 notFound();
             }
             renderBinary(attachment.get(), attachment.filename);
@@ -274,13 +274,13 @@ public abstract class CRUD extends Controller {
 
         public Long count(String search, String searchFields, String where) {
 
-            return factory.count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
+            return factory.count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split(" ")), search, where);
         }
 
         @SuppressWarnings("unchecked")
         public List<Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
             int offset = (page - 1) * getPageSize();
-            List<String> properties = searchFields == null ? new ArrayList<String>(0) : Arrays.asList(searchFields.split("[ ]"));
+            List<String> properties = searchFields == null ? new ArrayList<String>(0) : Arrays.asList(searchFields.split(" "));
             return Model.Manager.factoryFor(entityClass).fetch(offset, getPageSize(), orderBy, order, properties, search, where);
         }
 

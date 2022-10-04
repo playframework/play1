@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class PlayException extends RuntimeException {
 
-    private static AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());
+    private static final AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());
     private String id;
 
     public PlayException() {

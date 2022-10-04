@@ -2,7 +2,7 @@ package play.utils;
 
 public class Default {
 
-    Object o;
+    final Object o;
 
     public Default(Object o) {
         this.o = o;

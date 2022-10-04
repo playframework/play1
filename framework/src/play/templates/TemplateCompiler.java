@@ -28,12 +28,12 @@ public abstract class TemplateCompiler {
         return compile(new GroovyTemplate(file.relativePath(), file.contentAsString()));
     }
 
-    protected StringBuilder compiledSource = new StringBuilder();
+    protected final StringBuilder compiledSource = new StringBuilder();
+    protected final Stack<Tag> tagsStack = new Stack<>();
     protected BaseTemplate template;
     protected TemplateParser parser;
     protected boolean doNextScan = true;
     protected TemplateParser.Token state;
-    protected Stack<Tag> tagsStack = new Stack<>();
     protected int tagIndex;
     protected boolean skipLineBreak;
     protected int currentLine = 1;

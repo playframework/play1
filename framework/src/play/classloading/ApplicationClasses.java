@@ -26,7 +26,7 @@ public class ApplicationClasses {
     /**
      * Reference to the eclipse compiler.
      */
-    ApplicationCompiler compiler = new ApplicationCompiler(this);
+    final ApplicationCompiler compiler = new ApplicationCompiler(this);
     /**
      * Cache of all compiled classes
      */

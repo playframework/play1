@@ -13,18 +13,18 @@ import org.apache.ivy.util.MessageLogger;
 
 public class HumanReadyLogger implements MessageLogger, TransferListener {
 
-    Set<String> notFound = new HashSet<>();
-    Set<String> dynamics = new HashSet<>();
-    Set<String> evicteds = new HashSet<>();
-    Pattern dep = Pattern.compile("found ([^#]+)#([^;]+);([^\\s]+) in (.*)");
-    Pattern depNotFound = Pattern.compile("module not found: ([^#]+)#([^;]+);([^\\s]+)");
-    Pattern dynamic = Pattern.compile("\\[(.*)\\] ([^#]+)#([^;]+);([^\\s]+)");
-    Pattern evicted = Pattern.compile("([^#]+)#([^;]+);([^\\s]+) by \\[([^#]+)#([^;]+);([^\\s]+)\\].*");
+    final Set<String> notFound = new HashSet<>();
+    final Set<String> dynamics = new HashSet<>();
+    final Set<String> evicteds = new HashSet<>();
+    final Pattern dep = Pattern.compile("found ([^#]+)#([^;]+);([^\\s]+) in (.*)");
+    final Pattern depNotFound = Pattern.compile("module not found: ([^#]+)#([^;]+);([^\\s]+)");
+    final Pattern dynamic = Pattern.compile("\\[(.*)\\] ([^#]+)#([^;]+);([^\\s]+)");
+    final Pattern evicted = Pattern.compile("([^#]+)#([^;]+);([^\\s]+) by \\[([^#]+)#([^;]+);([^\\s]+)\\].*");
+    final String[] progressBar = {".  ", ".. ", "...", "   "};
     String downloading = null;
     long length = 0;
     int progress = 0;
     long lastTime = System.currentTimeMillis();
-    String[] progressBar = new String[]{".  ", ".. ", "...", "   "};
 
     public void niceLog(String msg, int level) {
         try {

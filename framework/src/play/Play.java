@@ -115,7 +115,7 @@ public class Play {
     /**
      * All paths to search for files
      */
-    public static List<VirtualFile> roots = new ArrayList<>(16);
+    public static final List<VirtualFile> roots = new ArrayList<>(16);
     /**
      * All paths to search for Java files
      */
@@ -123,7 +123,7 @@ public class Play {
     /**
      * All paths to search for templates files
      */
-    public static List<VirtualFile> templatesPath = new ArrayList<>(2);
+    public static final List<VirtualFile> templatesPath = new ArrayList<>(2);
     /**
      * Main routes file
      */
@@ -131,7 +131,7 @@ public class Play {
     /**
      * Plugin routes files
      */
-    public static Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
+    public static final Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
     /**
      * The loaded configuration files
      */
@@ -166,7 +166,7 @@ public class Play {
     /**
      * Modules
      */
-    public static Map<String, VirtualFile> modules = new HashMap<>(16);
+    public static final Map<String, VirtualFile> modules = new HashMap<>(16);
     /**
      * Framework version
      */
@@ -426,7 +426,7 @@ public class Play {
         for (Object key : propsFromFile.keySet()) {
             String value = propsFromFile.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
-            StringBuffer newValue = new StringBuffer(100);
+            StringBuilder newValue = new StringBuilder(100);
             while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r;

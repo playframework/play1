@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * they could check if the state of the ApplicationClassloader has changed..
  */
 public class ApplicationClassloaderState {
-    private static AtomicLong nextStateValue = new AtomicLong();
+    private static final AtomicLong nextStateValue = new AtomicLong();
 
     private final long currentStateValue = nextStateValue.getAndIncrement();
 
@@ -24,9 +24,7 @@ public class ApplicationClassloaderState {
 
         ApplicationClassloaderState that = (ApplicationClassloaderState) o;
 
-        if (currentStateValue != that.currentStateValue) return false;
-
-        return true;
+        return this.currentStateValue == that.currentStateValue;
     }
 
     @Override

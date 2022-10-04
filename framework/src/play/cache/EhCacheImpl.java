@@ -20,16 +20,15 @@ import play.Logger;
  */
 public class EhCacheImpl implements CacheImpl {
 
+    private static final String cacheName = "play";
     private static EhCacheImpl uniqueInstance;
 
-    CacheManager cacheManager;
+    final CacheManager cacheManager = CacheManager.create();
 
-    net.sf.ehcache.Cache cache;
+    final net.sf.ehcache.Cache cache;
 
-    private static final String cacheName = "play";
 
     private EhCacheImpl() {
-        this.cacheManager = CacheManager.create();
         this.cacheManager.addCache(cacheName);
         this.cache = cacheManager.getCache(cacheName);
     }

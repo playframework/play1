@@ -273,9 +273,9 @@ public class FileService  {
         }
         
         private class ByteRange {
-            public long start;
-            public long end;
-            public byte[] header;
+            public final long start;
+            public final long end;
+            public final byte[] header;
             
             public long length() {
                 return end - start + 1;

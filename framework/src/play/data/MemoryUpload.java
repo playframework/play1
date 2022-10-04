@@ -7,7 +7,7 @@ import org.apache.commons.fileupload.FileItem;
 
 public class MemoryUpload implements Upload {
 
-    FileItem fileItem;
+    final FileItem fileItem;
 
     public MemoryUpload(FileItem fileItem) {
         this.fileItem = fileItem;

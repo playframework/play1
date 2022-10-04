@@ -80,7 +80,7 @@ public class SslHttpServerContextFactory {
 
     public static class PEMKeyManager extends X509ExtendedKeyManager {
 
-        static PEMKeyManager instance = new PEMKeyManager();
+        static final PEMKeyManager instance = new PEMKeyManager();
         PrivateKey key;
         X509Certificate[] chain;
 

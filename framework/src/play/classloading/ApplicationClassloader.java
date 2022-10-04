@@ -323,8 +323,7 @@ public class ApplicationClassloader extends ClassLoader {
                 modifieds.add(applicationClass);
             }
         }
-        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>();
-        modifiedWithDependencies.addAll(modifieds);
+        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>(modifieds);
         if (!modifieds.isEmpty()) {
             modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }
@@ -446,7 +445,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
 
-                Collections.sort(result, Comparator.comparing(Class::getName));
+                result.sort(Comparator.comparing(Class::getName));
             }
 
             Map<String, ApplicationClass> byNormalizedName = new HashMap<>(result.size());

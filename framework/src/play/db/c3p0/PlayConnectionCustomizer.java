@@ -7,21 +7,17 @@ import play.exceptions.DatabaseException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class PlayConnectionCustomizer implements ConnectionCustomizer {
 
-  public static Map<String, Integer> isolationLevels;
-
-  static {
-    isolationLevels = new HashMap<>();
-    isolationLevels.put("NONE", Connection.TRANSACTION_NONE);
-    isolationLevels.put("READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED);
-    isolationLevels.put("READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED);
-    isolationLevels.put("REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ);
-    isolationLevels.put("SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE);
-  }
+  public static final Map<String, Integer> isolationLevels = Map.of(
+    "NONE", Connection.TRANSACTION_NONE,
+      "READ_UNCOMMITTED", Connection.TRANSACTION_READ_UNCOMMITTED,
+      "READ_COMMITTED", Connection.TRANSACTION_READ_COMMITTED,
+      "REPEATABLE_READ", Connection.TRANSACTION_REPEATABLE_READ,
+      "SERIALIZABLE", Connection.TRANSACTION_SERIALIZABLE
+  );
 
   @Override
   public void onAcquire(Connection c, String parentDataSourceIdentityToken) {

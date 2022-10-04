@@ -16,12 +16,12 @@ public class BeanWrapper {
     static final int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     static final int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
 
-    private Class<?> beanClass;
-
-    /** 
+    /**
      * a cache for our properties and setters
      */
-    private Map<String, Property> wrappers = new HashMap<>();
+    private final Map<String, Property> wrappers = new HashMap<>();
+
+    private final Class<?> beanClass;
 
     public BeanWrapper(Class<?> forClass) {
         if (Logger.isTraceEnabled()) {
@@ -143,12 +143,12 @@ public class BeanWrapper {
 
     public static class Property {
 
-        private Annotation[] annotations;
+        private final Annotation[] annotations;
+        private final Class<?> type;
+        private final Type genericType;
+        private final String name;
         private Method setter;
         private Field field;
-        private Class<?> type;
-        private Type genericType;
-        private String name;
         private String[] profiles;
 
         Property(String propertyName, Method setterMethod) {

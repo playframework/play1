@@ -5,7 +5,7 @@ package play.templates;
  */
 public class TemplateParser {
 
-    private String pageSource;
+    private final String pageSource;
     private int nestedBracesCounter; // counts nested braces in current expression/tag
 
     public TemplateParser(String pageSource) {

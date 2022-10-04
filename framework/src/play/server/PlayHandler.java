@@ -40,10 +40,7 @@ import play.vfs.VirtualFile;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,14 +66,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     private static final String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     private static final boolean exposePlayServer;
 
-    private static final String ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    private static final Charset ASCII = Charset.forName("ASCII");
-    private static final MessageDigest SHA_1;
-
     /**
      * The Pipeline is given for a PlayHandler
      */
-    public Map<String, ChannelHandler> pipelines = new HashMap<>();
+    public final Map<String, ChannelHandler> pipelines = new HashMap<>();
 
     private WebSocketServerHandshaker handshaker;
     
@@ -86,14 +79,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      * application.conf: <code>http.allowed.method.override=POST,PUT</code>
      */
     private static final Set<String> allowedHttpMethodOverride;
-
-    static {
-        try {
-            SHA_1 = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-1 not supported on this platform", e);
-        }
-    }
 
     static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
@@ -197,10 +182,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Response.current.set(response);
 
             Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(null);
-            Scope.RouteArgs.current.set(null);
-            Scope.Session.current.set(null);
-            Scope.Flash.current.set(null);
+            Scope.RenderArgs.current.remove();
+            Scope.RouteArgs.current.remove();
+            Scope.Session.current.remove();
+            Scope.Flash.current.remove();
             CachedBoundActionMethodArgs.init();
 
             try {
@@ -647,10 +632,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         for (String key : nettyRequest.headers().names()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
-            hd.values = new ArrayList<>();
-            for (String next : nettyRequest.headers().getAll(key)) {
-                hd.values.add(next);
-            }
+            hd.values = new ArrayList<>(nettyRequest.headers().getAll(key));
             headers.put(hd.name, hd);
         }
 
@@ -965,8 +947,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
+        private final ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
         private boolean closed = false;
-        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
 
         @Override
         public boolean hasNextChunk() throws Exception {

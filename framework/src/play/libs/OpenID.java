@@ -33,13 +33,13 @@ public class OpenID {
     }
 
     // ~~~ API
-    String id;
+    final List<String> sregRequired = new ArrayList<>();
+    final List<String> sregOptional = new ArrayList<>();
+    final Map<String, String> axRequired = new HashMap<>();
+    final Map<String, String> axOptional = new HashMap<>();
+    final String id;
     String returnAction;
     String realmAction;
-    List<String> sregRequired = new ArrayList<>();
-    List<String> sregOptional = new ArrayList<>();
-    Map<String, String> axRequired = new HashMap<>();
-    Map<String, String> axOptional = new HashMap<>();
 
     public OpenID returnTo(String action) {
         this.returnAction = action;
@@ -359,7 +359,7 @@ public class OpenID {
         /**
          * Extensions values
          */
-        public Map<String, String> extensions = new HashMap<>();
+        public final Map<String, String> extensions = new HashMap<>();
 
         @Override
         public String toString() {
