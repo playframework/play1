@@ -2,6 +2,7 @@ package play.db;
 
 import org.junit.*;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -110,11 +111,11 @@ public class SQLSplitterTest {
         CharSequence[] srcArr = new CharSequence[(int) srcArrList.size()];
         srcArr = srcArrList.toArray(srcArr);
 
-        assertEquals(readFile("/play/db/test.out.sql").split("==="), srcArr);
+        assertArrayEquals(readFile("/play/db/test.out.sql").split("==="), srcArr);
 
         srcArrList = SQLSplitter.splitSQL(readFile("/play/db/test2.sql"));
         srcArr = new CharSequence[(int) srcArrList.size()];
         srcArr = srcArrList.toArray(srcArr);
-        assertEquals(readFile("/play/db/test2.out.sql").split("==="), srcArr);
+        assertArrayEquals(readFile("/play/db/test2.out.sql").split("==="), srcArr);
     }
 }

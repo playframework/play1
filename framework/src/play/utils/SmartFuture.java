@@ -42,7 +42,7 @@ public class SmartFuture<V> implements Future<V>, Action<V> {
 
     // Callbacks
     
-    private List<Action<V>> callbacks = new ArrayList<>();
+    private final List<Action<V>> callbacks = new ArrayList<>();
     private boolean invoked = false;
     private V result = null;
 

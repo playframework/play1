@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Objects;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -95,17 +96,13 @@ public class Blob implements BinaryField, UserType {
         return Blob.class;
     }
 
-    private static boolean equal(Object a, Object b) {
-      return a == b || (a != null && a.equals(b));
-    }
-
     @Override
     public boolean equals(Object o, Object o1) throws HibernateException {
         if(o instanceof Blob && o1 instanceof Blob) {
-            return equal(((Blob)o).UUID, ((Blob)o1).UUID) &&
-                    equal(((Blob)o).type, ((Blob)o1).type);
+            return Objects.equals(((Blob) o).UUID, ((Blob) o1).UUID) &&
+                Objects.equals(((Blob)o).type, ((Blob)o1).type);
         }
-        return equal(o, o1);
+        return Objects.equals(o, o1);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class TestEngine {
 
     private static final ClassNameComparator classNameComparator = new ClassNameComparator();
 
-    public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
+    public static final ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
     public static List<Class> allUnitTests() {
         List<Class> classes = new ArrayList<>();
@@ -59,7 +59,7 @@ public class TestEngine {
                 }
             }
         }
-        Collections.sort(classes, classNameComparator);
+        classes.sort(classNameComparator);
         return classes;
     }
 
@@ -68,17 +68,9 @@ public class TestEngine {
         classes.addAll(Play.classloader.getAssignableClasses(FunctionalTest.class));
         classes.addAll(Play.pluginCollection.getFunctionalTests());
 
-        for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
-            Class c = it.next();
-            if (!Play.pluginCollection.shouldRunTest(c)) {
-                it.remove();
-            } else {
-                if (Modifier.isAbstract(c.getModifiers())) {
-                    it.remove();
-                }
-            }
-        }
-        Collections.sort(classes, classNameComparator);
+        classes.removeIf(aClass -> Modifier.isAbstract(aClass.getModifiers()));
+        classes.removeIf(aClass ->!Play.pluginCollection.shouldRunTest(aClass));
+        classes.sort(classNameComparator);
         return classes;
     }
 
@@ -206,9 +198,9 @@ public class TestEngine {
     // ~~~~~~ Run listener
     static class Listener extends RunListener {
 
-        TestResults results;
+        final TestResults results;
+        final String className;
         TestResult current;
-        String className;
 
         public Listener(String className, TestResults results) {
             this.results = results;

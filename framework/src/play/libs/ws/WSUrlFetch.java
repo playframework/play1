@@ -49,7 +49,7 @@ public class WSUrlFetch implements WSImpl {
         return new WSUrlfetchRequest(url, encoding);
     }
 
-    public class WSUrlfetchRequest extends WSRequest {
+    public static class WSUrlfetchRequest extends WSRequest {
 
         protected WSUrlfetchRequest(String url, String encoding) {
             super(url, encoding);

@@ -413,10 +413,9 @@ public class Invoker {
     static class WaitForTasksCompletion extends Thread {
 
         static WaitForTasksCompletion instance;
-        Map<Future<?>, Invocation> queue;
+        final Map<Future<?>, Invocation> queue = new ConcurrentHashMap<>();
 
         public WaitForTasksCompletion() {
-            queue = new ConcurrentHashMap<>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
         }

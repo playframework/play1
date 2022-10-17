@@ -99,11 +99,7 @@ public class ApacheMultipartParser extends DataParser {
      */
     public static class AutoFileItem implements FileItem {
 
-        private static FileCleaningTracker fileTracker;
-
-        static {
-            fileTracker = new FileCleaningTracker();
-        }
+        private static final FileCleaningTracker fileTracker = new FileCleaningTracker();
 
         // ----------------------------------------------------- Manifest constants
         /**
@@ -112,10 +108,6 @@ public class ApacheMultipartParser extends DataParser {
          * HTTP.
          */
         public static final String DEFAULT_CHARSET = "ISO-8859-1";
-        /**
-         * Size of buffer to use when writing an item to disk.
-         */
-        private static final int WRITE_BUFFER_SIZE = 2048;
 
         // ----------------------------------------------------------- Data members
         /**
@@ -604,12 +596,12 @@ public class ApacheMultipartParser extends DataParser {
      * The maximum size permitted for the complete request, as opposed to
      * {@link #maxFileSize}. A value of -1 indicates no maximum.
      */
-    private long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
+    private final long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
     /**
      * The maximum size permitted for a single uploaded file, as opposed to
      * {@link #maxRequestSize}. A value of -1 indicates no maximum.
      */
-    private long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
+    private final long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
 
     // ------------------------------------------------------ Protected methods
 

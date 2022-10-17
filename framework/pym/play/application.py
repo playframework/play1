@@ -296,8 +296,8 @@ class PlayApplication(object):
             javaVersion = getJavaVersion() 
         print("~ using java version \"%s\"" % javaVersion)
         
-        if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7"):
-            print("~ ERROR: java version prior to 1.8 are no longer supported: current version \"%s\" : please update" % javaVersion)
+        if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7") or javaVersion.startswith("1.8") or javaVersion.startswith("9") or javaVersion.startswith("10") :
+            print("~ ERROR: java version prior to 11 are no longer supported: current version \"%s\" : please update" % javaVersion)
             
         java_args.append('-noverify')
 

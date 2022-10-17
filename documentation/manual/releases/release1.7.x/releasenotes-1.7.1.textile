@@ -1,0 +1,25 @@
+# Play 1.7.1 -- Release notes
+
+Play 1.7.1 has been released of the master branch.
+
+The changes in this release are listed in the "1.7.1 on github":https://github.com/playframework/play1/milestone/7832586 including 13 resolved tickets.
+
+
+## What's new in Play 1.7.1
+
+
+## What's fixed in Play 1.7.1
+
+* "#1397":https://github.com/playframework/play1/issues/1397 : Third party dependency update 20220403
+* "#1399":https://github.com/playframework/play1/issues/1399 : [1.7.0] Regression: `play idealize` dies with `UnboundLocalError: local variable 'playHome' referenced before assignment`
+* "#1400":https://github.com/playframework/play1/issues/1400 : fixed #1399 "UnboundLocalError: local variable 'playHome' referenced before assignment
+* "#1401":https://github.com/playframework/play1/issues/1401 : Python3 incompatibilities in module manipulations
+* "#1402":https://github.com/playframework/play1/issues/1402 : [#1401] 🐛 Fix python3 incompatibilities in module manipulation code
+* "#1403":https://github.com/playframework/play1/issues/1403 : Temporary class of Groovy template is output directly under application dir
+* "#1405":https://github.com/playframework/play1/issues/1405 : 1.7.0: concurrent modification exception
+* "#1406":https://github.com/playframework/play1/issues/1406 : [#1403] 🐛 Fix Groovy compilation unit that tries to write in applicat…
+* "#1408":https://github.com/playframework/play1/issues/1408 : #1405: replace HashMap be ConcurrentHashMap
+* "#1409":https://github.com/playframework/play1/issues/1409 : update check of java version
+* "#1411":https://github.com/playframework/play1/issues/1411 : Do not overwrite system property net.spy.log.LoggerImpl -> 1.7.1
+* "#1413":https://github.com/playframework/play1/issues/1413 : #1405: replace HashMap be ConcurrentHashMap
+* "#1414":https://github.com/playframework/play1/issues/1414 : Memcached implementaion broken due to log4j update
