@@ -747,9 +747,9 @@ public class WSAsync implements WSImpl {
             return request;
         }
 
-        public class WSRequestAdapter implements HttpRequest {
+        public static class WSRequestAdapter implements HttpRequest {
 
-            private WSRequest request;
+            private final WSRequest request;
             private String method;
 
             public WSRequestAdapter(WSRequest request) {

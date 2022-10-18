@@ -16,7 +16,7 @@ public class Lang {
 
     static final ThreadLocal<String> current = new ThreadLocal<>();
 
-    private static Map<String, Locale> cache = new HashMap<>();
+    private static final Map<String, Locale> cache = new HashMap<>();
     
     /**
      * Retrieve the current language or null

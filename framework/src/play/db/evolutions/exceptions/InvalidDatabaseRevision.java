@@ -8,8 +8,8 @@ public class InvalidDatabaseRevision extends PlayException {
     /**
      * The name of the Database concern by the exception
      */
-    private String dbName;
-    private String evolutionScript;
+    private final String dbName;
+    private final String evolutionScript;
 
     public InvalidDatabaseRevision(String dbName, String evolutionScript) {
         this.dbName = dbName;

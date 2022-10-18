@@ -34,7 +34,7 @@ public class Messages {
 
     public static Properties defaults = new Properties();
 
-    public static Map<String, Properties> locales = new HashMap<>();
+    public static final Map<String, Properties> locales = new HashMap<>();
 
     private static final Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
@@ -125,7 +125,7 @@ public class Messages {
         String message = String.format(locale, value, coolStuff(value, args));
 
         Matcher matcher = recursive.matcher(message);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(sb, get(matcher.group(1)));
         }
@@ -133,7 +133,7 @@ public class Messages {
         return sb.toString();
     }
 
-    static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
+    static final Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
 
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {

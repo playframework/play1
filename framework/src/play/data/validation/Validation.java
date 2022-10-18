@@ -20,7 +20,7 @@ import play.exceptions.UnexpectedException;
 public class Validation {
 
     public static final ThreadLocal<Validation> current = new ThreadLocal<>();
-    List<Error> errors = new ArrayList<>();
+    final List<Error> errors = new ArrayList<>();
     boolean keep = false;
 
     protected Validation() {
@@ -97,13 +97,7 @@ public class Validation {
      public static void removeErrors(String field, String message) {
          Validation validation = current.get();
          if (validation != null) {
-             Iterator<Error> it = validation.errors.iterator();
-             while (it.hasNext()) {
-                 Error error = it.next();
-                 if (error.key != null && error.key.equals(field) && error.message.equals(message)) {
-                     it.remove();
-                 }
-             }
+             validation.errors.removeIf(error -> error.key != null && error.key.equals(field) && error.message.equals(message));
          }
      }
      
@@ -114,13 +108,7 @@ public class Validation {
     public static void removeErrors(String field) {
         Validation validation = current.get();
         if (validation != null) {
-            Iterator<Error> it = validation.errors.iterator();
-            while (it.hasNext()) {
-                Error error = it.next();
-                if (error.key != null && error.key.equals(field)) {
-                    it.remove();
-                }
-            }
+            validation.errors.removeIf(error -> error.key != null && error.key.equals(field));
         }
     }
     
@@ -274,8 +262,8 @@ public class Validation {
 
     public static class Validator {
 
-        public Annotation annotation;
-        public Map<String, Object> params = new HashMap<>();
+        public final Annotation annotation;
+        public final Map<String, Object> params = new HashMap<>();
 
         public Validator(Annotation annotation) {
             this.annotation = annotation;

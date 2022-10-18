@@ -56,7 +56,7 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                         parameterNames.add(new T2<>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
                     }
                 }
-                Collections.sort(parameterNames, Comparator.comparing(o -> o._1));
+                parameterNames.sort(Comparator.comparing(o -> o._1));
             }
             List<String> names = new ArrayList<>();
             for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {

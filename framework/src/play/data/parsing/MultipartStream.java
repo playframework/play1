@@ -195,11 +195,11 @@ public class MultipartStream {
      * The amount of data, in bytes, that must be kept in the buffer in order
      * to detect delimiters reliably.
      */
-    private int keepRegion;
+    private final int keepRegion;
     /**
      * The byte sequence that partitions the stream.
      */
-    private byte[] boundary;
+    private final byte[] boundary;
     /**
      * The length of the buffer used for processing the request.
      */

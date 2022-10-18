@@ -15,16 +15,14 @@ import java.util.List;
 
 public class ContinuationEnhancer extends Enhancer {
 
-    static final List<String> continuationMethods = new ArrayList<>();
-
-    static {
-        continuationMethods.add("play.mvc.Controller.await(java.lang.String)");
-        continuationMethods.add("play.mvc.Controller.await(int)");
-        continuationMethods.add("play.mvc.Controller.await(java.util.concurrent.Future)");
-        continuationMethods.add("play.mvc.WebSocketController.await(java.lang.String)");
-        continuationMethods.add("play.mvc.WebSocketController.await(int)");
-        continuationMethods.add("play.mvc.WebSocketController.await(java.util.concurrent.Future)");
-    }
+    private static final List<String> continuationMethods = List.of(
+        "play.mvc.Controller.await(java.lang.String)",
+        "play.mvc.Controller.await(int)",
+        "play.mvc.Controller.await(java.util.concurrent.Future)",
+        "play.mvc.WebSocketController.await(java.lang.String)",
+        "play.mvc.WebSocketController.await(int)",
+        "play.mvc.WebSocketController.await(java.util.concurrent.Future)"
+    );
 
     public static boolean isEnhanced(String appClassName) {
         ApplicationClass appClass = Play.classes.getApplicationClass( appClassName);

@@ -234,11 +234,11 @@ public class Images {
      */
     public static class Captcha extends InputStream {
 
+        public final GimpyRenderer gimpy = new RippleGimpyRenderer();
+        public final List<Font> fonts = new ArrayList<>(2);
         public String text = null;
         public BackgroundProducer background = new TransparentBackgroundProducer();
-        public GimpyRenderer gimpy = new RippleGimpyRenderer();
         public Color textColor = Color.BLACK;
-        public List<Font> fonts = new ArrayList<>(2);
         public int w, h;
         public Color noise = null;
 

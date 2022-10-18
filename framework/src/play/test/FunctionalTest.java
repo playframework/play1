@@ -53,7 +53,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored
                                                           // between calls
 
-    private static Map<String, Object> renderArgs = new HashMap<>();
+    private static final Map<String, Object> renderArgs = new HashMap<>();
 
     @Before
     public void clearCookies() {
@@ -626,7 +626,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static class URL {
 
-        ActionDefinition actionDefinition;
+        final ActionDefinition actionDefinition;
 
         URL(ActionDefinition actionDefinition) {
             this.actionDefinition = actionDefinition;

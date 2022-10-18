@@ -141,7 +141,7 @@ public class ValidationPlugin extends PlayPlugin {
             return validationCycle.violations;
         }
     }
-    static Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+    static final Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
     static Validation restore() {
         try {

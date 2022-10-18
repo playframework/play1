@@ -5,10 +5,9 @@ import java.util.List;
 
 public abstract class SqlQuery {
 
-    protected List<Object> params;
+    protected final List<Object> params = new ArrayList<>();
 
     protected SqlQuery() {
-        params = new ArrayList<>();
     }
 
     public SqlQuery param(Object obj) { params.add(obj); return this; }

@@ -10,6 +10,6 @@ public class LocalDateTimeBinder implements TypeBinder<LocalDateTime> {
 
     @Override
     public LocalDateTime bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
-        return value != null && !value.trim().isEmpty() ? LocalDateTime.parse(value) : null;
+        return value != null && !value.isBlank() ? LocalDateTime.parse(value) : null;
     }
 }

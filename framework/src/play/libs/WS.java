@@ -667,8 +667,8 @@ public class WS extends PlayPlugin {
     }
 
     public static class FileParam {
-        public File file;
-        public String paramName;
+        public final File file;
+        public final String paramName;
 
         public FileParam(File file, String name) {
             this.file = file;
@@ -852,7 +852,7 @@ public class WS extends PlayPlugin {
         public JsonElement getJson() {
             String json = getString();
             try {
-                return new JsonParser().parse(json);
+                return JsonParser.parseString(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);
                 throw new RuntimeException("Cannot parse JSON (check logs)", e);
