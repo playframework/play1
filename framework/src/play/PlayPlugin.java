@@ -219,6 +219,19 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
+     * Give a chance for this plugin to warp the actioninvoker.invoke request
+     *
+     * @param request
+     *            The Play request
+     * @param response
+     *            The Play response
+     * @return true if this plugin called play.mvc.ActionInvoker.invoke(request, response) while executing
+     */
+    public boolean wrapActionInvoker(Request request, Response response) {
+        return false;
+    }
+
+    /**
      * Let a chance to this plugin to manage a static resource
      *
      * @param file
