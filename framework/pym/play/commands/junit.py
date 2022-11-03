@@ -19,6 +19,7 @@ process = None
 def handle_sigterm(signum, frame):
     global process
     if 'process' in globals():
+        print("~ Terminating Java proces (SIGTERM)")
         process.terminate()
         sys.exit(0)
 
@@ -38,16 +39,13 @@ def handle_sigint(signum, frame):
             process.kill()
 
 def execute(**kargs):
-    command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
-    env = kargs.get("env")
-    cmdloader = kargs.get("cmdloader")
-
     junit(app, args)
 
 def junit(app, args):
     app.check()
+    print("~ Running junit")
     print("~ Running in test mode")
     print("~ Ctrl+C to stop")
     print("~ ")
@@ -70,25 +68,19 @@ def junit(app, args):
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
+        print("~ cleaning test results")
         shutil.rmtree(test_result)
     args.append('-Dplay.autotest')
     java_cmd = app.java_cmd(args, className='play.test.Runner')
     try:
-        process = subprocess.Popen (java_cmd, env=os.environ)
+        process = subprocess.Popen(java_cmd, env=os.environ)
         signal.signal(signal.SIGTERM, handle_sigterm)
         signal.signal(signal.SIGINT, handle_sigint)
         return_code = process.wait()
         if 0 != return_code:
+            print("~ java process exited with exit code %d" % return_code)
             sys.exit(return_code)
     except OSError:
         print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
 
-    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
-        print("~ All tests passed")
-        print("~")
-        testspassed = True
-    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
-        print("~ Some tests have failed. See file://%s for results" % test_result)
-        print("~")
-        sys.exit(1)
