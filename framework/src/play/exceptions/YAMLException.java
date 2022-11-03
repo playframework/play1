@@ -7,8 +7,8 @@ import play.vfs.VirtualFile;
 
 public class YAMLException extends PlayException implements SourceAttachment {
 
-    ScannerException e;
-    VirtualFile yaml;
+    final ScannerException e;
+    final VirtualFile yaml;
 
     public YAMLException(ScannerException e, VirtualFile yaml) {
         super(e.getMessage() + " (in file " + yaml.relativePath() + " line " + (e.getProblemMark().getLine() + 1) + ", column " + (e.getProblemMark().getColumn() + 1) + ")", e);

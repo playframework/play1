@@ -195,11 +195,11 @@ public class MultipartStream {
      * The amount of data, in bytes, that must be kept in the buffer in order
      * to detect delimiters reliably.
      */
-    private int keepRegion;
+    private final int keepRegion;
     /**
      * The byte sequence that partitions the stream.
      */
-    private byte[] boundary;
+    private final byte[] boundary;
     /**
      * The length of the buffer used for processing the request.
      */
@@ -478,7 +478,6 @@ public class MultipartStream {
         byte[] b = new byte[1];
         // to support multi-byte characters
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int sizeMax = HEADER_PART_SIZE_MAX;
         int size = 0;
         while (i < HEADER_SEPARATOR.length) {
             try {
@@ -492,7 +491,7 @@ public class MultipartStream {
             } else {
                 i = 0;
             }
-            if (size <= sizeMax) {
+            if (size <= HEADER_PART_SIZE_MAX) {
                 baos.write(b[0]);
             }
         }

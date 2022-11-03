@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public class Localized<T> {
 
-    private Map<String, T> values = new HashMap<>();
+    private final Map<String, T> values = new HashMap<>();
 
     public void set(T value) {
         this.values.put(Lang.get(), value);
@@ -28,7 +28,6 @@ public class Localized<T> {
         return this.values.get(lang);
     }
 
-    @SuppressWarnings("unchecked")
     public Set<T> values() {
         return new HashSet<>(values.values());
     }

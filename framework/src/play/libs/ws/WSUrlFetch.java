@@ -49,7 +49,7 @@ public class WSUrlFetch implements WSImpl {
         return new WSUrlfetchRequest(url, encoding);
     }
 
-    public class WSUrlfetchRequest extends WSRequest {
+    public static class WSUrlfetchRequest extends WSRequest {
 
         protected WSUrlfetchRequest(String url, String encoding) {
             super(url, encoding);
@@ -63,7 +63,7 @@ public class WSUrlFetch implements WSImpl {
                 if (!("PUT".equals(method) || "POST".equals(method))) {
                     // must add params to queryString/url
                     StringBuilder sb = new StringBuilder(url);
-                    if (url.indexOf("?") > 0) {
+                    if (url.indexOf('?') > 0) {
                         sb.append('&');
                     } else {
                         sb.append('?');

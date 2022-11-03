@@ -186,7 +186,7 @@ public class PlayConfigurationLoadTask {
     }
 
     private static String[] splitLine(String line) {
-        if (line.indexOf("=") == -1) return null;
+        if (line.indexOf('=') == -1) return null;
         String[] splitted = line.split("=");
         return new String[]{splitted[0].trim(), splitted[1].trim()};
     }

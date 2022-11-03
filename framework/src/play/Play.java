@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -114,7 +115,7 @@ public class Play {
     /**
      * All paths to search for files
      */
-    public static List<VirtualFile> roots = new ArrayList<>(16);
+    public static final List<VirtualFile> roots = new ArrayList<>(16);
     /**
      * All paths to search for Java files
      */
@@ -122,7 +123,7 @@ public class Play {
     /**
      * All paths to search for templates files
      */
-    public static List<VirtualFile> templatesPath = new ArrayList<>(2);
+    public static final List<VirtualFile> templatesPath = new ArrayList<>(2);
     /**
      * Main routes file
      */
@@ -130,7 +131,7 @@ public class Play {
     /**
      * Plugin routes files
      */
-    public static Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
+    public static final Map<String, VirtualFile> modulesRoutes = new HashMap<>(16);
     /**
      * The loaded configuration files
      */
@@ -165,7 +166,7 @@ public class Play {
     /**
      * Modules
      */
-    public static Map<String, VirtualFile> modules = new HashMap<>(16);
+    public static final Map<String, VirtualFile> modules = new HashMap<>(16);
     /**
      * Framework version
      */
@@ -348,7 +349,7 @@ public class Play {
             if (frameworkPath == null || !frameworkPath.exists()) {
                 if (uri.getScheme().equals("jar")) {
                     String jarPath = uri.getSchemeSpecificPart().substring(5,
-                            uri.getSchemeSpecificPart().lastIndexOf("!"));
+                            uri.getSchemeSpecificPart().lastIndexOf('!'));
                     frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
                 } else if (uri.getScheme().equals("file")) {
                     frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
@@ -425,7 +426,7 @@ public class Play {
         for (Object key : propsFromFile.keySet()) {
             String value = propsFromFile.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
-            StringBuffer newValue = new StringBuffer(100);
+            StringBuilder newValue = new StringBuilder(100);
             while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r;
@@ -482,12 +483,7 @@ public class Play {
                     // our plugins that we're going down when some calls ctrl+c or just kills our
                     // process..
                     shutdownHookEnabled = true;
-                    Thread hook = new Thread() {
-                        @Override
-                        public void run() {
-                            Play.stop();
-                        }
-                    };
+                    Thread hook = new Thread(Play::stop);
                     hook.setContextClassLoader(ClassLoader.getSystemClassLoader());
                     Runtime.getRuntime().addShutdownHook(hook);
                 }
@@ -684,7 +680,6 @@ public class Play {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends PlayPlugin> T plugin(Class<T> clazz) {
         return pluginCollection.getPluginInstance(clazz);
     }
@@ -702,7 +697,7 @@ public class Play {
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     try {
@@ -745,7 +740,7 @@ public class Play {
                     } else {
                         String modulePathName = modulePath.getName();
                         String moduleName = modulePathName.contains("-")
-                                ? modulePathName.substring(0, modulePathName.lastIndexOf("-"))
+                                ? modulePathName.substring(0, modulePathName.lastIndexOf('-'))
                                 : modulePathName;
                         addModule(appRoot, moduleName, modulePath);
                     }
@@ -776,16 +771,14 @@ public class Play {
                 modules.addAll(Arrays.asList(localModules.list()));
             }
 
-            for (Iterator<String> iter = modules.iterator(); iter.hasNext();) {
-                String moduleName = iter.next();
-
+            for (String moduleName : modules) {
                 File module = new File(localModules, moduleName);
 
                 if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+                    moduleName = moduleName.substring(0, moduleName.indexOf('-'));
                 }
 
-                if (module == null || !module.exists()) {
+                if (!module.exists()) {
                     Logger.error("Module %s will not be loaded because %s does not exist", moduleName,
                             module.getAbsolutePath());
                 } else if (module.isDirectory()) {

@@ -28,12 +28,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Router {
 
-    static Pattern routePattern = new Pattern(
+    static final Pattern routePattern = new Pattern(
             "^({method}GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|WS|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
-    static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
+    static final Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
     /**
      * Timestamp the routes file was last loaded at.
      */
@@ -289,8 +289,8 @@ public class Router {
                         newPrefix = newPrefix.substring(0, newPrefix.length() - 1);
                     }
                     if (moduleName.equals("*")) {
-                        for (String p : Play.modulesRoutes.keySet()) {
-                            parse(Play.modulesRoutes.get(p), newPrefix + p);
+                        for (Map.Entry<String, VirtualFile> routeEntry : Play.modulesRoutes.entrySet()) {
+                            parse(routeEntry.getValue(), newPrefix + routeEntry.getKey());
                         }
                     } else if (Play.modulesRoutes.containsKey(moduleName)) {
                         parse(Play.modulesRoutes.get(moduleName), newPrefix);
@@ -341,7 +341,7 @@ public class Router {
     /**
      * All the loaded routes.
      */
-    public static List<Route> routes = new CopyOnWriteArrayList<>();
+    public static final List<Route> routes = new CopyOnWriteArrayList<>();
 
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
@@ -379,7 +379,7 @@ public class Router {
                 if (args.containsKey("format")) {
                     request.format = args.get("format");
                 }
-                if (request.action.indexOf("{") > -1) { // more optimization ?
+                if (request.action.indexOf('{') > -1) { // more optimization ?
                     for (String arg : request.routeArgs.keySet()) {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
                     }
@@ -469,7 +469,7 @@ public class Router {
             throw new NoRouteFoundException("File not found (" + file + ")");
         }
         String path = file.relativePath();
-        path = path.substring(path.indexOf("}") + 1);
+        path = path.substring(path.indexOf('}') + 1);
         for (Route route : routes) {
             String staticDir = route.staticDir;
             if (staticDir != null) {
@@ -714,8 +714,8 @@ public class Router {
     }
 
     private static final class ActionRoute {
+        private final Map<String, String> args = new HashMap<>(2);
         private Route route;
-        private Map<String, String> args = new HashMap<>(2);
     }
 
     public static class ActionDefinition {
@@ -828,9 +828,9 @@ public class Router {
         Arg hostArg = null;
         public int routesFileLine;
         public String routesFile;
-        static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
-        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
-        static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
+        static final Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
+        static final Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
+        static final Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
             this.host = "";
@@ -839,8 +839,9 @@ public class Router {
                 // Is there is a host argument, append it.
                 if (!path.startsWith("/")) {
                     String p = this.path;
-                    this.path = p.substring(p.indexOf("/"));
-                    this.host = p.substring(0, p.indexOf("/"));
+                    int slashIndex = p.indexOf('/');
+                    this.path = p.substring(slashIndex);
+                    this.host = p.substring(0, slashIndex);
                     if (this.host.contains("{")) {
                         Logger.warn("Static route cannot have a dynamic host name");
                         return;
@@ -869,8 +870,9 @@ public class Router {
                 // Is there is a host argument, append it.
                 if (!path.startsWith("/")) {
                     String p = this.path;
-                    this.path = p.substring(p.indexOf("/"));
-                    this.host = p.substring(0, p.indexOf("/"));
+                    int slashIndex = p.indexOf('/');
+                    this.path = p.substring(slashIndex);
+                    this.host = p.substring(0, slashIndex);
                     String pattern = host.replaceAll("\\.", "\\\\.").replaceAll("\\{.*\\}", "(.*)");
 
                     if (Logger.isTraceEnabled()) {

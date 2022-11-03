@@ -23,14 +23,9 @@ import play.libs.F;
  */
 public class JPA {
 
-    protected static Map<String, EntityManagerFactory> emfs = new ConcurrentHashMap<>();
-    public static final ThreadLocal<Map<String, JPAContext>> currentEntityManager = new ThreadLocal<Map<String, JPAContext>>() {
-        @Override
-        protected Map<String, JPAContext> initialValue() {
-            return new ConcurrentHashMap<>();
-        }
-    };
-    public static String DEFAULT = "default";
+    protected static final Map<String, EntityManagerFactory> emfs = new ConcurrentHashMap<>();
+    public static final ThreadLocal<Map<String, JPAContext>> currentEntityManager = ThreadLocal.withInitial(ConcurrentHashMap::new);
+    public static final String DEFAULT = "default";
 
     public static class JPAContext {
         public String dbName = JPA.DEFAULT;

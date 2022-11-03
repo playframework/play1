@@ -7,7 +7,6 @@ import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import play.Logger;
 import play.Play;
@@ -81,7 +80,7 @@ public class SslHttpServerContextFactory {
 
     public static class PEMKeyManager extends X509ExtendedKeyManager {
 
-        static PEMKeyManager instance = new PEMKeyManager();
+        static final PEMKeyManager instance = new PEMKeyManager();
         PrivateKey key;
         X509Certificate[] chain;
 

@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -26,17 +26,17 @@ public class ApplicationClasses {
     /**
      * Reference to the eclipse compiler.
      */
-    ApplicationCompiler compiler = new ApplicationCompiler(this);
+    final ApplicationCompiler compiler = new ApplicationCompiler(this);
     /**
      * Cache of all compiled classes
      */
-    Map<String, ApplicationClass> classes = new HashMap<>();
+    Map<String, ApplicationClass> classes = new ConcurrentHashMap<>();
 
     /**
      * Clear the classes cache
      */
     public void clear() {
-        classes = new HashMap<>();
+        classes = new ConcurrentHashMap<>();
     }
 
     /**
@@ -47,13 +47,10 @@ public class ApplicationClasses {
      * @return The ApplicationClass or null
      */
     public ApplicationClass getApplicationClass(String name) {
-        if (!classes.containsKey(name)) {
-            VirtualFile javaFile = getJava(name);
-            if (javaFile != null) {
-                classes.put(name, new ApplicationClass(name, javaFile));
-            }
-        }
-        return classes.get(name);
+        return classes.computeIfAbsent(name, className -> {
+            VirtualFile javaFile = getJava(className);
+            return javaFile == null ? null : new ApplicationClass(className, javaFile);
+        });
     }
 
     /**
@@ -270,7 +267,7 @@ public class ApplicationClasses {
             if (System.getProperty("precompile") != null) {
                 try {
                     // emit bytecode to standard class layout as well
-                    File f = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
+                    File f = Play.getFile("precompiled/java/" + name.replace('.', '/') + ".class");
                     f.getParentFile().mkdirs();
                     try (FileOutputStream fos = new FileOutputStream(f)) {
                         fos.write(this.enhancedByteCode);
@@ -358,10 +355,10 @@ public class ApplicationClasses {
     public static VirtualFile getJava(String name) {
         String fileName = name;
         if (fileName.contains("$")) {
-            fileName = fileName.substring(0, fileName.indexOf("$"));
+            fileName = fileName.substring(0, fileName.indexOf('$'));
         }
         // the local variable fileOrDir is important!
-        String fileOrDir = fileName.replace(".", "/");
+        String fileOrDir = fileName.replace('.', '/');
         fileName = fileOrDir + ".java";
         for (VirtualFile path : Play.javaPath) {
             // 1. check if there is a folder (without extension)

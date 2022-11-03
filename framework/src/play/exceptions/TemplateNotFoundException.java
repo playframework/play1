@@ -8,7 +8,7 @@ import play.templates.Template;
 
 public class TemplateNotFoundException extends PlayException implements SourceAttachment {
 
-    private String path;
+    private final String path;
     private String sourceFile;
     private List<String> source;
     private Integer line;

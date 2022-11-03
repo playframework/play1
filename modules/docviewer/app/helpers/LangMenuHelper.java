@@ -20,12 +20,7 @@ public class LangMenuHelper {
         defaultLangMenu.key = "en";
         defaultLangMenu.value = "English";
         langMenuList.add(defaultLangMenu);
-        File[] dirs = baseDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory() && ptn.matcher(file.getName()).find();
-            }
-        });
+        File[] dirs = baseDir.listFiles(file -> file.isDirectory() && ptn.matcher(file.getName()).find());
         for (final File dir : dirs) {
             Matcher m = ptn.matcher(dir.getName());
             String langCd = "";

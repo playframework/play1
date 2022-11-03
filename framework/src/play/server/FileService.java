@@ -202,8 +202,7 @@ public class FileService  {
                 String headerValue = request.headers().get("range").trim().substring("bytes=".length());
                 String[] rangesValues = headerValue.split(",");
                 ArrayList<long[]> ranges = new ArrayList<>(rangesValues.length);
-                for(int i = 0; i < rangesValues.length; i++) {
-                    String rangeValue = rangesValues[i];
+                for (String rangeValue : rangesValues) {
                     long start, end;
                     if(rangeValue.startsWith("-")) {
                         end = fileLength - 1;
@@ -251,12 +250,7 @@ public class FileService  {
             if (chunks.length == 0)
                 return new long[0][];
             long[][] sortedChunks = Arrays.copyOf(chunks, chunks.length);
-            Arrays.sort(sortedChunks, new Comparator<long[]>() {
-                @Override
-                public int compare(long[] t1, long[] t2) {
-                    return new Long(t1[0]).compareTo(t2[0]);
-                }
-            });
+            Arrays.sort(sortedChunks, Comparator.comparingLong(t -> t[0]));
             ArrayList<long[]> result = new ArrayList<>();
             result.add(sortedChunks[0]);
             for (int i = 1; i < sortedChunks.length; i++) {
@@ -279,9 +273,9 @@ public class FileService  {
         }
         
         private class ByteRange {
-            public long start;
-            public long end;
-            public byte[] header;
+            public final long start;
+            public final long end;
+            public final byte[] header;
             
             public long length() {
                 return end - start + 1;

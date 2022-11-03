@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
-    public static List<Job> scheduledJobs = new ArrayList<>();
+    public static final List<Job> scheduledJobs = new ArrayList<>();
     private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
@@ -263,7 +263,7 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void afterInvocation() {
         List<Callable<?>> currentActions = afterInvocationActions.get();
-        afterInvocationActions.set(null);
+        afterInvocationActions.remove();
         for (Callable<?> callable : currentActions) {
             executor.submit(callable);
         }

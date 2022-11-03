@@ -667,8 +667,8 @@ public class WS extends PlayPlugin {
     }
 
     public static class FileParam {
-        public File file;
-        public String paramName;
+        public final File file;
+        public final String paramName;
 
         public FileParam(File file, String name) {
             this.file = file;
@@ -823,7 +823,7 @@ public class WS extends PlayPlugin {
             Map<String, String> result = new HashMap<>();
             String body = getString();
             for (String entry : body.split("&")) {
-                int pos = entry.indexOf("=");
+                int pos = entry.indexOf('=');
                 if (pos > -1) {
                     result.put(entry.substring(0, pos), entry.substring(pos + 1));
                 } else {
@@ -852,7 +852,7 @@ public class WS extends PlayPlugin {
         public JsonElement getJson() {
             String json = getString();
             try {
-                return new JsonParser().parse(json);
+                return JsonParser.parseString(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);
                 throw new RuntimeException("Cannot parse JSON (check logs)", e);

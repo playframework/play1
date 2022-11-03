@@ -24,7 +24,6 @@ import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
-import play.libs.F.Action;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.mvc.*;
@@ -41,9 +40,7 @@ import play.vfs.VirtualFile;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,14 +66,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     private static final String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     private static final boolean exposePlayServer;
 
-    private static final String ACCEPT_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    private static final Charset ASCII = Charset.forName("ASCII");
-    private static final MessageDigest SHA_1;
-
     /**
      * The Pipeline is given for a PlayHandler
      */
-    public Map<String, ChannelHandler> pipelines = new HashMap<>();
+    public final Map<String, ChannelHandler> pipelines = new HashMap<>();
 
     private WebSocketServerHandshaker handshaker;
     
@@ -86,14 +79,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      * application.conf: <code>http.allowed.method.override=POST,PUT</code>
      */
     private static final Set<String> allowedHttpMethodOverride;
-
-    static {
-        try {
-            SHA_1 = MessageDigest.getInstance("SHA1");
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-1 not supported on this platform", e);
-        }
-    }
 
     static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
@@ -137,13 +122,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 response.direct = null;
 
                 // Streamed output (using response.writeChunk)
-                response.onWriteChunk(new Action<Object>() {
-
-                    @Override
-                    public void invoke(Object result) {
-                        writeChunk(request, response, ctx, nettyRequest, result);
-                    }
-                });
+                response.onWriteChunk(result -> writeChunk(request, response, ctx, nettyRequest, result));
 
                 // Raw invocation
                 boolean raw = Play.pluginCollection.rawInvocation(request, response);
@@ -203,10 +182,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Response.current.set(response);
 
             Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(null);
-            Scope.RouteArgs.current.set(null);
-            Scope.Session.current.set(null);
-            Scope.Flash.current.set(null);
+            Scope.RenderArgs.current.remove();
+            Scope.RouteArgs.current.remove();
+            Scope.Session.current.remove();
+            Scope.Flash.current.remove();
             CachedBoundActionMethodArgs.init();
 
             try {
@@ -336,7 +315,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         && request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value != null) {
                     error.append(request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value);
                 }
-                String errorData = URLEncoder.encode(error.toString(), "utf-8");
+                String errorData = URLEncoder.encode(error.toString(), StandardCharsets.UTF_8);
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";
@@ -526,9 +505,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String fullAddress = ((InetSocketAddress) e.getRemoteAddress()).getAddress().getHostAddress();
         if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf(':'));
         } else if (fullAddress.matches(".*[%].*")) {
-            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf('%'));
         }
         return fullAddress;
     }
@@ -564,7 +543,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
 
-        int i = uri.indexOf("?");
+        int i = uri.indexOf('?');
         String querystring = "";
         String path = uri;
         if (i != -1) {
@@ -657,10 +636,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         for (String key : nettyRequest.headers().names()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
-            hd.values = new ArrayList<>();
-            for (String next : nettyRequest.headers().getAll(key)) {
-                hd.values.add(next);
-            }
+            hd.values = new ArrayList<>(nettyRequest.headers().getAll(key));
             headers.put(hd.name, hd);
         }
 
@@ -978,8 +954,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
 
+        private final ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
         private boolean closed = false;
-        private ConcurrentLinkedQueue<byte[]> nextChunks = new ConcurrentLinkedQueue<>();
 
         @Override
         public boolean hasNextChunk() throws Exception {
@@ -1148,13 +1124,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             synchronized void writeAndClose(ChannelFuture writeFuture) {
                 if (!writeFuture.isDone()) {
                     writeFutures.add(writeFuture);
-                    writeFuture.addListener(new ChannelFutureListener() {
-
-                        @Override
-                        public void operationComplete(ChannelFuture cf) throws Exception {
-                            writeFutures.remove(cf);
-                            futureClose();
-                        }
+                    writeFuture.addListener(cf -> {
+                        writeFutures.remove(cf);
+                        futureClose();
                     });
                 }
             }
@@ -1190,14 +1162,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             @Override
             public synchronized void close() {
                 closeTask = new Promise<>();
-                closeTask.onRedeem(new Action<Promise<Void>>() {
-
-                    @Override
-                    public void invoke(Promise<Void> completed) {
-                        writeFutures.clear();
-                        ctx.getChannel().disconnect();
-                        closeTask = null;
-                    }
+                closeTask.onRedeem(completed -> {
+                    writeFutures.clear();
+                    ctx.getChannel().disconnect();
+                    closeTask = null;
                 });
                 futureClose();
             }

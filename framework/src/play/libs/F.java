@@ -193,17 +193,13 @@ public class F {
                     return get();
                 }
             };
-            F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
-
-                @Override
-                public void invoke(Promise<T> completed) {
-                    waitAllLock.countDown();
-                    if (waitAllLock.getCount() == 0) {
-                        try {
-                            result.invoke(result.get());
-                        } catch (Exception e) {
-                            result.invokeWithException(e);
-                        }
+            F.Action<Promise<T>> action = completed -> {
+                waitAllLock.countDown();
+                if (waitAllLock.getCount() == 0) {
+                    try {
+                        result.invoke(result.get());
+                    } catch (Exception e) {
+                        result.invokeWithException(e);
                     }
                 }
             };
@@ -219,17 +215,13 @@ public class F {
         public static <A, B> Promise<F.Tuple<A, B>> wait2(Promise<A> tA, Promise<B> tB) {
             final Promise<F.Tuple<A, B>> result = new Promise<>();
             Promise<List<Object>> t = waitAll(new Promise[]{tA, tB});
-            t.onRedeem(new F.Action<Promise<List<Object>>>() {
-
-                @Override
-                public void invoke(Promise<List<Object>> completed) {
-                    List<Object> values = completed.getOrNull();
-                    if(values != null) {
-                        result.invoke(new F.Tuple((A) values.get(0), (B) values.get(1)));
-                    }
-                    else {
-                        result.invokeWithException(completed.exception);
-                    }
+            t.onRedeem(completed -> {
+                List<Object> values = completed.getOrNull();
+                if(values != null) {
+                    result.invoke(new Tuple((A) values.get(0), (B) values.get(1)));
+                }
+                else {
+                    result.invokeWithException(completed.exception);
                 }
             });
             return result;
@@ -238,17 +230,13 @@ public class F {
         public static <A, B, C> Promise<F.T3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
             final Promise<F.T3<A, B, C>> result = new Promise<>();
             Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC});
-            t.onRedeem(new F.Action<Promise<List<Object>>>() {
-
-                @Override
-                public void invoke(Promise<List<Object>> completed) {
-                    List<Object> values = completed.getOrNull();
-                    if(values != null) {
-                        result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
-                    }
-                    else {
-                        result.invokeWithException(completed.exception);
-                    }
+            t.onRedeem(completed -> {
+                List<Object> values = completed.getOrNull();
+                if(values != null) {
+                    result.invoke(new T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                }
+                else {
+                    result.invokeWithException(completed.exception);
                 }
             });
             return result;
@@ -257,17 +245,13 @@ public class F {
         public static <A, B, C, D> Promise<F.T4<A, B, C, D>> wait4(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
             final Promise<F.T4<A, B, C, D>> result = new Promise<>();
             Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD});
-            t.onRedeem(new F.Action<Promise<List<Object>>>() {
-
-                @Override
-                public void invoke(Promise<List<Object>> completed) {
-                    List<Object> values = completed.getOrNull();
-                    if(values != null) {
-                        result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
-                    }
-                    else {
-                        result.invokeWithException(completed.exception);
-                    }
+            t.onRedeem(completed -> {
+                List<Object> values = completed.getOrNull();
+                if(values != null) {
+                    result.invoke(new T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                }
+                else {
+                    result.invokeWithException(completed.exception);
                 }
             });
             return result;
@@ -276,17 +260,13 @@ public class F {
         public static <A, B, C, D, E> Promise<F.T5<A, B, C, D, E>> wait5(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
             final Promise<F.T5<A, B, C, D, E>> result = new Promise<>();
             Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD, tE});
-            t.onRedeem(new F.Action<Promise<List<Object>>>() {
-
-                @Override
-                public void invoke(Promise<List<Object>> completed) {
-                    List<Object> values = completed.getOrNull();
-                    if(values != null) {
-                        result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
-                    }
-                    else {
-                        result.invokeWithException(completed.exception);
-                    }
+            t.onRedeem(completed -> {
+                List<Object> values = completed.getOrNull();
+                if(values != null) {
+                    result.invoke(new T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
+                }
+                else {
+                    result.invokeWithException(completed.exception);
                 }
             });
             return result;
@@ -296,13 +276,7 @@ public class F {
             final Promise<F.Tuple<Integer, Promise<Object>>> result = new Promise<>();
             for (int i = 0; i < futures.length; i++) {
                 final int index = i + 1;
-                ((Promise<Object>) futures[i]).onRedeem(new F.Action<Promise<Object>>() {
-
-                    @Override
-                    public void invoke(Promise<Object> completed) {
-                        result.invoke(new F.Tuple(index, completed));
-                    }
-                });
+                futures[i].onRedeem(completed -> result.invoke(new Tuple(index, completed)));
             }
             return result;
         }
@@ -311,20 +285,15 @@ public class F {
             final Promise<F.Either<A, B>> result = new Promise<>();
             Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB);
 
-            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
-
-                @Override
-                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
-                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                    switch (value._1) {
-                        case 1:
-                            result.invoke(F.Either.<A, B>_1((A) value._2.getOrNull()));
-                            break;
-                        case 2:
-                            result.invoke(F.Either.<A, B>_2((B) value._2.getOrNull()));
-                            break;
-                    }
-
+            t.onRedeem(completed -> {
+                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                switch (value._1) {
+                    case 1:
+                        result.invoke(Either.<A, B>_1((A) value._2.getOrNull()));
+                        break;
+                    case 2:
+                        result.invoke(Either.<A, B>_2((B) value._2.getOrNull()));
+                        break;
                 }
             });
 
@@ -335,23 +304,18 @@ public class F {
             final Promise<F.E3<A, B, C>> result = new Promise<>();
             Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC);
 
-            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
-
-                @Override
-                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
-                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                    switch (value._1) {
-                        case 1:
-                            result.invoke(F.E3.<A, B, C>_1((A) value._2.getOrNull()));
-                            break;
-                        case 2:
-                            result.invoke(F.E3.<A, B, C>_2((B) value._2.getOrNull()));
-                            break;
-                        case 3:
-                            result.invoke(F.E3.<A, B, C>_3((C) value._2.getOrNull()));
-                            break;
-                    }
-
+            t.onRedeem(completed -> {
+                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                switch (value._1) {
+                    case 1:
+                        result.invoke(E3.<A, B, C>_1((A) value._2.getOrNull()));
+                        break;
+                    case 2:
+                        result.invoke(E3.<A, B, C>_2((B) value._2.getOrNull()));
+                        break;
+                    case 3:
+                        result.invoke(E3.<A, B, C>_3((C) value._2.getOrNull()));
+                        break;
                 }
             });
 
@@ -362,26 +326,21 @@ public class F {
             final Promise<F.E4<A, B, C, D>> result = new Promise<>();
             Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD);
 
-            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
-
-                @Override
-                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
-                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                    switch (value._1) {
-                        case 1:
-                            result.invoke(F.E4.<A, B, C, D>_1((A) value._2.getOrNull()));
-                            break;
-                        case 2:
-                            result.invoke(F.E4.<A, B, C, D>_2((B) value._2.getOrNull()));
-                            break;
-                        case 3:
-                            result.invoke(F.E4.<A, B, C, D>_3((C) value._2.getOrNull()));
-                            break;
-                        case 4:
-                            result.invoke(F.E4.<A, B, C, D>_4((D) value._2.getOrNull()));
-                            break;
-                    }
-
+            t.onRedeem(completed -> {
+                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                switch (value._1) {
+                    case 1:
+                        result.invoke(E4.<A, B, C, D>_1((A) value._2.getOrNull()));
+                        break;
+                    case 2:
+                        result.invoke(E4.<A, B, C, D>_2((B) value._2.getOrNull()));
+                        break;
+                    case 3:
+                        result.invoke(E4.<A, B, C, D>_3((C) value._2.getOrNull()));
+                        break;
+                    case 4:
+                        result.invoke(E4.<A, B, C, D>_4((D) value._2.getOrNull()));
+                        break;
                 }
             });
 
@@ -392,30 +351,24 @@ public class F {
             final Promise<F.E5<A, B, C, D, E>> result = new Promise<>();
             Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD, tE);
 
-            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
-
-                @Override
-                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
-                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                    switch (value._1) {
-                        case 1:
-                            result.invoke(F.E5.<A, B, C, D, E>_1((A) value._2.getOrNull()));
-                            break;
-                        case 2:
-                            result.invoke(F.E5.<A, B, C, D, E>_2((B) value._2.getOrNull()));
-                            break;
-                        case 3:
-                            result.invoke(F.E5.<A, B, C, D, E>_3((C) value._2.getOrNull()));
-                            break;
-                        case 4:
-                            result.invoke(F.E5.<A, B, C, D, E>_4((D) value._2.getOrNull()));
-                            break;
-                        case 5:
-                            result.invoke(F.E5.<A, B, C, D, E>_5((E) value._2.getOrNull()));
-                            break;
-
-                    }
-
+            t.onRedeem(completed -> {
+                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                switch (value._1) {
+                    case 1:
+                        result.invoke(E5.<A, B, C, D, E>_1((A) value._2.getOrNull()));
+                        break;
+                    case 2:
+                        result.invoke(E5.<A, B, C, D, E>_2((B) value._2.getOrNull()));
+                        break;
+                    case 3:
+                        result.invoke(E5.<A, B, C, D, E>_3((C) value._2.getOrNull()));
+                        break;
+                    case 4:
+                        result.invoke(E5.<A, B, C, D, E>_4((D) value._2.getOrNull()));
+                        break;
+                    case 5:
+                        result.invoke(E5.<A, B, C, D, E>_5((E) value._2.getOrNull()));
+                        break;
                 }
             });
 

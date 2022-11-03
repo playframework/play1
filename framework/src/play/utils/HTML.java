@@ -110,7 +110,7 @@ public class HTML {
                 int index = (referredChar < 1000 ? referredChar : referredChar - 7000);
                 String reference = entityReferences.getProperty(key);
                 this.characterToEntityReferenceMap[index] = REFERENCE_START + reference + REFERENCE_END;
-                this.entityReferenceToCharacterMap.put(reference, new Character((char) referredChar));
+                this.entityReferenceToCharacterMap.put(reference, (char) referredChar);
             }
         }
 

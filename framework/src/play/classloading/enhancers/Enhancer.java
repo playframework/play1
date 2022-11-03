@@ -29,7 +29,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public abstract class Enhancer {
 
-    protected ClassPool classPool;
+    protected final ClassPool classPool;
 
     public Enhancer() {
         this.classPool = newClassPool();
@@ -76,7 +76,7 @@ public abstract class Enhancer {
 
             if (Play.usePrecompiled) {
                 try {
-                    File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
+                    File file = Play.getFile("precompiled/java/" + className.replace('.', '/') + ".class");
                     return new FileInputStream(file);
                 } catch (Exception e) {
                     Logger.error("Missing class %s", className);

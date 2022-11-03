@@ -312,13 +312,10 @@ public class Invoker {
                 if (init()) {
                     before();
                     final AtomicBoolean executed = new AtomicBoolean(false);
-                    this.withinFilter(new play.libs.F.Function0<Void>() {
-                        @Override
-                        public Void apply() throws Throwable {
-                            executed.set(true);
-                            execute();
-                            return null;
-                        }
+                    this.withinFilter(() -> {
+                        executed.set(true);
+                        execute();
+                        return null;
                     });
                     // No filter function found => we need to execute anyway( as before the use of withinFilter )
                     if (!executed.get()) {
@@ -416,10 +413,9 @@ public class Invoker {
     static class WaitForTasksCompletion extends Thread {
 
         static WaitForTasksCompletion instance;
-        Map<Future<?>, Invocation> queue;
+        final Map<Future<?>, Invocation> queue = new ConcurrentHashMap<>();
 
         public WaitForTasksCompletion() {
-            queue = new ConcurrentHashMap<>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
         }
@@ -427,12 +423,7 @@ public class Invoker {
         public static <V> void waitFor(Future<V> task, final Invocation invocation) {
             if (task instanceof Promise) {
                 Promise<V> smartFuture = (Promise<V>) task;
-                smartFuture.onRedeem(new F.Action<F.Promise<V>>() {
-                    @Override
-                    public void invoke(Promise<V> result) {
-                        executor.submit(invocation);
-                    }
-                });
+                smartFuture.onRedeem(result -> executor.submit(invocation));
             } else {
                 synchronized (WaitForTasksCompletion.class) {
                     if (instance == null) {

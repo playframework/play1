@@ -3,11 +3,13 @@ package play.templates;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +18,11 @@ import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.IGroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.codehaus.groovy.control.Phases;
 import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.ExceptionMessage;
 import org.codehaus.groovy.control.messages.Message;
+import org.codehaus.groovy.control.messages.SimpleMessage;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
@@ -61,6 +65,8 @@ import play.templates.types.SafeXMLFormatter;
 import play.utils.HTML;
 import play.utils.Java;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class GroovyTemplate extends BaseTemplate {
 
     static final Map<String, SafeFormatter> safeFormatters = new HashMap<>();
@@ -101,7 +107,7 @@ public class GroovyTemplate extends BaseTemplate {
     @Override
     void directLoad(byte[] code) throws Exception {
         try (TClassLoader tClassLoader = new TClassLoader()) {
-	        String[] lines = new String(code, "utf-8").split("\n");
+	        String[] lines = new String(code, UTF_8).split("\n");
 	        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
 	        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
 	        for (int i = 4; i < lines.length; i = i + 2) {
@@ -139,34 +145,18 @@ public class GroovyTemplate extends BaseTemplate {
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                 compilationUnit.addSource(
                         new SourceUnit(name, compiledSource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
-                
-				// The following approach to adding the phase operation replaces the original
-				// reflection based approach commented out lower down. This appears to be the
-				// canonical approach and possibly has only been made available in the v3.x
-				// stream but it differs in two ways from the reflection based approach and it's
-				// not clear if and what the impact is:
-				// 1. It does NOT guarantee an empty list of OUTPUT phases operations to begin with.
-				// 2. The new phase operation is added to the start and not the end.
-                // See https://github.com/apache/groovy/blob/GROOVY_3_0_6/src/main/java/org/codehaus/groovy/control/CompilationUnit.java#L349
-                compilationUnit.addPhaseOperation(new IGroovyClassOperation() {
-                    @Override
-                    public void call(GroovyClass gclass) {
-                        groovyClassesForThisTemplate.add(gclass);
-                    }
-                });
 
-                // TOOD: Remove once the above replacement logic has been confirmed.
-//                Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
-//                phasesF.setAccessible(true);
-//                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
-//                LinkedList<IGroovyClassOperation> output = new LinkedList<>();
-//                phases[Phases.OUTPUT] = output;
-//                output.add(new IGroovyClassOperation() {
-//                    @Override
-//                    public void call(GroovyClass gclass) {
-//                        groovyClassesForThisTemplate.add(gclass);
-//                    }
-//                });
+                // Play needs to handle writing the generated Groovy class to the file system but the Groovy
+                // compilation unit by default adds it's own output phase operation to do this that cannot
+                // be replaced using the available public methods. Until Groovy provides this capability
+                // it's necessary to access the compilation unit directly using reflection to replace the
+                // default output operation with the Play Groovy class handler.
+                Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
+                phasesF.setAccessible(true);
+                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
+                LinkedList<IGroovyClassOperation> output = new LinkedList<>();
+                phases[Phases.OUTPUT] = output;
+                output.add(groovyClassesForThisTemplate::add);
                 
                 compilationUnit.compile();
                 // ouf
@@ -187,13 +177,13 @@ public class GroovyTemplate extends BaseTemplate {
                     sb.append("\n");
                 }
                 // Cache
-                BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, source);
+                BytecodeCache.cacheBytecode(sb.toString().getBytes(UTF_8), name, source);
                 compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
                 if (System.getProperty("precompile") != null) {
                     try {
                         // emit bytecode to standard class layout as well
                         File f = Play.getFile("precompiled/templates/"
-                                + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
+                                + name.replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent"));
                         f.getParentFile().mkdirs();
                         FileUtils.write(f, sb.toString(), "utf-8");
                     } catch (Exception e) {
@@ -217,16 +207,19 @@ public class GroovyTemplate extends BaseTemplate {
                             line = 0;
                         }
                         String message = syntaxException.getMessage();
-                        if (message.indexOf("@") > 0) {
-                            message = message.substring(0, message.lastIndexOf("@"));
+                        if (message.indexOf('@') > 0) {
+                            message = message.substring(0, message.lastIndexOf('@'));
                         }
                         throw new TemplateCompilationException(this, line, message);
-                    } else {
-                        ExceptionMessage errorMessage = (ExceptionMessage) e.getErrorCollector().getLastError();
+                    } else if (errorMsg instanceof ExceptionMessage) {
+                        ExceptionMessage errorMessage = ExceptionMessage.class.cast(errorMsg);
                         Exception exception = errorMessage.getCause();
                         Integer line = 0;
                         String message = exception.getMessage();
                         throw new TemplateCompilationException(this, line, message);
+                    } else if (errorMsg instanceof SimpleMessage) {
+                        SimpleMessage errorMessage = SimpleMessage.class.cast(errorMsg);
+                        throw new TemplateCompilationException(this, null, errorMessage.getMessage());
                     }
                 }
                 throw new UnexpectedException(e);
@@ -279,7 +272,7 @@ public class GroovyTemplate extends BaseTemplate {
             // We have to set up the PrintWriter that this (and all sub-templates) are going
             // to write the output to..
             applyLayouts = true;
-            layout.set(null);
+            layout.remove();
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
             currentTemplate.set(this);
@@ -358,17 +351,19 @@ public class GroovyTemplate extends BaseTemplate {
             // See GroovyTemplateCompiler.head() for more info.
             if (se.getClassName().startsWith("Template_")) {
                 String tn = se.getClassName().substring(9);
-                if (tn.indexOf("$") > -1) {
-                    tn = tn.substring(0, tn.indexOf("$"));
+                int charIndex = tn.indexOf('$');
+                if (charIndex > -1) {
+                    tn = tn.substring(0, charIndex);
                 }
                 BaseTemplate template = TemplateLoader.templates.get(tn);
                 if (template != null) {
                     Integer line = template.linesMatrix.get(se.getLineNumber());
                     if (line != null) {
                         String ext = "";
-                        if (tn.indexOf(".") > -1) {
-                            ext = tn.substring(tn.indexOf(".") + 1);
-                            tn = tn.substring(0, tn.indexOf("."));
+                        charIndex = tn.indexOf('.');
+                        if (charIndex > -1) {
+                            ext = tn.substring(charIndex + 1);
+                            tn = tn.substring(0, charIndex);
                         }
                         StackTraceElement nse = new StackTraceElement(TemplateLoader.templates.get(tn).name, ext, "line", line);
                         cleanTrace.add(nse);
@@ -396,7 +391,7 @@ public class GroovyTemplate extends BaseTemplate {
 
         public void init(GroovyTemplate t) {
             template = t;
-            int index = template.name.lastIndexOf(".");
+            int index = template.name.lastIndexOf('.');
             if (index > 0) {
                 extension = template.name.substring(index + 1);
             }
@@ -415,7 +410,7 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure body) {
-            String templateName = tag.replace(".", "/");
+            String templateName = tag.replace('.', '/');
             String callerExtension = (extension != null) ? extension : "tag";
 
             BaseTemplate tagTemplate = null;

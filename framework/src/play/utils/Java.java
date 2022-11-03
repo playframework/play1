@@ -15,10 +15,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
 
@@ -317,7 +317,7 @@ public class Java {
     }
 
     /** cache */
-    private static Map<Field, FieldWrapper> wrappers = new HashMap<>();
+    private static final Map<Field, FieldWrapper> wrappers = new HashMap<>();
 
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {
@@ -474,12 +474,7 @@ class JavaWithCaching {
 
             ClassAndAnnotation that = (ClassAndAnnotation) o;
 
-            if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null)
-                return false;
-            if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null)
-                return false;
-
-            return true;
+            return Objects.equals(annotation, that.annotation) && Objects.equals(clazz, that.clazz);
         }
 
         @Override
@@ -544,17 +539,14 @@ class JavaWithCaching {
     private void sortByPriority(List<Method> methods, final Class<? extends Annotation> annotationType) {
         try {
             final Method priority = annotationType.getMethod("priority");
-            sort(methods, new Comparator<Method>() {
-                @Override
-                public int compare(Method m1, Method m2) {
-                    try {
-                        Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
-                        Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));
-                        return priority1.compareTo(priority2);
-                    } catch (Exception e) {
-                        // should not happen
-                        throw new RuntimeException(e);
-                    }
+            methods.sort((m1, m2) -> {
+                try {
+                    Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
+                    Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));
+                    return priority1.compareTo(priority2);
+                } catch (Exception e) {
+                    // should not happen
+                    throw new RuntimeException(e);
                 }
             });
         } catch (NoSuchMethodException e) {

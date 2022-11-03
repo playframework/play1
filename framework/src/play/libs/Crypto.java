@@ -12,6 +12,8 @@ import org.apache.commons.codec.binary.Base64;
 import play.Play;
 import play.exceptions.UnexpectedException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Cryptography utils
  */
@@ -22,7 +24,7 @@ public class Crypto {
      */
     public enum HashType {
         MD5("MD5"), SHA1("SHA-1"), SHA256("SHA-256"), SHA512("SHA-512");
-        private String algorithm;
+        private final String algorithm;
 
         HashType(String algorithm) {
             this.algorithm = algorithm;
@@ -71,7 +73,7 @@ public class Crypto {
             Mac mac = Mac.getInstance("HmacSHA1");
             SecretKeySpec signingKey = new SecretKeySpec(key, "HmacSHA1");
             mac.init(signingKey);
-            byte[] messageBytes = message.getBytes("utf-8");
+            byte[] messageBytes = message.getBytes(UTF_8);
             byte[] result = mac.doFinal(messageBytes);
             int len = result.length;
             char[] hexChars = new char[len * 2];

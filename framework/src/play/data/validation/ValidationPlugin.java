@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,14 +129,14 @@ public class ValidationPlugin extends PlayPlugin {
             return violations;
         }
     }
-    static Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+    static final Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
     static Validation restore() {
         try {
             Validation validation = new Validation();
             Http.Cookie cookie = Http.Request.current().cookies.get(Scope.COOKIE_PREFIX + "_ERRORS");
             if (cookie != null) {
-                String errorsData = URLDecoder.decode(cookie.value, "utf-8");
+                String errorsData = URLDecoder.decode(cookie.value, StandardCharsets.UTF_8);
                 Matcher matcher = errorsParser.matcher(errorsData);
                 while (matcher.find()) {
                     String[] g2 = matcher.group(2).split("\u0001", -1);
@@ -178,7 +179,7 @@ public class ValidationPlugin extends PlayPlugin {
                     errors.append("\u0000");
                 }
             }
-            String errorsData = URLEncoder.encode(errors.toString(), "utf-8");
+            String errorsData = URLEncoder.encode(errors.toString(), StandardCharsets.UTF_8);
             Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", errorsData, null, "/", null, Scope.COOKIE_SECURE, Scope.SESSION_HTTPONLY, null);
         } catch (Exception e) {
             throw new UnexpectedException("Errors serializationProblem", e);

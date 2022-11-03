@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -273,7 +272,7 @@ public class Http {
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap<>(16);
+        public final Map<String, Object> args = new HashMap<>(16);
         /**
          * When the request has been received
          */
@@ -467,7 +466,7 @@ public class Http {
                 String decoded = new String(Codec.decodeBASE64(data));
                 // splitting on ONLY first : allows user's password to contain a
                 // :
-                int indexOf = decoded.indexOf(":");
+                int indexOf = decoded.indexOf(':');
                 if (indexOf < 0)
                     return;
 
@@ -581,22 +580,18 @@ public class Http {
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, new Comparator<String>() {
-
-                @Override
-                public int compare(String lang1, String lang2) {
-                    double q1 = 1.0;
-                    double q2 = 1.0;
-                    Matcher m1 = qpattern.matcher(lang1);
-                    Matcher m2 = qpattern.matcher(lang2);
-                    if (m1.find()) {
-                        q1 = Double.parseDouble(m1.group(1));
-                    }
-                    if (m2.find()) {
-                        q2 = Double.parseDouble(m2.group(1));
-                    }
-                    return (int) (q2 - q1);
+            languages.sort((lang1, lang2) -> {
+                double q1 = 1.0;
+                double q2 = 1.0;
+                Matcher m1 = qpattern.matcher(lang1);
+                Matcher m2 = qpattern.matcher(lang2);
+                if (m1.find()) {
+                    q1 = Double.parseDouble(m1.group(1));
                 }
+                if (m2.find()) {
+                    q2 = Double.parseDouble(m2.group(1));
+                }
+                return (int) (q2 - q1);
             });
             List<String> result = new ArrayList<>(10);
             for (String lang : languages) {
@@ -630,11 +625,11 @@ public class Http {
         /**
          * Response headers
          */
-        public Map<String, Http.Header> headers = new HashMap<>(16);
+        public final Map<String, Http.Header> headers = new HashMap<>(16);
         /**
          * Response cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<>(16);
+        public final Map<String, Http.Cookie> cookies = new HashMap<>(16);
         /**
          * Response body stream
          */

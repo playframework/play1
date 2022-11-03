@@ -20,16 +20,15 @@ import play.Logger;
  */
 public class EhCacheImpl implements CacheImpl {
 
+    private static final String cacheName = "play";
     private static EhCacheImpl uniqueInstance;
 
-    CacheManager cacheManager;
+    final CacheManager cacheManager = CacheManager.create();
 
-    net.sf.ehcache.Cache cache;
+    final net.sf.ehcache.Cache cache;
 
-    private static final String cacheName = "play";
 
     private EhCacheImpl() {
-        this.cacheManager = CacheManager.create();
         this.cacheManager.addCache(cacheName);
         this.cache = cacheManager.getCache(cacheName);
     }
@@ -64,7 +63,7 @@ public class EhCacheImpl implements CacheImpl {
         if (e == null) {
             return -1;
         }
-        long newValue = ((Number) e.getValue()).longValue() - by;
+        long newValue = ((Number) e.getObjectValue()).longValue() - by;
         Element newE = new Element(key, newValue);
         newE.setTimeToLive(e.getTimeToLive());
         cache.put(newE);
@@ -79,7 +78,7 @@ public class EhCacheImpl implements CacheImpl {
     @Override
     public Object get(String key) {
         Element e = cache.get(key);
-        return (e == null) ? null : e.getValue();
+        return (e == null) ? null : e.getObjectValue();
     }
 
     @Override
@@ -97,7 +96,7 @@ public class EhCacheImpl implements CacheImpl {
         if (e == null) {
             return -1;
         }
-        long newValue = ((Number) e.getValue()).longValue() + by;
+        long newValue = ((Number) e.getObjectValue()).longValue() + by;
         Element newE = new Element(key, newValue);
         newE.setTimeToLive(e.getTimeToLive());
         cache.put(newE);

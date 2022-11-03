@@ -18,11 +18,7 @@ import play.mvc.Http;
 public class MimeTypes {
 
     private static Properties mimetypes = null;
-    private static Pattern extPattern;
-
-    static {
-        extPattern = Pattern.compile("^.*\\.([^.]+)$");
-    }
+    private static final Pattern extPattern = Pattern.compile("^.*\\.([^.]+)$");
 
     /**
      * return the mimetype from a file name
@@ -103,7 +99,7 @@ public class MimeTypes {
     public static boolean isValidMimeType(String mimeType) {
         if (mimeType == null) {
             return false;
-        } else if (mimeType.indexOf(";") != -1) {
+        } else if (mimeType.contains(";")) {
             return mimetypes().contains(mimeType.split(";")[0]);
         } else {
             return mimetypes().contains(mimeType);

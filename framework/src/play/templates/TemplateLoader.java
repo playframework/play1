@@ -17,12 +17,12 @@ import play.vfs.VirtualFile;
 
 public class TemplateLoader {
 
-    protected static Map<String, BaseTemplate> templates = new HashMap<>();
+    protected static final Map<String, BaseTemplate> templates = new HashMap<>();
     /**
      * See getUniqueNumberForTemplateFile() for more info
      */
-    private static AtomicLong nextUniqueNumber = new AtomicLong(1000);// we start on 1000
-    private static Map<String, String> templateFile2UniqueNumber = Collections.synchronizedMap(new HashMap<String, String>());
+    private static final AtomicLong nextUniqueNumber = new AtomicLong(1000);// we start on 1000
+    private static final Map<String, String> templateFile2UniqueNumber = Collections.synchronizedMap(new HashMap<String, String>());
 
     /**
      * All loaded templates is cached in the templates-list using a key. This key is included as part of the classname
@@ -70,7 +70,7 @@ public class TemplateLoader {
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
                 BaseTemplate template = new GroovyTemplate(
-                        fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), "");
+                        fileRelativePath.replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent"), "");
                 try {
                     template.loadPrecompiled();
                     templates.put(key, template);
@@ -187,7 +187,7 @@ public class TemplateLoader {
             VirtualFile tf = vf.child(path);
             boolean templateExists = tf.exists();
             if (!templateExists && Play.usePrecompiled) {
-                String name = tf.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent");
+                String name = tf.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(':', '_').replace("..", "parent");
                 templateExists = Play.getFile("precompiled/templates/" + name).exists();
             }
             if (templateExists) {

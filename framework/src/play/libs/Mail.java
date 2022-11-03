@@ -3,7 +3,6 @@ package play.libs;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -194,19 +193,15 @@ public class Mail {
      */
     public static Future<Boolean> sendMessage(final Email msg) {
         if (asynchronousSend) {
-            return executor.submit(new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() {
-                    try {
-                        msg.setSentDate(new Date());
-                        msg.send();
-                        return true;
-                    } catch (Throwable e) {
-                        MailException me = new MailException("Error while sending email", e);
-                        Logger.error(me, "The email has not been sent");
-                        return false;
-                    }
+            return executor.submit(() -> {
+                try {
+                    msg.setSentDate(new Date());
+                    msg.send();
+                    return true;
+                } catch (Throwable e) {
+                    MailException me = new MailException("Error while sending email", e);
+                    Logger.error(me, "The email has not been sent");
+                    return false;
                 }
             });
         } else {
@@ -248,12 +243,12 @@ public class Mail {
         }
     }
 
-    static ExecutorService executor = Executors.newCachedThreadPool();
+    static final ExecutorService executor = Executors.newCachedThreadPool();
 
     public static class SMTPAuthenticator extends Authenticator {
 
-        private String user;
-        private String password;
+        private final String user;
+        private final String password;
 
         public SMTPAuthenticator(String user, String password) {
             this.user = user;

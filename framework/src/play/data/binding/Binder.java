@@ -81,20 +81,16 @@ public abstract class Binder {
         supportedTypes.remove(clazz);
     }
 
-    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
+    static final Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
-        if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = new BeanWrapper(clazz);
-            beanwrappers.put(clazz, beanwrapper);
-        }
-        return beanwrappers.get(clazz);
+        return beanwrappers.computeIfAbsent(clazz, BeanWrapper::new);
     }
 
     public static class MethodAndParamInfo {
         public final Object objectInstance;
         public final Method method;
-        public int parameterIndex;
+        public final int parameterIndex;
 
         public MethodAndParamInfo(Object objectInstance, Method method, int parameterIndex) {
             this.objectInstance = objectInstance;
@@ -521,9 +517,9 @@ public abstract class Binder {
                 l = (Collection) createNewInstance(clazz);
             }
             boolean hasMissing = false;
-            for (int i = 0; i < values.length; i++) {
+            for (String paramNodeValue : values) {
                 try {
-                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, values[i], componentClass,
+                    Object value = internalDirectBind(paramNode.getOriginalKey(), bindingAnnotations.annotations, paramNodeValue, componentClass,
                             componentType);
                     if (value == DIRECTBINDING_NO_RESULT) {
                         hasMissing = true;
@@ -548,14 +544,11 @@ public abstract class Binder {
             List l = (List) r;
 
             // must get all indexes and sort them so we add items in correct order.
-            Set<String> indexes = new TreeSet<>(new Comparator<String>() {
-                @Override
-                public int compare(String arg0, String arg1) {
-                    try {
-                        return Integer.parseInt(arg0) - Integer.parseInt(arg1);
-                    } catch (NumberFormatException e) {
-                        return arg0.compareTo(arg1);
-                    }
+            Set<String> indexes = new TreeSet<>((arg0, arg1) -> {
+                try {
+                    return Integer.parseInt(arg0) - Integer.parseInt(arg1);
+                } catch (NumberFormatException e) {
+                    return arg0.compareTo(arg1);
                 }
             });
             indexes.addAll(paramNode.getAllChildrenKeys());
@@ -737,43 +730,43 @@ public abstract class Binder {
         }
 
         // int or Integer binding
-        if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+        if (clazz.equals(int.class) || clazz.equals(Integer.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0 : null;
             }
 
-            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // long or Long binding
-        if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+        if (clazz.equals(long.class) || clazz.equals(Long.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0l : null;
             }
 
-            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // byte or Byte binding
-        if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
+        if (clazz.equals(byte.class) || clazz.equals(Byte.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (byte) 0 : null;
             }
 
-            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // short or Short binding
-        if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+        if (clazz.equals(short.class) || clazz.equals(Short.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (short) 0 : null;
             }
 
-            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf('.')) : value);
         }
 
         // float or Float binding
-        if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+        if (clazz.equals(float.class) || clazz.equals(Float.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0f : null;
             }
@@ -782,7 +775,7 @@ public abstract class Binder {
         }
 
         // double or Double binding
-        if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+        if (clazz.equals(double.class) || clazz.equals(Double.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0d : null;
             }
@@ -801,7 +794,7 @@ public abstract class Binder {
         }
 
         // boolean or Boolean binding
-        if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+        if (clazz.equals(boolean.class) || clazz.equals(Boolean.class)) {
             if (nullOrEmpty) {
                 return clazz.isPrimitive() ? false : null;
             }

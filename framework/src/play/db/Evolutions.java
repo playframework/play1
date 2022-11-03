@@ -39,10 +39,11 @@ import play.vfs.VirtualFile;
  */
 public class Evolutions extends PlayPlugin {
 
-    private static String EVOLUTIONS_TABLE_NAME = "play_evolutions";
-    protected static File evolutionsDirectory = Play.getFile("db/evolutions");
+    private static final String EVOLUTIONS_TABLE_NAME = "play_evolutions";
+    private static final Map<String, VirtualFile> modulesWithEvolutions = new LinkedHashMap<>();
 
-    private static Map<String, VirtualFile> modulesWithEvolutions = new LinkedHashMap<>();
+    protected static final File evolutionsDirectory = Play.getFile("db/evolutions");
+
 
     public static void main(String[] args) throws SQLException {
         /** Start the DB plugin **/
@@ -79,64 +80,67 @@ public class Evolutions extends PlayPlugin {
             System.out.println("~ Connected to " + DB.getDataSource(dbName).getConnection().getMetaData().getURL());
 
             for (Entry<String, VirtualFile> moduleRoot : modulesWithEvolutions.entrySet()) {
+                if (!isDatabaseEvolutionDisabled(dbName)) {
+                    /** Summary **/
+                    Evolution database = listDatabaseEvolutions(dbName, moduleRoot.getKey()).peek();
+                    Evolution application = listApplicationEvolutions(dbName, moduleRoot.getKey(), moduleRoot.getValue()).peek();
 
-                /** Summary **/
-                Evolution database = listDatabaseEvolutions(dbName, moduleRoot.getKey()).peek();
-                Evolution application = listApplicationEvolutions(dbName, moduleRoot.getKey(), moduleRoot.getValue()).peek();
-
-                boolean needToCheck = true;
-                if ("resolve".equals(System.getProperty("mode"))) {
-                    needToCheck = handleResolveAction(dbName, moduleRoot);
-                }
-                if (needToCheck) {
-                    /** Check inconsistency **/
-                    try {
-                        checkEvolutionsState(dbName);
-                    } catch (InconsistentDatabase e) {
-                        defaultExitCode = false;
-                        System.out.println("~");
-                        System.out.println("~ Your database " + dbName + " is in an inconsistent state!");
-                        System.out.println("~");
-                        System.out.println("~ While applying this script part:");
-                        System.out.println("");
-                        System.out.println(e.getEvolutionScript());
-                        System.out.println("");
-                        System.out.println("~ The following error occurred:");
-                        System.out.println("");
-                        System.out.println(e.getError());
-                        System.out.println("");
-                        System.out.println("~ Please correct it manually, and mark it resolved by running `play evolutions:resolve`");
-                        System.out.println("~");
-                        continue;
-                    } catch (InvalidDatabaseRevision e) {
-                        // see later
+                    boolean needToCheck = true;
+                    if ("resolve".equals(System.getProperty("mode"))) {
+                        needToCheck = handleResolveAction(dbName, moduleRoot);
                     }
-
-                    System.out.print("~ '" + moduleRoot.getKey() + "' Application revision is " + application.revision + " ["
-                            + application.hash.substring(0, 7) + "]");
-                    System.out.println(" and '" + moduleRoot.getKey() + "' Database revision is " + database.revision + " ["
-                            + database.hash.substring(0, 7) + "]");
-                    System.out.println("~");
-
-                    /** Evolution script **/
-                    List<Evolution> evolutions = getEvolutionScript(dbName, moduleRoot.getKey(), moduleRoot.getValue());
-                    if (evolutions.isEmpty()) {
-                        System.out.println("~ Your database " + dbName + " is up to date for " + moduleRoot.getKey());
-                        System.out.println("~");
-                    } else {
-                        if ("apply".equals(System.getProperty("mode"))) {
-                            if (!handleApplyAction(dbName, moduleRoot, evolutions)) {
-                                defaultExitCode = false;
-                            }
-                        } else if ("markApplied".equals(System.getProperty("mode"))) {
-                            if (!handleMarkAppliedAction(dbName, moduleRoot, evolutions)) {
-                                defaultExitCode = false;
-                            }
-                        } else {
+                    if (needToCheck) {
+                        /** Check inconsistency **/
+                        try {
+                            checkEvolutionsState(dbName);
+                        } catch (InconsistentDatabase e) {
                             defaultExitCode = false;
-                            handleDefaultAction(dbName, moduleRoot, evolutions);
+                            System.out.println("~");
+                            System.out.println("~ Your database " + dbName + " is in an inconsistent state!");
+                            System.out.println("~");
+                            System.out.println("~ While applying this script part:");
+                            System.out.println("");
+                            System.out.println(e.getEvolutionScript());
+                            System.out.println("");
+                            System.out.println("~ The following error occurred:");
+                            System.out.println("");
+                            System.out.println(e.getError());
+                            System.out.println("");
+                            System.out.println("~ Please correct it manually, and mark it resolved by running `play evolutions:resolve`");
+                            System.out.println("~");
+                            continue;
+                        } catch (InvalidDatabaseRevision e) {
+                            // see later
+                        }
+
+                        System.out.print("~ '" + moduleRoot.getKey() + "' Application revision is " + application.revision + " ["
+                                + application.hash.substring(0, 7) + "]");
+                        System.out.println(" and '" + moduleRoot.getKey() + "' Database revision is " + database.revision + " ["
+                                + database.hash.substring(0, 7) + "]");
+                        System.out.println("~");
+
+                        /** Evolution script **/
+                        List<Evolution> evolutions = getEvolutionScript(dbName, moduleRoot.getKey(), moduleRoot.getValue());
+                        if (evolutions.isEmpty()) {
+                            System.out.println("~ Your database " + dbName + " is up to date for " + moduleRoot.getKey());
+                            System.out.println("~");
+                        } else {
+                            if ("apply".equals(System.getProperty("mode"))) {
+                                if (!handleApplyAction(dbName, moduleRoot, evolutions)) {
+                                    defaultExitCode = false;
+                                }
+                            } else if ("markApplied".equals(System.getProperty("mode"))) {
+                                if (!handleMarkAppliedAction(dbName, moduleRoot, evolutions)) {
+                                    defaultExitCode = false;
+                                }
+                            } else {
+                                defaultExitCode = false;
+                                handleDefaultAction(dbName, moduleRoot, evolutions);
+                            }
                         }
                     }
+                } else {
+                    System.out.println("~ Database evolutions are disabled for " + dbName + ". Skipping check.");
                 }
             }
         }
@@ -322,8 +326,8 @@ public class Evolutions extends PlayPlugin {
             int index = request.url.lastIndexOf("/@evolutions/force/") + "/@evolutions/force/".length();
 
             String dbName = DB.DEFAULT;
-            String moduleKey = request.url.substring(index, request.url.lastIndexOf("/"));
-            int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf("/") + 1));
+            String moduleKey = request.url.substring(index, request.url.lastIndexOf('/'));
+            int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf('/') + 1));
 
             resolve(dbName, moduleKey, revision);
             new Redirect("/").apply(request, response);
@@ -390,6 +394,10 @@ public class Evolutions extends PlayPlugin {
      */
     private boolean isDisabled() {
         return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
+    }
+
+    private static boolean isDatabaseEvolutionDisabled(String dbName) {
+        return "false".equals(Play.configuration.getProperty("db." + dbName + ".evolutions.enabled", "true"));
     }
 
     private static boolean isModuleEvolutionDisabled() {
@@ -501,7 +509,9 @@ public class Evolutions extends PlayPlugin {
         // Look over all the DB
         Set<String> dBNames = Configuration.getDbNames();
         for (String dbName : dBNames) {
-            checkEvolutionsState(dbName);
+            if (!isDatabaseEvolutionDisabled(dbName)) {
+                checkEvolutionsState(dbName);
+            }
         }
     }
 
@@ -590,9 +600,9 @@ public class Evolutions extends PlayPlugin {
                     int version = 0;
                     if (evolution.getName().contains(dBName)) {
                         version = Integer.parseInt(
-                                evolution.getName().substring(evolution.getName().indexOf(".") + 1, evolution.getName().lastIndexOf(".")));
+                                evolution.getName().substring(evolution.getName().indexOf('.') + 1, evolution.getName().lastIndexOf('.')));
                     } else {
-                        version = Integer.parseInt(evolution.getName().substring(0, evolution.getName().indexOf(".")));
+                        version = Integer.parseInt(evolution.getName().substring(0, evolution.getName().indexOf('.')));
                     }
 
                     String sql = IO.readContentAsString(evolution);

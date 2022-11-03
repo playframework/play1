@@ -7,11 +7,11 @@ public class InconsistentDatabase extends PlayException {
     /**
      * The name of the Database concern by the exception
      */
-    private String dbName;
-    private String evolutionScript;
-    private String error;
-    private int revision;
-    private String moduleKey;
+    private final String dbName;
+    private final String evolutionScript;
+    private final String error;
+    private final int revision;
+    private final String moduleKey;
 
     public InconsistentDatabase(String dbName, String evolutionScript, String error, int revision, String moduleKey) {
         this.dbName = dbName;

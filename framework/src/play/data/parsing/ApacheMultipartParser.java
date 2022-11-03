@@ -1,5 +1,6 @@
 package play.data.parsing;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.apache.commons.io.FileUtils.readFileToByteArray;
 
 import java.io.ByteArrayInputStream;
@@ -47,17 +48,17 @@ import play.utils.HTTP;
 public class ApacheMultipartParser extends DataParser {
 
     private static void putMapEntry(Map<String, String[]> map, String name, String value) {
-        String[] newValues;
-        String[] oldValues = map.get(name);
-        if (oldValues == null) {
-            newValues = new String[1];
-            newValues[0] = value;
-        } else {
-            newValues = new String[oldValues.length + 1];
+        map.compute(name, (key, oldValues) -> {
+            if (oldValues == null) {
+                return new String[] { value };
+            }
+
+            String[] newValues = new String[oldValues.length + 1];
             System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
             newValues[oldValues.length] = value;
-        }
-        map.put(name, newValues);
+
+            return newValues;
+        });
     }
 
     /*
@@ -98,11 +99,7 @@ public class ApacheMultipartParser extends DataParser {
      */
     public static class AutoFileItem implements FileItem {
 
-        private static FileCleaningTracker fileTracker;
-
-        static {
-            fileTracker = new FileCleaningTracker();
-        }
+        private static final FileCleaningTracker fileTracker = new FileCleaningTracker();
 
         // ----------------------------------------------------- Manifest constants
         /**
@@ -111,10 +108,6 @@ public class ApacheMultipartParser extends DataParser {
          * HTTP.
          */
         public static final String DEFAULT_CHARSET = "ISO-8859-1";
-        /**
-         * Size of buffer to use when writing an item to disk.
-         */
-        private static final int WRITE_BUFFER_SIZE = 2048;
 
         // ----------------------------------------------------------- Data members
         /**
@@ -546,11 +539,7 @@ public class ApacheMultipartParser extends DataParser {
                         putMapEntry(result, fileItem.getFieldName(), fileItem.getString(_encoding));
                     } else {
                         @SuppressWarnings("unchecked")
-                        List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
-                        if (uploads == null) {
-                            uploads = new ArrayList<>();
-                            Request.current().args.put("__UPLOADS", uploads);
-                        }
+                        List<Upload> uploads = (List<Upload>) Request.current().args.computeIfAbsent("__UPLOADS", k -> new ArrayList<>());
                         try {
                             uploads.add(new FileUpload(fileItem));
                         } catch (Exception e) {
@@ -607,12 +596,12 @@ public class ApacheMultipartParser extends DataParser {
      * The maximum size permitted for the complete request, as opposed to
      * {@link #maxFileSize}. A value of -1 indicates no maximum.
      */
-    private long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
+    private final long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
     /**
      * The maximum size permitted for a single uploaded file, as opposed to
      * {@link #maxRequestSize}. A value of -1 indicates no maximum.
      */
-    private long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
+    private final long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
 
     // ------------------------------------------------------ Protected methods
 
@@ -634,13 +623,7 @@ public class ApacheMultipartParser extends DataParser {
         if (boundaryStr == null) {
             return null;
         }
-        byte[] boundary;
-        try {
-            boundary = boundaryStr.getBytes("ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            boundary = boundaryStr.getBytes();
-        }
-        return boundary;
+        return boundaryStr.getBytes(ISO_8859_1);
     }
 
     /**
