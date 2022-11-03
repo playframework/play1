@@ -32,8 +32,8 @@ public class Scope {
             .equals("true");
     public static boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
-    public static final Http.SAMESITE SESSION_SAMESITE = Play.configuration.getProperty("application.session.cookie.sameSite") != null ?
-            Http.SAMESITE.valueOf(Play.configuration.getProperty("application.session.cookie.sameSite").toUpperCase()) : null;
+    public static final Http.SameSite SESSION_SAMESITE = Play.configuration.getProperty("application.session.cookie.sameSite") != null ?
+            Http.SameSite.valueOf(Play.configuration.getProperty("application.session.cookie.sameSite").toUpperCase()) : null;
 
     public static final SessionStore sessionStore = createSessionStore();
 

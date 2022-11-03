@@ -164,7 +164,7 @@ public class Http {
         /**
          * See https://owasp.org/www-community/SameSite
          */
-        public SAMESITE sameSite;
+        public SameSite sameSite;
     }
 
     /**
@@ -705,7 +705,7 @@ public class Http {
          * @param value
          *            Cookie value
          */
-        public void setCookie(String name, String value, SAMESITE sameSite) {
+        public void setCookie(String name, String value, SameSite sameSite) {
             setCookie(name, value, null, "/", null, false, sameSite);
         }
 
@@ -741,15 +741,15 @@ public class Http {
          * @param duration
          *            the cookie duration (Ex: 3d)
          */
-        public void setCookie(String name, String value, String duration, SAMESITE sameSite) {
+        public void setCookie(String name, String value, String duration, SameSite sameSite) {
             setCookie(name, value, null, "/", Time.parseDuration(duration), false, sameSite);
         }
 
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, SAMESITE sameSite) {
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, SameSite sameSite) {
             setCookie(name, value, domain, path, maxAge, secure, false, sameSite);
         }
 
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly, SAMESITE sameSite) {
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly, SameSite sameSite) {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path)
                     && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
@@ -1018,14 +1018,14 @@ public class Http {
     public static class WebSocketClose extends WebSocketEvent {
     }
 
-    public enum SAMESITE {
+    public enum SameSite {
         STRICT("Strict"),
         LAX("Lax"),
         NONE("None");
 
         private final String value;
 
-        SAMESITE(String value) {
+        SameSite(String value) {
             this.value = value;
         }
 
