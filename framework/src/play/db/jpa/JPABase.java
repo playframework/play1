@@ -201,9 +201,7 @@ public class JPABase implements Serializable, play.db.Model {
             if (cp != null) {
                 Type ct = cp.getElementType();
                 if (ct instanceof EntityType) {
-                    EntityEntry entry = pc.getEntry(this);
-                    String entityName = entry.getEntityName();
-                    entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
+                    String entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
                     if (ce.getSnapshot() != null) {
                         Collection orphans = ce.getOrphans(entityName, persistentCollection);
                         for (Object o : orphans) {
