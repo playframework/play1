@@ -48,7 +48,7 @@ public class JPABase implements Serializable, play.db.Model {
             em(dbName).persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
-        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<>());
         try {
             saveAndCascade(true);
         } finally {
@@ -63,7 +63,7 @@ public class JPABase implements Serializable, play.db.Model {
                 throw e;
             }
         }
-        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<>());
         try {
             saveAndCascade(false);
         } finally {
@@ -76,7 +76,7 @@ public class JPABase implements Serializable, play.db.Model {
         String dbName = JPA.getDBName(this.getClass());
 
         try {
-            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<>());
             try {
                 saveAndCascade(true);
             } finally {
@@ -92,7 +92,7 @@ public class JPABase implements Serializable, play.db.Model {
                     throw e;
                 }
             }
-            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<>());
             try {
                 saveAndCascade(false);
             } finally {
@@ -113,7 +113,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static final transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
+    static final ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
@@ -157,27 +157,17 @@ public class JPABase implements Serializable, play.db.Model {
                         if (value instanceof PersistentMap) {
                             if (((PersistentMap) value).wasInitialized()) {
 
-                                cascadeOrphans(this, (PersistentCollection) value, willBeSaved);
+                                cascadeOrphans((PersistentCollection) value, willBeSaved);
 
                                 for (Object o : ((Map) value).values()) {
                                     saveAndCascadeIfJPABase(o, willBeSaved);
                                 }
                             }
                         } else if (value instanceof PersistentCollection) {
-                            PersistentCollection col = (PersistentCollection) value;
-                            if (((PersistentCollection) value).wasInitialized()) {
+                            cascadeOrphans((PersistentCollection) value, willBeSaved);
 
-                                cascadeOrphans(this, (PersistentCollection) value, willBeSaved);
-
-                                for (Object o : (Collection) value) {
-                                    saveAndCascadeIfJPABase(o, willBeSaved);
-                                }
-                            } else {
-                                cascadeOrphans(this, col, willBeSaved);
-
-                                for (Object o : (Collection) value) {
-                                    saveAndCascadeIfJPABase(o, willBeSaved);
-                                }
+                            for (Object o : (Collection) value) {
+                                saveAndCascadeIfJPABase(o, willBeSaved);
                             }
                         } else if (value instanceof Collection) {
                             for (Object o : (Collection) value) {
@@ -199,10 +189,10 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
-    private void cascadeOrphans(JPABase base, PersistentCollection persistentCollection, boolean willBeSaved) {
+    private void cascadeOrphans(PersistentCollection persistentCollection, boolean willBeSaved) {
         String dbName = JPA.getDBName(this.getClass());
 
-        SessionImpl session = ((SessionImpl) JPA.em(dbName).getDelegate());
+        SessionImpl session = JPA.em(dbName).unwrap(SessionImpl.class);
         PersistenceContext pc = session.getPersistenceContext();
         CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
 
@@ -211,7 +201,7 @@ public class JPABase implements Serializable, play.db.Model {
             if (cp != null) {
                 Type ct = cp.getElementType();
                 if (ct instanceof EntityType) {
-                    EntityEntry entry = pc.getEntry(base);
+                    EntityEntry entry = pc.getEntry(this);
                     String entityName = entry.getEntityName();
                     entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
                     if (ce.getSnapshot() != null) {
@@ -315,16 +305,18 @@ public class JPABase implements Serializable, play.db.Model {
     @Override
     public String toString() {
         Object key = this._key();
-        String keyStr = "";
+        StringBuilder keyStr = new StringBuilder(64)
+            .append(getClass().getSimpleName())
+            .append('[');
         if (key != null && key.getClass().isArray()) {
             for (Object object : (Object[]) key) {
-                keyStr += object.toString() + ", ";
+                keyStr.append(object.toString()).append(", ");
             }
-            keyStr = keyStr.substring(0, keyStr.length() - 2);
+            keyStr.setLength(keyStr.length() - 2);
         } else if (key != null) {
-            keyStr = key.toString();
+            keyStr.append(key);
         }
-        return getClass().getSimpleName() + "[" + keyStr + "]";
+        return keyStr.append(']').toString();
     }
 
     public static class JPAQueryException extends RuntimeException {
