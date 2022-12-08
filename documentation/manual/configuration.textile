@@ -758,7 +758,7 @@ Java source level, which overrides the @java.version@ system property. For examp
 
 bc. java.source=11
 
-Values:  @1.7@ (No longer supported since 1.5.0), @1.8@ (No longer supported since 1.7.0), @9@ (No longer supported since 1.7.0), @10@ (No longer supported since 1.7.0), @11@, @12@, @13@, @14@, @15@, @17@, @18@.
+Values:  @1.7@ (No longer supported since 1.5.0), @1.8@ (No longer supported since 1.7.0), @9@ (No longer supported since 1.7.0), @10@ (No longer supported since 1.7.0), @11@, @12@, @13@, @14@, @15@, @17@, @18@, @19@.
 
 Default: @11@
 
