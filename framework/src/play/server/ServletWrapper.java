@@ -1,7 +1,7 @@
 package play.server;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;

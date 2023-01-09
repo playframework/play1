@@ -1,6 +1,6 @@
 package play.templates.types;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import play.templates.SafeFormatter;
 import play.templates.Template;
 
