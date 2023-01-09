@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -105,12 +106,14 @@ public class Properties extends HashMap<String, String> {
             throw new IllegalArgumentException("Setting " + key + " must be a valid classname  : " + key);
         }
         try {
-            return Class.forName(s).newInstance();
+            return Class.forName(s).getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException nfe) {
             throw new IllegalArgumentException(s + ": invalid class name for key " + key, nfe);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | SecurityException e) {
+			throw new IllegalArgumentException(s + ": could not access class constructor for key " + key, e);
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
-        }
+		}
     }
 
     public Object getClassInstance(String key, Object defaultinstance)
