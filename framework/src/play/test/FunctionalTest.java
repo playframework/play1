@@ -6,6 +6,7 @@ import com.ning.http.client.multipart.MultipartBody;
 import com.ning.http.client.multipart.MultipartUtils;
 import com.ning.http.client.multipart.Part;
 import com.ning.http.client.multipart.StringPart;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -221,7 +222,8 @@ public abstract class FunctionalTest extends BaseTest {
         _ByteArrayOutputStream baos;
         try {
             requestEntity = MultipartUtils.newMultipartBody(parts, new FluentCaseInsensitiveStringsMap());
-            request.headers.put("content-type", new Http.Header("content-type", requestEntity.getContentType()));
+            request.headers.putAll(ArrayUtils
+                    .toMap(new Object[][] { { "content-type", new Http.Header("content-type", requestEntity.getContentType()) } }));
             long contentLength = requestEntity.getContentLength();
             if (contentLength < Integer.MIN_VALUE || contentLength > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException(contentLength + " cannot be cast to int without changing its value.");
