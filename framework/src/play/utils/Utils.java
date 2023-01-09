@@ -115,7 +115,7 @@ public class Utils {
         public static <K, V> Map<K, V> filterMap(Map<K, V> map, String keypattern) {
             try {
                 @SuppressWarnings("unchecked")
-                Map<K, V> filtered = map.getClass().newInstance();
+                Map<K, V> filtered = map.getClass().getDeclaredConstructor().newInstance();
                 for (Map.Entry<K, V> entry : map.entrySet()) {
                     K key = entry.getKey();
                     if (key.toString().matches(keypattern)) {
@@ -169,8 +169,8 @@ public class Utils {
     }
 
     public static void kill(String pid) throws Exception {
-        String command = OS.isWindows() ? "taskkill /F /PID " + pid : "kill " + pid;
-        Runtime.getRuntime().exec(command).waitFor();
+        String[] cmdarray = { OS.isWindows() ? "taskkill /F /PID " + pid : "kill " + pid };
+        Runtime.getRuntime().exec(cmdarray).waitFor();
     }
 
     public static class AlternativeDateFormat {

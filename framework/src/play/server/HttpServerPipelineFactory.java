@@ -67,7 +67,6 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
     }
 
     protected ChannelHandler getInstance(String name) throws Exception {
-
         Class<?> clazz = classes.computeIfAbsent(name, className -> {
             try {
                 return Class.forName(className);
@@ -76,8 +75,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
             }
         });
         if (ChannelHandler.class.isAssignableFrom(clazz))
-            return (ChannelHandler)clazz.newInstance(); 
+            return (ChannelHandler)clazz.getDeclaredConstructor().newInstance(); 
         return null;
     }
 }
-

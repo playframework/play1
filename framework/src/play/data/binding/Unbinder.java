@@ -121,14 +121,14 @@ public class Unbinder {
                         Class<? extends TypeUnbinder<?>> toInstantiate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
                                 .unbinder();
                         if (!(toInstantiate.equals(As.DEFAULT.class))) {
-                            TypeUnbinder<?> myInstance = toInstantiate.newInstance();
+                            TypeUnbinder<?> myInstance = toInstantiate.getDeclaredConstructor().newInstance();
                             isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                         }else{
                             // unbinder is default, test if binder handle the unbinder too
                             Class<? extends TypeBinder<?>> toInstantiateBinder = ((As) annotation).binder();
                             if (!(toInstantiateBinder.equals(As.DEFAULT.class))
                                     && TypeUnbinder.class.isAssignableFrom(toInstantiateBinder)) {
-                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstantiateBinder.newInstance();
+                                TypeUnbinder<?> myInstance = (TypeUnbinder<?>) toInstantiateBinder.getDeclaredConstructor().newInstance();
                                 isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
                             }    
                         }             

@@ -248,7 +248,7 @@ public class JPAModelLoader implements Model.Factory {
     private Object makeCompositeKey(Model model) throws Exception {
         initProperties();
         Class<?> idClass = getCompositeKeyClass();
-        Object id = idClass.newInstance();
+        Object id = idClass.getDeclaredConstructor().newInstance();
         PropertyDescriptor[] idProperties = PropertyUtils.getPropertyDescriptors(idClass);
         if (idProperties == null || idProperties.length == 0){
             throw new UnexpectedException("Composite id has no properties: " + idClass.getName());
