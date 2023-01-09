@@ -672,9 +672,9 @@ public class F {
             return filter;
         }
 
-        public synchronized List<IndexedEvent> availableEvents(long lastEventSeen) {
-            List<IndexedEvent> result = new ArrayList<>();
-            for (IndexedEvent event : events) {
+        public synchronized List<IndexedEvent<?>> availableEvents(long lastEventSeen) {
+            List<IndexedEvent<?>> result = new ArrayList<>();
+            for (IndexedEvent<?> event : events) {
                 if (event.id > lastEventSeen) {
                     result.add(event);
                 }
@@ -695,7 +695,7 @@ public class F {
                 Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
-            events.offer(new IndexedEvent(event));
+            events.offer(new IndexedEvent<T>(event));
             notifyNewEvent();
             for (EventStream<T> eventStream : pipedStreams) {
                 eventStream.publish(event);
@@ -765,7 +765,7 @@ public class F {
     }
 
     public static <A> Some<A> Some(A a) {
-        return new Some(a);
+        return new Some<A>(a);
     }
 
     public static class None<T> extends Option<T> {

@@ -99,7 +99,7 @@ public class GroovyTemplate extends BaseTemplate {
             super(Play.classloader);
         }
 
-        public Class defineTemplate(String name, byte[] byteCode) {
+        public Class<?> defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
     }
@@ -113,7 +113,7 @@ public class GroovyTemplate extends BaseTemplate {
 	        for (int i = 4; i < lines.length; i = i + 2) {
 	            String className = lines[i];
 	            byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-	            Class c = tClassLoader.defineTemplate(className, byteCode);
+	            Class<?> c = tClassLoader.defineTemplate(className, byteCode);
 	            if (compiledTemplate == null) {
 	                compiledTemplate = c;
 	            }
@@ -153,7 +153,7 @@ public class GroovyTemplate extends BaseTemplate {
                 // default output operation with the Play Groovy class handler.
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
-                Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
+                Collection<?>[] phases = (Collection[]) phasesF.get(compilationUnit);
                 LinkedList<IGroovyClassOperation> output = new LinkedList<>();
                 phases[Phases.OUTPUT] = output;
                 output.add(groovyClassesForThisTemplate::add);
@@ -409,7 +409,7 @@ public class GroovyTemplate extends BaseTemplate {
             }
         }
 
-        public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure body) {
+        public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure<?> body) {
             String templateName = tag.replace('.', '/');
             String callerExtension = (extension != null) ? extension : "tag";
 
@@ -466,7 +466,7 @@ public class GroovyTemplate extends BaseTemplate {
          * @throws Exception
          *             if problem occured when loading the class
          */
-        public Class __loadClass(String className) throws Exception {
+        public Class<?> __loadClass(String className) throws Exception {
             try {
                 return Play.classloader.loadClass(className);
             } catch (ClassNotFoundException e) {

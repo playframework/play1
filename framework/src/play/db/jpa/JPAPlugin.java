@@ -147,10 +147,10 @@ public class JPAPlugin extends PlayPlugin {
         JPQL.instance = new JPQL();
     }
 
-    private List<Class> entityClasses(String dbName) {
-        List<Class> entityClasses = new ArrayList<>();
+    private List<Class<?>> entityClasses(String dbName) {
+        List<Class<?>> entityClasses = new ArrayList<>();
         
-        List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+        List<Class<?>> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         for (Class<?> clazz : classes) {
             if (clazz.isAnnotationPresent(Entity.class)) {
                 // Do we have a transactional annotation matching our dbname?
@@ -196,7 +196,7 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     protected PersistenceUnitInfoImpl persistenceUnitInfo(String dbName, Configuration dbConfig) {
-        final List<Class> managedClasses = entityClasses(dbName);
+        final List<Class<?>> managedClasses = entityClasses(dbName);
         final Properties properties = properties(dbName, dbConfig);
         properties.put(org.hibernate.cfg.AvailableSettings.LOADED_CLASSES,managedClasses);
         return new PersistenceUnitInfoImpl(dbName,
