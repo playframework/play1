@@ -24,8 +24,8 @@ import java.util.TimeZone;
 import org.apache.commons.text.StringEscapeUtils;
 
 import groovy.lang.Closure;
-import groovy.util.XmlSlurper;
-import groovy.util.slurpersupport.GPathResult;
+import groovy.xml.XmlSlurper;
+import groovy.xml.slurpersupport.GPathResult;
 import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
