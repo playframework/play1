@@ -44,7 +44,6 @@ require:    &allDependencies
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.1
     - net.sf.oval -> oval 3.1.0
-    - mysql -> mysql-connector-java 8.0.30
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.0
