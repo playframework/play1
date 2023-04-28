@@ -48,8 +48,8 @@ require:    &allDependencies
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.1
-    - org.bouncycastle -> bcprov-jdk18on 1.72
-    - org.bouncycastle -> bcpkix-jdk18on 1.72
+    - org.bouncycastle -> bcprov-jdk18on 1.73
+    - org.bouncycastle -> bcpkix-jdk18on 1.73
     - org.codehaus.groovy -> groovy 3.0.17
     - org.codehaus.groovy -> groovy-xml 3.0.17
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
