@@ -26,7 +26,7 @@ import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import play.Play;
 import play.data.binding.BeanWrapper;
