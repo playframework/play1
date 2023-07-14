@@ -1,7 +1,7 @@
 package play.test;
 
 import java.io.File;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.rules.MethodRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;

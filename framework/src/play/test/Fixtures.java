@@ -438,7 +438,7 @@ public class Fixtures {
      */
     @SuppressWarnings("unchecked")
     public static <T> T loadYaml(String name, Class<T> clazz) {
-        Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader));
+        Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader, null));
         yaml.setBeanAccess(BeanAccess.FIELD);
         return (T) loadYaml(name, yaml);
     }

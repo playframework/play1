@@ -3,7 +3,7 @@ package play.mvc;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
