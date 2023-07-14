@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 public class Expression {
 
-    static Pattern expression = Pattern.compile("^\\$\\{(.*)\\}$");
+    static final Pattern expression = Pattern.compile("^\\$\\{(.*)\\}$");
 
     public static Object evaluate(String value, String defaultValue) {
         Matcher matcher = expression.matcher(value);

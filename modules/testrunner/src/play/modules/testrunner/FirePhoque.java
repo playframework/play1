@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -47,18 +48,18 @@ public class FirePhoque {
         
         if(runUnitTests != null || runFunctionalTests != null || runSeleniumTests != null){
             urlStringBuilder.append("?");
-            urlStringBuilder.append("runUnitTests=").append(runUnitTests != null ? true : false);
-            System.out.println("~ Run unit tests:" + (runUnitTests != null ? true : false));
+            urlStringBuilder.append("runUnitTests=").append(runUnitTests != null);
+            System.out.println("~ Run unit tests:" + (runUnitTests != null));
 
-            urlStringBuilder.append("&runFunctionalTests=").append(runFunctionalTests != null ? true : false);
-            System.out.println("~ Run functional tests:" + (runFunctionalTests != null ? true : false));
+            urlStringBuilder.append("&runFunctionalTests=").append(runFunctionalTests != null);
+            System.out.println("~ Run functional tests:" + (runFunctionalTests != null));
 
-            urlStringBuilder.append("&runSeleniumTests=").append(runSeleniumTests != null ? true : false);
-            System.out.println("~ Run selenium tests:" + (runSeleniumTests != null ? true : false));
+            urlStringBuilder.append("&runSeleniumTests=").append(runSeleniumTests != null);
+            System.out.println("~ Run selenium tests:" + (runSeleniumTests != null));
         }
         
         try {
-            in = new BufferedReader(new InputStreamReader(new URL(urlStringBuilder.toString()).openStream(), "utf-8"));
+            in = new BufferedReader(new InputStreamReader(new URL(urlStringBuilder.toString()).openStream(), StandardCharsets.UTF_8));
             String marker = in.readLine();
             if (!marker.equals("---")) {
                 throw new RuntimeException("Oops");

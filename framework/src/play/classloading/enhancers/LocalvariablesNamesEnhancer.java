@@ -181,9 +181,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static void clear() {
-            if (localVariables.get() != null) {
-                localVariables.set(null);
-            }
+            localVariables.remove();
         }
 
         public static void enter() {
@@ -280,43 +278,41 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
     }
 
-    static final Map<Integer, Integer> storeByCode = new HashMap<>();
-
     /*
      * Useful instructions
      */
-    static {
-        storeByCode.put(CodeIterator.ASTORE_0, 0);
-        storeByCode.put(CodeIterator.ASTORE_1, 1);
-        storeByCode.put(CodeIterator.ASTORE_2, 2);
-        storeByCode.put(CodeIterator.ASTORE_3, 3);
-        storeByCode.put(CodeIterator.ASTORE, -2);
+    static final Map<Integer, Integer> storeByCode = Map.ofEntries(
+        Map.entry(CodeIterator.ASTORE_0, 0),
+        Map.entry(CodeIterator.ASTORE_1, 1),
+        Map.entry(CodeIterator.ASTORE_2, 2),
+        Map.entry(CodeIterator.ASTORE_3, 3),
+        Map.entry(CodeIterator.ASTORE, -2),
 
-        storeByCode.put(CodeIterator.ISTORE_0, 0);
-        storeByCode.put(CodeIterator.ISTORE_1, 1);
-        storeByCode.put(CodeIterator.ISTORE_2, 2);
-        storeByCode.put(CodeIterator.ISTORE_3, 3);
-        storeByCode.put(CodeIterator.ISTORE, -2);
-        storeByCode.put(CodeIterator.IINC, -2);
+        Map.entry(CodeIterator.ISTORE_0, 0),
+        Map.entry(CodeIterator.ISTORE_1, 1),
+        Map.entry(CodeIterator.ISTORE_2, 2),
+        Map.entry(CodeIterator.ISTORE_3, 3),
+        Map.entry(CodeIterator.ISTORE, -2),
+        Map.entry(CodeIterator.IINC, -2),
 
-        storeByCode.put(CodeIterator.LSTORE_0, 0);
-        storeByCode.put(CodeIterator.LSTORE_1, 1);
-        storeByCode.put(CodeIterator.LSTORE_2, 2);
-        storeByCode.put(CodeIterator.LSTORE_3, 3);
-        storeByCode.put(CodeIterator.LSTORE, -2);
+        Map.entry(CodeIterator.LSTORE_0, 0),
+        Map.entry(CodeIterator.LSTORE_1, 1),
+        Map.entry(CodeIterator.LSTORE_2, 2),
+        Map.entry(CodeIterator.LSTORE_3, 3),
+        Map.entry(CodeIterator.LSTORE, -2),
 
-        storeByCode.put(CodeIterator.FSTORE_0, 0);
-        storeByCode.put(CodeIterator.FSTORE_1, 1);
-        storeByCode.put(CodeIterator.FSTORE_2, 2);
-        storeByCode.put(CodeIterator.FSTORE_3, 3);
-        storeByCode.put(CodeIterator.FSTORE, -2);
+        Map.entry(CodeIterator.FSTORE_0, 0),
+        Map.entry(CodeIterator.FSTORE_1, 1),
+        Map.entry(CodeIterator.FSTORE_2, 2),
+        Map.entry(CodeIterator.FSTORE_3, 3),
+        Map.entry(CodeIterator.FSTORE, -2),
 
-        storeByCode.put(CodeIterator.DSTORE_0, 0);
-        storeByCode.put(CodeIterator.DSTORE_1, 1);
-        storeByCode.put(CodeIterator.DSTORE_2, 2);
-        storeByCode.put(CodeIterator.DSTORE_3, 3);
-        storeByCode.put(CodeIterator.DSTORE, -2);
-    }
+        Map.entry(CodeIterator.DSTORE_0, 0),
+        Map.entry(CodeIterator.DSTORE_1, 1),
+        Map.entry(CodeIterator.DSTORE_2, 2),
+        Map.entry(CodeIterator.DSTORE_3, 3),
+        Map.entry(CodeIterator.DSTORE, -2)
+    );
 
     /**
      * Debug utility. Display a byte code op as plain text.

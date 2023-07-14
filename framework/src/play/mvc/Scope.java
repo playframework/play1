@@ -33,7 +33,7 @@ public class Scope {
     public static boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration
             .getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
-    public static SessionStore sessionStore = createSessionStore();
+    public static final SessionStore sessionStore = createSessionStore();
 
     private static SessionStore createSessionStore() {
         String sessionStoreClass = Play.configuration.getProperty("application.session.storeClass");
@@ -55,8 +55,8 @@ public class Scope {
      */
     public static class Flash {
 
-        Map<String, String> data = new HashMap<>();
-        Map<String, String> out = new HashMap<>();
+        final Map<String, String> data = new HashMap<>();
+        final Map<String, String> out = new HashMap<>();
 
         public static Flash restore() {
             try {
@@ -179,7 +179,7 @@ public class Scope {
             return sessionStore.restore();
         }
 
-        Map<String, String> data = new HashMap<>(); // ThreadLocal access
+        final Map<String, String> data = new HashMap<>(); // ThreadLocal access
         boolean changed = false;
         public static final ThreadLocal<Session> current = new ThreadLocal<>();
 
@@ -292,7 +292,7 @@ public class Scope {
         }
 
         boolean requestIsParsed;
-        public Map<String, String[]> data = new LinkedHashMap<>();
+        public final Map<String, String[]> data = new LinkedHashMap<>();
 
         boolean rootParamsNodeIsGenerated = false;
         private RootParamNode rootParamNode = null;
@@ -356,13 +356,7 @@ public class Scope {
 
         public void removeStartWith(String prefix) {
             checkAndParse();
-            Iterator<Map.Entry<String, String[]>> iterator = data.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String[]> entry = iterator.next();
-                if (entry.getKey().startsWith(prefix)) {
-                    iterator.remove();
-                }
-            }
+            data.entrySet().removeIf(entry -> entry.getKey().startsWith(prefix));
             // make sure rootsParamsNode is regenerated if needed
             rootParamsNodeIsGenerated = false;
         }
@@ -519,7 +513,7 @@ public class Scope {
      */
     public static class RenderArgs {
 
-        public Map<String, Object> data = new HashMap<>(); // ThreadLocal access
+        public final Map<String, Object> data = new HashMap<>(); // ThreadLocal access
         public static final ThreadLocal<RenderArgs> current = new ThreadLocal<>();
 
         public static RenderArgs current() {
@@ -550,7 +544,7 @@ public class Scope {
      */
     public static class RouteArgs {
 
-        public Map<String, Object> data = new HashMap<>(); // ThreadLocal access
+        public final Map<String, Object> data = new HashMap<>(); // ThreadLocal access
         public static final ThreadLocal<RouteArgs> current = new ThreadLocal<>();
 
         public static RouteArgs current() {

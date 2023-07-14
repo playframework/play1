@@ -29,7 +29,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public abstract class Enhancer {
 
-    protected ClassPool classPool;
+    protected final ClassPool classPool;
 
     public Enhancer() {
         this.classPool = newClassPool();

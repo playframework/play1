@@ -1,6 +1,6 @@
 package play.libs.mail.test;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import play.Logger;
 import play.libs.Mail;
@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 public class LegacyMockMailSystem implements MailSystem {
 
     // Has to remain static to preserve the possibility of testing mail sending within Selenium tests
-    static Map<String, String> emails = new HashMap<>();
+    static final Map<String, String> emails = new HashMap<>();
 
     @Override
     public Future<Boolean> sendMessage(Email email) {

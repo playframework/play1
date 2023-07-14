@@ -14,7 +14,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -667,8 +667,8 @@ public class WS extends PlayPlugin {
     }
 
     public static class FileParam {
-        public File file;
-        public String paramName;
+        public final File file;
+        public final String paramName;
 
         public FileParam(File file, String name) {
             this.file = file;
@@ -852,7 +852,7 @@ public class WS extends PlayPlugin {
         public JsonElement getJson() {
             String json = getString();
             try {
-                return new JsonParser().parse(json);
+                return JsonParser.parseString(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);
                 throw new RuntimeException("Cannot parse JSON (check logs)", e);

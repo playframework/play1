@@ -198,7 +198,7 @@ public class JPAPlugin extends PlayPlugin {
     protected PersistenceUnitInfoImpl persistenceUnitInfo(String dbName, Configuration dbConfig) {
         final List<Class> managedClasses = entityClasses(dbName);
         final Properties properties = properties(dbName, dbConfig);
-        properties.put(org.hibernate.jpa.AvailableSettings.LOADED_CLASSES,managedClasses);
+        properties.put(org.hibernate.cfg.AvailableSettings.LOADED_CLASSES,managedClasses);
         return new PersistenceUnitInfoImpl(dbName,
                 managedClasses, mappingFiles(dbConfig), properties);
     }
@@ -309,7 +309,7 @@ public class JPAPlugin extends PlayPlugin {
        }
     }
 
-    public class TransactionalFilter extends Filter<Object> {
+    public static class TransactionalFilter extends Filter<Object> {
       public TransactionalFilter(String name) {
         super(name);
       }
@@ -319,7 +319,7 @@ public class JPAPlugin extends PlayPlugin {
       }
     }
 
-    private TransactionalFilter txFilter = new TransactionalFilter("TransactionalFilter");
+    private final TransactionalFilter txFilter = new TransactionalFilter("TransactionalFilter");
 
     @Override
     public Filter<Object> getFilter() {

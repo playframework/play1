@@ -3,7 +3,7 @@ package play.mvc;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -28,12 +28,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Router {
 
-    static Pattern routePattern = new Pattern(
+    static final Pattern routePattern = new Pattern(
             "^({method}GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD|WS|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
-    static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
+    static final Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|PATCH|DELETE).*$");
     /**
      * Timestamp the routes file was last loaded at.
      */
@@ -341,7 +341,7 @@ public class Router {
     /**
      * All the loaded routes.
      */
-    public static List<Route> routes = new CopyOnWriteArrayList<>();
+    public static final List<Route> routes = new CopyOnWriteArrayList<>();
 
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
@@ -714,8 +714,8 @@ public class Router {
     }
 
     private static final class ActionRoute {
+        private final Map<String, String> args = new HashMap<>(2);
         private Route route;
-        private Map<String, String> args = new HashMap<>(2);
     }
 
     public static class ActionDefinition {
@@ -828,9 +828,9 @@ public class Router {
         Arg hostArg = null;
         public int routesFileLine;
         public String routesFile;
-        static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
-        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
-        static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
+        static final Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
+        static final Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
+        static final Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
             this.host = "";

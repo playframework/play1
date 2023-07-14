@@ -1,6 +1,6 @@
 package play.data.binding;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -81,7 +81,7 @@ public abstract class Binder {
         supportedTypes.remove(clazz);
     }
 
-    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
+    static final Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
         return beanwrappers.computeIfAbsent(clazz, BeanWrapper::new);
@@ -90,7 +90,7 @@ public abstract class Binder {
     public static class MethodAndParamInfo {
         public final Object objectInstance;
         public final Method method;
-        public int parameterIndex;
+        public final int parameterIndex;
 
         public MethodAndParamInfo(Object objectInstance, Method method, int parameterIndex) {
             this.objectInstance = objectInstance;

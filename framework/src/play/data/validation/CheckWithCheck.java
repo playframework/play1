@@ -14,7 +14,7 @@ public class CheckWithCheck extends AbstractAnnotationCheck<CheckWith> {
 
     static final String mes = "validation.invalid";
 
-    Map<String, String> variables = new TreeMap<>();
+    final Map<String, String> variables = new TreeMap<>();
     Check check;
 
     @Override

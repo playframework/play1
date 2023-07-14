@@ -28,8 +28,8 @@ import play.exceptions.UnexpectedException;
  */
 public class PropertiesEnhancer extends Enhancer {
 
-    private boolean enabled = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
-    private boolean generateAccessors = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.generateAccessors", "true"));
+    private final boolean enabled = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.enabled", "true"));
+    private final boolean generateAccessors = Boolean.parseBoolean(Play.configuration.getProperty("play.propertiesEnhancer.generateAccessors", "true"));
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {

@@ -24,7 +24,7 @@ public class Crypto {
      */
     public enum HashType {
         MD5("MD5"), SHA1("SHA-1"), SHA256("SHA-256"), SHA512("SHA-512");
-        private String algorithm;
+        private final String algorithm;
 
         HashType(String algorithm) {
             this.algorithm = algorithm;

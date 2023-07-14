@@ -1,6 +1,6 @@
 package play.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.IO;
 
@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.*;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class HTTP {
 

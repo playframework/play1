@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Play;
@@ -39,10 +39,11 @@ import play.vfs.VirtualFile;
  */
 public class Evolutions extends PlayPlugin {
 
-    private static String EVOLUTIONS_TABLE_NAME = "play_evolutions";
-    protected static File evolutionsDirectory = Play.getFile("db/evolutions");
+    private static final String EVOLUTIONS_TABLE_NAME = "play_evolutions";
+    private static final Map<String, VirtualFile> modulesWithEvolutions = new LinkedHashMap<>();
 
-    private static Map<String, VirtualFile> modulesWithEvolutions = new LinkedHashMap<>();
+    protected static final File evolutionsDirectory = Play.getFile("db/evolutions");
+
 
     public static void main(String[] args) throws SQLException {
         /** Start the DB plugin **/

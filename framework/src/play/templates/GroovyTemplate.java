@@ -156,12 +156,7 @@ public class GroovyTemplate extends BaseTemplate {
                 Collection[] phases = (Collection[]) phasesF.get(compilationUnit);
                 LinkedList<IGroovyClassOperation> output = new LinkedList<>();
                 phases[Phases.OUTPUT] = output;
-                output.add(new IGroovyClassOperation() {
-                    @Override
-                    public void call(GroovyClass gclass) {
-                        groovyClassesForThisTemplate.add(gclass);
-                    }
-                });
+                output.add(groovyClassesForThisTemplate::add);
                 
                 compilationUnit.compile();
                 // ouf
@@ -277,7 +272,7 @@ public class GroovyTemplate extends BaseTemplate {
             // We have to set up the PrintWriter that this (and all sub-templates) are going
             // to write the output to..
             applyLayouts = true;
-            layout.set(null);
+            layout.remove();
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
             currentTemplate.set(this);

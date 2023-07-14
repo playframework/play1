@@ -76,9 +76,9 @@ public class DependenciesManager {
         }
     }
 
-    File application;
-    File framework;
-    File userHome;
+    final File application;
+    final File framework;
+    final File userHome;
     HumanReadyLogger logger;
 
     final FileFilter dirsToTrim = new FileFilter() {

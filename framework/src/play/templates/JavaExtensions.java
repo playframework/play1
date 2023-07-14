@@ -21,11 +21,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import groovy.lang.Closure;
-import groovy.util.XmlSlurper;
-import groovy.util.slurpersupport.GPathResult;
+import groovy.xml.XmlSlurper;
+import groovy.xml.slurpersupport.GPathResult;
 import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
@@ -110,7 +110,7 @@ public class JavaExtensions {
     }
 
     public static String escapeJavaScript(String str) {
-        return StringEscapeUtils.escapeJavaScript(str);
+        return StringEscapeUtils.escapeEcmaScript(str);
     }
 
     public static RawData raw(Object val) {
@@ -156,7 +156,7 @@ public class JavaExtensions {
     }
 
     public static String escapeXml(String str) {
-        return StringEscapeUtils.escapeXml(str);
+        return StringEscapeUtils.escapeXml11(str);
     }
 
     public static String format(Number number, String pattern) {

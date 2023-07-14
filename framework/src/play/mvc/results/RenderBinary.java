@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
@@ -211,7 +212,7 @@ public class RenderBinary extends Result {
     }
 
     private boolean canAsciiEncode(String string) {
-        CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
+        CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
         return asciiEncoder.canEncode(string);
     }
 

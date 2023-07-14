@@ -6,7 +6,6 @@ import com.ning.http.client.multipart.MultipartBody;
 import com.ning.http.client.multipart.MultipartUtils;
 import com.ning.http.client.multipart.Part;
 import com.ning.http.client.multipart.StringPart;
-import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -53,7 +52,7 @@ public abstract class FunctionalTest extends BaseTest {
     private static Map<String, Http.Cookie> savedCookies; // cookies stored
                                                           // between calls
 
-    private static Map<String, Object> renderArgs = new HashMap<>();
+    private static final Map<String, Object> renderArgs = new HashMap<>();
 
     @Before
     public void clearCookies() {
@@ -222,8 +221,7 @@ public abstract class FunctionalTest extends BaseTest {
         _ByteArrayOutputStream baos;
         try {
             requestEntity = MultipartUtils.newMultipartBody(parts, new FluentCaseInsensitiveStringsMap());
-            request.headers.putAll(ArrayUtils
-                    .toMap(new Object[][] { { "content-type", new Http.Header("content-type", requestEntity.getContentType()) } }));
+            request.headers.put("content-type", new Http.Header("content-type", requestEntity.getContentType()));
             long contentLength = requestEntity.getContentLength();
             if (contentLength < Integer.MIN_VALUE || contentLength > Integer.MAX_VALUE) {
                 throw new IllegalArgumentException(contentLength + " cannot be cast to int without changing its value.");
@@ -626,7 +624,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static class URL {
 
-        ActionDefinition actionDefinition;
+        final ActionDefinition actionDefinition;
 
         URL(ActionDefinition actionDefinition) {
             this.actionDefinition = actionDefinition;

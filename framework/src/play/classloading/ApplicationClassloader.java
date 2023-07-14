@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Play;
@@ -323,8 +323,7 @@ public class ApplicationClassloader extends ClassLoader {
                 modifieds.add(applicationClass);
             }
         }
-        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>();
-        modifiedWithDependencies.addAll(modifieds);
+        Set<ApplicationClass> modifiedWithDependencies = new HashSet<>(modifieds);
         if (!modifieds.isEmpty()) {
             modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }
@@ -446,7 +445,7 @@ public class ApplicationClassloader extends ClassLoader {
                     }
                 }
 
-                Collections.sort(result, Comparator.comparing(Class::getName));
+                result.sort(Comparator.comparing(Class::getName));
             }
 
             Map<String, ApplicationClass> byNormalizedName = new HashMap<>(result.size());
