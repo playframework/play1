@@ -60,10 +60,10 @@ jobs:
           # we don't know what commit the last tag was it's safer to get entire repo so previousStableVersion resolves
           fetch-depth: 0
 
-      - name: Set up python 2
-        uses: actions/setup-python@v2
+      - name: Set up python 3
+        uses: actions/setup-python@v3
         with:
-          python-version: '2.x'
+          python-version: '3.x'
           architecture: 'x64'
 
       - name: Set up JDK 17
