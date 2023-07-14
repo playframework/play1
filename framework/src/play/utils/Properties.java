@@ -110,10 +110,10 @@ public class Properties extends HashMap<String, String> {
         } catch (ClassNotFoundException nfe) {
             throw new IllegalArgumentException(s + ": invalid class name for key " + key, nfe);
         } catch (NoSuchMethodException | SecurityException e) {
-			throw new IllegalArgumentException(s + ": could not access class constructor for key " + key, e);
-		} catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException(s + ": could not access class constructor for key " + key, e);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException(s + ": class could not be reflected " + s, e);
-		}
+        }
     }
 
     public Object getClassInstance(String key, Object defaultinstance)
