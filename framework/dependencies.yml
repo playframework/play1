@@ -20,10 +20,10 @@ require:    &allDependencies
     - com.jamonapi -> jamon 2.82
     - com.ning -> async-http-client 1.9.40
     - commons-beanutils 1.9.4
-    - commons-codec 1.15
+    - commons-codec 1.16.0
     - org.apache.commons -> commons-email 1.5
     - commons-fileupload 1.5
-    - commons-io 2.11.0
+    - commons-io 2.13.0
     - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
     - org.apache.commons -> commons-lang3 3.12.0
     - org.apache.commons -> commons-text 1.10.0
@@ -49,19 +49,19 @@ require:    &allDependencies
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.1
-    - org.bouncycastle -> bcprov-jdk18on 1.73
-    - org.bouncycastle -> bcpkix-jdk18on 1.73
-    - org.codehaus.groovy -> groovy 3.0.17
-    - org.codehaus.groovy -> groovy-xml 3.0.17
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
-    - org.eclipse.jdt -> ecj 3.33.0
+    - org.bouncycastle -> bcprov-jdk18on 1.75
+    - org.bouncycastle -> bcpkix-jdk18on 1.75
+    - org.codehaus.groovy -> groovy 3.0.18
+    - org.codehaus.groovy -> groovy-xml 3.0.18
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.34.0
+    - org.eclipse.jdt -> ecj 3.34.0
     - org.hibernate -> hibernate-core 5.6.5.Final.patched
-    - net.bytebuddy -> byte-buddy 1.14.4
+    - net.bytebuddy -> byte-buddy 1.14.5
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
     - org.hibernate -> hibernate-validator 5.4.3.Final
-    - io.smallrye -> jandex 3.1.1
-    - org.jboss.logging -> jboss-logging 3.5.0.Final
+    - io.smallrye -> jandex 3.1.2
+    - org.jboss.logging -> jboss-logging 3.5.3.Final
     - org.jboss.spec.javax.transaction -> jboss-transaction-api_1.2_spec 1.1.1.Final
     - javax.xml.bind -> jaxb-api 2.3.1
     - org.glassfish.jaxb -> jaxb-runtime 2.3.8
