@@ -435,11 +435,11 @@ public abstract class Binder {
     }
 
     private static Object bindMap(Type type, ParamNode paramNode, BindingAnnotations bindingAnnotations) {
-        Class keyClass = String.class;
-        Class valueClass = String.class;
+        Class<?> keyClass = String.class;
+        Class<?> valueClass = String.class;
         if (type instanceof ParameterizedType) {
-            keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
-            valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
+            keyClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+            valueClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[1];
         }
 
         Map<Object, Object> r = new HashMap<>();
@@ -510,11 +510,11 @@ public abstract class Binder {
                 }
             }
 
-            Collection l;
+            Collection<Object> l;
             if (clazz.equals(EnumSet.class)) {
                 l = EnumSet.noneOf(componentClass);
             } else {
-                l = (Collection) createNewInstance(clazz);
+                l = (Collection<Object>) createNewInstance(clazz);
             }
             boolean hasMissing = false;
             for (String paramNodeValue : values) {
@@ -537,11 +537,11 @@ public abstract class Binder {
             return l;
         }
 
-        Collection r = (Collection) createNewInstance(clazz);
+        Collection<Object> r = (Collection<Object>) createNewInstance(clazz);
 
         if (List.class.isAssignableFrom(clazz)) {
             // Must add items at position resolved from each child's key
-            List l = (List) r;
+            List<Object> l = (List<Object>) r;
 
             // must get all indexes and sort them so we add items in correct order.
             Set<String> indexes = new TreeSet<>((arg0, arg1) -> {
@@ -690,7 +690,7 @@ public abstract class Binder {
         // application custom types have higher priority. If unable to bind proceed with the next one
         for (Class<TypeBinder<?>> c : Play.classloader.getAssignableClasses(TypeBinder.class)) {
             if (c.isAnnotationPresent(Global.class)) {
-                Class<?> forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
+                Class<?> forType = (Class<?>) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
                 if (forType.isAssignableFrom(clazz)) {
                     Object result = createNewInstance(c).bind(name, annotations, value, clazz, type);
                     if (result != null) {

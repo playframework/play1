@@ -22,7 +22,7 @@ public abstract class BaseTemplate extends Template {
     public String compiledSource;
     public Map<Integer, Integer> linesMatrix = new HashMap<>();
     public Set<Integer> doBodyLines = new HashSet<>();
-    public Class compiledTemplate;
+    public Class<?> compiledTemplate;
     public String compiledTemplateName;
 
     public BaseTemplate(String name, String source) {
