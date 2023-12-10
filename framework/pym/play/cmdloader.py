@@ -1,5 +1,6 @@
 from __future__ import print_function
-import imp
+import importlib.util
+import importlib.machinery
 import os
 import warnings
 import traceback
@@ -22,8 +23,9 @@ class CommandLoader(object):
         for filename in os.listdir(self.path):
             if filename != "__init__.py" and filename.endswith(".py"):
                 try:
-                    name = filename.replace(".py", "")
-                    mod = load_python_module(name, self.path)
+                    module_name = filename.replace(".py", "")
+                    module_path = os.path.join(self.path, filename)
+                    mod = load_python_module(module_name, module_path)
                     self._load_cmd_from(mod)
                 except Exception as e:
                     print (e)
@@ -35,7 +37,8 @@ class CommandLoader(object):
         if os.path.exists(commands):
             try:
                 leafname = os.path.basename(modname).split('.')[0]
-                mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
+                # print(f"Loading commands for module \"{modname}\"")
+                mod = load_source(leafname, os.path.join(modname, "commands.py"))
                 self._load_cmd_from(mod)
             except Exception as e:
                 print('~')
@@ -55,12 +58,26 @@ class CommandLoader(object):
         if 'MODULE' in dir(mod):
             self.modules[mod.MODULE] = mod
 
-def load_python_module(name, location):
-    mod_desc = imp.find_module(name, [location])
-    mod_file = mod_desc[0]
-    try:
-        return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
-    finally:
-        if mod_file != None and not mod_file.closed:
-            mod_file.close()
 
+def load_python_module(name, location):
+#    print(f"Loading module \"{name}\" at location \"{location}\"")
+    spec = importlib.util.spec_from_file_location(name, location)
+    if spec is None:
+        raise ImportError(f"Could not find module {name} at {location}")
+
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    return mod
+
+
+# Obtained from https://docs.python.org/dev/whatsnew/3.12.html#imp
+def load_source(modname, filename):
+    loader = importlib.machinery.SourceFileLoader(modname, filename)
+    spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    # The module is always executed and not cached in sys.modules.
+    # Uncomment the following line to cache the module.
+    # sys.modules[module.__name__] = module
+    loader.exec_module(module)
+    return module

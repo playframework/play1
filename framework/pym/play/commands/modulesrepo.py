@@ -12,7 +12,7 @@ import zipfile
 import urllib.request, urllib.error, urllib.parse
 import shutil
 import string
-import imp
+import importlib.util
 import time
 import urllib.request, urllib.parse, urllib.error
 import yaml
@@ -40,8 +40,16 @@ DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7
 
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
-    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    module_path = os.path.join(base, 'framework/pym', name, '__init__.py')
+    
+    spec = importlib.util.spec_from_file_location(name, module_path)
+    if spec is None:
+        raise ImportError(f"Could not find module \"{name}\" at \"{module_path}\"")
+    
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    
+    return mod
 
 json = load_module('simplejson')
 
