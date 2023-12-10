@@ -32,7 +32,7 @@ jobs:
       - name: Set up python 3
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: '3.11.x'
           architecture: 'x64'
           cache: 'pip'
           cache-dependency-path: '**/requirements.txt'
@@ -63,7 +63,7 @@ jobs:
       - name: Set up python 3
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: '3.11.x'
           architecture: 'x64'
 
       - name: Set up JDK 17
