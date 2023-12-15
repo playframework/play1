@@ -125,7 +125,7 @@ class Downloader(object):
         return self.size
 
     def chunk_read(self, response, destination, chunk_size=8192, report_hook=None):
-        total_size = response.info().getheader('Content-Length').strip()
+        total_size = response.headers['Content-Length'].strip()
         total_size = int(total_size)
         bytes_so_far = 0
         file = open(destination,"wb")
