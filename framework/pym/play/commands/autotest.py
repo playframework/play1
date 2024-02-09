@@ -74,18 +74,18 @@ def autotest(app, args):
         add_options.append('-DrunSeleniumTests')
       
     # Handle timeout parameter
-    weblcient_timeout = -1
+    webclient_timeout = None
     if app.readConf('webclient.timeout'):
-        weblcient_timeout = app.readConf('webclient.timeout')
-    
+        webclient_timeout = app.readConf('webclient.timeout')
+
     for arg in args:
         if arg.startswith('--timeout='):
             args.remove(arg)
-            weblcient_timeout = arg[10:]
-          
-    if weblcient_timeout >= 0:  
-        add_options.append('-DwebclientTimeout=' + weblcient_timeout)
-            
+            webclient_timeout = arg[10:]
+
+    if webclient_timeout is not None:
+        add_options.append('-DwebclientTimeout=' + webclient_timeout)
+
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):

@@ -25,6 +25,74 @@ DEFAULTS = {
 class IamADeveloper(unittest.TestCase):
     play = None
 
+    def testAutoTest(self):
+        step('Hello, I am testing "play auto-test"')
+
+        self.working_directory = bootstrapWorkingDirectory('i-am-testing-auto-test-here')
+
+        # play new app
+        step('Create a new project')
+
+        app = '%s/testable-app' % self.working_directory
+
+        with callPlay(self, ['new', app, '--name=TESTABLEAPP']) as self.play:
+            self.assertTrue(waitFor(self.play, 'The new application will be created'))
+            self.assertTrue(waitFor(self.play, 'OK, the application is created'))
+            self.assertTrue(waitFor(self.play, 'Have fun!'))
+            self.play.wait()
+            self.assertEqual(self.play.returncode, 0)
+
+        # play auto-test
+        step('run with auto-test (the normal way)')
+
+        with callPlay(self, ['auto-test', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'BasicTest...           PASSED '))
+            self.assertTrue(waitFor(self.play, 'ApplicationTest...     PASSED '))
+            self.assertTrue(waitFor(self.play, 'Application...         PASSED '))
+            self.assertTrue(waitFor(self.play, 'All tests passed'))
+            self.play.wait()
+            self.assertEqual(self.play.returncode, 0)
+
+        # play autotest is also accepted
+        step('run with autotest (also accepted)')
+
+        with callPlay(self, ['autotest', app]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'BasicTest...           PASSED '))
+            self.assertTrue(waitFor(self.play, 'ApplicationTest...     PASSED '))
+            self.assertTrue(waitFor(self.play, 'Application...         PASSED '))
+            self.assertTrue(waitFor(self.play, 'All tests passed'))
+            self.play.wait()
+            self.assertEqual(self.play.returncode, 0)
+
+        # Run with a --timeout that is longer than the tests take
+        step('run with auto-test --timeout=60000')
+
+        with callPlay(self, ['auto-test', app, "--timeout=60000"]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'BasicTest...           PASSED '))
+            self.assertTrue(waitFor(self.play, 'ApplicationTest...     PASSED '))
+            self.assertTrue(waitFor(self.play, 'Application...         PASSED '))
+            self.assertTrue(waitFor(self.play, 'All tests passed'))
+            self.play.wait()
+            self.assertEqual(self.play.returncode, 0)
+
+        # Run with a --timeout that is shorter than the tests take
+        step('run with auto-test --timeout=1')
+
+        with callPlay(self, ['auto-test', app, "--timeout=1"]) as self.play:
+            # wait for play to be ready
+            self.assertTrue(waitFor(self.play, 'BasicTest...           ERROR '))
+            self.assertTrue(waitFor(self.play, 'ApplicationTest...     ERROR '))
+            self.assertTrue(waitFor(self.play, 'Application...         ERROR '))
+            self.assertTrue(waitFor(self.play, 'Tests did not successfully complete.'))
+            self.play.wait()
+            self.assertNotEqual(self.play.returncode, 0)
+
+        step("done testing auto-test")
+        self.play = None
+
     def testSSLConfig(self):
 
         # Testing ssl config
