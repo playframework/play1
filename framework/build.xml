@@ -268,11 +268,11 @@
 
         <!--exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
-        </exec>
+        </exec-->
 
         <exec executable="${pythonExecutable}" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/test_jvm_version_flag.py" />
-        </exec-->
+        </exec>
 
         <echo message="Using ${basedir}/../play${playExtension}" />
 
