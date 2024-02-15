@@ -32,6 +32,8 @@ public class XMLReportListener extends RunListener {
     private int problem;
     private long startTime;
 
+    private Description currentTest;
+
     public XMLReportListener() {
         this(new XMLJUnitResultFormatter());
     }
@@ -52,6 +54,7 @@ public class XMLReportListener extends RunListener {
 
     @Override
     public void testStarted(Description description) throws Exception {
+        this.currentTest = description;
         formatter.setOutput(new FileOutputStream(new File("test-result", "TEST-" + description.getClassName() + "-" + description.getMethodName() + ".xml")));
         formatter.startTestSuite(new JUnitTest(description.getDisplayName()));
         formatter.startTest(JUnit4TestAdapterCache.getDefault().asTest(description));
@@ -79,11 +82,19 @@ public class XMLReportListener extends RunListener {
         suite.setCounts(1, problem, 0);
         suite.setRunTime(System.currentTimeMillis() - startTime);
         formatter.endTestSuite(suite);
+        this.currentTest = null;
     }
 
     @Override
-    public void testFailure(Failure failure) {
-        testAssumptionFailure(failure);
+    public void testFailure(Failure failure) throws Exception{
+        if ( currentTest == null ){
+            // if failure happens in beforeClass then any tests hasn't started, so mimic the start and end of the test
+            testStarted(failure.getDescription());
+            testAssumptionFailure(failure);
+            testFinished(failure.getDescription());
+        } else {
+            testAssumptionFailure(failure);
+        }
     }
 
     @Override
