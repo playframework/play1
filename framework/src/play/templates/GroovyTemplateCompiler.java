@@ -3,7 +3,6 @@ package play.templates;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         // Static access
         List<String> names = new ArrayList<>();
         Map<String, String> originalNames = new HashMap<>();
-        for (Class clazz : Play.classloader.getAllClasses()) {
+        for (Class<?> clazz : Play.classloader.getAllClasses()) {
             if (clazz.getName().endsWith("$")) {
                 String name = clazz.getName().substring(0, clazz.getName().length() - 1).replace('$', '.') + '$';
                 names.add(name);

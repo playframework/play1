@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Date;
 
-import static org.apache.commons.lang.time.DateUtils.addDays;
+import static org.apache.commons.lang3.time.DateUtils.addDays;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.junit.Assert.*;
 

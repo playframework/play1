@@ -1,6 +1,6 @@
 package play.libs.mail.test;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import play.Logger;
 import play.libs.Mail;

@@ -25,7 +25,7 @@ import java.util.concurrent.*;
 public class JobsPlugin extends PlayPlugin {
 
     public static ScheduledThreadPoolExecutor executor;
-    public static final List<Job> scheduledJobs = new ArrayList<>();
+    public static final List<Job<?>> scheduledJobs = new ArrayList<>();
     private static final ThreadLocal<List<Callable<?>>> afterInvocationActions = new ThreadLocal<>();
 
     @Override
@@ -49,7 +49,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println();
             out.println("Scheduled jobs (" + scheduledJobs.size() + "):");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            for (Job job : scheduledJobs) {
+            for (Job<?> job : scheduledJobs) {
                 out.print(job);
                 if (job.getClass().isAnnotationPresent(OnApplicationStart.class)
                         && !(job.getClass().isAnnotationPresent(On.class) || job.getClass().isAnnotationPresent(Every.class))) {
@@ -85,9 +85,9 @@ public class JobsPlugin extends PlayPlugin {
             out.println();
             out.println("Waiting jobs:");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ScheduledFuture[] q = executor.getQueue().toArray(new ScheduledFuture[executor.getQueue().size()]);
+            ScheduledFuture<?>[] q = executor.getQueue().toArray(new ScheduledFuture[executor.getQueue().size()]);
 
-            for (ScheduledFuture task : q) {
+            for (ScheduledFuture<?> task : q) {
                 out.println(Java.extractUnderlyingCallable((FutureTask<?>) task) + " will run in " + task.getDelay(TimeUnit.SECONDS)
                         + " seconds");
             }
@@ -98,7 +98,7 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void afterApplicationStart() {
         List<Class<?>> jobs = new ArrayList<>();
-        for (Class clazz : Play.classloader.getAllClasses()) {
+        for (Class<?> clazz : Play.classloader.getAllClasses()) {
             if (Job.class.isAssignableFrom(clazz)) {
                 jobs.add(clazz);
             }
@@ -133,7 +133,7 @@ public class JobsPlugin extends PlayPlugin {
                         Job<?> job = createJob(clazz);
                         // start running job now in the background
                         @SuppressWarnings("unchecked")
-                        Callable<Job> callable = (Callable<Job>) job;
+                        Callable<Job<?>> callable = (Callable<Job<?>>) job;
                         executor.submit(callable);
                     } catch (InstantiationException | IllegalAccessException ex) {
                         throw new UnexpectedException("Cannot instantiate Job " + clazz.getName(), ex);
@@ -153,7 +153,7 @@ public class JobsPlugin extends PlayPlugin {
             // @Every
             if (clazz.isAnnotationPresent(Every.class)) {
                 try {
-                    Job job = createJob(clazz);
+                    Job<?> job = createJob(clazz);
                     String value = clazz.getAnnotation(Every.class).value();
                     if (value.startsWith("cron.")) {
                         value = Play.configuration.getProperty(value);
@@ -228,7 +228,7 @@ public class JobsPlugin extends PlayPlugin {
 
         List<Class> jobs = Play.classloader.getAssignableClasses(Job.class);
 
-        for (Class clazz : jobs) {
+        for (Class<?> clazz : jobs) {
             // @OnApplicationStop
             if (clazz.isAnnotationPresent(OnApplicationStop.class)) {
                 try {

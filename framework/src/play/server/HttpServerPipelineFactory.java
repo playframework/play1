@@ -14,7 +14,7 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
-    protected static final Map<String, Class> classes = new HashMap<>();
+    protected static final Map<String, Class<?>> classes = new HashMap<>();
 
     private String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "play.server.FlashPolicyHandler,play.server.PlayHttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
 
@@ -68,7 +68,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
     protected ChannelHandler getInstance(String name) throws Exception {
 
-        Class clazz = classes.computeIfAbsent(name, className -> {
+        Class<?> clazz = classes.computeIfAbsent(name, className -> {
             try {
                 return Class.forName(className);
             } catch (ClassNotFoundException e) {

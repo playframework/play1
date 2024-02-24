@@ -1,7 +1,7 @@
 package play.libs;
 
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Play;
 import play.i18n.Lang;
 
