@@ -594,12 +594,12 @@ class IamADeveloper(unittest.TestCase):
                 self.assertTrue(wait_for(self.play, 'ArithmeticException occurred : / by zero'))
                 self.assertTrue(wait_for(self.play, 'at controllers.Application.index(Application.java:13)'))
                 self.assertTrue(wait_for(self.play, '...'))
-             kill_play(self.play)
+                kill_play(self.play)
             # Fix it
         step('Fix it')
 
         delete(app, 'app/controllers/Application.java', 13)
-            
+
         with call_play(self, ['run', app]) as  self.play:
             self.assertTrue(wait_for(self.play, "Application 'YOP' is now started !"))
             response = browser.reload()
@@ -691,7 +691,7 @@ class IamADeveloper(unittest.TestCase):
             time.sleep(1)
 
             edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
-        
+
         with call_play(self, ['run', app]) as  self.play:
             self.assertTrue(wait_for(self.play, "Application 'YOP' is now started !"))
             browser.reload()
