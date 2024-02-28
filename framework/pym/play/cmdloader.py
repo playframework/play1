@@ -24,7 +24,7 @@ class CommandLoader(object):
             if filename != "__init__.py" and filename.endswith(".py"):
                 try:
                     module_name = filename.replace(".py", "")
-                    module_path = os.path.join(self.path,filename)
+                    module_path = os.path.join(self.path, filename)
                     mod = load_python_module(module_name, module_path)
                     self._load_cmd_from(mod)
                 except Exception as e:
