@@ -24,9 +24,9 @@ def execute(**kargs):
     args = kargs.get("args")
     env = kargs.get("env")
     cmdloader = kargs.get("cmdloader")
-    
+
     autotest(app, args)
-        
+
 def autotest(app, args):
     app.check()
     print("~ Running in test mode")
@@ -58,34 +58,34 @@ def autotest(app, args):
     if protocol == 'https' and not keystore:
       print("https without keystore configured. play auto-test will fail. Exiting now.")
       sys.exit(-1)
-      
+
     # read parameters
     add_options = []
     if args.count('--unit'):
         args.remove('--unit')
         add_options.append('-DrunUnitTests')
-            
+
     if args.count('--functional'):
         args.remove('--functional')
         add_options.append('-DrunFunctionalTests')
-            
+
     if args.count('--selenium'):
         args.remove('--selenium')
         add_options.append('-DrunSeleniumTests')
-      
+
     # Handle timeout parameter
     weblcient_timeout = -1
     if app.readConf('webclient.timeout'):
         weblcient_timeout = app.readConf('webclient.timeout')
-    
+
     for arg in args:
         if arg.startswith('--timeout='):
             args.remove(arg)
             weblcient_timeout = arg[10:]
-          
-    if weblcient_timeout >= 0:  
+
+    if weblcient_timeout >= 0:
         add_options.append('-DwebclientTimeout=' + weblcient_timeout)
-            
+
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
@@ -141,7 +141,7 @@ def autotest(app, args):
 
     print("~")
     time.sleep(1)
-    
+
     # Kill if exists
     try:
         proxy_handler = urllib.request.ProxyHandler({})
@@ -158,6 +158,15 @@ def autotest(app, args):
         testspassed = True
     if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
         testCompleted = True
+        # print all the failed tests from test_result
+        #
+        failed_out = [f for f in os.listdir(test_result) if os.path.isfile(os.path.join(test_result, f)) and f.endswith('.failed.html')]
+        for f in failed_out:
+            print("~ Failed test: %s" % f)
+            print("~ Contetnt:")
+            with open(os.path.join(test_result, f), 'r') as failed_file:
+                print(failed_file.read())
+
         print("~ Some tests have failed. See file://%s for results" % test_result)
         print("~")
         sys.exit(1)

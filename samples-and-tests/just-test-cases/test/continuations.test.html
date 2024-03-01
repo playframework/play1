@@ -63,7 +63,7 @@
     assertTextPresent('isOk->true')
     
     openAndWait('@{WithContinuations.loopWithCallback()}')
-    assertTextPresent('1:true;2:true;3:true;4:true;5:true')
+    assertText('html', '1:true;2:true;3:true;4:true;5:true')
     
     openAndWait('@{WithContinuations.streamedCallback()}')
     assertTextPresent('Hello 1')
