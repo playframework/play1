@@ -101,7 +101,7 @@ class Downloader(object):
 
     def retrieve(self, url, destination, callback=None):
         self.size = 0
-        time.clock()   
+        time.perf_counter()
         try:
           headers={'User-Agent':DEFAULT_USER_AGENT,
                   'Accept': 'application/json'
@@ -162,7 +162,7 @@ class Downloader(object):
             done = 100
         bar = self.bar(bytes_so_far, filesize, done)
         if not self.cycles % 3 and bits != filesize:
-            now = time.clock()
+            now = time.perf_counter()
             elapsed = now-self.before
             if elapsed:
                 speed = self.kibi(blocksize * 3 // elapsed)
