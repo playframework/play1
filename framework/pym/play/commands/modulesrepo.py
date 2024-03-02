@@ -328,7 +328,7 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         try:
-            deps = yaml.load(f.read())
+            deps = yaml.safe_load(f.read())
             if 'self' in deps:
                splitted = deps["self"].split(" -> ")
                if len(splitted) == 2:
@@ -354,7 +354,7 @@ def build(app, args, env):
 
     if os.path.exists(deps_file):
         f = open(deps_file)
-        deps = yaml.load(f.read())
+        deps = yaml.safe_load(f.read())
         if 'self' in deps:
            splitted = deps["self"].split(" -> ")
            f.close()
