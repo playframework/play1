@@ -1,4 +1,5 @@
-_extends: .github:.github/release-drafts/increasing-minor-version.yml
+name-template: 'Play $NEXT_PATCH_VERSION'
+tag-template: '$NEXT_PATCH_VERSION'
 template: |
   # :mega: Play $NEXT_MINOR_VERSION Released
   
@@ -21,7 +22,7 @@ template: |
   
   For more details see the [full list of changes](https://github.com/playframework/play1/compare/$PREVIOUS_TAG...$NEXT_MINOR_VERSION/) and the [$NEXT_MINOR_VERSION milestone](https://github.com/playframework/play1/issues?page=1&q=milestone%3A%22$NEXT_MINOR_VERSION%22).
 
-  ## 🙇 Thanks to our contributors
+  ## :bow: Thanks to our contributors
 
   Finally, thanks to the community for their help with detailed bug reports, discussions about new features and pull request reviews. This project is only possible due to the help we had from amazing contributors.
   Special thanks to all code contributors who helped with this particular release (they are listed below)!
