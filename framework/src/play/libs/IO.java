@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -109,7 +110,7 @@ public class IO {
     public static List<String> readLines(InputStream is) {
         try {
             return IOUtils.readLines(is, defaultCharset());
-        } catch (IOException ex) {
+        } catch (UncheckedIOException ex) {
             throw new UnexpectedException(ex);
         }
     }

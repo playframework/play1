@@ -39,7 +39,7 @@ import play.utils.HTML;
  */
 public class JavaExtensions {
 
-    public static Object[] enumValues(Class clazz) {
+    public static Object[] enumValues(Class<?> clazz) {
         return clazz.getEnumConstants();
     }
 
@@ -73,7 +73,7 @@ public class JavaExtensions {
         return temp.toArray(new String[temp.size()]);
     }
 
-    public static String toString(Closure closure) {
+    public static String toString(Closure<?> closure) {
         PrintWriter oldWriter = (PrintWriter) closure.getProperty("out");
         StringWriter newWriter = new StringWriter();
         closure.setProperty("out", new PrintWriter(newWriter));
@@ -124,14 +124,14 @@ public class JavaExtensions {
         return new RawData("");
     }
 
-    public static RawData asAttr(Map attributes, Object condition) {
+    public static RawData asAttr(Map<?,?> attributes, Object condition) {
         if (eval(condition)) {
             return asAttr(attributes);
         }
         return new RawData("");
     }
 
-    public static RawData asAttr(Map attributes) {
+    public static RawData asAttr(Map<?,?> attributes) {
         StringBuilder buf = new StringBuilder();
         for (Object key : attributes.keySet()) {
             buf.append(key).append("=\"").append(attributes.get(key)).append("\" ");
@@ -146,7 +146,7 @@ public class JavaExtensions {
         if (condition instanceof Boolean && !(Boolean) condition) {
             return false;
         }
-        if (condition instanceof Collection && ((Collection) condition).size() == 0) {
+        if (condition instanceof Collection && ((Collection<?>) condition).size() == 0) {
             return false;
         }
         if (condition instanceof String && condition.toString().equals("")) {
@@ -333,7 +333,7 @@ public class JavaExtensions {
         return "";
     }
 
-    public static String pluralize(Collection n) {
+    public static String pluralize(Collection<?> n) {
         return pluralize(n.size());
     }
 
@@ -345,7 +345,7 @@ public class JavaExtensions {
         return "";
     }
 
-    public static String pluralize(Collection n, String plural) {
+    public static String pluralize(Collection<?> n, String plural) {
         return pluralize(n.size(), plural);
     }
 
@@ -357,7 +357,7 @@ public class JavaExtensions {
         return forms[0];
     }
 
-    public static String pluralize(Collection n, String[] forms) {
+    public static String pluralize(Collection<?> n, String[] forms) {
         return pluralize(n.size(), forms);
     }
 
@@ -429,12 +429,12 @@ public class JavaExtensions {
      *            The separator to used
      * @return The concatenate items of a collection as a string
      */
-    public static String join(Collection items, String separator) {
+    public static String join(Collection<?> items, String separator) {
         if (items == null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        Iterator ite = items.iterator();
+        Iterator<?> ite = items.iterator();
         int i = 0;
         while (ite.hasNext()) {
             if (i++ > 0) {

@@ -140,7 +140,7 @@ public class Java {
      *             if problem occurred during invoking
      */
     public static Object invokeStatic(Class<?> clazz, String method, Object... args) throws Exception {
-        Class[] types = new Class[args.length];
+        Class<?>[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
         }
@@ -150,7 +150,7 @@ public class Java {
     }
 
     public static Object invokeStaticOrParent(Class<?> clazz, String method, Object... args) throws Exception {
-        Class[] types = new Class[args.length];
+        Class<?>[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
         }
@@ -175,7 +175,7 @@ public class Java {
     }
 
     public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
-        Class invokedClass = null;
+        Class<?> invokedClass = null;
         List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
         if (assignableClasses.size() == 0) {
             invokedClass = clazz;
@@ -234,7 +234,7 @@ public class Java {
         sig.append(".");
         sig.append(method.getName());
         sig.append('(');
-        for (Class clazz : method.getParameterTypes()) {
+        for (Class<?> clazz : method.getParameterTypes()) {
             sig.append(rawJavaType(clazz));
         }
         sig.append(")");
@@ -242,7 +242,7 @@ public class Java {
         return sig.toString();
     }
 
-    public static String rawJavaType(Class clazz) {
+    public static String rawJavaType(Class<?> clazz) {
         if (clazz.getName().equals("void")) {
             return "V";
         }
@@ -298,19 +298,19 @@ public class Java {
      *            The annotation class
      * @return A list of method object
      */
-    public static List<Method> findAllAnnotatedMethods(List<Class> classes, Class<? extends Annotation> annotationType) {
+    public static List<Method> findAllAnnotatedMethods(List<Class<?>> classes, Class<? extends Annotation> annotationType) {
         List<Method> methods = new ArrayList<>();
-        for (Class clazz : classes) {
+        for (Class<?> clazz : classes) {
             methods.addAll(findAllAnnotatedMethods(clazz, annotationType));
         }
         return methods;
     }
 
-    public static void findAllFields(Class clazz, Set<Field> found) {
+    public static void findAllFields(Class<?> clazz, Set<Field> found) {
         Field[] fields = clazz.getDeclaredFields();
         addAll(found, fields);
 
-        Class sClazz = clazz.getSuperclass();
+        Class<?> sClazz = clazz.getSuperclass();
         if (sClazz != null && sClazz != Object.class) {
             findAllFields(sClazz, found);
         }
@@ -579,7 +579,7 @@ class JavaWithCaching {
                     }
                 }
                 if (clazz.isAnnotationPresent(With.class)) {
-                    for (Class withClass : clazz.getAnnotation(With.class).value()) {
+                    for (Class<?> withClass : clazz.getAnnotation(With.class).value()) {
                         methods.addAll(findAllAnnotatedMethods(withClass));
                     }
                 }

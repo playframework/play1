@@ -14,7 +14,7 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
-    protected static final Map<String, Class> classes = new HashMap<>();
+    protected static final Map<String, Class<?>> classes = new HashMap<>();
 
     private final String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
 

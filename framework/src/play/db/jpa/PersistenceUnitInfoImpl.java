@@ -25,7 +25,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     private PersistenceUnitTransactionType transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
 
-    private final List<Class> managedClasses;
+    private final List<Class<?>> managedClasses;
     private final List<String> mappingFileNames;
 
     private final Properties properties;
@@ -34,7 +34,7 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     private DataSource nonJtaDataSource;
 
-    public PersistenceUnitInfoImpl(String persistenceUnitName, List<Class> managedClasses, List<String> mappingFileNames, Properties properties) {
+    public PersistenceUnitInfoImpl(String persistenceUnitName, List<Class<?>> managedClasses, List<String> mappingFileNames, Properties properties) {
         this.persistenceUnitName = persistenceUnitName;
         this.managedClasses = managedClasses;
         this.mappingFileNames = mappingFileNames;
