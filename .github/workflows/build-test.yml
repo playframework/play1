@@ -1,8 +1,11 @@
-name: Pull Requests
+name: Check
 
 on:
+  pull_request: # Check Pull Requests
+
   push:
-  pull_request:
+    branches:
+      - master # Check branch after merge
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
