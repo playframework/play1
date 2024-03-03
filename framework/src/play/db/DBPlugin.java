@@ -22,7 +22,7 @@ public class DBPlugin extends PlayPlugin {
     protected DataSourceFactory factory(Configuration dbConfig) {
         String dbFactory = dbConfig.getProperty("db.factory", "play.db.hikaricp.HikariDataSourceFactory");
         try {
-            return (DataSourceFactory) Class.forName(dbFactory).newInstance();
+            return (DataSourceFactory) Class.forName(dbFactory).getDeclaredConstructor().newInstance();
         }
         catch (Exception e) {
             throw new IllegalArgumentException("Expected implementation of " + DataSourceFactory.class.getName() + 
@@ -73,7 +73,7 @@ public class DBPlugin extends PlayPlugin {
                         // Try the driver
                         String driver = dbConfig.getProperty("db.driver");
                         try {
-                            Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
+                            Driver d = (Driver) Class.forName(driver, true, Play.classloader).getDeclaredConstructor().newInstance();
                             DriverManager.registerDriver(new ProxyDriver(d));
                         } catch (Exception e) {
                             throw new Exception("Database [" + dbName + "] Driver not found (" + driver + ")", e);
