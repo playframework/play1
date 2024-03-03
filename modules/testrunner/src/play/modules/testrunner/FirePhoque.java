@@ -81,20 +81,20 @@ public class FirePhoque {
 
         // Let's tweak WebClient
 
-        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX_38");
+        String headlessBrowser = System.getProperty("headlessBrowser", "CHROME");
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
-        } else if ("FIREFOX_38".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.FIREFOX_38;  
+        } else if ("FIREFOX".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.FIREFOX;  
         }    else if ("INTERNET_EXPLORER".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.INTERNET_EXPLORER;
-        }    else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.INTERNET_EXPLORER_11;
+//        }    else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
+//            browserVersion = BrowserVersion.INTERNET_EXPLORER;
         } else if ("EDGE".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.EDGE;
         } else {
-            browserVersion = BrowserVersion.FIREFOX_45;
+            browserVersion = BrowserVersion.FIREFOX_ESR;
         }
 
         WebClient firephoque = new WebClient(browserVersion);
@@ -150,7 +150,8 @@ public class FirePhoque {
             }
         });
         firephoque.setPromptHandler(new PromptHandler() {
-            public String handlePrompt(Page page, String message) {
+            @Override
+            public String handlePrompt(Page page, String message, String defaultValue) {
                 try {
                     ScriptableObject window = page.getEnclosingWindow().getScriptableObject();
                     String script = "parent.selenium.browserbot.recordedPrompts.push('" + message.replace("'", "\\'")+ "');" +
@@ -160,7 +161,7 @@ public class FirePhoque {
                             "result";
                     Object result = ScriptRuntime.evalSpecial(Context.getCurrentContext(), window, window, new Object[] {script}, null, 0);
                     //window.execScript(script,  "JavaScript");
-                    return (String)result;
+                    return result != null ? (String)result : defaultValue;
                 } catch(Exception e) {
                     e.printStackTrace();
                     return "";
