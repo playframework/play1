@@ -1,7 +1,7 @@
 # Welcome to Play framework
 
 [![GitHub Discussions](https://img.shields.io/github/discussions/playframework/play1?&logo=github&color=brightgreen)](https://github.com/playframework/play1/discussions)
-[![Gitter](https://img.shields.io/gitter/room/playframework/play1)](https://gitter.im/playframework/play1))
+[![Gitter](https://img.shields.io/gitter/room/playframework/play1)](https://gitter.im/playframework/play1)
 [![Contributors](https://img.shields.io/github/contributors/playframework/play1)](https://github.com/playframework/play1/graphs/contributors)
 [![StackOverflow](https://img.shields.io/static/v1?label=stackoverflow&logo=stackoverflow&logoColor=fe7a16&color=brightgreen&message=playframework)](https://stackoverflow.com/tags/playframework)
 
