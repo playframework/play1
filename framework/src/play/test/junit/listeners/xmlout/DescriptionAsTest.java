@@ -1,13 +1,12 @@
 package play.test.junit.listeners.xmlout;
 
-import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.junit.runner.Description;
 
 import junit.framework.Test;
 import junit.framework.TestResult;
 
 /**
- * Wraps {@link Description} into {@link Test} enough to fake {@link JUnitResultFormatter}.
+ * Wraps {@link Description} into {@link Test} enough to fake {@link org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter}.
  */
 public class DescriptionAsTest implements Test {
     private final Description description;
@@ -25,7 +24,7 @@ public class DescriptionAsTest implements Test {
     }
 
     /**
-     * {@link JUnitResultFormatter} determines the test name by reflection.
+     * {@link org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter} determines the test name by reflection.
      */
     public String getName() {
         return description.getDisplayName();
