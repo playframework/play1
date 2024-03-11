@@ -28,14 +28,14 @@ class IamADeveloper(unittest.TestCase):
     def testAutoTest(self):
         step('Hello, I am testing "play auto-test"')
 
-        self.working_directory = bootstrapWorkingDirectory('i-am-testing-auto-test-here')
+        self.working_directory = bootstrap_working_directory('i-am-testing-auto-test-here')
 
         # play new app
         step('Create a new project')
 
         app = '%s/testable-app' % self.working_directory
 
-        with callPlay(self, ['new', app, '--name=TESTABLEAPP']) as self.play:
+        with call_play(self, ['new', app, '--name=TESTABLEAPP']) as self.play:
             self.assertTrue(wait_for(self.play, 'The new application will be created'))
             self.assertTrue(wait_for(self.play, 'OK, the application is created'))
             self.assertTrue(wait_for(self.play, 'Have fun!'))
@@ -45,7 +45,7 @@ class IamADeveloper(unittest.TestCase):
         # play auto-test
         step('run with auto-test (the normal way)')
 
-        with callPlay(self, ['auto-test', app]) as self.play:
+        with call_play(self, ['auto-test', app]) as self.play:
             # wait for play to be ready
             self.assertTrue(wait_for(self.play, 'BasicTest...           PASSED '))
             self.assertTrue(wait_for(self.play, 'ApplicationTest...     PASSED '))
@@ -57,7 +57,7 @@ class IamADeveloper(unittest.TestCase):
         # play autotest is also accepted
         step('run with autotest (also accepted)')
 
-        with callPlay(self, ['autotest', app]) as self.play:
+        with call_play(self, ['autotest', app]) as self.play:
             # wait for play to be ready
             self.assertTrue(wait_for(self.play, 'BasicTest...           PASSED '))
             self.assertTrue(wait_for(self.play, 'ApplicationTest...     PASSED '))
@@ -69,7 +69,7 @@ class IamADeveloper(unittest.TestCase):
         # Run with a --timeout that is longer than the tests take
         step('run with auto-test --timeout=60000')
 
-        with callPlay(self, ['auto-test', app, "--timeout=60000"]) as self.play:
+        with call_play(self, ['auto-test', app, "--timeout=60000"]) as self.play:
             # wait for play to be ready
             self.assertTrue(wait_for(self.play, 'BasicTest...           PASSED '))
             self.assertTrue(wait_for(self.play, 'ApplicationTest...     PASSED '))
@@ -81,7 +81,7 @@ class IamADeveloper(unittest.TestCase):
         # Run with a --timeout that is shorter than the tests take
         step('run with auto-test --timeout=1')
 
-        with callPlay(self, ['auto-test', app, "--timeout=1"]) as self.play:
+        with call_play(self, ['auto-test', app, "--timeout=1"]) as self.play:
             # wait for play to be ready
             self.assertTrue(wait_for(self.play, 'BasicTest...           ERROR '))
             self.assertTrue(wait_for(self.play, 'ApplicationTest...     ERROR '))
