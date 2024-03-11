@@ -32,19 +32,19 @@ require:    &allDependencies
     - com.h2database -> h2 1.4.200
     - javax.activation -> javax.activation-api 1.2.0
     - com.sun.mail -> javax.mail 1.6.2
-    - javax.inject 1.0
+    - jakarta.inject -> jakarta.inject-api 1.0
     - javax.validation -> validation-api 1.1.0.Final
+    - javax.activation -> activation 1.1.1
     - jaxen 2.0.0
     - joda-time 2.12.7
     - org.hamcrest -> hamcrest-all 1.3
-    - junit 4.13.2
-    - jregex 1.2_01
+    - net.sourceforge.jregex -> jregex  1.2_01
     - org.apache.logging.log4j -> log4j-api 2.23.0
     - org.apache.logging.log4j -> log4j-core 2.23.0
     - net.sf.ehcache -> ehcache 2.10.9.2
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.1
-    - net.sf.oval -> oval 3.1.0
+    - net.sf.oval -> oval 3.2.1
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.2

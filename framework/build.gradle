@@ -1,0 +1,160 @@
+import org.yaml.snakeyaml.Yaml
+
+buildscript {
+    repositories {
+        maven {
+            url "https://repo.nos.to/content/repositories/central/"
+            credentials {
+                username = "$mavenUser"
+                password = "$mavenPassword"
+            }
+        }
+    }
+    dependencies {
+        classpath group: 'org.yaml', name: 'snakeyaml', version: '2.2'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group 'com.nosto.play'
+version '1.7.1-nosto-GA5-gradle-5'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['test-src']
+        }
+        resources {
+            srcDirs = ['test-src']
+        }
+
+        output.resourcesDir = "build/classes/java/test"
+    }
+}
+
+def deps = new Yaml().load(file("dependencies.yml").text)
+
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://repo.nos.to/content/repositories/central/"
+        credentials {
+            username = "$mavenUser"
+            password = "$mavenPassword"
+        }
+    }
+    maven {
+        url 'https://repo.nos.to/content/repositories/NostoDependencies/'
+        credentials {
+            username "$mavenUser"
+            password "$mavenPassword"
+        }
+    }
+}
+
+dependencies {
+    deps.require.each {
+        def lv = it.split(" ")
+        def version = lv[lv.size() - 1]
+        def lib = it.substring(0, it.length() - version.length()).split("->")
+        def group = lib[0]
+        def name = lib.size() > 1 ? lib[1] : group
+        implementation(group: group.trim(), name: name.trim(), version: version.trim(), {
+            transitive = false
+        })
+    }
+
+    // libs not listed in dependencies.yml, but required for compilation
+    compileOnly(group: 'org.apache.ant', name: 'ant', version: '1.10.14')
+    compileOnly(group: 'org.apache.ant', name: 'ant-junit', version: '1.10.14')
+    compileOnly group: 'com.google.code.maven-play-plugin.org.playframework', name: 'jj-simplecaptcha', version: '1.1'
+
+    testImplementation(group: 'junit', name: 'junit', version: '4.13.2')
+    testImplementation(group: 'org.apache.ant', name: 'ant', version: '1.10.14')
+    testImplementation(group: 'org.apache.ant', name: 'ant-junit', version: '1.10.14')
+    testImplementation(group: 'org.easytesting', name: 'fest-assert', version: '1.4')
+    testImplementation(group: 'org.easytesting', name: 'fest-util', version: '1.1.6')
+    testImplementation(group: 'org.mockito', name: 'mockito-core', version: '2.21.0')
+    testImplementation(group: 'org.objenesis', name: 'objenesis', version: '2.6')
+}
+
+jar {
+    manifest {
+        attributes 'Premain-Class': 'play.classloading.HotswapAgent',
+                'Can-Redefine-Classes': true,
+                'Built-JDK': System.getProperty('java.version'),
+                'Name': 'Play',
+                'Specification-Title': 'Play! framework'
+    }
+}
+
+task assembleRunscripts(type: Zip) {
+    archiveBaseName = 'play'
+    description "Assemble archive $archiveBaseName"
+    from("../play")
+    from("pym") {
+        into("framework/pym")
+    }
+
+    from("../modules/testrunner/lib") {
+        into("modules/testrunner/lib")
+    }
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    into "lib-gradle"
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId "play"
+            from components.java
+        }
+        mavenZip(MavenPublication) {
+            artifactId "play-zip"
+            artifact assembleRunscripts
+        }
+        maven(MavenPublication) {
+            groupId = "com.nosto.play"
+            artifactId = "play-test"
+
+            pom {
+                name = "play-test"
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.testImplementation.dependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url 'https://repo.nos.to/content/repositories/NostoDependencies/'
+            credentials {
+                username "$mavenUser"
+                password "$mavenPassword"
+            }
+        }
+    }
+}

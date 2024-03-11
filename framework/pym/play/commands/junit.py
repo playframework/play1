@@ -71,7 +71,12 @@ def junit(app, args):
         print("~ cleaning test results")
         shutil.rmtree(test_result)
     args.append('-Dplay.autotest')
-    java_cmd = app.java_cmd(args, className='play.test.Runner')
+
+    classpath = app.getClasspath()
+    if os.path.exists(os.path.join(app.path, 'lib-test')):
+        app.find_and_add_all_jars(classpath, os.path.join(app.path, 'lib-test'))
+
+    java_cmd = app.java_cmd(args, cp_args=':'.join(classpath), className='play.test.Runner')
     try:
         process = subprocess.Popen(java_cmd, env=os.environ)
         signal.signal(signal.SIGTERM, handle_sigterm)
@@ -83,4 +88,3 @@ def junit(app, args):
     except OSError:
         print("Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). ")
         sys.exit(-1)
-

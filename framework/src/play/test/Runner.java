@@ -20,7 +20,7 @@ public class Runner extends JUnitCore {
         //noinspection ResultOfMethodCallIgnored
         new File("test-result").mkdirs();
 
-        TestRun testRun = TestRun.parse();
+        TestRun testRun = TestRun.parse(System.getProperty("tests", "all"));
         runner.addListener(new LoggingListener());
         runner.addListener(new XMLReportListener());
         Result result = runner.run(testRun.createRequest(defaultComputer()));
