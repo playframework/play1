@@ -21,7 +21,7 @@ plugins {
 }
 
 group 'com.nosto.play'
-version '1.7.1-nosto-GA5-gradle-5'
+version '1.7.1-nosto-GA5-gradle-6'
 
 sourceSets {
     main {
@@ -82,7 +82,6 @@ dependencies {
     compileOnly(group: 'org.apache.ant', name: 'ant-junit', version: '1.10.14')
     compileOnly group: 'com.google.code.maven-play-plugin.org.playframework', name: 'jj-simplecaptcha', version: '1.1'
 
-    testImplementation(group: 'junit', name: 'junit', version: '4.13.2')
     testImplementation(group: 'org.apache.ant', name: 'ant', version: '1.10.14')
     testImplementation(group: 'org.apache.ant', name: 'ant-junit', version: '1.10.14')
     testImplementation(group: 'org.easytesting', name: 'fest-assert', version: '1.4')
@@ -108,7 +107,9 @@ task assembleRunscripts(type: Zip) {
     from("pym") {
         into("framework/pym")
     }
-
+    from("templates") {
+        into("framework/templates")
+    }
     from("../modules/testrunner/lib") {
         into("modules/testrunner/lib")
     }
