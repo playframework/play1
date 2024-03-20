@@ -77,7 +77,7 @@ dependencies {
         })
     }
     // not in `dependencies.yml` as in upstream, but present in libs and required for templates
-    implementation(group: "org.apache.common", name: 'commons-collections', version: '3.2.2')
+    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
 
     // libs not listed in dependencies.yml, but required for compilation
     compileOnly(group: 'org.apache.ant', name: 'ant', version: '1.10.14')
