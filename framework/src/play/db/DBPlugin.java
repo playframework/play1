@@ -1,7 +1,7 @@
 package play.db;
 
 import jregex.Matcher;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;

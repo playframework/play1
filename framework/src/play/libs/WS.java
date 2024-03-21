@@ -14,7 +14,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 

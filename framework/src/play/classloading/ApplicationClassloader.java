@@ -29,7 +29,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -102,7 +103,7 @@ public class ApplicationClassloader extends ClassLoader {
     public Class<?> loadApplicationClass(String name) {
 
         if (ApplicationClass.isClass(name)) {
-            Class maybeAlreadyLoaded = findLoadedClass(name);
+            Class<?> maybeAlreadyLoaded = findLoadedClass(name);
             if (maybeAlreadyLoaded != null) {
                 return maybeAlreadyLoaded;
             }
@@ -405,9 +406,9 @@ public class ApplicationClassloader extends ClassLoader {
      * 
      * @return The list of well defined Class
      */
-    public List<Class> getAllClasses() {
+    public List<Class<?>> getAllClasses() {
         if (allClasses == null) {
-            List<Class> result = new ArrayList<>();
+            List<Class<?>> result = new ArrayList<>();
 
             if (Play.usePrecompiled) {
 
@@ -416,7 +417,7 @@ public class ApplicationClassloader extends ClassLoader {
                 Play.classes.clear();
                 for (ApplicationClass applicationClass : applicationClasses) {
                     Play.classes.add(applicationClass);
-                    Class clazz = loadApplicationClass(applicationClass.name);
+                    Class<?> clazz = loadApplicationClass(applicationClass.name);
                     applicationClass.javaClass = clazz;
                     applicationClass.compiled = true;
                     result.add(clazz);
@@ -443,7 +444,7 @@ public class ApplicationClassloader extends ClassLoader {
                 }
 
                 for (ApplicationClass applicationClass : Play.classes.all()) {
-                    Class clazz = loadApplicationClass(applicationClass.name);
+                    Class<?> clazz = loadApplicationClass(applicationClass.name);
                     if (clazz != null) {
                         result.add(clazz);
                     }
@@ -466,7 +467,7 @@ public class ApplicationClassloader extends ClassLoader {
         return allClasses;
     }
 
-    private List<Class> allClasses;
+    private List<Class<?>> allClasses;
     private Map<String, ApplicationClass> allClassesByNormalizedName;
 
     /**
@@ -501,7 +502,7 @@ public class ApplicationClassloader extends ClassLoader {
      *            The class name.
      * @return a class
      */
-    public Class getClassIgnoreCase(String name) {
+    public Class<?> getClassIgnoreCase(String name) {
         getAllClasses();
         String nameLowerCased = name.toLowerCase();
         ApplicationClass c = allClassesByNormalizedName.get(nameLowerCased);
@@ -521,17 +522,17 @@ public class ApplicationClassloader extends ClassLoader {
      *            The annotation class.
      * @return A list of class
      */
-    public List<Class> getAnnotatedClasses(Class<? extends Annotation> clazz) {
+    public List<Class<?>> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         getAllClasses();
-        List<Class> results = new ArrayList<>();
+        List<Class<?>> results = new ArrayList<>();
         for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
             results.add(c.javaClass);
         }
         return results;
     }
 
-    public List<Class> getAnnotatedClasses(Class[] clazz) {
-        List<Class> results = new ArrayList<>();
+    public List<Class<?>> getAnnotatedClasses(Class<? extends Annotation>[] clazz) {
+        List<Class<?>> results = new ArrayList<>();
         for (Class<? extends Annotation> cl : clazz) {
             results.addAll(getAnnotatedClasses(cl));
         }

@@ -176,7 +176,7 @@ public class WithContinuations extends Controller {
     public static void loopWithCallback() {
         final AtomicInteger i = new AtomicInteger(0);
         final AtomicLong s = new AtomicLong(System.currentTimeMillis());
-        final StringBuilder sb = new StringBuilder();
+        final StringBuffer sb = new StringBuffer();
         final F.Action0 f = new F.Action0() {
             public void invoke() {
                 if(i.getAndIncrement() > 0) sb.append(";");

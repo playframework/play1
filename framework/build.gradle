@@ -21,7 +21,7 @@ plugins {
 }
 
 group 'com.nosto.play'
-version '1.7.1-nosto-GA5-gradle-6'
+version '1.8.0-nosto-GA-1'
 
 sourceSets {
     main {
@@ -76,6 +76,8 @@ dependencies {
             transitive = false
         })
     }
+    // not in `dependencies.yml` as in upstream, but present in libs and required for templates
+    implementation group: 'commons-collections', name: 'commons-collections', version: '3.2.2'
 
     // libs not listed in dependencies.yml, but required for compilation
     compileOnly(group: 'org.apache.ant', name: 'ant', version: '1.10.14')

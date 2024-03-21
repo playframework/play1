@@ -35,6 +35,8 @@ import org.apache.ivy.plugins.parser.ParserSettings;
 import org.apache.ivy.plugins.repository.Resource;
 import org.apache.ivy.plugins.repository.url.URLResource;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.LoaderOptions;
 
 import play.Logger;
 import play.Play;
@@ -53,15 +55,13 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return rsrc.exists() && rsrc.getName().endsWith(".yml");
     }
 
-
-
     @Override
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
         try {
             InputStream srcStream =  rsrc.openStream();
             long lastModified = (rsrc != null?rsrc.getLastModified():0L);
-            
-            Yaml yaml = new Yaml();
+
+            Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
             Object o = null;
 
             // Try to parse the yaml
@@ -112,7 +112,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             descriptor.setLastModified(lastModified);
 
             boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
-            
+
             List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {
                 if (data.get("configurations") instanceof List) {
@@ -121,7 +121,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                     for (Object conf : configurations) {
                         String confName;
                         Map options;
-                        
+
                         if (conf instanceof String) {
                             confName = ((String) conf).trim();
                             options = new HashMap();
@@ -135,7 +135,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         allExcludes &=  exclude;
                         confs.add((exclude ? "!" : "") + confName);
                     }
-                    
+
                     if (allExcludes) {
                         confs.add(0, "*");
                     }
@@ -145,7 +145,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             } else {
                 confs.add("*");
             }
-            
+
             if (data.containsKey("require")) {
                 if (data.get("require") instanceof List) {
 
@@ -304,7 +304,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
         return getOrderedModuleList(modules, file);
     }
-        
+
    private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws ParseException, IOException {
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
@@ -317,28 +317,28 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         DependencyDescriptor[] rules = md.getDependencies();
         File localModules = Play.getFile("modules");
         for (DependencyDescriptor dep : rules) {
-            ModuleRevisionId rev = dep.getDependencyRevisionId();       
+            ModuleRevisionId rev = dep.getDependencyRevisionId();
             String moduleName = filterModuleName(rev);
-            
+
             // Check if the module was already load to avoid circular parsing
             if (moduleName != null && !modules.contains(moduleName)) {
                 // Add the given module
                 modules.add(moduleName);
-                
-                // Need to load module dependencies of this given module 
+
+                // Need to load module dependencies of this given module
                 File module = new File(localModules, moduleName);
-                if(module != null && module.isDirectory()) {  
+                if(module != null && module.isDirectory()) {
                     File ivyModule = new File(module, "conf/dependencies.yml");
                     if(ivyModule != null && ivyModule.exists()) {
                         getOrderedModuleList(modules, ivyModule);
-                    }    
+                    }
                 } else {
                     File modulePath = new File(IO.readContentAsString(module).trim());
                     if (modulePath.exists() && modulePath.isDirectory()) {
                         File ivyModule = new File(modulePath, "conf/dependencies.yml");
                         if(ivyModule != null && ivyModule.exists()) {
                             getOrderedModuleList(modules, ivyModule);
-                        } 
+                        }
                     }
                 }
             } else if(moduleName == null && rev.getRevision().equals("->")){
@@ -347,8 +347,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         }
         return modules;
     }
-    
-      
+
+
     private static String filterModuleName(ModuleRevisionId rev) {
         if (rev != null && !"play".equals(rev.getName())) {
             File moduleDir = new File(Play.applicationPath, "modules");
