@@ -44,7 +44,8 @@ public class ApplicationCompiler {
         "16", CompilerOptions.VERSION_16,
         "17", CompilerOptions.VERSION_17,
         "18", CompilerOptions.VERSION_18,
-        "19", CompilerOptions.VERSION_19
+        "19", CompilerOptions.VERSION_19,
+        "21", CompilerOptions.VERSION_21
     );
 
     final Map<String, Boolean> packagesCache = new HashMap<>();
