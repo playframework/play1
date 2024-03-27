@@ -2,7 +2,7 @@
 
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
-    <property name="baseversion" value="1.7.x" />
+    <property name="baseversion" value="1.8.x" />
 
     <path id="project.classpath">
         <fileset dir=".">
