@@ -130,6 +130,38 @@ task copyDependencies(type: Copy) {
     into "lib-gradle"
 }
 
+def validate(task, command, message) {
+    task.commandLine "sh", "-c", command
+    task.setIgnoreExitValue(true)
+    task.doLast {
+        if (executionResult.get().exitValue != 0) {
+            throw new GradleException(message)
+        }
+    }
+}
+
+task validateGitStatus(type: Exec) {
+   validate(delegate, "git diff --quiet", "Unable to publish: git status is not clean, please commit your changes first.")
+}
+
+task validateGitBranch(type: Exec) {
+    validate(delegate,
+            "git branch -r --contains HEAD | grep origin/HEAD",
+            "Unable to publish: Current commit doesnt belong to origin/HEAD (origin/master) branch, please push and merge your changes first.")
+}
+
+task validateGitTags(type: Exec) {
+    validate(delegate,
+            "[ \"\$(git rev-parse HEAD)\" = \"\$(git ls-remote --exit-code origin \"refs/tags/$version^{}\" |  awk '{print \$1}' )\" ]",
+            "Unable to publish: Current commit is not tagged or not pushed, please tag it with $version first and don't forget to push the $version tag to origin.")
+}
+
+if(!version.toString().matches(".*-SNAPSHOT|.*-testing")) {
+    tasks.publish.dependsOn validateGitStatus
+    tasks.publish.dependsOn validateGitBranch
+    tasks.publish.dependsOn validateGitTags
+}
+
 
 publishing {
     publications {
