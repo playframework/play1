@@ -14,7 +14,7 @@ import play.test.FunctionalTest;
 
 public class XForwardedSupportTest extends FunctionalTest {
     private static final String xForwardedFor = "10.10.10.10";
-    private static final String PAGE_URL = "/users/list";
+    private static final String PAGE_URL = "/Application/helloZen";
     private static final String HEADER_XFORWARDED_FOR = "x-forwarded-for";
     private static final String CONFIG_XFORWARD_SUPPORT = "XForwardedSupport"; 
 

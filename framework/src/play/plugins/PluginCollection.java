@@ -19,7 +19,6 @@ import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.data.binding.RootParamNode;
-import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.inject.Injector;
 import play.libs.F;
@@ -699,16 +698,6 @@ public class PluginCollection {
             }
         }
         return value;
-    }
-
-    public Model.Factory modelFactory(Class<? extends Model> modelClass) {
-        for (PlayPlugin plugin : getEnabledPlugins()) {
-            Model.Factory factory = plugin.modelFactory(modelClass);
-            if (factory != null) {
-                return factory;
-            }
-        }
-        return null;
     }
 
     public String getMessage(String locale, Object key, Object... args) {

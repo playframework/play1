@@ -1,7 +1,7 @@
 #{selenium 'Test validation'}
 
 	open('@{Validation.index()}')
-	assertTextPresent('{bottle.name1=[Required], bottle.name2=[Required], bottle=[Validation failed]}')
+	assertTextPresent('{bottle=[Required]}')
 	
 	open('@{Validation.index()}?bottle.name1=Coucou')
 	assertTextPresent('{bottle.name2=[Required], bottle=[Validation failed]}')
@@ -20,7 +20,7 @@
 
 
     open('@{Validation.user()}')
-    assertTextPresent('{user.birth=[Required], user=[Validation failed]}')
+    assertTextPresent('{user=[Required]}')
 
     open('@{Validation.user()}?user.name=Nicolas')
     assertTextPresent('{user.birth=[Required], user=[Validation failed]}')

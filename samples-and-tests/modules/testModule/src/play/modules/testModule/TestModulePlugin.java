@@ -11,8 +11,6 @@ import play.Play.Mode;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.db.jpa.JPA;
-import play.db.jpa.JPAPlugin;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router;

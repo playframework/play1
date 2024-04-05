@@ -2,7 +2,6 @@ package controllers;
 
 import play.*;
 import play.mvc.*;
-import play.db.jpa.*;
 import play.libs.*;
 import play.libs.F.*;
 import static play.libs.F.*;
@@ -108,59 +107,7 @@ public class WithContinuations extends Controller {
         }
         renderText(sb);
     }
-    
-    public static void withNaiveJPA() {
-        User bob = new User("bob").save();
-        await(100);
-        // We are now in a new transaction! So it should fail
-        bob.name = "coco";
-        bob.save();
-        renderText("OK");
-    }
-    
-    public static void getUserByName(String name) {
-        renderText("Users:" + User.count() + " -> " + User.find("byName", name).first());
-    }
-    
-    public static void withJPA() {
-        User bob = new User("kiki").save();
-        await(100);
-        // We are now in a new transaction! So we need to merge previous JPA instances
-        bob = bob.merge();
-        bob.name = "coco";
-        bob.save();
-        renderText("OK");
-    }
-    
-    public static void rollbackWithoutContinuations() {
-        for(int i=0; i<10; i++) {
-            new User("user" + i).save();
-        }
-        // No users should be inserted
-        JPA.setRollbackOnly();
-        renderText("OK");
-    }
-    
-    public static void rollbackWithContinuations() {
-        for(int i=0; i<10; i++) {
-            new User("user" + i).save();
-            await(10);
-        }
-        // Too late! Each continuation uses its own transaction... we can't rollback them anymore
-        JPA.setRollbackOnly();
-        renderText("OK");
-    }
-    
-    public static void rollbackWithContinuationsThatWorks() {
-        for(int i=0; i<10; i++) {
-            new User("oops" + i).save();
-            // Rollback before triggering the continuation, so we'll properly rollback the current transaction
-            JPA.setRollbackOnly();
-            await(10);
-        }
-        renderText("OK");
-    }
-    
+
     public static void streamedResult() {
         response.contentType = "text/html";
         response.writeChunk("<h1>This page should load progressively in about a few seconds</h1>");
@@ -214,18 +161,7 @@ public class WithContinuations extends Controller {
         await(10, callback);
     }
     
-    public static void jpaAndCallback() {
-        final User bob = new User("bob").save();
-        await("1s", new F.Action0() {
-            public void invoke() {
-                // We are now in a new transaction! So it should fail
-                bob.name = "coco";
-                bob.save();
-                renderText("OK");
-            }
-        });
-    }
-    
+
     public static void callbackWithResult() {
         await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()), new F.Action<String>() {
             public void invoke(String result) {

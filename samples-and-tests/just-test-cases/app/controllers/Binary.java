@@ -1,10 +1,8 @@
 package controllers;
 
-import models.UserWithAvatar;
 import play.data.Upload;
 import play.mvc.Controller;
 import play.mvc.Http;
-import play.test.Fixtures;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -14,31 +12,12 @@ import java.util.List;
 
 public class Binary extends Controller {
     
-    public static void deleteAll(){ // see Bug #491403
-        Fixtures.deleteAll();
-    }
 
     public static void index() {
         render();
     }
 
-    public static void save(UserWithAvatar user) {
-        user.create();
-        show(user.id);
-    }
 
-    public static void show(Long id) {
-        UserWithAvatar user = UserWithAvatar.findById(id);
-        render(user);
-    }
-
-    public static void showAvatar(Long id) {
-        UserWithAvatar user = UserWithAvatar.findById(id);
-        if (user != null && user.avatar.exists()) {
-            renderBinary(user.avatar.get());
-        }
-        notFound();
-    }
 
     public static void uploadFile(File file) {
     	if(file != null){

@@ -1,28 +1,22 @@
 package controllers;
 
 import java.util.*;
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+
 import play.*;
 import play.mvc.*;
-import play.i18n.Lang;
 import play.libs.*;
 import play.jobs.*;
 
-import models.*;
 import utils.*;
 import jobs.*;
 
-import javax.mail.internet.InternetAddress;
-
-@play.db.jpa.Transactional
 public class Application extends Controller {
 
     // bug
@@ -206,13 +200,6 @@ public class Application extends Controller {
         render("Application/reverse2.html");
     }
 
-    public static void reverserouting3() {
-        Object def = reverse(); {
-            JPABinding.save(new Project("COLCOZ"));
-        }
-        renderText(def);
-    }
-
     public static void jsRoute() {
         render();
     }
@@ -335,26 +322,6 @@ public class Application extends Controller {
         renderText(results);
     }
 
-    public static void selectTag(){
-        List<User> users = new ArrayList<User>(12);
-        User user;
-        for(long i = 0; i < 10; i++) {
-        	user = new User("User-" + i);
-        	user.k = i;
-        	user.i = (int) i;
-        	users.add(user);
-        }
-        user = new User("User-%-10");
-        user.k = 10L;
-        user.i = (int) 10;
-        users.add(user);
-        user = new User("User-%%-11");
-        user.k = 11L;
-        user.i = (int) 11;
-        users.add(user);
-        render(users);
-    }
-    
     public static void fastTag_render_test() {
         render();
     }

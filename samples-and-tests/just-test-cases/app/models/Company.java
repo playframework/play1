@@ -5,10 +5,7 @@ import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
 
-import controllers.CRUD;
-
-@Entity
-public class Company extends GenericModel {
+public class Company {
 
     @Id
     @GeneratedValue(generator="system-uuid")
@@ -18,7 +15,6 @@ public class Company extends GenericModel {
     @Version
     public int version;
     
-    @CRUD.Exclude
     public String b = "YOP";
 
     public String name;

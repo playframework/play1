@@ -40,7 +40,6 @@ public abstract class Binder {
         supportedTypes.put(LocalDateTime.class, new LocalDateTimeBinder());
         supportedTypes.put(LocalDate.class, new LocalDateBinder());
         supportedTypes.put(LocalTime.class, new LocalTimeBinder());
-        supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
         supportedTypes.put(Upload.class, new UploadBinder());
         supportedTypes.put(Upload[].class, new UploadArrayBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());

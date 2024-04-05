@@ -14,7 +14,6 @@ import com.google.gson.JsonObject;
 
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.RootParamNode;
-import play.db.Model;
 import play.libs.F;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -414,15 +413,6 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      *            the current request
      */
     public void routeRequest(Request request) {
-    }
-
-    /**
-     * @param modelClass
-     *            class of the model
-     * @return the Model factory
-     */
-    public Model.Factory modelFactory(Class<? extends Model> modelClass) {
-        return null;
     }
 
     public void afterFixtureLoad() {

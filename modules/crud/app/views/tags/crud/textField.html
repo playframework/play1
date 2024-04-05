@@ -1,9 +1,0 @@
-#{field 'object.' + _name}
-    <label for="${field.id}">
-        &{_name}
-    </label>
-    <input id="${field.id}" class="${field.errorClass}" type="text" name="${field.name}" value="${params[field.name]?.escape()?.raw() ?: field.error?.message == 'validation.required' ? '' : _value?.escape()?.raw()}" size="50" />
-    #{ifError field.name}
-        <span class="error">${field.error.raw()}</span>
-    #{/ifError}
-#{/field}

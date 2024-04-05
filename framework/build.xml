@@ -284,26 +284,6 @@
         </antcall>
 
         <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/forum"/>
-            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
-        </antcall>
-
-        <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/zencontact"/>
-            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
-        </antcall>
-
-        <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/jobboard"/>
-            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
-        </antcall>
-
-        <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/yabe"/>
-            <param name="play.enhancement" value="-DenableAllEnhancers=true" />
-        </antcall>
-
-        <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/nonstatic-app"/>
             <param name="play.enhancement" value="-DenableAllEnhancers=true" />
         </antcall>

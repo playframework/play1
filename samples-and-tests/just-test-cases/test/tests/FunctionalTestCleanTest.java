@@ -7,7 +7,6 @@ import java.util.Map;
 import org.junit.*;
 import org.junit.Before;
 
-import controllers.async.AsyncApplication;
 
 import play.Logger;
 import play.test.*;
@@ -16,7 +15,6 @@ import play.mvc.Scope.RenderArgs;
 import play.mvc.Http.*;
 import play.exceptions.UnexpectedException;
 import models.*;
-import models.async.AsyncTrace;
 
 @CleanTest(removeCurrent= true, createDefault=false)
 public class FunctionalTestCleanTest extends FunctionalTest {

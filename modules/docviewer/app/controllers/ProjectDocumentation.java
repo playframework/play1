@@ -2,7 +2,6 @@ package controllers;
 
 import java.io.File;
 
-import play.db.jpa.NoTransaction;
 import play.modules.docviewer.DocumentationGenerator;
 import play.mvc.Controller;
 
@@ -12,7 +11,6 @@ import play.mvc.Controller;
  *
  * @author Marek Piechut
  */
-@NoTransaction
 public class ProjectDocumentation extends Controller {
 
     public static DocumentationGenerator generator = new DocumentationGenerator();

@@ -30,7 +30,7 @@ public class PropertiesEnhancerTest extends FunctionalTest {
 		// get all of the properties for a POJO
 		PropertyDescriptor[] descriptors = PropertyUtils.getPropertyDescriptors(obj);
 
-		assertEquals(9, descriptors.length);
+		assertEquals(6, descriptors.length);
 
 // It appears the "class" attribute is no longer returned in BeanUtils v1.9.4. This property is only
 // referenced in play.db.jpa.JPAModelLoader.makeCompositeKey(Model model) and it is specifically ignored
@@ -39,8 +39,7 @@ public class PropertiesEnhancerTest extends FunctionalTest {
 		assertTrue(validAccessorFor(obj, descriptors, "companies", true, true));
 		assertTrue(validAccessorFor(obj, descriptors, "company", true, true));
 		assertTrue(validAccessorFor(obj, descriptors, "endDate", true, true));
-		assertTrue(validAccessorFor(obj, descriptors, "entityId", true, false));
-		assertTrue(validAccessorFor(obj, descriptors, "id", true, false));
+
 		assertTrue(validAccessorFor(obj, descriptors, "name", true, true));
 		assertTrue(validAccessorFor(obj, descriptors, "observation", true, true));
 		assertTrue(validAccessorFor(obj, descriptors, "startDate", true, true));

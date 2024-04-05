@@ -1,5 +1,3 @@
-#{fixture delete:'all' /}
-
 #{selenium 'Test continuations'}
 
     openAndWait('@{WithContinuations.loopWithWait()}')
@@ -17,45 +15,6 @@
     openAndWait('@{WithContinuations.waitAny()}')
     assertTextPresent('0:[DONE];1:[DONE]')
 
-    openAndWait('@{WithContinuations.withNaiveJPA()}')
-    assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
-    
-    openAndWait('@{WithContinuations.getUserByName('coco')}')
-    assertTextPresent('Users:1 -> null')
-    
-    openAndWait('@{WithContinuations.getUserByName('bob')}')
-    assertTextPresent('Users:1 -> bob')
-    
-    openAndWait('@{WithContinuations.withJPA()}')
-    assertTextPresent('OK')
-    
-    openAndWait('@{WithContinuations.getUserByName('kiki')}')
-    assertTextPresent('Users:2 -> null')
-    
-    openAndWait('@{WithContinuations.getUserByName('coco')}')
-    assertTextPresent('Users:2 -> coco')
-    
-    openAndWait('@{WithContinuations.rollbackWithoutContinuations()}')
-    assertTextPresent('OK')
-    
-    openAndWait('@{WithContinuations.getUserByName('user1')}')
-    assertTextPresent('Users:2 -> null')
-    
-    openAndWait('@{WithContinuations.rollbackWithContinuations()}')
-    assertTextPresent('OK')
-    
-    openAndWait('@{WithContinuations.getUserByName('user1')}')
-    assertTextPresent('Users:12 -> user1')
-    
-    openAndWait('@{WithContinuations.getUserByName('user9')}')
-    assertTextPresent('Users:12 -> user9')
-    
-    openAndWait('@{WithContinuations.rollbackWithContinuationsThatWorks()}')
-    assertTextPresent('OK')
-    
-    openAndWait('@{WithContinuations.getUserByName('oops1')}')
-    assertTextPresent('Users:12 -> null')
-    
     openAndWait('@{WithContinuations.streamedResult()}')
     assertTextPresent('Hello 1')
     assertTextPresent('Hello 50')
@@ -67,9 +26,6 @@
     assertTextPresent('Hello 50')
     assertTextPresent('Hello 99')
     assertTextPresent('isOk->true')
-    
-    openAndWait('@{WithContinuations.jpaAndCallback()}')
-    assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
     
     openAndWait('@{WithContinuations.callbackWithResult()}')
     assertTextPresent('yep -> DONE')

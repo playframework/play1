@@ -27,10 +27,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", int.class).equals(10));
         assertTrue(directBind("", Integer.class) == null);
         assertTrue(directBind(null, Integer.class) == null);
-        assertTrue(directBind("0", Integer.class).equals(new Integer("0")));
-        assertTrue(directBind("10", Integer.class).equals(new Integer("10")));
-        assertTrue(directBind("-10", Integer.class).equals(new Integer("-10")));
-        assertTrue(directBind("10.25", Integer.class).equals(new Integer("10")));
+        assertTrue(directBind("0", Integer.class).equals(Integer.valueOf("0")));
+        assertTrue(directBind("10", Integer.class).equals(Integer.valueOf("10")));
+        assertTrue(directBind("-10", Integer.class).equals(Integer.valueOf("-10")));
+        assertTrue(directBind("10.25", Integer.class).equals(Integer.valueOf("10")));
     }
     
     @Test
@@ -49,10 +49,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", long.class).equals(10l));
         assertTrue(directBind("", Long.class) == null);
         assertTrue(directBind(null, Long.class) == null);
-        assertTrue(directBind("0", Long.class).equals(new Long("0")));
-        assertTrue(directBind("10", Long.class).equals(new Long("10")));
-        assertTrue(directBind("-10", Long.class).equals(new Long("-10")));
-        assertTrue(directBind("10.25", Long.class).equals(new Long("10")));
+        assertTrue(directBind("0", Long.class).equals(Long.valueOf("0")));
+        assertTrue(directBind("10", Long.class).equals(Long.valueOf("10")));
+        assertTrue(directBind("-10", Long.class).equals(Long.valueOf("-10")));
+        assertTrue(directBind("10.25", Long.class).equals(Long.valueOf("10")));
     }
     
     @Test
@@ -65,10 +65,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", byte.class).equals((byte)10));
         assertTrue(directBind("", Byte.class) == null);
         assertTrue(directBind(null, Byte.class) == null);
-        assertTrue(directBind("0", Byte.class).equals(new Byte("0")));
-        assertTrue(directBind("10", Byte.class).equals(new Byte("10")));
-        assertTrue(directBind("-10", Byte.class).equals(new Byte("-10")));
-        assertTrue(directBind("10.25", Byte.class).equals(new Byte("10")));
+        assertTrue(directBind("0", Byte.class).equals(Byte.valueOf("0")));
+        assertTrue(directBind("10", Byte.class).equals(Byte.valueOf("10")));
+        assertTrue(directBind("-10", Byte.class).equals(Byte.valueOf("-10")));
+        assertTrue(directBind("10.25", Byte.class).equals(Byte.valueOf("10")));
     }
     
     @Test
@@ -81,10 +81,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", short.class).equals((short)10));
         assertTrue(directBind("", Short.class) == null);
         assertTrue(directBind(null, Short.class) == null);
-        assertTrue(directBind("0", Short.class).equals(new Short("0")));
-        assertTrue(directBind("10", Short.class).equals(new Short("10")));
-        assertTrue(directBind("-10", Short.class).equals(new Short("-10")));
-        assertTrue(directBind("10.25", Short.class).equals(new Short("10")));
+        assertTrue(directBind("0", Short.class).equals(Short.valueOf("0")));
+        assertTrue(directBind("10", Short.class).equals(Short.valueOf("10")));
+        assertTrue(directBind("-10", Short.class).equals(Short.valueOf("-10")));
+        assertTrue(directBind("10.25", Short.class).equals(Short.valueOf("10")));
     }
     
     @Test
@@ -97,10 +97,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", float.class).equals(10.25f));
         assertTrue(directBind("", Float.class) == null);
         assertTrue(directBind(null, Float.class) == null);
-        assertTrue(directBind("0", Float.class).equals(new Float("0")));
-        assertTrue(directBind("10", Float.class).equals(new Float("10")));
-        assertTrue(directBind("-10", Float.class).equals(new Float("-10")));
-        assertTrue(directBind("10.25", Float.class).equals(new Float("10.25")));
+        assertTrue(directBind("0", Float.class).equals(Float.valueOf("0")));
+        assertTrue(directBind("10", Float.class).equals(Float.valueOf("10")));
+        assertTrue(directBind("-10", Float.class).equals(Float.valueOf("-10")));
+        assertTrue(directBind("10.25", Float.class).equals(Float.valueOf("10.25")));
     }
     
     @Test
@@ -113,10 +113,10 @@ public class DirectBindingTest extends UnitTest {
         assertTrue(directBind("10.25", double.class).equals(10.25d));
         assertTrue(directBind("", Double.class) == null);
         assertTrue(directBind(null, Double.class) == null);
-        assertTrue(directBind("0", Double.class).equals(new Double("0")));
-        assertTrue(directBind("10", Double.class).equals(new Double("10")));
-        assertTrue(directBind("-10", Double.class).equals(new Double("-10")));
-        assertTrue(directBind("10.25", Double.class).equals(new Double("10.25")));
+        assertTrue(directBind("0", Double.class).equals(Double.valueOf("0")));
+        assertTrue(directBind("10", Double.class).equals(Double.valueOf("10")));
+        assertTrue(directBind("-10", Double.class).equals(Double.valueOf("-10")));
+        assertTrue(directBind("10.25", Double.class).equals(Double.valueOf("10.25")));
     }
     
     @Test

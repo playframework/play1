@@ -9,14 +9,12 @@ import helpers.CheatSheetHelper;
 import helpers.LangMenuHelper;
 import helpers.LangMenuHelper.LangMenu;
 import play.Play;
-import play.db.jpa.NoTransaction;
 import play.libs.IO;
 import play.modules.docviewer.DocumentationGenerator;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.vfs.VirtualFile;
 
-@NoTransaction
 public class PlayDocumentation extends Controller {
 
   public static DocumentationGenerator generator = new DocumentationGenerator();

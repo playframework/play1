@@ -9,8 +9,6 @@ public class CacheTest extends UnitTest {
     
     @Before
     public void setup() {
-        Fixtures.deleteAll();
-        Fixtures.load("users.yml");
         Cache.clear();
     }
 
@@ -85,16 +83,5 @@ public class CacheTest extends UnitTest {
         pause(2500);
         assertNull(Cache.get("hop"));
     }
-    
-    @Test
-    public void cacheObjects() {
-        List<User> users = User.findAll();
-        User u = users.get(0);
-        Cache.set("u", u);
-        assertEquals(u, Cache.get("u"));
-        assertEquals(u, Cache.get("u", User.class));
-        Cache.add("users", users);
-        assertEquals(users.size(), Cache.get("users", List.class).size());
-    }
-    
+
 }

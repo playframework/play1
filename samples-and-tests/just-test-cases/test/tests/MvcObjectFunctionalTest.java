@@ -7,7 +7,6 @@ import java.util.Map;
 import org.junit.*;
 import org.junit.Before;
 
-import controllers.async.AsyncApplication;
 
 import play.Logger;
 import play.test.*;
@@ -15,7 +14,6 @@ import play.mvc.*;
 import play.mvc.Scope.RenderArgs;
 import play.mvc.Http.*;
 import models.*;
-import models.async.AsyncTrace;
 
 public class MvcObjectFunctionalTest extends FunctionalTest {
     @Test

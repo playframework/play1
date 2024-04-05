@@ -44,21 +44,7 @@ public interface Model {
         public List<Model.Property> listProperties();
 
     }
-
-    public static class Manager {
-
-        public static Model.Factory factoryFor(Class<? extends Model> clazz) {
-            if(Model.class.isAssignableFrom(clazz)) {
-                Model.Factory factory = Play.pluginCollection.modelFactory(clazz);
-                if( factory != null) {
-                    return factory;
-                }
-            }
-            throw new UnexpectedException("Model " + clazz.getName() + " is not managed by any plugin");
-        }
-
-    }
-
+    
     public static interface BinaryField {
 
         public InputStream get();

@@ -3,7 +3,6 @@ package play.test;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
-import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 
 @RunWith(PlayJUnitRunner.class)
@@ -26,12 +25,4 @@ public abstract class BaseTest extends org.junit.Assert {
         }
     }
 
-    /**
-     * Flush and clear the JPA session
-     */
-    @Deprecated
-    public void clearJPASession() {
-        JPA.em().flush();
-        JPA.em().clear();
-    }
 }

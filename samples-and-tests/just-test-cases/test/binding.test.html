@@ -42,25 +42,7 @@
         assertTextPresent('24/01/02 00:00:00')
 
 
-         <!-- As and NoBinding -->
-        open('@{DataBinding.signinPage()}')
-        type('userName', 'x')
-	    type('password', 'x')
-        clickAndWait('submit')
 
-        assertTextPresent('Authentication failed!')
-        assertText('userNameResult', 'x')
-        assertText('passwordResult', 'x')
-        assertText('roleResult', '')
-        
-        type('userName', 'nicolas')
-	    type('password', 'nicolas')
-        clickAndWait('submit')
-
-        assertTextPresent('Authentication successful!')
-        assertText('userNameResult', 'nicolas')
-        assertText('passwordResult', 'nicolas')
-        assertText('roleResult', '')
         
         <!-- Custom binder -->
         open('@{DataBinding.customeBinding('kiki')}')
@@ -83,16 +65,6 @@
         open('@{Application.generateBookWithDateLink(2879964256556)}')                                      
         clickAndWait('timeLink')
         <!--assertTextPresent('Booked at 05/04/61 !!')-->
-		
-		<!-- Binding internal enum with empty string -->
-		open('/databinding/createFactory?factory.name=Nestle&factory.color=RED')
-		assertTextPresent('false -> Nestle,Color RED')
-		
-		open('/databinding/createFactory?factory.name=Nestle&factory.color=REDX')
-		assertTextPresent('true -> Nestle,null')
-		
-		open('/databinding/createFactory?factory.name=Nestle&factory.color=')
-		assertTextPresent('false -> Nestle,null')
 
         <!-- Test that value-less params are noticed -->
         open('@{DataBinding.printParams()}?noValue&noValue2&key=value&noValue3')
@@ -101,19 +73,4 @@
         assertTextPresent('key value')
         assertTextPresent('noValue3 null')
         
-   open('@{DataBinding.dispatchAnEntity()}') 
-   type('//input[@id='entity_date']','2013-10-03 11:33:05:125 AM')
-   type('//input[@id='entity_yop']','yop')
-   type('//input[@id='entity_yap']','--yap--')
-   type('//input[@id='entity_yip']','yip')
-   clickAndWait('id=submit')
-
-   assertHtmlSource('*2013-10-03 11:33:05:125 AM*')
-   assertHtmlSource('*yop*')
-   assertNotHtmlSource('*----yop----*')
-   assertHtmlSource('*yap*')
-   assertNotHtmlSource('*--yap--*')
-   assertHtmlSource('*yip*')
-   assertHtmlSource('*--##yip##--*')
-   assertNotHtmlSource('*----yip----*')
 #{/selenium}

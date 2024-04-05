@@ -151,14 +151,6 @@
     assertText('i', '/optionalSlash')
     assertText('j', '/withQueryParam')
     assertText('k', '/withQueryParam?lucky=duck')
-    
-    // Reverse
-    open('@{Application.reverserouting2()}')
-    assertTextPresent('/jpabinding/save?project.name=colcoz')
-
-    // Reverse
-    open('@{Application.reverserouting3()}')
-    assertTextPresent('/jpabinding/save?project.name=COLCOZ')
 
     // Host
     open('/')

@@ -1,15 +1,12 @@
 package models;
 
 import play.data.binding.As;
-import play.data.binding.NoBinding;
 import play.data.validation.*;
-import play.db.jpa.*;
 
 import javax.persistence.*;
 import java.util.*;
 
-@Entity
-public class User extends Model {
+public class User {
 	
 	public User(String name) {
 		this.name = name;

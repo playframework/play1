@@ -1,14 +1,6 @@
 package models;
 
-import play.*;
-import play.db.jpa.*;
-import play.data.validation.*;
-
-import javax.persistence.*;
-import java.util.*;
-
-@Entity
-public class Factory extends GenericModel {
+public class Factory  {
     
     public static enum Color { 
         RED, GREEN, BLUE; 
@@ -17,8 +9,6 @@ public class Factory extends GenericModel {
         } 
     }
     
-    @Id
-    @GeneratedValue
     public long number;
     
     public String name;
