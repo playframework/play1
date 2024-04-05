@@ -47,7 +47,7 @@ require:    &allDependencies
     - net.sf.jsr107cache -> jsr107cache 1.1
     - net.sf.oval -> oval 3.2.1
     - oauth.signpost -> signpost-core 1.2.1.2
-    - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
+    - javax.servlet -> javax.servlet-api 3.0.1
     - org.apache.ivy -> ivy 2.5.2
     - org.bouncycastle -> bcprov-jdk18on 1.77
     - org.bouncycastle -> bcpkix-jdk18on 1.77

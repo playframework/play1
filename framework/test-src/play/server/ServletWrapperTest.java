@@ -3,14 +3,23 @@ package play.server;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -200,6 +209,26 @@ public class ServletWrapperTest {
             throw new RuntimeException("Method not implemented");
         }
 
+        public boolean authenticate(HttpServletResponse httpServletResponse) throws IOException, ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public void login(String s, String s1) throws ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public void logout() throws ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public Collection<Part> getParts() throws IOException, ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public Part getPart(String s) throws IOException, ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
         @Override
         public boolean isRequestedSessionIdValid() {
             throw new RuntimeException("Method not implemented");
@@ -252,6 +281,34 @@ public class ServletWrapperTest {
 
         @Override
         public int getLocalPort() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public ServletContext getServletContext() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public AsyncContext startAsync() throws IllegalStateException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public boolean isAsyncStarted() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public boolean isAsyncSupported() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public AsyncContext getAsyncContext() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        public DispatcherType getDispatcherType() {
             throw new RuntimeException("Method not implemented");
         }
 
