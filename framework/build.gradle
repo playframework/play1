@@ -23,6 +23,10 @@ plugins {
 group 'com.nosto.play'
 version '1.8.0-nosto-GA-1'
 
+java {
+    withSourcesJar()
+}
+
 sourceSets {
     main {
         java {
@@ -100,6 +104,10 @@ jar {
                 'Name': 'Play',
                 'Specification-Title': 'Play! framework'
     }
+}
+
+tasks.named('sourcesJar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 task assembleRunscripts(type: Zip) {
