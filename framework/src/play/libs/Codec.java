@@ -1,10 +1,10 @@
 package play.libs;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 import play.exceptions.UnexpectedException;
@@ -33,18 +33,18 @@ public class Codec {
      * @return The base64 encoded String
      */
     public static String encodeBASE64(String value) {
-        return new String(Base64.encodeBase64(value.getBytes(UTF_8)));
+        return java.util.Base64.getEncoder().encodeToString(value.getBytes(UTF_8));
     }
 
     /**
      * Encode binary data to base64
-     * 
+     *
      * @param value
      *            The binary data
      * @return The base64 encoded String
      */
     public static String encodeBASE64(byte[] value) {
-        return new String(Base64.encodeBase64(value));
+        return java.util.Base64.getEncoder().encodeToString(value);
     }
 
     /**
@@ -55,50 +55,34 @@ public class Codec {
      * @return decoded binary data
      */
     public static byte[] decodeBASE64(String value) {
-        return Base64.decodeBase64(value.getBytes(UTF_8));
+        return java.util.Base64.getDecoder().decode(value);
     }
 
     /**
-     * Build an hexadecimal MD5 hash for a String
+     * Build a hexadecimal MD5 hash for a String
      * 
      * @param value
      *            The String to hash
-     * @return An hexadecimal Hash
+     * @return A hexadecimal Hash
      */
     public static String hexMD5(String value) {
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.reset();
-            messageDigest.update(value.getBytes(UTF_8));
-            byte[] digest = messageDigest.digest();
-            return byteToHexString(digest);
-        } catch (Exception ex) {
-            throw new UnexpectedException(ex);
-        }
+        return hashToHexString("MD5", value);
     }
 
     /**
-     * Build an hexadecimal SHA1 hash for a String
-     * 
+     * Build a hexadecimal SHA1 hash for a String
+     *
      * @param value
      *            The String to hash
-     * @return An hexadecimal Hash
+     * @return A hexadecimal Hash
      */
     public static String hexSHA1(String value) {
-        try {
-            MessageDigest md;
-            md = MessageDigest.getInstance("SHA-1");
-            md.update(value.getBytes(UTF_8));
-            byte[] digest = md.digest();
-            return byteToHexString(digest);
-        } catch (Exception ex) {
-            throw new UnexpectedException(ex);
-        }
+        return hashToHexString("SHA-1", value);
     }
 
     /**
      * Write a byte array as hexadecimal String.
-     * 
+     *
      * @param bytes
      *            byte array
      * @return The hexadecimal String
@@ -108,8 +92,8 @@ public class Codec {
     }
 
     /**
-     * Transform an hexadecimal String to a byte array.
-     * 
+     * Transform a hexadecimal String to a byte array.
+     *
      * @param hexString
      *            Hexadecimal string to transform
      * @return The byte array
@@ -119,6 +103,25 @@ public class Codec {
             return Hex.decodeHex(hexString.toCharArray());
         } catch (DecoderException e) {
             throw new UnexpectedException(e);
+        }
+    }
+
+    /**
+     * Build a hexadecimal hash specified by {@code algorithm} for a given {@code value}.
+     *
+     * @param algorithm The hash name
+     * @param value     The String to hash
+     *
+     * @return A hexadecimal hash
+     */
+    private static String hashToHexString(String algorithm, String value) {
+        try {
+            return byteToHexString(
+                MessageDigest.getInstance(algorithm)
+                    .digest(value.getBytes(UTF_8))
+            );
+        } catch (NoSuchAlgorithmException ex) {
+            throw new UnexpectedException(ex);
         }
     }
 
