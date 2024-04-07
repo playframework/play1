@@ -157,7 +157,7 @@ public class ActionInvoker {
                         // Generate a cache key for this request
                         cacheKey = cacheFor.generator().getDeclaredConstructor().newInstance().generate(request);
                     }
-                    if(cacheKey != null && !"".equals(cacheKey)) {
+                    if(cacheKey != null && !cacheKey.isEmpty()) {
                     	actionResult = (Result) Cache.get(cacheKey);
                     }
                 }
@@ -169,7 +169,7 @@ public class ActionInvoker {
             } catch (Result result) {
                 actionResult = result;
                 // Cache it if needed
-                if (cacheKey != null && !"".equals(cacheKey)) {
+                if (cacheKey != null && !cacheKey.isEmpty()) {
                     Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                 }
             } catch (JavaExecutionException e) {
