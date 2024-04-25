@@ -23,10 +23,10 @@ require:    &allDependencies
     - commons-codec 1.16.1
     - org.apache.commons -> commons-email 1.6.0
     - commons-fileupload 1.5
-    - commons-io 2.16.0
+    - commons-io 2.16.1
     - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
     - org.apache.commons -> commons-lang3 3.14.0
-    - org.apache.commons -> commons-text 1.11.0
+    - org.apache.commons -> commons-text 1.12.0
     - commons-logging 1.3.1
     - org.dom4j -> dom4j 2.1.4
     - com.h2database -> h2 1.4.200
@@ -49,14 +49,14 @@ require:    &allDependencies
     - oauth.signpost -> signpost-core 1.2.1.2
     - org.apache.geronimo.specs -> geronimo-servlet_2.5_spec 1.2
     - org.apache.ivy -> ivy 2.5.2
-    - org.bouncycastle -> bcprov-jdk18on 1.77
-    - org.bouncycastle -> bcpkix-jdk18on 1.77
+    - org.bouncycastle -> bcprov-jdk18on 1.78.1
+    - org.bouncycastle -> bcpkix-jdk18on 1.78.1
     - org.codehaus.groovy -> groovy 3.0.21
     - org.codehaus.groovy -> groovy-xml 3.0.21
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
     - org.eclipse.jdt -> ecj 3.33.0
     - org.hibernate -> hibernate-core 5.6.5.Final.patched
-    - net.bytebuddy -> byte-buddy 1.14.13
+    - net.bytebuddy -> byte-buddy 1.14.14
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
     - org.hibernate -> hibernate-validator 5.4.3.Final
@@ -72,7 +72,7 @@ require:    &allDependencies
     - org.javassist -> javassist 3.30.2-GA
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.7.3
-    - org.slf4j -> slf4j-api 2.0.12
+    - org.slf4j -> slf4j-api 2.0.13
     - org.apache.logging.log4j -> log4j-slf4j2-impl 2.23.1
     - org.yaml -> snakeyaml 2.2
     - net.spy -> spymemcached 2.12.3
