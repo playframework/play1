@@ -36,10 +36,10 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.Future;
 
 /**
@@ -103,7 +103,7 @@ public class ActionInvoker {
         Scope.Flash.current.set(Scope.Flash.restore());
         CachedBoundActionMethodArgs.init();
 
-        ControllersEnhancer.currentAction.set(new Stack<>());
+        ControllersEnhancer.currentAction.set(new ArrayDeque<>());
     }
 
     public static void invoke(Http.Request request, Http.Response response) {
