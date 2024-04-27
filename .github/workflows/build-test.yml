@@ -1,8 +1,11 @@
-name: Pull Requests
+name: Check
 
 on:
+  pull_request: # Check Pull Requests
+
   push:
-  pull_request:
+    branches:
+      - master # Check branch after merge
 
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
@@ -30,7 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up python 3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
           architecture: 'x64'
@@ -39,7 +42,7 @@ jobs:
       - run: pip install -r python/requirements.txt
 
       - name: Set up JDK ${{ matrix.jdk }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.jdk }}
           distribution: 'adopt'
@@ -61,13 +64,13 @@ jobs:
           fetch-depth: 0
 
       - name: Set up python 3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
           architecture: 'x64'
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'adopt'
