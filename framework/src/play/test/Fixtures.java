@@ -492,7 +492,7 @@ public class Fixtures {
      */
     static Map<String, String[]> serialize(Map<?, ?> entityProperties, String prefix) {
         if (entityProperties == null) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
 
         Map<String, String[]> serialized = new HashMap<>();

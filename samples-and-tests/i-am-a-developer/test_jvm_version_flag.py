@@ -33,7 +33,7 @@ class JvmVersionFlag(unittest.TestCase):
         play_app.java_cmd([])
 
         step('Assert getJavaVersion was not called')
-        self.assert_(not mock.called)
+        mock.assert_(not mock.called)
 
     @mock.patch('play.application.getJavaVersion', return_value='')
     def testWithoutFlag(self, mock):
@@ -43,7 +43,7 @@ class JvmVersionFlag(unittest.TestCase):
         play_app.java_cmd([])
 
         step('Assert getJavaVersion was called once')
-        self.assert_(mock.called)
+        mock.assert_(mock.called)
 
 
 if __name__ == '__main__':

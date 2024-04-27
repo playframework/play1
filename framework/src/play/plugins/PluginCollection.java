@@ -236,7 +236,7 @@ public class PluginCollection {
             // Is this plugin an application-supplied-plugin?
             if (isLoadedByApplicationClassloader(plugin)) {
                 // This plugin is application-supplied - Must reload it
-                Class pluginClazz = Play.classloader.loadClass(plugin.getClass().getName());
+                Class<?> pluginClazz = Play.classloader.loadClass(plugin.getClass().getName());
                 PlayPlugin newPlugin = (PlayPlugin) Injector.getBeanOfType(pluginClazz);
                 newPlugin.index = plugin.index;
                 // Replace this plugin
@@ -458,7 +458,7 @@ public class PluginCollection {
             Iterator<PlayPlugin> itr = pluginsWithFilters.iterator();
             PlayPlugin.Filter<T> ret = itr.next().getFilter();
             while (itr.hasNext()) {
-                ret = ret.<T> decorate(itr.next().getFilter());
+                ret = ret.decorate(itr.next().getFilter());
             }
             return F.Option.Some(ret);
         }

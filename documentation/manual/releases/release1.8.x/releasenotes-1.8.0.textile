@@ -1,0 +1,35 @@
+h1. Play 1.8.0 -- Release notes
+
+Play 1.8.0 has been released of the master branch.
+
+The changes in this release are listed in [1.8.0 on github](https://github.com/playframework/play1/issues?q=milestone%3A1.8.0+) including 22 resolved tickets.
+
+
+h2. What's new in Play 1.8.0
+
+* [#1428](https://github.com/playframework/play1/issues/1428): add support for java 18, 19.
+
+h2. What's fixed in Play 1.8.0
+
+* [#1407](https://github.com/playframework/play1/issues/1407): Cleanup code
+* [#1417](https://github.com/playframework/play1/issues/1417): Updated dependencies as of 20220618
+* [#1425](https://github.com/playframework/play1/issues/1425): Updated dependencies
+* [#1430](https://github.com/playframework/play1/issues/1430): NullPointer in JPABase.cascadeOrphans() caused by unused lines
+* [#1431](https://github.com/playframework/play1/issues/1431): Bugfix/1430 do not get unused value
+* [#1432](https://github.com/playframework/play1/issues/1432): Better compatibility with Hibernate Envers
+* [#1433](https://github.com/playframework/play1/issues/1433): about play 1.7.1 log problem
+* [#1437](https://github.com/playframework/play1/issues/1437): "play auto-test" can return a exit code zero when the tests don't run
+* [#1435](https://github.com/playframework/play1/issues/1435): #1437: play auto-test can return an exit code of zero when the teà
+* [#1438](https://github.com/playframework/play1/issues/1438): Upgrade Commons Lang
+* [#1440](https://github.com/playframework/play1/issues/1440): Fix warnings with generics
+* [#1441](https://github.com/playframework/play1/issues/1441): Dependency update 20230106
+* [#1444](https://github.com/playframework/play1/issues/1444): Fix missing HTTPMessage.getHeader()
+* [#1446](https://github.com/playframework/play1/issues/1446): Removed support for python 2.x in github action
+* [#1447](https://github.com/playframework/play1/issues/1447): [#1146] test(python): use python 3 for build instead of deprecated python2
+* [#1448](https://github.com/playframework/play1/issues/1448): Updated 3rd party dependencies
+* [#1459](https://github.com/playframework/play1/issues/1459): Updated 3rd party dependencies
+* [#1460](https://github.com/playframework/play1/issues/1460): Removed Python imp dependency
+* [#1465](https://github.com/playframework/play1/issues/1465): #1457 python imp module
+* [#1466](https://github.com/playframework/play1/issues/1466): Python AttributeError: module 'time' has no attribute 'clock'
+* [#1467](https://github.com/playframework/play1/issues/1467): #1466 The clock function was removed from time module in Python 3.8
+* [#1469](https://github.com/playframework/play1/issues/1469): feat(YamlParser): add SafeConstructor to enforce security
