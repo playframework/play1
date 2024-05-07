@@ -2,7 +2,6 @@ package play.classloading;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,13 +21,9 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Play;
@@ -221,12 +216,10 @@ public class ApplicationClassloader extends ClassLoader {
         if (is == null) {
             return null;
         }
-        try {
-            return IOUtils.toByteArray(is);
+        try (is) {
+            return is.readAllBytes();
         } catch (Exception e) {
             throw new UnexpectedException(e);
-        } finally {
-            closeQuietly(is);
         }
     }
 
@@ -238,7 +231,6 @@ public class ApplicationClassloader extends ClassLoader {
                 return res.inputstream();
             }
         }
-        URL url = getResource(name);
 
         return super.getResourceAsStream(name);
     }
@@ -293,19 +285,8 @@ public class ApplicationClassloader extends ClassLoader {
                 urls.add(next);
             }
         }
-        final Iterator<URL> it = urls.iterator();
-        return new Enumeration<URL>() {
 
-            @Override
-            public boolean hasMoreElements() {
-                return it.hasNext();
-            }
-
-            @Override
-            public URL nextElement() {
-                return it.next();
-            }
-        };
+        return Collections.enumeration(urls);
     }
 
     /**
@@ -452,7 +433,7 @@ public class ApplicationClassloader extends ClassLoader {
             for (ApplicationClass clazz : Play.classes.all()) {
                 byNormalizedName.put(clazz.name.toLowerCase(), clazz);
                 if (clazz.name.contains("$")) {
-                    byNormalizedName.put(StringUtils.replace(clazz.name.toLowerCase(), "$", "."), clazz);
+                    byNormalizedName.put(clazz.name.toLowerCase().replace('$', '.'), clazz);
                 }
             }
 

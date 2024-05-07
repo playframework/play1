@@ -66,8 +66,8 @@ public class Fixtures {
 
     public static void executeSQL(String sqlScript) {
         for (CharSequence sql : new SQLSplitter(sqlScript)) {
-            String s = sql.toString().trim();
-            if (s.length() > 0) {
+            String s = sql.toString().strip();
+            if (!s.isEmpty()) {
                 DB.execute(s);
             }
         }
