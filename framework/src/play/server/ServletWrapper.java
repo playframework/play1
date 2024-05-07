@@ -1,6 +1,5 @@
 package play.server;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -38,8 +37,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * Servlet implementation.
@@ -474,7 +471,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         // Content
 
         response.out.flush();
-        if (response.direct != null && response.direct instanceof File) {
+        if (response.direct instanceof File) {
             File file = (File) response.direct;
             servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
             if (!request.method.equals("HEAD")) {
@@ -482,7 +479,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             } else {
                 copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
             }
-        } else if (response.direct != null && response.direct instanceof InputStream) {
+        } else if (response.direct instanceof InputStream) {
             copyStream(servletResponse, (InputStream) response.direct);
         } else {
             byte[] content = response.out.toByteArray();
@@ -498,12 +495,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     private void copyStream(HttpServletResponse servletResponse, InputStream is) throws IOException {        
         if (servletResponse != null && is != null) {
-            try {
+            try (is) {
                 OutputStream os = servletResponse.getOutputStream();
-                IOUtils.copyLarge(is, os);
+                is.transferTo(os);
                 os.flush();
-            } finally {
-                closeQuietly(is);
             }
         }
     }
@@ -547,7 +542,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 super.run();
             } catch (Exception e) {
                 serve500(e, httpServletRequest, httpServletResponse);
-                return;
             }
         }
 
