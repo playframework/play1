@@ -119,7 +119,7 @@ public class Validation {
      */
     public static boolean hasErrors() {
         Validation validation = current.get();
-        return validation != null && validation.errors.size() > 0;
+        return validation != null && !validation.errors.isEmpty();
     }
 
     /**
