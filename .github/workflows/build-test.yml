@@ -18,11 +18,8 @@ jobs:
 
     strategy:
       matrix:
-        jdk: [ 11, 17 ]
+        jdk: [ 17, 21 ]
         os: [ubuntu-latest, windows-latest]
-        exclude:
-          - os: windows-latest
-            jdk: 11
 
     name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ matrix.os }}
     steps:
@@ -69,10 +66,10 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 21
           distribution: 'adopt'
 
       - name: Build with Ant

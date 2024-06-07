@@ -64,7 +64,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="11" target="11">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="17" target="17">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -233,7 +233,7 @@
     <!-- Tests -->
 
     <target name="compile-tests" depends="compile">
-        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"  destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="11" target="11">
+        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"  destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="17" target="17">
             <include name="**/*.java"/>
         </javac>
     </target>
@@ -376,7 +376,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="11" target="11">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="17" target="17">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">

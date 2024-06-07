@@ -34,17 +34,19 @@ import play.exceptions.UnexpectedException;
  */
 public class ApplicationCompiler {
 
-    private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
-    static final Map<String, String> compatibleJavaVersions = Map.of(
-        "11", CompilerOptions.VERSION_11,
-        "12", CompilerOptions.VERSION_12,
-        "13", CompilerOptions.VERSION_13,
-        "14", CompilerOptions.VERSION_14,
-        "15", CompilerOptions.VERSION_15,
-        "16", CompilerOptions.VERSION_16,
-        "17", CompilerOptions.VERSION_17,
-        "18", CompilerOptions.VERSION_18,
-        "19", CompilerOptions.VERSION_19
+    private static final String JAVA_SOURCE_DEFAULT_VERSION = "17";
+    static final Map<String, String> compatibleJavaVersions = Map.ofEntries(
+        Map.entry("11", CompilerOptions.VERSION_11),
+        Map.entry("12", CompilerOptions.VERSION_12),
+        Map.entry("13", CompilerOptions.VERSION_13),
+        Map.entry("14", CompilerOptions.VERSION_14),
+        Map.entry("15", CompilerOptions.VERSION_15),
+        Map.entry("16", CompilerOptions.VERSION_16),
+        Map.entry("17", CompilerOptions.VERSION_17),
+        Map.entry("18", CompilerOptions.VERSION_18),
+        Map.entry("19", CompilerOptions.VERSION_19),
+        Map.entry("20", CompilerOptions.VERSION_20),
+        Map.entry("21", CompilerOptions.VERSION_21)
     );
 
     final Map<String, Boolean> packagesCache = new HashMap<>();

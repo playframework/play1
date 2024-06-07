@@ -32,6 +32,12 @@ jobs:
         language: [ 'java-kotlin', 'javascript-typescript', 'python' ]
 
     steps:
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: 17
+        distribution: 'adopt'
+
     - name: Checkout repository
       uses: actions/checkout@v4
 

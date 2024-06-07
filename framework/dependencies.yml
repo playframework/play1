@@ -51,8 +51,8 @@ require:    &allDependencies
     - org.bouncycastle -> bcutil-jdk18on 1.77
     - org.codehaus.groovy -> groovy 3.0.20
     - org.codehaus.groovy -> groovy-xml 3.0.20
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
-    - org.eclipse.jdt -> ecj 3.33.0
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.36.0
+    - org.eclipse.jdt -> ecj 3.36.0
     - net.bytebuddy -> byte-buddy 1.14.12
     - io.smallrye -> jandex 3.1.6
     - org.jboss.logging -> jboss-logging 3.5.3.Final
