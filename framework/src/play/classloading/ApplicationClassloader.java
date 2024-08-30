@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -488,7 +489,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     // assignable classes cache
-    private final Map<String, List<Class>> assignableClassesByName = new HashMap<>(100);
+    private final Map<String, List<Class>> assignableClassesByName = new ConcurrentHashMap<>(100);
 
     /**
      * Find a class in a case insensitive way
