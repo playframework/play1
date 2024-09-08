@@ -41,7 +41,7 @@
     <target name="compile" depends="check">
         <mkdir dir="lib" />
         <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes" source="1.8" target="1.8" debug="true">
+        <javac srcdir="src" destdir="tmp/classes" source="11" target="11" debug="true">
             <classpath refid="project.classpath" />
         </javac>
     </target>
