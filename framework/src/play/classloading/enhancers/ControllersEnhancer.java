@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Stack;
+import java.util.Deque;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtField;
@@ -24,7 +24,7 @@ import play.exceptions.UnexpectedException;
  */
 public class ControllersEnhancer extends Enhancer {
 
-    public static final ThreadLocal<Stack<String>> currentAction = new ThreadLocal<>();
+    public static final ThreadLocal<Deque<String>> currentAction = new ThreadLocal<>();
 
     @Override
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {

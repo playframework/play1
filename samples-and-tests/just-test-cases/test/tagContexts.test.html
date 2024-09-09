@@ -2,7 +2,7 @@
 
 	open('@{Application.tagContexts()}')
 	assertTextNotPresent('Yop')
-	assertTextPresent('[ROOT{_executeNextElse=false}, list{_executeNextElse=true}, if{}, ifnot{}, verbatim{_executeNextElse=true}, else{}]')
+	assertTextPresent('[else{}, verbatim{_executeNextElse=true}, ifnot{}, if{}, list{_executeNextElse=true}, ROOT{_executeNextElse=false}]')
 
     assertTextPresent('Hello World')
     assertTextPresent('Hello Bab')

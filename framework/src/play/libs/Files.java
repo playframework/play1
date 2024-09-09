@@ -9,13 +9,11 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import play.Logger;
 import play.exceptions.UnexpectedException;
@@ -74,7 +72,7 @@ public class Files {
         }
 
         try {
-            FileUtils.copyFile(from, to);
+            java.nio.file.Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -118,9 +116,9 @@ public class Files {
 
     public static boolean copyDir(File from, File to) {
         try {
-            FileUtils.copyDirectory(from, to);
+            IO.copyDirectory(from, to);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -221,7 +219,7 @@ public class Files {
                     String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
                     ZipEntry anEntry = new ZipEntry(path);
                     zos.putNextEntry(anEntry);
-                    IOUtils.copyLarge(fis, zos);
+                    fis.transferTo(zos);
                 }
             }
         }
