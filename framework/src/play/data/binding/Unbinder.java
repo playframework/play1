@@ -2,12 +2,17 @@ package play.data.binding;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import play.Logger;
 import play.Play;
+import play.exceptions.UnexpectedException;
 import play.libs.I18N;
 
 /**
@@ -150,7 +155,24 @@ public class Unbinder {
             result.putAll(r);
             return;
         }
-        
+
+        // application custom types have higher priority. If unable to bind proceed with the next one
+        for (Class<TypeUnbinder<?>> c : Play.classloader.getAssignableClasses(TypeUnbinder.class)) {
+            if (c.isAnnotationPresent(Global.class)) {
+                Class<?> forType = (Class<?>) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
+                if (forType.isAssignableFrom(srcClazz)) {
+                    try {
+                        boolean _r = createNewInstance(c).unBind(result, src, srcClazz, name, annotations);
+                        if (_r) {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        // ...
+                    }
+                }
+            }
+        }
+
         if (isDirect(srcClazz) || src == null) {
             directUnbind(result, src, srcClazz, name, annotations);           
         }else if (src.getClass().isArray()) {
@@ -198,5 +220,19 @@ public class Unbinder {
 
     public static boolean isDirect(Class<?> clazz) {
         return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.isPrimitive() || clazz.equals(Class.class);
+    }
+
+    private static <T> T createNewInstance(Class<T> clazz) {
+        try {
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            Logger.warn("Failed to create instance of %s: %s", clazz.getName(), e);
+            throw new UnexpectedException(e);
+        } catch (NoSuchMethodException | InvocationTargetException e) {
+            Logger.error("Failed to create instance of %s: %s", clazz.getName(), e);
+            throw new UnexpectedException(e);
+        }
     }
 }
