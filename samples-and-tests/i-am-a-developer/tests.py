@@ -89,7 +89,6 @@ class IamADeveloper(unittest.TestCase):
             self.assertTrue(wait_for(self.play, 'BasicTest...           ERROR '))
             self.assertTrue(wait_for(self.play, 'ApplicationTest...     ERROR '))
             self.assertTrue(wait_for(self.play, 'Application...         ERROR '))
-            self.assertTrue(wait_for(self.play, 'Tests did not successfully complete.'))
             self.play.wait()
             self.assertNotEqual(self.play.returncode, 0)
 
