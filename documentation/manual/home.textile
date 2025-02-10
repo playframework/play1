@@ -189,6 +189,7 @@ h2. <a name="versionnotes">Version notes</a>
 New versions of Play include certain changes. Check older release notes for:
 
 # "About Play releases":releases/releases
+# "Play 1.8.0":releases/release1.8.x/releasenotes-1.8.0
 # "Play 1.7.1":releases/release1.7.x/releasenotes-1.7.1
 # "Play 1.7.0":releases/release1.7.x/releasenotes-1.7.0
 # "Play 1.6.0":releases/release1.6.x/releasenotes-1.6.0

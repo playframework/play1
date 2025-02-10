@@ -47,7 +47,7 @@ public class Logger {
     /**
      * When using java.util.logging.
      */
-    public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
+    public static final java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
     /**
      * true if logger is configured manually (log4j-config file supplied by application)
      */

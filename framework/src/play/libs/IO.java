@@ -1,17 +1,23 @@
 package play.libs;
 
+import static java.nio.charset.Charset.defaultCharset;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.apache.commons.io.Charsets.toCharset;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import play.exceptions.UnexpectedException;
@@ -77,7 +83,11 @@ public class IO {
      * @return The String content
      */
     public static String readContentAsString(File file) {
-        return readContentAsString(file, "utf-8");
+        try {
+            return Files.readString(file.toPath(), UTF_8);
+        } catch (IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
@@ -91,32 +101,34 @@ public class IO {
      */
     public static String readContentAsString(File file, String encoding) {
         try {
-            return FileUtils.readFileToString(file, encoding);
+            return Files.readString(file.toPath(), toCharset(encoding));
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
     }
 
     public static List<String> readLines(InputStream is) {
-        List<String> lines = null;
         try {
-            lines = IOUtils.readLines(is);
-        } catch (IOException ex) {
+            return IOUtils.readLines(is, defaultCharset());
+        } catch (UncheckedIOException ex) {
             throw new UnexpectedException(ex);
         }
-        return lines;
     }
 
     public static List<String> readLines(File file, String encoding) {
         try {
-            return FileUtils.readLines(file, encoding);
+            return Files.readAllLines(file.toPath(), toCharset(encoding));
         } catch (IOException ex) {
             throw new UnexpectedException(ex);
         }
     }
 
     public static List<String> readLines(File file) {
-        return readLines(file, "utf-8");
+        try {
+            return Files.readAllLines(file.toPath(), UTF_8);
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
+        }
     }
 
     /**
@@ -128,7 +140,7 @@ public class IO {
      */
     public static byte[] readContent(File file) {
         try {
-            return FileUtils.readFileToByteArray(file);
+            return Files.readAllBytes(file.toPath());
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
@@ -158,7 +170,13 @@ public class IO {
      *            The stream to write
      */
     public static void writeContent(CharSequence content, OutputStream os) {
-        writeContent(content, os, "utf-8");
+        try {
+            IOUtils.write(content, os, UTF_8);
+        } catch (IOException e) {
+            throw new UnexpectedException(e);
+        } finally {
+            closeQuietly(os);
+        }
     }
 
     /**
@@ -190,7 +208,11 @@ public class IO {
      *            The file to write
      */
     public static void writeContent(CharSequence content, File file) {
-        writeContent(content, file, "utf-8");
+        try {
+            Files.writeString(file.toPath(), content, UTF_8);
+        } catch (IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
@@ -205,7 +227,7 @@ public class IO {
      */
     public static void writeContent(CharSequence content, File file, String encoding) {
         try {
-            FileUtils.write(file, content, encoding);
+            Files.writeString(file.toPath(), content, toCharset(encoding));
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
@@ -221,14 +243,14 @@ public class IO {
      */
     public static void write(byte[] data, File file) {
         try {
-            FileUtils.writeByteArrayToFile(file, data);
+            Files.write(file.toPath(), data);
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
     }
 
     /**
-     * Copy an stream to another one.
+     * Copy a stream to another one. By the end of the method the input stream {@code is} will be closed.
      * 
      * @param is
      *            The source stream
@@ -237,7 +259,7 @@ public class IO {
      */
     public static void copy(InputStream is, OutputStream os) {
         try {
-            IOUtils.copyLarge(is, os);
+            is.transferTo(os);
         } catch (IOException e) {
             throw new UnexpectedException(e);
         } finally {
@@ -246,7 +268,7 @@ public class IO {
     }
 
     /**
-     * Copy an stream to another one.
+     * Copy a stream to another one. By the end of the method both of streams {@code is} and {@code os} will be closed.
      * 
      * @param is
      *            The source stream
@@ -255,7 +277,7 @@ public class IO {
      */
     public static void write(InputStream is, OutputStream os) {
         try {
-            IOUtils.copyLarge(is, os);
+            is.transferTo(os);
         } catch (IOException e) {
             throw new UnexpectedException(e);
         } finally {
@@ -276,7 +298,7 @@ public class IO {
         try {
             OutputStream os = new FileOutputStream(f);
             try {
-                IOUtils.copyLarge(is, os);
+                is.transferTo(os);
             } finally {
                 closeQuietly(is);
                 closeQuietly(os);
@@ -288,19 +310,16 @@ public class IO {
 
     // If targetLocation does not exist, it will be created.
     public static void copyDirectory(File source, File target) {
-        if (source.isDirectory()) {
-            if (!target.exists()) {
-                target.mkdir();
-            }
-            for (String child : source.list()) {
-                copyDirectory(new File(source, child), new File(target, child));
-            }
-        } else {
-            try {
-                write(new FileInputStream(source), new FileOutputStream(target));
-            } catch (IOException e) {
-                throw new UnexpectedException(e);
-            }
+        try (Stream<Path> dirs = Files.walk(source.toPath())) {
+            dirs.forEach(src -> {
+                try {
+                    Files.copy(source.toPath(), target.toPath(), REPLACE_EXISTING);
+                } catch (IOException e) {
+                    throw new UnexpectedException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new UnexpectedException(e);
         }
     }
 

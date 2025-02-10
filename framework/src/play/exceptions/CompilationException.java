@@ -9,7 +9,7 @@ import play.vfs.VirtualFile;
  */
 public class CompilationException extends PlayException implements SourceAttachment {
 
-    private String problem;
+    private final String problem;
     private VirtualFile source;
     private Integer line;
     private Integer start;

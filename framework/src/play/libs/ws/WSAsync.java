@@ -15,7 +15,7 @@ import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
@@ -738,9 +738,9 @@ public class WSAsync implements WSImpl {
             return request;
         }
 
-        public class WSRequestAdapter implements HttpRequest {
+        public static class WSRequestAdapter implements HttpRequest {
 
-            private WSRequest request;
+            private final WSRequest request;
             private String method;
 
             public WSRequestAdapter(WSRequest request) {

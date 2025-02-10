@@ -234,7 +234,7 @@
     <!-- Tests -->
 
     <target name="compile-tests" depends="compile">
-        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"  destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="1.8" target="1.8">
+        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"  destdir="classes" classpathref="project.classpath" srcdir="tests/src" source="11" target="11">
             <include name="**/*.java"/>
         </javac>
     </target>

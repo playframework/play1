@@ -30,7 +30,7 @@ import play.libs.IO;
  */
 public class VirtualFile {
 
-    File realFile;
+    final File realFile;
 
     VirtualFile(File file) {
         this.realFile = file;

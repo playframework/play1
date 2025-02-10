@@ -6,7 +6,7 @@ import com.google.gson.JsonPrimitive;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Invoker;
 import play.Logger;
 import play.Play;

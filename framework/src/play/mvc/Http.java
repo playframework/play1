@@ -268,7 +268,7 @@ public class Http {
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap<>(16);
+        public final Map<String, Object> args = new HashMap<>(16);
         /**
          * When the request has been received
          */
@@ -576,7 +576,7 @@ public class Http {
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, (lang1, lang2) -> {
+            languages.sort((lang1, lang2) -> {
                 double q1 = 1.0;
                 double q2 = 1.0;
                 Matcher m1 = qpattern.matcher(lang1);
@@ -621,11 +621,11 @@ public class Http {
         /**
          * Response headers
          */
-        public Map<String, Http.Header> headers = new HashMap<>(16);
+        public final Map<String, Http.Header> headers = new HashMap<>(16);
         /**
          * Response cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<>(16);
+        public final Map<String, Http.Cookie> cookies = new HashMap<>(16);
         /**
          * Response body stream
          */

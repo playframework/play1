@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
 
@@ -139,7 +140,7 @@ public class Java {
      *             if problem occurred during invoking
      */
     public static Object invokeStatic(Class<?> clazz, String method, Object... args) throws Exception {
-        Class[] types = new Class[args.length];
+        Class<?>[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
         }
@@ -149,7 +150,7 @@ public class Java {
     }
 
     public static Object invokeStaticOrParent(Class<?> clazz, String method, Object... args) throws Exception {
-        Class[] types = new Class[args.length];
+        Class<?>[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
         }
@@ -174,7 +175,7 @@ public class Java {
     }
 
     public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
-        Class invokedClass = null;
+        Class<?> invokedClass = null;
         List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
         if (assignableClasses.size() == 0) {
             invokedClass = clazz;
@@ -233,7 +234,7 @@ public class Java {
         sig.append(".");
         sig.append(method.getName());
         sig.append('(');
-        for (Class clazz : method.getParameterTypes()) {
+        for (Class<?> clazz : method.getParameterTypes()) {
             sig.append(rawJavaType(clazz));
         }
         sig.append(")");
@@ -241,7 +242,7 @@ public class Java {
         return sig.toString();
     }
 
-    public static String rawJavaType(Class clazz) {
+    public static String rawJavaType(Class<?> clazz) {
         if (clazz.getName().equals("void")) {
             return "V";
         }
@@ -297,26 +298,26 @@ public class Java {
      *            The annotation class
      * @return A list of method object
      */
-    public static List<Method> findAllAnnotatedMethods(List<Class> classes, Class<? extends Annotation> annotationType) {
+    public static List<Method> findAllAnnotatedMethods(List<Class<?>> classes, Class<? extends Annotation> annotationType) {
         List<Method> methods = new ArrayList<>();
-        for (Class clazz : classes) {
+        for (Class<?> clazz : classes) {
             methods.addAll(findAllAnnotatedMethods(clazz, annotationType));
         }
         return methods;
     }
 
-    public static void findAllFields(Class clazz, Set<Field> found) {
+    public static void findAllFields(Class<?> clazz, Set<Field> found) {
         Field[] fields = clazz.getDeclaredFields();
         addAll(found, fields);
 
-        Class sClazz = clazz.getSuperclass();
+        Class<?> sClazz = clazz.getSuperclass();
         if (sClazz != null && sClazz != Object.class) {
             findAllFields(sClazz, found);
         }
     }
 
     /** cache */
-    private static Map<Field, FieldWrapper> wrappers = new HashMap<>();
+    private static final Map<Field, FieldWrapper> wrappers = new HashMap<>();
 
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {
@@ -473,12 +474,7 @@ class JavaWithCaching {
 
             ClassAndAnnotation that = (ClassAndAnnotation) o;
 
-            if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null)
-                return false;
-            if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null)
-                return false;
-
-            return true;
+            return Objects.equals(annotation, that.annotation) && Objects.equals(clazz, that.clazz);
         }
 
         @Override
@@ -543,7 +539,7 @@ class JavaWithCaching {
     private void sortByPriority(List<Method> methods, final Class<? extends Annotation> annotationType) {
         try {
             final Method priority = annotationType.getMethod("priority");
-            sort(methods, (m1, m2) -> {
+            methods.sort((m1, m2) -> {
                 try {
                     Integer priority1 = (Integer) priority.invoke(m1.getAnnotation(annotationType));
                     Integer priority2 = (Integer) priority.invoke(m2.getAnnotation(annotationType));
@@ -583,7 +579,7 @@ class JavaWithCaching {
                     }
                 }
                 if (clazz.isAnnotationPresent(With.class)) {
-                    for (Class withClass : clazz.getAnnotation(With.class).value()) {
+                    for (Class<?> withClass : clazz.getAnnotation(With.class).value()) {
                         methods.addAll(findAllAnnotatedMethods(withClass));
                     }
                 }

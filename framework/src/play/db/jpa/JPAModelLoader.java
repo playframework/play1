@@ -36,8 +36,8 @@ import play.exceptions.UnexpectedException;
 
 public class JPAModelLoader implements Model.Factory {
 
-    private String dbName;
-    private Class<? extends Model> clazz;
+    private final String dbName;
+    private final Class<? extends Model> clazz;
     private Map<String, Model.Property> properties;
 
     public JPAModelLoader(Class<? extends Model> clazz) {

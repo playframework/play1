@@ -18,8 +18,8 @@ import play.mvc.Scope.Params;
  */
 public class OAuth {
 
-    private ServiceInfo info;
-    private OAuthProvider provider;
+    private final ServiceInfo info;
+    private final OAuthProvider provider;
 
     private OAuth(ServiceInfo info) {
         this.info = info;
@@ -139,11 +139,11 @@ public class OAuth {
      *
      */
     public static class ServiceInfo {
-        public String requestTokenURL;
-        public String accessTokenURL;
-        public String authorizationURL;
-        public String consumerKey;
-        public String consumerSecret;
+        public final String requestTokenURL;
+        public final String accessTokenURL;
+        public final String authorizationURL;
+        public final String consumerKey;
+        public final String consumerSecret;
 
         public ServiceInfo(String requestTokenURL, String accessTokenURL, String authorizationURL, String consumerKey,
                 String consumerSecret) {
@@ -229,8 +229,8 @@ public class OAuth {
 
     @Deprecated
     public static class TokenPair {
-        public String token;
-        public String secret;
+        public final String token;
+        public final String secret;
 
         public TokenPair(String token, String secret) {
             this.token = token;

@@ -1,0 +1,41 @@
+name-template: 'Play $NEXT_MINOR_VERSION'
+tag-template: '$NEXT_MINOR_VERSION'
+template: |
+  # :mega: Play $NEXT_MINOR_VERSION Released
+  
+  The Play Team is proud to announce the release of Play $NEXT_MINOR_VERSION. This release adds many new features and continues our efforts to make Play more modular, flexible, and secure. Play $NEXT_MINOR_VERSION is the result of more than **X months** of relentless work from our fantastic community, comprehending **more than a thousand (TODO?) changes** made from **X contributors**.
+  
+  ## :green_book: What is new?
+  
+  The highlights in Play $NEXT_MINOR_VERSION include, but are not limited by:
+   
+  To get started with Play, follow the instructions in our [Getting Started page](https://www.playframework.com/documentation/1.5.x/home#started). 
+
+  ## Full Changelog
+  
+  Following pull requests got merged for this release:
+  <details>
+    <summary>Following pull requests got merged for this release (click to expand)</summary>
+  
+    $CHANGES
+  </details>
+  
+  For more details see the [full list of changes](https://github.com/playframework/play1/compare/$PREVIOUS_TAG...$NEXT_MINOR_VERSION/) and the [$NEXT_MINOR_VERSION milestone](https://github.com/playframework/play1/issues?page=1&q=milestone%3A%22$NEXT_MINOR_VERSION%22).
+
+  ## :bow: Thanks to our contributors
+
+  Finally, thanks to the community for their help with detailed bug reports, discussions about new features and pull request reviews. This project is only possible due to the help we had from amazing contributors.
+  Special thanks to all code contributors who helped with this particular release (they are listed below)!
+
+
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'refactoring'
+  - title: '🐛 Bug Fixes'
+    label: 'bug'
+  - title: 📦 Dependency updates
+    label: 'dependencies'
+  - title: 📖 Documentation
+    label: 'documentation'

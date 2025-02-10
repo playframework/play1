@@ -133,7 +133,7 @@ public class JdbcResultFactories {
                 int count = meta.getColumnCount();
                 for (int i = 1; i <= count; i++) {
                     String label = meta.getColumnLabel(i);
-                    if (label.length()>0) fields.add(label);
+                    if (!label.isEmpty()) fields.add(label);
                 }
             }
         }

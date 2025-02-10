@@ -148,12 +148,20 @@ def autotest(app, args):
         opener.open('%s://localhost:%s/@kill' % (protocol, http_port))
     except Exception as e:
         pass
- 
+
+    testCompleted = False
     if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
+        testCompleted = True
         print("~ All tests passed")
         print("~")
         testspassed = True
     if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
+        testCompleted = True
         print("~ Some tests have failed. See file://%s for results" % test_result)
         print("~")
         sys.exit(1)
+
+    if not testCompleted:
+        print("~ Tests did not successfully complete.")
+        print("~")
+        sys.exit(-1)

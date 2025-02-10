@@ -2,7 +2,7 @@ package play.modules.docviewer;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.Play;
 import play.libs.IO;
 import play.templates.Template;

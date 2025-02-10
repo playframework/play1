@@ -12,7 +12,7 @@ import zipfile
 import urllib.request, urllib.error, urllib.parse
 import shutil
 import string
-import imp
+import importlib.util
 import time
 import urllib.request, urllib.parse, urllib.error
 import yaml
@@ -40,8 +40,16 @@ DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7
 
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
-    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    module_path = os.path.join(base, 'framework/pym', name, '__init__.py')
+    
+    spec = importlib.util.spec_from_file_location(name, module_path)
+    if spec is None:
+        raise ImportError(f"Could not find module \"{name}\" at \"{module_path}\"")
+    
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    
+    return mod
 
 json = load_module('simplejson')
 
@@ -93,7 +101,7 @@ class Downloader(object):
 
     def retrieve(self, url, destination, callback=None):
         self.size = 0
-        time.clock()   
+        time.perf_counter()
         try:
           headers={'User-Agent':DEFAULT_USER_AGENT,
                   'Accept': 'application/json'
@@ -117,7 +125,7 @@ class Downloader(object):
         return self.size
 
     def chunk_read(self, response, destination, chunk_size=8192, report_hook=None):
-        total_size = response.info().getheader('Content-Length').strip()
+        total_size = response.headers['Content-Length'].strip()
         total_size = int(total_size)
         bytes_so_far = 0
         file = open(destination,"wb")
@@ -154,7 +162,7 @@ class Downloader(object):
             done = 100
         bar = self.bar(bytes_so_far, filesize, done)
         if not self.cycles % 3 and bits != filesize:
-            now = time.clock()
+            now = time.perf_counter()
             elapsed = now-self.before
             if elapsed:
                 speed = self.kibi(blocksize * 3 // elapsed)
@@ -320,7 +328,7 @@ def build(app, args, env):
     if os.path.exists(deps_file):
         f = open(deps_file)
         try:
-            deps = yaml.load(f.read())
+            deps = yaml.safe_load(f.read())
             if 'self' in deps:
                splitted = deps["self"].split(" -> ")
                if len(splitted) == 2:
@@ -346,7 +354,7 @@ def build(app, args, env):
 
     if os.path.exists(deps_file):
         f = open(deps_file)
-        deps = yaml.load(f.read())
+        deps = yaml.safe_load(f.read())
         if 'self' in deps:
            splitted = deps["self"].split(" -> ")
            f.close()

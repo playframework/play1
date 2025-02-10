@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.NullObject;
 
 import play.cache.Cache;
@@ -414,8 +414,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<>();
-            newArgs.putAll(template.getBinding().getVariables());
+            Map<String, Object> newArgs = new HashMap<>(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.internalRender(newArgs);
         } catch (TemplateNotFoundException e) {
@@ -441,8 +440,7 @@ public class FastTags {
             }
             args.remove("arg");
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
-            Map<String, Object> newArgs = new HashMap<>();
-            newArgs.putAll((Map<? extends String, ? extends Object>) args);
+            Map<String, Object> newArgs = new HashMap<>((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
             newArgs.put("out", out);
             t.internalRender(newArgs);

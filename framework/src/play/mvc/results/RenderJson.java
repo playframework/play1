@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
@@ -47,11 +48,7 @@ public class RenderJson extends Result {
 
     public RenderJson(Object response, Gson gson) {
         this.response = response;
-        if (gson != null) {
-            json = gson.toJson(response);
-        } else {
-            json = GSON.toJson(response);
-        }
+        json = Objects.requireNonNullElse(gson, GSON).toJson(response);
     }
 
     @Override

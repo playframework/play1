@@ -15,7 +15,7 @@ import java.util.List;
 
 public class PlayConflictManager extends AbstractConflictManager {
 
-    public LatestConflictManager delegate = new LatestConflictManager(new LatestRevisionStrategy());
+    public final LatestConflictManager delegate = new LatestConflictManager(new LatestRevisionStrategy());
 
     @Override
     public Collection<IvyNode> resolveConflicts(IvyNode in, Collection conflictsUntyped) {
