@@ -65,7 +65,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="11" target="11">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="17" target="17">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -429,12 +429,11 @@
         </zip>
     </target>
 
-    <target name="package-heroku" depends="clean,version,jar,javadoc">
+    <target name="package-heroku" depends="artifact">
         <mkdir dir="dist" />
         <tar destfile="dist/play-${version}.tar.gz" compression="gzip">
-            <tarfileset prefix=".play" dir=".." includes="**/*" excludes="**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />
-            <tarfileset prefix=".play" dir=".." includes="play" filemode="777" />
-            <tarfileset prefix=".play" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
+            <zipfileset prefix="play-${version}" dir="dist/play-${version}" includes="**/*" excludes="play" />
+            <zipfileset prefix="play-${version}" dir="dist/play-${version}" includes="play" filemode="777" />
         </tar>
     </target>
 
