@@ -52,6 +52,7 @@ def deps = new Yaml().load(file("dependencies.yml").text)
 
 
 repositories {
+    mavenCentral()
     maven {
         name "NostoCentral"
         url "https://repo.nos.to/content/repositories/central/"
