@@ -46,14 +46,14 @@ require:    &allDependencies
     - oauth.signpost -> signpost-core 1.2.1.2
     - javax.servlet -> javax.servlet-api 3.0.1
     - org.apache.ivy -> ivy 2.5.2
-    - org.bouncycastle -> bcprov-jdk18on 1.77
-    - org.bouncycastle -> bcpkix-jdk18on 1.77
-    - org.bouncycastle -> bcutil-jdk18on 1.77
+    - org.bouncycastle -> bcprov-jdk18on 1.78.1
+    - org.bouncycastle -> bcpkix-jdk18on 1.78.1
+    - org.bouncycastle -> bcutil-jdk18on 1.78.1
     - org.codehaus.groovy -> groovy 3.0.20
     - org.codehaus.groovy -> groovy-xml 3.0.20
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.36.0
     - org.eclipse.jdt -> ecj 3.36.0
-    - net.bytebuddy -> byte-buddy 1.14.12
+    - net.bytebuddy -> byte-buddy 1.14.19
     - io.smallrye -> jandex 3.1.6
     - org.jboss.logging -> jboss-logging 3.5.3.Final
     - org.jboss.spec.javax.transaction -> jboss-transaction-api_1.2_spec 1.1.1.Final
@@ -69,7 +69,7 @@ require:    &allDependencies
     - org.apache.logging.log4j -> log4j-slf4j2-impl 2.23.0
     - org.yaml -> snakeyaml 2.2
     - net.spy -> spymemcached 2.12.3
-    - com.thoughtworks.xstream -> xstream 1.4.20
+    - com.thoughtworks.xstream -> xstream 1.4.21
     - xmlpull 1.1.3.4d_b4_min
 
 
@@ -87,7 +87,7 @@ repositories:
         type:       local
         artifact:   "${play.path}/framework/lib/[artifact]-[revision].jar"
         contains:   *allDependencies
-        
+
     - playCoreCrud:
         type:       local
         artifact:   "${play.path}/modules/crud"
@@ -99,16 +99,16 @@ repositories:
         artifact:   "${play.path}/modules/secure"
         contains:
             - play -> secure $version
-            
+
     - playCoreDocviewer:
         type:       local
         artifact:   "${play.path}/modules/docviewer"
         contains:
             - play -> docviewer $version
 
-    - playModules:  
+    - playModules:
         type:       chain
-        using:            
+        using:
             - playLocalModules:
                 type:       local
                 descriptor: "${play.path}/modules/[module]-[revision]/conf/dependencies.yml"
@@ -118,7 +118,7 @@ repositories:
                 type:       http
                 descriptor: "https://www.playframework.com/modules/repo/[module]/[revision]/dependencies.yml"
                 artifact:   "https://www.playframework.com/modules/[module]-[revision].zip"
-                
+
         contains:
             - play -> *
 
