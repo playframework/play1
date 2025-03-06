@@ -194,7 +194,6 @@ publishing {
         }
     }
     repositories {
-        mavenLocal()
         maven {
             name "NostoDependencies"
             url 'https://repo.nos.to/content/repositories/NostoDependencies/'
