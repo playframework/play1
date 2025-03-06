@@ -52,8 +52,8 @@ def deps = new Yaml().load(file("dependencies.yml").text)
 
 
 repositories {
-    mavenLocal()
     maven {
+        name "NostoCentral"
         url "https://repo.nos.to/content/repositories/central/"
         credentials {
             username = "$mavenUser"
@@ -61,6 +61,7 @@ repositories {
         }
     }
     maven {
+        name "NostoDependencies"
         url 'https://repo.nos.to/content/repositories/NostoDependencies/'
         credentials {
             username "$mavenUser"
@@ -193,7 +194,7 @@ publishing {
     }
     repositories {
         maven {
-            name = "nosto"
+            name "NostoDependencies"
             url 'https://repo.nos.to/content/repositories/NostoDependencies/'
             credentials {
                 username "$mavenUser"
