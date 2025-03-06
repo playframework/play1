@@ -193,6 +193,7 @@ publishing {
     }
     repositories {
         maven {
+            name = "nosto"
             url 'https://repo.nos.to/content/repositories/NostoDependencies/'
             credentials {
                 username "$mavenUser"
