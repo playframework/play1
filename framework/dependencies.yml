@@ -123,5 +123,5 @@ repositories:
             - play -> *
 
     - mavenCentral:
-          type:           iBiblio
+        type:           iBiblio
 
