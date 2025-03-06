@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.jdk }}
-          distribution: 'corretto'
+          distribution: 'adopt'
 
       - name: Build with Ant
         working-directory: ./framework
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'corretto'
+          distribution: 'adopt'
 
       - name: Build with Ant
         working-directory: ./framework
