@@ -76,7 +76,8 @@ public class TemplateLoader {
                     templates.put(key, template);
                     return template;
                 } catch (Exception e) {
-                    Logger.warn(e, "Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
+                    // changing the log level to debug to avoid too much noise in the logs caused by skipping template compilation in webapp packaging
+                    Logger.debug(e, "Precompiled template %s not found, trying to load it dynamically...", file.relativePath());
                 }
             }
             BaseTemplate template = new GroovyTemplate(fileRelativePath, file.contentAsString());
