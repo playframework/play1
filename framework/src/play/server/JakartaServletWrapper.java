@@ -474,28 +474,36 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         }
 
         // Content
-
-        response.out.flush();
-        if (response.direct != null && response.direct instanceof File) {
-            File file = (File) response.direct;
-            servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
-            if (!request.method.equals("HEAD")) {
-                copyStream(servletResponse, VirtualFile.open(file).inputstream());
-            } else {
-                copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+        if (response.chunked) {
+            servletResponse.setHeader("Transfer-Encoding", "chunked");
+            // Actual chunk writing is handled by onWriteChunk.
+            // We might need to copy the stream if response.direct is an InputStream and chunked.
+            if (response.direct != null && response.direct instanceof InputStream) {
+                copyStream(servletResponse, (InputStream) response.direct);
             }
-        } else if (response.direct != null && response.direct instanceof InputStream) {
-            copyStream(servletResponse, (InputStream) response.direct);
+            // Ensure response.out is handled by onWriteChunk if needed by application logic for chunking.
         } else {
-            byte[] content = response.out.toByteArray();
-            servletResponse.setHeader("Content-Length", String.valueOf(content.length));
-            if (!request.method.equals("HEAD")) {
-                servletResponse.getOutputStream().write(content);
+            response.out.flush();
+            if (response.direct != null && response.direct instanceof File) {
+                File file = (File) response.direct;
+                servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
+                if (!request.method.equals("HEAD")) {
+                    copyStream(servletResponse, VirtualFile.open(file).inputstream());
+                } else {
+                    copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+                }
+            } else if (response.direct != null && response.direct instanceof InputStream) {
+                copyStream(servletResponse, (InputStream) response.direct);
             } else {
-                copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+                byte[] content = response.out.toByteArray();
+                servletResponse.setHeader("Content-Length", String.valueOf(content.length));
+                if (!request.method.equals("HEAD")) {
+                    servletResponse.getOutputStream().write(content);
+                } else {
+                    copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+                }
             }
         }
-
     }
 
     private void copyStream(HttpServletResponse servletResponse, InputStream is) throws IOException {        
@@ -555,8 +563,27 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
 
         @Override
         public void execute() throws Exception {
+            response.onWriteChunk(chunk -> writeChunk(chunk));
             ActionInvoker.invoke(request, response);
             copyResponse(request, response, httpServletRequest, httpServletResponse);
+
+        }
+
+        private void writeChunk(Object chunk) {
+            try {
+                    OutputStream out = httpServletResponse.getOutputStream();
+                    byte[] bytes;
+                    if (chunk instanceof byte[]) {
+                        bytes = (byte[]) chunk;
+                    } else {
+                        String message = chunk == null ? "" : chunk.toString();
+                        bytes = message.getBytes(response.encoding);
+                    }
+                    out.write(bytes);
+                    out.flush();
+            } catch (Exception e) {
+                throw new UnexpectedException(e);
+            }
         }
 
         @Override
