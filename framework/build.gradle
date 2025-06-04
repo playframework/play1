@@ -21,7 +21,7 @@ plugins {
 }
 
 group 'com.nosto.play'
-version '1.8.0-nosto-GA-7'
+version '1.8.0-nosto-GA-8'
 
 java {
     withSourcesJar()

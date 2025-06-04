@@ -71,7 +71,19 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
     
     
     private static final String X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
-    
+
+    private static final List<String> CLIENT_DISCONNECT_MESSAGES = List.of(
+            "broken pipe",
+            "connection reset by peer",
+            "connection reset",
+            "software caused connection abort",
+            "premature eof",
+            "stream closed",
+            "socket closed",
+            "reset by peer",
+            "connection aborted"
+    );
+
     /**
      * Define allowed methods that will be handled when defined in X-HTTP-Method-Override
      * You can define allowed method in
@@ -340,8 +352,53 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         return cookies;
     }
 
+    // Add a static helper for writing bytes to the response stream with client disconnect handling
+    private static void writeToResponseStream(HttpServletResponse servletResponse, byte[] bytes) throws IOException {
+        OutputStream os = null;
+        try {
+            os = servletResponse.getOutputStream();
+            os.write(bytes);
+            os.flush();
+        } catch (IOException e) {
+            if (isClientDisconnect(e)) {
+                Logger.debug(e, "Client disconnected");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    // Check if the exception is related to a client disconnect
+    private static boolean isClientDisconnect(Throwable t) {
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        while (t != null && seen.add(t)) {
+            if (t instanceof java.nio.channels.ClosedChannelException) {
+                return true;
+            }
+            String className = t.getClass().getName();
+            if (className.contains("ClientAbortException") ||
+                className.contains("EofException") ||
+                className.contains("ConnectionClosedException")) {
+                return true;
+            }
+            String msg = t.getMessage();
+            if (msg != null) {
+                String lower = msg.toLowerCase();
+                for (String pattern : CLIENT_DISCONNECT_MESSAGES) {
+                    if (lower.contains(pattern)) {
+                        return true;
+                    }
+                }
+            }
+            t = t.getCause();
+        }
+        return false;
+    }
+
     public void serve404(HttpServletRequest servletRequest, HttpServletResponse servletResponse, NotFound e) {
-        Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
+        }
         servletResponse.setStatus(404);
         servletResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<>();
@@ -368,7 +425,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         servletResponse.setContentType(MimeTypes.getContentType("404." + format, "text/plain"));
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
-            servletResponse.getOutputStream().write(errorHtml.getBytes(Response.current().encoding));
+            writeToResponseStream(servletResponse, errorHtml.getBytes(Response.current().encoding));
         } catch (Exception fex) {
             Logger.error(fex, "(encoding ?)");
         }
@@ -423,7 +480,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
             response.setContentType(MimeTypes.getContentType("500." + format, "text/plain"));
             try {
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
-                response.getOutputStream().write(errorHtml.getBytes(Response.current().encoding));
+                writeToResponseStream(response, errorHtml.getBytes(Response.current().encoding));
                 Logger.error(e, "Internal Server Error (500)");
             } catch (Throwable ex) {
                 Logger.error(e, "Internal Server Error (500)");
@@ -512,6 +569,12 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
                 OutputStream os = servletResponse.getOutputStream();
                 IOUtils.copyLarge(is, os);
                 os.flush();
+            } catch (IOException e) {
+                if (isClientDisconnect(e)) {
+                    Logger.debug(e, "Client disconnected");
+                } else {
+                    throw e;
+                }
             } finally {
                 closeQuietly(is);
             }
@@ -563,7 +626,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
 
         @Override
         public void execute() throws Exception {
-            response.onWriteChunk(chunk -> writeChunk(chunk));
+            response.onWriteChunk(this::writeChunk);
             ActionInvoker.invoke(request, response);
             copyResponse(request, response, httpServletRequest, httpServletResponse);
 
@@ -571,18 +634,20 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
 
         private void writeChunk(Object chunk) {
             try {
-                    OutputStream out = httpServletResponse.getOutputStream();
-                    byte[] bytes;
-                    if (chunk instanceof byte[]) {
-                        bytes = (byte[]) chunk;
-                    } else {
-                        String message = chunk == null ? "" : chunk.toString();
-                        bytes = message.getBytes(response.encoding);
-                    }
-                    out.write(bytes);
-                    out.flush();
-            } catch (Exception e) {
-                throw new UnexpectedException(e);
+                byte[] bytes;
+                if (chunk instanceof byte[]) {
+                    bytes = (byte[]) chunk;
+                } else {
+                    String message = chunk == null ? "" : chunk.toString();
+                    bytes = message.getBytes(response.encoding);
+                }
+                writeToResponseStream(httpServletResponse, bytes);
+            } catch (IOException e) {
+                if (isClientDisconnect(e)) {
+                    Logger.debug(e, "Client disconnected");
+                } else {
+                    throw new UnexpectedException(e);
+                }
             }
         }
 
@@ -595,4 +660,3 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         }
     }
 }
-
