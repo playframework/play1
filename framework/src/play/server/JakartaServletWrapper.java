@@ -555,7 +555,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
                 byte[] content = response.out.toByteArray();
                 servletResponse.setHeader("Content-Length", String.valueOf(content.length));
                 if (!request.method.equals("HEAD")) {
-                    servletResponse.getOutputStream().write(content);
+                    writeToResponseStream(servletResponse, content);
                 } else {
                     copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
                 }
