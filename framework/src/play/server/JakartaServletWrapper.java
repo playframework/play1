@@ -437,19 +437,29 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
             if (!(e instanceof PlayException)) {
                 e = new UnexpectedException(e);
             }
-            // Flush some cookies
+            // Flush all cookies (do not check sendOnError, match PlayHandler)
             try {
                 Map<String, Http.Cookie> cookies = Response.current().cookies;
                 for (Http.Cookie cookie : cookies.values()) {
-                    if (cookie.sendOnError) {
-                        Cookie c = new Cookie(cookie.name, cookie.value);
-                        c.setSecure(cookie.secure);
-                        c.setPath(cookie.path);
-                        if (cookie.domain != null) {
-                            c.setDomain(cookie.domain);
-                        }
-                        response.addCookie(c);
+                    Cookie c = new Cookie(cookie.name, cookie.value);
+                    c.setSecure(cookie.secure);
+                    c.setPath(cookie.path);
+                    if (cookie.domain != null) {
+                        c.setDomain(cookie.domain);
                     }
+                    if (cookie.maxAge != null) {
+                        c.setMaxAge(cookie.maxAge);
+                    }
+                    if (cookie.sameSite != null && !cookie.sameSite.isEmpty()) {
+                        c.setAttribute("SameSite", cookie.sameSite);
+                    }
+                    // Set httpOnly if available (Servlet 3.0+)
+                    try {
+                        c.setHttpOnly(cookie.httpOnly);
+                    } catch (NoSuchMethodError | UnsupportedOperationException ignored) {
+                        // Ignore if not supported by the servlet container
+                    }
+                    response.addCookie(c);
                 }
             } catch (Exception exx) {
                 Logger.error(exx, "Failed to flush cookies");
@@ -512,7 +522,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
             Http.Header hd = entry.getValue();
             String key = entry.getKey();
             for (String value : hd.values) {
-                servletResponse.setHeader(key, value);
+                servletResponse.addHeader(key, value);
             }
         }
 
@@ -526,6 +536,15 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
             }
             if (cookie.maxAge != null) {
                 c.setMaxAge(cookie.maxAge);
+            }
+            if (cookie.sameSite != null && !cookie.sameSite.isEmpty()) {
+                c.setAttribute("SameSite", cookie.sameSite);
+            }
+            // Set httpOnly if available (Servlet 3.0+)
+            try {
+                c.setHttpOnly(cookie.httpOnly);
+            } catch (NoSuchMethodError | UnsupportedOperationException ignored) {
+                // Ignore if not supported by the servlet container
             }
             servletResponse.addCookie(c);
         }
@@ -563,7 +582,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         }
     }
 
-    private void copyStream(HttpServletResponse servletResponse, InputStream is) throws IOException {        
+    private void copyStream(HttpServletResponse servletResponse, InputStream is) throws IOException {
         if (servletResponse != null && is != null) {
             try {
                 OutputStream os = servletResponse.getOutputStream();
@@ -660,3 +679,4 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
         }
     }
 }
+

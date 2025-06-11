@@ -304,6 +304,106 @@ public class JakartaServletWrapperTest {
         copyStreamMethod.invoke(wrapper, mockResponse, inputStream);
     }
 
+    private void assertServletCookieAttributes(
+            play.mvc.Http.Cookie playCookie,
+            java.util.function.Consumer<jakarta.servlet.http.Cookie> extraAssertions
+    ) throws Exception {
+        play.mvc.Http.Response response = new play.mvc.Http.Response();
+        response.cookies.put(playCookie.name, playCookie);
+        response.status = 200;
+        response.contentType = "text/plain";
+        response.out = new java.io.ByteArrayOutputStream();
+        response.encoding = "UTF-8";
+
+        play.mvc.Http.Request request = new play.mvc.Http.Request();
+        request.method = "GET";
+
+        HttpServletRequest servletRequest = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse servletResponse = Mockito.mock(HttpServletResponse.class);
+
+        java.io.ByteArrayOutputStream servletOut = new java.io.ByteArrayOutputStream();
+        ServletOutputStream servletOutputStream = new ServletOutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                servletOut.write(b);
+            }
+            @Override
+            public boolean isReady() { return true; }
+            @Override
+            public void setWriteListener(jakarta.servlet.WriteListener writeListener) { }
+        };
+        Mockito.when(servletResponse.getOutputStream()).thenReturn(servletOutputStream);
+
+        final java.util.List<jakarta.servlet.http.Cookie> servletCookies = new java.util.ArrayList<>();
+        Mockito.doAnswer(invocation -> {
+            jakarta.servlet.http.Cookie c = invocation.getArgument(0);
+            servletCookies.add(c);
+            return null;
+        }).when(servletResponse).addCookie(Mockito.any(jakarta.servlet.http.Cookie.class));
+
+        play.mvc.Http.Response.current.set(response);
+        play.mvc.Http.Request.current.set(request);
+
+        new JakartaServletWrapper().copyResponse(request, response, servletRequest, servletResponse);
+
+        boolean found = false;
+        for (jakarta.servlet.http.Cookie c : servletCookies) {
+            if (playCookie.name.equals(c.getName())) {
+                found = true;
+                extraAssertions.accept(c);
+            }
+        }
+        assertTrue(playCookie.name + " cookie should be present in servlet response", found);
+    }
+
+    @Test
+    public void testSameSiteCookieAttribute() throws Exception {
+        play.mvc.Http.Cookie playCookie = new play.mvc.Http.Cookie();
+        playCookie.name = "samesiteTest";
+        playCookie.value = "testValue";
+        playCookie.path = "/";
+        playCookie.domain = null;
+        playCookie.secure = false;
+        playCookie.maxAge = 123;
+        playCookie.sameSite = "Strict";
+
+        assertServletCookieAttributes(playCookie, c -> {
+            assertEquals("Strict", c.getAttribute("SameSite"));
+        });
+    }
+
+    @Test
+    public void testHttpOnlyCookieAttribute() throws Exception {
+        play.mvc.Http.Cookie playCookieTrue = new play.mvc.Http.Cookie();
+        playCookieTrue.name = "httpOnlyTestTrue";
+        playCookieTrue.value = "testValueTrue";
+        playCookieTrue.path = "/";
+        playCookieTrue.domain = null;
+        playCookieTrue.secure = false;
+        playCookieTrue.maxAge = 123;
+        playCookieTrue.httpOnly = true;
+
+        play.mvc.Http.Cookie playCookieFalse = new play.mvc.Http.Cookie();
+        playCookieFalse.name = "httpOnlyTestFalse";
+        playCookieFalse.value = "testValueFalse";
+        playCookieFalse.path = "/";
+        playCookieFalse.domain = null;
+        playCookieFalse.secure = false;
+        playCookieFalse.maxAge = 456;
+        playCookieFalse.httpOnly = false;
+
+        assertServletCookieAttributes(playCookieTrue, c -> {
+            try {
+                assertTrue(c.isHttpOnly());
+            } catch (NoSuchMethodError | UnsupportedOperationException ignored) {}
+        });
+        assertServletCookieAttributes(playCookieFalse, c -> {
+            try {
+                assertFalse(c.isHttpOnly());
+            } catch (NoSuchMethodError | UnsupportedOperationException ignored) {}
+        });
+    }
+
     // Mock exception classes for testing class name patterns
     private static class MockClientAbortException extends Exception {
         // Class name contains "ClientAbortException"
@@ -317,3 +417,4 @@ public class JakartaServletWrapperTest {
         // Class name contains "ConnectionClosedException"
     }
 }
+
