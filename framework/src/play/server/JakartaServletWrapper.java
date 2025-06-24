@@ -522,7 +522,7 @@ public class JakartaServletWrapper extends HttpServlet implements ServletContext
             Http.Header hd = entry.getValue();
             String key = entry.getKey();
             for (String value : hd.values) {
-                servletResponse.addHeader(key, value);
+                servletResponse.setHeader(key, value);
             }
         }
 
