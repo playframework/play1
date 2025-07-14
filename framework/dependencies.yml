@@ -16,7 +16,7 @@ require:    &allDependencies
     - org.ow2.asm -> asm-tree 9.8
     - org.ow2.asm -> asm-analysis 9.8
     - cglib -> cglib 3.3.0
-    - com.google.code.gson -> gson 2.11.0
+    - com.google.code.gson -> gson 2.13.1
     - com.jamonapi -> jamon 2.82
     - com.ning -> async-http-client 1.9.40
     - commons-beanutils 1.9.4
