@@ -22,7 +22,7 @@ require:    &allDependencies
     - commons-beanutils 1.11.0
     - commons-codec 1.18.0
     - org.apache.commons -> commons-email 1.6.0
-    - commons-fileupload 1.5
+    - commons-fileupload 1.6.0
     - commons-io 2.16.1
     - com.google.code.maven-play-plugin.org.apache.commons -> commons-javaflow 1590792
     - org.apache.commons -> commons-lang3 3.16.0
