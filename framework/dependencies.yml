@@ -8,7 +8,7 @@ transitiveDependencies: false
 # This core dependencies are required by Play framework
 require:    &allDependencies
     - antlr 2.7.7
-    - com.mchange -> c3p0 0.10.1
+    - com.mchange -> c3p0 0.10.2
     - com.zaxxer -> HikariCP 5.1.0
     - org.ow2.asm -> asm 9.7
     - org.ow2.asm -> asm-commons 9.7
