@@ -20,7 +20,7 @@ require:    &allDependencies
     - com.jamonapi -> jamon 2.82
     - com.ning -> async-http-client 1.9.40
     - commons-beanutils 1.11.0
-    - commons-codec 1.17.1
+    - commons-codec 1.18.0
     - org.apache.commons -> commons-email 1.6.0
     - commons-fileupload 1.5
     - commons-io 2.16.1
