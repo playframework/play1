@@ -10,11 +10,11 @@ require:    &allDependencies
     - antlr 2.7.7
     - com.mchange -> c3p0 0.10.2
     - com.zaxxer -> HikariCP 5.1.0
-    - org.ow2.asm -> asm 9.7
-    - org.ow2.asm -> asm-commons 9.7
-    - org.ow2.asm -> asm-util 9.7
-    - org.ow2.asm -> asm-tree 9.7
-    - org.ow2.asm -> asm-analysis 9.7
+    - org.ow2.asm -> asm 9.8
+    - org.ow2.asm -> asm-commons 9.8
+    - org.ow2.asm -> asm-util 9.8
+    - org.ow2.asm -> asm-tree 9.8
+    - org.ow2.asm -> asm-analysis 9.8
     - cglib -> cglib 3.3.0
     - com.google.code.gson -> gson 2.11.0
     - com.jamonapi -> jamon 2.82
