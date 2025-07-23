@@ -51,8 +51,8 @@ require:    &allDependencies
     - org.apache.ivy -> ivy 2.5.2
     - org.bouncycastle -> bcprov-jdk18on 1.78.1
     - org.bouncycastle -> bcpkix-jdk18on 1.78.1
-    - org.codehaus.groovy -> groovy 3.0.22
-    - org.codehaus.groovy -> groovy-xml 3.0.22
+    - org.codehaus.groovy -> groovy 3.0.25
+    - org.codehaus.groovy -> groovy-xml 3.0.25
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
     - org.eclipse.jdt -> ecj 3.33.0
     - org.hibernate -> hibernate-core 5.6.5.Final.patched
