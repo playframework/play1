@@ -56,7 +56,7 @@ require:    &allDependencies
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
     - org.eclipse.jdt -> ecj 3.33.0
     - org.hibernate -> hibernate-core 5.6.5.Final.patched
-    - net.bytebuddy -> byte-buddy 1.15.0
+    - net.bytebuddy -> byte-buddy 1.17.6
     - javax.persistence -> javax.persistence-api 2.2
     - org.hibernate.common -> hibernate-commons-annotations 5.1.2.Final
     - org.hibernate -> hibernate-validator 5.4.3.Final
