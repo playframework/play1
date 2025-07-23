@@ -68,7 +68,7 @@ require:    &allDependencies
     - com.fasterxml -> classmate 1.7.0
     - org.hibernate -> hibernate-c3p0 5.6.15.Final
     - org.hibernate -> hibernate-ehcache 5.6.15.Final
-    - com.mchange -> mchange-commons-java 0.3.1
+    - com.mchange -> mchange-commons-java 0.3.2
     - org.javassist -> javassist 3.30.2-GA
     - io.netty -> netty 3.10.6.Final
     - org.postgresql -> postgresql 42.7.7
