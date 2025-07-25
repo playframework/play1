@@ -1,0 +1,24 @@
+# Play 1.9.0 -- Release notes
+
+Play 1.9.0 has been released of the master branch.
+
+The changes in this release are listed in the "1.9.0":https://github.com/playframework/play1/milestone/10624965 including 12 resolved tickets.
+
+
+## What's new in Play 1.9.0
+
+
+## What's fixed in Play 1.9.0
+
+* "#1358":https://github.com/playframework/play1/issues/1358 : Update the README, use Markdown instead of Textile
+* "#1472":https://github.com/playframework/play1/issues/1472 : Fix "play build-module" by replacing yaml.load with yaml.safe_load
+* "#1473":https://github.com/playframework/play1/issues/1473 : feat(dependabot): add dependabot.yml configuration
+* "#1474":https://github.com/playframework/play1/issues/1474 : Convert README from textile to markdown
+* "#1475":https://github.com/playframework/play1/issues/1475 : Bump actions/setup-python from 4 to 5
+* "#1476":https://github.com/playframework/play1/issues/1476 : Bump actions/setup-java from 3 to 4
+* "#1477":https://github.com/playframework/play1/issues/1477 : GitHub actions configuration
+* "#1478":https://github.com/playframework/play1/issues/1478 : Update issue templates
+* "#1479":https://github.com/playframework/play1/issues/1479 : fix(release-draft): fix version number
+* "#1482":https://github.com/playframework/play1/issues/1482 : Updated dependencies
+* "#1502":https://github.com/playframework/play1/issues/1502 : dependencies upgrade:
+* "#1503":https://github.com/playframework/play1/issues/1503 : 1502 update dependencies
