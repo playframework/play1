@@ -183,7 +183,7 @@ models.Hotel(h19):
     zip:        NW13UP
     country:    Great Britain
 
-models.Hotel(h10):
+models.Hotel(h20):
     price:      210
     name:       Hotel Allegro
     address:    171 West Randolph Street

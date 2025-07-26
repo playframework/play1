@@ -21,7 +21,7 @@ We will start to code the blog engine by creating the User class. Create a new f
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  
@@ -139,7 +139,7 @@ The @Post@ class will represent blog posts. Let’s write a first implementation
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  
@@ -221,7 +221,7 @@ Creating the @Comment@ class is pretty straightforward.
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  

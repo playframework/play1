@@ -168,7 +168,7 @@ h2. <a name="hibernate">Persist your object model with Hibernate</a>
 
 You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
 
-When you define JPA entities by adding <code>@javax.persistence.Entity</code> annotations to any Java object, Play will automatically start a JPA entity manager.
+When you define JPA entities by adding <code>@jakarta.persistence.Entity</code> annotations to any Java object, Play will automatically start a JPA entity manager.
 
 bc. @Entity
 public class Product {

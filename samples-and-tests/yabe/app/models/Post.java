@@ -1,7 +1,7 @@
 package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import play.data.binding.*;
 import play.data.validation.*;

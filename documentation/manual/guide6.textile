@@ -9,7 +9,7 @@ We will add one more object to the blog model definition. The @Tag@ class itself
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  

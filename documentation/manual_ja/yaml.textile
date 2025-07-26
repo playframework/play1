@@ -47,7 +47,7 @@ p. @City.java@
 bc.. package models;
 
 import java.util.List;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import play.db.jpa.Model;
 
 @Entity
@@ -65,7 +65,7 @@ p. @Neighborhood.java@
 bc.. package models;
 
 import java.util.List;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import play.db.jpa.Model;
 
 @Entity
@@ -88,7 +88,7 @@ p. @User.java@
 bc.. package models;
 
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import play.db.jpa.Model;
 
 @Entity

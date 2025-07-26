@@ -3,7 +3,7 @@ package models;
 import play.*;
 import play.db.jpa.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity

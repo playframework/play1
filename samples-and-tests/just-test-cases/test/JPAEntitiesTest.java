@@ -4,7 +4,7 @@ import play.db.jpa.GenericModel.JPAQuery;
 import play.db.jpa.JPA;
 import play.test.UnitTest;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 public class JPAEntitiesTest extends UnitTest {
 

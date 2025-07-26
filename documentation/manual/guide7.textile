@@ -89,7 +89,7 @@ Let’s add some annotations to the @User@ class:
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -117,7 +117,7 @@ Let’s do the same for the @Post@ class:
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -158,7 +158,7 @@ Finally we can add validation rules to the @Comment@ and @Tag@ classes as well:
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -173,7 +173,7 @@ public class Tag extends Model implements Comparable<Tag> {
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;

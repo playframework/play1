@@ -9,9 +9,9 @@ import play.data.binding.As;
 import play.data.binding.NoBinding;
 import play.db.jpa.*;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class AnEntity extends Model {

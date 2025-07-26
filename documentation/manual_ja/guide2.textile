@@ -21,7 +21,7 @@ User クラスを作成するところからブログエンジンのコーディ
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  
@@ -139,7 +139,7 @@ h2. <a class="post">Post クラス</a>
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  
@@ -221,7 +221,7 @@ h2. <a class="comments">コメントの追加</a>
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
  

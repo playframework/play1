@@ -326,7 +326,7 @@ require:
         exclude:
             - javassist -> javassist *
             - org.hibernate -> hibernate-annotations *
-            - javax.persistence -> persistence-api *
+            - jakarta.persistence -> persistence-api *
 repositories:
     - jboss:
         type: iBiblio

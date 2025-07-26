@@ -1,6 +1,6 @@
 package models.vendor;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class VenueVendor extends Vendor {

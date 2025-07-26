@@ -1,7 +1,7 @@
 package play.db.helper;
 
 import java.util.List;
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 import play.db.jpa.JPA;
 
 public class JpaHelper {

@@ -22,7 +22,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.hibernate.javax.persistence</groupId>
+        <groupId>org.hibernate.jakarta.persistence</groupId>
         <artifactId>hibernate-jpa-2.0-api</artifactId>
         <version>1.0.1.Final</version>
     </dependency>

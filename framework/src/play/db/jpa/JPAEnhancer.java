@@ -22,14 +22,14 @@ public class JPAEnhancer extends Enhancer {
         }
 
         // Enhance only JPA entities
-        if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
+        if (!hasAnnotation(ctClass, "jakarta.persistence.Entity")) {
             return;
         }
 
         AnnotationsAttribute annotation = getAnnotations(ctClass);
         String dbName = JPA.DEFAULT;
         if (annotation != null) {
-            Annotation an = annotation.getAnnotation("javax.persistence.PersistenceUnit");
+            Annotation an = annotation.getAnnotation("jakarta.persistence.PersistenceUnit");
             if (an != null) {
                 dbName = ((StringMemberValue)an.getMemberValue("name")).getValue();
            }

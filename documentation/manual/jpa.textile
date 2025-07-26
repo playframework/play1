@@ -6,7 +6,7 @@ p(note). **Note** that you can still go back to the plain JPA API whenever you w
 
 h2. <a name="starting">Starting the JPA entity manager</a>
 
-Play will automatically start the Hibernate entity manager when it finds one or more classes annotated with the <code>@javax.persistence.Entity</code> annotation. However, make sure that you have correctly configured a JDBC datasource or it will fail.
+Play will automatically start the Hibernate entity manager when it finds one or more classes annotated with the <code>@jakarta.persistence.Entity</code> annotation. However, make sure that you have correctly configured a JDBC datasource or it will fail.
 
 h2. <a name="obtaining">Obtaining the JPA entity manager</a>
 

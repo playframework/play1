@@ -7,7 +7,7 @@ import play.data.validation.*;
 import play.templates.*;
 import play.mvc.Scope.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Job extends Model {

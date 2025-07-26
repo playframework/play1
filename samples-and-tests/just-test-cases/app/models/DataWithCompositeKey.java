@@ -1,7 +1,7 @@
 package models;
 
 import play.db.jpa.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class DataWithCompositeKey extends GenericModel {

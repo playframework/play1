@@ -1,6 +1,6 @@
 package play.db.jpa;
 
-import javax.persistence.Query;
+import jakarta.persistence.Query;
 
 /**
  * Use play.db.jpa.GenericModel instead
