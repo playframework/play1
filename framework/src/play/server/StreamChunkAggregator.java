@@ -1,6 +1,5 @@
 package play.server;
 
-import org.apache.commons.io.IOUtils;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpChunk;
@@ -59,7 +58,7 @@ public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
             if (maxContentLength != -1 && (localFile.length() > (maxContentLength - chunk.getContent().readableBytes()))) {
                 currentMessage.headers().set(HttpHeaders.Names.WARNING, "play.netty.content.length.exceeded");
             } else {
-                IOUtils.copyLarge(new ChannelBufferInputStream(chunk.getContent()), this.out);
+                new ChannelBufferInputStream(chunk.getContent()).transferTo(this.out);
 
                 if (chunk.isLast()) {
                     this.out.flush();

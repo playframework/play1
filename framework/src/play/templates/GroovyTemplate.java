@@ -261,7 +261,7 @@ public class GroovyTemplate extends BaseTemplate {
             binding.setVariable("_response_encoding", currentResponse.encoding);
         }
         StringWriter writer = null;
-        Boolean applyLayouts = false;
+        boolean applyLayouts = false;
 
         // must check if this is the first template being rendered..
         // If this template is called from inside another template,

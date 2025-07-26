@@ -1,30 +1,33 @@
 package play.templates;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * Tag Context (retrieve who call you)
  */
 public class TagContext {
     
-    private static final ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<>();
+    private static final ThreadLocal<Deque<TagContext>> currentStack = new ThreadLocal<>();
     
-    public final String tagName;
     public final Map<String, Object> data = new HashMap<>();
+
+    public final String tagName;
 
     public TagContext(String tagName) {
         this.tagName = tagName;
     }
     
     public static void init() {
-        currentStack.set(new Stack<TagContext>());
+        currentStack.set(new ArrayDeque<>());
         enterTag("ROOT");
     }
     
     public static void enterTag(String name) {
-        currentStack.get().add(new TagContext(name));
+        currentStack.get().push(new TagContext(name));
     }
     
     public static void exitTag() {
@@ -36,15 +39,22 @@ public class TagContext {
     }
     
     public static TagContext parent() {
-        if(currentStack.get().size() < 2) {
-            return null;
+        Iterator<TagContext> it = currentStack.get().iterator();
+        if (it.hasNext()) {
+            // skip
+            it.next();
+
+            if (it.hasNext()) {
+                return it.next();
+            }
         }
-        return currentStack.get().get(currentStack.get().size()-2);
+
+        return null;
     }
     
     public static boolean hasParentTag(String name) {
-        for(int i=currentStack.get().size()-1; i>=0; i--) {
-            if(name.equals(currentStack.get().get(i).tagName)) {
+        for (TagContext current : currentStack.get()) {
+            if (name.equals(current.tagName)) {
                 return true;
             }
         }
@@ -52,19 +62,33 @@ public class TagContext {
     }
     
     public static TagContext parent(String name) {
-        for(int i=currentStack.get().size()-2; i>=0; i--) {
-            if(name.equals(currentStack.get().get(i).tagName)) {
-                return currentStack.get().get(i);
+        Iterator<TagContext> it = currentStack.get().iterator();
+        if (it.hasNext()) {
+            // skip head
+            it.next();
+
+            while (it.hasNext()) {
+                TagContext parent = it.next();
+                if (name.equals(parent.tagName)) {
+                    return parent;
+                }
             }
         }
         return null;
     }
 
     public static TagContext parent(String... names) {
-        for (int i = currentStack.get().size() - 2; i >= 0; i--) {
-            for (String name : names) {
-                if (name.equals(currentStack.get().get(i).tagName)) {
-                    return currentStack.get().get(i);
+        Iterator<TagContext> it = currentStack.get().iterator();
+        if (it.hasNext()) {
+            // skip head
+            it.next();
+
+            while (it.hasNext()) {
+                TagContext parent = it.next();
+                for (String name : names) {
+                    if (name.equals(parent.tagName)) {
+                        return parent;
+                    }
                 }
             }
         }
@@ -73,9 +97,7 @@ public class TagContext {
 
     @Override
     public String toString() {
-        return tagName+""+data;
+        return this.tagName + this.data;
     }
-
-
 
 }

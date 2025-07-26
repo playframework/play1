@@ -1,6 +1,7 @@
 package play.templates;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import play.Logger;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
@@ -29,7 +30,7 @@ public abstract class TemplateCompiler {
     }
 
     protected final StringBuilder compiledSource = new StringBuilder();
-    protected final Stack<Tag> tagsStack = new Stack<>();
+    protected final Deque<Tag> tagsStack = new ArrayDeque<>();
     protected BaseTemplate template;
     protected TemplateParser parser;
     protected boolean doNextScan = true;
@@ -99,7 +100,7 @@ public abstract class TemplateCompiler {
         end();
 
         // Check tags imbrication
-        if (!tagsStack.empty()) {
+        if (!tagsStack.isEmpty()) {
             Tag tag = tagsStack.peek();
             throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
         }
@@ -139,7 +140,7 @@ public abstract class TemplateCompiler {
     }
 
     protected void println() {
-        compiledSource.append("\n");
+        compiledSource.append('\n');
         currentLine++;
     }
 
