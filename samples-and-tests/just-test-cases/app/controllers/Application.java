@@ -398,7 +398,7 @@ public class Application extends Controller {
 
     public static void makeSureCookieSaved(){
         if(request.cookies!=null && request.cookies.get("PLAY_TEST")!=null){
-            response.setCookie("PLAY_TEST", request.cookies.get("PLAY_TEST").value);
+            response.setCookie("PLAY_TEST", request.cookies.get("PLAY_TEST").value, null);
         }
         renderText("OK");
     }
