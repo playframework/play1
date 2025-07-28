@@ -1,15 +1,24 @@
-Index: hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
+diff --git a/hibernate-core-jakarta/hibernate-core-jakarta.gradle b/hibernate-core-jakarta/hibernate-core-jakarta.gradle
+index 802fea1831..e9b36e2a1e 100644
+--- a/hibernate-core-jakarta/hibernate-core-jakarta.gradle
++++ b/hibernate-core-jakarta/hibernate-core-jakarta.gradle
+@@ -306,7 +306,7 @@ test {
+ 		jvmArgs( ['--add-opens', 'java.base/java.lang=ALL-UNNAMED'] )
+ 	}
+ 
+-	maxHeapSize = '3G'
++	maxHeapSize = '1024m'
+ 	// Allow to exclude specific tests
+ 	if (project.hasProperty('excludeTests')) {
+ 		filter {
 diff --git a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
---- a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	(revision dca2cabaf26fafb30baead8ba0e3d7229fb67c65)
-+++ b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java	(revision 1d894ccfd3e5740a5a764ac95e71e1f73fd454df)
-@@ -120,15 +120,4 @@
+index dde4912ee1..bfe0fc6e6f 100755
+--- a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java
+@@ -120,15 +120,4 @@ public class EmptyInterceptor implements Interceptor, Serializable {
  		return sql;
  	}
-
+ 
 -	@Override
 -	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
 -	}
@@ -22,15 +31,11 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/EmptyInterceptor.java b/
 -	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
 -	}
  }
-Index: hibernate-core/src/main/java/org/hibernate/Interceptor.java
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
---- a/hibernate-core/src/main/java/org/hibernate/Interceptor.java	(revision dca2cabaf26fafb30baead8ba0e3d7229fb67c65)
-+++ b/hibernate-core/src/main/java/org/hibernate/Interceptor.java	(revision 1d894ccfd3e5740a5a764ac95e71e1f73fd454df)
-@@ -121,7 +121,9 @@
+index f71df01f64..8fb7f457f5 100644
+--- a/hibernate-core/src/main/java/org/hibernate/Interceptor.java
++++ b/hibernate-core/src/main/java/org/hibernate/Interceptor.java
+@@ -121,7 +121,9 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -38,10 +43,10 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hiber
 +	default boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
 +		return true;
 +	}
-
+ 
  	/**
  	 * Called before a collection is deleted.
-@@ -131,7 +133,9 @@
+@@ -131,7 +133,9 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -49,10 +54,10 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hiber
 +	default boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
 +		return true;
 +	}
-
+ 
  	/**
  	 * Called before a collection is updated.
-@@ -141,7 +145,9 @@
+@@ -141,7 +145,9 @@ public interface Interceptor {
  	 *
  	 * @throws CallbackException Thrown if the interceptor encounters any problems handling the callback.
  	 */
@@ -60,24 +65,16 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/Interceptor.java b/hiber
 +	default boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
 +		return true;
 +	}
-
+ 
  	/**
  	 * Called before a flush.
-Index: hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
---- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(revision dca2cabaf26fafb30baead8ba0e3d7229fb67c65)
-+++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(revision 1d894ccfd3e5740a5a764ac95e71e1f73fd454df)
-@@ -142,9 +142,30 @@
- 		final Object anything = getAnything();
- 		//safe from concurrent modification because of how concurrentEntries() is implemented on IdentityMap
- 		for ( Map.Entry<Object,EntityEntry> me : persistenceContext.reentrantSafeEntityEntries() ) {
--//		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
--			EntityEntry entry = (EntityEntry) me.getValue();
-+			EntityEntry entry = me.getValue();
+index 98502d8c68..bb43e3114d 100644
+--- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
++++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
+@@ -145,6 +145,28 @@ public abstract class AbstractFlushingEventListener implements JpaBootstrapSensi
+ //		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
+ 			EntityEntry entry = (EntityEntry) me.getValue();
  			Status status = entry.getStatus();
 +
 +			// This entity will be saved?
@@ -104,17 +101,17 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractF
  			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
  				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
  			}
-@@ -261,8 +282,7 @@
+@@ -260,8 +282,7 @@ public abstract class AbstractFlushingEventListener implements JpaBootstrapSensi
  		final Interceptor interceptor = session.getInterceptor();
  		persistenceContext.forEachCollectionEntry(
  				(coll, ce) -> {
 -					if ( ce.isDorecreate() ) {
 -						interceptor.onCollectionRecreate( coll, ce.getCurrentKey() );
-+					if ( ce.isDorecreate() && interceptor.onCollectionRecreate( coll, ce.getCurrentKey() ) ) {
++					if ( ce.isDorecreate() && interceptor.onCollectionRecreate( coll, ce.getCurrentKey()) ) {
  						actionQueue.addAction(
  								new CollectionRecreateAction(
  										coll,
-@@ -272,8 +292,7 @@
+@@ -271,8 +292,7 @@ public abstract class AbstractFlushingEventListener implements JpaBootstrapSensi
  								)
  						);
  					}
@@ -124,7 +121,7 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractF
  						actionQueue.addAction(
  								new CollectionRemoveAction(
  										coll,
-@@ -284,8 +303,7 @@
+@@ -283,8 +303,7 @@ public abstract class AbstractFlushingEventListener implements JpaBootstrapSensi
  								)
  						);
  					}
@@ -134,35 +131,27 @@ diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractF
  						actionQueue.addAction(
  								new CollectionUpdateAction(
  										coll,
-Index: hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java b/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
---- a/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java	(revision dca2cabaf26fafb30baead8ba0e3d7229fb67c65)
-+++ b/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java	(revision 1d894ccfd3e5740a5a764ac95e71e1f73fd454df)
-@@ -94,8 +94,4 @@
+index 9d0e8d4be5..fafe972c27 100755
+--- a/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
++++ b/hibernate-core/src/test/java/org/hibernate/test/interfaceproxy/DocumentInterceptor.java
+@@ -94,8 +94,4 @@ public class DocumentInterceptor implements Interceptor {
  		return sql;
  	}
-
+ 
 -	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {}
 -	public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {}
 -	public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {}
 -
  }
-Index: hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java b/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
---- a/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java	(revision dca2cabaf26fafb30baead8ba0e3d7229fb67c65)
-+++ b/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java	(revision 1d894ccfd3e5740a5a764ac95e71e1f73fd454df)
-@@ -111,12 +111,4 @@
+index fc1b53f8d2..e5e00d68bb 100755
+--- a/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
++++ b/hibernate-core/src/test/java/org/hibernate/test/mixed/DocumentInterceptor.java
+@@ -111,12 +111,4 @@ public class DocumentInterceptor implements Interceptor {
  		return sql;
  	}
-
+ 
 -	public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
 -	}
 -
