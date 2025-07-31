@@ -1,8 +1,6 @@
 package play.utils;
 
 import static java.util.Collections.addAll;
-import static java.util.Collections.sort;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -345,16 +343,11 @@ public class Java {
     }
 
     public static Object deserialize(byte[] b) throws Exception {
-        ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        try {
-            ObjectInputStream oi = new ObjectInputStream(bais);
-            try {
-                return oi.readObject();
-            } finally {
-                closeQuietly(oi);
-            }
-        } finally {
-            closeQuietly(bais);
+        try (
+            ByteArrayInputStream bais = new ByteArrayInputStream(b);
+            ObjectInputStream oi = new ObjectInputStream(bais)
+        ) {
+            return oi.readObject();
         }
     }
 
