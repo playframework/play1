@@ -180,7 +180,7 @@ public class WS extends PlayPlugin {
             wsImpl = new WSAsync();
         } else {
             try {
-                wsImpl = (WSImpl) Play.classloader.loadClass(implementation).newInstance();
+                wsImpl = (WSImpl) Play.classloader.loadClass(implementation).getDeclaredConstructor().newInstance();
                 if (Logger.isTraceEnabled()) {
                     Logger.trace("Using the class:" + implementation + " for web service");
                 }

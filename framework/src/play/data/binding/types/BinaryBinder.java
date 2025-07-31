@@ -22,7 +22,7 @@ public class BinaryBinder implements TypeBinder<Model.BinaryField> {
         try {
             Request req = Request.current();
             if (req != null && req.args != null) {
-                Model.BinaryField b = (Model.BinaryField) actualClass.newInstance();
+                Model.BinaryField b = (Model.BinaryField) actualClass.getDeclaredConstructor().newInstance();
                 List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
                 if(uploads != null){
                     for (Upload upload : uploads) {
