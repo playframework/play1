@@ -1,6 +1,6 @@
 package models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 import play.db.jpa.*;

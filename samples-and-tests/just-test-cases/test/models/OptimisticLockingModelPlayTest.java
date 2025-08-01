@@ -6,7 +6,7 @@ package models;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import models.OptimisticLockingModel.OptimisticLockingCheck;
 

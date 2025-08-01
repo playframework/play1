@@ -1,6 +1,6 @@
 package models;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import play.db.jpa.Model;
 

@@ -6,7 +6,7 @@ p(note). いつでも素の JPA API に立ち返ることができることに *
 
 h2. <a name="starting">JPA エンティティマネージャの開始</a>
 
-Playは、 <code>@javax.persistence.Entity</code> アノテーションで注釈されたクラスをひとつ以上見つけた場合、自動的に Hibernate エンティティマネージャを開始します。とは言え、JDBC データソースを正しく設定していない場合、エンティティマネージャの開始は失敗してしまうので、確実に設定してください。
+Playは、 <code>@jakarta.persistence.Entity</code> アノテーションで注釈されたクラスをひとつ以上見つけた場合、自動的に Hibernate エンティティマネージャを開始します。とは言え、JDBC データソースを正しく設定していない場合、エンティティマネージャの開始は失敗してしまうので、確実に設定してください。
 
 h2. <a name="obtaining">JPA エンティティマネージャの取得</a>
 

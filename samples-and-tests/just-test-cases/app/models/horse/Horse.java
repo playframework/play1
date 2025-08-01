@@ -2,7 +2,7 @@ package models.horse;
 
 import play.data.validation.*;
 import play.db.jpa.Model;
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Horse extends Model {

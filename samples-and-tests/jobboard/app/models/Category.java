@@ -3,7 +3,7 @@ package models;
 import play.db.jpa.*;
 import play.data.validation.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Category extends Model {

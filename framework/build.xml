@@ -2,7 +2,7 @@
 
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
-    <property name="baseversion" value="1.7.x" />
+    <property name="baseversion" value="1.9.x" />
 
     <path id="project.classpath">
         <fileset dir=".">
@@ -103,6 +103,10 @@
             <link offline="false" href="https://docs.jboss.org/hibernate/orm/4.2/javadocs/" />
             <link offline="false" href="http://www.mchange.com/projects/c3p0/apidocs/" />
         </javadoc>
+    </target>
+
+    <target name="build" description="Build play">
+        <antcall target="jar"/>
     </target>
 
     <target name="jar" depends="clean,version,compile,modules" description="create play.jar">

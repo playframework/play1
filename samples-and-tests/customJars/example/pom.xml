@@ -18,13 +18,13 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.hibernate.javax.persistence</groupId>
-        <artifactId>hibernate-jpa-2.0-api</artifactId>
-        <version>1.0.1.Final</version>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core-jakarta</artifactId>
+        <version>5.6.15.Final</version>
     </dependency>
   </dependencies>
 </project>

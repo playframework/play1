@@ -2,7 +2,7 @@ import org.junit.Test;
 
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
-import javax.persistence.TransactionRequiredException;
+import jakarta.persistence.TransactionRequiredException;
 
 public class TransactionalJPATest extends FunctionalTest {
     

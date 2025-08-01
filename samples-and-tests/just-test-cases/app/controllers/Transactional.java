@@ -19,7 +19,7 @@ public class Transactional extends Controller {
         tag2.name = "TransactionalTest";
         post.tags.add(tag1);
         post.tags.add(tag2);
-        post.save(); // since this is read only the request will fail with javax.persistence.TransactionRequiredException
+        post.save(); // since this is read only the request will fail with jakarta.persistence.TransactionRequiredException
 
         renderText("Wrote 1 post: total is now " + Post.count());
     }

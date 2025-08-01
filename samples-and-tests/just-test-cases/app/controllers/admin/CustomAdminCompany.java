@@ -3,7 +3,7 @@ package controllers.admin;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import javax.persistence.Version;
+import jakarta.persistence.Version;
 
 import models.Company;
 import play.db.Model;

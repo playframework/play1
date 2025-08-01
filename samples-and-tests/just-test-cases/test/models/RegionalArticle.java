@@ -1,11 +1,11 @@
 package models;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import play.*;
 import play.db.jpa.*;
 import play.data.validation.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.*;
 

@@ -89,7 +89,7 @@ h2. <a>バリデーションの追加</a>
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -117,7 +117,7 @@ public class User extends Model {
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -158,7 +158,7 @@ public class Post extends Model {
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;
@@ -173,7 +173,7 @@ public class Tag extends Model implements Comparable<Tag> {
 bc. package models;
  
 import java.util.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
  
 import play.db.jpa.*;
 import play.data.validation.*;

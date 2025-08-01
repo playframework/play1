@@ -16,7 +16,7 @@ import play.Play;
 public class Configuration {
 
     /** definition of regex to filter db related settings. */
-    final String regexDbRelatedSettings = "^(db|javax\\.persistence|jpa|(?:org\\.)?hibernate){1}";
+    final String regexDbRelatedSettings = "^(db|jakarta\\.persistence|jpa|(?:org\\.)?hibernate){1}";
 
     /** compiled regex as a pattern for reuse to filter all db related settings. */
     final java.util.regex.Pattern compiledRegexDbRelatedSettings = java.util.regex.Pattern.compile(regexDbRelatedSettings +".*");

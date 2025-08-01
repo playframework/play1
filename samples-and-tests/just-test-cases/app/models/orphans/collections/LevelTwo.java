@@ -2,9 +2,9 @@ package models.orphans.collections;
 
 import play.db.jpa.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity(name = "collections.LevelTwo")
 @Table(name = "collections_level_two")

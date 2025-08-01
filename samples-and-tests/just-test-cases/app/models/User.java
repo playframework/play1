@@ -5,7 +5,7 @@ import play.data.binding.NoBinding;
 import play.data.validation.*;
 import play.db.jpa.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity

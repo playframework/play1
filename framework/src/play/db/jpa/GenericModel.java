@@ -15,16 +15,16 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.Query;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostUpdate;
+import jakarta.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -425,7 +425,7 @@ public class GenericModel extends JPABase {
      * @return The created entity.
      */
     public static <T extends JPABase> T create(String name, Params params) {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -434,7 +434,7 @@ public class GenericModel extends JPABase {
      * @return number of entities of this class
      */
     public static long count() {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -447,7 +447,7 @@ public class GenericModel extends JPABase {
      * @return A long
      */
     public static long count(String query, Object... params) {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -458,7 +458,7 @@ public class GenericModel extends JPABase {
      * @return All entities of this type
      */
     public static <T extends JPABase> List<T> findAll() {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -471,7 +471,7 @@ public class GenericModel extends JPABase {
      * @return The entity
      */
     public static <T extends JPABase> T findById(Object id) {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -484,7 +484,7 @@ public class GenericModel extends JPABase {
      * @return A JPAQuery
      */
     public static JPAQuery find(String query, Object... params) {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -493,7 +493,7 @@ public class GenericModel extends JPABase {
      * @return A JPAQuery
      */
     public static JPAQuery all() {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -506,7 +506,7 @@ public class GenericModel extends JPABase {
      * @return Number of entities deleted
      */
     public static int delete(String query, Object... params) {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
@@ -515,7 +515,7 @@ public class GenericModel extends JPABase {
      * @return Number of entities deleted
      */
     public static int deleteAll() {
-        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @jakarta.persistence.Entity annotation.");
     }
 
     /**
