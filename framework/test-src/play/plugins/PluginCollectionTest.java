@@ -1,7 +1,7 @@
 package play.plugins;
 
 import static java.util.Arrays.asList;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -145,7 +145,7 @@ public class PluginCollectionTest {
         PluginCollection pc = new PluginCollection();
         pc.loadPlugins();
 
-        assertThat(Play.plugins).containsExactly(pc.getEnabledPlugins().toArray());
+        assertThat(Play.plugins).containsExactly(pc.getEnabledPlugins().toArray(new PlayPlugin[0]));
 
     }
 
