@@ -1,7 +1,7 @@
 package play.templates;
 
 import static org.junit.Assert.*;
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class JavaExtensionsTest {
     @Test 
     public void testAdd()  {
         final String[] items = JavaExtensions.add(new String[]{"a", "b"}, "c");
-		assertThat(items).hasSize(3).contains((Object[]) new String[] {"a", "b", "c"});
+		assertThat(items).hasSize(3).contains(new String[] {"a", "b", "c"});
         
     }
 
