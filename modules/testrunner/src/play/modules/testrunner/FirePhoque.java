@@ -1,16 +1,16 @@
 package play.modules.testrunner;
 
-import com.gargoylesoftware.htmlunit.AlertHandler;
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.ConfirmHandler;
-import com.gargoylesoftware.htmlunit.DefaultCssErrorHandler;
-import com.gargoylesoftware.htmlunit.DefaultPageCreator;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.PromptHandler;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.WebWindow;
-import com.gargoylesoftware.htmlunit.javascript.host.Window;
+import org.htmlunit.AlertHandler;
+
+import org.htmlunit.ConfirmHandler;
+import org.htmlunit.DefaultCssErrorHandler;
+import org.htmlunit.DefaultPageCreator;
+import org.htmlunit.Page;
+import org.htmlunit.PromptHandler;
+import org.htmlunit.WebClient;
+import org.htmlunit.WebResponse;
+import org.htmlunit.WebWindow;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,12 +20,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import net.sourceforge.htmlunit.corejs.javascript.Context;
-import net.sourceforge.htmlunit.corejs.javascript.ScriptRuntime;
-import net.sourceforge.htmlunit.corejs.javascript.ScriptableObject;
+
+import org.htmlunit.corejs.javascript.Context;
+import org.htmlunit.corejs.javascript.ScriptRuntime;
+import org.htmlunit.corejs.javascript.ScriptableObject;
+import org.htmlunit.BrowserVersion;
 
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
@@ -81,20 +81,18 @@ public class FirePhoque {
 
         // Let's tweak WebClient
 
-        String headlessBrowser = System.getProperty("headlessBrowser", "CHROME");
+        String headlessBrowser = System.getProperty("headlessBrowser", "FIREFOX");
         BrowserVersion browserVersion;
         if ("CHROME".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.CHROME;
         } else if ("FIREFOX".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.FIREFOX;  
-        }    else if ("INTERNET_EXPLORER".equals(headlessBrowser)) {
-            browserVersion = BrowserVersion.INTERNET_EXPLORER;
-//        }    else if ("INTERNET_EXPLORER_11".equals(headlessBrowser)) {
-//            browserVersion = BrowserVersion.INTERNET_EXPLORER;
+            browserVersion = BrowserVersion.FIREFOX;
+        } else if ("INTERNET_EXPLORER".equals(headlessBrowser)) {
+            browserVersion = BrowserVersion.EDGE;
         } else if ("EDGE".equals(headlessBrowser)) {
             browserVersion = BrowserVersion.EDGE;
         } else {
-            browserVersion = BrowserVersion.FIREFOX_ESR;
+            browserVersion = BrowserVersion.FIREFOX;
         }
 
         WebClient firephoque = new WebClient(browserVersion);
