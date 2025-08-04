@@ -141,7 +141,7 @@ public class JPQL {
     }
 
     public JPABase create(String dbName, String entity, String name, Params params) throws Exception {
-        Object o = Play.classloader.loadClass(entity).newInstance();
+        Object o = Play.classloader.loadClass(entity).getDeclaredConstructor().newInstance();
 
         RootParamNode rootParamNode = ParamNode.convert(params.all());
 

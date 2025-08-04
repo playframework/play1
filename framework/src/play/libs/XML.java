@@ -211,7 +211,7 @@ public class XML {
 
         try {
             String providerName = System.getProperty("jsr105Provider", "org.jcp.xml.dsig.internal.dom.XMLDSigRI");
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).newInstance());
+            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", (Provider) Class.forName(providerName).getDeclaredConstructor().newInstance());
             DOMValidateContext valContext = new DOMValidateContext(keySelector, signatureNode);
 
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
