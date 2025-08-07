@@ -10,7 +10,6 @@ import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ContinuationEnhancer extends Enhancer {

@@ -155,7 +155,7 @@ public class ActionInvoker {
                     cacheKey = cacheFor.id();
                     if ("".equals(cacheKey)) {
                         // Generate a cache key for this request
-                        cacheKey = cacheFor.generator().newInstance().generate(request);
+                        cacheKey = cacheFor.generator().getDeclaredConstructor().newInstance().generate(request);
                     }
                     if(cacheKey != null && !"".equals(cacheKey)) {
                     	actionResult = (Result) Cache.get(cacheKey);
