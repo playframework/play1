@@ -15,7 +15,7 @@
     <target name="build">
         <mkdir dir="tmp/classes" />
         <mkdir dir="lib" />
-        <javac srcdir="src" destdir="tmp/classes" source="11" target="11">
+        <javac srcdir="src" destdir="tmp/classes" source="17" target="17">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="tmp/classes">
