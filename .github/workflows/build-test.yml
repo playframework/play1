@@ -7,6 +7,9 @@ on:
     branches:
       - master # Check branch after merge
 
+env:
+  DEFAULT_JAVA_VERSION: '17'
+
 concurrency:
   # Only run once for latest commit per ref and cancel other (previous) runs.
   group: ci-${{ github.ref }}
@@ -18,13 +21,22 @@ jobs:
 
     strategy:
       matrix:
-        jdk: [ 11, 17 ]
+        jdk: [ 11, 17, 21 ]
         os: [ubuntu-latest, windows-latest]
-        exclude:
+        include:
+          - target: 11
+            jdk: 11
+          - target: 17
+            jdk: 17
+          - target: 17
+            jdk: 21
+        exclude: # only build specific os on java 17
           - os: windows-latest
             jdk: 11
+          - os: windows-latest
+            jdk: 21
 
-    name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ matrix.os }}
+    name: Build / Tests -> JDK-${{ matrix.jdk }}/ Target java-${{ matrix.target }} / ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,7 +61,7 @@ jobs:
 
       - name: Build with Ant
         working-directory: ./framework
-        run: ant test
+        run: ant test -Dbuild-source=${{ matrix.target }} -Dbuild-target=${{ matrix.target }}
 
   build:
     needs:
@@ -69,20 +81,58 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
 
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ env.DEFAULT_JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: ${{ env.DEFAULT_JAVA_VERSION }}
           distribution: 'adopt'
 
       - name: Build with Ant
         working-directory: ./framework
-        run: ant artifact
+        run: ant artifact -Dbuild-source=${{ env.DEFAULT_JAVA_VERSION }} -Dbuild-target=${{ env.DEFAULT_JAVA_VERSION }}
 
-      - name: ziping artifact
+      - name: Zipping artifact
         uses: actions/upload-artifact@v4
         with:
           name: play-${{ github.sha }}
           if-no-files-found: error
           path: |
             ./framework/dist/*
+
+  # Specific build on mac because of issue with firephoque browser (FIXME)
+  build-on-mac:
+    runs-on: ${{ matrix.os }}
+    name: Build -> JDK-${{ matrix.jdk }}/ Target java-${{ matrix.target }} / ${{ matrix.os }}
+    strategy:
+      matrix:
+        jdk: [ 17 ]
+        os: [ macos-latest ]
+        include:
+          - target: 17
+            jdk: 17
+
+    steps:
+       - name: Checkout
+         uses: actions/checkout@v4
+         with:
+           # we don't know what commit the last tag was it's safer to get entire repo so previousStableVersion resolves
+           fetch-depth: 0
+
+       - name: Set up python 3
+         uses: actions/setup-python@v5
+         with:
+           python-version: '3.x'
+           architecture: 'x64'
+           cache: 'pip'
+           cache-dependency-path: '**/requirements.txt'
+       - run: pip install -r python/requirements.txt
+
+       - name: Set up JDK ${{ matrix.jdk }}
+         uses: actions/setup-java@v4
+         with:
+           java-version: ${{ matrix.jdk }}
+           distribution: 'adopt'
+
+       - name: Build with Ant
+         working-directory: ./framework
+         run: ant build -Dbuild-source=${{ matrix.target }} -Dbuild-target=${{ matrix.target }}
