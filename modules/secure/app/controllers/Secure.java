@@ -29,11 +29,16 @@ public class Secure extends Controller {
     }
 
     private static void check(Check check) throws Throwable {
+        boolean hasOne = false;
         for(String profile : check.value()) {
             boolean hasProfile = (Boolean)Security.invoke("check", profile);
-            if(!hasProfile) {
-                Security.invoke("onCheckFailed", profile);
+            if (hasProfile) {
+                hasOne = true;
+                break;
             }
+        }
+        if(!hasOne) {
+            Security.invoke("onCheckFailed", profile);
         }
     }
 
