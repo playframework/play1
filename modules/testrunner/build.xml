@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="testrunner module" default="build" basedir=".">
-
+    <property name="build-source" value="17" />
+    <property name="build-target" value="${build-source}" />
     <path id="project.classpath">
         <pathelement path="../../framework/classes"/>
         <fileset dir="../../framework/lib">
@@ -15,7 +16,7 @@
     <target name="build">
         <mkdir dir="tmp/classes" />
         <mkdir dir="lib" />
-        <javac srcdir="src" destdir="tmp/classes" source="11" target="11">
+        <javac srcdir="src" destdir="tmp/classes" source="${build-source}" target="${build-target}">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="tmp/classes">

@@ -3,6 +3,8 @@
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
     <property name="baseversion" value="1.9.x" />
+    <property name="build-source" value="17" />
+    <property name="build-target" value="${build-source}" />
 
     <path id="project.classpath">
         <fileset dir=".">
@@ -64,7 +66,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="11" target="11">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="${build-source}" target="${build-target}">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -112,6 +114,8 @@
     <target name="jar" depends="clean,version,compile,modules" description="create play.jar">
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
+        <echo message="build-source=${build-source}" />
+        <echo message="build-target=${build-target}" />
         <jar destfile="play-${version}.jar" basedir="classes">
             <manifest>
                 <attribute name="Premain-Class" value="play.classloading.HotswapAgent"/>
@@ -133,6 +137,8 @@
 
     <target name="modules">
         <property name="play.path" value="../.."/>
+        <property name="build-target" value="${build-target}"/>
+        <property name="build-source" value="${build-source}"/>
         <ant antfile="build.xml" target="build" dir="../modules/testrunner" />
         <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
         <ant antfile="build.xml" target="build" dir="../modules/docviewer" />
@@ -392,7 +398,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="11" target="11">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="${build-source}" target="${build-target}">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">

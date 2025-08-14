@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="Grizzly" default="build" basedir=".">
-
+    <property name="build-source" value="17" />
+    <property name="build-target" value="${build-source}" />
     <path id="project.classpath">
         <pathelement path="${play.path}/framework/classes"/>
         <fileset dir="${play.path}/framework/lib">
@@ -34,7 +35,7 @@
 
     <target name="compile">
         <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes" debug="true" source="11" target="11">
+        <javac srcdir="src" destdir="tmp/classes" debug="true" source="${build-source}" target="${build-target}">
             <classpath refid="project.classpath" />
         </javac>
     </target>
