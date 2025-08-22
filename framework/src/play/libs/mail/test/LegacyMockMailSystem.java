@@ -1,15 +1,15 @@
 package play.libs.mail.test;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.Email;
+import org.apache.commons.mail2.jakarta.Email;
 import play.Logger;
 import play.libs.Mail;
 import play.libs.mail.MailSystem;
 import play.utils.ImmediateFuture;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
