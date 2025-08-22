@@ -1,6 +1,6 @@
 package controllers;
 
-import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail2.core.EmailException;
 import play.mvc.*;
 
 public class Welcome extends Mailer {

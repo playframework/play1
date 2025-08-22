@@ -2,7 +2,7 @@ package notifiers;
 
 import play.mvc.*;
 
-import javax.mail.internet.*;
+import jakarta.mail.internet.*;
 
 import models.*;
 
