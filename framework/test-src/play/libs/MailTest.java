@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.concurrent.Future;
 
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.mail2.jakarta.Email;
+import org.apache.commons.mail2.core.EmailException;
+import org.apache.commons.mail2.jakarta.SimpleEmail;
 import org.junit.Before;
 import org.junit.Test;
 

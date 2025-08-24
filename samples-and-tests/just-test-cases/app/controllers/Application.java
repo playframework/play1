@@ -6,10 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.mail.EmailAttachment;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail2.jakarta.EmailAttachment;
+import org.apache.commons.mail2.core.EmailException;
+import org.apache.commons.mail2.jakarta.HtmlEmail;
 import play.*;
 import play.mvc.*;
 import play.i18n.Lang;
@@ -19,8 +18,6 @@ import play.jobs.*;
 import models.*;
 import utils.*;
 import jobs.*;
-
-import javax.mail.internet.InternetAddress;
 
 @play.db.jpa.Transactional
 public class Application extends Controller {

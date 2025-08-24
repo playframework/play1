@@ -13,18 +13,18 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.activation.DataSource;
-import javax.activation.URLDataSource;
-import javax.mail.internet.InternetAddress;
+import jakarta.activation.DataSource;
+import jakarta.activation.URLDataSource;
+import jakarta.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailAttachment;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
-import org.apache.commons.mail.MultiPartEmail;
-import org.apache.commons.mail.SimpleEmail;
+import org.apache.commons.mail2.jakarta.Email;
+import org.apache.commons.mail2.jakarta.EmailAttachment;
+import org.apache.commons.mail2.core.EmailException;
+import org.apache.commons.mail2.jakarta.HtmlEmail;
+import org.apache.commons.mail2.jakarta.MultiPartEmail;
+import org.apache.commons.mail2.jakarta.SimpleEmail;
 
 import play.Logger;
 import play.Play;

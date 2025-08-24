@@ -82,7 +82,7 @@ class IamADeveloper(unittest.TestCase):
             self.assertEqual(self.play.returncode, 0)
 
         # Run with a --timeout that is shorter than the tests take
-        step('run with auto-test --timeout=1')
+        step('run with auto-test --timeout=1 (Tests should be in ERROR)')
 
         with call_play(self, ['auto-test', app, "--timeout=1"]) as self.play:
             # wait for play to be ready

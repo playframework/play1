@@ -2,7 +2,7 @@ package play.libs.mail;
 
 import java.util.concurrent.Future;
 
-import org.apache.commons.mail.Email;
+import org.apache.commons.mail2.jakarta.Email;
 
 import play.libs.Mail;
 
