@@ -52,7 +52,7 @@ require:    &allDependencies
     - net.sf.ehcache -> ehcache 2.10.9.2
     - net.sf.ezmorph -> ezmorph 1.0.6
     - net.sf.jsr107cache -> jsr107cache 1.1
-    - net.sf.oval -> oval 1.90
+    - net.sf.oval -> oval 3.2.1
     - com.mysql -> mysql-connector-j 9.3.0
     - oauth.signpost -> signpost-core 1.2.1.2
     - jakarta.servlet -> jakarta.servlet-api 6.0.0
