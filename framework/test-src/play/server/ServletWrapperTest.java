@@ -3,18 +3,12 @@ package play.server;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -176,6 +170,9 @@ public class ServletWrapperTest {
         }
 
         @Override
+        public String changeSessionId() { throw new RuntimeException("Method not implemented"); }
+
+        @Override
         public HttpSession getSession(boolean arg0) {
             throw new RuntimeException("Method not implemented");
         }
@@ -196,8 +193,33 @@ public class ServletWrapperTest {
         }
 
         @Override
-        public boolean isRequestedSessionIdFromUrl() {
+        public boolean authenticate(HttpServletResponse httpServletResponse) throws IOException, ServletException {
+            return false;
+        }
+
+        @Override
+        public void login(String s, String s1) throws ServletException {
             throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public void logout() throws ServletException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public Collection<Part> getParts() throws IOException, ServletException {
+            return List.of();
+        }
+
+        @Override
+        public Part getPart(String s) throws IOException, ServletException {
+            return null;
+        }
+
+        @Override
+        public <T extends HttpUpgradeHandler> T upgrade(Class<T> aClass) throws IOException, ServletException {
+            return null;
         }
 
         @Override
@@ -231,6 +253,11 @@ public class ServletWrapperTest {
         }
 
         @Override
+        public long getContentLengthLong() {
+            return 0;
+        }
+
+        @Override
         public String getContentType() {
             throw new RuntimeException("Method not implemented");
         }
@@ -252,6 +279,52 @@ public class ServletWrapperTest {
 
         @Override
         public int getLocalPort() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public ServletContext getServletContext() { throw new RuntimeException("Method not implemented"); }
+
+        @Override
+        public AsyncContext startAsync() throws IllegalStateException { throw new RuntimeException("Method not implemented"); }
+
+        @Override
+        public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public boolean isAsyncStarted() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public boolean isAsyncSupported() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public AsyncContext getAsyncContext() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public DispatcherType getDispatcherType() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public String getRequestId() {
+            throw new RuntimeException("Method not implemented");
+        }
+
+        @Override
+        public String getProtocolRequestId() {
+            return "";
+        }
+
+        @Override
+        public ServletConnection getServletConnection() {
             throw new RuntimeException("Method not implemented");
         }
 
@@ -292,11 +365,6 @@ public class ServletWrapperTest {
 
         @Override
         public BufferedReader getReader() throws IOException {
-            throw new RuntimeException("Method not implemented");
-        }
-
-        @Override
-        public String getRealPath(String arg0) {
             throw new RuntimeException("Method not implemented");
         }
 

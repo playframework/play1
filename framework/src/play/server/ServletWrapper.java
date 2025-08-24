@@ -24,14 +24,14 @@ import play.utils.HTTP;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -321,9 +321,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     protected static Map<String, Http.Cookie> getCookies(HttpServletRequest httpServletRequest) {
         Map<String, Http.Cookie> cookies = new HashMap<>(16);
-        javax.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
+        jakarta.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
         if (cookiesViaServlet != null) {
-            for (javax.servlet.http.Cookie cookie : cookiesViaServlet) {
+            for (jakarta.servlet.http.Cookie cookie : cookiesViaServlet) {
                 Http.Cookie playCookie = new Http.Cookie();
                 playCookie.name = cookie.getName();
                 playCookie.path = cookie.getPath();

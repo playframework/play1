@@ -1,7 +1,7 @@
 package play.plugins;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
