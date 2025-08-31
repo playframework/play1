@@ -33,7 +33,7 @@ require:    &allDependencies
     - com.h2database -> h2 1.4.200
     - jakarta.activation -> jakarta.activation-api 2.1.3
     - com.sun.mail -> jakarta.mail 2.0.2
-    - javax.inject 1.0
+    - jakarta.inject -> jakarta.inject-api 2.0.1
     - javax.validation -> validation-api 1.1.0.Final
     - jaxen 2.0.0
     - joda-time 2.14.0

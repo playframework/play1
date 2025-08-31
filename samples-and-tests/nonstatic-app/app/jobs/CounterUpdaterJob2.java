@@ -5,7 +5,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import services.Counter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @OnApplicationStart
 public class CounterUpdaterJob2 extends Job<Void> {
