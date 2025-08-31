@@ -10,8 +10,7 @@ public class PThreadFactory implements ThreadFactory {
     final String namePrefix;
 
     public PThreadFactory(String poolName) {
-        SecurityManager s = System.getSecurityManager();
-        group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        group = Thread.currentThread().getThreadGroup();
         namePrefix = poolName + "-thread-";
     }
 
