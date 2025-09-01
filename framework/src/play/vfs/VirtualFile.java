@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channel;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -103,11 +102,7 @@ public class VirtualFile {
     }
 
     public boolean exists() {
-        try {
-            return realFile != null && realFile.exists();
-        } catch (AccessControlException e) {
-            return false;
-        }
+        return realFile != null && realFile.exists();
     }
 
     public InputStream inputstream() {
