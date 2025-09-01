@@ -188,7 +188,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
         zip.close()
 
 # Recursively delete all files/folders in root whose name equals to filename
-# We could pass a "ignore" parameter to copytree, but that's not supported in Python 2.5
+# We could pass an "ignore" parameter to copytree, but that's not supported in Python 2.5
 
 def deleteFrom(root, filenames):
     for f in os.listdir(root):
@@ -250,15 +250,30 @@ def java_path():
     else:
         return os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
-def getJavaVersion():
+def get_java_version():
     sp = subprocess.Popen([java_path(), "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    javaVersion = sp.communicate()
-    javaVersion = str(javaVersion)
+    java_version = sp.communicate()
+    java_version = str(java_version)
     
-    result = re.search('version "([a-zA-Z0-9\.\-_]{1,})"', javaVersion)
+    result = re.search('version "([a-zA-Z0-9\.\-_]{1,})"', java_version)
     
     if result:
         return result.group(1)
     else:
-        print("Unable to retrieve java version from " + javaVersion)
+        print("Unable to retrieve java version from " + java_version)
         return ""
+
+def get_minimal_supported_java_version():
+    return 11
+
+def is_java_version_supported(java_version):
+    try:
+        if java_version.startswith("1."):
+            num = int(java_version.split('.')[-1])
+        elif java_version.count('.') >= 1:
+            num = int(java_version.split('.')[0])
+        else:
+            num = int(java_version)
+        return not (num < get_minimal_supported_java_version())
+    except ValueError:
+        return True
