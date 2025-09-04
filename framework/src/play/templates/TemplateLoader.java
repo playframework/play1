@@ -1,5 +1,6 @@
 package play.templates;
 
+import java.io.File;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -236,7 +237,7 @@ public class TemplateLoader {
         String play_templates_compile = Play.configuration.getProperty("play.templates.compile",
                 System.getProperty("play.templates.compile", System.getenv("PLAY_TEMPLATES_COMPILE")));
         String play_templates_compile_path_separator = Play.configuration.getProperty("play.templates.compile.path.separator",
-                System.getProperty("play.templates.compile.path.separator", System.getProperty("path.separator")));
+                System.getProperty("play.templates.compile.path.separator", File.pathSeparator));
         if (play_templates_compile != null) {
             for (String yamlTemplate : play_templates_compile.split(play_templates_compile_path_separator)) {
                 VirtualFile vf = null;
