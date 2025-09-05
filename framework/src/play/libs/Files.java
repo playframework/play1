@@ -149,10 +149,11 @@ public class Files {
 
     public static void zip(File directory, File zipFile) {
         try {
-            try (FileOutputStream os = new FileOutputStream(zipFile)) {
-                try (ZipOutputStream zos = new ZipOutputStream(os)) {
-                    zipDirectory(directory, directory, zos);
-                }
+            try (
+                FileOutputStream os = new FileOutputStream(zipFile);
+                ZipOutputStream zos = new ZipOutputStream(os)
+            ) {
+                zipDirectory(directory, directory, zos);
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
