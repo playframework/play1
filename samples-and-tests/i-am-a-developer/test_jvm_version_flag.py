@@ -23,7 +23,7 @@ class JvmVersionFlag(unittest.TestCase):
             'jpda.port': 8000
         }
 
-    @mock.patch('play.application.getJavaVersion', return_value='')
+    @mock.patch('play.application.get_java_version', return_value='')
     def testWithFlag(self, mock):
         play_env = self.common.copy()
         # pass the jvm_version flag in
@@ -32,17 +32,17 @@ class JvmVersionFlag(unittest.TestCase):
         play_app = PlayApplication('fake', play_env, True)
         play_app.java_cmd([])
 
-        step('Assert getJavaVersion was not called')
+        step('Assert get_java_version was not called')
         mock.assert_(not mock.called)
 
-    @mock.patch('play.application.getJavaVersion', return_value='')
+    @mock.patch('play.application.get_java_version', return_value='')
     def testWithoutFlag(self, mock):
         play_env = self.common.copy()
 
         play_app = PlayApplication('fake', play_env, True)
         play_app.java_cmd([])
 
-        step('Assert getJavaVersion was called once')
+        step('Assert get_java_version was called once')
         mock.assert_(mock.called)
 
 

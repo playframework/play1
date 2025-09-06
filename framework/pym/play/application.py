@@ -291,15 +291,13 @@ class PlayApplication(object):
             java_args.append('-server')
 
         if 'jvm_version' in self.play_env:
-            javaVersion = self.play_env['jvm_version']
+            java_version = self.play_env['jvm_version']
         else:
-            javaVersion = getJavaVersion() 
-        print("~ using java version \"%s\"" % javaVersion)
-        
-        if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7") or javaVersion.startswith("1.8") or javaVersion.startswith("9") or javaVersion.startswith("10") :
-            print("~ ERROR: java version prior to 11 are no longer supported: current version \"%s\" : please update" % javaVersion)
-            
-        java_args.append('-noverify')
+            java_version = get_java_version()
+        print("~ using java version \"%s\"" % java_version)
+
+        if is_java_version_supported(java_version):
+            print("~ ERROR: java version prior to %s are no longer supported: current version \"%s\" : please update" % (get_minimal_supported_java_version(), java_version))
 
         java_policy = self.readConf('java.policy')
         if java_policy != '':

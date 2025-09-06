@@ -74,7 +74,7 @@ def defineJavadocOptions(app, outdir, args):
         args.remove('--links')
         # Add link to JavaDoc of JAVA
         
-        javaVersion = getJavaVersion()
+        javaVersion = get_java_version()
         print("~ using java version \"%s\"" % javaVersion)
         if javaVersion.startswith("1.5"):
             print("~    Java(TM) Platform, Platform Standard Edition 5.0")        
