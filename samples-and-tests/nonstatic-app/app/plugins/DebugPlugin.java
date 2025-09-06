@@ -5,7 +5,7 @@ import play.mvc.Http;
 import play.mvc.Scope;
 import services.Mathematics;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 

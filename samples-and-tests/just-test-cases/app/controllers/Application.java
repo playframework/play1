@@ -319,7 +319,7 @@ public class Application extends Controller {
 
     }
 
-    @javax.inject.Inject
+    @Jakarta.inject.Inject
     static Test myTest;
 
     public static void useSpringBeanInject() {
