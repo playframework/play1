@@ -4,7 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import play.Logger;
 import play.libs.IO;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.util.*;
 
@@ -53,16 +55,19 @@ public class HTTP {
         Map<String, String> map = new HashMap<>();
 
         String path = "/play/utils/http_headers.properties";
-        InputStream in = HTTP.class.getResourceAsStream(path);
-        if (in == null) {
-            throw new RuntimeException("Error reading " + path);
-        }
-        List<String> lines = IO.readLines(in);
-        for (String line : lines) {
-            line = line.trim();
-            if (!line.startsWith("#")) {
-                map.put(line.toLowerCase(), line);
+        try (InputStream in = HTTP.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new RuntimeException("Error reading " + path);
             }
+            List<String> lines = IO.readLines(in);
+            for (String line : lines) {
+                line = line.trim();
+                if (!line.startsWith("#")) {
+                    map.put(line.toLowerCase(), line);
+                }
+            }
+        } catch (IOException exception) {
+            throw new UncheckedIOException(exception);
         }
 
         return Collections.unmodifiableMap(map);
@@ -80,12 +85,8 @@ public class HTTP {
         if (headerName == null) {
             return null;
         }
-        String correctCase = lower2UppercaseHttpHeaders.get(headerName.toLowerCase());
-        if (correctCase != null) {
-            return correctCase;
-        }
         // Didn't find it - return it as it is
-        return headerName;
+        return lower2UppercaseHttpHeaders.getOrDefault(headerName.toLowerCase(), headerName);
     }
 
     /**

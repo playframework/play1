@@ -1,6 +1,5 @@
 package play.server;
 
-import org.apache.commons.io.IOUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -568,10 +567,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
 
         } else {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IOUtils.copy(new ChannelBufferInputStream(b), out);
-            byte[] n = out.toByteArray();
-            body = new ByteArrayInputStream(n);
+            body = new ByteArrayInputStream(new ChannelBufferInputStream(b).readAllBytes());
         }
 
         String host = nettyRequest.headers().get(HOST);
