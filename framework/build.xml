@@ -420,13 +420,15 @@
     </target>
 
     <target name="unittest" depends="compile-unittest">
-        <junitlauncher failureproperty="junit.failure">
+        <junitlauncher haltonfailure="false" failureproperty="junit.failure" printSummary="true">
             <classpath refid="classpath.test" />
             <testclasses>
                 <fileset dir="test-classes" includes="**/*Test.class" />
-<!--                <listener type="legacy-brief" sendSysOut="true" />-->
-                <listener type="legacy-xml" sendSysErr="true" sendSysOut="true"/>
             </testclasses>
+            <classpath>
+                <pathelement location="test-classes"/>
+                <path refid="classpath.test"/>
+            </classpath>
         </junitlauncher>
         <fail if="junit.failure" message="Unit test(s) failed. See reports!"/>
     </target>
