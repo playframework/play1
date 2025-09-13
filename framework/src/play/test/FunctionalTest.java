@@ -554,7 +554,7 @@ public abstract class FunctionalTest extends BaseTest {
     public static void assertCharset(String charset, Response response) {
         int pos = response.contentType.indexOf("charset=") + 8;
         String responseCharset = (pos > 7) ? response.contentType.substring(pos).toLowerCase() : "";
-        assertEquals("Response charset", charset.toLowerCase(), responseCharset);
+        assertEquals(charset.toLowerCase(), responseCharset, "Response charset");
     }
 
     /**

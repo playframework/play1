@@ -1,8 +1,8 @@
-import static org.junit.Assert.assertEquals;
 
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import play.libs.WS;
@@ -35,7 +35,7 @@ public class WSUrlFetchTest extends UnitTest {
 
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws Exception {
         // Restore to default WS impl
         field.set(null, orgWsImpl);

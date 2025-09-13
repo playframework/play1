@@ -27,7 +27,7 @@ public class FilesTest {
             String actual = Files.sanitizeFileName(FILE_NAMES[i]);
             String expected = FILE_NAMES[i + 1];
 
-            assertEquals("String was not sanitized properly", expected, actual);
+            assertEquals(expected, actual, "String was not sanitized properly");
         }
     }
 
@@ -39,7 +39,7 @@ public class FilesTest {
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\TEST.TXT");
-            assertTrue( Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
+            assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\TEST.TXT");

@@ -1,4 +1,6 @@
-import org.junit.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import play.cache.*;
 import java.util.*;
@@ -7,7 +9,7 @@ import models.*;
 
 public class CacheTest extends UnitTest {
     
-    @Before
+    @BeforeEach
     public void setup() {
         Fixtures.deleteAll();
         Fixtures.load("users.yml");

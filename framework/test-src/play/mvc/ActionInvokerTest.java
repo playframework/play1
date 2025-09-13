@@ -1,6 +1,7 @@
 package play.mvc;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import play.Play;
 import play.PlayBuilder;
@@ -24,7 +25,7 @@ import static play.mvc.ActionInvokerTest.TestInterceptor.beforesCounter;
 public class ActionInvokerTest {
     private Object[] noArgs = new Object[0];
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         new PlayBuilder().build();
         Http.Request.current.set(new Http.Request());

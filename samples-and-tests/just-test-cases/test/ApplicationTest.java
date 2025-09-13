@@ -1,4 +1,4 @@
-import org.junit.*;
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import play.mvc.*;
 import play.mvc.Http.*;

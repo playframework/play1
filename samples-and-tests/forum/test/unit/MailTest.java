@@ -1,6 +1,6 @@
 package unit;
 
-import org.junit.*;
+import org.junit.jupiter.api.*;
 import play.test.*;
 import play.libs.*;
 

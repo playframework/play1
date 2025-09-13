@@ -7,7 +7,7 @@ import models.*;
 
 public class Application extends Controller {
     
-    @Before
+    @BeforeEach
     static void addUser() {
         User user = connected();
         if(user != null) {

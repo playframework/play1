@@ -1,5 +1,5 @@
 import controllers.Binary;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 public class BinaryTest extends FunctionalTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Fixtures.deleteAll(); // see Bug #491403
         Fixtures.deleteDirectory("attachments");
@@ -68,7 +68,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "1366949", size);
+        assertEquals("1366949", size, "Size does not match");
     }
 
     @Test
@@ -87,7 +87,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "1366949", size);
+        assertEquals( "1366949", size, "Size does not match");
     }
 
     @Test
@@ -105,7 +105,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "2440", size);
+        assertEquals( "2440", size, "Size does not match");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "2440", size);
+        assertEquals("2440", size, "Size does not match");
     }
 
     @Test
@@ -142,7 +142,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "0", size);
+        assertEquals( "0", size, "Size does not match");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class BinaryTest extends FunctionalTest {
 
         String size = uploadResponse.getHeader("Content-Length");
 
-        assertEquals("Size does not match", "0", size);
+        assertEquals( "0", size, "Size does not match");
     }
     
     @Test

@@ -1,10 +1,12 @@
 package controllers;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import play.Logger;
 import play.libs.F;
 import play.libs.WS;
 import play.mvc.Controller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,7 +29,7 @@ public class SlowResponseTestController extends Controller {
         String url = "http://localhost:9003/SlowResponseTestController/slowResponse";
         // first make sure SlowResponse works
         String res = await(WS.url(url).getAsync()).getString();
-        Assert.assertEquals("Response after sleep", res);
+        assertEquals("Response after sleep", res);
 
         // assert that we get exception if we have too short timeout
         boolean gotException = false;
@@ -36,7 +38,7 @@ public class SlowResponseTestController extends Controller {
         } catch (Exception e) {
             gotException = true;
         }
-        Assert.assertTrue("Did not get exception!", gotException);
+        Assertions.assertTrue(gotException, "Did not get exception!");
 
         // assert that we get exception if we connect to invalid port
         gotException = false;
@@ -45,7 +47,7 @@ public class SlowResponseTestController extends Controller {
         } catch (Exception e) {
             gotException = true;
         }
-        Assert.assertTrue("Did not get exception!", gotException);
+        Assertions.assertTrue(gotException, "Did not get exception!");
 
         renderText("ok");
     }
@@ -68,7 +70,7 @@ public class SlowResponseTestController extends Controller {
            Logger.info(e, "got xpected timeout ");
            gotException = true;
         }
-        Assert.assertTrue("Did not get exception!", gotException);
+        Assertions.assertTrue(gotException, "Did not get exception!");
 
         renderText("ok");
     }

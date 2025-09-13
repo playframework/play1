@@ -5,8 +5,8 @@ import models.zoo.Animal;
 import models.zoo.Meal;
 import models.zoo.Zoo;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import play.db.jpa.JPA;
@@ -17,7 +17,7 @@ import play.test.UnitTest;
 
 public class JPAPluginTest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void cleanup() {
 	Fixtures.deleteDatabase();
     }
@@ -48,8 +48,8 @@ public class JPAPluginTest extends UnitTest {
 	zoo.save(); // this line causes a violation exception: seems to be due
 		    // to a Hibernate bug (see
 		    // http://stackoverflow.com/questions/20280271/hibernate-jpa-onetoone-orphan-removal-still-not-working-as-of-4-2-7-4-3-0-cr1)
-	assertEquals("There should be no animal left", 0, Animal.count());
-	assertEquals("There should not be any meals left", 0, Meal.count());
+	assertEquals(0, Animal.count(), "There should be no animal left");
+	assertEquals( 0, Meal.count(), "There should not be any meals left");
     }
     
     @Test
@@ -69,7 +69,8 @@ public class JPAPluginTest extends UnitTest {
 	bmA.save();
 	bmB.save();
 	
-	assertEquals("We must have 2 LevelOne", 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals( 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 2 LevelOne");
 
 	// now clear them out
 	bmA.levelOnes.clear();
@@ -78,7 +79,8 @@ public class JPAPluginTest extends UnitTest {
 	bmA.save();
 	bmB.save();
 	
-	assertEquals("We must have 0 LevelOne", 0L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals(0L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 0 LevelOne");
 
 	// now add new ones 
 	levelOneA = new LevelOne();
@@ -91,7 +93,8 @@ public class JPAPluginTest extends UnitTest {
 	bmB.levelOnes.add(levelOneB);
 
 	bmB.save();
-	assertEquals("We must have 2 LevelOne", 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals( 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 2 LevelOne");
     }
     
     @Disabled("wait for full fix")
@@ -112,7 +115,8 @@ public class JPAPluginTest extends UnitTest {
 	bmA.save();
 	bmB.save();
 	
-	assertEquals("We must have 2 LevelOne", 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals( 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 2 LevelOne");
 
 	// now clear them out
 	bmA.levelOnes.clear();
@@ -121,7 +125,8 @@ public class JPAPluginTest extends UnitTest {
 	bmA.save();
 	bmB.save();
 	
-	assertEquals("We must have 0 LevelOne", 0L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals( 0L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 0 LevelOne");
 
 	// now add new ones 
 	levelOneA = new LevelOne();
@@ -134,7 +139,8 @@ public class JPAPluginTest extends UnitTest {
 
 	bmA.save();
 	bmB.save();
-	assertEquals("We must have 2 LevelOne", 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
+	assertEquals( 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB),
+            "We must have 2 LevelOne");
     }
     
     @Test

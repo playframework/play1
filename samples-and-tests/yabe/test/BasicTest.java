@@ -1,11 +1,14 @@
-import org.junit.*;
+
 import java.util.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import models.*;
  
 public class BasicTest extends UnitTest {
     
-    @Before
+    @BeforeEach
     public void setup() {
         Fixtures.deleteAll();
     }

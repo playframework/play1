@@ -1,4 +1,5 @@
 import models.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Http.Request;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 
 public class FunctionalTestTest extends FunctionalTest {
     
-    @org.junit.Before
+    @BeforeEach
     public void setUp() {
         Fixtures.deleteDatabase();
         Fixtures.loadModels("users.yml");
@@ -88,7 +89,7 @@ public class FunctionalTestTest extends FunctionalTest {
         assertIsOk(response);
         assertEquals("Is it keeping saved?", response.cookies.get("PLAY_TEST").value);
     }
-    
+
     public static class AnotherInnerTest extends UnitTest {
         
         @Test
@@ -157,9 +158,11 @@ public class FunctionalTestTest extends FunctionalTest {
     /**
      * When a route is called that is not even defined, an exception is expected.
      */
-    @Test(expected = NotFound.class)
+    @Test
     public void testNoRoute() {
-        GET("/status/route-not-defined/");
+        assertThrows(NotFound.class, () -> {
+            GET("/status/route-not-defined/");
+        });
     }
 
     /**
@@ -176,9 +179,11 @@ public class FunctionalTestTest extends FunctionalTest {
      * When a controller throws a normal exception, an exception is expected in
      * the test method as well.
      */
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testFailure() {
-      GET("/status/failure/");
+      assertThrows(UnsupportedOperationException.class, () -> {
+          GET("/status/failure/");
+      });
     }
 
     /**

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import play.Logger;
@@ -23,7 +23,7 @@ import controllers.Rest;
 public class RestTest extends UnitTest {
     static Map<String, Object> params;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         params = new HashMap<String, Object>();
         params.put("timestamp", 1200000L);

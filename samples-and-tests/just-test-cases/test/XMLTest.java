@@ -2,7 +2,8 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import play.libs.XML;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 
 public class XMLTest {
   @Test

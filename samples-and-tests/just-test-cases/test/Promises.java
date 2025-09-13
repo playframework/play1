@@ -1,9 +1,8 @@
-import org.junit.*;
-
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
+import org.junit.jupiter.api.Test;
 import play.*;
 import play.test.*;
 import play.jobs.*;
@@ -53,7 +52,7 @@ public class Promises extends UnitTest {
             assertEquals("-> 250", s);
             p = true;
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
         for(String s : Promise.waitAny(new DoSomething(100).now(), new DoSomething(250).now()).get()) {
             fail("Oops");
@@ -73,7 +72,7 @@ public class Promises extends UnitTest {
                 p = true;
             }
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
         for(String s : e._2) {
             fail("Oops");
@@ -92,7 +91,7 @@ public class Promises extends UnitTest {
             assertEquals("-> 100", s);
             p = true;
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
     }
 
@@ -253,9 +252,11 @@ public class Promises extends UnitTest {
 
     }
 
-  @Test(expected = TimeoutException.class)
-  public void waitAllTimeout() throws InterruptedException, ExecutionException, TimeoutException {
-    Promise.waitAll(new DoSomething2(200).now(), new DoSomething2(200).now()).get(100, TimeUnit.MILLISECONDS);
+  @Test
+  public void waitAllTimeout() {
+        assertThrows(TimeoutException.class, () -> {
+            Promise.waitAll(new DoSomething2(200).now(), new DoSomething2(200).now()).get(100, TimeUnit.MILLISECONDS);
+        });
   }
 
   @Test()
@@ -263,9 +264,11 @@ public class Promises extends UnitTest {
     Promise.waitAll(new DoSomething2(200).now(), new DoSomething2(200).now()).get(400, TimeUnit.MILLISECONDS);
   }
 
-  @Test(expected = TimeoutException.class)
-  public void waitForTimeout() throws InterruptedException, ExecutionException, TimeoutException {
-    new DoSomething2(200).now().get(100, TimeUnit.MILLISECONDS);
+  @Test
+  public void waitForTimeout() {
+      assertThrows(TimeoutException.class, () -> {
+          new DoSomething2(200).now().get(100, TimeUnit.MILLISECONDS);
+      });
   }
 
     /**
@@ -357,8 +360,9 @@ public class Promises extends UnitTest {
 
             // The onRedeem action should have been invoked exactly once for each time
             // it was registered.
-            assertEquals(String.format("The %dth iteration failed", i), totalCallbacksRegisteredOnPromise,
-                totalTimesPromiseIsInvoked.get());
+            assertEquals(totalCallbacksRegisteredOnPromise,
+                    totalTimesPromiseIsInvoked.get(),
+                    String.format("The %dth iteration failed", i));
             i++;
         }
 

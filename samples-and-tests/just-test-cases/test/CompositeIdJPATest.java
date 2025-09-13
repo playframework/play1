@@ -1,6 +1,6 @@
 import models.*;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import play.Logger;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CompositeIdJPATest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         Fixtures.deleteAll();
         Fixtures.load("compositeIds.yml");
