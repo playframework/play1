@@ -1,6 +1,6 @@
 package play.data.validation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.Play;
 import play.i18n.Messages;
 import play.i18n.MessagesBuilder;
@@ -9,7 +9,7 @@ import play.mvc.Http;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidationTest {
 

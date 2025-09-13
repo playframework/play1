@@ -4,11 +4,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.junit.*;
-import org.junit.Before;
-
 import controllers.async.AsyncApplication;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.Logger;
 import play.test.*;
 import play.mvc.*;
@@ -19,7 +18,7 @@ import models.async.AsyncTrace;
 public class AsyncApplicationTest extends FunctionalTest {
     public static Map<Long, String> goodTraceOrders = new HashMap<Long, String>();
 
-    @Before
+    @BeforeEach
     public void intit() {
         AsyncTrace.deleteAll();
         goodTraceOrders.put(0L, "~~~~ Beginning functional test execution.");

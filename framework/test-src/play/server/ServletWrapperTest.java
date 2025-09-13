@@ -1,7 +1,7 @@
 package play.server;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -10,15 +10,16 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.*;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class ServletWrapperTest {
     private String browserEtag;
     private String browserLastModified;
     private long lastModified;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         browserEtag = "\"1299752290000-1192808478\"";
         browserLastModified = "Thu, 10 Mar 2011 10:18:10 GMT";

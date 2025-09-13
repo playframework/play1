@@ -1,12 +1,13 @@
 package play.libs;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.libs.F.ArchivedEventStream;
 import play.libs.F.IndexedEvent;
@@ -23,7 +24,7 @@ public class ArchivedEventStreamTest {
     
     private ArchivedEventStream<String> stream;
     
-    @Before
+    @BeforeEach
     public void setUp() {
         stream = new ArchivedEventStream<>(100);
     }
@@ -61,5 +62,4 @@ public class ArchivedEventStreamTest {
         assertEquals(1, p2.get().size());
         assertEquals(VALUE_1, p2.get().get(0).data);
     }
-
 }

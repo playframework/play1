@@ -8,7 +8,7 @@ import models.CompositeIdForeignB;
 import models.CompositeIdPk;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.data.binding.Binder;

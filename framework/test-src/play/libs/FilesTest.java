@@ -1,14 +1,14 @@
 package play.libs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.utils.OS;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Marek Piechut
@@ -39,23 +39,23 @@ public class FilesTest {
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\TEST.TXT");
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue( Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\TEST.TXT");
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()) );
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\test.txt");
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue( Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
             a = new File("C:\\temp\\TEST.TXT");
             b = new File("C:\\temp\\.\\test.txt");
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue( Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
             a = new File("C:\\temp\\..\\TEMP\\TEST.TXT");
             b = new File("C:\\temp\\.\\test.txt");
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         }
     }
 
@@ -66,30 +66,30 @@ public class FilesTest {
 
         a = new File("temp\\TEST.TXT");
         b = new File("temp\\TEST.TXT");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
         a = new File("\\temp\\TEST.TXT");
         b = new File("\\temp\\TEST.TXT");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
         a = new File("\\temp\\TEST.TXT");
         b = new File("\\temp\\test.txt");
         if (OS.isWindows()) {
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         } else {
-            assertFalse(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertFalse(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         }
 
         a = new File("/temp/TEST.TXT");
         b = new File("/temp/TEST.TXT");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
         a = new File("/temp/TEST.TXT");
         b = new File("/temp/test.txt");
         if (OS.isWindows()) {
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         } else {
-            assertFalse(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertFalse(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         }
     }
 
@@ -101,21 +101,21 @@ public class FilesTest {
         a = new File("\\temp\\test.txt");
         b = new File("\\temp\\.\\test.txt");
         if (OS.isWindows()) {
-            assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertTrue( Files.isSameFile(a, b),String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         } else {
-            assertFalse(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+            assertFalse( Files.isSameFile(a, b),String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
         }
 
         a = new File("/temp/../temp/test.txt");
         b = new File("/temp/test.txt");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
         a = new File("/temp/test.txt");
         b = new File("/temp/./test.txt");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
 
         a = new File("/temp/../temp/test.txt");
         b = new File("/temp/./test.txt");
-        assertTrue(String.format("Error comparing %s and %s", a.getPath(), b.getPath()), Files.isSameFile(a, b));
+        assertTrue(Files.isSameFile(a, b), String.format("Error comparing %s and %s", a.getPath(), b.getPath()));
     }
 }

@@ -1,13 +1,10 @@
 package play.mvc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.PlayBuilder;
 import play.i18n.Messages;
@@ -17,9 +14,11 @@ import play.mvc.Scope.Flash;
 import play.mvc.Scope.Params;
 import play.mvc.Scope.Session;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class ScopeTest {
 
-    @org.junit.Before
+    @BeforeEach
     public void playBuilderBefore() {
         new PlayBuilder().build();
     }

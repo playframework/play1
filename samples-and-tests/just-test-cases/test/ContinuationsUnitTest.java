@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.libs.WS;

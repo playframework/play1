@@ -1,6 +1,8 @@
 package classloading.enhancers;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -16,8 +18,7 @@ import javassist.CtMethod;
 import models.Project;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.test.FunctionalTest;
 import play.test.UnitTest;

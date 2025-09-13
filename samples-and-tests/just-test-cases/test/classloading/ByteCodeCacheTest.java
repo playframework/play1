@@ -5,7 +5,7 @@ import java.io.File;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Play;
 import play.classloading.BytecodeCache;

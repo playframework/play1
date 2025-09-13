@@ -3,7 +3,7 @@ import models.Author;
 import models.Book;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.Error;
 import play.data.validation.Validation;

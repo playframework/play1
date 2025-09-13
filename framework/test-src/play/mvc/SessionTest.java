@@ -1,17 +1,18 @@
 package play.mvc;
 
-import org.junit.*;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.Play;
 import play.PlayBuilder;
 import play.mvc.Http.*;
 import play.mvc.Scope.Session;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class SessionTest {
 
-    @org.junit.Before
+    @BeforeEach
     public void playBuilderBefore() {
         new PlayBuilder().build();
     }
