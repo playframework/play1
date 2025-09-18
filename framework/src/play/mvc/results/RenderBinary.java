@@ -1,18 +1,14 @@
 package play.mvc.results;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.io.IOUtils;
 
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
@@ -204,16 +200,13 @@ public class RenderBinary extends Result {
     }
 
     private static void copyInputStreamAndClose(InputStream is, OutputStream out) throws IOException {
-        try {
-            IOUtils.copyLarge(is, out);
-        } finally {
-            closeQuietly(is);
+        try (is) {
+            is.transferTo(out);
         }
     }
 
     private boolean canAsciiEncode(String string) {
-        CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
-        return asciiEncoder.canEncode(string);
+        return US_ASCII.newEncoder().canEncode(string);
     }
 
     public boolean isInline() {
