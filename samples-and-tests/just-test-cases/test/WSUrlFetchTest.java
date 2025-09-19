@@ -3,7 +3,7 @@ import static org.junit.Assert.assertEquals;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
@@ -19,7 +19,7 @@ public class WSUrlFetchTest extends UnitTest {
     private static Field field;
 
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         // make sure we use WSUrlFetch as WS impl
 

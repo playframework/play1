@@ -14,7 +14,7 @@ import models.vendor.tag.Tag;
 import models.*;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.test.Fixtures;

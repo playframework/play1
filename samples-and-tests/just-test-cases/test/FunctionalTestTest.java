@@ -1,5 +1,5 @@
 import models.User;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.mvc.Http.Cookie;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;

@@ -1,19 +1,14 @@
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.libs.IO;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
-import play.libs.ws.WSUrlFetch;
 import play.test.UnitTest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 
 
 public class WSTest extends UnitTest {

@@ -1,12 +1,11 @@
 package play.libs;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import play.PlayBuilder;
-import play.libs.MimeTypes;
 import play.mvc.Http.Response;
 
 
@@ -14,7 +13,7 @@ import play.mvc.Http.Response;
  * Tests for {@link MimeTypes} class.
  */
 public class MimeTypesTest {
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         PlayBuilder playBuilder = new PlayBuilder();
         playBuilder.build();

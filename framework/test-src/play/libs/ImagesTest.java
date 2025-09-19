@@ -1,7 +1,8 @@
 package play.libs;
 
-import org.junit.After;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -9,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexandre Chatiron
@@ -82,7 +83,7 @@ public class ImagesTest {
         return new File(getClass().getResource(name).toURI());
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         result.delete();
     }

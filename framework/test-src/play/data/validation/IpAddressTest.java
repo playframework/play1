@@ -1,11 +1,13 @@
 package play.data.validation;
 
-import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.Validation.ValidationResult;
 import play.i18n.MessagesBuilder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class IpAddressTest {
 
@@ -114,7 +116,6 @@ public class IpAddressTest {
     public void assertValidIpV4Address(Boolean valid, String ipAddress) {
         Validation.clear();
         ValidationResult result = Validation.ipv4Address("phone", ipAddress);
-        assertEquals("Validation ipv4Address [" + ipAddress + "] should be " + valid, valid, result.ok);
+        assertEquals(valid, result.ok, "Validation ipv4Address [" + ipAddress + "] should be " + valid);
     }
-
 }

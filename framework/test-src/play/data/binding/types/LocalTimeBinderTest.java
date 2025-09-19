@@ -1,20 +1,21 @@
 package play.data.binding.types;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.PlayBuilder;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LocalTimeBinderTest {
 
     private LocalTimeBinder binder = new LocalTimeBinder();
 
-    @Before
+    @BeforeEach
     public void setup() {
         new PlayBuilder().build();
     }
@@ -36,8 +37,10 @@ public class LocalTimeBinderTest {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = DateTimeParseException.class)
+    @Test
     public void invalidLocalTime() throws Exception {
-        binder.bind("event.start", null, "25:15:30", LocalTime.class, null);
+        assertThrows(DateTimeParseException.class, () -> {
+            binder.bind("event.start", null, "25:15:30", LocalTime.class, null);
+        });
     }
 }

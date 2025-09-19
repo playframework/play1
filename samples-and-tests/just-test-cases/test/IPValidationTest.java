@@ -1,4 +1,4 @@
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.IPv4AddressCheck;
 import play.data.validation.IPv6AddressCheck;

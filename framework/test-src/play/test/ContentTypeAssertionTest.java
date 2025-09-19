@@ -2,17 +2,17 @@ package play.test;
 
 import static play.test.FunctionalTest.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.mvc.Http.Response;
 
 public class ContentTypeAssertionTest {
 
-    @Test(expected = AssertionError.class)
+    @Test
     public void givenContentTypeIsMissing_shouldThrowAssertionError() {
-        Response responseWithoutContentType = new Response();
-
-        assertContentType("text/html", responseWithoutContentType);
+        assertThrows(AssertionError.class, () -> {
+            Response responseWithoutContentType = new Response();
+            assertContentType("text/html", responseWithoutContentType);
+        });
     }
-
 }

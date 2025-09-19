@@ -2,15 +2,17 @@ package play.db;
 
 import java.util.*;
 
-import org.junit.*;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.Play;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 public class ConfigurationTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Play.configuration = new Properties();
     }

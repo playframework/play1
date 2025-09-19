@@ -1,6 +1,6 @@
 package application;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.test.FunctionalTest;
 import play.mvc.Http.Response;
 

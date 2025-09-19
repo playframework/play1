@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.test.UnitTest;
 
 public class Chunked2Test extends UnitTest {

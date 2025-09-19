@@ -7,7 +7,7 @@ import models.zoo.Zoo;
 
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
@@ -38,7 +38,7 @@ public class JPAPluginTest extends UnitTest {
 	}
     }
 
-    @Ignore("wait for full fix")
+    @Disabled("wait for full fix")
     @Test
     public void testOrphanRemovalDepDeletion() {
 	final Zoo zoo = new Zoo().save();
@@ -94,7 +94,7 @@ public class JPAPluginTest extends UnitTest {
 	assertEquals("We must have 2 LevelOne", 2L, LevelOne.count("baseModel = ?1 OR baseModel = ?2", bmA, bmB));
     }
     
-    @Ignore("wait for full fix")
+    @Disabled("wait for full fix")
     @Test
     public void testTransientErrorAddingTogether() {
 	BaseModel bmA = new BaseModel();

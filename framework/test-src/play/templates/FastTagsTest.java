@@ -4,15 +4,16 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import groovy.lang.Closure;
 import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.Scope;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class FastTagsTest {
@@ -20,7 +21,7 @@ public class FastTagsTest {
     private static final String LINE_SEPARATOR = System.lineSeparator();
     private StringWriter out = new StringWriter();
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
 
         Http.Response.current.set(new Http.Response());

@@ -9,13 +9,9 @@ import java.net.URL;
 import java.util.Properties;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test the Logger class. At the moment only a few methods.
@@ -38,7 +34,7 @@ public class LoggerTest {
      * Safes the original configuration and log.
      * @throws java.lang.Exception
      */
-    @BeforeClass
+    @BeforeAll
     public static void setUpBeforeClass() throws Exception {
         playConfig = Play.configuration;
         applicationPath = Play.applicationPath;
@@ -50,7 +46,7 @@ public class LoggerTest {
      * Restore  the original configuration and log.
      * @throws java.lang.Exception
      */
-    @AfterClass
+    @AfterAll
     public static void tearDownAfterClass() throws Exception {
         Play.configuration = playConfig;
         Play.applicationPath = applicationPath;
@@ -61,14 +57,14 @@ public class LoggerTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         Play.configuration = new Properties();
         Play.applicationPath = new File(".");
         Play.id = "test";
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
     }
 

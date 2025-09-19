@@ -1,19 +1,22 @@
 package play.libs;
 
-import static org.junit.Assert.*;
 
 import java.util.concurrent.Future;
 
 import org.apache.commons.mail2.jakarta.Email;
 import org.apache.commons.mail2.core.EmailException;
 import org.apache.commons.mail2.jakarta.SimpleEmail;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.PlayBuilder;
 import play.exceptions.MailException;
 import play.libs.mail.MailSystem;
 import play.utils.ImmediateFuture;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MailTest {
 
@@ -30,7 +33,7 @@ public class MailTest {
     private Email simpleEmail;
     private SpyingMailSystem spyingMailSystem;
 
-    @Before
+    @BeforeEach
     public void initializeFixture() throws Exception {
         new PlayBuilder().build();
 
@@ -43,29 +46,35 @@ public class MailTest {
         spyingMailSystem = new SpyingMailSystem();
     }
 
-    @Test(expected = MailException.class)
-    public void buildMessageWithoutFrom() throws EmailException {
-        Email emailWithoutFrom = new SimpleEmail();
-        emailWithoutFrom.addTo("from@playframework.com");
-        emailWithoutFrom.setSubject("subject");
-        Mail.buildMessage(new SimpleEmail());
+    @Test
+    public void buildMessageWithoutFrom() {
+        assertThrows(MailException.class, () -> {
+            Email emailWithoutFrom = new SimpleEmail();
+            emailWithoutFrom.addTo("from@playframework.com");
+            emailWithoutFrom.setSubject("subject");
+            Mail.buildMessage(new SimpleEmail());
+        });
     }
 
-    @Test(expected = MailException.class)
-    public void buildMessageWithoutRecipient() throws EmailException {
-        Email emailWithoutRecipients =
-                new SimpleEmail()
-                        .setFrom("from@playframework.com")
-                        .setSubject("subject");
-        Mail.buildMessage(emailWithoutRecipients);
+    @Test()
+    public void buildMessageWithoutRecipient() {
+        assertThrows(MailException.class, () -> {
+            Email emailWithoutRecipients =
+                    new SimpleEmail()
+                            .setFrom("from@playframework.com")
+                            .setSubject("subject");
+            Mail.buildMessage(emailWithoutRecipients);
+        });
     }
 
-    @Test(expected = MailException.class)
-    public void buildMessageWithoutSubject() throws EmailException {
-        Email emailWithoutSubject = new SimpleEmail();
-        emailWithoutSubject.setFrom("from@playframework.com");
-        emailWithoutSubject.addTo("to@playframework.com");
-        Mail.buildMessage(emailWithoutSubject);
+    @Test
+    public void buildMessageWithoutSubject() {
+        assertThrows(MailException.class, () -> {
+            Email emailWithoutSubject = new SimpleEmail();
+            emailWithoutSubject.setFrom("from@playframework.com");
+            emailWithoutSubject.addTo("to@playframework.com");
+            Mail.buildMessage(emailWithoutSubject);
+        });
     }
 
     @Test

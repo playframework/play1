@@ -1,7 +1,7 @@
 package play.plugins;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.Play;
 import play.PlayBuilder;
 import play.PlayPlugin;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ConfigurablePluginDisablingPluginTest {
 
-    @Before
+    @BeforeEach
     public void before(){
         //each test must begin with empty memory..
         ConfigurablePluginDisablingPlugin.previousDisabledPlugins.clear();

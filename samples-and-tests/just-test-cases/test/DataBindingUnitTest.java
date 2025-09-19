@@ -16,7 +16,7 @@ import models.City;
 import models.Entity2;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.data.binding.ParamNode;

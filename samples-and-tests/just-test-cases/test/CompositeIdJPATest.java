@@ -1,7 +1,7 @@
 import models.*;
 
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.db.jpa.JPA;

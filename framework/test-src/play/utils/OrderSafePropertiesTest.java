@@ -1,6 +1,6 @@
 package play.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.Logger;
 import play.libs.IO;
 

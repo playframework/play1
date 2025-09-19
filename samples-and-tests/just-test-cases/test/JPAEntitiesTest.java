@@ -1,4 +1,4 @@
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.playframework.models.Cat;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.db.jpa.JPA;

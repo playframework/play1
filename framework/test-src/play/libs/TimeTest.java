@@ -1,58 +1,66 @@
 package play.libs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 public class TimeTest {
     @Test
     public void parseWithNullArgument() {
         int duration = Time.parseDuration(null);
-        assertEquals(duration, 2592000);
+        assertEquals(2592000, duration);
     }
 
     @Test
     public void parseGood1() {
         int duration = Time.parseDuration("40s");
-        assertEquals(duration, 40);
+        assertEquals(40 , duration);
     }
 
     @Test
     public void parseGood2() {
         int duration = Time.parseDuration("2d4h10s");
-        assertEquals(duration, 187210);
+        assertEquals(187210, duration);
     }
 
     @Test
     public void parseGood3() {
         int duration = Time.parseDuration("0d4h10s");
-        assertEquals(duration, 14410);
+        assertEquals(14410, duration);
     }
 
     @Test
     public void parseGood4() {
         int duration = Time.parseDuration("2h");
-        assertEquals(duration, 7200);
+        assertEquals(7200, duration);
     }
 
     @Test
     public void parseGood5() {
         int duration = Time.parseDuration("120min");
-        assertEquals(duration, 7200);
+        assertEquals(7200, duration);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseBad1() {
-        int duration = Time.parseDuration("1w2d3h10s");
+        assertThrows(IllegalArgumentException.class, () -> {
+            Time.parseDuration("1w2d3h10s");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseBad2() {
-        int duration = Time.parseDuration("foobar");
+        assertThrows(IllegalArgumentException.class, () -> {
+            Time.parseDuration("foobar");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseBad3() {
-        int duration = Time.parseDuration("20xyz");
+        assertThrows(IllegalArgumentException.class, () -> {
+            Time.parseDuration("20xyz");
+        });
     }
 }

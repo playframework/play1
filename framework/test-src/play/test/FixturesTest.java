@@ -1,8 +1,6 @@
 package play.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.net.URL;
@@ -10,11 +8,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import models.ClassWithStaticFinalMap;
 import play.Play;
@@ -60,7 +54,7 @@ public class FixturesTest {
         public List<Property> listProperties() { return null; }
     };
     
-    @BeforeClass
+    @BeforeAll
     public static void setUpBeforeClass() throws Exception {
         new PlayBuilder().build();
         
@@ -84,17 +78,17 @@ public class FixturesTest {
         Play.javaPath.add(appRoot);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownAfterClass() throws Exception {
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
     	// Initialise the model store.
     	store = new LinkedList<>();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
     }
 
@@ -105,10 +99,10 @@ public class FixturesTest {
         Fixtures.loadModels(false, "testModelClassStaticFinalMapField.yml");
         
         // Ensure the model was loaded correctly.
-        assertEquals(store.size(), 1);
+        assertEquals(1, store.size());
         MockModel model = store.get(0);
         assertNotNull(model);
-        assertTrue(model instanceof ClassWithStaticFinalMap);
-        assertEquals(((ClassWithStaticFinalMap)model).name, "hello");
+        assertInstanceOf(ClassWithStaticFinalMap.class, model);
+        assertEquals("hello", ((ClassWithStaticFinalMap)model).name);
     }
 }

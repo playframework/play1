@@ -3,7 +3,7 @@ import java.lang.reflect.Modifier;
 
 import models.PropertyEnhancerModel;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.test.UnitTest;

@@ -420,14 +420,17 @@
     </target>
 
     <target name="unittest" depends="compile-unittest">
-        <junit errorproperty="junit.failure" failureproperty="junit.failure">
+        <junitlauncher haltonfailure="false" failureproperty="junit.failure" printSummary="true">
             <classpath refid="classpath.test" />
-            <formatter type="brief" usefile="false" />
-            <batchtest>
+            <testclasses>
                 <fileset dir="test-classes" includes="**/*Test.class" />
-            </batchtest>
-        </junit>
-        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
+            </testclasses>
+            <classpath>
+                <pathelement location="test-classes"/>
+                <path refid="classpath.test"/>
+            </classpath>
+        </junitlauncher>
+        <fail if="junit.failure" message="Unit test(s) failed. See reports!"/>
     </target>
 
     <target name="package" depends="artifact">

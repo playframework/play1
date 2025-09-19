@@ -1,7 +1,7 @@
 package play.data.binding;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.PlayBuilder;
 import play.data.validation.Validation;
 import play.data.validation.ValidationPlugin;
@@ -14,8 +14,8 @@ import java.util.*;
 
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class BinderTest {
@@ -27,7 +27,7 @@ public class BinderTest {
         private List<Data2> listOfData2 = new ArrayList<>();
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         new PlayBuilder().build();
     }

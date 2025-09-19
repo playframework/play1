@@ -12,11 +12,15 @@ import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.Assert;
-import org.junit.runner.Description;
-import org.junit.runner.JUnitCore;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
+import org.junit.jupiter.api.Assertions;
+import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.TestExecutionListener;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
+import org.junit.platform.launcher.core.LauncherFactory;
+
 import play.Logger;
 import play.Play;
 import play.mvc.Http.Request;
@@ -24,6 +28,8 @@ import play.mvc.Http.Response;
 import play.mvc.Router;
 import play.mvc.Scope.RenderArgs;
 import play.vfs.VirtualFile;
+
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 /**
  * Run application tests
@@ -43,7 +49,7 @@ public class TestEngine {
 
     public static List<Class> allUnitTests() {
         List<Class> classes = new ArrayList<>();
-        classes.addAll(Play.classloader.getAssignableClasses(Assert.class));
+        classes.addAll(Play.classloader.getAssignableClasses(Assertions.class));
         classes.addAll(Play.pluginCollection.getUnitTests());
         for (ListIterator<Class> it = classes.listIterator(); it.hasNext();) {
             Class c = it.next();
@@ -101,28 +107,25 @@ public class TestEngine {
             }
         }
     }
-    
-    public static void initTest(Class<?> testClass) { 
+
+    public static void initTest(Class<?> testClass) {
         CleanTest cleanTestAnnot = null;
-        if(testClass != null ){
-            cleanTestAnnot = testClass.getAnnotation(CleanTest.class) ;
+        if (testClass != null) {
+            cleanTestAnnot = testClass.getAnnotation(CleanTest.class);
         }
-        if(cleanTestAnnot != null && cleanTestAnnot.removeCurrent() == true){
-            if(Request.current != null){
+        if (cleanTestAnnot != null && cleanTestAnnot.removeCurrent() == true) {
+            if (Request.current != null) {
                 Request.current.remove();
             }
-            if(Response.current != null){
+            if (Response.current != null) {
                 Response.current.remove();
             }
-            if(RenderArgs.current != null){
+            if (RenderArgs.current != null) {
                 RenderArgs.current.remove();
             }
         }
         if (cleanTestAnnot == null || (cleanTestAnnot != null && cleanTestAnnot.createDefault() == true)) {
             if (Request.current() == null) {
-                // Use base URL to create a request for this host
-                // host => with port
-                // domain => without port
                 String host = Router.getBaseUrl();
                 String domain = null;
                 Integer port = 80;
@@ -135,14 +138,14 @@ public class TestEngine {
                 } else if (host.contains("https://")) {
                     host = host.replaceAll("https://", "");
                     port = 443;
-                    isSecure = true;         
+                    isSecure = true;
                 }
-                int colonPos =  host.indexOf(':');
-                if(colonPos > -1){
+                int colonPos = host.indexOf(':');
+                if (colonPos > -1) {
                     domain = host.substring(0, colonPos);
-                    port = Integer.parseInt(host.substring(colonPos+1));
-                }else{
-                   domain = host;
+                    port = Integer.parseInt(host.substring(colonPos + 1));
+                } else {
+                    domain = host;
                 }
                 Request request = Request.createRequest(null, "GET", "/", "", null,
                         null, null, host, false, port, domain, isSecure, null, null);
@@ -164,24 +167,29 @@ public class TestEngine {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static TestResults run(String name) {
         TestResults testResults = new TestResults();
 
         try {
-            // Load test class
             Class testClass = Play.classloader.loadClass(name);
-                 
+
             initTest(testClass);
-            
+
             TestResults pluginTestResults = Play.pluginCollection.runTest(testClass);
             if (pluginTestResults != null) {
                 return pluginTestResults;
             }
 
-            JUnitCore junit = new JUnitCore();
-            junit.addListener(new Listener(testClass.getName(), testResults));
-            junit.run(testClass);
+            // Prepare JUnit 5 launcher request
+            LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                    .selectors(selectClass(testClass))
+                    .build();
+
+            Launcher launcher = LauncherFactory.create();
+            Listener listener = new Listener(testClass.getName(), testResults);
+
+            launcher.registerTestExecutionListeners(listener);
+            launcher.execute(request);
 
         } catch (ClassNotFoundException e) {
             Logger.error(e, "Test not found %s", name);
@@ -190,8 +198,8 @@ public class TestEngine {
         return testResults;
     }
 
-    // ~~~~~~ Run listener
-    static class Listener extends RunListener {
+    // ~~~~~~ Test Execution Listener (JUnit 5)
+    static class Listener implements TestExecutionListener {
 
         final TestResults results;
         final String className;
@@ -203,45 +211,55 @@ public class TestEngine {
         }
 
         @Override
-        public void testStarted(Description description) throws Exception {
-            current = new TestResult();
-            current.name = description.getDisplayName().substring(0, description.getDisplayName().indexOf('('));
-            current.time = System.currentTimeMillis();
-        }
-
-        @Override
-        public void testFailure(Failure failure) throws Exception {
-
-            if (current == null) {
-                // The test probably failed before it could start, ie in @BeforeClass
+        public void executionStarted(TestIdentifier testIdentifier) {
+            if (testIdentifier.isTest()) {
                 current = new TestResult();
-                results.add(current); // must add it here since testFinished() never was called.
-                current.name = "Before any test started, maybe in @BeforeClass?";
+                current.name = testIdentifier.getDisplayName();
                 current.time = System.currentTimeMillis();
             }
-
-            if (failure.getException() instanceof AssertionError) {
-                current.error = "Failure, " + failure.getMessage();
-            } else {
-                current.error = "A " + failure.getException().getClass().getName() + " has been caught, " + failure.getMessage();
-            }
-            current.trace = failure.getTrace();
-            for (StackTraceElement stackTraceElement : failure.getException().getStackTrace()) {
-                if (stackTraceElement.getClassName().equals(className)) {
-                    current.sourceInfos = "In " + Play.classes.getApplicationClass(className).javaFile.relativePath() + ", line " + stackTraceElement.getLineNumber();
-                    current.sourceCode = Play.classes.getApplicationClass(className).javaSource.split("\n")[stackTraceElement.getLineNumber() - 1];
-                    current.sourceFile = Play.classes.getApplicationClass(className).javaFile.relativePath();
-                    current.sourceLine = stackTraceElement.getLineNumber();
-                }
-            }
-            current.passed = false;
-            results.passed = false;
         }
 
         @Override
-        public void testFinished(Description description) throws Exception {
-            current.time = System.currentTimeMillis() - current.time;
-            results.add(current);
+        public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+            if (testIdentifier.isTest()) {
+                current.time = System.currentTimeMillis() - current.time;
+                TestExecutionResult.Status status = testExecutionResult.getStatus();
+                if (status == TestExecutionResult.Status.SUCCESSFUL) {
+                    current.passed = true;
+                } else {
+                    current.passed = false;
+                    Throwable ex = testExecutionResult.getThrowable().orElse(null);
+                    if (ex != null) {
+                        if (ex instanceof AssertionError) {
+                            current.error = "Failure, " + ex.getMessage();
+                        } else {
+                            current.error = "A " + ex.getClass().getName() + " has been caught, " + ex.getMessage();
+                        }
+                        current.trace = getStackTrace(ex);
+                        for (StackTraceElement stackTraceElement : ex.getStackTrace()) {
+                            if (stackTraceElement.getClassName().equals(className)) {
+                                // Play.classes.getApplicationClass may need adaptation for source info
+                                current.sourceInfos = "In " + Play.classes.getApplicationClass(className).javaFile.relativePath() + ", line " + stackTraceElement.getLineNumber();
+                                String[] lines = Play.classes.getApplicationClass(className).javaSource.split("\n");
+                                if (stackTraceElement.getLineNumber() - 1 < lines.length) {
+                                    current.sourceCode = lines[stackTraceElement.getLineNumber() - 1];
+                                }
+                                current.sourceFile = Play.classes.getApplicationClass(className).javaFile.relativePath();
+                                current.sourceLine = stackTraceElement.getLineNumber();
+                            }
+                        }
+                    }
+                }
+                results.add(current);
+            }
+        }
+
+        private String getStackTrace(Throwable throwable) {
+            StringBuilder sb = new StringBuilder();
+            for (StackTraceElement element : throwable.getStackTrace()) {
+                sb.append(element.toString()).append("\n");
+            }
+            return sb.toString();
         }
     }
 
@@ -258,13 +276,14 @@ public class TestEngine {
             time = result.time + time;
             this.results.add(result);
             if (result.passed) {
-              success++;
+                success++;
             } else {
-              if (result.error.startsWith("Failure")) {
-                failures++;
-              } else {
-                errors++;
-              }
+                if (result.error != null && result.error.startsWith("Failure")) {
+                    failures++;
+                } else {
+                    errors++;
+                }
+                passed = false;
             }
         }
     }
