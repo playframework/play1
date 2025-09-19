@@ -1215,52 +1215,51 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
      * leaving actionInvoke into the app, and before reentering Controller.await
      */
     private static void verifyContinuationsEnhancement() {
-        // only check in dev mode..
+
         if (Play.mode == Play.Mode.PROD) {
             return;
         }
 
         try {
             throw new Exception();
+
         } catch (Exception e) {
-            boolean haveSeenFirstApplicationClass = false;
+            boolean verificationStarted = false;
+
             for (StackTraceElement ste : e.getStackTrace()) {
                 String className = ste.getClassName();
 
-                if (!haveSeenFirstApplicationClass) {
-                    haveSeenFirstApplicationClass = Play.classes.getApplicationClass(className) != null;
-                    // when haveSeenFirstApplicationClass is set to true, we are
-                    // entering the user application code..
+                if (!verificationStarted) {
+                    // Look for first application class to mark start of verification
+                    verificationStarted = Play.classes.getApplicationClass(className) != null;
                 }
 
-                if (haveSeenFirstApplicationClass) {
-                    if (shouldBeCheckedForEnhancement(className)) {
-                        // we're back into the play framework code...
-                        return; // done checking
-                    } else {
-                        // is this class enhanced?
-                        boolean enhanced = ContinuationEnhancer.isEnhanced(className);
-                        if (!enhanced) {
-                            throw new ContinuationsException(
-                                    "Cannot use await/continuations when not all application classes on the callstack are properly enhanced. The following class is not enhanced: "
-                                            + className);
-                        }
-                    }
+                if(verificationStarted && shouldNotBeEnhanced(className)) {
+                    // When we next see a class that should not be enhanced, the verification is complete
+                    return;
+                }
+
+                if(verificationStarted) {
+                    assertEnhancedClass(className);
                 }
             }
-
         }
     }
 
-
     /**
-     * Checks if the classname is from the jdk, sun or play package and therefore should not be checked for enhancement
-     * @param String className
-     * @return boolean
+     * Checks if the classname is from a play package or from the JDK. These classes should not be enhanced and
+     * should not be verified. These presence of these packages indicate the verification is complete.
      */
-    static boolean shouldBeCheckedForEnhancement(String className)
-    {
-        return className.startsWith("jdk.") || className.startsWith("sun.") || className.startsWith("play.");
+    static boolean shouldNotBeEnhanced(String className) {
+        return className.startsWith("play.") || className.startsWith("jdk.") || className.startsWith("sun.");
+    }
+
+    private static void assertEnhancedClass(String className) {
+        if (!ContinuationEnhancer.isEnhanced(className)) {
+            throw new ContinuationsException(
+                "Cannot use await/continuations when not all application classes on the callstack are properly enhanced. " +
+                "The following class is not enhanced: " + className);
+        }
     }
 
     protected static <T> void await(Future<T> future, F.Action<T> callback) {
