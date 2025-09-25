@@ -274,6 +274,6 @@ def is_java_version_supported(java_version):
             num = int(java_version.split('.')[0])
         else:
             num = int(java_version)
-        return not (num < get_minimal_supported_java_version())
+        return num >= get_minimal_supported_java_version()
     except ValueError:
         return True
