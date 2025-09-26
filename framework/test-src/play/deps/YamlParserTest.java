@@ -1,9 +1,5 @@
 package play.deps;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,18 +7,21 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import play.Play;
 import play.PlayBuilder;
 
-@Ignore
+import static org.junit.jupiter.api.Assertions.*;
+
+@Disabled
 public class YamlParserTest {
     
-    @BeforeClass
+    @BeforeAll
     public static void setUp(){
         // Play
         new PlayBuilder().build();
@@ -44,7 +43,7 @@ public class YamlParserTest {
         }
     }
     
-    @AfterClass
+    @AfterAll
     public static void cleanUp(){
         File moduleDir = new File(Play.applicationPath, "modules");
         try {
@@ -56,15 +55,17 @@ public class YamlParserTest {
     }
     
     
-    @Test(expected = FileNotFoundException.class)
-    public void fileNotFoundTest() throws Exception {    
-        Set<String> modules = null;
-        try {
-            modules =  YamlParser.getOrderedModuleList(new File(Play.applicationPath, "fakeFile.yml"));
-        } catch (Exception e) {
-            assertTrue(e.getMessage().startsWith("There was a problem to find the file"));
-            throw e;
-        }
+    @Test
+    public void fileNotFoundTest() {
+        assertThrows(FileNotFoundException.class, () -> {
+            Set<String> modules = null;
+            try {
+                modules = YamlParser.getOrderedModuleList(new File(Play.applicationPath, "fakeFile.yml"));
+            } catch (Exception e) {
+                assertTrue(e.getMessage().startsWith("There was a problem to find the file"));
+                throw e;
+            }
+        });
     }
     
 

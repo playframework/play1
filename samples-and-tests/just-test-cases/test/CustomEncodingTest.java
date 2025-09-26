@@ -1,4 +1,5 @@
-import org.junit.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import play.cache.*;
 import java.util.*;
@@ -10,9 +11,9 @@ public class CustomEncodingTest extends UnitTest {
 
     @Test
     public void testCustomEncoding() {
-        Assert.assertEquals("Norwegian letters: ÆØÅ", 
+        Assertions.assertEquals("Norwegian letters: ÆØÅ",
             WS.url("http://localhost:9003/customEncoding/getText").get().getString("iso-8859-1"));
-        Assert.assertEquals("Norwegian letters: ÆØÅ", 
+        Assertions.assertEquals("Norwegian letters: ÆØÅ",
             WS.url("http://localhost:9003/customEncoding/getTemplate").get().getString("iso-8859-1"));
     }
 }

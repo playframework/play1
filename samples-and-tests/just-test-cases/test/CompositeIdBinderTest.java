@@ -7,8 +7,8 @@ import models.CompositeIdForeignA;
 import models.CompositeIdForeignB;
 import models.CompositeIdPk;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.data.binding.Binder;
@@ -21,7 +21,7 @@ import play.test.UnitTest;
 
 public class CompositeIdBinderTest extends UnitTest {
     
-    @Before
+    @BeforeEach
     public void setup() {
     	Fixtures.delete(CompositeIdEntity.class, CompositeIdForeignA.class, CompositeIdForeignB.class);
     }

@@ -1,7 +1,7 @@
 package play.libs;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -10,8 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.AssertionsKt.assertNull;
+
 
 /**
  * Tests for {@link XML} class.
@@ -26,7 +27,7 @@ public class XMLTest {
             "</feed>";
     private Document document;
     
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         document = XML.getDocument(ORIGINAL_DOCUMENT); 
     }

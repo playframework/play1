@@ -1,7 +1,7 @@
 package play.data.binding.types;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.Play;
 import play.PlayBuilder;
 
@@ -9,13 +9,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DateBinderTest {
     private DateBinder binder = new DateBinder();
 
-    @Before
+    @BeforeEach
     public void setup() {
         new PlayBuilder().build();
     }
@@ -46,8 +45,10 @@ public class DateBinderTest {
         assertNull(binder.bind("client.birthday", null, "", Date.class, null));
     }
 
-    @Test(expected = ParseException.class)
-    public void throws_ParseException_for_invalid_value() throws Exception {
-        binder.bind("client.birthday", null, "12/31/1986", Date.class, null);
+    @Test    public void throws_ParseException_for_invalid_value() {
+        assertThrows(ParseException.class, () -> {
+            binder.bind("client.birthday", null, "12/31/1986", Date.class, null);
+        });
+
     }
 }

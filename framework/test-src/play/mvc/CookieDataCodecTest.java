@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.jboss.netty.handler.codec.http.cookie.Cookie;
 import org.jboss.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CookieDataCodecTest {
 

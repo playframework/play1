@@ -1,5 +1,3 @@
-import static org.junit.Assert.*;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -13,8 +11,8 @@ import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
 import models.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.test.Fixtures;
@@ -22,7 +20,7 @@ import play.test.UnitTest;
 
 public class FixturesTest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         Fixtures.deleteAll();
     }

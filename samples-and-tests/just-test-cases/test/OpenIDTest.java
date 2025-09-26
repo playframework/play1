@@ -1,5 +1,6 @@
-import org.junit.*;
 import java.util.*;
+
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import models.*;
 

@@ -1,11 +1,13 @@
 package play.data.validation;
 
-import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.Validation.ValidationResult;
 import play.i18n.MessagesBuilder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class PhoneTest {
 
@@ -55,7 +57,7 @@ public class PhoneTest {
     public void assertValidPhone(Boolean valid, String phone) {
         Validation.clear();
         ValidationResult result = Validation.phone("phone", phone);
-        assertEquals("Validation phone [" + phone + "] should be " + valid, valid, result.ok);
+        assertEquals(valid, result.ok, "Validation phone [" + phone + "] should be " + valid);
     }
 
 }

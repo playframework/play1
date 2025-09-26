@@ -1,9 +1,8 @@
-import static org.junit.Assert.*;
 import models.Author;
 import models.Book;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -18,7 +17,7 @@ import play.test.UnitTest;
  */
 public class UniqueTest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Fixtures.deleteDatabase();
         Fixtures.loadModels("uniqueTestdata.yml");

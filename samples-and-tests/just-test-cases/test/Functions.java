@@ -1,7 +1,6 @@
-import org.junit.*;
-
 import java.util.*;
 
+import org.junit.jupiter.api.Test;
 import play.test.*;
 import play.jobs.*;
 import play.libs.*;
@@ -20,14 +19,14 @@ public class Functions extends UnitTest {
             assertEquals("Coco", coco);
             p = true;
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
         p = false;
         for(Integer four : s2) {
             assertEquals((int)4, (int)four);
             p = true;
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
         for(String oops : n) {
             fail("Oops!");
@@ -49,7 +48,7 @@ public class Functions extends UnitTest {
             assertEquals((int)6, (int)coco);
             p = true;
         }
-        assertTrue("Loop missed?", p);
+        assertTrue(p, "Loop missed?");
 
         for(Boolean oops : e._3) {
             fail("Oops!");

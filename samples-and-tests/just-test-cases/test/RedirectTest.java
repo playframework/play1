@@ -1,4 +1,4 @@
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.libs.URLs;
 import play.mvc.Http.Request;
@@ -53,8 +53,8 @@ public class RedirectTest extends FunctionalTest {
 		// on core2 duo timing used to be 30ms vs 2000ms 
 		// should be constant now
 		String msg = String.format("long redirect takes exponentially longer %s vs %s", shortUrlmSecs, longUrlmSecs);
-		assertTrue(msg, longUrlmSecs < 400 );
-		assertTrue(msg, shortUrlmSecs < 400 );
+		assertTrue(longUrlmSecs < 400, msg);
+		assertTrue(shortUrlmSecs < 400, msg);
 		
 	}
 	//[#1675] make sure Action redirects still work

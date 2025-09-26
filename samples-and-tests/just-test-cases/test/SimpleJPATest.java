@@ -1,4 +1,5 @@
-import org.junit.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import play.test.*;
 import java.util.*;
 
@@ -6,7 +7,7 @@ import models.*;
 
 public class SimpleJPATest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
         Fixtures.deleteAll();
         Fixtures.load("users.yml");

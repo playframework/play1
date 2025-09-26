@@ -9,8 +9,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import play.ConfigurationChangeWatcherPlugin;
 import play.Play;
@@ -28,7 +28,7 @@ import play.test.TestEngine;
 
 public class PluginCollectionTest {
 
-    @Before
+    @BeforeEach
     public void init() {
         new PlayBuilder().build();
     }

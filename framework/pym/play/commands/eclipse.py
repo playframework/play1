@@ -33,7 +33,7 @@ def execute(**kargs):
     javaVersion = get_java_version()
     
     print("~ using java version \"%s\"" % javaVersion)
-    if is_java_version_supported(javaVersion):
+    if not is_java_version_supported(javaVersion):
         print("~ ERROR: java version prior to %s are no longer supported: current version \"%s\" : please update" % (get_minimal_supported_java_version(), javaVersion))
 
     if application_name:

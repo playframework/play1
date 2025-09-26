@@ -4,7 +4,7 @@ import java.util.List;
 
 import models.User;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.test.UnitTest;
 

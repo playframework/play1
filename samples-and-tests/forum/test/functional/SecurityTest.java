@@ -1,6 +1,6 @@
 package functional;
 
-import org.junit.*;
+import org.junit.jupiter.api.*;
 
 import play.test.*;
 

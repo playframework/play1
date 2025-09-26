@@ -4,19 +4,21 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.TimeZone;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Russia will subtract an hour from most of its time zones on 2014-10-26 at 02:00 local time.
  * Updated timezone file has version 2014f, but Joda-time 2.3 in current Play Framework
  * distribution has 2014e version only. So it's time to check and update.
  */
-public class JodaTimeTest extends Assert {
+public class JodaTimeTest extends Assertions {
 
     @Test
     public void test() {

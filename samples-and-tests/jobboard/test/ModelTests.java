@@ -1,12 +1,13 @@
 
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import play.test.*;
 
 import models.*;
 
 public class ModelTests extends UnitTest {
     
-    @Before
+    @BeforeEach
     public void setUpData() {
         Fixtures.deleteAll();
         Fixtures.load("data.yml");

@@ -1,4 +1,4 @@
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.data.validation.PhoneCheck;
 import play.test.UnitTest;

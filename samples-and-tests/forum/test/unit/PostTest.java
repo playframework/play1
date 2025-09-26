@@ -1,13 +1,13 @@
 package unit;
 
-import org.junit.*;
+import org.junit.jupiter.api.*;
 import play.test.*;
 
 import models.*;
 
 public class PostTest extends UnitTest {
 
-    @Before
+    @BeforeEach
     public void setUpData() {
         Fixtures.deleteAll();
         Fixtures.load("test-data.yml");

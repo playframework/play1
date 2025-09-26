@@ -1,9 +1,3 @@
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -15,8 +9,7 @@ import java.util.concurrent.Future;
 import models.City;
 import models.Entity2;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import play.Logger;
 import play.data.binding.ParamNode;

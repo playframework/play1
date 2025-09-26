@@ -1,6 +1,6 @@
 package play.data.binding;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.PlayBuilder;
 import play.data.validation.ValidationBuilder;
 

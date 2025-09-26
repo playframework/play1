@@ -1,21 +1,16 @@
 package play.db.jpa;
 
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-import java.util.Properties;
-import java.util.Set;
-
-import static play.db.jpa.JPQL.extractProp;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JPQLTest {
 
     static JPQL jpql;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup(){
         jpql = new JPQL();
     }
@@ -52,7 +47,5 @@ public class JPQLTest {
         query = "ByNameOrderByNameDescAndAgeDesc";
         result = jpql.findByToJPQL(query);
         assertTrue(result.endsWith(" ORDER BY name DESC, age DESC"));
-
     }
-
 }

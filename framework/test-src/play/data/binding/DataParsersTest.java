@@ -1,13 +1,14 @@
 package play.data.binding;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import play.data.parsing.ApacheMultipartParser;
 import play.data.parsing.DataParsers;
 import play.data.parsing.TextParser;
 import play.data.parsing.UrlEncodedParser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 
 public class DataParsersTest {
     @Test

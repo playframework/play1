@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.junit.*;
-import org.junit.Before;
+import org.junit.jupiter.api.Test;
 
 import controllers.async.AsyncApplication;
 
