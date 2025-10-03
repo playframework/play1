@@ -123,14 +123,14 @@ public class ActionInvoker {
 
             // 2. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {
-                Controller.class.getDeclaredField("params").set(null, Scope.Params.current());
-                Controller.class.getDeclaredField("request").set(null, Http.Request.current());
-                Controller.class.getDeclaredField("response").set(null, Http.Response.current());
-                Controller.class.getDeclaredField("session").set(null, Scope.Session.current());
-                Controller.class.getDeclaredField("flash").set(null, Scope.Flash.current());
-                Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
-                Controller.class.getDeclaredField("routeArgs").set(null, Scope.RouteArgs.current());
-                Controller.class.getDeclaredField("validation").set(null, Validation.current());
+                Controller.params = Scope.Params.current();
+                Controller.request = Http.Request.current();
+                Controller.response = Http.Response.current();
+                Controller.session = Scope.Session.current();
+                Controller.flash = Scope.Flash.current();
+                Controller.renderArgs = Scope.RenderArgs.current();
+                Controller.routeArgs = Scope.RouteArgs.current();
+                Controller.validation = Validation.current();
             }
 
             ControllerInstrumentation.stopActionCall();
