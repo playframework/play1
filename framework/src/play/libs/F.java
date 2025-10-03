@@ -17,6 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
 import org.jboss.netty.channel.ChannelHandlerContext;
 
 import play.Logger;
@@ -27,14 +29,14 @@ public class F {
     /**
      * A Function with no arguments.
      */
-    public static interface Function0<R> {
-        public R apply() throws Throwable;
+    @FunctionalInterface
+    public interface Function0<R> {
+        R apply() throws Throwable;
     }
 
     public static class Promise<V> implements Future<V>, F.Action<V> {
 
         protected final CountDownLatch taskLock = new CountDownLatch(1);
-        protected boolean cancelled = false;
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
@@ -739,14 +741,28 @@ public class F {
         }
     }
 
-    public static interface Action0 {
+    @FunctionalInterface
+    public interface Action0 extends Runnable {
 
         void invoke();
+
+        @Override
+        default void run() {
+            invoke();
+        }
+
     }
 
-    public static interface Action<T> {
+    @FunctionalInterface
+    public interface Action<T> extends Consumer<T> {
 
         void invoke(T result);
+
+        @Override
+        default void accept(T result) {
+            invoke(result);
+        }
+
     }
 
     public abstract static class Option<T> implements Iterable<T> {
@@ -756,7 +772,7 @@ public class F {
         public abstract T get();
 
         public static <T> None<T> None() {
-            return (None<T>) (Object) None;
+            return (None<T>) None;
         }
 
         public static <T> Some<T> Some(T value) {
@@ -782,7 +798,7 @@ public class F {
 
         @Override
         public Iterator<T> iterator() {
-            return Collections.<T>emptyList().iterator();
+            return Collections.emptyIterator();
         }
 
         @Override
