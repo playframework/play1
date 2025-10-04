@@ -20,6 +20,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
@@ -380,14 +381,20 @@ public class JPAModelLoader implements Model.Factory {
     }
 
     String getSearchQuery(List<String> searchFields) {
-        StringBuilder q = new StringBuilder("");
+        StringBuilder q = new StringBuilder();
+        boolean forceSearch = searchFields == null || searchFields.isEmpty();
         for (Model.Property property : this.listProperties()) {
-            if (property.isSearchable
-                    && (searchFields == null || searchFields.isEmpty() ? true : searchFields.contains(property.name))) {
+            if (property.isSearchable && (forceSearch || searchFields.contains(property.name))) {
                 if (q.length() > 0) {
                     q.append(" or ");
                 }
-                q.append("lower(").append(property.name).append(") like ?1");
+                q.append("lower(");
+                if (property.field.isAnnotationPresent(Lob.class)) {
+                    q.append("CAST(").append(property.name).append(" AS string)");
+                } else {
+                    q.append(property.name);
+                }
+                q.append(") like ?1");
             }
         }
         return q.toString();

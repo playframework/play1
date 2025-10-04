@@ -230,7 +230,7 @@ public class GenericModel extends JPABase {
                             }
                         } else {
                             String[] ids = fieldParamNode.getChild(keyName, true).getValues();
-                            if (ids != null && ids.length > 0 && !ids[0].equals("")) {
+                            if (ids != null && ids.length > 0 && !ids[0].isEmpty()) {
 
                                 Query q = JPA.em(dbName).createQuery("from " + relation + " where " + keyName + " = ?1");
                                 q.setParameter(1, Binder.directBind(rootParamNode.getOriginalKey(), annotations, ids[0],

@@ -15,7 +15,7 @@ public class Post extends Model {
     @As("yyyy-MM-dd")
     public Date postedAt;
     
-    @OneToOne
+    @ManyToOne
     public User postedBy;
     
     @ManyToOne

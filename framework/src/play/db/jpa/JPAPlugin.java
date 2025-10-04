@@ -58,7 +58,7 @@ public class JPAPlugin extends PlayPlugin {
             for (String keyName : keyNames) {
                 ids[i++] = paramNode.getChild(keyName, true);
             }
-            if (ids != null && ids.length > 0) {
+            if (ids.length > 0) {
                 try {
                     EntityManager em = JPA.em(dbName);
                     StringBuilder q = new StringBuilder().append("from ").append(clazz.getName()).append(" o where");
@@ -67,7 +67,7 @@ public class JPAPlugin extends PlayPlugin {
                             q.append(" o.").append(keyName).append(" = ?").append(keyIdx++).append(" and ");
                     }
                     if (q.length() > 4) {
-                        q = q.delete(q.length() - 4, q.length());
+                        q.setLength(q.length() - 4);
                     }
                     Query query = em.createQuery(q.toString());
                     // The primary key can be a composite.
@@ -239,39 +239,17 @@ public class JPAPlugin extends PlayPlugin {
         } else if ("com.mysql.cj.jdbc.Driver".equals(driver)) {
             return "org.hibernate.dialect.MySQL8Dialect";
         } else if ("com.mysql.jdbc.Driver".equals(driver)) {
-            return "play.db.jpa.MySQLDialect";
+            return "org.hibernate.dialect.MySQLDialect";
         } else if ("org.postgresql.Driver".equals(driver)) {
             return "org.hibernate.dialect.PostgreSQLDialect";
         } else if ("com.ibm.db2.jdbc.app.DB2Driver".equals(driver)) {
             return "org.hibernate.dialect.DB2Dialect";
         } else if ("com.ibm.as400.access.AS400JDBCDriver".equals(driver)) {
             return "org.hibernate.dialect.DB2400Dialect";
-        } else if ("com.ibm.as400.access.AS390JDBCDriver".equals(driver)) {
-            return "org.hibernate.dialect.DB2390Dialect";
         } else if ("oracle.jdbc.OracleDriver".equals(driver)) {
-            return "org.hibernate.dialect.Oracle10gDialect";
-        } else if ("com.sybase.jdbc2.jdbc.SybDriver".equals(driver)) {
-            return "org.hibernate.dialect.SybaseAnywhereDialect";
+            return "org.hibernate.dialect.OracleDialect";
         } else if ("com.microsoft.jdbc.sqlserver.SQLServerDriver".equals(driver)) {
             return "org.hibernate.dialect.SQLServerDialect";
-        } else if ("com.sap.dbtech.jdbc.DriverSapDB".equals(driver)) {
-            return "org.hibernate.dialect.SAPDBDialect";
-        } else if ("com.informix.jdbc.IfxDriver".equals(driver)) {
-            return "org.hibernate.dialect.InformixDialect";
-        } else if ("com.ingres.jdbc.IngresDriver".equals(driver)) {
-            return "org.hibernate.dialect.IngresDialect";
-        } else if ("progress.sql.jdbc.JdbcProgressDriver".equals(driver)) {
-            return "org.hibernate.dialect.ProgressDialect";
-        } else if ("com.mckoi.JDBCDriver".equals(driver)) {
-            return "org.hibernate.dialect.MckoiDialect";
-        } else if ("InterBase.interclient.Driver".equals(driver)) {
-            return "org.hibernate.dialect.InterbaseDialect";
-        } else if ("com.pointbase.jdbc.jdbcUniversalDriver".equals(driver)) {
-            return "org.hibernate.dialect.PointbaseDialect";
-        } else if ("com.frontbase.jdbc.FBJDriver".equals(driver)) {
-            return "org.hibernate.dialect.FrontbaseDialect";
-        } else if ("org.firebirdsql.jdbc.FBDriver".equals(driver)) {
-            return "org.hibernate.dialect.FirebirdDialect";
         } else {
             throw new UnsupportedOperationException("I do not know which hibernate dialect to use with "
                     + driver + " and I cannot guess it, use the property jpa.dialect in config file");
