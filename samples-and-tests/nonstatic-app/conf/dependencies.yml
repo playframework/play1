@@ -2,12 +2,26 @@
 
 require:
     - play
-    - play-tazmaniax -> guice 1.11.1
+    - play-guice -> guice 1.12.0
     - com.google.guava -> guava 32.1.2-jre
 
 repositories:
-    - tazmaniax:
-        type: http
-        artifact: https://github.com/tazmaniax/play-[module]/releases/download/v[revision]/[module]-[revision].zip
-        contains:
-            - play-tazmaniax -> *
+  - playModules:
+      type: chain
+      using:
+        - playLocalModules2:
+            type:       local
+            descriptor: "${application.path}/../../../play-modules/play-[module]/conf/dependencies.yml"
+            artifact:   "${application.path}/../../../play-modules/play-[module]"
+        - tazmaniax:
+            type: http
+            artifact: https://github.com/tazmaniax/play-[module]/releases/download/v[revision]/[module]-[revision].zip
+        - xael_fry:
+            type: http
+            artifact: https://github.com/xael-fry/play-[module]/releases/download/[revision]/[module]-[revision].zip
+        - playContributedModules:
+            type:       http
+            descriptor: "http://www.playframework.org/modules/repo/[module]/[revision]/dependencies.yml"
+            artifact: "http://www.playframework.org/modules/[module]-[revision].zip"
+      contains:
+        - play-guice -> *
