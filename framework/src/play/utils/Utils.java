@@ -14,11 +14,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.TimeZone;
+import java.util.function.BiFunction;
 
 import play.Play;
 import play.mvc.Scope;
 import play.vfs.VirtualFile;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Generic utils
@@ -29,19 +33,17 @@ public class Utils {
         if (values == null) {
             return "";
         }
-        Iterator<T> iter = values.iterator();
-        if (!iter.hasNext()) {
-            return "";
+
+        StringJoiner joiner = new StringJoiner(separator);
+        for (T value : values) {
+            joiner.add(String.valueOf(value));
         }
-        StringBuilder toReturn = new StringBuilder(String.valueOf(iter.next()));
-        while (iter.hasNext()) {
-            toReturn.append(separator).append(iter.next());
-        }
-        return toReturn.toString();
+
+        return joiner.toString();
     }
 
     public static String join(String[] values, String separator) {
-        return (values == null) ? "" : join(Arrays.asList(values), separator);
+        return (values == null) ? "" : String.join(separator, values);
     }
 
     public static String join(Annotation[] values, String separator) {
@@ -92,24 +94,20 @@ public class Utils {
      */
     public static class Maps {
 
+        private static final BiFunction<String[], String[], String[]> MERGE_MAP_VALUES = (oldValues, newValues) -> {
+            String[] merged = new String[oldValues.length + newValues.length];
+            System.arraycopy(oldValues, 0, merged, 0, oldValues.length);
+            System.arraycopy(newValues, 0, merged, oldValues.length, newValues.length);
+
+            return merged;
+        };
+
         public static void mergeValueInMap(Map<String, String[]> map, String name, String value) {
-            String[] newValues = null;
-            String[] oldValues = map.get(name);
-            if (oldValues == null) {
-                newValues = new String[1];
-                newValues[0] = value;
-            } else {
-                newValues = new String[oldValues.length + 1];
-                System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
-                newValues[oldValues.length] = value;
-            }
-            map.put(name, newValues);
+            map.merge(name, new String[]{ value }, MERGE_MAP_VALUES);
         }
 
         public static void mergeValueInMap(Map<String, String[]> map, String name, String[] values) {
-            for (String value : values) {
-                mergeValueInMap(map, name, value);
-            }
+            map.merge(name, requireNonNull(values), MERGE_MAP_VALUES);
         }
 
         public static <K, V> Map<K, V> filterMap(Map<K, V> map, String keypattern) {
@@ -129,20 +127,22 @@ public class Utils {
         }
     }
 
-    private static final ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> httpFormatter = ThreadLocal.withInitial(() -> {
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        return format;
+    });
 
     public static SimpleDateFormat getHttpDateFormatter() {
-        if (httpFormatter.get() == null) {
-            httpFormatter.set(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US));
-            httpFormatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
         return httpFormatter.get();
     }
 
     public static Map<String, String[]> filterMap(Map<String, String[]> map, String prefix) {
-        Map<String, String[]> newMap = new HashMap<>();
+        prefix += '.';
+        Map<String, String[]> newMap = new HashMap<>(map.size());
         for (String key : map.keySet()) {
-            if (!key.startsWith(prefix + ".")) {
+            if (!key.startsWith(prefix)) {
                 newMap.put(key, map.get(key));
             }
         }
@@ -155,7 +155,7 @@ public class Utils {
 
     public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
         Map<String, String> filteredMap = new LinkedHashMap<>();
-        prefix += ".";
+        prefix += '.';
         for (Map.Entry<String, String[]> e : params.entrySet()) {
             if (e.getKey().startsWith(prefix)) {
                 filteredMap.put(e.getKey().substring(prefix.length()), Utils.join(e.getValue(), separator));
@@ -201,15 +201,26 @@ public class Utils {
             throw new ParseException("Date format not understood", 0);
         }
 
-        static final ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<>();
+        static final ThreadLocal<AlternativeDateFormat> dateformat = ThreadLocal.withInitial(() ->
+            new AlternativeDateFormat(
+                Locale.US,
+                "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
+                "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyyMMdd HHmmss",
+                "yyyy-MM-dd",
+                "yyyyMMdd'T'HHmmss",
+                "yyyyMMddHHmmss",
+                "dd'/'MM'/'yyyy",
+                "dd-MM-yyyy",
+                "dd'/'MM'/'yyyy HH:mm:ss",
+                "dd-MM-yyyy HH:mm:ss",
+                "ddMMyyyy HHmmss",
+                "ddMMyyyy"
+            )
+        );
 
         public static AlternativeDateFormat getDefaultFormatter() {
-            if (dateformat.get() == null) {
-                dateformat.set(new AlternativeDateFormat(Locale.US, "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
-                        "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
-                        "yyyy-MM-dd HH:mm:ss", "yyyyMMdd HHmmss", "yyyy-MM-dd", "yyyyMMdd'T'HHmmss", "yyyyMMddHHmmss", "dd'/'MM'/'yyyy",
-                        "dd-MM-yyyy", "dd'/'MM'/'yyyy HH:mm:ss", "dd-MM-yyyy HH:mm:ss", "ddMMyyyy HHmmss", "ddMMyyyy"));
-            }
             return dateformat.get();
         }
     }

@@ -4,21 +4,21 @@ import static java.nio.charset.Charset.defaultCharset;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.io.Charsets.toCharset;
-import static org.apache.commons.io.IOUtils.closeQuietly;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.io.IOUtils;
 
 import play.exceptions.UnexpectedException;
 import play.utils.OrderSafeProperties;
@@ -37,13 +37,11 @@ public class IO {
      */
     public static Properties readUtf8Properties(InputStream is) {
         Properties properties = new OrderSafeProperties();
-        try {
+        try (is) {
             properties.load(is);
             return properties;
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            closeQuietly(is);
         }
     }
 
@@ -69,7 +67,7 @@ public class IO {
      */
     public static String readContentAsString(InputStream is, String encoding) {
         try {
-            return IOUtils.toString(is, encoding);
+            return new String(is.readAllBytes(), toCharset(encoding));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -108,11 +106,7 @@ public class IO {
     }
 
     public static List<String> readLines(InputStream is) {
-        try {
-            return IOUtils.readLines(is, defaultCharset());
-        } catch (UncheckedIOException ex) {
-            throw new UnexpectedException(ex);
-        }
+        return new BufferedReader(new InputStreamReader(is, defaultCharset())).lines().collect(Collectors.toList());
     }
 
     public static List<String> readLines(File file, String encoding) {
@@ -155,7 +149,7 @@ public class IO {
      */
     public static byte[] readContent(InputStream is) {
         try {
-            return IOUtils.toByteArray(is);
+            return is.readAllBytes();
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
@@ -170,12 +164,12 @@ public class IO {
      *            The stream to write
      */
     public static void writeContent(CharSequence content, OutputStream os) {
-        try {
-            IOUtils.write(content, os, UTF_8);
+        try (os) {
+            if (content != null) {
+                Channels.newChannel(os).write(UTF_8.encode(content.toString()));
+            }
         } catch (IOException e) {
             throw new UnexpectedException(e);
-        } finally {
-            closeQuietly(os);
         }
     }
 
@@ -190,12 +184,12 @@ public class IO {
      *            Encoding to used
      */
     public static void writeContent(CharSequence content, OutputStream os, String encoding) {
-        try {
-            IOUtils.write(content, os, encoding);
+        try (os) {
+            if (content != null) {
+                Channels.newChannel(os).write(toCharset(encoding).encode(content.toString()));
+            }
         } catch (IOException e) {
             throw new UnexpectedException(e);
-        } finally {
-            closeQuietly(os);
         }
     }
 
@@ -258,12 +252,10 @@ public class IO {
      *            The destination stream
      */
     public static void copy(InputStream is, OutputStream os) {
-        try {
+        try (is) {
             is.transferTo(os);
         } catch (IOException e) {
             throw new UnexpectedException(e);
-        } finally {
-            closeQuietly(is);
         }
     }
 
@@ -276,13 +268,10 @@ public class IO {
      *            The destination stream
      */
     public static void write(InputStream is, OutputStream os) {
-        try {
+        try (is; os) {
             is.transferTo(os);
         } catch (IOException e) {
             throw new UnexpectedException(e);
-        } finally {
-            closeQuietly(is);
-            closeQuietly(os);
         }
     }
 
@@ -295,14 +284,8 @@ public class IO {
      *            The destination file
      */
     public static void write(InputStream is, File f) {
-        try {
-            OutputStream os = new FileOutputStream(f);
-            try {
-                is.transferTo(os);
-            } finally {
-                closeQuietly(is);
-                closeQuietly(os);
-            }
+        try (is; var os = new FileOutputStream(f)) {
+            is.transferTo(os);
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
