@@ -20,10 +20,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PersistenceException;
 
-import org.hibernate.collection.internal.PersistentMap;
+import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CollectionEntry;
-import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.internal.SessionImpl;
@@ -196,17 +195,15 @@ public class JPABase implements Serializable, play.db.Model {
         PersistenceContext pc = session.getPersistenceContext();
         CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
 
-        if (ce != null) {
-            CollectionPersister cp = ce.getLoadedPersister();
-            if (cp != null) {
-                Type ct = cp.getElementType();
-                if (ct instanceof EntityType) {
-                    String entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
-                    if (ce.getSnapshot() != null) {
-                        Collection orphans = ce.getOrphans(entityName, persistentCollection);
-                        for (Object o : orphans) {
-                            saveAndCascadeIfJPABase(o, willBeSaved);
-                        }
+        CollectionPersister cp = ce.getLoadedPersister();
+        if (cp != null) {
+            Type ct = cp.getElementType();
+            if (ct instanceof EntityType) {
+                String entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
+                if (ce.getSnapshot() != null) {
+                    Collection orphans = ce.getOrphans(entityName, persistentCollection);
+                    for (Object o : orphans) {
+                        saveAndCascadeIfJPABase(o, willBeSaved);
                     }
                 }
             }
