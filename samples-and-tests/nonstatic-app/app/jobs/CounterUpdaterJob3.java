@@ -5,7 +5,7 @@ import play.jobs.On;
 import play.jobs.OnApplicationStart;
 import services.Counter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @On("cron.counterUpdater")
 public class CounterUpdaterJob3 extends Job<Void> {

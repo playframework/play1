@@ -1,6 +1,6 @@
 package services;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.math.BigDecimal;
 
 @Singleton

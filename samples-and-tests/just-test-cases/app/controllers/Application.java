@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import jakarta.inject.Inject;
 import org.apache.commons.mail2.jakarta.EmailAttachment;
 import org.apache.commons.mail2.core.EmailException;
 import org.apache.commons.mail2.jakarta.HtmlEmail;
@@ -319,7 +320,7 @@ public class Application extends Controller {
 
     }
 
-    @javax.inject.Inject
+    @Inject
     static Test myTest;
 
     public static void useSpringBeanInject() {
