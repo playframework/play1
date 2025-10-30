@@ -1,0 +1,439 @@
+ USERGUIDE.md                                       | 64 +++++++--------
+ pom.xml                                            | 18 ++--
+ .../BeanValidationAnnotationsConfigurer.java       | 95 +++++++++++-----------
+ .../annotation/JPAAnnotationsConfigurer.java       | 21 ++---
+ src/main/resources/META-INF/MANIFEST.MF            |  2 +-
+ .../oval/test/guard/ChainedConstructorsTest.java   |  3 +-
+ .../net/sf/oval/test/guard/InheritanceTest.java    |  3 +-
+ .../SpringAOPAllianceBeanValidationTest.java       |  5 +-
+ .../BeanValidationAnnotationsConfigurerTest.java   | 11 +--
+ .../validator/JPAAnnotationsConfigurerTest.java    | 14 ++--
+ 10 files changed, 121 insertions(+), 115 deletions(-)
+
+diff --git a/USERGUIDE.md b/USERGUIDE.md
+index c42ed16c..36a985f2 100644
+--- a/USERGUIDE.md
++++ b/USERGUIDE.md
+@@ -260,14 +260,14 @@ ### <a name="jpa-annotations"></a>Interpreting EJB3 JPA annotations
+ OVal comes with a configurer that is capable of translating certain EJB3 JPA annotations into equivalent OVal constraints.
+ The `net.sf.oval.configuration.annotation.JPAAnnotationsConfigurer` interprets the EJB3 JPA annotations as follows:
+ 
+-    @jakarta.persistence.Basic(optional=false)     => @net.sf.oval.constraint.NotNull
+-    @jakarta.persistence.OneToOne(optional=false)  => @net.sf.oval.constraint.NotNull
+-    @jakarta.persistence.OneToOne                  => @net.sf.oval.constraint.AssertValid
+-    @jakarta.persistence.OneToMany                 => @net.sf.oval.constraint.AssertValid
+-    @jakarta.persistence.ManyToOne(optional=false) => @net.sf.oval.constraint.NotNull
+-    @jakarta.persistence.ManyToOne                 => @net.sf.oval.constraint.AssertValid
+-    @jakarta.persistence.Column(nullable=false)    => @net.sf.oval.constraint.NotNull (only applied for fields not annotated with @javax.persistence.GeneratedValue or @javax.persistence.Version)
+-    @jakarta.persistence.Column(length=5)          => @net.sf.oval.constraint.Length
++    @javax.persistence.Basic(optional=false)     => @net.sf.oval.constraint.NotNull
++    @javax.persistence.OneToOne(optional=false)  => @net.sf.oval.constraint.NotNull
++    @javax.persistence.OneToOne                  => @net.sf.oval.constraint.AssertValid
++    @javax.persistence.OneToMany                 => @net.sf.oval.constraint.AssertValid
++    @javax.persistence.ManyToOne(optional=false) => @net.sf.oval.constraint.NotNull
++    @javax.persistence.ManyToOne                 => @net.sf.oval.constraint.AssertValid
++    @javax.persistence.Column(nullable=false)    => @net.sf.oval.constraint.NotNull (only applied for fields not annotated with @javax.persistence.GeneratedValue or @javax.persistence.Version)
++    @javax.persistence.Column(length=5)          => @net.sf.oval.constraint.Length
+ 
+ ```java
+ @Entity
+@@ -303,33 +303,33 @@ ### <a name="jpa-annotations"></a>Interpreting EJB3 JPA annotations
+ ### <a name="bean-validation-annotations"></a>Interpreting Bean Validation annotations
+ 
+ OVal itself is not a JSR303/JSR380 compliant bean validation framework. However it now comes with a configurer
+-that can translate the standard Bean Validation constraints (jakarta.validation.constraints.\*) into equivalent
++that can translate the standard Bean Validation constraints (javax.validation.constraints.\*) into equivalent
+ OVal constraints. The `net.sf.oval.configuration.annotation.BeanValidationAnnotationsConfigurer`
+ interprets the annotations as follows:
+ 
+-    @jakarta.validation.constraints.AssertFalse     => @net.sf.oval.constraint.AssertFalse
+-    @jakarta.validation.constraints.AssertTrue      => @net.sf.oval.constraint.AssertTrue
+-    @jakarta.validation.constraints.DecimalMax      => @net.sf.oval.constraint.Max
+-    @jakarta.validation.constraints.DecimalMin      => @net.sf.oval.constraint.Min
+-    @jakarta.validation.constraints.Digits          => @net.sf.oval.constraint.Digits
+-    @jakarta.validation.constraints.Email           => @net.sf.oval.constraint.Email
+-    @jakarta.validation.constraints.Future          => @net.sf.oval.constraint.Future
+-    @jakarta.validation.constraints.FutureOrPresent => @net.sf.oval.constraint.Future(min="now")
+-    @jakarta.validation.constraints.Max             => @net.sf.oval.constraint.Max
+-    @jakarta.validation.constraints.Min             => @net.sf.oval.constraint.Min
+-    @jakarta.validation.constraints.Negative        => @net.sf.oval.constraint.Max(max=0, inclusive=false)
+-    @jakarta.validation.constraints.NegativeOrZero  => @net.sf.oval.constraint.Max(max=0, inclusive=true)
+-    @jakarta.validation.constraints.NotBlank        => @net.sf.oval.constraint.NotNull+NotBlank
+-    @jakarta.validation.constraints.NotEmpty        => @net.sf.oval.constraint.NotNull+NotEmpty
+-    @jakarta.validation.constraints.NotNull         => @net.sf.oval.constraint.NotNull
+-    @jakarta.validation.constraints.Null            => @net.sf.oval.constraint.Null
+-    @jakarta.validation.constraints.Past            => @net.sf.oval.constraint.Past
+-    @jakarta.validation.constraints.PastOrPresent   => @net.sf.oval.constraint.Past(max="now")
+-    @jakarta.validation.constraints.Pattern         => @net.sf.oval.constraint.Pattern
+-    @jakarta.validation.constraints.Size            => @net.sf.oval.constraint.Size
+-    @jakarta.validation.constraints.Positive        => @net.sf.oval.constraint.Min(min=0, inclusive=false)
+-    @jakarta.validation.constraints.PositiveOrZero  => @net.sf.oval.constraint.NotNegative
+-    @jakarta.validation.constraints.Valid           => @net.sf.oval.constraint.AssertValid
++    @javax.validation.constraints.AssertFalse     => @net.sf.oval.constraint.AssertFalse
++    @javax.validation.constraints.AssertTrue      => @net.sf.oval.constraint.AssertTrue
++    @javax.validation.constraints.DecimalMax      => @net.sf.oval.constraint.Max
++    @javax.validation.constraints.DecimalMin      => @net.sf.oval.constraint.Min
++    @javax.validation.constraints.Digits          => @net.sf.oval.constraint.Digits
++    @javax.validation.constraints.Email           => @net.sf.oval.constraint.Email
++    @javax.validation.constraints.Future          => @net.sf.oval.constraint.Future
++    @javax.validation.constraints.FutureOrPresent => @net.sf.oval.constraint.Future(min="now")
++    @javax.validation.constraints.Max             => @net.sf.oval.constraint.Max
++    @javax.validation.constraints.Min             => @net.sf.oval.constraint.Min
++    @javax.validation.constraints.Negative        => @net.sf.oval.constraint.Max(max=0, inclusive=false)
++    @javax.validation.constraints.NegativeOrZero  => @net.sf.oval.constraint.Max(max=0, inclusive=true)
++    @javax.validation.constraints.NotBlank        => @net.sf.oval.constraint.NotNull+NotBlank
++    @javax.validation.constraints.NotEmpty        => @net.sf.oval.constraint.NotNull+NotEmpty
++    @javax.validation.constraints.NotNull         => @net.sf.oval.constraint.NotNull
++    @javax.validation.constraints.Null            => @net.sf.oval.constraint.Null
++    @javax.validation.constraints.Past            => @net.sf.oval.constraint.Past
++    @javax.validation.constraints.PastOrPresent   => @net.sf.oval.constraint.Past(max="now")
++    @javax.validation.constraints.Pattern         => @net.sf.oval.constraint.Pattern
++    @javax.validation.constraints.Size            => @net.sf.oval.constraint.Size
++    @javax.validation.constraints.Positive        => @net.sf.oval.constraint.Min(min=0, inclusive=false)
++    @javax.validation.constraints.PositiveOrZero  => @net.sf.oval.constraint.NotNegative
++    @javax.validation.constraints.Valid           => @net.sf.oval.constraint.AssertValid
+ 
+ ```java
+ public class MyEntity {
+diff --git a/pom.xml b/pom.xml
+index 76ef1902..4d756c5a 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -15,7 +15,7 @@
+ 
+    <groupId>net.sf.oval</groupId>
+    <artifactId>oval</artifactId>
+-   <version>4.0.0</version>
++   <version>3.2.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
+ 
+ 
+@@ -88,7 +88,7 @@
+    <properties>
+       <skip.japicmp.cmp>true</skip.japicmp.cmp>
+ 
+-      <java.version>11</java.version>
++      <java.version>8</java.version>
+ 
+       <!-- https://search.maven.org/artifact/org.aspectj/aspectjrt -->
+       <aspectj.version>1.9.7</aspectj.version>
+@@ -363,19 +363,19 @@
+       <dependency>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+-         <version>1.3.5</version>
++         <version>1.2</version>
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+-         <version>2.0.17</version>
++         <version>1.7.32</version>
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+          <groupId>com.thoughtworks.xstream</groupId>
+          <artifactId>xstream</artifactId>
+-         <version>1.4.21</version>
++         <version>1.4.18</version>
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+@@ -453,7 +453,7 @@
+       <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-jexl3</artifactId>
+-         <version>3.5.0</version>
++         <version>3.2.1</version>
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+@@ -469,9 +469,9 @@
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+-         <groupId>jakarta.persistence</groupId>
+-         <artifactId>jakarta.persistence-api</artifactId>
+-         <version>3.1.0</version>
++         <groupId>javax.persistence</groupId>
++         <artifactId>persistence-api</artifactId>
++         <version>1.0.2</version>
+          <optional>true</optional>
+       </dependency>
+       <dependency>
+diff --git a/src/main/java/net/sf/oval/configuration/annotation/BeanValidationAnnotationsConfigurer.java b/src/main/java/net/sf/oval/configuration/annotation/BeanValidationAnnotationsConfigurer.java
+index 93d31eb5..91adfd83 100644
+--- a/src/main/java/net/sf/oval/configuration/annotation/BeanValidationAnnotationsConfigurer.java
++++ b/src/main/java/net/sf/oval/configuration/annotation/BeanValidationAnnotationsConfigurer.java
+@@ -16,29 +16,30 @@
+ import java.util.List;
+ import java.util.Map;
+ 
+-import jakarta.validation.Valid;
+-import jakarta.validation.constraints.AssertFalse;
+-import jakarta.validation.constraints.AssertTrue;
+-import jakarta.validation.constraints.DecimalMax;
+-import jakarta.validation.constraints.DecimalMin;
+-import jakarta.validation.constraints.Digits;
+-import jakarta.validation.constraints.Future;
+-import jakarta.validation.constraints.FutureOrPresent;
+-import jakarta.validation.constraints.Max;
+-import jakarta.validation.constraints.Min;
+-import jakarta.validation.constraints.Negative;
+-import jakarta.validation.constraints.NegativeOrZero;
+-import jakarta.validation.constraints.NotBlank;
+-import jakarta.validation.constraints.NotEmpty;
+-import jakarta.validation.constraints.NotNull;
+-import jakarta.validation.constraints.Null;
+-import jakarta.validation.constraints.Past;
+-import jakarta.validation.constraints.PastOrPresent;
+-import jakarta.validation.constraints.Pattern;
+-import jakarta.validation.constraints.Pattern.Flag;
+-import jakarta.validation.constraints.Positive;
+-import jakarta.validation.constraints.PositiveOrZero;
+-import jakarta.validation.constraints.Size;
++import javax.validation.Valid;
++import javax.validation.constraints.AssertFalse;
++import javax.validation.constraints.AssertTrue;
++import javax.validation.constraints.DecimalMax;
++import javax.validation.constraints.DecimalMin;
++import javax.validation.constraints.Digits;
++import javax.validation.constraints.Future;
++import javax.validation.constraints.FutureOrPresent;
++import javax.validation.constraints.Max;
++import javax.validation.constraints.Min;
++import javax.validation.constraints.Negative;
++import javax.validation.constraints.NegativeOrZero;
++import javax.validation.constraints.NotBlank;
++import javax.validation.constraints.NotEmpty;
++import javax.validation.constraints.NotNull;
++import javax.validation.constraints.Null;
++import javax.validation.constraints.Past;
++import javax.validation.constraints.PastOrPresent;
++import javax.validation.constraints.Pattern;
++import javax.validation.constraints.Pattern.Flag;
++import javax.validation.constraints.Positive;
++import javax.validation.constraints.PositiveOrZero;
++import javax.validation.constraints.Size;
++
+ import net.sf.oval.Check;
+ import net.sf.oval.ConstraintTarget;
+ import net.sf.oval.collection.CollectionFactory;
+@@ -78,33 +79,33 @@
+  * <p>
+  * <b>JSR-303:</b>
+  * <ul>
+- * <li>jakarta.validation.constraints.AssertFalse => net.sf.oval.constraint.AssertFalseCheck
+- * <li>jakarta.validation.constraints.AssertTrue => net.sf.oval.constraint.AssertTrueCheck
+- * <li>jakarta.validation.constraints.DecimalMax => net.sf.oval.constraint.MaxCheck
+- * <li>jakarta.validation.constraints.DecimalMin => net.sf.oval.constraint.MinCheck
+- * <li>jakarta.validation.constraints.Digits => net.sf.oval.constraint.DigitsCheck
+- * <li>jakarta.validation.constraints.Future => net.sf.oval.constraint.FutureCheck
+- * <li>jakarta.validation.constraints.Max => net.sf.oval.constraint.MaxCheck
+- * <li>jakarta.validation.constraints.Min => net.sf.oval.constraint.MinCheck
+- * <li>jakarta.validation.constraints.NotNull => net.sf.oval.constraint.NotNullCheck
+- * <li>jakarta.validation.constraints.Null => net.sf.oval.constraint.AssertNullCheck
+- * <li>jakarta.validation.constraints.Past => net.sf.oval.constraint.PastCheck
+- * <li>jakarta.validation.constraints.Pattern => net.sf.oval.constraint.PatternCheck
+- * <li>jakarta.validation.constraints.Size => net.sf.oval.constraint.SizeCheck
+- * <li>jakarta.validation.Valid => net.sf.oval.constraint.AssertValidCheck
++ * <li>javax.validation.constraints.AssertFalse => net.sf.oval.constraint.AssertFalseCheck
++ * <li>javax.validation.constraints.AssertTrue => net.sf.oval.constraint.AssertTrueCheck
++ * <li>javax.validation.constraints.DecimalMax => net.sf.oval.constraint.MaxCheck
++ * <li>javax.validation.constraints.DecimalMin => net.sf.oval.constraint.MinCheck
++ * <li>javax.validation.constraints.Digits => net.sf.oval.constraint.DigitsCheck
++ * <li>javax.validation.constraints.Future => net.sf.oval.constraint.FutureCheck
++ * <li>javax.validation.constraints.Max => net.sf.oval.constraint.MaxCheck
++ * <li>javax.validation.constraints.Min => net.sf.oval.constraint.MinCheck
++ * <li>javax.validation.constraints.NotNull => net.sf.oval.constraint.NotNullCheck
++ * <li>javax.validation.constraints.Null => net.sf.oval.constraint.AssertNullCheck
++ * <li>javax.validation.constraints.Past => net.sf.oval.constraint.PastCheck
++ * <li>javax.validation.constraints.Pattern => net.sf.oval.constraint.PatternCheck
++ * <li>javax.validation.constraints.Size => net.sf.oval.constraint.SizeCheck
++ * <li>javax.validation.Valid => net.sf.oval.constraint.AssertValidCheck
+  * </ul>
+  * <p>
+  * <b>JSR-380:</b>
+  * <ul>
+- * <li>jakarta.validation.constraints.Email => net.sf.oval.constraint.EmailCheck
+- * <li>jakarta.validation.constraints.FutureOrPresent => net.sf.oval.constraint.DateRangeCheck(min="now")
+- * <li>jakarta.validation.constraints.Negative => net.sf.oval.constraint.MaxCheck(max=0, inclusive=false)
+- * <li>jakarta.validation.constraints.NegativeOrZero => net.sf.oval.constraint.MaxCheck(max=0, inclusive=true)
+- * <li>jakarta.validation.constraints.NotBlank => net.sf.oval.constraint.NotBlankCheck
+- * <li>jakarta.validation.constraints.NotEmpty => net.sf.oval.constraint.NotEmptyCheck
+- * <li>jakarta.validation.constraints.PastOrPresent => net.sf.oval.constraint.DateRange(max="now")
+- * <li>jakarta.validation.constraints.Positive => net.sf.oval.constraint.MinCheck(min=0, inclusive=false)
+- * <li>jakarta.validation.constraints.PositiveOrZero => net.sf.oval.constraint.NotNegativeCheck
++ * <li>javax.validation.constraints.Email => net.sf.oval.constraint.EmailCheck
++ * <li>javax.validation.constraints.FutureOrPresent => net.sf.oval.constraint.DateRangeCheck(min="now")
++ * <li>javax.validation.constraints.Negative => net.sf.oval.constraint.MaxCheck(max=0, inclusive=false)
++ * <li>javax.validation.constraints.NegativeOrZero => net.sf.oval.constraint.MaxCheck(max=0, inclusive=true)
++ * <li>javax.validation.constraints.NotBlank => net.sf.oval.constraint.NotBlankCheck
++ * <li>javax.validation.constraints.NotEmpty => net.sf.oval.constraint.NotEmptyCheck
++ * <li>javax.validation.constraints.PastOrPresent => net.sf.oval.constraint.DateRange(max="now")
++ * <li>javax.validation.constraints.Positive => net.sf.oval.constraint.MinCheck(min=0, inclusive=false)
++ * <li>javax.validation.constraints.PositiveOrZero => net.sf.oval.constraint.NotNegativeCheck
+  * </ul>
+  *
+  * @author Sebastian Thomschke
+@@ -440,7 +441,7 @@ protected void initializeChecks(final Annotation anno, final Collection<Check> c
+       /*
+        * process bean validation annotations
+        */
+-      if (annoClass.getAnnotation(jakarta.validation.Constraint.class) != null || anno instanceof Valid) {
++      if (annoClass.getAnnotation(javax.validation.Constraint.class) != null || anno instanceof Valid) {
+ 
+          final Check[] mappedChecks = CONSTRAINT_MAPPER.map(anno);
+ 
+diff --git a/src/main/java/net/sf/oval/configuration/annotation/JPAAnnotationsConfigurer.java b/src/main/java/net/sf/oval/configuration/annotation/JPAAnnotationsConfigurer.java
+index a60e09f7..2d7bf03e 100644
+--- a/src/main/java/net/sf/oval/configuration/annotation/JPAAnnotationsConfigurer.java
++++ b/src/main/java/net/sf/oval/configuration/annotation/JPAAnnotationsConfigurer.java
+@@ -13,16 +13,17 @@
+ import java.util.Collection;
+ import java.util.List;
+ 
+-import jakarta.persistence.Basic;
+-import jakarta.persistence.Column;
+-import jakarta.persistence.Enumerated;
+-import jakarta.persistence.GeneratedValue;
+-import jakarta.persistence.Lob;
+-import jakarta.persistence.ManyToMany;
+-import jakarta.persistence.ManyToOne;
+-import jakarta.persistence.OneToMany;
+-import jakarta.persistence.OneToOne;
+-import jakarta.persistence.Version;
++import javax.persistence.Basic;
++import javax.persistence.Column;
++import javax.persistence.Enumerated;
++import javax.persistence.GeneratedValue;
++import javax.persistence.Lob;
++import javax.persistence.ManyToMany;
++import javax.persistence.ManyToOne;
++import javax.persistence.OneToMany;
++import javax.persistence.OneToOne;
++import javax.persistence.Version;
++
+ import net.sf.oval.Check;
+ import net.sf.oval.collection.CollectionFactory;
+ import net.sf.oval.configuration.Configurer;
+diff --git a/src/main/resources/META-INF/MANIFEST.MF b/src/main/resources/META-INF/MANIFEST.MF
+index d1ff14f3..ba6d0736 100644
+--- a/src/main/resources/META-INF/MANIFEST.MF
++++ b/src/main/resources/META-INF/MANIFEST.MF
+@@ -20,7 +20,7 @@ Require-Bundle: org.aspectj.runtime;bundle-version="${org.aspectj:aspectjrt:jar.
+ Export-Package: net.sf.oval,
+  net.sf.oval.collection,
+  net.sf.oval.configuration,
+- net.sf.oval.configuration.annotation;uses:="jakarta.persistence",
++ net.sf.oval.configuration.annotation;uses:="javax.persistence",
+  net.sf.oval.configuration.pojo,
+  net.sf.oval.configuration.pojo.elements,
+  net.sf.oval.configuration.xml,
+diff --git a/src/test/java/net/sf/oval/test/guard/ChainedConstructorsTest.java b/src/test/java/net/sf/oval/test/guard/ChainedConstructorsTest.java
+index 11c630fe..9217fc4b 100644
+--- a/src/test/java/net/sf/oval/test/guard/ChainedConstructorsTest.java
++++ b/src/test/java/net/sf/oval/test/guard/ChainedConstructorsTest.java
+@@ -6,9 +6,10 @@
+ 
+ import static org.assertj.core.api.Assertions.*;
+ 
++import javax.validation.ConstraintViolationException;
++
+ import org.junit.Test;
+ 
+-import jakarta.validation.ConstraintViolationException;
+ import net.sf.oval.constraint.NotNull;
+ import net.sf.oval.guard.Guarded;
+ 
+diff --git a/src/test/java/net/sf/oval/test/guard/InheritanceTest.java b/src/test/java/net/sf/oval/test/guard/InheritanceTest.java
+index f5884c77..4ddb3490 100644
+--- a/src/test/java/net/sf/oval/test/guard/InheritanceTest.java
++++ b/src/test/java/net/sf/oval/test/guard/InheritanceTest.java
+@@ -6,9 +6,10 @@
+ 
+ import static org.assertj.core.api.Assertions.*;
+ 
++import javax.validation.ConstraintViolationException;
++
+ import org.junit.Test;
+ 
+-import jakarta.validation.ConstraintViolationException;
+ import net.sf.oval.constraint.AssertFieldConstraints;
+ import net.sf.oval.constraint.NotNull;
+ import net.sf.oval.exception.ConstraintsViolatedException;
+diff --git a/src/test/java/net/sf/oval/test/integration/spring/SpringAOPAllianceBeanValidationTest.java b/src/test/java/net/sf/oval/test/integration/spring/SpringAOPAllianceBeanValidationTest.java
+index 86f41538..7d2876b7 100644
+--- a/src/test/java/net/sf/oval/test/integration/spring/SpringAOPAllianceBeanValidationTest.java
++++ b/src/test/java/net/sf/oval/test/integration/spring/SpringAOPAllianceBeanValidationTest.java
+@@ -6,11 +6,12 @@
+ 
+ import static org.assertj.core.api.Assertions.*;
+ 
++import javax.validation.constraints.NotNull;
++import javax.validation.constraints.Size;
++
+ import org.junit.Test;
+ import org.springframework.aop.framework.ProxyFactory;
+ 
+-import jakarta.validation.constraints.NotNull;
+-import jakarta.validation.constraints.Size;
+ import net.sf.oval.configuration.annotation.BeanValidationAnnotationsConfigurer;
+ import net.sf.oval.exception.ConstraintsViolatedException;
+ import net.sf.oval.guard.Guard;
+diff --git a/src/test/java/net/sf/oval/test/validator/BeanValidationAnnotationsConfigurerTest.java b/src/test/java/net/sf/oval/test/validator/BeanValidationAnnotationsConfigurerTest.java
+index 9294c850..5ca4e8e9 100644
+--- a/src/test/java/net/sf/oval/test/validator/BeanValidationAnnotationsConfigurerTest.java
++++ b/src/test/java/net/sf/oval/test/validator/BeanValidationAnnotationsConfigurerTest.java
+@@ -13,13 +13,14 @@
+ import java.util.List;
+ import java.util.Map;
+ 
++import javax.persistence.Entity;
++import javax.validation.Valid;
++import javax.validation.constraints.NotEmpty;
++import javax.validation.constraints.NotNull;
++import javax.validation.constraints.Size;
++
+ import org.junit.Test;
+ 
+-import jakarta.persistence.Entity;
+-import jakarta.validation.Valid;
+-import jakarta.validation.constraints.NotEmpty;
+-import jakarta.validation.constraints.NotNull;
+-import jakarta.validation.constraints.Size;
+ import net.sf.oval.ConstraintViolation;
+ import net.sf.oval.Validator;
+ import net.sf.oval.configuration.annotation.BeanValidationAnnotationsConfigurer;
+diff --git a/src/test/java/net/sf/oval/test/validator/JPAAnnotationsConfigurerTest.java b/src/test/java/net/sf/oval/test/validator/JPAAnnotationsConfigurerTest.java
+index 3f827e84..0fba6ece 100644
+--- a/src/test/java/net/sf/oval/test/validator/JPAAnnotationsConfigurerTest.java
++++ b/src/test/java/net/sf/oval/test/validator/JPAAnnotationsConfigurerTest.java
+@@ -10,19 +10,19 @@
+ import java.util.Collection;
+ import java.util.List;
+ 
++import javax.persistence.Basic;
++import javax.persistence.Column;
++import javax.persistence.Entity;
++import javax.persistence.ManyToOne;
++import javax.persistence.OneToMany;
++import javax.persistence.OneToOne;
++
+ import org.junit.Test;
+ 
+-import jakarta.persistence.Basic;
+-import jakarta.persistence.Column;
+-import jakarta.persistence.Entity;
+-import jakarta.persistence.ManyToOne;
+-import jakarta.persistence.OneToMany;
+-import jakarta.persistence.OneToOne;
+ import net.sf.oval.ConstraintViolation;
+ import net.sf.oval.Validator;
+ import net.sf.oval.configuration.annotation.JPAAnnotationsConfigurer;
+ 
+-
+ /**
+  * @author Sebastian Thomschke
+  *
