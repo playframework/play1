@@ -1,0 +1,6 @@
+----
+cf https://github.com/xael-fry/oval/pull/2
+----
+
+DRY RUN -> patch --dry-run -p1 -i oval-3.2.1.patch
+APPLY -> patch -p1 -i oval-3.2.1.patch
