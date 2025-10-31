@@ -18,7 +18,7 @@
     assertTextPresent('0:[DONE];1:[DONE]')
 
     openAndWait('@{WithContinuations.withNaiveJPA()}')
-    assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
+    assertTextPresent('EntityExistsException occurred : detached entity passed to persist: models.User')
     
     openAndWait('@{WithContinuations.getUserByName('coco')}')
     assertTextPresent('Users:1 -> null')
@@ -72,7 +72,7 @@
     assertTextPresent('isOk->true')
     
     openAndWait('@{WithContinuations.jpaAndCallback()}')
-    assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
+    assertTextPresent('EntityExistsException occurred : detached entity passed to persist: models.User')
     
     openAndWait('@{WithContinuations.callbackWithResult()}')
     assertTextPresent('yep -> DONE')

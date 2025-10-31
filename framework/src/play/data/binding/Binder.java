@@ -672,7 +672,7 @@ public abstract class Binder {
     // Needs this because sometimes we need to know if no value was returned..
     private static Object internalDirectBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type)
             throws Exception {
-        boolean nullOrEmpty = value == null || value.trim().length() == 0;
+        boolean nullOrEmpty = value == null || value.isBlank();
 
         if (annotations != null) {
             for (Annotation annotation : annotations) {

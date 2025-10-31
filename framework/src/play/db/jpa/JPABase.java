@@ -20,10 +20,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PersistenceException;
 
-import org.hibernate.collection.internal.PersistentMap;
+import org.hibernate.annotations.TypeRegistration;
+import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.engine.spi.CollectionEntry;
-import org.hibernate.engine.spi.EntityEntry;
 import org.hibernate.engine.spi.PersistenceContext;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.internal.SessionImpl;
@@ -39,6 +39,7 @@ import play.exceptions.UnexpectedException;
  * A super class for JPA entities
  */
 @MappedSuperclass
+@TypeRegistration(basicClass = Blob.class, userType = BlobType.class)
 public class JPABase implements Serializable, play.db.Model {
 
     @Override
@@ -117,13 +118,11 @@ public class JPABase implements Serializable, play.db.Model {
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
-        if (avoidCascadeSaveLoops.get().contains(this)) {
+        if (!avoidCascadeSaveLoops.get().add(this)) {
             return;
-        } else {
-            avoidCascadeSaveLoops.get().add(this);
-            if (willBeSaved) {
-                PlayPlugin.postEvent("JPASupport.objectUpdated", this);
-            }
+        }
+        if (willBeSaved) {
+            PlayPlugin.postEvent("JPASupport.objectUpdated", this);
         }
         // Cascade save
         try {

@@ -1,21 +1,17 @@
 package play.db.jpa;
 
-
 import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.type.Type;
-import java.io.Serializable;
 
-
-public class HibernateInterceptor extends EmptyInterceptor {
+public class HibernateInterceptor implements Interceptor {
 
   public HibernateInterceptor() {
-
   }
 
   @Override
-  public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
+  public int[] findDirty(Object o, Object id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
     if (o instanceof JPABase && !((JPABase) o).willBeSaved) {
       return new int[0];
     }
@@ -23,7 +19,7 @@ public class HibernateInterceptor extends EmptyInterceptor {
   }
 
     @Override
-    public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+    public boolean onCollectionUpdate(Object collection, Object key) throws CallbackException {
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
@@ -36,11 +32,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
         } else {
             System.out.println("HOO: Case not handled !!!");
         }
-        return super.onCollectionUpdate(collection, key);
+        return Interceptor.super.onCollectionUpdate(collection, key);
     }
 
     @Override
-    public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+    public boolean onCollectionRecreate(Object collection, Object key) throws CallbackException {
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
@@ -54,11 +50,11 @@ public class HibernateInterceptor extends EmptyInterceptor {
             System.out.println("HOO: Case not handled !!!");
         }
 
-        return super.onCollectionRecreate(collection, key);
+        return Interceptor.super.onCollectionRecreate(collection, key);
     }
 
     @Override
-    public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+    public boolean onCollectionRemove(Object collection, Object key) throws CallbackException {
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
@@ -71,15 +67,15 @@ public class HibernateInterceptor extends EmptyInterceptor {
         } else {
             System.out.println("HOO: Case not handled !!!");
         }
-        return super.onCollectionRemove(collection, key);
+        return Interceptor.super.onCollectionRemove(collection, key);
     }
 
     protected final ThreadLocal<Object> entities = new ThreadLocal<>();
 
     @Override
-    public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
+    public boolean onPersist(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) {
         entities.set(entity);
-        return super.onSave(entity, id, state, propertyNames, types);
+        return Interceptor.super.onPersist(entity, id, state, propertyNames, types);
     }
 
     @Override
