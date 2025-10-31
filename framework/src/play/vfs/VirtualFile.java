@@ -1,7 +1,5 @@
 package play.vfs;
 
-import static org.apache.commons.io.IOUtils.closeQuietly;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +16,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.io.IOUtils;
 
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -156,15 +153,12 @@ public class VirtualFile {
     }
 
     public Channel channel() {
-        try {
-            FileInputStream fis = new FileInputStream(realFile);
-            try {
-                return fis.getChannel();
-            } finally {
-                closeQuietly(fis);
-            }
+        try (FileInputStream fis = new FileInputStream(realFile)) {
+            return fis.getChannel();
         } catch (FileNotFoundException e) {
             return null;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -177,13 +171,8 @@ public class VirtualFile {
     }
 
     public String contentAsString() {
-        try {
-            InputStream is = inputstream();
-            try {
-                return IO.readContentAsString(is);
-            } finally {
-                closeQuietly(is);
-            }
+        try (InputStream is = inputstream()) {
+            return IO.readContentAsString(is);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -202,13 +191,8 @@ public class VirtualFile {
     }
 
     public byte[] content() {
-        try {
-            InputStream is = inputstream();
-            try {
-                return IOUtils.toByteArray(is);
-            } finally {
-                closeQuietly(is);
-            }
+        try (InputStream is = inputstream()) {
+            return is.readAllBytes();
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -265,7 +249,7 @@ public class VirtualFile {
      * @return true if match
      */
     public boolean matchName(String fileName) {
-        // we need to check the name case to be sure we is not conflict with a file with the same name
+        // we need to check the name case to be sure we are not conflict with a file with the same name
         String canonicalName = null;
         try {
             canonicalName = this.realFile.getCanonicalFile().getName();
