@@ -1,0 +1,42 @@
+# Play 1.10.0 -- Release notes
+
+Play 1.10.0 has been released of the master branch.
+
+The changes in this release are listed in the "1.10.0":https://github.com/playframework/play1/milestone/13352426 including 31 resolved tickets.
+
+
+## What's new in Play 1.10.0
+
+* "#1506":https://github.com/playframework/play1/issues/1506 : feat(dependencies): migrate javax.persistence to jakarta.persistence
+* "#1510":https://github.com/playframework/play1/issues/1510 : Update lib test
+* "#1513":https://github.com/playframework/play1/issues/1513 : Make java 17 as default
+* "#1514":https://github.com/playframework/play1/issues/1514 : chore(java): set build for java 17 instead of java 11 + test 21 + build mac-os (#1513)
+* "#1517":https://github.com/playframework/play1/issues/1517 : Migrate from javax.activation » jakarta.activation
+* "#1529":https://github.com/playframework/play1/issues/1529 : chore(dependencies): migrate from javax.inject 1.0 to jakarta.inject-api 2.0.1 (#1525)
+* "#1530":https://github.com/playframework/play1/issues/1530 : chore(securitymanager): remove deprecated Security manager (#1527)
+* "#1533":https://github.com/playframework/play1/issues/1533 : junit5 upgrade
+
+## What's fixed in Play 1.10.0
+
+* "#1390":https://github.com/playframework/play1/issues/1390 : When should play! migrate to jakarta-jpa?
+* "#1418":https://github.com/playframework/play1/issues/1418 : Firephoque dependencies update 20220618
+* "#1439":https://github.com/playframework/play1/issues/1439 : Fix class newinstance deprecation
+* "#1480":https://github.com/playframework/play1/issues/1480 : Fix issue #1463 by restoring behavior of --timeout parameter
+* "#1505":https://github.com/playframework/play1/issues/1505 : chore(dependencies): update hibernate-commons-annotations from 5.1.2.Final to 7.0.3.Final
+* "#1509":https://github.com/playframework/play1/issues/1509 : feat(testrunner): update firephoque dependencies
+* "#1511":https://github.com/playframework/play1/issues/1511 : Fix class newinstance deprecation
+* "#1515":https://github.com/playframework/play1/issues/1515 : chore(deps): bump actions/checkout from 4 to 5
+* "#1516":https://github.com/playframework/play1/issues/1516 : Migrate from javax.servlet.* to jakarta.servlet
+* "#1518":https://github.com/playframework/play1/issues/1518 : Migrate from javax.validation » jakarta.validation
+* "#1519":https://github.com/playframework/play1/issues/1519 : chore(servlet): update geronimo-servlet_2.5_spec 1.2 to jakarta.servl…
+* "#1521":https://github.com/playframework/play1/issues/1521 : chore(activation): update commons-email 1.6.0 to commons-email2-core …
+* "#1522":https://github.com/playframework/play1/issues/1522 : 1518 jakarta validation
+* "#1523":https://github.com/playframework/play1/issues/1523 : Update to junit 5
+* "#1525":https://github.com/playframework/play1/issues/1525 : Migrate javax.inject to jakarta.inject
+* "#1526":https://github.com/playframework/play1/issues/1526 : Fix warning about deprecated parameters  -Xverify:none and -noverify were deprecated in JDK 13 a
+* "#1527":https://github.com/playframework/play1/issues/1527 : Remove deprecated SecurityManager usage
+* "#1528":https://github.com/playframework/play1/issues/1528 : chore(deps): bump actions/setup-java from 4 to 5
+* "#1531":https://github.com/playframework/play1/issues/1531 : fix(command): remove deprecated use of -noverify jvm parameter (1526)
+* "#1532":https://github.com/playframework/play1/issues/1532 : chore(deps): bump actions/setup-python from 5 to 6
+* "#1535":https://github.com/playframework/play1/issues/1535 : chore(deps): bump github/codeql-action from 3 to 4
+* "#1536":https://github.com/playframework/play1/issues/1536 : chore(deps): bump actions/upload-artifact from 4 to 5
