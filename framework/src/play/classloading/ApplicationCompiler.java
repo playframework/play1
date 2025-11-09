@@ -36,12 +36,6 @@ public class ApplicationCompiler {
 
     private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
     static final Map<String, String> compatibleJavaVersions = Map.ofEntries(
-        Map.entry("11", CompilerOptions.VERSION_11),
-        Map.entry("12", CompilerOptions.VERSION_12),
-        Map.entry("13", CompilerOptions.VERSION_13),
-        Map.entry("14", CompilerOptions.VERSION_14),
-        Map.entry("15", CompilerOptions.VERSION_15),
-        Map.entry("16", CompilerOptions.VERSION_16),
         Map.entry("17", CompilerOptions.VERSION_17),
         Map.entry("18", CompilerOptions.VERSION_18),
         Map.entry("19", CompilerOptions.VERSION_19),
@@ -63,7 +57,7 @@ public class ApplicationCompiler {
      */
     public ApplicationCompiler(ApplicationClasses applicationClasses) {
         final String runningJavaVersion = System.getProperty("java.version");
-        if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10").anyMatch(runningJavaVersion::startsWith)) {
+        if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10", "11", "12", "13", "14", "15", "16").anyMatch(runningJavaVersion::startsWith)) {
             throw new CompilationException("JDK version prior to 11 are not supported to run the application");
         }
 
