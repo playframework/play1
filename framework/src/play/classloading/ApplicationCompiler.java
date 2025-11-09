@@ -34,7 +34,7 @@ import play.exceptions.UnexpectedException;
  */
 public class ApplicationCompiler {
 
-    private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
+    private static final String JAVA_SOURCE_DEFAULT_VERSION = "17";
     static final Map<String, String> compatibleJavaVersions = Map.ofEntries(
         Map.entry("17", CompilerOptions.VERSION_17),
         Map.entry("18", CompilerOptions.VERSION_18),
