@@ -64,6 +64,12 @@ public class Fixtures {
     // Allows people to clear the cache, so Fixture is not stateful
     public static final Map<String, Object> idCache = new HashMap<>();
 
+    /**
+     * The ANSI-standard set of read-only views that provide information database metadata.
+     * See details <a herf="https://en.wikipedia.org/wiki/Information_schema">here</a>.
+     */
+    private static final String INFORMATION_SCHEMA = "INFORMATION_SCHEMA";
+
     public static void executeSQL(String sqlScript) {
         for (CharSequence sql : new SQLSplitter(sqlScript)) {
             String s = sql.toString().trim();
@@ -149,6 +155,10 @@ public class Fixtures {
             List<String> names = new ArrayList<>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[] { "TABLE" });
             while (rs.next()) {
+                var schema = rs.getString("TABLE_SCHEM");
+                if (INFORMATION_SCHEMA.equalsIgnoreCase(schema)) {
+                    continue;
+                }
                 String name = rs.getString("TABLE_NAME");
                 names.add(name);
             }

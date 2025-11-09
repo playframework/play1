@@ -54,7 +54,7 @@ public class OptimisticLockingModelPlayTest extends UnitTest {
     }
     
     
-    @Entity
+    @Entity(name = "OptimisticLockingModelPlayTest_TestModel")
     public static class TestModel extends OptimisticLockingModel {
         public String text;
     }

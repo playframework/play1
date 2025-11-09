@@ -610,7 +610,7 @@ public class ActionInvoker {
 
     public static Object[] getActionMethodArgs(Method method, Object o) throws Exception {
         String[] paramsNames = Java.parameterNames(method);
-        if (paramsNames == null && method.getParameterTypes().length > 0) {
+        if (paramsNames.length == 0 && method.getParameterCount() > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
 
@@ -622,9 +622,8 @@ public class ActionInvoker {
             return rArgs;
         }
 
-        rArgs = new Object[method.getParameterTypes().length];
-        for (int i = 0; i < method.getParameterTypes().length; i++) {
-
+        rArgs = new Object[method.getParameterCount()];
+        for (int i = 0; i < method.getParameterCount(); i++) {
             Class<?> type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap<>();
 

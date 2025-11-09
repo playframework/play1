@@ -6,6 +6,7 @@ import play.db.jpa.*;
 import play.data.validation.*;
  
 @Entity
+@Table(name = "users")
 public class User extends Model {
  
     @Email

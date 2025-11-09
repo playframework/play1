@@ -22,7 +22,7 @@ public class JPAExceptionTest {
 
     @Test
     public void errorDescription_messageWithCause_GenericJDBCException() {
-        assertEquals("A JPA error occurred (ups): <strong>sql fail</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete. SQL: (select - from dual)", 
+        assertEquals("A JPA error occurred (ups): <strong>sql fail [select - from dual]</strong>. This is likely because the batch has broken some referential integrity. Check your cascade delete. SQL: (select - from dual)",
                 new JPAException("ups", new GenericJDBCException("sql fail", new SQLException("ORA-666"), "select - from dual")).getErrorDescription());
     }
 }

@@ -259,7 +259,7 @@ public class EvolutionQuery{
                 Class<?> dialectClass = Play.classloader.loadClass(jpaDialect);
 
                 // Oracle 8i dialect is the base class for oracle dialects (at least for now)
-                isOracle = org.hibernate.dialect.Oracle8iDialect.class.isAssignableFrom(dialectClass);
+                isOracle = org.hibernate.dialect.OracleDialect.class.isAssignableFrom(dialectClass);
             } catch (ClassNotFoundException e) {
                 // swallow
                 Logger.warn("jpa.dialect class %s not found", jpaDialect);
