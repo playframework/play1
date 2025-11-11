@@ -5,13 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.io.Charsets.toCharset;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -293,14 +287,25 @@ public class IO {
 
     // If targetLocation does not exist, it will be created.
     public static void copyDirectory(File source, File target) {
-        try (Stream<Path> dirs = Files.walk(source.toPath())) {
-            dirs.forEach(src -> {
+        var sourcePath = source.toPath();
+        var targetPath = target.toPath();
+
+        try (var stream = Files.walk(sourcePath)) {
+            stream.forEach(src -> {
                 try {
-                    Files.copy(source.toPath(), target.toPath(), REPLACE_EXISTING);
+                    Path dst = targetPath.resolve(sourcePath.relativize(src));
+
+                    if (Files.isDirectory(src)) {
+                        Files.createDirectories(dst);
+                    } else {
+                        Files.copy(src, dst, REPLACE_EXISTING);
+                    }
                 } catch (IOException e) {
-                    throw new UnexpectedException(e);
+                    throw new UncheckedIOException(e);
                 }
             });
+        } catch (UncheckedIOException e) {
+            throw new UnexpectedException(e.getCause());
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
