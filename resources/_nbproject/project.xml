@@ -109,7 +109,7 @@
                 %MODULES%
                 <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
                 <built-to>nbproject/classes</built-to>  
-                <source-level>1.8</source-level>                 
+                <source-level>17</source-level>
             </compilation-unit>
         </java-data>
     </configuration>

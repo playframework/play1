@@ -58,7 +58,7 @@ public class ApplicationCompiler {
     public ApplicationCompiler(ApplicationClasses applicationClasses) {
         final String runningJavaVersion = System.getProperty("java.version");
         if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10", "11", "12", "13", "14", "15", "16").anyMatch(runningJavaVersion::startsWith)) {
-            throw new CompilationException("JDK version prior to 11 are not supported to run the application");
+            throw new CompilationException("JDK version prior to 17 are not supported to run the application");
         }
 
         final String configSourceVersion = Play.configuration.getProperty("java.source", JAVA_SOURCE_DEFAULT_VERSION);
