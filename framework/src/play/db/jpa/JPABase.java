@@ -114,7 +114,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static final ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
+    private static final ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
@@ -195,18 +195,13 @@ public class JPABase implements Serializable, play.db.Model {
         PersistenceContext pc = session.getPersistenceContext();
         CollectionEntry ce = pc.getCollectionEntry(persistentCollection);
 
-        if (ce != null) {
+        if (ce != null && ce.getSnapshot() != null) {
             CollectionPersister cp = ce.getLoadedPersister();
             if (cp != null) {
-                Type ct = cp.getElementType();
-                if (ct instanceof EntityType) {
-                    String entityName = ((EntityType) ct).getAssociatedEntityName(session.getFactory());
-                    if (ce.getSnapshot() != null) {
-                        Collection orphans = ce.getOrphans(entityName, persistentCollection);
-                        for (Object o : orphans) {
-                            saveAndCascadeIfJPABase(o, willBeSaved);
-                        }
-                    }
+                String entityName = cp.getAttributeMapping().getElementDescriptor().getJavaType().getTypeName();
+                Collection orphans = ce.getOrphans(entityName, persistentCollection);
+                for (Object o : orphans) {
+                    saveAndCascadeIfJPABase(o, willBeSaved);
                 }
             }
         }
