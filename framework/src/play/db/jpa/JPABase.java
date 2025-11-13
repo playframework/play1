@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -29,8 +28,6 @@ import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.internal.SessionImpl;
 import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.type.EntityType;
-import org.hibernate.type.Type;
 
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
@@ -49,11 +46,11 @@ public class JPABase implements Serializable, play.db.Model {
             em(dbName).persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
-        avoidCascadeSaveLoops.set(new HashSet<>());
+        var avoidCascadeSaveLoops = new HashSet<JPABase>();
         try {
-            saveAndCascade(true);
+            saveAndCascade(avoidCascadeSaveLoops, true);
         } finally {
-            avoidCascadeSaveLoops.get().clear();
+            avoidCascadeSaveLoops.clear();
         }
         try {
             em(dbName).flush();
@@ -64,11 +61,10 @@ public class JPABase implements Serializable, play.db.Model {
                 throw e;
             }
         }
-        avoidCascadeSaveLoops.set(new HashSet<>());
         try {
-            saveAndCascade(false);
+            saveAndCascade(avoidCascadeSaveLoops, false);
         } finally {
-            avoidCascadeSaveLoops.get().clear();
+            avoidCascadeSaveLoops.clear();
         }
     }
 
@@ -77,11 +73,11 @@ public class JPABase implements Serializable, play.db.Model {
         String dbName = JPA.getDBName(this.getClass());
 
         try {
-            avoidCascadeSaveLoops.set(new HashSet<>());
+            var avoidCascadeSaveLoops = new HashSet<JPABase>();
             try {
-                saveAndCascade(true);
+                saveAndCascade(avoidCascadeSaveLoops, true);
             } finally {
-                avoidCascadeSaveLoops.get().clear();
+                avoidCascadeSaveLoops.clear();
             }
             em(dbName).remove(this);
             try {
@@ -93,11 +89,10 @@ public class JPABase implements Serializable, play.db.Model {
                     throw e;
                 }
             }
-            avoidCascadeSaveLoops.set(new HashSet<>());
             try {
-                saveAndCascade(false);
+                saveAndCascade(avoidCascadeSaveLoops, false);
             } finally {
-                avoidCascadeSaveLoops.get().clear();
+                avoidCascadeSaveLoops.clear();
             }
             PlayPlugin.postEvent("JPASupport.objectDeleted", this);
         } catch (PersistenceException e) {
@@ -114,11 +109,10 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    private static final ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<>();
 
-    private void saveAndCascade(boolean willBeSaved) {
+    private void saveAndCascade(Set<JPABase> avoidCascadeSaveLoops, boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
-        if (!avoidCascadeSaveLoops.get().add(this)) {
+        if (!avoidCascadeSaveLoops.add(this)) {
             return;
         }
         if (willBeSaved) {
@@ -152,34 +146,31 @@ public class JPABase implements Serializable, play.db.Model {
                 }
                 if (doCascade) {
                     Object value = field.get(this);
-                    if (value != null) {
-                        if (value instanceof PersistentMap) {
-                            if (((PersistentMap) value).wasInitialized()) {
+                    if (value instanceof PersistentMap map) {
+                        if (map.wasInitialized()) {
+                            cascadeOrphans(map, avoidCascadeSaveLoops, willBeSaved);
 
-                                cascadeOrphans((PersistentCollection) value, willBeSaved);
-
-                                for (Object o : ((Map) value).values()) {
-                                    saveAndCascadeIfJPABase(o, willBeSaved);
-                                }
+                            for (Object o : map.values()) {
+                                saveAndCascadeIfJPABase(o, avoidCascadeSaveLoops, willBeSaved);
                             }
-                        } else if (value instanceof PersistentCollection) {
-                            cascadeOrphans((PersistentCollection) value, willBeSaved);
-
-                            for (Object o : (Collection) value) {
-                                saveAndCascadeIfJPABase(o, willBeSaved);
-                            }
-                        } else if (value instanceof Collection) {
-                            for (Object o : (Collection) value) {
-                                saveAndCascadeIfJPABase(o, willBeSaved);
-                            }
-                        } else if (value instanceof HibernateProxy && value instanceof JPABase) {
-                            if (!((HibernateProxy) value).getHibernateLazyInitializer().isUninitialized()) {
-                                ((JPABase) ((HibernateProxy) value).getHibernateLazyInitializer().getImplementation())
-                                        .saveAndCascade(willBeSaved);
-                            }
-                        } else if (value instanceof JPABase) {
-                            ((JPABase) value).saveAndCascade(willBeSaved);
                         }
+                    } else if (value instanceof PersistentCollection collection) {
+                        cascadeOrphans(collection, avoidCascadeSaveLoops, willBeSaved);
+
+                        for (Object o : (Collection) value) {
+                            saveAndCascadeIfJPABase(o, avoidCascadeSaveLoops, willBeSaved);
+                        }
+                    } else if (value instanceof Collection collection) {
+                        for (Object o : collection) {
+                            saveAndCascadeIfJPABase(o, avoidCascadeSaveLoops, willBeSaved);
+                        }
+                    } else if (value instanceof HibernateProxy proxy && value instanceof JPABase) {
+                        if (!proxy.getHibernateLazyInitializer().isUninitialized()) {
+                            ((JPABase) proxy.getHibernateLazyInitializer().getImplementation())
+                                    .saveAndCascade(avoidCascadeSaveLoops, willBeSaved);
+                        }
+                    } else {
+                        saveAndCascadeIfJPABase(value, avoidCascadeSaveLoops, willBeSaved);
                     }
                 }
             }
@@ -188,7 +179,7 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
-    private void cascadeOrphans(PersistentCollection persistentCollection, boolean willBeSaved) {
+    private void cascadeOrphans(PersistentCollection persistentCollection, Set<JPABase> avoidCascadeSaveLoops, boolean willBeSaved) {
         String dbName = JPA.getDBName(this.getClass());
 
         SessionImpl session = JPA.em(dbName).unwrap(SessionImpl.class);
@@ -201,15 +192,15 @@ public class JPABase implements Serializable, play.db.Model {
                 String entityName = cp.getAttributeMapping().getElementDescriptor().getJavaType().getTypeName();
                 Collection orphans = ce.getOrphans(entityName, persistentCollection);
                 for (Object o : orphans) {
-                    saveAndCascadeIfJPABase(o, willBeSaved);
+                    saveAndCascadeIfJPABase(o, avoidCascadeSaveLoops, willBeSaved);
                 }
             }
         }
     }
 
-    private static void saveAndCascadeIfJPABase(Object o, boolean willBeSaved) {
-        if (o instanceof JPABase) {
-            ((JPABase) o).saveAndCascade(willBeSaved);
+    private static void saveAndCascadeIfJPABase(Object o, Set<JPABase> avoidCascadeSaveLoops, boolean willBeSaved) {
+        if (o instanceof JPABase jpaBase) {
+            jpaBase.saveAndCascade(avoidCascadeSaveLoops, willBeSaved);
         }
     }
 
