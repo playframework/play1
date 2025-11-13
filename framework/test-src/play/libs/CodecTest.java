@@ -55,4 +55,16 @@ public class CodecTest {
         assertThat(Codec.hexSHA1("Test vector from febooti.com")).isEqualTo("a7631795f6d59cd6d14ebd0058a6394a4b93d868");
     }
 
+    @Test void hexStringToByte() {
+        assertThat(Codec.hexStringToByte("0123456789AbCdEf")).containsExactly(
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF
+        );
+    }
+
+    @Test void byteToHexString() {
+        assertThat(Codec.byteToHexString(
+            new byte[] { 0x01, 0x23, 0x45, 0x67, (byte) 0x89, (byte) 0xAB, (byte) 0xCD, (byte) 0xEF }
+        )).isEqualTo("0123456789abcdef");
+    }
+
 }

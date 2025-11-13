@@ -2,10 +2,8 @@ package play.libs;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.UUID;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 
 import play.exceptions.UnexpectedException;
 
@@ -88,7 +86,7 @@ public class Codec {
      * @return The hexadecimal String
      */
     public static String byteToHexString(byte[] bytes) {
-        return String.valueOf(Hex.encodeHex(bytes));
+        return HexFormat.of().formatHex(bytes);
     }
 
     /**
@@ -99,11 +97,7 @@ public class Codec {
      * @return The byte array
      */
     public static byte[] hexStringToByte(String hexString) {
-        try {
-            return Hex.decodeHex(hexString.toCharArray());
-        } catch (DecoderException e) {
-            throw new UnexpectedException(e);
-        }
+        return HexFormat.of().parseHex(hexString);
     }
 
     /**
