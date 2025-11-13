@@ -264,7 +264,7 @@ def get_java_version():
         return ""
 
 def get_minimal_supported_java_version():
-    return 11
+    return 17
 
 def is_java_version_supported(java_version):
     try:

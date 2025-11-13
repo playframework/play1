@@ -8,6 +8,9 @@ on:
   schedule:
     - cron: '15 1 * * 6'
 
+env:
+  DEFAULT_JAVA_VERSION: '21'
+
 jobs:
   analyze:
     name: Analyze
@@ -34,6 +37,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
+
+    - name: Set up JDK ${{ env.DEFAULT_JAVA_VERSION }}
+      uses: actions/setup-java@v5
+      with:
+        java-version: ${{ env.DEFAULT_JAVA_VERSION }}
+        distribution: 'adopt'
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

@@ -61,8 +61,8 @@ require:    &allDependencies
     - org.bouncycastle -> bcpkix-jdk18on 1.81
     - org.codehaus.groovy -> groovy 3.0.25
     - org.codehaus.groovy -> groovy-xml 3.0.25
-    - org.eclipse.jdt -> org.eclipse.jdt.core 3.33.0
-    - org.eclipse.jdt -> ecj 3.33.0
+    - org.eclipse.jdt -> org.eclipse.jdt.core 3.40.0
+    - org.eclipse.jdt -> ecj 3.40.0
     - org.hibernate -> hibernate-core 6.6.31.Final.patched
     - net.bytebuddy -> byte-buddy 1.17.6
     - jakarta.persistence -> jakarta.persistence-api 3.1.0

@@ -34,17 +34,15 @@ import play.exceptions.UnexpectedException;
  */
 public class ApplicationCompiler {
 
-    private static final String JAVA_SOURCE_DEFAULT_VERSION = "11";
-    static final Map<String, String> compatibleJavaVersions = Map.of(
-        "11", CompilerOptions.VERSION_11,
-        "12", CompilerOptions.VERSION_12,
-        "13", CompilerOptions.VERSION_13,
-        "14", CompilerOptions.VERSION_14,
-        "15", CompilerOptions.VERSION_15,
-        "16", CompilerOptions.VERSION_16,
-        "17", CompilerOptions.VERSION_17,
-        "18", CompilerOptions.VERSION_18,
-        "19", CompilerOptions.VERSION_19
+    private static final String JAVA_SOURCE_DEFAULT_VERSION = "17";
+    static final Map<String, String> compatibleJavaVersions = Map.ofEntries(
+        Map.entry("17", CompilerOptions.VERSION_17),
+        Map.entry("18", CompilerOptions.VERSION_18),
+        Map.entry("19", CompilerOptions.VERSION_19),
+        Map.entry("20", CompilerOptions.VERSION_20),
+        Map.entry("21", CompilerOptions.VERSION_21),
+        Map.entry("22", CompilerOptions.VERSION_22),
+        Map.entry("23", CompilerOptions.VERSION_23)
     );
 
     final Map<String, Boolean> packagesCache = new HashMap<>();
@@ -59,8 +57,8 @@ public class ApplicationCompiler {
      */
     public ApplicationCompiler(ApplicationClasses applicationClasses) {
         final String runningJavaVersion = System.getProperty("java.version");
-        if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10").anyMatch(runningJavaVersion::startsWith)) {
-            throw new CompilationException("JDK version prior to 11 are not supported to run the application");
+        if (Stream.of("1.5", "1.6", "1.7", "1.8", "9", "10", "11", "12", "13", "14", "15", "16").anyMatch(runningJavaVersion::startsWith)) {
+            throw new CompilationException("JDK version prior to 17 are not supported to run the application");
         }
 
         final String configSourceVersion = Play.configuration.getProperty("java.source", JAVA_SOURCE_DEFAULT_VERSION);
@@ -305,7 +303,7 @@ public class ApplicationCompiler {
         /**
          * The JDT compiler
          */
-        Compiler jdtCompiler = new Compiler(nameEnvironment, policy, settings, compilerRequestor, problemFactory) {
+        Compiler jdtCompiler = new Compiler(nameEnvironment, policy, new CompilerOptions(settings), compilerRequestor, problemFactory) {
 
             @Override
             protected void handleInternalException(Throwable e, CompilationUnitDeclaration ud, CompilationResult result) {
