@@ -426,6 +426,7 @@
                 <include name="**/*.gif"/>
                 <include name="**/*.png"/>
                 <include name="**/*.jpg"/>
+                <include name="**/IOTest/**"/>
             </fileset>
         </copy>
     </target>

@@ -2,7 +2,6 @@ package play.deps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -44,8 +43,8 @@ import play.libs.IO;
 
 public class YamlParser extends AbstractModuleDescriptorParser {
 
-    static class Oops extends Exception {
-        public Oops(String message) {
+    private static final class Oops extends Exception {
+        Oops(String message) {
             super(message);
         }
     }
@@ -57,26 +56,19 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
     @Override
     public ModuleDescriptor parseDescriptor(ParserSettings ps, URL url, Resource rsrc, boolean bln) throws ParseException, IOException {
-        try {
-            InputStream srcStream =  rsrc.openStream();
-            long lastModified = (rsrc != null?rsrc.getLastModified():0L);
+        try (InputStream srcStream =  rsrc.openStream()) {
+            long lastModified = rsrc.getLastModified();
 
             Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
-            Object o = null;
+            Map data;
 
             // Try to parse the yaml
             try {
-                o = yaml.load(srcStream);
+                data = yaml.load(srcStream);
             } catch (Exception e) {
                 throw new Oops(e.toString().replace("\n", "\n~ \t"));
             }
 
-            // We expect a Map here
-            if (!(o instanceof Map)) {
-                throw new Oops("Unexpected format -> " + o);
-            }
-
-            Map data = (Map) o;
             ModuleRevisionId id = null;
 
             // Search for 'self' tag
@@ -111,7 +103,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             descriptor.addArtifact("default", new MDArtifact(descriptor, id.getName(), "jar", "zip"));
             descriptor.setLastModified(lastModified);
 
-            boolean transitiveDependencies = get(data, "transitiveDependencies", boolean.class, true);
+            boolean transitiveDependencies = get(data, "transitiveDependencies", Boolean.class, true);
 
             List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {
@@ -148,7 +140,6 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
             if (data.containsKey("require")) {
                 if (data.get("require") instanceof List) {
-
                     List dependencies = (List) data.get("require");
                     for (Object dep : dependencies) {
 
@@ -254,9 +245,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         }
 
                     }
-
                 } else {
-                    throw new Oops("require list not found -> " + o);
+                    throw new Oops("require list not found -> " + data);
                 }
             }
 
@@ -280,7 +270,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     <T> T get(Map data, String key, Class<T> type) {
         if (data.containsKey(key)) {
             Object o = data.get(key);
-            if (type.isAssignableFrom(o.getClass())) {
+            if (type.isInstance(o)) {
                 if(o instanceof String) {
                     o = o.toString().replace("${play.path}", System.getProperty("play.path"));
                     o = o.toString().replace("${application.path}", System.getProperty("application.path"));
@@ -305,7 +295,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         return getOrderedModuleList(modules, file);
     }
 
-   private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws ParseException, IOException {
+    private static Set<String> getOrderedModuleList(Set<String> modules, File file) throws ParseException, IOException {
         if (file == null || !file.exists()) {
             throw new FileNotFoundException("There was a problem to find the file");
         }
@@ -321,27 +311,24 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             String moduleName = filterModuleName(rev);
 
             // Check if the module was already load to avoid circular parsing
-            if (moduleName != null && !modules.contains(moduleName)) {
-                // Add the given module
-                modules.add(moduleName);
-
+            if (moduleName != null && modules.add(moduleName)) {
                 // Need to load module dependencies of this given module
                 File module = new File(localModules, moduleName);
-                if(module != null && module.isDirectory()) {
+                if (module.isDirectory()) {
                     File ivyModule = new File(module, "conf/dependencies.yml");
-                    if(ivyModule != null && ivyModule.exists()) {
+                    if (ivyModule.exists()) {
                         getOrderedModuleList(modules, ivyModule);
                     }
                 } else {
                     File modulePath = new File(IO.readContentAsString(module).trim());
                     if (modulePath.exists() && modulePath.isDirectory()) {
                         File ivyModule = new File(modulePath, "conf/dependencies.yml");
-                        if(ivyModule != null && ivyModule.exists()) {
+                        if (ivyModule.exists()) {
                             getOrderedModuleList(modules, ivyModule);
                         }
                     }
                 }
-            } else if(moduleName == null && rev.getRevision().equals("->")){
+            } else if (moduleName == null && rev.getRevision().equals("->")) {
                 Logger.error("Revision is required, module [%s -> %s] will not be loaded.", rev.getName(), rev.getExtraAttribute("classifier"));
             }
         }
@@ -352,38 +339,24 @@ public class YamlParser extends AbstractModuleDescriptorParser {
     private static String filterModuleName(ModuleRevisionId rev) {
         if (rev != null && !"play".equals(rev.getName())) {
             File moduleDir = new File(Play.applicationPath, "modules");
-            if(moduleDir != null && moduleDir.isDirectory()){
+            if (moduleDir.isDirectory()) {
                 // create new filename filter to check if it is a module (lib will
                 // be skipped)
-                File[] filterFiles = moduleDir.listFiles(new ModuleFilter(rev));
+                File[] filterFiles = moduleDir.listFiles((dir, name) -> {
+                    // Accept module with the same name or with a version number
+                    return name != null && (
+                        name.equals(rev.getName())
+                        || name.equals(rev.getName() + '-' + rev.getRevision())
+                        || name.startsWith(rev.getName() + '-')
+                    );
+                });
                 if (filterFiles != null && filterFiles.length > 0) {
                     return filterFiles[0].getName();
-               }
+                }
             }
         }
 
         return null;
-
-    }
-    private static class ModuleFilter implements FilenameFilter {
-
-        private final ModuleRevisionId moduleRevision;
-
-        public ModuleFilter(ModuleRevisionId moduleRevision) {
-            this.moduleRevision = moduleRevision;
-        }
-
-        @Override
-        public boolean accept(File dir, String name) {
-            // Accept module with the same name or with a version number
-            if (name != null && moduleRevision != null &&
-                    (name.equals(moduleRevision.getName())
-                    || name.equals(moduleRevision.getName() + "-" + moduleRevision.getRevision())
-                    || name.startsWith(moduleRevision.getName() + "-"))) {
-                return true;
-            }
-            return false;
-        }
     }
 
 }
