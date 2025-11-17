@@ -117,4 +117,24 @@ public class YamlParserTest {
         moduleName = it.next();  
         assertEquals("crud", moduleName);     
     }
+
+    @Test void transitiveDependenciesFalseTest() throws Exception {
+        Resource resource = mock(Resource.class);
+        try (InputStream inputStream = getClass().getResource("dependencies_test_transitiveDependencies.yml").openStream()) {
+            when(resource.openStream()).thenReturn(inputStream);
+
+            YamlParser yamlParser = new YamlParser();
+            ModuleDescriptor moduleDescriptor = yamlParser.parseDescriptor(
+                null /*unused*/,
+                null /*unused*/,
+                resource,
+                false /*unused*/
+            );
+            DependencyDescriptor[] dependencies = moduleDescriptor.getDependencies();
+            assertThat(dependencies)
+                .hasSize(2)
+                .allMatch(dependency -> !dependency.isTransitive());
+        }
+    }
+
 }
