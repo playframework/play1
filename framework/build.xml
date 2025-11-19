@@ -3,8 +3,7 @@
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
     <property name="baseversion" value="1.11.x" />
-    <property name="build-source" value="21" />
-    <property name="build-target" value="${build-source}" />
+    <property name="build-release" value="21" />
 
     <path id="project.classpath">
         <fileset dir=".">
@@ -66,7 +65,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="${build-source}" target="${build-target}">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" release="${build-release}">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -114,8 +113,7 @@
     <target name="jar" depends="clean,version,compile,modules" description="create play.jar">
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
-        <echo message="build-source=${build-source}" />
-        <echo message="build-target=${build-target}" />
+        <echo message="build-release=${build-release}" />
         <jar destfile="play-${version}.jar" basedir="classes">
             <manifest>
                 <attribute name="Premain-Class" value="play.classloading.HotswapAgent"/>
@@ -137,8 +135,7 @@
 
     <target name="modules">
         <property name="play.path" value="../.."/>
-        <property name="build-target" value="${build-target}"/>
-        <property name="build-source" value="${build-source}"/>
+        <property name="build-release" value="${build-release}"/>
         <ant antfile="build.xml" target="build" dir="../modules/testrunner" />
         <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
         <ant antfile="build.xml" target="build" dir="../modules/docviewer" />
@@ -245,7 +242,7 @@
         <mkdir dir="test-classes"/>
         <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true"
                destdir="test-classes" classpathref="project.classpath" srcdir="test-src"
-               source="${build-source}" target="${build-target}">
+               release="${build-release}">
             <classpath refid="classpath.test" />
             <include name="**/*.java"/>
         </javac>
@@ -413,7 +410,7 @@
 
     <target name="compile-unittest" depends="compile">
         <mkdir dir="test-classes"/>
-        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" source="${build-source}" target="${build-target}">
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" release="${build-release}">
             <classpath refid="classpath.test" />
         </javac>
         <copy todir="test-classes">

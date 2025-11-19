@@ -59,7 +59,7 @@ jobs:
 
       - name: Build with Ant
         working-directory: ./framework
-        run: ant test -Dbuild-source=${{ matrix.target }} -Dbuild-target=${{ matrix.target }}
+        run: ant test -Dbuild-release=${{ matrix.target }}
 
   build:
     needs:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Build with Ant
         working-directory: ./framework
-        run: ant artifact -Dbuild-source=${{ env.DEFAULT_JAVA_VERSION }} -Dbuild-target=${{ env.DEFAULT_JAVA_VERSION }}
+        run: ant artifact -Dbuild-release=${{ env.DEFAULT_JAVA_VERSION }}
 
       - name: Zipping artifact
         uses: actions/upload-artifact@v5
@@ -133,4 +133,4 @@ jobs:
 
        - name: Build with Ant
          working-directory: ./framework
-         run: ant build -Dbuild-source=${{ matrix.target }} -Dbuild-target=${{ matrix.target }}
+         run: ant build -Dbuild-release=${{ matrix.target }}
