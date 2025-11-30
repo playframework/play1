@@ -1,0 +1,24 @@
+# Play 1.11.0 -- Release notes
+
+Play 1.11.0 has been released of the master branch.
+
+The changes in this release are listed in the "1.11.0":https://github.com/playframework/play1/milestone/13541142 including 12 resolved tickets.
+
+
+## What's new in Play 1.11.0
+
+* "#1483":https://github.com/playframework/play1/issues/1483 : Support for JDK 21
+* "#1484":https://github.com/playframework/play1/issues/1484 : Upgrade to Hibernate 5.6 -> 6.x
+* "#1524":https://github.com/playframework/play1/issues/1524 : Update to ANTLR 4.x
+* "#1534":https://github.com/playframework/play1/issues/1534 : update hibernate up to 6.6.31 version
+* "#1538":https://github.com/playframework/play1/issues/1538 : 1458 support java 21
+
+## What's fixed in Play 1.11.0
+
+* "#1031":https://github.com/playframework/play1/issues/1031 : transitiveDependencies in dependencies.conf doesn't work
+* "#1034":https://github.com/playframework/play1/issues/1034 : [#1031] - fix transitiveDependencies global setting in dependency.yml
+* "#1488":https://github.com/playframework/play1/issues/1488 : Cleanup
+* "#1539":https://github.com/playframework/play1/issues/1539 : Jpa cleanup
+* "#1540":https://github.com/playframework/play1/issues/1540 : Bugfix/1031
+* "#1541":https://github.com/playframework/play1/issues/1541 : use property "release" instead of "source" and "target"
+* "#1542":https://github.com/playframework/play1/issues/1542 : chore(deps): bump actions/checkout from 5 to 6
