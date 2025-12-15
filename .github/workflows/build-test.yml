@@ -90,7 +90,7 @@ jobs:
         run: ant artifact -Dbuild-release=${{ env.DEFAULT_JAVA_VERSION }}
 
       - name: Zipping artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: play-${{ github.sha }}
           if-no-files-found: error
