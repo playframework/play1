@@ -25,12 +25,9 @@ public class ContinuationEnhancer extends Enhancer {
 
     public static boolean isEnhanced(String appClassName) {
         ApplicationClass appClass = Play.classes.getApplicationClass( appClassName);
-        if ( appClass == null) {
-            return false;
-        }
 
         // All classes enhanced for Continuations are implementing the interface EnhancedForContinuations
-        return EnhancedForContinuations.class.isAssignableFrom( appClass.javaClass );
+        return appClass != null && EnhancedForContinuations.class.isAssignableFrom(appClass.javaClass);
     }
 
     @Override
@@ -79,34 +76,27 @@ public class ContinuationEnhancer extends Enhancer {
             return false;
         }
 
-        final boolean[] _needsContinuations = new boolean[]{false};
-
-        for (CtMethod m : ctClass.getDeclaredMethods()) {
-            m.instrument(new ExprEditor() {
-
-                @Override
-                public void edit(MethodCall m) throws CannotCompileException {
-                    try {
-                        if (continuationMethods.contains(m.getMethod().getLongName())) {
-                            _needsContinuations[0] = true;
-                        }
-                    } catch (Exception e) {
+        var editor = new ExprEditor() {
+            boolean needsContinuations;
+            @Override
+            public void edit(MethodCall methodCall) throws CannotCompileException {
+                try {
+                    if (continuationMethods.contains(methodCall.getMethod().getLongName())) {
+                        this.needsContinuations = true;
                     }
+                } catch (Exception e) {
                 }
-            });
+            }
+        };
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
+            m.instrument(editor);
 
-            if (_needsContinuations[0]) {
+            if (editor.needsContinuations) {
                 break;
             }
         }
 
-        if (!_needsContinuations[0]) {
-            // Check parent class
-            _needsContinuations[0] = shouldEnhance( ctClass.getSuperclass());
-        }
-
-        return _needsContinuations[0];
-
+        return editor.needsContinuations || shouldEnhance(ctClass.getSuperclass());
     }
 
 

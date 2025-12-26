@@ -1,27 +1,25 @@
 package play.libs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.Queue;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import io.netty.channel.ChannelHandlerContext;
 
 import play.Logger;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class F {
 
@@ -34,82 +32,36 @@ public class F {
         R apply() throws Throwable;
     }
 
-    public static class Promise<V> implements Future<V>, F.Action<V> {
-
-        protected final CountDownLatch taskLock = new CountDownLatch(1);
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
+    /**
+     * Async result. The public class is retained only as an internal implementation of
+     * {@link CompletableFuture} during the migration period; the framework’s public
+     * APIs work directly with {@link CompletableFuture}.
+     *
+     * @deprecated use {@link CompletableFuture} instead.
+     */
+    @Deprecated(since = "1.12", forRemoval = true)
+    public static class Promise<V> extends CompletableFuture<V> implements F.Action<V> {
 
         @Override
-        public boolean isDone() {
-            return invoked;
+        public <U> Promise<U> newIncompleteFuture() {
+            return new Promise<>();
         }
 
         public V getOrNull() {
-            return result;
+            return isDone() && !isCompletedExceptionally() ? join() : null;
         }
-
-        @Override
-        public V get() throws InterruptedException, ExecutionException {
-            taskLock.await();
-            if (exception != null) {
-                // The result of the promise is an exception - throw it
-                throw new ExecutionException(exception);
-            }
-            return result;
-        }
-
-        @Override
-        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            if(!taskLock.await(timeout, unit)) {
-              throw new TimeoutException(String.format("Promise didn't redeem in %s %s", timeout, unit));
-            }
-            
-            if (exception != null) {
-                // The result of the promise is an exception - throw it
-                throw new ExecutionException(exception);
-            }
-            return result;
-        }
-        protected List<F.Action<Promise<V>>> callbacks = new ArrayList<>();
-        protected boolean invoked = false;
-        protected V result = null;
-        protected Throwable exception = null;
 
         @Override
         public void invoke(V result) {
-            invokeWithResultOrException(result, null);
+            complete(result);
         }
 
+        /**
+         * @deprecated use {@link #completeExceptionally(Throwable)} instead.
+         */
+        @Deprecated(since = "1.12", forRemoval = true)
         public void invokeWithException(Throwable t) {
-            invokeWithResultOrException(null, t);
-        }
-
-        protected void invokeWithResultOrException(V result, Throwable t) {
-            synchronized (this) {
-                if (!invoked) {
-                    invoked = true;
-                    this.result = result;
-                    this.exception = t;
-                    taskLock.countDown();
-                } else {
-                    return;
-                }
-            }
-
-            // Notify all registered callbacks that this promise has been invoked.
-            // Do this outside of the synchronized block to avoid deadlocks.
-            for (F.Action<Promise<V>> callback : callbacks) {
-                callback.invoke(this);
-            }
+            completeExceptionally(t);
         }
 
         /**
@@ -124,318 +76,365 @@ public class F {
          *
          * @param callback
          *            The callback action to invoke when this promise.
+         *
+         * @deprecated use {@link CompletableFuture#whenComplete(java.util.function.BiConsumer)} instead.
          */
+        @Deprecated(since = "1.12", forRemoval = true)
         public void onRedeem(F.Action<Promise<V>> callback) {
-            // If this promise has already been invoked, then we must call the callback.
-            final boolean mustCallCallback;
-            synchronized (this) {
-                if (!invoked) {
-                    callbacks.add(callback);
-                }
-                mustCallCallback = invoked;
-            }
-            
-            // Invoke the callback outside the synchronized block to avoid deadlocks.
-            if (mustCallCallback) {
-                callback.invoke(this);
-            }
+            whenComplete((r, e) -> callback.accept(this));
         }
 
-        public static <T> Promise<List<T>> waitAll(Promise<T>... promises) {
-            return waitAll(Arrays.asList(promises));
+        @SafeVarargs
+        public static <T> CompletableFuture<List<T>> waitAll(CompletableFuture<T>... promises) {
+            return CompletableFuture.allOf(promises).thenApply(
+                __ -> Stream.of(promises)
+                    .map(CompletableFuture::join)
+                    .toList()
+            );
         }
 
-        public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
-            final CountDownLatch waitAllLock = new CountDownLatch(promises.size());
-            final Promise<List<T>> result = new Promise<List<T>>() {
+        public static <T> CompletableFuture<List<T>> waitAll(final Collection<? extends CompletableFuture<T>> promises) {
+            return waitAll(promises.toArray(Promise[]::new));
+        }
 
-                @Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.cancel(mayInterruptIfRunning);
+        public static <A, B> CompletableFuture<F.Tuple<A, B>> wait2(CompletableFuture<A> tA, CompletableFuture<B> tB) {
+            return CompletableFuture.allOf(tA, tB)
+                .thenApply(__ -> new Tuple<>(tA.join(), tB.join()));
+        }
+
+        public static <A, B, C> CompletableFuture<F.T3<A, B, C>> wait3(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
+            return CompletableFuture.allOf(tA, tB, tC)
+                .thenApply(__ -> new T3<>(tA.join(), tB.join(), tC.join()));
+        }
+
+        public static <A, B, C, D> CompletableFuture<F.T4<A, B, C, D>> wait4(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
+            return CompletableFuture.allOf(tA, tB, tC, tD)
+                .thenApply(__ -> new T4<>(tA.join(), tB.join(), tC.join(), tD.join()));
+        }
+
+        public static <A, B, C, D, E> CompletableFuture<F.T5<A, B, C, D, E>> wait5(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
+            return CompletableFuture.allOf(tA, tB, tC, tD, tE)
+                .thenApply(__ -> new T5<>(tA.join(), tB.join(), tC.join(), tD.join(), tE.join()));
+        }
+
+        public static <A, B> CompletableFuture<F.Either<A, B>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB) {
+            var result = new CompletableFuture<F.Either<A, B>>();
+            final AtomicBoolean winnerFound = new AtomicBoolean(false);
+
+            tA.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E2._1(tA.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                    return r;
+                    tB.cancel(false);
                 }
+            });
 
-                @Override
-                public boolean isCancelled() {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.isCancelled();
+            tB.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E2._2(tB.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                    return r;
+                    tA.cancel(false);
                 }
+            });
 
-                @Override
-                public boolean isDone() {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.isDone();
+            return result;
+        }
+
+        public static <A, B, C> CompletableFuture<F.E3<A, B, C>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
+            var result = new CompletableFuture<F.E3<A, B, C>>();
+            final AtomicBoolean winnerFound = new AtomicBoolean(false);
+
+            tA.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E3._1(tA.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                    return r;
+                    tB.cancel(false);
+                    tC.cancel(false);
                 }
+            });
 
-                @Override
-                public List<T> get() throws InterruptedException, ExecutionException {
-                    waitAllLock.await();
-                    List<T> r = new ArrayList<>();
-                    for (Promise<T> f : promises) {
-                        r.add(f.get());
+            tB.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E3._2(tB.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                    return r;
+                    tA.cancel(false);
+                    tC.cancel(false);
                 }
+            });
 
-                @Override
-                public List<T> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                    if(!waitAllLock.await(timeout, unit)) {
-                      throw new TimeoutException(String.format("Promises didn't redeem in %s %s", timeout, unit));
+            tC.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E3._3(tC.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                    
-                    return get();
+                    tA.cancel(false);
+                    tB.cancel(false);
                 }
-            };
-            F.Action<Promise<T>> action = completed -> {
-                waitAllLock.countDown();
-                if (waitAllLock.getCount() == 0) {
-                    try {
-                        result.invoke(result.get());
-                    } catch (Exception e) {
-                        result.invokeWithException(e);
+            });
+
+            return result;
+        }
+
+        public static <A, B, C, D> CompletableFuture<F.E4<A, B, C, D>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
+            var result = new CompletableFuture<F.E4<A, B, C, D>>();
+            final AtomicBoolean winnerFound = new AtomicBoolean(false);
+
+            tA.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E4._1(tA.join()));
+                    } else {
+                        result.completeExceptionally(exception);
                     }
-                }
-            };
-            for (Promise<T> f : promises) {
-                f.onRedeem(action);
-            }
-            if(promises.isEmpty()) {
-              result.invoke(Collections.<T>emptyList());
-            }
-            return result;
-        }
-
-        public static <A, B> Promise<F.Tuple<A, B>> wait2(Promise<A> tA, Promise<B> tB) {
-            final Promise<F.Tuple<A, B>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new Tuple((A) values.get(0), (B) values.get(1)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+                    tB.cancel(false);
+                    tC.cancel(false);
+                    tD.cancel(false);
                 }
             });
-            return result;
-        }
 
-        public static <A, B, C> Promise<F.T3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
-            final Promise<F.T3<A, B, C>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
-                }
-            });
-            return result;
-        }
-
-        public static <A, B, C, D> Promise<F.T4<A, B, C, D>> wait4(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
-            final Promise<F.T4<A, B, C, D>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+            tB.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E4._2(tB.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tC.cancel(false);
+                    tD.cancel(false);
                 }
             });
-            return result;
-        }
 
-        public static <A, B, C, D, E> Promise<F.T5<A, B, C, D, E>> wait5(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
-            final Promise<F.T5<A, B, C, D, E>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD, tE});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+            tC.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E4._3(tC.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tB.cancel(false);
+                    tD.cancel(false);
                 }
             });
-            return result;
-        }
 
-        private static Promise<F.Tuple<Integer, Promise<Object>>> waitEitherInternal(Promise<?>... futures) {
-            final Promise<F.Tuple<Integer, Promise<Object>>> result = new Promise<>();
-            for (int i = 0; i < futures.length; i++) {
-                final int index = i + 1;
-                futures[i].onRedeem(completed -> result.invoke(new Tuple(index, completed)));
-            }
-            return result;
-        }
-
-        public static <A, B> Promise<F.Either<A, B>> waitEither(Promise<A> tA, Promise<B> tB) {
-            final Promise<F.Either<A, B>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB);
-
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(Either.<A, B>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(Either.<A, B>_2((B) value._2.getOrNull()));
-                        break;
+            tD.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E4._4(tD.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tB.cancel(false);
+                    tC.cancel(false);
                 }
             });
 
             return result;
         }
 
-        public static <A, B, C> Promise<F.E3<A, B, C>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
-            final Promise<F.E3<A, B, C>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC);
+        public static <A, B, C, D, E> CompletableFuture<F.E5<A, B, C, D, E>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
+            var result = new CompletableFuture<F.E5<A, B, C, D, E>>();
+            final AtomicBoolean winnerFound = new AtomicBoolean(false);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E3.<A, B, C>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E3.<A, B, C>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E3.<A, B, C>_3((C) value._2.getOrNull()));
-                        break;
+            tA.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E5._1(tA.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tB.cancel(false);
+                    tC.cancel(false);
+                    tD.cancel(false);
+                    tE.cancel(false);
+                }
+            });
+
+            tB.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E5._2(tB.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tC.cancel(false);
+                    tD.cancel(false);
+                    tE.cancel(false);
+                }
+            });
+
+            tC.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E5._3(tC.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tB.cancel(false);
+                    tD.cancel(false);
+                    tE.cancel(false);
+                }
+            });
+
+            tD.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E5._4(tD.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tB.cancel(false);
+                    tC.cancel(false);
+                    tE.cancel(false);
+                }
+            });
+
+            tE.whenComplete((value, exception) -> {
+                // the first completion (a value or a failure) wins;
+                // joining the winner is the single proxy read that
+                // consumes its LazyTask exactly once, losers are never
+                // joined so their events stay in the queue untouched
+                if (winnerFound.compareAndSet(false, true)) {
+                    if (exception == null) {
+                        result.complete(E5._5(tE.join()));
+                    } else {
+                        result.completeExceptionally(exception);
+                    }
+                    tA.cancel(false);
+                    tB.cancel(false);
+                    tC.cancel(false);
+                    tD.cancel(false);
                 }
             });
 
             return result;
         }
 
-        public static <A, B, C, D> Promise<F.E4<A, B, C, D>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
-            final Promise<F.E4<A, B, C, D>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD);
+        public static <T> CompletableFuture<T> waitAny(CompletableFuture<T>... promises) {
+            final CompletableFuture<T> result = new CompletableFuture<>();
+            final AtomicBoolean winnerFound = new AtomicBoolean(false);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E4.<A, B, C, D>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E4.<A, B, C, D>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E4.<A, B, C, D>_3((C) value._2.getOrNull()));
-                        break;
-                    case 4:
-                        result.invoke(E4.<A, B, C, D>_4((D) value._2.getOrNull()));
-                        break;
-                }
-            });
-
-            return result;
-        }
-
-        public static <A, B, C, D, E> Promise<F.E5<A, B, C, D, E>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
-            final Promise<F.E5<A, B, C, D, E>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD, tE);
-
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E5.<A, B, C, D, E>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E5.<A, B, C, D, E>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E5.<A, B, C, D, E>_3((C) value._2.getOrNull()));
-                        break;
-                    case 4:
-                        result.invoke(E5.<A, B, C, D, E>_4((D) value._2.getOrNull()));
-                        break;
-                    case 5:
-                        result.invoke(E5.<A, B, C, D, E>_5((E) value._2.getOrNull()));
-                        break;
-                }
-            });
-
-            return result;
-        }
-
-        public static <T> Promise<T> waitAny(Promise<T>... futures) {
-            final Promise<T> result = new Promise<>();
-
-            F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
-
-                @Override
-                public void invoke(Promise<T> completed) {
-                    synchronized (this) {
-                        if (result.isDone()) {
-                            return;
+            for (final CompletableFuture<T> promise : promises) {
+                promise.whenComplete((value, exception) -> {
+                    if (exception != null) {
+                        if (!result.isDone()) {
+                            result.completeExceptionally(exception);
+                        }
+                        return;
+                    }
+                    // First future to complete wins; joining the winner
+                    // triggers markAsRead() on its LazyTask so the event is
+                    // consumed exactly once. Subsequent completions are ignored.
+                    if (winnerFound.compareAndSet(false, true)) {
+                        try {
+                            result.complete(promise.join());
+                        } catch (Throwable e) {
+                            result.completeExceptionally(e);
                         }
                     }
-                    T resultOrNull = completed.getOrNull();
-                    if(resultOrNull != null) {
-                      result.invoke(resultOrNull);
-                    }
-                    else {
-                      result.invokeWithException(completed.exception);
-                    }
-                }
-            };
-
-            for (Promise<T> f : futures) {
-                f.onRedeem(action);
+                });
             }
 
             return result;
         }
     }
 
-    public static class Timeout extends Promise<Timeout> {
+    /**
+     * @deprecated use {@link CompletableFuture#orTimeout(long, TimeUnit)} or
+     *             {@link CompletableFuture#completeOnTimeout(Object, long, TimeUnit)} instead
+     */
+    @Deprecated(since = "1.12", forRemoval = true)
+    public static class Timeout extends CompletableFuture<Timeout> {
 
-        static Timer timer = new Timer("F.Timeout", true);
-        public final String token;
         public final long delay;
 
         public Timeout(String delay) {
             this(Time.parseDuration(delay) * 1000L);
         }
 
-        public Timeout(String token, String delay) {
-            this(token, Time.parseDuration(delay) * 1000L);
-        }
-
         public Timeout(long delay) {
-            this("timeout", delay);
+            this(delay, null);
+            completeOnTimeout(this, delay, MILLISECONDS);
         }
 
-        public Timeout(String token, long delay) {
+        private Timeout(long delay, Void unused) {
             this.delay = delay;
-            this.token = token;
-            final Timeout timeout = this;
-            timer.schedule(new TimerTask() {
+        }
 
-                @Override
-                public void run() {
-                    timeout.invoke(timeout);
-                }
-            }, delay);
+        @Override
+        public Timeout newIncompleteFuture() {
+            return new Timeout(this.delay, null);
         }
 
         @Override
@@ -449,44 +448,42 @@ public class F {
         return new Timeout(delay);
     }
 
-    public static Timeout Timeout(String token, String delay) {
-        return new Timeout(token, delay);
-    }
-
     public static Timeout Timeout(long delay) {
         return new Timeout(delay);
     }
 
-    public static Timeout Timeout(String token, long delay) {
-        return new Timeout(token, delay);
-    }
-
     public static class EventStream<T> {
 
-        final int bufferSize;
-        final ConcurrentLinkedQueue<T> events = new ConcurrentLinkedQueue<>();
-        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+        final Queue<T> events = new ConcurrentLinkedQueue<>();
+        final List<CompletableFuture<T>> waiting = new ArrayList<>();
+
+        private final int bufferSize;
 
         public EventStream() {
-            this.bufferSize = 100;
+            this(100);
         }
 
         public EventStream(int maxBufferSize) {
+            if (maxBufferSize < 0) {
+                throw new IllegalArgumentException("maxBufferSize must not be negative");
+            }
             this.bufferSize = maxBufferSize;
         }
 
-        public synchronized Promise<T> nextEvent() {
-            if (events.isEmpty()) {
-                LazyTask task = new LazyTask();
-                waiting.add(task);
-                return task;
+        public synchronized CompletableFuture<T> nextEvent() {
+            var event = events.peek();
+            if (event != null) {
+                return new LazyTask(event);
             }
-            return new LazyTask(events.peek());
+
+            var task = new LazyTask();
+            waiting.add(task);
+            return task;
         }
 
         public synchronized void publish(T event) {
             if (events.size() > bufferSize) {
-                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+                Logger.warn("Dropping message. If this is catastrophic to your app, use a BlockingEvenStream instead");
                 events.poll();
             }
             events.offer(event);
@@ -495,21 +492,58 @@ public class F {
 
         void notifyNewEvent() {
             T value = events.peek();
-            for (Promise<T> task : waiting) {
-                task.invoke(value);
-            }
+            // take a snapshot and empty the subscription list first: a
+            // handler running synchronously inside complete() may call
+            // nextEvent() reentrantly, and such a late registration must
+            // survive the completion of the earlier tasks
+            var toNotify = new ArrayList<>(waiting);
             waiting.clear();
+            for (var task : toNotify) {
+                task.complete(value);
+            }
         }
 
-        class LazyTask extends Promise<T> {
+        // An event is consumed only when a subscriber actually reads the
+        // returned promise through get()/getOrNull()/join(): delivery merely
+        // notifies the subscribers, the event itself stays in the queue until
+        // one of the delivered promises is read.
+        private final class LazyTask extends CompletableFuture<T> {
 
-            public LazyTask() {
+            private final AtomicBoolean consumed = new AtomicBoolean(false);
+
+            LazyTask() {
             }
 
-            public LazyTask(T value) {
-                invoke(value);
+            LazyTask(T value) {
+                complete(value);
             }
 
+            // Every family member is its own gate on the event: whichever
+            // one first reads a value removes it from the queue, and any
+            // duplicate removal attempt is a harmless identity no-op, so
+            // no consumption state needs to be shared between them.
+            @Override
+            public LazyTask newIncompleteFuture() {
+                return new LazyTask();
+            }
+
+            // a single LazyTask consumes exactly one event, once: repeated
+            // reads of the same promise (e.g. join() followed by get()) must
+            // not remove further events from the queue
+            @Override
+            public T getNow(T valueIfAbsent) {
+                T value = super.getNow(valueIfAbsent);
+                // on exceptional completion getNow() returns the default
+                // valueIfAbsent, which is not the delivered event
+                if (isDone() && !isCompletedExceptionally()) {
+                    markAsRead(value);
+                }
+                return value;
+            }
+
+            // remove only the exact delivered instance, by identity: event
+            // values may compare equal (e.g. two identical chat messages)
+            // and must not be mixed up
             @Override
             public T get() throws InterruptedException, ExecutionException {
                 T value = super.get();
@@ -518,43 +552,60 @@ public class F {
             }
 
             @Override
-            public T getOrNull() {
-                T value = super.getOrNull();
+            public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                T value = super.get(timeout, unit);
+                markAsRead(value);
+                return value;
+            }
+
+            @Override
+            public T join() {
+                T value = super.join();
                 markAsRead(value);
                 return value;
             }
 
             private void markAsRead(T value) {
-                if (value != null) {
-                    events.remove(value);
+                if (value != null && consumed.compareAndSet(false, true)) {
+                    var it = EventStream.this.events.iterator();
+                    while (it.hasNext()) {
+                        if (it.next() == value) {
+                            it.remove();
+                            break;
+                        }
+                    }
                 }
             }
         }
+
     }
 
     public static class BlockingEventStream<T> {
 
         final LinkedBlockingQueue<T> events;
-        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+        final List<CompletableFuture<T>> waiting = new ArrayList<>();
         final ChannelHandlerContext ctx;
-        
 
         public BlockingEventStream(ChannelHandlerContext ctx) {
             this(100, ctx);
         }
 
         public BlockingEventStream(int maxBufferSize, ChannelHandlerContext ctx) {
+            if (maxBufferSize < 0) {
+                throw new IllegalArgumentException("maxBufferSize must not be negative");
+            }
             this.ctx = ctx;
-            events = new LinkedBlockingQueue<>(maxBufferSize + 10);
+            this.events = new LinkedBlockingQueue<>(maxBufferSize + 10);
         }
 
-        public synchronized Promise<T> nextEvent() {
-            if (events.isEmpty()) {
-                LazyTask task = new LazyTask(ctx);
-                waiting.add(task);
-                return task;
+        public synchronized CompletableFuture<T> nextEvent() {
+            if (!events.isEmpty()) {
+                return new LazyTask(events.peek());
             }
-            return new LazyTask(events.peek(), ctx);
+
+            var task = new LazyTask();
+            waiting.add(task);
+            return task;
         }
 
         //NOTE: cannot synchronize since events.put may block when system is overloaded.
@@ -574,6 +625,7 @@ public class F {
                 }
                 events.put(event);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
             notifyNewEvent();
@@ -581,23 +633,53 @@ public class F {
 
         synchronized void notifyNewEvent() {
             T value = events.peek();
-            for (Promise<T> task : waiting) {
-                task.invoke(value);
-            }
+            // take a snapshot and empty the subscription list first: a
+            // handler running synchronously inside complete() may call
+            // nextEvent() reentrantly, and such a late registration must
+            // survive the completion of the earlier tasks
+            var toNotify = new ArrayList<>(waiting);
             waiting.clear();
+            for (var task : toNotify) {
+                task.complete(value);
+            }
         }
 
-        class LazyTask extends Promise<T> {
+        // An event is consumed only when a subscriber actually reads the
+        // returned promise through get()/getOrNull()/join(): delivery merely
+        // notifies the subscribers, the event itself stays in the queue until
+        // one of the delivered promises is read.
+        private final class LazyTask extends CompletableFuture<T> {
 
-            final ChannelHandlerContext ctx;
+            private final AtomicBoolean consumed = new AtomicBoolean(false);
 
-            public LazyTask(ChannelHandlerContext ctx) {
-                this.ctx = ctx;
+            LazyTask() {
             }
 
-            public LazyTask(T value, ChannelHandlerContext ctx) {
-                this.ctx = ctx;
-                invoke(value);
+            LazyTask(T value) {
+                complete(value);
+            }
+
+            // Every family member is its own gate on the event: whichever
+            // one first reads a value removes it from the queue, and any
+            // duplicate removal attempt is a harmless identity no-op, so
+            // no consumption state needs to be shared between them.
+            @Override
+            public LazyTask newIncompleteFuture() {
+                return new LazyTask();
+            }
+
+            // a single LazyTask consumes exactly one event, once: repeated
+            // reads of the same promise (e.g. join() followed by get()) must
+            // not remove further events from the queue
+            @Override
+            public T getNow(T valueIfAbsent) {
+                T value = super.getNow(valueIfAbsent);
+                // on exceptional completion getNow() returns the default
+                // valueIfAbsent, which is not the delivered event
+                if (isDone() && !isCompletedExceptionally()) {
+                    markAsRead(value);
+                }
+                return value;
             }
 
             @Override
@@ -608,33 +690,50 @@ public class F {
             }
 
             @Override
-            public T getOrNull() {
-                T value = super.getOrNull();
+            public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                T value = super.get(timeout, unit);
                 markAsRead(value);
                 return value;
             }
 
+            @Override
+            public T join() {
+                T value = super.join();
+                markAsRead(value);
+                return value;
+            }
+
+            // remove only the exact delivered instance, by identity: event
+            // values may compare equal (e.g. two identical chat messages)
+            // and must not be mixed up
             private void markAsRead(T value) {
-                if (value != null) {
-                    events.remove(value);
+                if (value != null && consumed.compareAndSet(false, true)) {
+                    var it = BlockingEventStream.this.events.iterator();
+                    while (it.hasNext()) {
+                        if (it.next() == value) {
+                            it.remove();
+                            break;
+                        }
+                    }
                     //Don't start back up until we get down to half the total capacity to prevent jittering:
-                    if (events.remainingCapacity() > events.size()) {
-                        ctx.channel().config().setAutoRead(true);
+                    if (BlockingEventStream.this.events.remainingCapacity() > BlockingEventStream.this.events.size()) {
+                        BlockingEventStream.this.ctx.channel().config().setAutoRead(true);
                     }
                 }
             }
         }
+
     }
 
-    public static class IndexedEvent<M> {
+    public static final class IndexedEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
+
+        public final Long id = idGenerator.getAndIncrement();
         public final M data;
-        public final Long id;
 
         public IndexedEvent(M data) {
             this.data = data;
-            this.id = idGenerator.getAndIncrement();
         }
 
         @Override
@@ -649,62 +748,78 @@ public class F {
 
     public static class ArchivedEventStream<T> {
 
-        final int archiveSize;
-        final ConcurrentLinkedQueue<IndexedEvent<T>> events = new ConcurrentLinkedQueue<>();
-        final List<FilterTask<T>> waiting = Collections.synchronizedList(new ArrayList<FilterTask<T>>());
-        final List<EventStream<T>> pipedStreams = new ArrayList<>();
+        private final Lock lock = new ReentrantLock();
+        private final Queue<IndexedEvent<T>> events = new ConcurrentLinkedQueue<>();
+        private final List<FilterTask<T>> waiting = new ArrayList<>();
+        private final List<EventStream<T>> pipedStreams = new ArrayList<>();
+
+        private final int archiveSize;
 
         public ArchivedEventStream(int archiveSize) {
             this.archiveSize = archiveSize;
         }
 
-        public synchronized EventStream<T> eventStream() {
-            EventStream<T> stream = new EventStream<>(archiveSize);
-            for (IndexedEvent<T> event : events) {
-                stream.publish(event.data);
-            }
-            pipedStreams.add(stream);
-            return stream;
-        }
-
-        public synchronized Promise<List<IndexedEvent<T>>> nextEvents(long lastEventSeen) {
-            FilterTask<T> filter = new FilterTask<>(lastEventSeen);
-            waiting.add(filter);
-            notifyNewEvent();
-            return filter;
-        }
-
-        public synchronized List<IndexedEvent<?>> availableEvents(long lastEventSeen) {
-            List<IndexedEvent<?>> result = new ArrayList<>();
-            for (IndexedEvent<?> event : events) {
-                if (event.id > lastEventSeen) {
-                    result.add(event);
+        public EventStream<T> eventStream() {
+            this.lock.lock();
+            try {
+                EventStream<T> stream = new EventStream<>(this.archiveSize);
+                for (IndexedEvent<T> event : this.events) {
+                    stream.publish(event.data);
                 }
+                this.pipedStreams.add(stream);
+                return stream;
+            } finally {
+                this.lock.unlock();
             }
-            return result;
+        }
+
+        public CompletableFuture<List<IndexedEvent<T>>> nextEvents(long lastEventSeen) {
+            this.lock.lock();
+            try {
+                FilterTask<T> filter = new FilterTask<>(lastEventSeen);
+                this.waiting.add(filter);
+                notifyNewEvent();
+                return filter;
+            } finally {
+                this.lock.unlock();
+            }
+        }
+
+        public List<IndexedEvent<T>> availableEvents(long lastEventSeen) {
+            this.lock.lock();
+            try {
+                return this.events.stream()
+                    .filter(event -> event.id > lastEventSeen)
+                    .toList();
+            } finally {
+                this.lock.unlock();
+            }
         }
 
         public List<T> archive() {
-            List<T> result = new ArrayList<>();
-            for (IndexedEvent<T> event : events) {
-                result.add(event.data);
-            }
-            return result;
+            return this.events.stream()
+                .map(event -> event.data)
+                .toList();
         }
 
-        public synchronized void publish(T event) {
-            if (events.size() >= archiveSize) {
-                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
-                events.poll();
-            }
-            events.offer(new IndexedEvent<T>(event));
-            notifyNewEvent();
-            for (EventStream<T> eventStream : pipedStreams) {
-                eventStream.publish(event);
+        public void publish(T event) {
+            this.lock.lock();
+            try {
+                if (this.events.size() >= this.archiveSize) {
+                    Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+                    this.events.poll();
+                }
+                this.events.offer(new IndexedEvent<>(event));
+                notifyNewEvent();
+                for (EventStream<T> eventStream : this.pipedStreams) {
+                    eventStream.publish(event);
+                }
+            } finally {
+                this.lock.unlock();
             }
         }
 
-        void notifyNewEvent() {
+        private void notifyNewEvent() {
             for (ListIterator<FilterTask<T>> it = waiting.listIterator(); it.hasNext();) {
                 FilterTask<T> filter = it.next();
                 for (IndexedEvent<T> event : events) {
@@ -716,26 +831,31 @@ public class F {
             }
         }
 
-        static class FilterTask<K> extends Promise<List<IndexedEvent<K>>> {
+        private static class FilterTask<K> extends CompletableFuture<List<IndexedEvent<K>>> {
 
-            final Long lastEventSeen;
-            final List<IndexedEvent<K>> newEvents = new ArrayList<>();
+            private final List<IndexedEvent<K>> newEvents = new ArrayList<>();
+            private final long lastEventSeen;
 
-            public FilterTask(Long lastEventSeen) {
+            FilterTask(long lastEventSeen) {
                 this.lastEventSeen = lastEventSeen;
             }
 
-            public void propose(IndexedEvent<K> event) {
-                if (event.id > lastEventSeen) {
-                    newEvents.add(event);
+            @Override
+            public FilterTask<K> newIncompleteFuture() {
+                return new FilterTask<>(this.lastEventSeen);
+            }
+
+            void propose(IndexedEvent<K> event) {
+                if (event.id > this.lastEventSeen) {
+                    this.newEvents.add(event);
                 }
             }
 
-            public boolean trigger() {
-                if (newEvents.isEmpty()) {
+            boolean trigger() {
+                if (this.newEvents.isEmpty()) {
                     return false;
                 }
-                invoke(newEvents);
+                complete(this.newEvents);
                 return true;
             }
         }
@@ -765,7 +885,7 @@ public class F {
 
     }
 
-    public abstract static class Option<T> implements Iterable<T> {
+    public static abstract sealed class Option<T> implements Iterable<T> permits F.Some, F.None {
 
         public abstract boolean isDefined();
 
@@ -784,7 +904,10 @@ public class F {
         return new Some<A>(a);
     }
 
-    public static class None<T> extends Option<T> {
+    public static final class None<T> extends Option<T> {
+
+        private None() {
+        }
 
         @Override
         public boolean isDefined() {
@@ -808,9 +931,9 @@ public class F {
     }
     public static None<Object> None = new None<>();
 
-    public static class Some<T> extends Option<T> {
+    public static final class Some<T> extends Option<T> {
 
-        final T value;
+        private final T value;
 
         public Some(T value) {
             this.value = value;
@@ -1091,36 +1214,30 @@ public class F {
         }
 
         public <NR> Matcher<T, NR> and(final Matcher<R, NR> nextMatcher) {
-            final Matcher<T, R> firstMatcher = this;
-            return new Matcher<T, NR>() {
-
-                @Override
-                public Option<NR> match(T o) {
-                    for (R r : firstMatcher.match(o)) {
+            return new Matcher<>() {
+                @Override public Option<NR> match(T o) {
+                    for (R r : F.Matcher.this.match(o)) {
                         return nextMatcher.match(r);
                     }
                     return Option.None();
                 }
             };
         }
-        public static Matcher<Object, String> String = new Matcher<Object, String>() {
 
-            @Override
-            public Option<String> match(Object o) {
-                if (o instanceof String) {
-                    return Option.Some((String) o);
+        public static final Matcher<Object, String> String = new Matcher<>() {
+            @Override public Option<String> match(Object o) {
+                if (o instanceof String s) {
+                    return Option.Some(s);
                 }
                 return Option.None();
             }
         };
 
         public static <K> Matcher<Object, K> ClassOf(final Class<K> clazz) {
-            return new Matcher<Object, K>() {
-
-                @Override
-                public Option<K> match(Object o) {
-                    if (o instanceof Option && ((Option) o).isDefined()) {
-                        o = ((Option) o).get();
+            return new Matcher<>() {
+                @Override public Option<K> match(Object o) {
+                    if (o instanceof Option option && option.isDefined()) {
+                        o = option.get();
                     }
                     if (clazz.isInstance(o)) {
                         return Option.Some((K) o);
@@ -1131,10 +1248,8 @@ public class F {
         }
 
         public static Matcher<String, String> StartsWith(final String prefix) {
-            return new Matcher<String, String>() {
-
-                @Override
-                public Option<String> match(String o) {
+            return new Matcher<>() {
+                @Override public Option<String> match(String o) {
                     if (o.startsWith(prefix)) {
                         return Option.Some(o);
                     }
@@ -1144,10 +1259,8 @@ public class F {
         }
 
         public static Matcher<String, String> Re(final String pattern) {
-            return new Matcher<String, String>() {
-
-                @Override
-                public Option<String> match(String o) {
+            return new Matcher<>() {
+                @Override public Option<String> match(String o) {
                     if (o.matches(pattern)) {
                         return Option.Some(o);
                     }
@@ -1157,10 +1270,8 @@ public class F {
         }
 
         public static <X> Matcher<X, X> Equals(final X other) {
-            return new Matcher<X, X>() {
-
-                @Override
-                public Option<X> match(X o) {
+            return new Matcher<>() {
+                @Override public Option<X> match(X o) {
                     if (o.equals(other)) {
                         return Option.Some(o);
                     }

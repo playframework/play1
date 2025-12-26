@@ -1,0 +1,34 @@
+*{ You can use plain selenium command using the selenium tag }*
+
+#{selenium 'Enter chat room'}
+
+    clearSession()
+
+    // Open the home page, and check that we are on the sign-in page
+    open('/')
+    assertTitle('Sign in')
+
+    // Submit the form without a nickname: validation must fail
+    clickAndWait('enter')
+    assertTextPresent('Please choose a nick name')
+
+    // Login as Bob with the active refresh demo
+    type('user', 'Bob')
+    select('demo', 'value=refresh')
+    clickAndWait('enter')
+
+    // We are now in the chat room
+    assertTextPresent('You are now chatting as Bob')
+
+    // Send a message
+    type('message', 'Hello !')
+    clickAndWait('send')
+
+    // Wait for the message
+    waitForTextPresent('Hello !')
+
+    // Leave the room
+    clickAndWait('link=*Leave*')
+    assertTitle('Sign in')
+
+#{/selenium}
