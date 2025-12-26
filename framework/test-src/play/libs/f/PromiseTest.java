@@ -23,6 +23,12 @@ class PromiseTest {
         }
     }
 
+    @Test void newIncompleteFutureShouldReturnPromise() {
+        assertThat(new F.Promise<>().newIncompleteFuture())
+            .isInstanceOf(F.Promise.class)
+            .isNotDone();
+    }
+
     @Test void simpleCompletedPromise() throws Exception {
         var promise = new F.Promise<>();
         var value = new Object();
@@ -47,7 +53,7 @@ class PromiseTest {
         assertThat(promise.getOrNull()).isNull();
 
         // complete exceptionally
-        promise.invokeWithException(throwable);
+        promise.completeExceptionally(throwable);
 
         assertThat(promise.isDone()).isTrue();
         assertThat(promise.getOrNull()).isNull();
@@ -107,7 +113,7 @@ class PromiseTest {
         var latch = new CountDownLatch(1);
         EXECUTOR.submit(() -> assertThatNoException().isThrownBy(() -> {
             latch.await();
-            promise.invokeWithException(throwable);
+            promise.completeExceptionally(throwable);
         }));
 
         assertThat(promise.isDone()).isFalse();
@@ -129,7 +135,7 @@ class PromiseTest {
         EXECUTOR.submit(() -> assertThatNoException().isThrownBy(() -> {
             latch.await();
             Thread.sleep(1_000L);
-            promise.invokeWithException(throwable);
+            promise.completeExceptionally(throwable);
         }));
 
         assertThat(promise.isDone()).isFalse();
