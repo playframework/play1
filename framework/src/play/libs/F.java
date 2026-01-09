@@ -77,7 +77,7 @@ public class F {
             whenComplete((r, e) -> callback.accept(this));
         }
 
-        public static <T> Promise<List<T>> waitAll(Promise<T>... promises) {
+        public static <T> CompletableFuture<List<T>> waitAll(CompletableFuture<T>... promises) {
             Promise<List<T>> result = new Promise<>();
 
             CompletableFuture.allOf(promises).whenComplete((__, exception) -> {
@@ -95,11 +95,11 @@ public class F {
             return result;
         }
 
-        public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
+        public static <T> CompletableFuture<List<T>> waitAll(final Collection<? extends CompletableFuture<T>> promises) {
             return waitAll(promises.toArray(Promise[]::new));
         }
 
-        public static <A, B> Promise<F.Tuple<A, B>> wait2(Promise<A> tA, Promise<B> tB) {
+        public static <A, B> CompletableFuture<F.Tuple<A, B>> wait2(CompletableFuture<A> tA, CompletableFuture<B> tB) {
             final Promise<F.Tuple<A, B>> result = new Promise<>();
 
             CompletableFuture.allOf(tA, tB).whenComplete((__, exception) -> {
@@ -113,7 +113,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C> Promise<F.T3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
+        public static <A, B, C> CompletableFuture<F.T3<A, B, C>> wait3(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
             final Promise<F.T3<A, B, C>> result = new Promise<>();
 
             CompletableFuture.allOf(tA, tB, tC).whenComplete((__, exception) -> {
@@ -127,7 +127,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C, D> Promise<F.T4<A, B, C, D>> wait4(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
+        public static <A, B, C, D> CompletableFuture<F.T4<A, B, C, D>> wait4(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
             final Promise<F.T4<A, B, C, D>> result = new Promise<>();
 
             CompletableFuture.allOf(tA, tB, tC, tD).whenComplete((__, exception) -> {
@@ -141,7 +141,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C, D, E> Promise<F.T5<A, B, C, D, E>> wait5(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
+        public static <A, B, C, D, E> CompletableFuture<F.T5<A, B, C, D, E>> wait5(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
             final Promise<F.T5<A, B, C, D, E>> result = new Promise<>();
 
             CompletableFuture.allOf(tA, tB, tC, tD, tE).whenComplete((__, exception) -> {
@@ -155,7 +155,7 @@ public class F {
             return result;
         }
 
-        public static <A, B> Promise<F.Either<A, B>> waitEither(Promise<A> tA, Promise<B> tB) {
+        public static <A, B> CompletableFuture<F.Either<A, B>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB) {
             final Promise<F.Either<A, B>> result = new Promise<>();
 
             CompletableFuture.anyOf(
@@ -172,7 +172,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C> Promise<F.E3<A, B, C>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
+        public static <A, B, C> CompletableFuture<F.E3<A, B, C>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
             final Promise<F.E3<A, B, C>> result = new Promise<>();
 
             CompletableFuture.anyOf(
@@ -190,7 +190,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C, D> Promise<F.E4<A, B, C, D>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
+        public static <A, B, C, D> CompletableFuture<F.E4<A, B, C, D>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
             final Promise<F.E4<A, B, C, D>> result = new Promise<>();
 
             CompletableFuture.anyOf(
@@ -209,7 +209,7 @@ public class F {
             return result;
         }
 
-        public static <A, B, C, D, E> Promise<F.E5<A, B, C, D, E>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
+        public static <A, B, C, D, E> CompletableFuture<F.E5<A, B, C, D, E>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
             final Promise<F.E5<A, B, C, D, E>> result = new Promise<>();
 
             CompletableFuture.anyOf(
@@ -229,7 +229,7 @@ public class F {
             return result;
         }
 
-        public static <T> Promise<T> waitAny(Promise<T>... promises) {
+        public static <T> CompletableFuture<T> waitAny(CompletableFuture<T>... promises) {
             final Promise<T> result = new Promise<>();
 
             CompletableFuture.anyOf(promises).whenComplete((value, exception) -> {

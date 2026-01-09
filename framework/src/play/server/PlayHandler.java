@@ -23,7 +23,6 @@ import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
-import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.mvc.*;
 import play.mvc.Http.Request;
@@ -42,6 +41,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
@@ -1108,7 +1108,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Http.Outbound outbound = new Http.Outbound() {
 
             final List<ChannelFuture> writeFutures = Collections.synchronizedList(new ArrayList<ChannelFuture>());
-            Promise<Void> closeTask;
+            CompletableFuture<Void> closeTask;
 
             synchronized void writeAndClose(ChannelFuture writeFuture) {
                 if (!writeFuture.isDone()) {
@@ -1122,7 +1122,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             void futureClose() {
                 if (closeTask != null && writeFutures.isEmpty()) {
-                    closeTask.invoke(null);
+                    closeTask.complete(null);
                 }
             }
 
@@ -1150,8 +1150,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
             @Override
             public synchronized void close() {
-                closeTask = new Promise<>();
-                closeTask.onRedeem(completed -> {
+                closeTask = new CompletableFuture<>();
+                closeTask.whenComplete((v, e) -> {
                     writeFutures.clear();
                     ctx.getChannel().disconnect();
                     closeTask = null;

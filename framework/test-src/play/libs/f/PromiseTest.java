@@ -202,7 +202,7 @@ class PromiseTest {
         F.Promise<Object>[] promises = Stream.generate(() -> new F.Promise<>())
             .limit(5)
             .toArray(F.Promise[]::new);
-        F.Promise<List<Object>> all = F.Promise.waitAll(promises);
+        CompletableFuture<List<Object>> all = F.Promise.waitAll(promises);
         assertThat(all.isDone()).isFalse();
 
         var lastPromise = promises[promises.length - 1];
@@ -212,8 +212,9 @@ class PromiseTest {
             assertThat(all.isDone()).isEqualTo(promise == lastPromise);
         }
 
-        assertThat(all.getOrNull()).containsExactly(
-            Stream.of(promises).map(F.Promise::getOrNull).toArray()
+        assertThat(all).satisfies(
+            f -> assertThat(f.join())
+                .containsExactly(Stream.of(promises).map(F.Promise::getOrNull).toArray())
         );
     }
 
@@ -231,9 +232,7 @@ class PromiseTest {
             assertThat(all.isDone()).isEqualTo(promise == lastPromise);
         }
 
-        assertThat(all.getOrNull()).containsExactly(
-            promises.stream().map(F.Promise::getOrNull).toArray()
-        );
+        assertThat(all).isCompletedWithValue(promises.stream().map(F.Promise::getOrNull).toList());
     }
 
     @Test void wait2ShouldBeCompletedOnlyWhenAllGivenPromisesAreCompleted() {
@@ -249,9 +248,11 @@ class PromiseTest {
         longPromise.invoke(ThreadLocalRandom.current().nextLong());
         assertThat(all.isDone()).isTrue();
 
-        assertThat(all.getOrNull())
-            .returns(intPromise.getOrNull(), v -> v._1)
-            .returns(longPromise.getOrNull(), v -> v._2);
+        assertThat(all).satisfies(
+            f -> assertThat(f.join())
+                .returns(intPromise.getOrNull(), v -> v._1)
+                .returns(longPromise.getOrNull(), v -> v._2)
+        );
     }
 
     @Test void wait3ShouldBeCompletedOnlyWhenAllGivenPromisesAreCompleted() {
@@ -271,10 +272,12 @@ class PromiseTest {
         stringPromise.invoke("value");
         assertThat(all.isDone()).isTrue();
 
-        assertThat(all.getOrNull())
-            .returns(intPromise.getOrNull(), v -> v._1)
-            .returns(longPromise.getOrNull(), v -> v._2)
-            .returns(stringPromise.getOrNull(), v -> v._3);
+        assertThat(all).satisfies(
+            f -> assertThat(f.join())
+                .returns(intPromise.getOrNull(), v -> v._1)
+                .returns(longPromise.getOrNull(), v -> v._2)
+                .returns(stringPromise.getOrNull(), v -> v._3)
+        );
     }
 
     @Test void wait4ShouldBeCompletedOnlyWhenAllGivenPromisesAreCompleted() {
@@ -298,11 +301,13 @@ class PromiseTest {
         bytePromise.invoke((byte) ThreadLocalRandom.current().nextInt());
         assertThat(all.isDone()).isTrue();
 
-        assertThat(all.getOrNull())
-            .returns(intPromise.getOrNull(), v -> v._1)
-            .returns(longPromise.getOrNull(), v -> v._2)
-            .returns(stringPromise.getOrNull(), v -> v._3)
-            .returns(bytePromise.getOrNull(), v -> v._4);
+        assertThat(all).satisfies(
+            f -> assertThat(f.join())
+                .returns(intPromise.getOrNull(), v -> v._1)
+                .returns(longPromise.getOrNull(), v -> v._2)
+                .returns(stringPromise.getOrNull(), v -> v._3)
+                .returns(bytePromise.getOrNull(), v -> v._4)
+        );
     }
 
     @Test void wait5ShouldBeCompletedOnlyWhenAllGivenPromisesAreCompleted() {
@@ -330,26 +335,31 @@ class PromiseTest {
         objectPromise.invoke(new Object());
         assertThat(all.isDone()).isTrue();
 
-        assertThat(all.getOrNull())
-            .returns(intPromise.getOrNull(), v -> v._1)
-            .returns(longPromise.getOrNull(), v -> v._2)
-            .returns(stringPromise.getOrNull(), v -> v._3)
-            .returns(bytePromise.getOrNull(), v -> v._4)
-            .returns(objectPromise.getOrNull(), v -> v._5);
+        assertThat(all).satisfies(
+            f -> assertThat(f.join())
+                .returns(intPromise.getOrNull(), v -> v._1)
+                .returns(longPromise.getOrNull(), v -> v._2)
+                .returns(stringPromise.getOrNull(), v -> v._3)
+                .returns(bytePromise.getOrNull(), v -> v._4)
+                .returns(objectPromise.getOrNull(), v -> v._5)
+        );
     }
 
     @Test void waitAnyShouldBeCompletedWhenAnyGivenPromisesIsCompleted() {
         F.Promise<Object>[] promises = Stream.generate(() -> new F.Promise<>())
             .limit(5)
             .toArray(F.Promise[]::new);
-        F.Promise<Object> all = F.Promise.waitAny(promises);
+        CompletableFuture<Object> all = F.Promise.waitAny(promises);
         assertThat(all.isDone()).isFalse();
 
         var completed = promises[ThreadLocalRandom.current().nextInt(promises.length)];
         completed.invoke(new Object());
 
         assertThat(all.isDone()).isTrue();
-        assertThat(all.getOrNull()).isSameAs(completed.getOrNull());
+        assertThat(all).satisfies(
+            f -> assertThat(f.join()).isSameAs(completed.getOrNull())
+        );
+
     }
 
     @Test void waitEither2ShouldBeCompletedWhenAnyGivenPromisesIsCompleted() {
@@ -363,7 +373,10 @@ class PromiseTest {
             intPromise.invoke(ThreadLocalRandom.current().nextInt());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(intPromise.getOrNull(), v -> v._1.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(intPromise.getOrNull(), v -> v._1.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -375,7 +388,10 @@ class PromiseTest {
             longPromise.invoke(ThreadLocalRandom.current().nextLong());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(longPromise.getOrNull(), v -> v._2.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(longPromise.getOrNull(), v -> v._2.get())
+            );
         }
     }
 
@@ -391,7 +407,10 @@ class PromiseTest {
             intPromise.invoke(ThreadLocalRandom.current().nextInt());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(intPromise.getOrNull(), v -> v._1.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(intPromise.getOrNull(), v -> v._1.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -404,7 +423,10 @@ class PromiseTest {
             longPromise.invoke(ThreadLocalRandom.current().nextLong());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(longPromise.getOrNull(), v -> v._2.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(longPromise.getOrNull(), v -> v._2.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -417,7 +439,10 @@ class PromiseTest {
             stringPromise.invoke("value");
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(stringPromise.getOrNull(), v -> v._3.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(stringPromise.getOrNull(), v -> v._3.get())
+            );
         }
     }
 
@@ -434,7 +459,10 @@ class PromiseTest {
             intPromise.invoke(ThreadLocalRandom.current().nextInt());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(intPromise.getOrNull(), v -> v._1.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(intPromise.getOrNull(), v -> v._1.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -448,7 +476,10 @@ class PromiseTest {
             longPromise.invoke(ThreadLocalRandom.current().nextLong());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(longPromise.getOrNull(), v -> v._2.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(longPromise.getOrNull(), v -> v._2.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -462,7 +493,10 @@ class PromiseTest {
             stringPromise.invoke("value");
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(stringPromise.getOrNull(), v -> v._3.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(stringPromise.getOrNull(), v -> v._3.get())
+            );
         }
         {
             var intPromise = new F.Promise<Integer>();
@@ -476,7 +510,104 @@ class PromiseTest {
             objectPromise.invoke(new Object());
             assertThat(all.isDone()).isTrue();
 
-            assertThat(all.getOrNull()).returns(objectPromise.getOrNull(), v -> v._4.get());
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(objectPromise.getOrNull(), v -> v._4.get())
+            );
+        }
+    }
+
+
+    @Test void waitEither5ShouldBeCompletedWhenAnyGivenPromisesIsCompleted() {
+        {
+            var intPromise = new F.Promise<Integer>();
+            var longPromise = new F.Promise<Long>();
+            var stringPromise = new F.Promise<String>();
+            var objectPromise = new F.Promise<Object>();
+            var bytePromise = new F.Promise<Byte>();
+
+            var all = F.Promise.waitEither(intPromise, longPromise, stringPromise, objectPromise, bytePromise);
+            assertThat(all.isDone()).isFalse();
+
+            intPromise.invoke(ThreadLocalRandom.current().nextInt());
+            assertThat(all.isDone()).isTrue();
+
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(intPromise.getOrNull(), v -> v._1.get())
+            );
+        }
+        {
+            var intPromise = new F.Promise<Integer>();
+            var longPromise = new F.Promise<Long>();
+            var stringPromise = new F.Promise<String>();
+            var objectPromise = new F.Promise<Object>();
+            var bytePromise = new F.Promise<Byte>();
+
+            var all = F.Promise.waitEither(intPromise, longPromise, stringPromise, objectPromise, bytePromise);
+            assertThat(all.isDone()).isFalse();
+
+            longPromise.invoke(ThreadLocalRandom.current().nextLong());
+            assertThat(all.isDone()).isTrue();
+
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(longPromise.getOrNull(), v -> v._2.get())
+            );
+        }
+        {
+            var intPromise = new F.Promise<Integer>();
+            var longPromise = new F.Promise<Long>();
+            var stringPromise = new F.Promise<String>();
+            var objectPromise = new F.Promise<Object>();
+            var bytePromise = new F.Promise<Byte>();
+
+            var all = F.Promise.waitEither(intPromise, longPromise, stringPromise, objectPromise, bytePromise);
+            assertThat(all.isDone()).isFalse();
+
+            stringPromise.invoke("value");
+            assertThat(all.isDone()).isTrue();
+
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(stringPromise.getOrNull(), v -> v._3.get())
+            );
+        }
+        {
+            var intPromise = new F.Promise<Integer>();
+            var longPromise = new F.Promise<Long>();
+            var stringPromise = new F.Promise<String>();
+            var objectPromise = new F.Promise<>();
+            var bytePromise = new F.Promise<Byte>();
+
+            var all = F.Promise.waitEither(intPromise, longPromise, stringPromise, objectPromise, bytePromise);
+            assertThat(all.isDone()).isFalse();
+
+            objectPromise.invoke(new Object());
+            assertThat(all.isDone()).isTrue();
+
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(objectPromise.getOrNull(), v -> v._4.get())
+            );
+        }
+        {
+            var intPromise = new F.Promise<Integer>();
+            var longPromise = new F.Promise<Long>();
+            var stringPromise = new F.Promise<String>();
+            var objectPromise = new F.Promise<>();
+            var bytePromise = new F.Promise<Byte>();
+
+            var all = F.Promise.waitEither(intPromise, longPromise, stringPromise, objectPromise, bytePromise);
+            assertThat(all.isDone()).isFalse();
+
+            bytePromise.invoke((byte) ThreadLocalRandom.current().nextInt());
+            assertThat(all.isDone()).isTrue();
+
+            assertThat(all).satisfies(
+                f -> assertThat(f.join())
+                    .returns(bytePromise.getOrNull(), v -> v._5.get())
+            );
         }
     }
 

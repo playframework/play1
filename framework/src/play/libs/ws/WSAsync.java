@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.net.ssl.SSLContext;
 
@@ -271,7 +272,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a GET request asynchronously. */
         @Override
-        public Promise<HttpResponse> getAsync() {
+        public CompletableFuture<HttpResponse> getAsync() {
             this.type = "GET";
             sign();
             return execute(prepareGet());
@@ -291,7 +292,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a PATCH request asynchronously. */
         @Override
-        public Promise<HttpResponse> patchAsync() {
+        public CompletableFuture<HttpResponse> patchAsync() {
             this.type = "PATCH";
             sign();
             return execute(preparePatch());
@@ -311,7 +312,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a POST request asynchronously. */
         @Override
-        public Promise<HttpResponse> postAsync() {
+        public CompletableFuture<HttpResponse> postAsync() {
             this.type = "POST";
             sign();
             return execute(preparePost());
@@ -330,7 +331,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a PUT request asynchronously. */
         @Override
-        public Promise<HttpResponse> putAsync() {
+        public CompletableFuture<HttpResponse> putAsync() {
             this.type = "PUT";
             return execute(preparePut());
         }
@@ -348,7 +349,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a DELETE request asynchronously. */
         @Override
-        public Promise<HttpResponse> deleteAsync() {
+        public CompletableFuture<HttpResponse> deleteAsync() {
             this.type = "DELETE";
             return execute(prepareDelete());
         }
@@ -366,7 +367,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a OPTIONS request asynchronously. */
         @Override
-        public Promise<HttpResponse> optionsAsync() {
+        public CompletableFuture<HttpResponse> optionsAsync() {
             this.type = "OPTIONS";
             return execute(prepareOptions());
         }
@@ -384,7 +385,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a HEAD request asynchronously. */
         @Override
-        public Promise<HttpResponse> headAsync() {
+        public CompletableFuture<HttpResponse> headAsync() {
             this.type = "HEAD";
             return execute(prepareHead());
         }
@@ -398,7 +399,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a TRACE request asynchronously. */
         @Override
-        public Promise<HttpResponse> traceAsync() {
+        public CompletableFuture<HttpResponse> traceAsync() {
             this.type = "TRACE";
             throw new NotImplementedException();
         }
@@ -451,7 +452,7 @@ public class WSAsync implements WSImpl {
             return builder;
         }
 
-        private Promise<HttpResponse> execute(BoundRequestBuilder builder) {
+        private CompletableFuture<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
                 final Promise<HttpResponse> smartFuture = new Promise<>();
                 prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
