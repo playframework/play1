@@ -302,7 +302,7 @@ public class F {
 
         private final Lock lock = new ReentrantLock();
         private final Queue<T> events = new ConcurrentLinkedQueue<>();
-        private final Queue<Promise<T>> waiting = new ConcurrentLinkedQueue<>();
+        private final List<Promise<T>> waiting = new ArrayList<>();
 
         private final int bufferSize;
 
@@ -317,10 +317,13 @@ public class F {
         public Promise<T> nextEvent() {
             this.lock.lock();
             try {
-                var wait = this.waiting.peek();
-                if (wait != null && wait.isDone()) {
-                    this.events.remove(wait.join());
-                    return this.waiting.remove();
+                var it = this.waiting.iterator();
+                if (it.hasNext()) {
+                    var wait = it.next();
+                    if (wait.isDone()) {
+                        it.remove();
+                        return wait;
+                    }
                 }
 
                 var task = new Promise<T>();
@@ -340,13 +343,18 @@ public class F {
         public void publish(T event) {
             this.lock.lock();
             try {
-                this.waiting.forEach(f -> f.complete(event));
-
-                if (this.events.size() > this.bufferSize) {
-                    Logger.warn("Dropping message. If this is catastrophic to your app, use a BlockingEvenStream instead");
-                    this.events.poll();
+                boolean saveEvent = true;
+                for (var f : this.waiting) {
+                    saveEvent &= !f.complete(event);
                 }
-                this.events.offer(event);
+
+                if (saveEvent) {
+                    if (this.events.size() > this.bufferSize) {
+                        Logger.warn("Dropping message. If this is catastrophic to your app, use a BlockingEvenStream instead");
+                        this.events.poll();
+                    }
+                    this.events.offer(event);
+                }
             } finally {
                 this.lock.unlock();
             }
@@ -357,7 +365,7 @@ public class F {
     public static class BlockingEventStream<T> {
 
         private final Lock lock = new ReentrantLock();
-        private final Queue<Promise<T>> waiting = new ConcurrentLinkedQueue<>();
+        private final List<Promise<T>> waiting = new ArrayList<>();
 
         private final BlockingQueue<T> events;
         private final ChannelHandlerContext ctx;
@@ -374,11 +382,15 @@ public class F {
         public Promise<T> nextEvent() {
             this.lock.lock();
             try {
-                var wait = this.waiting.peek();
-                if (wait != null && wait.isDone()) {
-                    this.events.remove(wait.join());
-                    return this.waiting.remove();
+                var it = this.waiting.iterator();
+                if (it.hasNext()) {
+                    var wait = it.next();
+                    if (wait.isDone()) {
+                        it.remove();
+                        return wait;
+                    }
                 }
+
                 var task = new Promise<T>();
                 var event = this.events.poll();
                 if (event == null) {
@@ -410,18 +422,22 @@ public class F {
         public void publish(T event) {
             this.lock.lock();
             try {
-                this.waiting.forEach(f -> f.complete(event));
-
-                // This method blocks if the queue is full(read publish method documentation just above)
-                if (this.events.remainingCapacity() == 10) {
-                    Logger.trace("events queue is full! Setting readable to false.");
-                    this.ctx.getChannel().setReadable(false);
+                boolean saveEvent = true;
+                for (var f : this.waiting) {
+                    saveEvent &= !f.complete(event);
                 }
-                try {
-                    this.events.put(event);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
+
+                if (saveEvent) {
+                    // This method blocks if the queue is full(read publish method documentation just above)
+                    if (this.events.remainingCapacity() == 10) {
+                        Logger.trace("events queue is full! Setting readable to false.");
+                        this.ctx.getChannel().setReadable(false);
+                    }
+                    try {
+                        this.events.put(event);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } finally {
                 this.lock.unlock();
