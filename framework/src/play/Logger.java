@@ -592,8 +592,7 @@ public class Logger {
             StringWriter sw = new StringWriter();
 
             // Better format for Play exceptions
-            if (e instanceof PlayException) {
-                PlayException playException = (PlayException) e;
+            if (e instanceof PlayException playException) {
                 PrintWriter errorOut = new PrintWriter(sw);
                 errorOut.println("");
                 errorOut.println("");

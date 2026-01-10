@@ -113,7 +113,7 @@ public class TestEngine {
         if (testClass != null) {
             cleanTestAnnot = testClass.getAnnotation(CleanTest.class);
         }
-        if (cleanTestAnnot != null && cleanTestAnnot.removeCurrent() == true) {
+        if (cleanTestAnnot != null && cleanTestAnnot.removeCurrent()) {
             if (Request.current != null) {
                 Request.current.remove();
             }
@@ -124,7 +124,7 @@ public class TestEngine {
                 RenderArgs.current.remove();
             }
         }
-        if (cleanTestAnnot == null || (cleanTestAnnot != null && cleanTestAnnot.createDefault() == true)) {
+        if (cleanTestAnnot == null || cleanTestAnnot.createDefault()) {
             if (Request.current() == null) {
                 String host = Router.getBaseUrl();
                 String domain = null;

@@ -79,8 +79,7 @@ public class LegacyMockMailSystem implements MailSystem {
 
         if (message.getContent() instanceof String) {
             return message.getContentType() + ": " + message.getContent() + " \n\t";
-        } else if (message.getContent() != null && message.getContent() instanceof Multipart) {
-            Multipart part = (Multipart) message.getContent();
+        } else if (message.getContent() != null && message.getContent() instanceof Multipart part) {
             String text = "";
             for (int i = 0; i < part.getCount(); i++) {
                 BodyPart bodyPart = part.getBodyPart(i);

@@ -196,7 +196,7 @@ public class DependenciesManager {
         List<IvyNode> problems = new ArrayList<>();
 
         List<ArtifactDownloadReport> artifacts = new ArrayList<>();
-        for (IvyNode node : ((List<IvyNode>) report.getDependencies())) {
+        for (IvyNode node : report.getDependencies()) {
             if (node.isLoaded() && !node.isCompletelyEvicted()) {
                 ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
                 for (ArtifactDownloadReport artifact : adr) {
@@ -235,7 +235,7 @@ public class DependenciesManager {
                 StringBuilder msg = new StringBuilder(d.getArtifact().getModuleRevisionId().getOrganisation()).append(" -> ")
                         .append(d.getArtifact().getModuleRevisionId().getName()).append(' ')
                         .append(d.getArtifact().getModuleRevisionId().getRevision()).append(": ").append(d.getDownloadDetails());
-                System.out.println("~\t" + msg.toString());
+                System.out.println("~\t" + msg);
                 if (logger != null) {
                     logger.notFound.add(msg.toString());
                 }
@@ -247,7 +247,7 @@ public class DependenciesManager {
                     StringBuilder msg = new StringBuilder(moduleRevisionId.getOrganisation()).append("->")
                             .append(moduleRevisionId.getName()).append(' ').append(moduleRevisionId.getRevision()).append(": ")
                             .append(node.getProblemMessage());
-                    System.out.println("~\t" + msg.toString());
+                    System.out.println("~\t" + msg);
                     if (logger != null) {
                         logger.notFound.add(msg.toString());
                     }

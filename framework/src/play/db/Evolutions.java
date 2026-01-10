@@ -465,8 +465,7 @@ public class Evolutions extends PlayPlugin {
                 Logger.error(e, "Can't apply evolution");
                 if (Evolutions.autoCommit()) {
                     String message = e.getMessage();
-                    if (e instanceof SQLException) {
-                        SQLException ex = (SQLException) e;
+                    if (e instanceof SQLException ex) {
                         message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
                     }
 

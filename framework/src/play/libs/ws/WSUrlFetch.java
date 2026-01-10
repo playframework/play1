@@ -221,8 +221,7 @@ public class WSUrlFetch implements WSImpl {
 
             try {
                 URLConnection connection = url.openConnection();
-                if (connection instanceof HttpsURLConnection) {
-                    HttpsURLConnection cssl = (HttpsURLConnection) connection;
+                if (connection instanceof HttpsURLConnection cssl) {
                     if (sslCTX != null) {
                         SSLSocketFactory sslSocketFactory = sslCTX.getSocketFactory();
                         cssl.setSSLSocketFactory(sslSocketFactory);
@@ -271,8 +270,7 @@ public class WSUrlFetch implements WSImpl {
                     connection.setRequestProperty("Content-Type", this.mimeType + "; charset=" + encoding);
                 }
                 OutputStream out = connection.getOutputStream();
-                if (this.body instanceof InputStream) {
-                    InputStream bodyStream = (InputStream) this.body;
+                if (this.body instanceof InputStream bodyStream) {
                     byte[] buffer = new byte[1024];
                     int bytesRead;
                     while ((bytesRead = bodyStream.read(buffer, 0, buffer.length)) > 0) {

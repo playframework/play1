@@ -257,7 +257,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         InputStream body = httpServletRequest.getInputStream();
         boolean secure = httpServletRequest.isSecure();
 
-        String url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
+        String url = uri + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
         String host = httpServletRequest.getHeader("host");
         int port = 0;
         String domain = null;
@@ -471,8 +471,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         // Content
 
         response.out.flush();
-        if (response.direct instanceof File) {
-            File file = (File) response.direct;
+        if (response.direct instanceof File file) {
             servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
             if (!request.method.equals("HEAD")) {
                 copyStream(servletResponse, VirtualFile.open(file).inputstream());

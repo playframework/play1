@@ -331,8 +331,7 @@ public class Mailer implements LocalVariablesSupport {
         if (inlineEmbeds != null && inlineEmbeds.containsKey(name)) {
             InlineImage ii = inlineEmbeds.get(name);
 
-            if (ii.getDataSource() instanceof URLDataSource) {
-                URLDataSource urlDataSource = (URLDataSource) ii.getDataSource();
+            if (ii.getDataSource() instanceof URLDataSource urlDataSource) {
                 // Make sure the supplied URL points to the same thing
                 // as the one already associated with this name.
                 // NOTE: Comparing URLs with URL.equals() is a blocking

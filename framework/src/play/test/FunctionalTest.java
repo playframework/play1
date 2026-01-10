@@ -611,7 +611,7 @@ public abstract class FunctionalTest extends BaseTest {
 
     public void sleep(int seconds) {
         try {
-            Thread.sleep(seconds * 1000);
+            Thread.sleep(seconds * 1000L);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

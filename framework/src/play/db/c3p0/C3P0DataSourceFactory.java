@@ -74,14 +74,13 @@ public class C3P0DataSourceFactory implements DataSourceFactory {
 
     for (String dbName : dbNames) {
       DataSource ds = DB.getDataSource(dbName);
-      if (ds == null || !(ds instanceof ComboPooledDataSource)) {
+      if (ds == null || !(ds instanceof ComboPooledDataSource datasource)) {
         out.println("Datasource:");
         out.println("~~~~~~~~~~~");
         out.println("(not yet connected)");
         return sw.toString();
       }
-      ComboPooledDataSource datasource = (ComboPooledDataSource) ds;
-      out.println("Datasource (" + dbName + "):");
+        out.println("Datasource (" + dbName + "):");
       out.println("~~~~~~~~~~~");
       out.println("Jdbc url: " + datasource.getJdbcUrl());
       out.println("Jdbc driver: " + datasource.getDriverClass());

@@ -43,7 +43,7 @@ public class Scope {
 
         try {
             Logger.info("Storing sessions using " + sessionStoreClass);
-            return (SessionStore) Injector.getBeanOfType(sessionStoreClass);
+            return Injector.getBeanOfType(sessionStoreClass);
         }
         catch (Exception e) {
             throw new UnexpectedException("Cannot create instance of " + sessionStoreClass, e);

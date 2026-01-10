@@ -964,8 +964,7 @@ public class Http {
 
             @Override
             public Option<String> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame) {
-                    WebSocketFrame frame = (WebSocketFrame) o;
+                if (o instanceof WebSocketFrame frame) {
                     if (!frame.isBinary) {
                         return F.Option.Some(frame.textData);
                     }
@@ -977,8 +976,7 @@ public class Http {
 
             @Override
             public Option<byte[]> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame) {
-                    WebSocketFrame frame = (WebSocketFrame) o;
+                if (o instanceof WebSocketFrame frame) {
                     if (frame.isBinary) {
                         return F.Option.Some(frame.binaryData);
                     }
