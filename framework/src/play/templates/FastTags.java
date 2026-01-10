@@ -424,7 +424,7 @@ public class FastTags {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException(
                         "Specify a template name"));
             }
-            String name = args.get("arg").toString();
+            String name = args.remove("arg").toString();
             if (name.startsWith("./")) {
                 String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
@@ -433,7 +433,6 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf('/'));
                 name = ct + name.substring(1);
             }
-            args.remove("arg");
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<>((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);

@@ -1162,11 +1162,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        Http.Inbound inbound = channels.get(ctx);
+        Http.Inbound inbound = channels.remove(ctx);
         if (inbound != null) {
             inbound.close();
         }
-        channels.remove(ctx);
     }
 
     public static class WebSocketInvocation extends Invoker.Invocation {
