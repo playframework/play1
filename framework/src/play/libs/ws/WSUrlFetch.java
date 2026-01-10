@@ -194,7 +194,7 @@ public class WSUrlFetch implements WSImpl {
             String keyStore = Play.configuration.getProperty("ssl.keyStore", System.getProperty("javax.net.ssl.keyStore"));
             String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword",
                     System.getProperty("javax.net.ssl.keyStorePassword"));
-            Boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
+            boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
 
             if (this.username != null && this.password != null && this.scheme != null) {
                 String authString = null;
