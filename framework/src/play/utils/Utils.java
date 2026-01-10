@@ -191,7 +191,7 @@ public class Utils {
 
         public Date parse(String source) throws ParseException {
             for (SimpleDateFormat dateFormat : formats) {
-                if (source.length() == dateFormat.toPattern().replace("\'", "").length()) {
+                if (source.length() == dateFormat.toPattern().replace("'", "").length()) {
                     try {
                         return dateFormat.parse(source);
                     } catch (ParseException ex) {

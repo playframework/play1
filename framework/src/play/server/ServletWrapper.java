@@ -246,7 +246,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if (httpServletRequest.getHeader("Content-Type") != null) {
             contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
-            contentType = "text/html".intern();
+            contentType = "text/html";
         }
 
         if (httpServletRequest.getHeader(X_HTTP_METHOD_OVERRIDE) != null && allowedHttpMethodOverride

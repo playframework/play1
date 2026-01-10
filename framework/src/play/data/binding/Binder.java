@@ -799,7 +799,7 @@ public abstract class Binder {
                 return clazz.isPrimitive() ? false : null;
             }
 
-            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes")) {
+            if (value.equals("1") || value.equalsIgnoreCase("on") || value.equalsIgnoreCase("yes")) {
                 return true;
             }
 
