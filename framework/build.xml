@@ -137,7 +137,6 @@
         <property name="play.path" value="../.."/>
         <property name="build-release" value="${build-release}"/>
         <ant antfile="build.xml" target="build" dir="../modules/testrunner" />
-        <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
         <ant antfile="build.xml" target="build" dir="../modules/docviewer" />
     </target>
 
@@ -459,7 +458,7 @@
         <mkdir dir="dist/play-${version}" />
         <copy todir="dist/play-${version}">
             <fileset dir=".." excludes=".github,**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />
-            <fileset dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
+            <fileset dir=".." includes="modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
         </copy>
     </target>
 
