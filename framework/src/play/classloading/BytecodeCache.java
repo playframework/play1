@@ -61,7 +61,7 @@ public class BytecodeCache {
                     hash.append((char) read);
                     offset++;
                 }
-                if (!hash(source).equals(hash.toString())) {
+                if (!hash(source).contentEquals(hash)) {
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
                     }

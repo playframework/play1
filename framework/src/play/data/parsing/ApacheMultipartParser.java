@@ -482,7 +482,7 @@ public class ApacheMultipartParser extends DataParser {
 
         @Override
         public String toString() {
-            return "name=" + this.getName() + ", StoreLocation=" + String.valueOf(this.getStoreLocation()) + ", size=" + this.getSize()
+            return "name=" + this.getName() + ", StoreLocation=" + this.getStoreLocation() + ", size=" + this.getSize()
                     + "bytes, " + "isFormField=" + isFormField() + ", FieldName=" + this.getFieldName();
         }
 

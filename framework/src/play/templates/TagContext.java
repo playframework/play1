@@ -73,7 +73,7 @@ public class TagContext {
 
     @Override
     public String toString() {
-        return tagName+""+data;
+        return tagName+data;
     }
 
 

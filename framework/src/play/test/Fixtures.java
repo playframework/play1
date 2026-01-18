@@ -450,7 +450,7 @@ public class Fixtures {
     public static <T> T loadYaml(String name, Class<T> clazz) {
         Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader, null));
         yaml.setBeanAccess(BeanAccess.FIELD);
-        return (T) loadYaml(name, yaml);
+        return loadYaml(name, yaml);
     }
 
     @SuppressWarnings("unchecked")
@@ -570,7 +570,7 @@ public class Fixtures {
             if (field.isRelation) {
                 // These are the Ids that were set in the yml file (i.e
                 // person(nicolas)-> nicolas is the id)
-                String[] ids = resolvedYml.get("object." + field.name);
+                String[] ids = resolvedYml.remove("object." + field.name);
                 if (ids != null) {
                     String[] resolvedIds = new String[ids.length];
                     for (int i = 0; i < ids.length; i++) {
@@ -615,8 +615,6 @@ public class Fixtures {
                         }
                     }
                 }
-
-                resolvedYml.remove("object." + field.name);
             }
         }
         // Returns the map containing the ids to load for this object's

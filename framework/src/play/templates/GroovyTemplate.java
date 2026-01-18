@@ -211,14 +211,12 @@ public class GroovyTemplate extends BaseTemplate {
                             message = message.substring(0, message.lastIndexOf('@'));
                         }
                         throw new TemplateCompilationException(this, line, message);
-                    } else if (errorMsg instanceof ExceptionMessage) {
-                        ExceptionMessage errorMessage = ExceptionMessage.class.cast(errorMsg);
+                    } else if (errorMsg instanceof ExceptionMessage errorMessage) {
                         Exception exception = errorMessage.getCause();
                         Integer line = 0;
                         String message = exception.getMessage();
                         throw new TemplateCompilationException(this, line, message);
-                    } else if (errorMsg instanceof SimpleMessage) {
-                        SimpleMessage errorMessage = SimpleMessage.class.cast(errorMsg);
+                    } else if (errorMsg instanceof SimpleMessage errorMessage) {
                         throw new TemplateCompilationException(this, null, errorMessage.getMessage());
                     }
                 }

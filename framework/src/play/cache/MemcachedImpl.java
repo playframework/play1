@@ -165,7 +165,7 @@ public class MemcachedImpl implements CacheImpl {
         } catch (Exception e) {
             future.cancel(false);
         }
-        return Collections.<String, Object>emptyMap();
+        return Collections.emptyMap();
     }
 
     @Override

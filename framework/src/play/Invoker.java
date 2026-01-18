@@ -443,8 +443,7 @@ public class Invoker {
                     if (!queue.isEmpty()) {
                         for (Future<?> task : new HashSet<>(queue.keySet())) {
                             if (task.isDone()) {
-                                executor.submit(queue.get(task));
-                                queue.remove(task);
+                                executor.submit(queue.remove(task));
                             }
                         }
                     }

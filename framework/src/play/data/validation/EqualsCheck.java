@@ -36,8 +36,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
         requireMessageVariablesRecreation();
         try {
             if (context != null) {
-                if (context instanceof MethodParameterContext) {
-                    MethodParameterContext ctx = (MethodParameterContext) context;
+                if (context instanceof MethodParameterContext ctx) {
                     Method method = ctx.getMethod();
                     String[] paramNames = Java.parameterNames(method);
                     int index = -1;
@@ -60,8 +59,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
 
                 }
-                if (context instanceof FieldContext) {
-                    FieldContext ctx = (FieldContext) context;
+                if (context instanceof FieldContext ctx) {
                     try {
                         Field otherField = ctx.getField().getDeclaringClass().getDeclaredField(to);
                         otherKey = to;

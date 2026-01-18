@@ -15,8 +15,8 @@ public abstract class SqlQuery {
     public List<Object> getParams() { return params; }
 
     public int paramCurrentIndex() { return params.size()+1; }
-    public String pmark() { return "?"+Integer.toString(paramCurrentIndex()); }
-    public String pmark(int offset) { return "?"+Integer.toString(paramCurrentIndex()+offset); }
+    public String pmark() { return "?"+ paramCurrentIndex(); }
+    public String pmark(int offset) { return "?"+ (paramCurrentIndex() + offset); }
 
     public static class Concat {
         private String prefix, separator, suffix;

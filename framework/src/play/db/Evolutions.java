@@ -99,13 +99,13 @@ public class Evolutions extends PlayPlugin {
                             System.out.println("~ Your database " + dbName + " is in an inconsistent state!");
                             System.out.println("~");
                             System.out.println("~ While applying this script part:");
-                            System.out.println("");
+                            System.out.println();
                             System.out.println(e.getEvolutionScript());
-                            System.out.println("");
+                            System.out.println();
                             System.out.println("~ The following error occurred:");
-                            System.out.println("");
+                            System.out.println();
                             System.out.println(e.getError());
-                            System.out.println("");
+                            System.out.println();
                             System.out.println("~ Please correct it manually, and mark it resolved by running `play evolutions:resolve`");
                             System.out.println("~");
                             continue;
@@ -162,13 +162,13 @@ public class Evolutions extends PlayPlugin {
      */
     private static void handleDefaultAction(String dbName, Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions) {
         System.out.println("~ Your database " + dbName + " needs evolutions for " + moduleRoot.getKey() + "!");
-        System.out.println("");
+        System.out.println();
         System.out.println("# ------------------------------------------------------------------------------");
-        System.out.println("");
+        System.out.println();
         System.out.println(toHumanReadableScript(evolutions));
-        System.out.println("");
+        System.out.println();
         System.out.println("# ------------------------------------------------------------------------------");
-        System.out.println("");
+        System.out.println();
         System.out.println("~ Run `play evolutions:apply` to automatically apply this script to the database");
         System.out.println("~ or apply it yourself and mark it done using `play evolutions:markApplied`");
         System.out.println("~");
@@ -214,13 +214,13 @@ public class Evolutions extends PlayPlugin {
      */
     private static boolean handleApplyAction(String dbName, Entry<String, VirtualFile> moduleRoot, List<Evolution> evolutions) {
         System.out.println("~ Applying evolutions for " + moduleRoot.getKey() + ":");
-        System.out.println("");
+        System.out.println();
         System.out.println("# ------------------------------------------------------------------------------");
-        System.out.println("");
+        System.out.println();
         System.out.println(toHumanReadableScript(evolutions));
-        System.out.println("");
+        System.out.println();
         System.out.println("# ------------------------------------------------------------------------------");
-        System.out.println("");
+        System.out.println();
         if (applyScript(dbName, true, moduleRoot.getKey(), moduleRoot.getValue())) {
             System.out.println("~");
             System.out.println("~ Evolutions script successfully applied for " + moduleRoot.getKey() + "!");
@@ -465,8 +465,7 @@ public class Evolutions extends PlayPlugin {
                 Logger.error(e, "Can't apply evolution");
                 if (Evolutions.autoCommit()) {
                     String message = e.getMessage();
-                    if (e instanceof SQLException) {
-                        SQLException ex = (SQLException) e;
+                    if (e instanceof SQLException ex) {
                         message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
                     }
 
@@ -492,7 +491,7 @@ public class Evolutions extends PlayPlugin {
                 containsDown = true;
             }
             sql.append("# --- Rev:").append(evolution.revision).append(",").append(evolution.applyUp ? "Ups" : "Downs").append(" - ")
-                    .append(evolution.hash.substring(0, 7)).append("\n");
+                    .append(evolution.hash, 0, 7).append("\n");
             sql.append("\n");
             sql.append(evolution.applyUp ? evolution.sql_up : evolution.sql_down);
             sql.append("\n\n");

@@ -143,16 +143,13 @@ public class JavaExtensions {
         if (condition == null) {
             return false;
         }
-        if (condition instanceof Boolean && !(Boolean) condition) {
-            return false;
+        if (condition instanceof Boolean v) {
+            return v;
         }
-        if (condition instanceof Collection && ((Collection<?>) condition).size() == 0) {
-            return false;
+        if (condition instanceof Collection v) {
+            return !v.isEmpty();
         }
-        if (condition instanceof String && condition.toString().equals("")) {
-            return false;
-        }
-        return true;
+        return !(condition instanceof String v) || !v.isEmpty();
     }
 
     public static String escapeXml(String str) {

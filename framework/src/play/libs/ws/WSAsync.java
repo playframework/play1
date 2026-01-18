@@ -81,7 +81,7 @@ public class WSAsync implements WSImpl {
         String userAgent = Play.configuration.getProperty("http.userAgent");
         String keyStore = Play.configuration.getProperty("ssl.keyStore", System.getProperty("javax.net.ssl.keyStore"));
         String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword", System.getProperty("javax.net.ssl.keyStorePassword"));
-        Boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
+        boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {

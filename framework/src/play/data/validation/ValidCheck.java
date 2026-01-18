@@ -25,13 +25,11 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
         }
         try {
             if (context != null) {
-                if (context instanceof MethodParameterContext) {
-                    MethodParameterContext ctx = (MethodParameterContext) context;
+                if (context instanceof MethodParameterContext ctx) {
                     String[] paramNames = Java.parameterNames(ctx.getMethod());
                     key = paramNames[ctx.getParameterIndex()];
                 }
-                if (context instanceof FieldContext) {
-                    FieldContext ctx = (FieldContext) context;
+                if (context instanceof FieldContext ctx) {
                     key = ctx.getField().getName();
                 }
             }
@@ -66,8 +64,7 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
             return true;
         } else {
             for (ConstraintViolation violation : violations) {
-                if (violation.getContext() instanceof FieldContext) {
-                    FieldContext ctx = (FieldContext) violation.getContext();
+                if (violation.getContext() instanceof FieldContext ctx) {
                     String fkey = (key == null ? "" : key + ".") + ctx.getField().getName();
                     Error error = new Error(
                             fkey,

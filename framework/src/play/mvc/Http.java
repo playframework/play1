@@ -357,7 +357,7 @@ public class Http {
 
             // must try to extract encoding-info from contentType
             if (_contentType == null) {
-                newRequest.contentType = "text/html".intern();
+                newRequest.contentType = "text/html";
             } else {
 
                 HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
@@ -416,7 +416,7 @@ public class Http {
                 }
             }
 
-            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").toLowerCase().equals("true")
+            if (Play.configuration.getProperty("XForwardedOverwriteDomainAndPort", "false").equalsIgnoreCase("true")
                     && this.host != null && !this.host.equals(_host)) {
                 if (this.host.contains(":")) {
                     String[] hosts = this.host.split(":");
@@ -440,7 +440,7 @@ public class Http {
             return ("https".equals(Play.configuration.get("XForwardedProto"))
                     || (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value()))
                     || (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value()))
-                    || (frontEndHttpsHeader != null && "on".equals(frontEndHttpsHeader.value().toLowerCase())));
+                    || (frontEndHttpsHeader != null && "on".equalsIgnoreCase(frontEndHttpsHeader.value())));
         }
 
         /**
@@ -484,34 +484,34 @@ public class Http {
             }
 
             if (headers.get("accept") == null) {
-                format = "html".intern();
+                format = "html";
                 return;
             }
 
             String accept = headers.get("accept").value();
 
             if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1 || accept.startsWith("*/*")) {
-                format = "html".intern();
+                format = "html";
                 return;
             }
 
             if (accept.indexOf("application/xml") != -1 || accept.indexOf("text/xml") != -1) {
-                format = "xml".intern();
+                format = "xml";
                 return;
             }
 
             if (accept.indexOf("text/plain") != -1) {
-                format = "txt".intern();
+                format = "txt";
                 return;
             }
 
             if (accept.indexOf("application/json") != -1 || accept.indexOf("text/javascript") != -1) {
-                format = "json".intern();
+                format = "json";
                 return;
             }
 
             if (accept.endsWith("*/*")) {
-                format = "html".intern();
+                format = "html";
                 return;
             }
         }
@@ -662,7 +662,7 @@ public class Http {
          */
         public String getHeader(String name) {
             for (String key : headers.keySet()) {
-                if (key.toLowerCase().equals(name.toLowerCase())) {
+                if (key.equalsIgnoreCase(name)) {
                     if (headers.get(key) != null) {
                         return headers.get(key).value();
                     }
@@ -964,8 +964,7 @@ public class Http {
 
             @Override
             public Option<String> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame) {
-                    WebSocketFrame frame = (WebSocketFrame) o;
+                if (o instanceof WebSocketFrame frame) {
                     if (!frame.isBinary) {
                         return F.Option.Some(frame.textData);
                     }
@@ -977,8 +976,7 @@ public class Http {
 
             @Override
             public Option<byte[]> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame) {
-                    WebSocketFrame frame = (WebSocketFrame) o;
+                if (o instanceof WebSocketFrame frame) {
                     if (frame.isBinary) {
                         return F.Option.Some(frame.binaryData);
                     }

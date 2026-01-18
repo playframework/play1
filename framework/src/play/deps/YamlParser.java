@@ -107,9 +107,8 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
             List<String> confs = new ArrayList<>();
             if (data.containsKey("configurations")) {
-                if (data.get("configurations") instanceof List) {
+                if (data.get("configurations") instanceof List configurations) {
                     boolean allExcludes = true;
-                    List configurations = (List) data.get("configurations");
                     for (Object conf : configurations) {
                         String confName;
                         Map options;
@@ -139,8 +138,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
             }
 
             if (data.containsKey("require")) {
-                if (data.get("require") instanceof List) {
-                    List dependencies = (List) data.get("require");
+                if (data.get("require") instanceof List dependencies) {
                     for (Object dep : dependencies) {
 
                         String depName;
@@ -201,8 +199,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         }
 
                         // Exclude transitive dependencies
-                        if (options.containsKey("exclude") && options.get("exclude") instanceof List) {
-                            List exclude = (List) options.get("exclude");
+                        if (options.containsKey("exclude") && options.get("exclude") instanceof List exclude) {
                             for (Object ex : exclude) {
                                 String exName = ex.toString().trim();
                                 m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+).*").matcher(exName);

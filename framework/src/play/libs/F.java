@@ -414,11 +414,11 @@ public class F {
         public final long delay;
 
         public Timeout(String delay) {
-            this(Time.parseDuration(delay) * 1000);
+            this(Time.parseDuration(delay) * 1000L);
         }
 
         public Timeout(String token, String delay) {
-            this(token, Time.parseDuration(delay) * 1000);
+            this(token, Time.parseDuration(delay) * 1000L);
         }
 
         public Timeout(long delay) {

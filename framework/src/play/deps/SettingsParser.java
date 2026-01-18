@@ -60,9 +60,8 @@ public class SettingsParser {
             parseIncludes(settings, data);
 
             if (data.containsKey("repositories")) {
-                if (data.get("repositories") instanceof List) {
+                if (data.get("repositories") instanceof List repositories) {
 
-                    List repositories = (List) data.get("repositories");
                     List<Map<String, String>> modules = new ArrayList<>();
                     for (Object dep : repositories) {
                         if (dep instanceof Map) {
@@ -96,8 +95,7 @@ public class SettingsParser {
      */
     private void parseIncludes(IvySettings settings, Map<String, Object> data) throws Oops {
         if (data.containsKey("include") && data.get("include") != null) {
-            if (data.get("include") instanceof List) {
-                List<?> includes = (List<?>) data.get("include");
+            if (data.get("include") instanceof List<?> includes) {
                 if (includes != null) {
                     for (Object inc : includes) {
                         File include = new File(substitute(inc.toString()));

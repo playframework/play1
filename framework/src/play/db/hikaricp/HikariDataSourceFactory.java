@@ -94,14 +94,13 @@ public class HikariDataSourceFactory implements DataSourceFactory {
 
     for (String dbName : dbNames) {
       DataSource ds = DB.getDataSource(dbName);
-      if (ds == null || !(ds instanceof HikariDataSource)) {
+      if (ds == null || !(ds instanceof HikariDataSource datasource)) {
         out.println("Datasource:");
         out.println("~~~~~~~~~~~");
         out.println("(not yet connected)");
         return sw.toString();
       }
-      HikariDataSource datasource = (HikariDataSource) ds;
-      out.println("Datasource (" + dbName + "):");
+        out.println("Datasource (" + dbName + "):");
       out.println("~~~~~~~~~~~");
       out.println("Jdbc url: " + getJdbcUrl(datasource));
       out.println("Jdbc driver: " + getDriverClass(datasource));

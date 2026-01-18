@@ -144,10 +144,7 @@ public class HTML {
         public String convertToReference(char character) {
             if (character < 1000 || (character >= 8000 && character < 10000)) {
                 int index = (character < 1000 ? character : character - 7000);
-                String entityReference = this.characterToEntityReferenceMap[index];
-                if (entityReference != null) {
-                    return entityReference;
-                }
+                return this.characterToEntityReferenceMap[index];
             }
             return null;
         }

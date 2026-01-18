@@ -127,8 +127,7 @@ public class VirtualFile {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof VirtualFile) {
-            VirtualFile vf = (VirtualFile) other;
+        if (other instanceof VirtualFile vf) {
             if (realFile != null && vf.realFile != null) {
                 return realFile.equals(vf.realFile);
             }

@@ -54,7 +54,7 @@ public class OrderSafeProperties extends java.util.Properties {
 
     @Override
     public Enumeration<Object> keys() {
-        return Collections.<Object>enumeration(keys);
+        return Collections.enumeration(keys);
     }
 
     @Override

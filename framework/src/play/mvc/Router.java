@@ -228,7 +228,7 @@ public class Router {
         route.addParams(params);
         route.compute();
         if (Logger.isTraceEnabled()) {
-            Logger.trace("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
+            Logger.trace("Adding [" + route + "] with params [" + params + "] and headers [" + headers + "]");
         }
         return route;
     }
@@ -634,7 +634,7 @@ public class Router {
                                         queryString.append(':');
                                         objStr = objStr.substring(1);
                                     }
-                                    queryString.append(URLEncoder.encode(objStr + "", encoding));
+                                    queryString.append(URLEncoder.encode(objStr, encoding));
                                     queryString.append("&");
                                 } catch (UnsupportedEncodingException ex) {
                                 }
@@ -651,7 +651,7 @@ public class Router {
                                     queryString.append(':');
                                     objStr = objStr.substring(1);
                                 }
-                                queryString.append(URLEncoder.encode(objStr + "", encoding));
+                                queryString.append(URLEncoder.encode(objStr, encoding));
                                 queryString.append("&");
                             } catch (UnsupportedEncodingException ex) {
                             }

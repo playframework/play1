@@ -18,8 +18,7 @@ public class TextParser extends DataParser {
             while ((b = is.read()) != -1) {
                 os.write(b);
             }
-            byte[] data = os.toByteArray();
-            params.put("body", new String[] {new String(data, Http.Request.current().encoding)});
+            params.put("body", new String[] {os.toString(Http.Request.current().encoding)});
             return params;
         } catch (Exception e) {
             throw new UnexpectedException(e);

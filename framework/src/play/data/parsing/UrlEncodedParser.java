@@ -55,7 +55,7 @@ public class UrlEncodedParser extends DataParser {
                 os.write( buffer, 0, bytesRead);
             }
 
-            String data = new String(os.toByteArray(), encoding);
+            String data = os.toString(encoding);
             if (data.length() == 0) {
                 //data is empty - can skip the rest
                 return new HashMap<>(0);

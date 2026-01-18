@@ -93,9 +93,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Object msg = messageEvent.getMessage();
 
         // Http request
-        if (msg instanceof HttpRequest) {
-
-            final HttpRequest nettyRequest = (HttpRequest) msg;
+        if (msg instanceof HttpRequest nettyRequest) {
 
             // Websocket upgrade
             if (HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(nettyRequest.headers().get(HttpHeaders.Names.UPGRADE))) {
@@ -141,8 +139,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         // Websocket frame
-        if (msg instanceof WebSocketFrame) {
-            WebSocketFrame frame = (WebSocketFrame) msg;
+        if (msg instanceof WebSocketFrame frame) {
             websocketFrameReceived(ctx, frame);
         }
 
@@ -556,8 +553,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         InputStream body = null;
         ChannelBuffer b = nettyRequest.getContent();
-        if (b instanceof FileChannelBuffer) {
-            FileChannelBuffer buffer = (FileChannelBuffer) b;
+        if (b instanceof FileChannelBuffer buffer) {
             // An error occurred
             Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
 
@@ -1166,11 +1162,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        Http.Inbound inbound = channels.get(ctx);
+        Http.Inbound inbound = channels.remove(ctx);
         if (inbound != null) {
             inbound.close();
         }
-        channels.remove(ctx);
     }
 
     public static class WebSocketInvocation extends Invoker.Invocation {

@@ -82,11 +82,10 @@ public class FastTags {
 
     public static void _jsRoute(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object arg = args.get("arg");
-        if (!(arg instanceof ActionDefinition)) {
+        if (!(arg instanceof ActionDefinition action)) {
             throw new TemplateExecutionException(template.template, fromLine,
                     "Wrong parameter type, try #{jsRoute @Application.index() /}", new TagInternalException("Wrong parameter type"));
         }
-        ActionDefinition action = (ActionDefinition) arg;
         out.print("{");
         if (action.args.isEmpty()) {
             out.print("url: function() { return '" + action.url.replace("&amp;", "&") + "'; },");
@@ -305,19 +304,15 @@ public class FastTags {
 
     static boolean _evaluateCondition(Object test) {
         if (test != null) {
-            if (test instanceof Boolean) {
-                return ((Boolean) test).booleanValue();
-            } else if (test instanceof String) {
-                return ((String) test).length() > 0;
-            } else if (test instanceof Number) {
-                return ((Number) test).intValue() != 0;
-            } else if (test instanceof Collection) {
-                return !((Collection) test).isEmpty();
-            } else if (test instanceof NullObject) {
-                return false;
-            } else {
-                return true;
-            }
+            if (test instanceof Boolean v) {
+                return v;
+            } else if (test instanceof String v) {
+                return !v.isEmpty();
+            } else if (test instanceof Number v) {
+                return v.intValue() != 0;
+            } else if (test instanceof Collection v) {
+                return !v.isEmpty();
+            } else return !(test instanceof NullObject);
         }
         return false;
     }
@@ -429,7 +424,7 @@ public class FastTags {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException(
                         "Specify a template name"));
             }
-            String name = args.get("arg").toString();
+            String name = args.remove("arg").toString();
             if (name.startsWith("./")) {
                 String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
@@ -438,7 +433,6 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf('/'));
                 name = ct + name.substring(1);
             }
-            args.remove("arg");
             BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<>((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);

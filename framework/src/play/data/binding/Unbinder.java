@@ -72,7 +72,7 @@ public class Unbinder {
                 if (!isDirect(key.getClass())) {
                     throw new UnsupportedOperationException("Unbind won't work with indirect map keys yet");
                 }
-                String paramKey = name + '.' + key.toString();
+                String paramKey = name + '.' + key;
                 Unbinder.unBind(result, entry.getValue(), paramKey, annotations);
             }
         }
@@ -118,8 +118,7 @@ public class Unbinder {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType().equals(As.class)) {
                         // Check the unbinder param first
-                        Class<? extends TypeUnbinder<?>> toInstantiate = (Class<? extends TypeUnbinder<?>>) ((As) annotation)
-                                .unbinder();
+                        Class<? extends TypeUnbinder<?>> toInstantiate = ((As) annotation).unbinder();
                         if (!(toInstantiate.equals(As.DEFAULT.class))) {
                             TypeUnbinder<?> myInstance = toInstantiate.getDeclaredConstructor().newInstance();
                             isExtendedTypeBinder = myInstance.unBind(result, src, srcClazz, name, annotations);
