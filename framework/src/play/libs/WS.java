@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -24,7 +25,6 @@ import com.google.gson.JsonParser;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.libs.F.Promise;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
@@ -509,7 +509,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> getAsync() {
+        public CompletableFuture<HttpResponse> getAsync() {
             throw new NotImplementedException();
         }
 
@@ -525,7 +525,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> patchAsync() {
+        public CompletableFuture<HttpResponse> patchAsync() {
             throw new NotImplementedException();
         }
 
@@ -541,7 +541,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> postAsync() {
+        public CompletableFuture<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
@@ -557,7 +557,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> putAsync() {
+        public CompletableFuture<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
@@ -573,7 +573,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> deleteAsync() {
+        public CompletableFuture<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
@@ -589,7 +589,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> optionsAsync() {
+        public CompletableFuture<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
@@ -605,7 +605,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> headAsync() {
+        public CompletableFuture<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
@@ -621,7 +621,7 @@ public class WS extends PlayPlugin {
          * 
          * @return The HTTP response
          */
-        public Promise<HttpResponse> traceAsync() {
+        public CompletableFuture<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
 

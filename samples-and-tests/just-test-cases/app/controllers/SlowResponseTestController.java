@@ -6,6 +6,8 @@ import play.libs.F;
 import play.libs.WS;
 import play.mvc.Controller;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -57,10 +59,10 @@ public class SlowResponseTestController extends Controller {
         String url = "http://localhost:9003/SlowResponseTestController/slowResponse";
 
         // first will timeout...
-        F.Promise remoteCall1 = WS.url(url).timeout("1s").getAsync();
-        F.Promise remoteCall2 = WS.url(url).timeout("4s").getAsync();
+        CompletableFuture remoteCall1 = WS.url(url).timeout("1s").getAsync();
+        CompletableFuture remoteCall2 = WS.url(url).timeout("4s").getAsync();
 
-        F.Promise promises = F.Promise.waitAll(remoteCall1, remoteCall2);
+        CompletableFuture promises = F.Promise.waitAll(remoteCall1, remoteCall2);
 
         // assert that we get exception if we have too short timeout
         boolean gotException = false;
