@@ -5,12 +5,12 @@ import java.io.File;
 
 public interface Upload {
 
-    public byte[] asBytes();
-    public InputStream asStream();
-    public String getContentType();
-    public String getFileName();
-    public String getFieldName();
-    public long getSize();
-    public boolean isInMemory();
-    public File asFile();
+    byte[] asBytes();
+    InputStream asStream();
+    String getContentType();
+    String getFileName();
+    String getFieldName();
+    long getSize();
+    boolean isInMemory();
+    File asFile();
 }
