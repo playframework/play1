@@ -77,8 +77,7 @@ public class ValidationPlugin extends PlayPlugin {
                                 .getContext()).getParameterIndex()], violation
                                 .getMessage(),
                         violation.getMessageVariables() == null ? new String[0]
-                                : violation.getMessageVariables().values()
-                                        .toArray(new String[0]), violation
+                                : violation.getMessageVariables().values().toArray(String[]::new), violation
                                 .getSeverity()));
             }
             Validation.current.get().errors.addAll(errors);

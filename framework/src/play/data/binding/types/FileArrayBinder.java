@@ -38,7 +38,7 @@ public class FileArrayBinder implements TypeBinder<File[]> {
                     }
                 }
             }
-            return fileArray.toArray(new File[fileArray.size()]);
+            return fileArray.toArray(File[]::new);
         }
         return null;
     }

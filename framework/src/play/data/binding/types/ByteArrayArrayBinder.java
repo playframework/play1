@@ -32,7 +32,7 @@ public class ByteArrayArrayBinder implements TypeBinder<byte[][]> {
                     }
                 }
             }
-            return byteList.toArray(new byte[byteList.size()][]);
+            return byteList.toArray(byte[][]::new);
         }
         return null;
     }
