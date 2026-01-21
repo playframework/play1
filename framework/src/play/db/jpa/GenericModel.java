@@ -563,8 +563,8 @@ public class GenericModel extends JPABase {
             if (param.getClass().isArray()) {
                 param = Arrays.asList((Object[]) param);
             }
-            if (param instanceof Integer) {
-                param = ((Integer) param).longValue();
+            if (param instanceof Integer v) {
+                param = v.longValue();
             }
             query.setParameter(name, param);
             return this;

@@ -38,16 +38,16 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
         if (value == null) {
             return true;
         }
-        if (value instanceof Date) {
+        if (value instanceof Date v) {
             try {
-                return reference.after((Date) value);
+                return reference.after(v);
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Long) {
+        if (value instanceof Long v) {
             try {
-                return reference.after(new Date((Long) value));
+                return reference.after(new Date(v));
             } catch (Exception e) {
                 return false;
             }
