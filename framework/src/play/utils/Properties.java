@@ -74,7 +74,7 @@ public class Properties extends HashMap<String, String> {
         }
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, encoding));
         for (String key : keySet()) {
-            if (key.length() > 0) {
+            if (!key.isEmpty()) {
                 wr.write(key + "=" + get(key) + System.getProperties().getProperty("line.separator"));
             }
         }

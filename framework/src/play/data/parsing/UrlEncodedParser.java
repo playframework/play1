@@ -56,7 +56,7 @@ public class UrlEncodedParser extends DataParser {
             }
 
             String data = os.toString(encoding);
-            if (data.length() == 0) {
+            if (data.isEmpty()) {
                 //data is empty - can skip the rest
                 return new HashMap<>(0);
             }
@@ -94,7 +94,7 @@ public class UrlEncodedParser extends DataParser {
                 } else {
                     key = keyValue;
                 }
-                if (key.length()>0) {
+                if (!key.isEmpty()) {
                     Utils.Maps.mergeValueInMap(params, key, value);
                 }
             }
