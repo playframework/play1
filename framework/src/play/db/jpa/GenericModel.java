@@ -212,7 +212,7 @@ public class GenericModel extends JPABase {
                                 // Remove it to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
-                                    if (_id == null || _id.equals("")) {
+                                    if (_id == null || _id.isEmpty()) {
                                         continue;
                                     }
 
@@ -253,7 +253,7 @@ public class GenericModel extends JPABase {
 
                                 }
 
-                            } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
+                            } else if (ids != null && ids.length > 0 && ids[0].isEmpty()) {
                                 bw.set(field.getName(), o, null);
                                 // Remove the key to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);

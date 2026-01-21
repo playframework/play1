@@ -221,7 +221,7 @@ public class VirtualFile {
         if (matcher.matches()) {
             String path = matcher.group(3);
             String module = matcher.group(2);
-            if (module == null || module.equals("?") || module.equals("")) {
+            if (module == null || module.equals("?") || module.isEmpty()) {
                 return new VirtualFile(Play.applicationPath).child(path);
             } else {
                 if (module.equals("play")) {

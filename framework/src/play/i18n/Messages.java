@@ -192,7 +192,7 @@ public class Messages {
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties all(String locale) {
-        if (locale == null || "".equals(locale)) {
+        if (locale == null || locale.isEmpty()) {
             return defaults;
         }
         Properties mergedMessages = new Properties();
