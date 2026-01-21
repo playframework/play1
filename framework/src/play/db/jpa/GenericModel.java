@@ -246,7 +246,7 @@ public class GenericModel extends JPABase {
                                     // Remove only the key to prevent us from finding it again later
                                     // This how the old impl does it..
                                     fieldParamNode.removeChild(keyName, removedNodesList);
-                                    if (fieldParamNode.getAllChildren().size() == 0) {
+                                    if (fieldParamNode.getAllChildren().isEmpty()) {
                                         // remove the whole node..
                                         paramNode.removeChild(field.getName(), removedNodesList);
                                     }

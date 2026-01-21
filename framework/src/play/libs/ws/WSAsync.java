@@ -529,7 +529,7 @@ public class WSAsync implements WSImpl {
                         if (value instanceof Collection<?> || value.getClass().isArray()) {
                             Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
                             for (Object v : values) {
-                                if (sb.length() > 0) {
+                                if (!sb.isEmpty()) {
                                     sb.append('&');
                                 }
                                 sb.append(encode(key));
@@ -540,7 +540,7 @@ public class WSAsync implements WSImpl {
                             // Since AHC is hard-coded to encode using UTF-8, we
                             // must build
                             // the content ourself..
-                            if (sb.length() > 0) {
+                            if (!sb.isEmpty()) {
                                 sb.append('&');
                             }
                             sb.append(encode(key));

@@ -205,7 +205,7 @@ public class JPAPlugin extends PlayPlugin {
 
     private List<String> mappingFiles(Configuration dbConfig) {
         String mappingFile = dbConfig.getProperty("jpa.mapping-file", "");
-        return mappingFile != null && mappingFile.length() > 0 ? singletonList(mappingFile) : emptyList();
+        return mappingFile == null || mappingFile.isEmpty() ? emptyList() : singletonList(mappingFile);
 
     }
 

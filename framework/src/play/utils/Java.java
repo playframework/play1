@@ -175,7 +175,7 @@ public class Java {
     public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
         Class<?> invokedClass = null;
         List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
-        if (assignableClasses.size() == 0) {
+        if (assignableClasses.isEmpty()) {
             invokedClass = clazz;
         } else {
             invokedClass = assignableClasses.get(0);

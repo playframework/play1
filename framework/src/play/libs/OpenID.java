@@ -229,10 +229,10 @@ public class OpenID {
         try {
             URI url = new URI(openID);
             String frag = url.getRawFragment();
-            if (frag != null && frag.length() > 0) {
+            if (frag != null && !frag.isEmpty()) {
                 openID = openID.replace("#" + frag, "");
             }
-            if (url.getPath().equals("")) {
+            if (url.getPath().isEmpty()) {
                 openID += "/";
             }
             openID = new URI(openID).toString();

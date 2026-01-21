@@ -114,8 +114,8 @@ public class PlayConfigurationLoadTask {
                     continue;
                 }
                 if (line.startsWith("%")) {
-                    if (playId.length() > 0 && line.startsWith(playId + ".")) {
-                        line = line.substring((playId + ".").length());
+                    if (!playId.isEmpty() && line.startsWith(playId + '.')) {
+                        line = line.substring(playId.length() + 1);
                         String[] sa = splitLine(line);
                         if (sa != null) {
                             idSpecific.put(sa[0], sa[1]);

@@ -301,7 +301,7 @@ public class JavaExtensions {
 
     public static String capFirst(Object o) {
         String string = o.toString();
-        if (string.length() == 0) {
+        if (string.isEmpty()) {
             return string;
         }
         return ("" + string.charAt(0)).toUpperCase() + string.substring(1);

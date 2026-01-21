@@ -521,7 +521,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     private List<ApplicationClass> getAllClasses(VirtualFile path, String basePackage) {
-        if (basePackage.length() > 0 && !basePackage.endsWith(".")) {
+        if (!basePackage.isEmpty() && !basePackage.endsWith(".")) {
             basePackage += ".";
         }
         List<ApplicationClass> res = new ArrayList<>();
