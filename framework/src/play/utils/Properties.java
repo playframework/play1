@@ -84,7 +84,7 @@ public class Properties extends HashMap<String, String> {
 
     public boolean getBoolean(String key) throws IllegalArgumentException {
         String s = get(key);
-        if (s == null || "".equals(s)) {
+        if (s == null || s.isEmpty()) {
             throw new IllegalArgumentException("Setting must be an boolean (values:true/false/yes/no/on/off) : " + key);
         }
         s = s.trim().toLowerCase();
@@ -93,7 +93,7 @@ public class Properties extends HashMap<String, String> {
 
     public boolean getBoolean(String key, boolean defval) {
         String s = get(key);
-        if (s == null || "".equals(s)) {
+        if (s == null || s.isEmpty()) {
             return defval;
         }
         s = s.trim().toLowerCase();
@@ -102,7 +102,7 @@ public class Properties extends HashMap<String, String> {
 
     public Object getClassInstance(String key) throws IllegalArgumentException {
         String s = get(key);
-        if (s == null || "".equals(s)) {
+        if (s == null || s.isEmpty()) {
             throw new IllegalArgumentException("Setting " + key + " must be a valid classname  : " + key);
         }
         try {

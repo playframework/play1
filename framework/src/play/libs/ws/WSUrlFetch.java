@@ -208,7 +208,7 @@ public class WSUrlFetch implements WSImpl {
                 this.headers.put("Authorization", authString);
             }
 
-            if (keyStore != null && !keyStore.equals("")) {
+            if (keyStore != null && !keyStore.isEmpty()) {
                 Logger.info("Keystore configured, loading from '%s', CA validation enabled : %s", keyStore, CAValidation);
                 if (Logger.isTraceEnabled()) {
                     Logger.trace("Keystore password : %s, SSLCTX : %s", keyStorePass, sslCTX);

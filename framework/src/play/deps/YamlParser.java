@@ -225,7 +225,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         // Ids
                         boolean useIt = true;
                         String currentId = System.getProperty("play.id");
-                        if (currentId == null || currentId.trim().equals("")) {
+                        if (currentId == null || currentId.isBlank()) {
                             currentId = "unset";
                         }
                         if (options.containsKey("id")) {

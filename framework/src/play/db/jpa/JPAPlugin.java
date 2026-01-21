@@ -166,7 +166,7 @@ public class JPAPlugin extends PlayPlugin {
         // Add entities
         String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
         for (String entity : moreEntities) {
-            if (entity.trim().equals("")) {
+            if (entity.trim().isEmpty()) {
                 continue;
             }
             try {
