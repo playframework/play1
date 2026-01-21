@@ -385,7 +385,7 @@ public class JPAModelLoader implements Model.Factory {
         boolean forceSearch = searchFields == null || searchFields.isEmpty();
         for (Model.Property property : this.listProperties()) {
             if (property.isSearchable && (forceSearch || searchFields.contains(property.name))) {
-                if (q.length() > 0) {
+                if (!q.isEmpty()) {
                     q.append(" or ");
                 }
                 q.append("lower(");

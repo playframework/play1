@@ -518,7 +518,7 @@ public class Validation {
 
     static String getLocalName(Object o) {
         List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-        if (names.size() > 0) {
+        if (!names.isEmpty()) {
             return names.get(0);
         }
         return "";

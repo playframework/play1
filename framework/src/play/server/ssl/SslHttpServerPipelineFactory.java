@@ -29,7 +29,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
         engine.setUseClientMode(false);
 
-        if (enabledCiphers != null && enabledCiphers.length() > 0) {
+        if (enabledCiphers != null && !enabledCiphers.isEmpty()) {
             engine.setEnabledCipherSuites(enabledCiphers.replaceAll(" ", "").split(","));
         }
 
@@ -39,7 +39,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
             engine.setNeedClientAuth(true);
         }
 
-        if (enabledProtocols != null && enabledProtocols.trim().length() > 0) {
+        if (enabledProtocols != null && !enabledProtocols.isBlank()) {
             engine.setEnabledProtocols(enabledProtocols.replaceAll(" ", "").split(","));
         }
 

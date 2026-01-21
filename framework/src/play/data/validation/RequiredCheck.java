@@ -17,14 +17,14 @@ public class RequiredCheck extends AbstractAnnotationCheck<Required> {
         if (value == null) {
             return false;
         }
-        if (value instanceof String) {
-            return value.toString().trim().length() > 0;
+        if (value instanceof String v) {
+            return !v.isBlank();
         }
-        if (value instanceof Collection<?>) {
-            return ((Collection<?>)value).size() > 0;
+        if (value instanceof Collection<?> v) {
+            return !v.isEmpty();
         }
-        if (value instanceof BinaryField) {
-            return ((BinaryField)value).exists();
+        if (value instanceof BinaryField v) {
+            return v.exists();
         }
         if (value.getClass().isArray()) {
             try {

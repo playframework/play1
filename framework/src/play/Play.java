@@ -512,7 +512,7 @@ public class Play {
 
             // Locales
             langs = new ArrayList<>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
-            if (langs.size() == 1 && langs.get(0).trim().length() == 0) {
+            if (langs.size() == 1 && langs.get(0).isBlank()) {
                 langs = new ArrayList<>(16);
             }
 
@@ -521,7 +521,7 @@ public class Play {
 
             // SecretKey
             secretKey = configuration.getProperty("application.secret", "").trim();
-            if (secretKey.length() == 0) {
+            if (secretKey.isEmpty()) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
 
@@ -729,7 +729,7 @@ public class Play {
     public static void loadModules(VirtualFile appRoot) {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
-            if (System.getenv("MODULES") != null && System.getenv("MODULES").trim().length() > 0) {
+            if (System.getenv("MODULES") != null && !System.getenv("MODULES").isBlank()) {
 
                 for (String m : System.getenv("MODULES").split(File.pathSeparator)) {
                     File modulePath = new File(m);

@@ -640,7 +640,7 @@ public class WS extends PlayPlugin {
         protected String createQueryString() {
             StringBuilder sb = new StringBuilder();
             for (String key : this.parameters.keySet()) {
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append("&");
                 }
                 Object value = this.parameters.get(key);

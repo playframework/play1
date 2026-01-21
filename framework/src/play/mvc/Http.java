@@ -468,8 +468,8 @@ public class Http {
 
                 String username = decoded.substring(0, indexOf);
                 String thePasswd = decoded.substring(indexOf + 1);
-                user = username.length() > 0 ? username : null;
-                password = thePasswd.length() > 0 ? thePasswd : null;
+                user = username.isEmpty() ? null : username;
+                password = thePasswd.isEmpty() ? null : thePasswd;
             }
         }
 
@@ -560,7 +560,7 @@ public class Http {
 
         @Override
         public String toString() {
-            return method + " " + path + (querystring != null && querystring.length() > 0 ? "?" + querystring : "");
+            return method + " " + path + (querystring == null || querystring.isEmpty() ? "" : "?" + querystring);
         }
 
         /**
