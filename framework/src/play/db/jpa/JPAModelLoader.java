@@ -117,7 +117,7 @@ public class JPAModelLoader implements Model.Factory {
     }
 
     @Override
-    public Long count(List<String> searchFields, String keywords, String where) {
+    public long count(List<String> searchFields, String keywords, String where) {
         String q = "select count(*) from " + this.clazz.getName() + " e";
         if (keywords != null && !keywords.equals("")) {
             String searchQuery = getSearchQuery(searchFields);
@@ -128,11 +128,11 @@ public class JPAModelLoader implements Model.Factory {
         } else {
             q += (where != null ? " where " + where : "");
         }
-        Query query = JPA.em(this.dbName).createQuery(q);
+        var query = JPA.em(this.dbName).createQuery(q, Long.class);
         if (keywords != null && !keywords.equals("") && q.indexOf("?1") != -1) {
             query.setParameter(1, "%" + keywords.toLowerCase() + "%");
         }
-        return Long.decode(query.getSingleResult().toString());
+        return query.getSingleResult();
     }
 
     @Override

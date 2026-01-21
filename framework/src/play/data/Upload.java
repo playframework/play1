@@ -10,7 +10,7 @@ public interface Upload {
     public String getContentType();
     public String getFileName();
     public String getFieldName();
-    public Long getSize();
+    public long getSize();
     public boolean isInMemory();
     public File asFile();
 }

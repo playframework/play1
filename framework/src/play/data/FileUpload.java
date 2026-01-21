@@ -88,8 +88,8 @@ public class FileUpload implements Upload {
     }
 
     @Override
-    public Long getSize() {
-        return defaultFile == null ? null : defaultFile.length();
+    public long getSize() {
+        return defaultFile == null ? 0L : defaultFile.length();
     }
 
     @Override

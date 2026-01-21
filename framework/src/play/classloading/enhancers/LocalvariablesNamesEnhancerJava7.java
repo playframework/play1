@@ -135,7 +135,7 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
                 try {
 
                     // The instruction at which this local variable has been created
-                    Integer pc = localVariableAttribute.startPc(i);
+                    int pc = localVariableAttribute.startPc(i);
 
                     // Move to the next instruction (insertionPc)
                     CodeIterator codeIterator = codeAttribute.iterator();
@@ -190,7 +190,7 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
         ctClass.defrost();
     }
 
-    public static Integer computeMethodHash(CtClass[] parameters) {
+    public static int computeMethodHash(CtClass[] parameters) {
         String[] names = new String[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             names[i] = parameters[i].getName();
@@ -198,7 +198,7 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
         return computeMethodHash(names);
     }
 
-    public static Integer computeMethodHash(Class<?>[] parameters) {
+    public static int computeMethodHash(Class<?>[] parameters) {
         String[] names = new String[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             Class<?> param = parameters[i];
@@ -222,12 +222,12 @@ public class LocalvariablesNamesEnhancerJava7 extends LocalvariablesNamesEnhance
         return computeMethodHash(names);
     }
 
-    public static Integer computeMethodHash(String[] parameters) {
+    public static int computeMethodHash(String[] parameters) {
         StringBuilder buffer = new StringBuilder();
         for (String param : parameters) {
             buffer.append(param);
         }
-        Integer hash = buffer.toString().hashCode();
+        int hash = buffer.toString().hashCode();
         if (hash < 0) {
             return -hash;
         }

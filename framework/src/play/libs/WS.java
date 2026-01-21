@@ -696,7 +696,7 @@ public class WS extends PlayPlugin {
          * 
          * @return the status code of the http response
          */
-        public abstract Integer getStatus();
+        public abstract int getStatus();
 
         /**
          * The HTTP status text

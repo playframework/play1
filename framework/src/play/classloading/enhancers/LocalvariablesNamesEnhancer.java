@@ -75,7 +75,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
                 try {
                     // The instruction at which this local variable has been created
-                    Integer pc = localVariableAttribute.startPc(i);
+                    int pc = localVariableAttribute.startPc(i);
 
                     // Move to the next instruction (insertionPc)
                     CodeIterator codeIterator = codeAttribute.iterator();

@@ -149,7 +149,7 @@ public class Messages {
         int incrementalPosition = 1;
         while (matcher.find()) {
             String conversion = matcher.group(6);
-            Integer position;
+            int position;
             if (matcher.group(2) == null) {
                 position = incrementalPosition++;
             } else {

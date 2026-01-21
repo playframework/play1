@@ -118,7 +118,7 @@ public class VirtualFile {
         }
     }
 
-    public Long lastModified() {
+    public long lastModified() {
         if (realFile != null) {
             return realFile.lastModified();
         }
