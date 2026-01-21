@@ -405,13 +405,13 @@ public class Play {
         Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
         for (Object key : propsFromFile.keySet()) {
-            Matcher matcher = pattern.matcher(key + "");
+            Matcher matcher = pattern.matcher(String.valueOf(key));
             if (!matcher.matches()) {
                 newConfiguration.put(key, propsFromFile.get(key).toString().trim());
             }
         }
         for (Object key : propsFromFile.keySet()) {
-            Matcher matcher = pattern.matcher(key + "");
+            Matcher matcher = pattern.matcher(String.valueOf(key));
             if (matcher.matches()) {
                 String instance = matcher.group(1);
                 if (instance.equals(id)) {

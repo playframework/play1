@@ -317,8 +317,7 @@ public class JPQL {
 
     protected static String extractProp(String part, String end) {
         String prop = part.substring(0, part.length() - end.length());
-        prop = (prop.charAt(0) + "").toLowerCase() + prop.substring(1);
-        return prop;
+        return Character.toLowerCase(prop.charAt(0)) + prop.substring(1);
     }
     public static JPQL instance = null;
 }
