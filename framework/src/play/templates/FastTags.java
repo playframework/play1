@@ -474,7 +474,7 @@ public class FastTags {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public static @interface Namespace {
+    public @interface Namespace {
 
         String value() default "";
     }

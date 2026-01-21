@@ -228,9 +228,9 @@ public class WS extends PlayPlugin {
     }
 
     public interface WSImpl {
-        public WSRequest newRequest(String url, String encoding);
+        WSRequest newRequest(String url, String encoding);
 
-        public void stop();
+        void stop();
     }
 
     public abstract static class WSRequest {

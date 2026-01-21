@@ -151,7 +151,7 @@ public class ActionInvoker {
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
-                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);;
+                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);
                     cacheKey = cacheFor.id();
                     if ("".equals(cacheKey)) {
                         // Generate a cache key for this request
