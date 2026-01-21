@@ -11,14 +11,14 @@ import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.TimeZone;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -68,8 +68,15 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List<String> temp = new ArrayList<>(Arrays.asList(array));
-        temp.remove(s);
+        List<String> temp = new ArrayList<>(array.length);
+        var remove = true;
+        for (var element : array) {
+            if (remove && Objects.equals(element, s)) {
+                remove = false;
+            } else {
+                temp.add(element);
+            }
+        }
         return temp.toArray(String[]::new);
     }
 
@@ -97,12 +104,9 @@ public class JavaExtensions {
         return sb.toString();
     }
 
-    public static String pad(String str, Integer size) {
+    public static String pad(String str, int size) {
         int t = size - str.length();
-        for (int i = 0; i < t; i++) {
-            str += "&nbsp;";
-        }
-        return str;
+        return t > 0 ? str + "&nbsp;".repeat(t) : str;
     }
 
     public static RawData escapeHtml(String htmlToEscape) {
@@ -430,15 +434,11 @@ public class JavaExtensions {
         if (items == null) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-        Iterator<?> ite = items.iterator();
-        int i = 0;
-        while (ite.hasNext()) {
-            if (i++ > 0) {
-                sb.append(separator);
-            }
-            sb.append(ite.next());
+
+        StringJoiner joiner = new StringJoiner(separator);
+        for (Object item : items) {
+            joiner.add(String.valueOf(item));
         }
-        return sb.toString();
+        return joiner.toString();
     }
 }
