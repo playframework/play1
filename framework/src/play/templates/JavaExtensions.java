@@ -70,7 +70,7 @@ public class JavaExtensions {
     public static String[] remove(String[] array, String s) {
         List<String> temp = new ArrayList<>(Arrays.asList(array));
         temp.remove(s);
-        return temp.toArray(new String[temp.size()]);
+        return temp.toArray(String[]::new);
     }
 
     public static String toString(Closure<?> closure) {

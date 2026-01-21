@@ -503,8 +503,7 @@ public class Validation {
                         .getDeclaredField("mes").get(null)
                         + "",
                         check.getMessageVariables() == null ? new String[0]
-                                : check.getMessageVariables().values()
-                                        .toArray(new String[0]),
+                                : check.getMessageVariables().values().toArray(String[]::new),
                         check.getSeverity());
                 Validation.current().errors.add(error);
                 result.error = error;

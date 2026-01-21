@@ -331,7 +331,7 @@ public class ApplicationClassloader extends ClassLoader {
             Cache.clear();
             if (HotswapAgent.enabled) {
                 try {
-                    HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
+                    HotswapAgent.reload(newDefinitions.toArray(ClassDefinition[]::new));
                 } catch (Throwable e) {
                     throw new RestartNeededException(newDefinitions.size() + " classes changed", e);
                 }
@@ -416,7 +416,7 @@ public class ApplicationClassloader extends ClassLoader {
                         }
                     }
 
-                    Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+                    Play.classes.compiler.compile(classNames.toArray(String[]::new));
 
                 }
 
