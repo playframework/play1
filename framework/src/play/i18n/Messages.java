@@ -174,7 +174,7 @@ public class Messages {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive
                     // and object binder
-                    result[i] = Binder.directBind(null, args[i] + "", conversions[i], null);
+                    result[i] = Binder.directBind(null, String.valueOf(args[i]), conversions[i], null);
                 } catch (Exception e) {
                     // Ignore
                     result[i] = null;

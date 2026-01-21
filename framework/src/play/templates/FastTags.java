@@ -291,13 +291,13 @@ public class FastTags {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException(
                     "Please specify the error key"));
         }
-        String key = args.get("arg") == null ? args.get("key") + "" : args.get("arg") + "";
+        String key = args.get("arg") == null ? String.valueOf(args.get("key")) : String.valueOf(args.get("arg"));
         Error error = Validation.error(key);
         if (error != null) {
             if (args.get("field") == null) {
                 out.print(error.message());
             } else {
-                out.print(error.message(args.get("field") + ""));
+                out.print(error.message(String.valueOf(args.get("field"))));
             }
         }
     }
