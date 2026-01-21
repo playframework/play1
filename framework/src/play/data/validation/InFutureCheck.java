@@ -42,30 +42,30 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
         if (value == null) {
             return true;
         }
-        if (value instanceof Date) {
+        if (value instanceof Date v) {
             try {
-                return reference.before((Date)value);
+                return reference.before(v);
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Long) {
+        if (value instanceof Long v) {
             try {
-                return reference.before(new Date((Long) value));
+                return reference.before(new Date(v));
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof LocalDate) {
+        if (value instanceof LocalDate v) {
             try {
-                return reference.before(Date.from(((LocalDate) value).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                return reference.before(Date.from(v.atStartOfDay(ZoneId.systemDefault()).toInstant()));
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof LocalDateTime) {
+        if (value instanceof LocalDateTime v) {
             try {
-                return reference.before(Date.from(((LocalDateTime) value).atZone(ZoneId.systemDefault()).toInstant()));
+                return reference.before(Date.from(v.atZone(ZoneId.systemDefault()).toInstant()));
             } catch (Exception e) {
                 return false;
             }

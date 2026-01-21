@@ -58,7 +58,7 @@ public class FastTags {
     public static void _jsAction(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         String html = "";
         String minimize = "";
-        if (args.containsKey("minimize") && Boolean.FALSE.equals(Boolean.valueOf(args.get("minimize").toString()))) {
+        if (args.containsKey("minimize") && !Boolean.parseBoolean(args.get("minimize").toString())) {
             minimize = "\n";
         }
         html += "function(options) {" + minimize;
@@ -66,7 +66,7 @@ public class FastTags {
         html += "for(key in options) {" + minimize;
         html += "var val = options[key];" + minimize;
         // Encode URI script
-        if (args.containsKey("encodeURI") && Boolean.TRUE.equals(Boolean.valueOf(args.get("encodeURI").toString()))) {
+        if (args.containsKey("encodeURI") && Boolean.parseBoolean(args.get("encodeURI").toString())) {
             html += "val = encodeURIComponent(val.replace('&amp;', '&'));" + minimize;
         }
         // Custom script
