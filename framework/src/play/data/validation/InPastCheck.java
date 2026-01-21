@@ -21,11 +21,11 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
     @Override
     public void configure(InPast past) {
         try {
-            this.reference = past.value().equals("") ? new Date() : AlternativeDateFormat.getDefaultFormatter().parse(past.value());
+            this.reference = past.value().isEmpty() ? new Date() : AlternativeDateFormat.getDefaultFormatter().parse(past.value());
         } catch (ParseException ex) {
             throw new UnexpectedException("Cannot parse date " + past.value(), ex);
         }
-        if (!past.value().equals("") && past.message().equals(mes)) {
+        if (!past.value().isEmpty() && past.message().equals(mes)) {
             setMessage("validation.before");
         } else {
             setMessage(past.message());

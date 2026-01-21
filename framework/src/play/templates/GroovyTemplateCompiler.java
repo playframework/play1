@@ -326,7 +326,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         }
         Tag tag = tagsStack.pop();
         String lastInStack = tag.name;
-        if (tagName.equals("")) {
+        if (tagName.isEmpty()) {
             tagName = lastInStack;
         }
         if (!lastInStack.equals(tagName)) {

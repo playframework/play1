@@ -49,7 +49,7 @@ public class Lang {
      * @return false if the language is not supported by the application
      */
     public static boolean set(String locale) {
-        if (locale.equals("") || Play.langs.contains(locale)) {
+        if (locale.isEmpty() || Play.langs.contains(locale)) {
             current.set(locale);
             return true;
         } else {
