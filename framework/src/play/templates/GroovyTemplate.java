@@ -374,7 +374,7 @@ public class GroovyTemplate extends BaseTemplate {
                 cleanTrace.add(se);
             }
         }
-        e.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
+        e.setStackTrace(cleanTrace.toArray(StackTraceElement[]::new));
         return e;
     }
 

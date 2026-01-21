@@ -219,7 +219,7 @@ public class FileService  {
                         ranges.add(new long[] { start, end });
                     }
                 }
-                long[][] reducedRanges = reduceRanges(ranges.toArray(new long[0][]));
+                long[][] reducedRanges = reduceRanges(ranges.toArray(long[][]::new));
                 ByteRange[] byteRanges = new ByteRange[reducedRanges.length];
                 for(int i = 0; i < reducedRanges.length; i++) {
                     long[] range = reducedRanges[i];
@@ -262,7 +262,7 @@ public class FileService  {
                     result.add(c1);
                 }
             }
-            return result.toArray(new long[0][]);
+            return result.toArray(long[][]::new);
         }
         
         private static String makeRangeBodyHeader(String separator, String contentType, long start, long end, long fileLength) {

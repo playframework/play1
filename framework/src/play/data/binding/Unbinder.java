@@ -185,7 +185,7 @@ public class Unbinder {
                 }
 
                 try {
-                    internalUnbind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(new Annotation[0]));
+                    internalUnbind(result, field.get(src), field.getType(), newName, allAnnotations.toArray(Annotation[]::new));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     throw new RuntimeException("Object " + field.getType() + " won't unbind field " + newName, e);
                 } finally{

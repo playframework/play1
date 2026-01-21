@@ -370,7 +370,7 @@ public class JPAModelLoader implements Model.Factory {
                 }
                 c = c.getSuperclass();
             }
-            Field[] f = fields.toArray(new Field[fields.size()]);
+            Field[] f = fields.toArray(Field[]::new);
             if (f.length == 0) {
                 throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
             }
