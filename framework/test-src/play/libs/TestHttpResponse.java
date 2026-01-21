@@ -18,9 +18,8 @@ public class TestHttpResponse extends HttpResponse {
     }
 
     @Override
-    public Integer getStatus() {
-        // TODO Auto-generated method stub
-        return null;
+    public int getStatus() {
+        return 200;
     }
 
     @Override

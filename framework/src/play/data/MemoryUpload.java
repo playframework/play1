@@ -44,7 +44,7 @@ public class MemoryUpload implements Upload {
     }
 
     @Override
-    public Long getSize() {
+    public long getSize() {
         return fileItem.getSize();
     }
 

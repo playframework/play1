@@ -1069,7 +1069,7 @@ public class Router {
             String name;
             Pattern constraint;
             String defaultValue;
-            Boolean optional = false;
+            boolean optional = false;
         }
 
         @Override

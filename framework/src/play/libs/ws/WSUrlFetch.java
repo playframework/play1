@@ -295,7 +295,7 @@ public class WSUrlFetch implements WSImpl {
     public static class HttpUrlfetchResponse extends HttpResponse {
 
         private String body;
-        private Integer status;
+        private int status;
         private String statusText;
         private Map<String, List<String>> headersMap;
 
@@ -333,7 +333,7 @@ public class WSUrlFetch implements WSImpl {
          * @return the status code of the http response
          */
         @Override
-        public Integer getStatus() {
+        public int getStatus() {
             return status;
         }
 

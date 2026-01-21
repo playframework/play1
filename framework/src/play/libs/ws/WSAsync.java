@@ -650,7 +650,7 @@ public class WSAsync implements WSImpl {
          * @return the status code of the http response
          */
         @Override
-        public Integer getStatus() {
+        public int getStatus() {
             return this.response.getStatusCode();
         }
 

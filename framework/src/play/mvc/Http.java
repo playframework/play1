@@ -220,11 +220,11 @@ public class Http {
         /**
          * HTTP port
          */
-        public Integer port;
+        public int port;
         /**
          * is HTTPS ?
          */
-        public Boolean secure = false;
+        public boolean secure = false;
         /**
          * HTTP Headers
          */
@@ -613,7 +613,7 @@ public class Http {
         /**
          * Response status code
          */
-        public Integer status = 200;
+        public int status = 200;
         /**
          * Response content type
          */

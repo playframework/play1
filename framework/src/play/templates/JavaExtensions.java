@@ -184,7 +184,7 @@ public class JavaExtensions {
         return df.format(date);
     }
 
-    public static Integer page(Number number, Integer pageSize) {
+    public static int page(Number number, int pageSize) {
         return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
     }
 
@@ -192,7 +192,7 @@ public class JavaExtensions {
         return since(date, false);
     }
 
-    public static String since(Date date, Boolean stopAtMonth) {
+    public static String since(Date date, boolean stopAtMonth) {
         Date now = new Date();
         if (now.before(date)) {
             return "";
@@ -224,19 +224,19 @@ public class JavaExtensions {
         return Messages.get("since.years", years, pluralize(years));
     }
 
-    public static String asdate(Long timestamp) {
+    public static String asdate(long timestamp) {
         return asdate(timestamp, I18N.getDateFormat());
     }
 
-    public static String asdate(Long timestamp, String pattern) {
+    public static String asdate(long timestamp, String pattern) {
         return asdate(timestamp, pattern, Lang.get());
     }
 
-    public static String asdate(Long timestamp, String pattern, String lang) {
+    public static String asdate(long timestamp, String pattern, String lang) {
         return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(new Date(timestamp));
     }
 
-    public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
+    public static String asdate(long timestamp, String pattern, String lang, String timezone) {
         return format(new Date(timestamp), pattern, lang, timezone);
     }
 
@@ -261,7 +261,7 @@ public class JavaExtensions {
         return entity;
     }
 
-    public static String formatSize(Long bytes) {
+    public static String formatSize(long bytes) {
         if (bytes < 1024L) {
             return bytes + " B";
         }
@@ -377,10 +377,10 @@ public class JavaExtensions {
     }
 
     public static String slugify(String string) {
-        return slugify(string, Boolean.TRUE);
+        return slugify(string, true);
     }
 
-    public static String slugify(String string, Boolean lowercase) {
+    public static String slugify(String string, boolean lowercase) {
         string = noAccents(string);
         // Apostrophes.
         string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");

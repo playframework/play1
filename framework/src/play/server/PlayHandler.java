@@ -580,7 +580,7 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
                 : Unpooled.EMPTY_BUFFER;
         if (b instanceof FileChannelBuffer buffer) {
             // An error occurred
-            Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
+            int max = Integer.parseInt(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
 
             body = buffer.getInputStream();
             if (!(max == -1 || body.available() < max)) {
@@ -1061,7 +1061,7 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
     private void websocketHandshake(final ChannelHandlerContext ctx, HttpRequest req)
             throws Exception {
 
-        Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "65345"));
+        int max = Integer.parseInt(Play.configuration.getProperty("play.netty.maxContentLength", "65345"));
 
         WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
                 this.getWebSocketLocation(req), null, false);
