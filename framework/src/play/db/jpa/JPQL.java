@@ -189,8 +189,7 @@ public class JPQL {
     }
 
     public String createCountQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
-        var strippedQuery = query.strip();
-        var strippedAndLoweredQuery = strippedQuery.toLowerCase();
+        var strippedAndLoweredQuery = (query = query.strip()).toLowerCase();
         if (strippedAndLoweredQuery.startsWith("select ")) {
             return query;
         }
@@ -203,13 +202,14 @@ public class JPQL {
         if (strippedAndLoweredQuery.startsWith("order by ")) {
             return "select count(*) from " + entityName;
         }
-        if (strippedQuery.indexOf(' ') == -1 && strippedQuery.indexOf('=') == -1 && params != null && params.length == 1) {
-            query += " = ?1";
+        if (query.indexOf(' ') == -1 && query.indexOf('=') == -1) {
+            if (params == null) {
+                query += " = null";
+            } else if (params.length == 1) {
+                query += " = ?1";
+            }
         }
-        if (strippedQuery.indexOf(' ') == -1 && strippedQuery.indexOf('=') == -1 && params == null) {
-            query += " = null";
-        }
-        if (strippedQuery.isEmpty()) {
+        if (query.isEmpty()) {
             return "select count(*) from " + entityName;
         }
         return "select count(*) from " + entityName + " e where " + query;
@@ -230,12 +230,10 @@ public class JPQL {
     }
 
     public Query bindParameters(Query q, Map<String,Object> params) {
-        if (params == null) {
-            return q;
+        if (params != null) {
+            params.forEach(q::setParameter);
         }
-        for (String key : params.keySet()) {
-            q.setParameter(key, params.get(key));
-        }
+
         return q;
     }
 
