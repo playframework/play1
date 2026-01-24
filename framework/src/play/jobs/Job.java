@@ -203,6 +203,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public V call() {
         Monitor monitor = null;
         try {
+            preInit();
             if (init()) {
                 before();
                 V result = null;
@@ -238,6 +239,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                     throw e;
                 }
                 after();
+                onSuccess();
                 return result;
             }
         } catch (Throwable e) {
