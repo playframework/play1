@@ -72,7 +72,7 @@ class Release(object):
     def __init__(self, strversion):
         self.strversion = strversion
         try:
-            self.numpart = re.findall("\d+[\.\d+]+", strversion)[0]
+            self.numpart = re.findall(r"\d+[\.\d+]+", strversion)[0]
         except:
             self.numpart = ''
         self.rest = strversion.replace(self.numpart, "")
