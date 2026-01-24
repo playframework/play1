@@ -1,7 +1,6 @@
 package play;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +24,8 @@ import play.i18n.Lang;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.utils.PThreadFactory;
+
+import static java.util.Collections.unmodifiableList;
 
 /**
  * Run some code in a Play! context
@@ -115,8 +116,7 @@ public class Invoker {
         }
 
         public InvocationContext(String invocationType) {
-            this.invocationType = invocationType;
-            this.annotations = new ArrayList<>();
+            this(invocationType, List.of());
         }
 
         public InvocationContext(String invocationType, List<Annotation> annotations) {
@@ -125,16 +125,11 @@ public class Invoker {
         }
 
         public InvocationContext(String invocationType, Annotation[] annotations) {
-            this.invocationType = invocationType;
-            this.annotations = Arrays.asList(annotations);
+            this(invocationType, List.of(annotations));
         }
 
         public InvocationContext(String invocationType, Annotation[]... annotations) {
-            this.invocationType = invocationType;
-            this.annotations = new ArrayList<>();
-            for (Annotation[] some : annotations) {
-                this.annotations.addAll(Arrays.asList(some));
-            }
+            this(invocationType, Arrays.stream(annotations).flatMap(Arrays::stream).toList());
         }
 
         public List<Annotation> getAnnotations() {
@@ -144,7 +139,7 @@ public class Invoker {
         @SuppressWarnings("unchecked")
         public <T extends Annotation> T getAnnotation(Class<T> clazz) {
             for (Annotation annotation : annotations) {
-                if (annotation.annotationType().isAssignableFrom(clazz)) {
+                if (annotation.annotationType() == clazz) {
                     return (T) annotation;
                 }
             }
@@ -153,7 +148,7 @@ public class Invoker {
 
         public <T extends Annotation> boolean isAnnotationPresent(Class<T> clazz) {
             for (Annotation annotation : annotations) {
-                if (annotation.annotationType().isAssignableFrom(clazz)) {
+                if (annotation.annotationType() == clazz) {
                     return true;
                 }
             }
