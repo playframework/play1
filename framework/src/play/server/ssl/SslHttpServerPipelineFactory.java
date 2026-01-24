@@ -15,7 +15,7 @@ import play.server.HttpServerPipelineFactory;
 public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
 
     private final String pipelineConfig = Play.configuration.getProperty("play.ssl.netty.pipeline",
-            "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
+            "org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
 
     @Override
     public ChannelPipeline getPipeline() throws Exception {
