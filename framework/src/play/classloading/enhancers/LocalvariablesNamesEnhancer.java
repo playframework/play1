@@ -1,11 +1,12 @@
 package play.classloading.enhancers;
 
 import java.lang.reflect.Field;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -172,7 +173,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
      */
     public static class LocalVariablesNamesTracer {
 
-        static final ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<>();
+        static final ThreadLocal<Deque<Map<String, Object>>> localVariables = new ThreadLocal<>();
 
         public static void checkEmpty() {
             if (localVariables.get() != null && !localVariables.get().isEmpty()) {
@@ -186,9 +187,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         public static void enter() {
             if (localVariables.get() == null) {
-                localVariables.set(new Stack<Map<String, Object>>());
+                localVariables.set(new ArrayDeque<>());
             }
-            localVariables.get().push(new HashMap<String, Object>());
+            localVariables.get().push(new HashMap<>());
         }
 
         public static void exit() {
@@ -199,7 +200,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static Map<String, Object> locals() {
-            if (localVariables.get() != null && !localVariables.get().empty()) {
+            if (localVariables.get() != null && !localVariables.get().isEmpty()) {
                 return localVariables.get().peek();
             }
             return new HashMap<>();
@@ -262,17 +263,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
 
-        public static Stack<Map<String, Object>> getLocalVariablesStateBeforeAwait() {
-            Stack<Map<String, Object>> state = localVariables.get();
+        public static Deque<Map<String, Object>> getLocalVariablesStateBeforeAwait() {
+            Deque<Map<String, Object>> state = localVariables.get();
             // must clear the ThreadLocal to prevent destroying the state when exit() is called due to
             // continuations-suspend
-            localVariables.set(new Stack<Map<String, Object>>());
+            localVariables.set(new ArrayDeque<>());
             return state;
         }
 
-        public static void setLocalVariablesStateAfterAwait(Stack<Map<String, Object>> state) {
+        public static void setLocalVariablesStateAfterAwait(Deque<Map<String, Object>> state) {
             if (state == null) {
-                state = new Stack<>();
+                state = new ArrayDeque<>();
             }
             localVariables.set(state);
         }
