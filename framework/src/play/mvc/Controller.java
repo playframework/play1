@@ -7,10 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.Future;
 
 import org.apache.commons.javaflow.Continuation;
@@ -1122,7 +1122,7 @@ public class Controller implements PlayController, ControllerSupport, LocalVaria
             // we are restoring after suspend
 
             // localVariablesState
-            Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args
+            Deque<Map<String, Object>> localVariablesState = (Deque<Map<String, Object>>) Http.Request.current().args
                     .remove(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
             LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.setLocalVariablesStateAfterAwait(localVariablesState);
 
