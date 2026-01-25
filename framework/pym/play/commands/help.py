@@ -23,7 +23,7 @@ def execute(**kargs):
             print(open(help_file, 'r').read())
         else:
             exists = False
-            slugCmd = re.sub('[-\s]+', '-', re.sub('[^\w\s-]', '', cmd.encode('ascii', 'ignore')).strip().lower())
+            slugCmd = re.sub(r'[-\s]+', '-', re.sub(r'[^\w\s-]', '', cmd.encode('ascii', 'ignore')).strip().lower())
             for module in app.modules():
                 help_file = os.path\
                     .join(module, 'documentation', 'commands',

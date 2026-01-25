@@ -82,7 +82,7 @@ def get_repositories(play_base):
         repos = []
         f = file(repopath)
         for line in f:
-            if not re.match("^\s*#", line) and not line.strip() == "":
+            if not re.match(r"^\s*#", line) and not line.strip() == "":
                 repos.append(line.strip())
         if len(repos) > 0:
             return repos
