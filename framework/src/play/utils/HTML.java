@@ -157,11 +157,7 @@ public class HTML {
          * @return The char mapped to the given entityReference or -1.
          */
         public char convertToCharacter(String entityReference) {
-            Character referredCharacter = this.entityReferenceToCharacterMap.get(entityReference);
-            if (referredCharacter != null) {
-                return referredCharacter.charValue();
-            }
-            return CHAR_NULL;
+            return this.entityReferenceToCharacterMap.getOrDefault(entityReference, CHAR_NULL);
         }
     }
 }

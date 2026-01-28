@@ -22,7 +22,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
     @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
-        if (value == null || value.toString().length() == 0) {
+        if (value == null || value.toString().isEmpty()) {
             return true;
         }
         return value.toString().length() <= maxSize;

@@ -8,11 +8,11 @@ import play.exceptions.UnexpectedException;
 
 public interface Model {
 
-    public void _save();
-    public void _delete();
-    public Object _key();
+    void _save();
+    void _delete();
+    Object _key();
 
-    public static class Property {
+    class Property {
 
         public String name;
         public Class<?> type;
@@ -26,26 +26,26 @@ public interface Model {
 
     }
 
-    public static interface Choices {
+    interface Choices {
 
-        public List<Object> list();
-
-    }
-
-    public static interface Factory {
-
-        public String keyName();
-        public Class<?> keyType();
-        public Object keyValue(Model m);
-        public Model findById(Object id);
-        public List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords, String where);
-        public Long count(List<String> properties, String keywords, String where);
-        public void deleteAll();
-        public List<Model.Property> listProperties();
+        List<Object> list();
 
     }
 
-    public static class Manager {
+    interface Factory {
+
+        String keyName();
+        Class<?> keyType();
+        Object keyValue(Model m);
+        Model findById(Object id);
+        List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords, String where);
+        long count(List<String> properties, String keywords, String where);
+        void deleteAll();
+        List<Model.Property> listProperties();
+
+    }
+
+    class Manager {
 
         public static Model.Factory factoryFor(Class<? extends Model> clazz) {
             if(Model.class.isAssignableFrom(clazz)) {
@@ -59,13 +59,13 @@ public interface Model {
 
     }
 
-    public static interface BinaryField {
+    interface BinaryField {
 
-        public InputStream get();
-        public void set(InputStream is, String type);
-        public long length();
-        public String type();
-        public boolean exists();
+        InputStream get();
+        void set(InputStream is, String type);
+        long length();
+        String type();
+        boolean exists();
 
     }
 

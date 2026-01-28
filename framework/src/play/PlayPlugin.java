@@ -567,8 +567,8 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
         // I don't want to add any additional dependencies to the project or use JDK 8 features
         // so I'm just rolling my own 1 arg function interface... there must be a better way to do this...
-        public static interface Function1<I, O> {
-            public O apply(I arg) throws Throwable;
+        public interface Function1<I, O> {
+            O apply(I arg) throws Throwable;
         }
     }
 
