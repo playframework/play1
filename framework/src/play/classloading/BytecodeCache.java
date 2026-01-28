@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -51,27 +52,26 @@ public class BytecodeCache {
             }
             File f = cacheFile(REPLACED_CHARS.matcher(name).replaceAll("_"));
             if (f.exists()) {
-                FileInputStream fis = new FileInputStream(f);
-                // Read hash
-                int offset = 0;
-                int read = -1;
-                StringBuilder hash = new StringBuilder();
-                // look for null byte, or end-of file
-                while ((read = fis.read()) > 0) {
-                    hash.append((char) read);
-                    offset++;
-                }
-                if (!hash(source).contentEquals(hash)) {
-                    if (Logger.isTraceEnabled()) {
-                        Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
+                try (FileInputStream fis = new FileInputStream(f)) {
+                    // Read hash
+                    int offset = 0;
+                    int read;
+                    StringBuilder hash = new StringBuilder();
+                    // look for null byte, or end-of file
+                    while ((read = fis.read()) > 0) {
+                        hash.append((char) read);
+                        offset++;
                     }
-                    fis.close();
-                    return null;
+                    if (!hash(source).contentEquals(hash)) {
+                        if (Logger.isTraceEnabled()) {
+                            Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
+                        }
+                        return null;
+                    }
+                    byte[] byteCode = new byte[(int) f.length() - (offset + 1)];
+                    fis.read(byteCode);
+                    return byteCode;
                 }
-                byte[] byteCode = new byte[(int) f.length() - (offset + 1)];
-                fis.read(byteCode);
-                fis.close();
-                return byteCode;
             }
 
             if (Logger.isTraceEnabled()) {
@@ -127,18 +127,9 @@ public class BytecodeCache {
                 plugins.append(plugin.getClass().getName());
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.reset();
             messageDigest.update((Play.version + plugins + text).getBytes(UTF_8));
             byte[] digest = messageDigest.digest();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < digest.length; ++i) {
-                int value = digest[i];
-                if (value < 0) {
-                    value += 256;
-                }
-                builder.append(Integer.toHexString(value));
-            }
-            return builder.toString();
+            return HexFormat.of().formatHex(digest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
