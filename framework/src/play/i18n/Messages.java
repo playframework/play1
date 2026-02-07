@@ -149,7 +149,7 @@ public class Messages {
         int incrementalPosition = 1;
         while (matcher.find()) {
             String conversion = matcher.group(6);
-            Integer position;
+            int position;
             if (matcher.group(2) == null) {
                 position = incrementalPosition++;
             } else {
@@ -174,7 +174,7 @@ public class Messages {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive
                     // and object binder
-                    result[i] = Binder.directBind(null, args[i] + "", conversions[i], null);
+                    result[i] = Binder.directBind(null, String.valueOf(args[i]), conversions[i], null);
                 } catch (Exception e) {
                     // Ignore
                     result[i] = null;
@@ -192,7 +192,7 @@ public class Messages {
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties all(String locale) {
-        if (locale == null || "".equals(locale)) {
+        if (locale == null || locale.isEmpty()) {
             return defaults;
         }
         Properties mergedMessages = new Properties();

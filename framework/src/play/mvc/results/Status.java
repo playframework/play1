@@ -8,7 +8,7 @@ public class Status extends Result {
     private final int code;
 
     public Status(int code) {
-        super(code+"");
+        super(Integer.toString(code));
         this.code = code;
     }
 
