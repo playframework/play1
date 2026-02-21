@@ -85,44 +85,54 @@ JDK 21 failures should decrease until the `continue-on-error` can be removed.
 
 ### 0C. Audit test coverage and add missing tests
 **Scope:** New test files in `framework/test-src/`
+**Status:** Partially complete — see below.
 
-Several subsystems we're about to modify have no unit tests:
+**Added (commit 4c8d51a):**
+- `framework/test-src/play/db/jpa/HibernateInterceptorTest.java` —
+  Covers `findDirty()` explicit-save blocking, collection callback gating,
+  `onSave()` ThreadLocal storage, and `afterTransactionCompletion()` cleanup.
+  Guards Phase 1E and Phase 2B.
+- `framework/test-src/play/classloading/enhancers/PropertiesEnhancerTest.java` —
+  Covers getter/setter generation, `@PlayPropertyAccessor` annotation, boolean
+  field handling, default constructor addition, and behavioral round-trip tests
+  (getter returns field value, setter updates field). Uses Javassist bytecode
+  loading with a child-first ClassLoader to test the actual enhanced bytes.
+  Guards Phase 2C.
+- `framework/test-src/play/classloading/enhancers/ContinuationEnhancerTest.java` —
+  Covers `isEnhanced()` runtime detection for unknown classes, unenhanced classes,
+  and classes with null `javaClass` (which exposed a latent NPE bug, now fixed).
+  Full transformation test (await() detection + JavaFlow transform) requires a
+  real Play classloader and is covered by the sample app integration tests.
+  Guards Phase 3C.
+- Also fixed a latent NPE in `ContinuationEnhancer.isEnhanced()`: it now
+  null-checks `appClass.javaClass` before calling `isAssignableFrom()`.
 
-**No unit tests (critical for this plan):**
-- `PropertiesEnhancer` — We need tests that verify accessor generation and field
-  access rewriting work correctly before we start modifying or removing this enhancer.
-  A `PropertiesEnhancerTest` exists in `samples-and-tests/just-test-cases/` but not
-  in the framework unit tests. Port or duplicate it.
-- `ControllersEnhancer` — No unit tests for ThreadLocal rewriting or auto-redirect
-  injection. Add tests that verify enhanced controller classes have the expected
-  behavior.
-- `ContinuationEnhancer` — No unit tests for `await()` enhancement detection.
-- `ConstructorEnhancer` — Will be new code (Phase 1C) — write tests alongside it.
-- Server layer (`PlayHandler`, `Server`, etc.) — No unit tests. Hard to unit test
-  since it's tightly coupled to Netty, but add at least a smoke test that boots the
-  server and serves a response. The integration tests via sample apps partially cover
-  this, but a focused server-layer test would catch regressions faster.
+**Still needed:**
+- `JPABase` Hibernate internal API usage — `saveAndCascade()`, `cascadeOrphans()`,
+  and the Hibernate SPI calls (`SessionImpl`, `CollectionEntry`, `PersistenceContext`,
+  `HibernateProxy`) require a live Hibernate session. A proper unit test needs an
+  in-memory H2 database with Hibernate bootstrapped. This is non-trivial and is
+  better done as part of Phase 2B prep work, alongside the Hibernate 6 migration.
+  Priority: write before starting Phase 2B. The sample app integration tests
+  (yabe, forum) cover these paths indirectly in the meantime.
+- `ControllersEnhancer` ThreadLocal rewriting and auto-redirect injection — testing
+  requires a controller class processed through the full enhancer chain. Defer to
+  Phase 2C prep.
+- `ConstructorEnhancer` — will be new code (Phase 1C); write tests alongside it.
+- Server boot/response smoke test — difficult to unit test due to Netty coupling.
+  Defer to Phase 3A prep.
 
-**Have unit tests (verify they're current):**
-- `BeanWrapper` — `BeanWrapperTest.java` exists. Verify it covers the
-  `@PlayPropertyAccessor` filtering that will change in Phase 2C.
-- `ActionInvoker` — `ActionInvokerTest.java` exists. Verify it covers the
-  continuation/`await()` code paths that will change in Phase 3C.
-- `JPAPlugin` / JPA layer — `JPQLTest.java` exists for query parsing. No direct test
-  for `JPAPlugin` bootstrap or `JPABase` cascade logic. The sample app integration
-  tests (`yabe`, `forum`) cover these indirectly, but add unit tests for the Hibernate
-  internal API calls in `JPABase.java` (the `saveAndCascade` / `willBeSaved` logic
-  that uses `SessionImpl`, `EntityEntry`, `CollectionEntry`) since these are the exact
-  APIs that change in Hibernate 6.
-- `GroovyTemplate` — `GroovyTemplateTest.java` exists. Verify it covers template
-  compilation and rendering paths, since Groovy 4 may change `CompilationUnit`
-  behavior.
-
-**Priority order for new tests** (by risk of the change they're guarding):
-1. `PropertiesEnhancer` field access rewriting (guards Phase 2C)
-2. `JPABase` Hibernate internal API usage (guards Phase 2B)
-3. `ContinuationEnhancer` await detection (guards Phase 3C)
-4. Server boot/response smoke test (guards Phase 3A)
+**Coverage confirmed adequate (no gaps blocking immediate phases):**
+- `BeanWrapper` — `BeanWrapperTest.java` covers binding via fields and methods.
+  The `@PlayPropertyAccessor` filter in `BeanWrapper.java:66,70` is exercised by
+  existing tests; no additional coverage needed before Phase 2C.
+- `ActionInvoker` — `ActionInvokerTest.java` is comprehensive (interceptors,
+  exception unwrapping, static/non-static/Scala actions). Does not test
+  continuation/await() paths, which are integration-tested via sample apps.
+- `GroovyTemplate` — `GroovyTemplateTest.java` covers compilation and rendering.
+  Confirmed passing on JDK 17; the JDK 23+ failure ("Unsupported class file
+  major version") is expected and tracked via Phase 3B (Groovy 4 upgrade).
+- `JPQLTest.java` — covers JPQL query generation from method names.
 
 ### 0D. Add missing sample apps to `ant test`
 **Scope:** 1 file (`framework/build.xml`)
