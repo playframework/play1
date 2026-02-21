@@ -26,7 +26,7 @@ public class ContinuationEnhancer extends Enhancer {
 
     public static boolean isEnhanced(String appClassName) {
         ApplicationClass appClass = Play.classes.getApplicationClass( appClassName);
-        if ( appClass == null) {
+        if ( appClass == null || appClass.javaClass == null) {
             return false;
         }
 
