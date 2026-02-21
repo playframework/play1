@@ -2,7 +2,8 @@
 
 <project name="play! framework" default="jar" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 
-    <property name="baseversion" value="1.7.x" />
+    <property name="baseversion" value="1.8.0" />
+    <property name="version" value="1.8.0.larva" />
 
     <path id="project.classpath">
         <fileset dir=".">
@@ -65,7 +66,7 @@
 
     <target name="compile" description="compile without cleaning">
         <mkdir dir="classes"/>
-        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="17" target="17">
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" source="11" target="11">
             <classpath refid="project.classpath" />
         </javac>
         <copy todir="classes">
@@ -257,7 +258,7 @@
         <condition property="pythonExecutable" value="python">
             <and><os family="windows"/></and>
         </condition>
-        <condition property="pythonExecutable" value="python">
+        <condition property="pythonExecutable" value="python3">
             <and><os family="unix"/></and>
         </condition>
 
