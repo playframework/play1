@@ -27,7 +27,8 @@ Phase 1 (independent leaf changes, no ordering between them)
   ├── 1A  Remove -noverify flag
   ├── 1B  Remove SecurityManager usage
   ├── 1C  Extract constructor enhancer from PropertiesEnhancer
-  └── 1D  Add Method cache to PropertiesEnhancer.FieldAccessor
+  ├── 1D  Add Method cache to PropertiesEnhancer.FieldAccessor
+  └── 1E  Add opt-in JPA standard dirty checking (bypass saveAndCascade)
 
 Phase 2 (can be done in parallel tracks after Phase 1)
   ├── Track A: JPA/Hibernate modernization
@@ -232,6 +233,62 @@ File:
 
 **Validation:** Run `ant test`. Behavior should be identical, just faster. Benchmark
 before/after with a data-heavy sample app (yabe) to measure improvement.
+
+### 1E. Add opt-in JPA standard dirty checking (bypass `saveAndCascade`)
+**Goal:** Performance
+**Scope:** 3 files
+**Config:** `jpa.explicitSave=false` (new flag, default `true` to preserve existing behavior)
+
+Play overrides Hibernate's standard dirty checking with an explicit-save model:
+`HibernateInterceptor.findDirty()` returns an empty array for any entity where
+`willBeSaved` is `false`, effectively blocking Hibernate from flushing changes unless
+`.save()` was called. The `saveAndCascade` method in `JPABase._save()` walks the
+entire object graph via reflection twice per save (once before flush, once after) to
+propagate the `willBeSaved` flag to cascaded entities. This is O(graph-size)
+reflection work with zero caching — field metadata, annotation checks, and
+`setAccessible` calls are repeated on every save of every entity in the cascade chain.
+
+For models with many relationships this becomes a serious bottleneck. The manual
+cascade walk also duplicates what Hibernate does natively, and uses Hibernate internal
+SPIs (`SessionImpl`, `CollectionEntry`, `CollectionPersister`, `PersistenceContext`)
+that change in Hibernate 6 (Phase 2B).
+
+When `jpa.explicitSave=false`, switch to standard JPA/Hibernate semantics:
+- `_save()` just calls `persist()` (if new) + `flush()` — no `saveAndCascade` walk
+- `HibernateInterceptor.findDirty()` returns `null` (defer to Hibernate's own dirty
+  check) instead of blocking with an empty array
+- Collection interceptor methods (`onCollectionUpdate`, etc.) return `true`
+  unconditionally instead of gating on `willBeSaved`
+- Cascading is handled entirely by Hibernate based on `CascadeType` annotations
+
+This means any field mutation on a managed entity will be flushed at transaction
+commit, which is standard JPA behavior but differs from Play's current explicit-save
+contract. Hence the opt-in flag.
+
+Files:
+- `framework/src/play/db/jpa/JPABase.java` — in `_save()`, check config flag; when
+  disabled, skip `saveAndCascade` and just persist + flush
+- `framework/src/play/db/jpa/HibernateInterceptor.java` — check config flag in
+  `findDirty()` and collection callbacks; when disabled, return `null`/`true` to let
+  Hibernate manage dirty checking
+- `framework/src/play/db/jpa/JPAPlugin.java` — read `jpa.explicitSave` from config
+  and expose it (e.g., static boolean on `JPAPlugin` or `JPA`)
+
+**Behavioral change when `jpa.explicitSave=false`:**
+- Mutations on managed entities are flushed at commit even without `.save()`
+- `.save()` still works (calls persist/flush) but is only needed for new entities
+- This is standard JPA semantics and matches what most other JPA frameworks do
+
+**Validation:** Run `ant test` with both `jpa.explicitSave=true` (default, existing
+behavior) and `jpa.explicitSave=false`. The false case may surface tests that mutate
+entities without intending to persist — these would be test bugs or cases where the
+explicit-save guard was masking unintended writes.
+
+**Relationship to Phase 2B:** When Hibernate 6 lands, the `saveAndCascade` code must
+change anyway (the internal SPIs it uses moved or were removed). If
+`jpa.explicitSave=false` proves reliable, the default can flip in Phase 2B, and the
+legacy `saveAndCascade` code path can be removed entirely rather than ported to
+Hibernate 6 APIs.
 
 ---
 
@@ -544,6 +601,7 @@ This simplifies deployment and avoids the increasingly restricted
 | 1B. Remove SecurityManager | ✓ | | No (unless using java.policy) |
 | 1C. Extract constructor enhancer | | prep | No |
 | 1D. FieldAccessor method cache | | ✓ | No |
+| 1E. Opt-in JPA standard dirty checking | | ✓ | Opt-in — changes save semantics |
 | 2A. javax → jakarta | ✓ (prereq) | | **Yes** — all user imports |
 | 2B. Hibernate 5 → 6 | ✓ | ✓ | Yes — dialect config, internal API |
 | 2C. Remove PropertiesEnhancer | | ✓ | **Yes** — generated accessors gone |
