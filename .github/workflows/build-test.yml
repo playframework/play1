@@ -18,11 +18,16 @@ jobs:
 
     strategy:
       matrix:
-        jdk: [ 11, 17 ]
+        jdk: [ 11, 17, 21 ]
         os: [ubuntu-latest, windows-latest]
         exclude:
           - os: windows-latest
             jdk: 11
+          - os: windows-latest
+            jdk: 21
+
+    # JDK 21 is work-in-progress: failures are expected and non-blocking
+    continue-on-error: ${{ matrix.jdk == 21 }}
 
     name: Check / Tests -> JDK-${{ matrix.jdk }}/${{ matrix.os }}
     steps:
