@@ -299,16 +299,6 @@ class PlayApplication(object):
         if javaVersion.startswith("1.5") or javaVersion.startswith("1.6") or javaVersion.startswith("1.7") or javaVersion.startswith("1.8") or javaVersion.startswith("9") or javaVersion.startswith("10") :
             print("~ ERROR: java version prior to 11 are no longer supported: current version \"%s\" : please update" % javaVersion)
             
-        java_args.append('-noverify')
-
-        java_policy = self.readConf('java.policy')
-        if java_policy != '':
-            policyFile = os.path.join(self.path, 'conf', java_policy)
-            if os.path.exists(policyFile):
-                print("~ using policy file \"%s\"" % policyFile)
-                java_args.append('-Djava.security.manager')
-                java_args.append('-Djava.security.policy==%s' % policyFile)
-
         if 'http.port' in self.play_env:
             args += ["--http.port=%s" % self.play_env['http.port']]
         if 'https.port' in self.play_env:
