@@ -5,8 +5,8 @@ import java.sql.SQLException;
 
 public interface JdbcResultFactory<T> {
 
-    public void init(ResultSet result) throws SQLException;
+    void init(ResultSet result) throws SQLException;
 
-    public T create(ResultSet result) throws SQLException;
+    T create(ResultSet result) throws SQLException;
 
 }

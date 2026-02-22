@@ -107,7 +107,7 @@ public class SslHttpServerContextFactory {
 
                 final File hostCertFile = Play.getFile(p.getProperty("certificate.file", "conf/host.cert"));
                 final Collection collection = new CertificateFactory().engineGenerateCertificates(new FileInputStream(hostCertFile));
-                chain = (X509Certificate[]) collection.toArray(new X509Certificate[collection.size()]);
+                chain = (X509Certificate[]) collection.toArray(X509Certificate[]::new);
             } catch (Exception e) {
                 Logger.error(e, "Failed to initialize PEMKeyManager from file %s", keyFile);
             }

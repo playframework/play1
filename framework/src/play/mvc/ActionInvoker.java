@@ -151,7 +151,7 @@ public class ActionInvoker {
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
-                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);;
+                    CacheFor cacheFor = actionMethod.getAnnotation(CacheFor.class);
                     cacheKey = cacheFor.id();
                     if ("".equals(cacheKey)) {
                         // Generate a cache key for this request
@@ -553,14 +553,14 @@ public class ActionInvoker {
                 Continuation nextContinuation = new Continuation(pStackRecorder);
                 Request.current().args.put(C, nextContinuation);
 
-                if (trigger instanceof Long) {
-                    throw new Suspend((Long) trigger);
+                if (trigger instanceof Long timeout) {
+                    throw new Suspend(timeout);
                 }
-                if (trigger instanceof Integer) {
-                    throw new Suspend(((Integer) trigger).longValue());
+                if (trigger instanceof Integer timeout) {
+                    throw new Suspend(timeout.longValue());
                 }
-                if (trigger instanceof Future) {
-                    throw new Suspend((Future) trigger);
+                if (trigger instanceof Future future) {
+                    throw new Suspend(future);
                 }
 
                 throw new UnexpectedException("Unexpected continuation trigger -> " + trigger);

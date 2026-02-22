@@ -18,7 +18,7 @@ import play.libs.IO;
 
 public abstract class BaseTemplate extends Template {
 
-    public final Long timestamp = System.currentTimeMillis();
+    public final long timestamp = System.currentTimeMillis();
     public String compiledSource;
     public Map<Integer, Integer> linesMatrix = new HashMap<>();
     public Set<Integer> doBodyLines = new HashSet<>();

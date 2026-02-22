@@ -37,7 +37,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
 
     private String[] getPropertyNames(String uniqueKey) {
         String completeUniqueKey;
-        if (uniqueKeyContext.length() > 0) {
+        if (!uniqueKeyContext.isEmpty()) {
             completeUniqueKey = uniqueKeyContext + ";" + uniqueKey;
         } else {
             completeUniqueKey = uniqueKey;

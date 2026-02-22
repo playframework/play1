@@ -19,23 +19,23 @@ public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
         if (value == null) {
             return false;
         }
-        if (value instanceof String) {
+        if (value instanceof String v) {
             try {
-                return Boolean.parseBoolean(value.toString());
+                return Boolean.parseBoolean(v);
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Number) {
+        if (value instanceof Number v) {
             try {
-                return ((Number) value).doubleValue() != 0;
+                return v.doubleValue() != 0;
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Boolean) {
+        if (value instanceof Boolean v) {
             try {
-                return ((Boolean) value);
+                return v;
             } catch (Exception e) {
                 return false;
             }
