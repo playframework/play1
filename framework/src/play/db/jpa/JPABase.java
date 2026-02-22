@@ -44,6 +44,22 @@ public class JPABase implements Serializable, play.db.Model {
     @Override
     public void _save() {
         String dbName = JPA.getDBName(this.getClass());
+        if (!JPAPlugin.explicitSave) {
+            if (!em(dbName).contains(this)) {
+                em(dbName).persist(this);
+                PlayPlugin.postEvent("JPASupport.objectPersisted", this);
+            }
+            try {
+                em(dbName).flush();
+            } catch (PersistenceException e) {
+                if (e.getCause() instanceof GenericJDBCException) {
+                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL(), e);
+                } else {
+                    throw e;
+                }
+            }
+            return;
+        }
         if (!em(dbName).contains(this)) {
             em(dbName).persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);

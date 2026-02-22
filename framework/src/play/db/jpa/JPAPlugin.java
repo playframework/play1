@@ -41,7 +41,13 @@ import static java.util.Collections.singletonList;
 
 public class JPAPlugin extends PlayPlugin {
     public static boolean autoTxs = true;
-  
+    public static boolean explicitSave = true;
+
+    @Override
+    public void onConfigurationRead() {
+        explicitSave = !"false".equals(Play.configuration.getProperty("jpa.explicitSave", "true"));
+    }
+
     @Override
     public Object bind(RootParamNode rootParamNode, String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations) {
         // TODO need to be more generic in order to work with JPASupport

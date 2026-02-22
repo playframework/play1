@@ -16,6 +16,9 @@ public class HibernateInterceptor extends EmptyInterceptor {
 
   @Override
   public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
+    if (!JPAPlugin.explicitSave) {
+      return null;
+    }
     if (o instanceof JPABase && !((JPABase) o).willBeSaved) {
       return new int[0];
     }
@@ -24,6 +27,9 @@ public class HibernateInterceptor extends EmptyInterceptor {
 
     @Override
     public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+        if (!JPAPlugin.explicitSave) {
+            return true;
+        }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
@@ -41,6 +47,9 @@ public class HibernateInterceptor extends EmptyInterceptor {
 
     @Override
     public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+        if (!JPAPlugin.explicitSave) {
+            return true;
+        }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
@@ -59,6 +68,9 @@ public class HibernateInterceptor extends EmptyInterceptor {
 
     @Override
     public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+        if (!JPAPlugin.explicitSave) {
+            return true;
+        }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
