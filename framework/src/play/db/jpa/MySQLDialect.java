@@ -1,15 +1,9 @@
 package play.db.jpa;
 
-import org.hibernate.dialect.MySQLInnoDBDialect;
-
 /**
- * InnoDB, UTF-8 dialect for Mysql
+ * InnoDB is the default engine in MySQL 5.5+. This dialect exists for
+ * compatibility with configurations that reference play.db.jpa.MySQLDialect.
  */
-public class MySQLDialect extends MySQLInnoDBDialect {
+public class MySQLDialect extends org.hibernate.dialect.MySQLDialect {
 
-    @Override
-    public String getTableTypeString() {
-        return " ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    }
-    
 }

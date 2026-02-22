@@ -16,8 +16,6 @@ import javax.sql.RowSet;
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;
 
-import org.hibernate.internal.SessionImpl;
-
 import play.Logger;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
@@ -171,7 +169,8 @@ public class DB {
     public static Connection getConnection(String name) {
         try {
             if (JPA.isEnabled()) {
-                return JPA.em(name).unwrap(SessionImpl.class).getSession().connection();
+                return JPA.em(name).unwrap(org.hibernate.Session.class)
+                        .doReturningWork(connection -> connection);
             }
 
             Connection localConnection = getLocalConnection(name);

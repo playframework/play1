@@ -12,7 +12,6 @@ import java.util.Objects;
 
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 
 import play.Play;
@@ -21,7 +20,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.IO;
 
-public class Blob implements BinaryField, UserType {
+public class Blob implements BinaryField, UserType<Blob> {
 
     private String UUID;
     private String type;
@@ -81,45 +80,45 @@ public class Blob implements BinaryField, UserType {
         }
         return file;
     }
-    
+
     public String getUUID()  {
         return UUID;
     }
 
     @Override
-    public int[] sqlTypes() {
-        return new int[] {Types.VARCHAR};
+    public int getSqlType() {
+        return Types.VARCHAR;
     }
 
     @Override
-    public Class returnedClass() {
+    public Class<Blob> returnedClass() {
         return Blob.class;
     }
 
     @Override
-    public boolean equals(Object o, Object o1) throws HibernateException {
+    public boolean equals(Blob o, Blob o1) throws HibernateException {
         if(o instanceof Blob && o1 instanceof Blob) {
-            return Objects.equals(((Blob) o).UUID, ((Blob) o1).UUID) &&
-                Objects.equals(((Blob)o).type, ((Blob)o1).type);
+            return Objects.equals(o.UUID, o1.UUID) &&
+                Objects.equals(o.type, o1.type);
         }
         return Objects.equals(o, o1);
     }
 
     @Override
-    public int hashCode(Object o) throws HibernateException {
+    public int hashCode(Blob o) throws HibernateException {
         return o.hashCode();
     }
 
     @Override
-    public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-        String val = (String) StringType.INSTANCE.nullSafeGet(rs, names[0], session, owner);
+    public Blob nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws SQLException {
+        String val = rs.getString(position);
         return new Blob(val);
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement ps, Blob value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         if (value != null) {
-            ps.setString(index, encode((Blob) value));
+            ps.setString(index, encode(value));
         } else {
             ps.setNull(index, Types.VARCHAR);
         }
@@ -130,11 +129,11 @@ public class Blob implements BinaryField, UserType {
     }
 
     @Override
-    public Object deepCopy(Object o) throws HibernateException {
+    public Blob deepCopy(Blob o) throws HibernateException {
         if(o == null) {
             return null;
         }
-        return new Blob(((Blob)o).UUID, ((Blob)o).type);
+        return new Blob(o.UUID, o.type);
     }
 
     @Override
@@ -143,19 +142,19 @@ public class Blob implements BinaryField, UserType {
     }
 
     @Override
-    public Serializable disassemble(Object o) throws HibernateException {
+    public Serializable disassemble(Blob o) throws HibernateException {
         if (o == null) return null;
-        return encode((Blob) o);
+        return encode(o);
     }
 
     @Override
-    public Object assemble(Serializable cached, Object owner) throws HibernateException {
+    public Blob assemble(Serializable cached, Object owner) throws HibernateException {
         if (cached == null) return null;
         return new Blob((String) cached);
     }
 
     @Override
-    public Object replace(Object original, Object target, Object owner) throws HibernateException {
+    public Blob replace(Blob original, Blob target, Object owner) throws HibernateException {
         return original;
     }
 
@@ -174,5 +173,5 @@ public class Blob implements BinaryField, UserType {
         }
         return store;
     }
-    
+
 }

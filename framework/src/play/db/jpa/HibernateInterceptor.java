@@ -2,13 +2,13 @@ package play.db.jpa;
 
 
 import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
+import org.hibernate.Interceptor;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.type.Type;
 import java.io.Serializable;
 
 
-public class HibernateInterceptor extends EmptyInterceptor {
+public class HibernateInterceptor implements Interceptor {
 
   public HibernateInterceptor() {
 
@@ -26,64 +26,48 @@ public class HibernateInterceptor extends EmptyInterceptor {
   }
 
     @Override
-    public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
         if (!JPAPlugin.explicitSave) {
-            return true;
+            return;
         }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
-                if (entities.get() instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-                } else {
-                    return ((JPABase) o).willBeSaved;
-                }
+                // nothing to return - side effect only
             }
         } else {
             System.out.println("HOO: Case not handled !!!");
         }
-        return super.onCollectionUpdate(collection, key);
     }
 
     @Override
-    public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
         if (!JPAPlugin.explicitSave) {
-            return true;
+            return;
         }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
-                if (entities.get() instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-                } else {
-                    return ((JPABase) o).willBeSaved;
-                }
+                // nothing to return - side effect only
             }
         } else {
             System.out.println("HOO: Case not handled !!!");
         }
-
-        return super.onCollectionRecreate(collection, key);
     }
 
     @Override
-    public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+    public void onCollectionRemove(Object collection, Serializable key) throws CallbackException {
         if (!JPAPlugin.explicitSave) {
-            return true;
+            return;
         }
         if (collection instanceof PersistentCollection) {
             Object o = ((PersistentCollection) collection).getOwner();
             if (o instanceof JPABase) {
-                if (entities.get() instanceof JPABase) {
-                    return ((JPABase) o).willBeSaved || ((JPABase) entities.get()).willBeSaved;
-                } else {
-                    return ((JPABase) o).willBeSaved;
-                }
+                // nothing to return - side effect only
             }
         } else {
             System.out.println("HOO: Case not handled !!!");
         }
-        return super.onCollectionRemove(collection, key);
     }
 
     protected final ThreadLocal<Object> entities = new ThreadLocal<>();
@@ -91,7 +75,7 @@ public class HibernateInterceptor extends EmptyInterceptor {
     @Override
     public boolean onSave(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types) {
         entities.set(entity);
-        return super.onSave(entity, id, state, propertyNames, types);
+        return false;
     }
 
     @Override
