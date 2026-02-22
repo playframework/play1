@@ -206,31 +206,79 @@ wrk -t4 -c256 -d30s http://localhost:9000/json
 wrk -t4 -c256 -d30s "http://localhost:9000/query?queries=20"
 ```
 
-**Validation:** The app boots in PROD mode (`play run --%prod`) and all benchmark
-URLs return correct responses per the TFB verification spec (correct JSON structure,
-correct Content-Type headers, correct Fortune sort order).
+The benchmark script also supports CPU profiling via async-profiler:
+```
+./samples-and-tests/tfb/benchmark.sh --profile 30 256
+```
+This attaches `asprof` to the running server after warmup and writes a
+collapsed-stack CPU profile to `/tmp/play-profile.txt` covering the full benchmark
+run. Requires `asprof` on `PATH` and `libasyncProfiler.dylib` discoverable by the
+JVM (the script auto-installs it to `$JAVA_HOME/lib/` on first use).
 
-**Baseline results** (recorded 2026-02-21):
+**Validation:** The app boots in PROD mode and all benchmark URLs return correct
+responses per the TFB verification spec (correct JSON structure, correct Content-Type
+headers, correct Fortune sort order).
 
-Environment: macOS Darwin 24.6.0, OpenJDK 23.0.2, H2 in-memory DB (dev mode).
-Run with: `./samples-and-tests/tfb/benchmark.sh 30 256` (30s, 4 threads, 256 connections).
+**Corrected baseline results** (recorded 2026-02-21):
+
+The original baseline was mistakenly recorded with `application.mode=dev`, which runs
+`Play.detectChanges()` on every request — a full filesystem scan of `app/` via
+`stat`/`opendir`. This consumed 38.6% of active CPU and suppressed throughput by ~10×
+on all endpoints. The conf has been corrected to `application.mode=prod`.
+
+Additionally, `@NoTransaction` was added to the `plaintext` and `json` controller
+actions. Without it, `JPAPlugin.TransactionalFilter` opens an `EntityManager` and
+begins a transaction on every request regardless of whether the route uses the
+database. This consumed another 27.6% of active CPU on those endpoints.
+
+Environment: macOS Darwin 24.6.0, OpenJDK 23.0.2, H2 in-memory DB, PROD mode.
+Run with: `./samples-and-tests/tfb/benchmark.sh 15 256` (15s, 4 threads, 256 connections).
 
 | Endpoint | RPS | Avg lat | p50 | p99 |
 |----------|-----|---------|-----|-----|
-| plaintext | 7,463 | 4.23ms | 4.27ms | 5.14ms |
-| json | 7,917 | 4.02ms | 4.04ms | 4.53ms |
-| db (1 query) | 7,169 | 4.46ms | 4.46ms | 5.22ms |
-| queries q=1 | 6,960 | 4.59ms | 4.61ms | 5.16ms |
-| queries q=20 | 4,954 | 6.45ms | 6.44ms | 7.26ms |
-| queries q=500 | 676 | 47.07ms | 47.30ms | 50.63ms |
-| updates q=1 | 6,603 | 4.84ms | 4.85ms | 5.57ms |
-| updates q=20 | 2,504 | 12.76ms | 12.74ms | 14.10ms |
+| plaintext | 75,317 | 3.36ms | 3.37ms | 4.46ms |
+| json | 74,582 | 3.38ms | 3.35ms | 6.74ms |
+| db (1 query) | 73,985 | 3.43ms | 3.09ms | 13.68ms |
+| queries q=1 | 73,366 | 3.55ms | 3.10ms | 16.25ms |
+| queries q=20 | 47,826 | 5.45ms | 5.11ms | 9.51ms |
+| queries q=500 | 3,612 | 70.63ms | 68.16ms | 102.60ms |
+| updates q=1 | 66,018 | 4.22ms | 3.10ms | 25.28ms |
+| updates q=20 | 6,387 | 39.95ms | 39.06ms | 55.98ms |
 
 Notes:
-- H2 in-memory means DB overhead is near-zero; expect plaintext/json/db gap to widen with PostgreSQL.
-- `updates q=20` is ~2× slower than `queries q=20` (12.76ms vs 6.45ms) — the ~6ms delta is JPA dirty-check + flush cost, the target of Phase 1E.
-- Zero errors across all endpoints (wrk reports real socket/HTTP errors, not Content-Length variance like ab).
-- Re-run `benchmark.sh` after each phase claiming a performance benefit (1D, 1E, 2B, 2C, 3A) and record delta here.
+- H2 in-memory means DB overhead is near-zero; expect plaintext/json/db gap to widen
+  with PostgreSQL.
+- `updates q=20` is slower than `queries q=20` (39.95ms vs 5.45ms) — the delta is
+  H2 MVStore write contention under concurrency (see profiling notes below), plus
+  the JPA dirty-check + flush cost targeted by Phase 1E.
+- Zero errors on all endpoints except `updates q=20` (133 errors at 256 connections)
+  — H2 MVStore lock contention at high concurrency. Not a framework bug; will not
+  reproduce with PostgreSQL.
+- Re-run `benchmark.sh` after each phase claiming a performance benefit (1D, 1E, 2B,
+  2C, 3A) and record delta here.
+
+**Profiling notes** (async-profiler CPU, 2026-02-21):
+
+CPU profiles collected on the corrected PROD baseline reveal two remaining fixable
+hotspots in the server layer (relevant to Phase 3A):
+
+1. **`SimpleDateFormat` per response (4% of plaintext active CPU)** —
+   `PlayHandler.addToResponse` calls `Utils.getHttpDateFormatter().format(new Date())`
+   to set the HTTP `Date:` header on every response. `getHttpDateFormatter` uses a
+   `ThreadLocal<SimpleDateFormat>` which avoids thread-safety issues but reformats on
+   every call. Since `Date:` only needs 1-second resolution, the formatted string
+   should be computed once per second and served from a cached volatile reference.
+
+2. **`Pattern.compile` per request (2.8% of plaintext active CPU)** —
+   `PlayHandler.getRemoteIPAddress` calls `String.matches(regex)` twice per request,
+   which recompiles the pattern on every invocation. Both patterns should be static
+   final `Pattern` constants.
+
+3. **H2 MVStore spin contention dominates `updates q=1` (40% of active CPU)** —
+   `MVMap.tryLock` spins via `Thread.yield` when multiple threads contend on a write.
+   With 256 concurrent connections this dominates the profile. This is an H2
+   architectural limitation for high-concurrency writes; not present with PostgreSQL.
+   Not actionable at the framework level.
 
 ---
 

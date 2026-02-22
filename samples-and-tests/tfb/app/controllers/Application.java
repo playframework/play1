@@ -2,6 +2,7 @@ package controllers;
 
 import play.*;
 import play.mvc.*;
+import play.db.jpa.NoTransaction;
 import models.World;
 
 import java.util.*;
@@ -9,11 +10,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Application extends Controller {
 
+    @NoTransaction
     public static void plaintext() {
         response.contentType = "text/plain";
         renderText("Hello, World!");
     }
 
+    @NoTransaction
     public static void json() {
         Map<String, String> result = new HashMap<>();
         result.put("message", "Hello, World!");
