@@ -21,7 +21,7 @@ Phase 0 (prerequisite: establish baseline)
   ├── 0A  Get ant test passing on current JDK (11 and 17)
   ├── 0B  Add JDK 21 to CI matrix (expected failures)
   ├── 0C  Audit and expand test coverage for areas we're changing
-  └── 0D  Add missing sample apps to ant test
+  └── 0D  Establish TechEmpower benchmark baseline
 
 Phase 1 (independent leaf changes, no ordering between them)
   ├── 1A  Remove -noverify flag
@@ -134,39 +134,103 @@ JDK 21 failures should decrease until the `continue-on-error` can be removed.
   major version") is expected and tracked via Phase 3B (Groovy 4 upgrade).
 - `JPQLTest.java` — covers JPQL query generation from method names.
 
-### 0D. Add missing sample apps to `ant test`
-**Scope:** 1 file (`framework/build.xml`)
+### 0D. Establish TechEmpower benchmark baseline
+**Scope:** New directory `samples-and-tests/tfb/`
 
-The `ant test` target runs 7 sample apps: `just-test-cases`, `forum`, `zencontact`,
-`jobboard`, `yabe`, `nonstatic-app`, `fast-tag`. But several apps with test
-directories are not included:
+The [TechEmpower Framework Benchmarks](https://www.techempower.com/benchmarks/#section=data-r23)
+(TFB) are the standard reference for comparing web framework throughput. A play1
+implementation existed in the TFB repository from 2013 until it was removed in March
+2025 (PR #9655) when the Typesafe download URL broke and the OpenJDK 10 base image
+became unmaintainable.
 
-| Sample app | Has tests | In `ant test` | Relevant to plan |
-|------------|-----------|---------------|------------------|
-| just-test-cases | ✓ | ✓ | Core test coverage |
-| forum | ✓ | ✓ | JPA, templates |
-| zencontact | ✓ | ✓ | JPA, data binding |
-| jobboard | ✓ | ✓ | JPA, jobs |
-| yabe | ✓ | ✓ | JPA, templates, the main benchmark app |
-| nonstatic-app | ✓ | ✓ | Non-static controller pattern |
-| fast-tag | ✓ | ✓ | Template tags |
-| **booking** | ✓ | **No** | **JPA, validation, data binding** |
-| **java8Support** | ✓ | **No** | **Date/time binding** |
-| **multi-db** | ✓ | **No** | **Multiple DB/persistence units — critical for 2B** |
-| **validation** | ✓ | **No** | **Validation with model objects** |
+Restoring a runnable TFB benchmark serves two purposes: it gives us a credible
+before/after number to publish alongside the modernization work, and it catches
+throughput regressions introduced by any phase.
 
-Add `booking`, `multi-db`, and `validation` to the `ant test` target. These cover
-JPA, multi-database, and validation scenarios that are directly affected by the
-Hibernate upgrade (Phase 2B) and PropertiesEnhancer removal (Phase 2C).
+**What the original play1 TFB implementation covered:**
 
-`java8Support` should also be added if its tests still pass — it covers date/time
-type binding which exercises the data binding layer.
+| Test type | URL | Status |
+|-----------|-----|--------|
+| Plaintext | `/plaintext` | Implemented |
+| JSON serialization | `/json` | Implemented |
+| Single DB query | `/db` | Implemented |
+| Multiple DB queries | `/query?queries=N` | Implemented |
+| Fortunes | `/fortunes` | **Never implemented** |
+| DB updates | `/update?queries=N` | **Never implemented** |
+| Cached queries | `/cached-queries?count=N` | **Never implemented** |
 
-File:
-- `framework/build.xml` — add `play-test` antcall entries for each new sample app
+**Implementation:**
 
-**Validation:** Run the full `ant test` with the new apps included. Fix any failures
-in the newly-added apps before proceeding to Phase 1.
+Create `samples-and-tests/tfb/` as a self-contained Play 1.x app. Model it on the
+original TFB play1 implementation:
+
+- `app/controllers/Application.java` — action methods for each benchmark type
+- `app/models/World.java` — `@Entity` extending `GenericModel` with `id` and
+  `randomNumber` fields (Long); matches the TFB `hello_world` schema
+- `app/models/Fortune.java` — `@Entity` for the fortunes test (new; wasn't in
+  the original)
+- `conf/routes` — routes for all benchmark URLs
+- `conf/application.conf` — production-mode config pointing at `tfb-database`
+  (MySQL) with an aggressively tuned JDBC URL and connection pool settings
+- `Dockerfile` — builds from this repo's `play` CLI rather than downloading
+  Play 1.5.2; uses a current JDK base image
+
+**Complete the missing test types** that the original never implemented:
+
+- **Fortunes** — query all `Fortune` rows, add a server-generated entry
+  (`"Additional fortune added at request time."`), sort by message, render via a
+  Groovy template. This exercises template rendering under load.
+- **Updates** — fetch N `World` rows, update `randomNumber` on each, persist,
+  return JSON. Uses `jpa.explicitSave=false` (Phase 1E) if available, otherwise
+  calls `.save()` explicitly.
+- **Cached queries** — same shape as the queries test but backed by Play's cache
+  (`Cache.get`/`Cache.set`). Tests EhCache throughput.
+
+**Database schema** (standard TFB `hello_world` schema):
+```sql
+CREATE TABLE World (id INT, randomNumber INT);
+CREATE TABLE Fortune (id INT, message VARCHAR(2048));
+```
+
+**Baseline measurement procedure:**
+
+Run against the framework as it stands at the end of Phase 0 (JDK 17, Hibernate 5,
+Netty 3). Record requests/sec for each test type. Re-run after each phase that claims
+a performance benefit (1D, 1E, 2B, 2C, 3A) and record the delta.
+
+The TFB tooling (`tfb --test play1`) can run the full suite in a controlled
+environment. For local spot checks, `wrk` is sufficient:
+```
+wrk -t4 -c256 -d30s http://localhost:9000/plaintext
+wrk -t4 -c256 -d30s http://localhost:9000/json
+wrk -t4 -c256 -d30s "http://localhost:9000/query?queries=20"
+```
+
+**Validation:** The app boots in PROD mode (`play run --%prod`) and all benchmark
+URLs return correct responses per the TFB verification spec (correct JSON structure,
+correct Content-Type headers, correct Fortune sort order).
+
+**Baseline results** (recorded 2026-02-21):
+
+Environment: macOS Darwin 24.6.0, OpenJDK 23.0.2, H2 in-memory DB (dev mode).
+Run with: `./samples-and-tests/tfb/benchmark.sh 30 256` (30s, 4 threads, 256 connections).
+
+| Endpoint | RPS | Avg lat | p50 | p99 |
+|----------|-----|---------|-----|-----|
+| plaintext | 7,463 | 4.23ms | 4.27ms | 5.14ms |
+| json | 7,917 | 4.02ms | 4.04ms | 4.53ms |
+| db (1 query) | 7,169 | 4.46ms | 4.46ms | 5.22ms |
+| queries q=1 | 6,960 | 4.59ms | 4.61ms | 5.16ms |
+| queries q=20 | 4,954 | 6.45ms | 6.44ms | 7.26ms |
+| queries q=500 | 676 | 47.07ms | 47.30ms | 50.63ms |
+| updates q=1 | 6,603 | 4.84ms | 4.85ms | 5.57ms |
+| updates q=20 | 2,504 | 12.76ms | 12.74ms | 14.10ms |
+
+Notes:
+- H2 in-memory means DB overhead is near-zero; expect plaintext/json/db gap to widen with PostgreSQL.
+- `updates q=20` is ~2× slower than `queries q=20` (12.76ms vs 6.45ms) — the ~6ms delta is JPA dirty-check + flush cost, the target of Phase 1E.
+- Zero errors across all endpoints (wrk reports real socket/HTTP errors, not Content-Length variance like ab).
+- Re-run `benchmark.sh` after each phase claiming a performance benefit (1D, 1E, 2B, 2C, 3A) and record delta here.
 
 ---
 
@@ -606,7 +670,7 @@ This simplifies deployment and avoids the increasingly restricted
 | 0A. Verify tests pass on JDK 11/17 | prereq | prereq | No |
 | 0B. Add JDK 21 to CI | ✓ | | No |
 | 0C. Audit and expand test coverage | prereq | prereq | No |
-| 0D. Add missing sample apps to ant test | prereq | prereq | No |
+| 0D. Establish TechEmpower benchmark baseline | | prereq | No |
 | 1A. Remove -noverify | ✓ | | No |
 | 1B. Remove SecurityManager | ✓ | | No (unless using java.policy) |
 | 1C. Extract constructor enhancer | | prep | No |
@@ -631,7 +695,9 @@ This simplifies deployment and avoids the increasingly restricted
 ## Minimum viable JDK 21 support
 
 If the goal is to get a working build on JDK 21 with minimum effort, the critical
-path is: **0A → 0B → 0C → 0D → 1A → 1B → 2A → 2B → 3A → 3B → 3C**. The performance
+path is: **0A → 0B → 0C → 1A → 1B → 2A → 2B → 3A → 3B → 3C**. Phase 0D (benchmark
+baseline) is independent of the critical path but should be done before any phase
+claiming a performance benefit (1D, 1E, 2B, 2C, 3A) so there is a number to diff against. The performance
 track (1C, 1D, 2C, 2D) can be deferred or done in parallel without blocking JDK 21
 compatibility. Phase 0 is non-negotiable — without a reliable test baseline, every
 subsequent phase is flying blind.

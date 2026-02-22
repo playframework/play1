@@ -1,0 +1,5 @@
+GET  /plaintext  Application.plaintext
+GET  /json       Application.json
+GET  /db         Application.db
+GET  /queries    Application.queries
+GET  /updates    Application.updates
