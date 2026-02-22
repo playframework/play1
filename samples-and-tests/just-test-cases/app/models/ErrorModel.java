@@ -2,7 +2,7 @@ package models;
 
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "errors")

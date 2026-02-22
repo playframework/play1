@@ -2,7 +2,7 @@ package models.orphans.maps;
 
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
 

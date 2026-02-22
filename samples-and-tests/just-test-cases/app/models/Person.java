@@ -6,7 +6,7 @@ import play.db.jpa.Model;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class Person extends Model{

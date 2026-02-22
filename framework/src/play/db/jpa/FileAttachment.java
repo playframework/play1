@@ -1,8 +1,8 @@
 package play.db.jpa;
 
 import java.io.File;
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import play.Play;
 import play.libs.Files;
 

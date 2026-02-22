@@ -2,7 +2,7 @@ package models;
 
 import play.db.jpa.*;
 import play.data.validation.*;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.*;
 
 @Entity

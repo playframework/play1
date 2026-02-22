@@ -2,7 +2,7 @@ package models.orphans.collections;
 
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

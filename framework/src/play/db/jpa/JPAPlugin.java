@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.Query;
-import javax.persistence.spi.PersistenceUnitInfo;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PersistenceUnit;
+import jakarta.persistence.Query;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.cfg.AvailableSettings;
@@ -218,8 +218,8 @@ public class JPAPlugin extends PlayPlugin {
     protected Properties properties(String dbName, Configuration dbConfig) {
         Properties properties = new Properties();
         properties.putAll(dbConfig.getProperties());
-        properties.put("javax.persistence.transaction", "RESOURCE_LOCAL");
-        properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
+        properties.put("jakarta.persistence.transaction", "RESOURCE_LOCAL");
+        properties.put("jakarta.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
         properties.put("hibernate.dialect", getDefaultDialect(dbConfig, dbConfig.getProperty("db.driver")));
 
         if (!dbConfig.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
