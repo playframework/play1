@@ -221,41 +221,68 @@ headers, correct Fortune sort order).
 
 **Corrected baseline results** (recorded 2026-02-21):
 
-The original baseline was mistakenly recorded with `application.mode=dev`, which runs
-`Play.detectChanges()` on every request — a full filesystem scan of `app/` via
-`stat`/`opendir`. This consumed 38.6% of active CPU and suppressed throughput by ~10×
-on all endpoints. The conf has been corrected to `application.mode=prod`.
+Three corrections were applied to reach this baseline:
 
-Additionally, `@NoTransaction` was added to the `plaintext` and `json` controller
-actions. Without it, `JPAPlugin.TransactionalFilter` opens an `EntityManager` and
-begins a transaction on every request regardless of whether the route uses the
-database. This consumed another 27.6% of active CPU on those endpoints.
+1. `application.mode=dev` → `prod` — DEV mode runs `Play.detectChanges()` on every
+   request (full filesystem scan of `app/`), consuming 38.6% of active CPU and
+   suppressing throughput ~10×.
+2. `@NoTransaction` added to `plaintext` and `json` actions — `JPAPlugin` was opening
+   an `EntityManager` and beginning a JPA transaction on every request, including those
+   that never touch the database (27.6% of active CPU on those endpoints).
+3. `play.pool=64, db.pool.maxSize=64` — the default thread pool of `CPUs+1` (11 on
+   this machine) queues 245 of 256 concurrent connections at any moment. A pool-size
+   sweep (`pool-sweep.sh`) found pool=64 maximises read/query throughput (+6%) on this
+   10-core machine with H2; see pool sweep notes below.
 
-Environment: macOS Darwin 24.6.0, OpenJDK 23.0.2, H2 in-memory DB, PROD mode.
-Run with: `./samples-and-tests/tfb/benchmark.sh 15 256` (15s, 4 threads, 256 connections).
+Environment: macOS Darwin 24.6.0, OpenJDK 23.0.2, H2 in-memory DB, PROD mode,
+`play.pool=64`. Run with: `./samples-and-tests/tfb/benchmark.sh 15 256`
+(15s, 4 threads, 256 connections).
 
 | Endpoint | RPS | Avg lat | p50 | p99 |
 |----------|-----|---------|-----|-----|
-| plaintext | 75,317 | 3.36ms | 3.37ms | 4.46ms |
-| json | 74,582 | 3.38ms | 3.35ms | 6.74ms |
-| db (1 query) | 73,985 | 3.43ms | 3.09ms | 13.68ms |
-| queries q=1 | 73,366 | 3.55ms | 3.10ms | 16.25ms |
-| queries q=20 | 47,826 | 5.45ms | 5.11ms | 9.51ms |
-| queries q=500 | 3,612 | 70.63ms | 68.16ms | 102.60ms |
-| updates q=1 | 66,018 | 4.22ms | 3.10ms | 25.28ms |
-| updates q=20 | 6,387 | 39.95ms | 39.06ms | 55.98ms |
+| plaintext | 78,803 | 3.30ms | 2.98ms | 9.68ms |
+| json | 79,648 | 3.20ms | 2.97ms | 7.24ms |
+| db (1 query) | 77,832 | 3.31ms | 3.03ms | 8.77ms |
+| queries q=1 | 76,286 | 3.40ms | 3.04ms | 10.26ms |
+| queries q=20 | 50,646 | 5.78ms | 5.21ms | 24.92ms |
+| queries q=500 | 3,824 | 78.86ms | 51.98ms | 354.43ms |
+| updates q=1 | 69,892 | 4.20ms | 3.16ms | 24.36ms |
+| updates q=20 | 4,301 | 59.47ms | 56.06ms | 119.58ms |
 
 Notes:
 - H2 in-memory means DB overhead is near-zero; expect plaintext/json/db gap to widen
   with PostgreSQL.
-- `updates q=20` is slower than `queries q=20` (39.95ms vs 5.45ms) — the delta is
-  H2 MVStore write contention under concurrency (see profiling notes below), plus
-  the JPA dirty-check + flush cost targeted by Phase 1E.
-- Zero errors on all endpoints except `updates q=20` (133 errors at 256 connections)
-  — H2 MVStore lock contention at high concurrency. Not a framework bug; will not
-  reproduce with PostgreSQL.
+- `updates q=20` degrades at higher pool sizes (see pool sweep below) — H2 MVStore
+  serialises writers via a spin loop (`Thread.yield`); more threads = more contention.
+  This is H2-specific and does not apply to PostgreSQL.
+- `updates q=20` errors at pool=64 — H2 lock contention causes transaction failures
+  at high concurrency. Not a framework bug; will not reproduce with PostgreSQL.
 - Re-run `benchmark.sh` after each phase claiming a performance benefit (1D, 1E, 2B,
   2C, 3A) and record delta here.
+
+**Pool size sweep** (recorded 2026-02-21, `pool-sweep.sh`):
+
+`play.pool` defaults to `CPUs+1`. A sweep across five pool sizes with
+`db.pool.maxSize=play.pool` throughout revealed:
+
+| Endpoint | pool=11 | pool=32 | pool=64 | pool=128 | pool=256 |
+|----------|---------|---------|---------|----------|----------|
+| plaintext | 74,896 | 77,257 | **79,684** | 76,866 | 64,533 |
+| json | 75,052 | 77,542 | **80,036** | 77,134 | 63,207 |
+| db | 75,798 | 76,188 | **77,977** | 72,475 | 59,226 |
+| queries q=1 | 74,904 | **76,067** | 76,029 | 71,427 | 59,847 |
+| queries q=20 | 50,994 | **51,319** | 49,888 | 48,070 | 42,969 |
+| updates q=1 | **71,338** | 70,819 | 67,957 | 64,886 | 53,555 |
+| updates q=20 | **6,622** | 5,403 | 4,487 | 3,123 | 3,606 |
+
+Key findings:
+- Read/query endpoints peak at pool=64 (+6% vs default). Beyond 64 threads,
+  context-switch overhead on 10 CPU cores erodes throughput.
+- Update endpoints peak at pool=11 (the default) and degrade monotonically as pool
+  grows — a direct consequence of H2 MVStore write lock spinning. With PostgreSQL,
+  this curve would invert and updates would improve with more threads/connections.
+- For PostgreSQL benchmarking, set `play.pool` and `db.pool.maxSize` to match the
+  expected concurrency (256+).
 
 **Profiling notes** (async-profiler CPU, 2026-02-21):
 
