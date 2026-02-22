@@ -41,7 +41,8 @@ Phase 2 (can be done in parallel tracks after Phase 1)
 Phase 3 (depends on Phase 2 completion)
   ├── 3A  Netty 3 → Netty 4  (or alternative server)
   ├── 3B  Groovy 3 → Groovy 4
-  └── 3C  Replace/remove JavaFlow continuations
+  ├── 3C  Replace/remove JavaFlow continuations
+  └── 3D  Virtual thread executor  (depends on 3A; benefits greatly from 2B)
 
 Phase 4 (depends on Phase 3)
   └── 4A  Remove -javaagent requirement for production mode
@@ -735,6 +736,115 @@ Files:
 - `framework/src/play/plugins/EnhancerPlugin.java` — remove from array
 - Remove `commons-javaflow-1590792.jar` from `framework/lib/`
 
+### 3D. Virtual thread executor for request handling
+**Goal:** Performance
+**Scope:** 1 file (trivial code change; non-trivial interaction with dependencies)
+**Depends on:** 3A (JDK 21 compatible server runtime)
+**Benefits greatly from:** 2B (Hibernate 6 — eliminates virtual thread pinning)
+**JDK requirement:** 21+
+
+Replace the fixed-size `ScheduledThreadPoolExecutor` in `play.Invoker` with a
+virtual thread executor for request dispatch. Virtual threads (JEP 444, finalized in
+JDK 21) are cheap JVM-managed threads that unmount from their carrier OS thread when
+blocking, allowing a small number of carrier threads to multiplex thousands of
+concurrent requests without a thread-per-request OS overhead.
+
+**The problem this solves:**
+
+Play's blocking request model requires `play.pool` to be manually sized to match the
+expected concurrency level. The pool sweep in Phase 0D demonstrated the consequence:
+with 256 concurrent connections and the default of `CPUs+1` (11 threads on a 10-core
+machine), 245 connections queue at any moment. Setting `play.pool=64` improved
+read/query throughput ~6%, but the right value is workload-dependent and must be
+re-tuned for different hardware. With virtual threads, the executor handles arbitrary
+concurrency naturally — `play.pool` becomes irrelevant for request handling.
+
+**Code change:**
+
+`framework/src/play/Invoker.java:368-371` — the static initializer currently creates:
+
+```java
+int core = Integer.parseInt(Play.configuration.getProperty("play.pool",
+    Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
+executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"),
+    new ThreadPoolExecutor.AbortPolicy());
+```
+
+Replace the request-handling executor with a virtual thread executor when running on
+JDK 21+, while keeping a small platform-thread pool for scheduled background jobs
+(`@Every`, `@On` cron), which are long-lived and should not be virtual threads:
+
+```java
+if (Runtime.version().feature() >= 21) {
+    executor = (ScheduledThreadPoolExecutor) Executors.newVirtualThreadPerTaskExecutor();
+    // scheduled jobs stay on a separate small platform-thread pool
+} else {
+    int core = Integer.parseInt(Play.configuration.getProperty("play.pool", ...));
+    executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), ...);
+}
+```
+
+In practice `newVirtualThreadPerTaskExecutor()` returns an `ExecutorService`, not a
+`ScheduledThreadPoolExecutor`, so the field type and any call sites that use
+scheduler-specific methods will need adjustment. The `JobsPlugin` uses
+`Invoker.executor` directly for scheduling — it will need its own dedicated
+`ScheduledExecutorService` on platform threads regardless.
+
+Files:
+- `framework/src/play/Invoker.java` — replace executor initialisation; split
+  scheduled-job pool from request-handling pool
+- `framework/src/play/plugins/JobsPlugin.java` — use dedicated platform-thread
+  scheduler instead of sharing `Invoker.executor`
+
+**The Hibernate 5 pinning problem:**
+
+Virtual threads get **pinned** — unable to unmount from their carrier — when they
+execute inside a `synchronized` block or `synchronized` method. Hibernate 5 uses
+`synchronized` throughout session and transaction management. H2's JDBC driver also
+uses `synchronized` internally. With Hibernate 5, virtual threads would be pinned on
+almost every DB operation, degrading to platform-thread behaviour. Use
+`-Djdk.tracePinnedThreads=full` (JDK 21) to measure pinning frequency before and
+after the Hibernate 6 upgrade.
+
+Hibernate 6 was specifically reworked to replace `synchronized` with `ReentrantLock`
+throughout its session management, making it virtual-thread-friendly. The performance
+benefit of 3D is therefore gated on 2B in practice:
+
+| State | Plaintext / JSON | DB reads (PostgreSQL) | DB writes (PostgreSQL) |
+|---|---|---|---|
+| 3D alone + Hibernate 5 | Moderate gain | Pinned — minimal gain | Pinned — minimal gain |
+| 3D + 2B (Hibernate 6) | Moderate gain | **Full gain** | **Full gain** |
+
+**Interaction with 3C (JavaFlow continuations):**
+
+3C's Option B ("replace continuation-based `await()` with virtual thread blocking")
+is implemented here. Once the Invoker runs on virtual threads, a blocking `await(int
+millis)` inside a controller just parks the virtual thread for the specified duration
+— no bytecode transformation needed. This is the cleanest implementation of `await()`
+and can replace JavaFlow entirely for JDK 21+:
+
+```java
+// Controller.await(int millis) — virtual thread implementation
+public static void await(int millis) {
+    Thread.sleep(millis);  // parks the virtual thread; carrier is free
+}
+```
+
+The continuation-based path in `ContinuationEnhancer` and `ActionInvoker` can be
+removed on JDK 21+ once 3D is in place, completing 3C.
+
+**`play.pool` config interaction:**
+
+`play.pool` is ignored when the virtual thread executor is active. Document this:
+users who set `play.pool` explicitly should not expect it to cap concurrency on
+JDK 21+. If a concurrency limit is needed (e.g., to protect a downstream service),
+use a `Semaphore` at the application level rather than the thread pool.
+
+**Validation:** Run `ant test`. Re-run the TFB benchmark (`benchmark.sh`) against
+PostgreSQL — the pool sweep should no longer be necessary and throughput should be
+competitive with reactive frameworks at high concurrency. Verify `await()` behaviour
+in the sample apps that use continuations (`just-test-cases`).
+
 ---
 
 ## Phase 4 — Cleanup
@@ -774,6 +884,7 @@ This simplifies deployment and avoids the increasingly restricted
 | 3A. Netty 3 → 4 | ✓ | ✓ | No (internal) |
 | 3B. Groovy 3 → 4 | ✓ | | No (internal) |
 | 3C. Replace JavaFlow continuations | ✓ | ✓ | Partial — continuation await() |
+| 3D. Virtual thread executor | | ✓ | No (play.pool ignored on JDK 21+) |
 | 4A. Remove -javaagent for prod | ✓ | | No |
 
 ## Suggested issue labels
@@ -788,7 +899,15 @@ This simplifies deployment and avoids the increasingly restricted
 If the goal is to get a working build on JDK 21 with minimum effort, the critical
 path is: **0A → 0B → 0C → 1A → 1B → 2A → 2B → 3A → 3B → 3C**. Phase 0D (benchmark
 baseline) is independent of the critical path but should be done before any phase
-claiming a performance benefit (1D, 1E, 2B, 2C, 3A) so there is a number to diff against. The performance
-track (1C, 1D, 2C, 2D) can be deferred or done in parallel without blocking JDK 21
-compatibility. Phase 0 is non-negotiable — without a reliable test baseline, every
-subsequent phase is flying blind.
+claiming a performance benefit (1D, 1E, 2B, 2C, 3A, 3D) so there is a number to diff
+against. The performance track (1C, 1D, 2C, 2D) can be deferred or done in parallel
+without blocking JDK 21 compatibility. Phase 0 is non-negotiable — without a reliable
+test baseline, every subsequent phase is flying blind.
+
+**Maximum performance path on JDK 21+:**
+**2B → 3A → 3D** is the combination that unlocks the most throughput improvement.
+Phase 2B (Hibernate 6) eliminates virtual thread pinning on DB operations. Phase 3A
+provides a JDK 21-compatible HTTP server. Phase 3D then switches the Invoker to a
+virtual thread executor, making high-concurrency blocking workloads competitive with
+reactive frameworks — without requiring any change to the blocking programming model
+that Play 1.x applications are written against.
