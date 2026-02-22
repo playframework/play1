@@ -335,6 +335,8 @@ and must be fixed before proceeding.
 surface as failures. Those failures are bugs we need to fix anyway — they're just
 currently hidden.
 
+**Status:** Complete — [f7adeb634](https://github.com/larvalabs/play1/commit/f7adeb634). `ant unittest` passes.
+
 ### 1B. Remove SecurityManager usage
 **Goal:** JDK 21+
 **Scope:** 3 files
@@ -348,6 +350,8 @@ Files:
 - `framework/pym/play/application.py:304-310` — remove the `java.policy` /
   `java.security.manager` configuration block
 - Remove/update any documentation referencing `java.policy` configuration
+
+**Status:** Complete — [0610cb12e](https://github.com/larvalabs/play1/commit/0610cb12e) (PThreadFactory) + [f7adeb634](https://github.com/larvalabs/play1/commit/f7adeb634) (application.py). `ant unittest` passes.
 
 ### 1C. Extract constructor enhancer from PropertiesEnhancer
 **Goal:** Performance (preparation)
@@ -367,6 +371,8 @@ Files:
 **Validation:** Run `ant test`. Behavior should be identical since PropertiesEnhancer
 still runs and still generates constructors — the new enhancer is additive.
 
+**Status:** Complete — [57365a297](https://github.com/larvalabs/play1/commit/57365a297). `ant unittest` passes.
+
 ### 1D. Add Method cache to PropertiesEnhancer.FieldAccessor
 **Goal:** Performance
 **Scope:** 1 file
@@ -384,7 +390,7 @@ File:
 **Validation:** Run `ant test`. Behavior should be identical, just faster. Benchmark
 before/after with a data-heavy sample app (yabe) to measure improvement.
 
-**Status:** Complete (commit pending). `ant unittest` passes. TFB benchmark delta
+**Status:** Complete — [72827c6f8](https://github.com/larvalabs/play1/commit/72827c6f8). `ant unittest` passes. TFB benchmark delta
 vs Phase 0D baseline (30s, 4 threads, 256 connections, H2, JDK 23):
 
 | Endpoint | Baseline | After 1D | Delta |
@@ -455,6 +461,8 @@ change anyway (the internal SPIs it uses moved or were removed). If
 `jpa.explicitSave=false` proves reliable, the default can flip in Phase 2B, and the
 legacy `saveAndCascade` code path can be removed entirely rather than ported to
 Hibernate 6 APIs.
+
+**Status:** Complete — [d475d8f5a](https://github.com/larvalabs/play1/commit/d475d8f5a). `ant unittest` passes with default `jpa.explicitSave=true`.
 
 ---
 
@@ -844,6 +852,8 @@ use a `Semaphore` at the application level rather than the thread pool.
 PostgreSQL — the pool sweep should no longer be necessary and throughput should be
 competitive with reactive frameworks at high concurrency. Verify `await()` behaviour
 in the sample apps that use continuations (`just-test-cases`).
+
+**Status:** Complete — [00cb5d2ba](https://github.com/larvalabs/play1/commit/00cb5d2ba). Implemented with JDK version guard; `JobsPlugin` uses its own dedicated scheduler. Full benefit requires Phase 2B (Hibernate 6) to avoid virtual thread pinning on DB ops.
 
 ---
 
