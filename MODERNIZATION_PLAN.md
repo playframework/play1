@@ -308,6 +308,22 @@ File:
 **Validation:** Run `ant test`. Behavior should be identical, just faster. Benchmark
 before/after with a data-heavy sample app (yabe) to measure improvement.
 
+**Status:** Complete (commit pending). `ant unittest` passes. TFB benchmark delta
+vs Phase 0D baseline (30s, 4 threads, 256 connections, H2, JDK 23):
+
+| Endpoint | Baseline | After 1D | Delta |
+|----------|----------|----------|-------|
+| plaintext | 7,463 | 7,855 | +5% |
+| json | 7,917 | 7,734 | −2% (noise) |
+| db | 7,169 | 7,431 | +4% |
+| queries q=1 | 6,960 | 7,161 | +3% |
+| queries q=20 | 4,954 | 4,963 | ≈0% |
+| updates q=20 | 2,504 | 2,519 | ≈0% |
+
+TFB endpoints only read 2 fields per World entity so the cache savings are
+small per request. Real-world apps with deep object graphs (template loops
+over collections with many fields) will see larger gains.
+
 ### 1E. Add opt-in JPA standard dirty checking (bypass `saveAndCascade`)
 **Goal:** Performance
 **Scope:** 3 files

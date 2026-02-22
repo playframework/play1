@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
@@ -214,6 +215,31 @@ public class PropertiesEnhancer extends Enhancer {
      */
     public static class FieldAccessor {
 
+        // Sentinel: cached entry meaning "no accessor method found, fall back to field access"
+        private static final Method NO_METHOD;
+        static {
+            try {
+                NO_METHOD = Object.class.getMethod("hashCode");
+            } catch (NoSuchMethodException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        // Two-level cache: Class -> field name -> getter/setter Method (or NO_METHOD)
+        // Invalidated when Play.classloader changes (hot reload in dev mode).
+        private static volatile ClassLoader cachedClassLoader = null;
+        private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, Method>> GETTER_CACHE = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, Method>> SETTER_CACHE = new ConcurrentHashMap<>();
+
+        private static void checkCacheValidity() {
+            ClassLoader current = Play.classloader;
+            if (current != cachedClassLoader) {
+                GETTER_CACHE.clear();
+                SETTER_CACHE.clear();
+                cachedClassLoader = current;
+            }
+        }
+
         public static Object invokeReadProperty(Object o, String property, String targetType, String invocationPoint) throws Throwable {
             if (o == null) {
                 throw new NullPointerException("Try to read " + property + " on null object " + targetType + " (" + invocationPoint + ")");
@@ -221,13 +247,23 @@ public class PropertiesEnhancer extends Enhancer {
             if (o.getClass().getClassLoader() == null || !o.getClass().getClassLoader().equals(Play.classloader)) {
                 return o.getClass().getField(property).get(o);
             }
-            String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
-            try {
-                Method getterMethod = o.getClass().getMethod(getter);
-                Object result = getterMethod.invoke(o);
-                return result;
-            } catch (NoSuchMethodException e) {
+            checkCacheValidity();
+            ConcurrentHashMap<String, Method> classGetters = GETTER_CACHE.computeIfAbsent(o.getClass(), k -> new ConcurrentHashMap<>());
+            Method getterMethod = classGetters.get(property);
+            if (getterMethod == null) {
+                String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
+                try {
+                    getterMethod = o.getClass().getMethod(getter);
+                } catch (NoSuchMethodException e) {
+                    getterMethod = NO_METHOD;
+                }
+                classGetters.put(property, getterMethod);
+            }
+            if (getterMethod == NO_METHOD) {
                 return o.getClass().getField(property).get(o);
+            }
+            try {
+                return getterMethod.invoke(o);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
@@ -269,12 +305,24 @@ public class PropertiesEnhancer extends Enhancer {
             if (o == null) {
                 throw new NullPointerException("Attempting to write a property " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
             }
-            String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
-            try {
-                Method setterMethod = o.getClass().getMethod(setter, valueType);
-                setterMethod.invoke(o, value);
-            } catch (NoSuchMethodException e) {
+            checkCacheValidity();
+            ConcurrentHashMap<String, Method> classSetters = SETTER_CACHE.computeIfAbsent(o.getClass(), k -> new ConcurrentHashMap<>());
+            Method setterMethod = classSetters.get(property);
+            if (setterMethod == null) {
+                String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
+                try {
+                    setterMethod = o.getClass().getMethod(setter, valueType);
+                } catch (NoSuchMethodException e) {
+                    setterMethod = NO_METHOD;
+                }
+                classSetters.put(property, setterMethod);
+            }
+            if (setterMethod == NO_METHOD) {
                 o.getClass().getField(property).set(o, value);
+                return;
+            }
+            try {
+                setterMethod.invoke(o, value);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
