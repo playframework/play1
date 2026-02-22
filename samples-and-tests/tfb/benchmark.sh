@@ -17,7 +17,7 @@ for arg in "$@"; do
   esac
 done
 
-DURATION=${POSITIONAL[0]:-30}
+DURATION=${POSITIONAL[0]:-10}
 CONCURRENCY=${POSITIONAL[1]:-256}
 THREADS=4
 BASE="http://localhost:9000"
@@ -134,10 +134,10 @@ echo "Build done."
 wait_for_server
 
 echo ""
-echo "Warming up (10s each: plaintext, json, db) ..."
-wrk -t"$THREADS" -c"$CONCURRENCY" -d10s "$BASE/plaintext" >/dev/null 2>&1
-wrk -t"$THREADS" -c"$CONCURRENCY" -d10s "$BASE/json"      >/dev/null 2>&1
-wrk -t"$THREADS" -c"$CONCURRENCY" -d10s "$BASE/db"        >/dev/null 2>&1
+echo "Warming up (5s each: plaintext, json, db) ..."
+wrk -t"$THREADS" -c"$CONCURRENCY" -d5s "$BASE/plaintext" >/dev/null 2>&1
+wrk -t"$THREADS" -c"$CONCURRENCY" -d5s "$BASE/json"      >/dev/null 2>&1
+wrk -t"$THREADS" -c"$CONCURRENCY" -d5s "$BASE/db"        >/dev/null 2>&1
 echo "Warmup done."
 
 SERVER_PID=""
