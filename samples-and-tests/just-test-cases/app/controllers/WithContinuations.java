@@ -67,8 +67,8 @@ public class WithContinuations extends Controller {
     }
     
     public static void waitWithTimeout() {
-        Promise<String> task1 = new jobs.DoSomething(100).now();
-        Promise<String> task2 = new jobs.DoSomething(2000).now();
+        CompletableFuture<String> task1 = new jobs.DoSomething(100).now();
+        CompletableFuture<String> task2 = new jobs.DoSomething(2000).now();
         Either<List<String>,Timeout> r = await(Promise.waitEither(Promise.waitAll(task1, task2), Timeout(300)));
         
         for(Timeout t : r._2) {
@@ -76,11 +76,11 @@ public class WithContinuations extends Controller {
             StringBuilder result = new StringBuilder();
             
             if(task1.isDone()) {
-                result.append(" + Task1 -> " + task1.getOrNull());
+                result.append(" + Task1 -> " + task1.join());
             }
             
             if(task2.isDone()) {
-                result.append(" + Task2 -> " + task2.getOrNull());
+                result.append(" + Task2 -> " + task2.join());
             }
             
             renderText("Timeout! Partial result is " + result);
@@ -339,7 +339,7 @@ public class WithContinuations extends Controller {
     public static void usingRenderArgsAndAwaitWithFutureAndCallback(final String arg) {
         renderArgs.put("arg", arg);
 
-        Promise<String> promise = new play.jobs.Job() {
+        CompletableFuture<String> promise = new play.jobs.Job() {
             @Override
             public String doJobWithResult() throws Exception {
                 return "result";
@@ -473,8 +473,8 @@ public class WithContinuations extends Controller {
                 throw new RuntimeException("Hello world!");
             }
         };
-        
-        Promise promise;
+
+        CompletableFuture promise;
         if("now".equals(a)) {
             promise = job.now();
         }
@@ -497,8 +497,8 @@ public class WithContinuations extends Controller {
             Logger.trace("Everything is fine, I'm just doing my job!");
           }
         };
-        
-        Promise promise;
+
+        CompletableFuture promise;
         if("now".equals(a)) {
             promise = job.now();
         }

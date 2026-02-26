@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,6 @@ import play.libs.Codec;
 import play.libs.F;
 import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
-import play.libs.F.Promise;
 import play.libs.Time;
 import play.utils.HTTP;
 import play.utils.Utils;
@@ -902,7 +902,7 @@ public class Http {
             stream.publish(frame);
         }
 
-        public Promise<WebSocketEvent> nextEvent() {
+        public CompletableFuture<WebSocketEvent> nextEvent() {
             if (!isOpen()) {
                 throw new IllegalStateException("The inbound channel is closed");
             }
