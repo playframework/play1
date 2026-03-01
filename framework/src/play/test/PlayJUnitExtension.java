@@ -5,17 +5,21 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
+import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import play.Invoker;
 import play.Invoker.DirectInvocation;
 import play.Play;
+import java.lang.reflect.Method;
 
-public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback, TestExecutionExceptionHandler {
+public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback, InvocationInterceptor, TestExecutionExceptionHandler {
 
     public static final String invocationType = "JUnitTest";
 
     public static boolean useCustomRunner = false;
 
+    private static final ThreadLocal<Invoker.InvocationContext> invocationContext = ThreadLocal.withInitial(() -> null);
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
@@ -34,7 +38,6 @@ public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback
         TestEngine.initTest(testClass);
     }
 
-
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
         if (useCustomRunner) {
@@ -42,16 +45,39 @@ public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback
                 Play.forceProd = true;
                 Play.init(new File("."), getPlayId());
             }
+            // Store invocation context in ThreadLocal for use in interceptTestMethod
+            invocationContext.set(new Invoker.InvocationContext(invocationType));
+        }
+    }
+
+    @Override
+    public void interceptTestMethod(Invocation<Void> invocation, ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable {
+        if (useCustomRunner) {
+            // Run the test method within the Play thread context
+            Invoker.InvocationContext ctx = new Invoker.InvocationContext(invocationType);
+            Throwable[] testException = new Throwable[1];
+            
             Invoker.invokeInThread(new DirectInvocation() {
                 @Override
                 public void execute() throws Exception {
-                    // Nothing here; test method will run
+                    try {
+                        invocation.proceed();
+                    } catch (Throwable e) {
+                        testException[0] = e;
+                    }
                 }
+                
                 @Override
                 public Invoker.InvocationContext getInvocationContext() {
-                    return new Invoker.InvocationContext(invocationType);
+                    return ctx;
                 }
             });
+            
+            if (testException[0] != null) {
+                throw testException[0];
+            }
+        } else {
+            invocation.proceed();
         }
     }
 
