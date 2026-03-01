@@ -15,7 +15,7 @@ public class RenderTemplate extends Result {
 
     private final String name;
     private final String content;
-    private final Map<String, Object> arguments;
+    private final transient Map<String, Object> arguments;
     private final long renderTime;
 
     public RenderTemplate(Template template, Map<String, Object> arguments) {
