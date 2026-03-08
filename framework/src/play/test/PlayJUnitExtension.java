@@ -56,25 +56,35 @@ public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback
             // Run the test method within the Play thread context
             Invoker.InvocationContext ctx = new Invoker.InvocationContext(invocationType);
             Throwable[] testException = new Throwable[1];
-            
-            Invoker.invokeInThread(new DirectInvocation() {
-                @Override
-                public void execute() throws Exception {
-                    try {
-                        invocation.proceed();
-                    } catch (Throwable e) {
-                        testException[0] = e;
+
+            // Set the Play classloader for this thread
+            ClassLoader originalLoader = Thread.currentThread().getContextClassLoader();
+            if (Play.classloader != null) {
+                Thread.currentThread().setContextClassLoader(Play.classloader);
+            }
+            try {
+                Invoker.invokeInThread(new DirectInvocation() {
+                    @Override
+                    public void execute() throws Exception {
+                        try {
+                            invocation.proceed();
+                        } catch (Throwable e) {
+                            testException[0] = e;
+                        }
                     }
+
+                    @Override
+                    public Invoker.InvocationContext getInvocationContext() {
+                        return ctx;
+                    }
+                });
+
+                if (testException[0] != null) {
+                    throw testException[0];
                 }
-                
-                @Override
-                public Invoker.InvocationContext getInvocationContext() {
-                    return ctx;
-                }
-            });
-            
-            if (testException[0] != null) {
-                throw testException[0];
+            } finally {
+                // Restore original classloader
+                Thread.currentThread().setContextClassLoader(originalLoader);
             }
         } else {
             invocation.proceed();
