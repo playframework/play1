@@ -2,24 +2,19 @@ package play.test;
 
 import java.io.File;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.InvocationInterceptor;
-import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
-import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.junit.jupiter.api.extension.*;
 import play.Invoker;
 import play.Invoker.DirectInvocation;
 import play.Play;
 import java.lang.reflect.Method;
 
-public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback, InvocationInterceptor, TestExecutionExceptionHandler {
+public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback, AfterEachCallback, InvocationInterceptor, TestExecutionExceptionHandler {
 
     public static final String invocationType = "JUnitTest";
 
     public static boolean useCustomRunner = false;
 
-    private static final ThreadLocal<Invoker.InvocationContext> invocationContext = ThreadLocal.withInitial(() -> null);
+    private static final ThreadLocal<Invoker.InvocationContext> invocationContext = new ThreadLocal<>();
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
@@ -47,6 +42,13 @@ public class PlayJUnitExtension implements BeforeAllCallback, BeforeEachCallback
             }
             // Store invocation context in ThreadLocal for use in interceptTestMethod
             invocationContext.set(new Invoker.InvocationContext(invocationType));
+        }
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        if (useCustomRunner) {
+            invocationContext.remove();
         }
     }
 
