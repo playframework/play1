@@ -228,9 +228,9 @@ public class WS extends PlayPlugin {
     }
 
     public interface WSImpl {
-        public WSRequest newRequest(String url, String encoding);
+        WSRequest newRequest(String url, String encoding);
 
-        public void stop();
+        void stop();
     }
 
     public abstract static class WSRequest {
@@ -640,7 +640,7 @@ public class WS extends PlayPlugin {
         protected String createQueryString() {
             StringBuilder sb = new StringBuilder();
             for (String key : this.parameters.keySet()) {
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append("&");
                 }
                 Object value = this.parameters.get(key);
@@ -696,7 +696,7 @@ public class WS extends PlayPlugin {
          * 
          * @return the status code of the http response
          */
-        public abstract Integer getStatus();
+        public abstract int getStatus();
 
         /**
          * The HTTP status text

@@ -18,7 +18,7 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
 
     @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) throws OValException {
-        if (value == null || value.toString().length() == 0) {
+        if (value == null || value.toString().isEmpty()) {
             return true;
         }
         try {

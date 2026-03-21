@@ -155,7 +155,7 @@ public class ControllersEnhancer extends Enhancer {
     /**
      * Mark class that need controller enhancement
      */
-    public static interface ControllerSupport {
+    public interface ControllerSupport {
     }
 
     /**

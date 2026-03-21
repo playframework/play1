@@ -25,7 +25,7 @@ public class FileUpload implements Upload {
         this.fileItem = fileItem;
         File tmp = TempFilePlugin.createTempFolder();
         // Check that the file has a name to avoid to override the field folder
-        if (fileItem.getName().trim().length() > 0) {
+        if (!fileItem.getName().isBlank()) {
             defaultFile = new File(tmp, FilenameUtils.getName(fileItem.getFieldName()) + File.separator
                     + FilenameUtils.getName(fileItem.getName()));
             try {
@@ -88,8 +88,8 @@ public class FileUpload implements Upload {
     }
 
     @Override
-    public Long getSize() {
-        return defaultFile == null ? null : defaultFile.length();
+    public long getSize() {
+        return defaultFile == null ? 0L : defaultFile.length();
     }
 
     @Override

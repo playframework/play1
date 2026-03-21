@@ -629,12 +629,11 @@ public class F {
     public static class IndexedEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
+        public final long id = idGenerator.getAndIncrement();
         public final M data;
-        public final Long id;
 
         public IndexedEvent(M data) {
             this.data = data;
-            this.id = idGenerator.getAndIncrement();
         }
 
         @Override
@@ -718,10 +717,10 @@ public class F {
 
         static class FilterTask<K> extends Promise<List<IndexedEvent<K>>> {
 
-            final Long lastEventSeen;
+            final long lastEventSeen;
             final List<IndexedEvent<K>> newEvents = new ArrayList<>();
 
-            public FilterTask(Long lastEventSeen) {
+            public FilterTask(long lastEventSeen) {
                 this.lastEventSeen = lastEventSeen;
             }
 

@@ -175,7 +175,7 @@ public class Java {
     public static Object invokeChildOrStatic(Class<?> clazz, String method, Object... args) throws Exception {
         Class<?> invokedClass = null;
         List<Class> assignableClasses = Play.classloader.getAssignableClasses(clazz);
-        if (assignableClasses.size() == 0) {
+        if (assignableClasses.isEmpty()) {
             invokedClass = clazz;
         } else {
             invokedClass = assignableClasses.get(0);
@@ -241,37 +241,21 @@ public class Java {
     }
 
     public static String rawJavaType(Class<?> clazz) {
-        if (clazz.getName().equals("void")) {
-            return "V";
-        }
-        if (clazz.getName().equals("boolean")) {
-            return "Z";
-        }
-        if (clazz.getName().equals("byte")) {
-            return "B";
-        }
-        if (clazz.getName().equals("char")) {
-            return "C";
-        }
-        if (clazz.getName().equals("double")) {
-            return "D";
-        }
-        if (clazz.getName().equals("float")) {
-            return "F";
-        }
-        if (clazz.getName().equals("int")) {
-            return "I";
-        }
-        if (clazz.getName().equals("long")) {
-            return "J";
-        }
-        if (clazz.getName().equals("short")) {
-            return "S";
-        }
-        if (clazz.getName().startsWith("[")) {
-            return clazz.getName().replace('.', '/');
-        }
-        return "L" + (clazz.getName().replace('.', '/')) + ";";
+        var className = clazz.getName();
+        return switch (className) {
+            case "void" -> "V";
+            case "boolean" -> "Z";
+            case "byte" -> "B";
+            case "char" -> "C";
+            case "double" -> "D";
+            case "float" -> "F";
+            case "int" -> "I";
+            case "long" -> "J";
+            case "short" -> "S";
+            default -> className.startsWith("[")
+                ? className.replace('.', '/')
+                : "L" + (className.replace('.', '/')) + ";";
+        };
     }
 
     /**
