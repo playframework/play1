@@ -79,7 +79,7 @@ require:    &allDependencies
     - com.mchange -> mchange-commons-java 0.3.2
     - org.javassist -> javassist 3.30.2-GA
     - io.netty -> netty 3.10.6.Final
-    - org.postgresql -> postgresql 42.7.7
+    - org.postgresql -> postgresql 42.7.13
     - org.slf4j -> slf4j-api 2.0.17
     - org.apache.logging.log4j -> log4j-slf4j2-impl 2.23.1
     - org.yaml -> snakeyaml 2.6
