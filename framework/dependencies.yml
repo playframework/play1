@@ -56,7 +56,7 @@ require:    &allDependencies
     - com.mysql -> mysql-connector-j 9.3.0
     - oauth.signpost -> signpost-core 1.2.1.2
     - jakarta.servlet -> jakarta.servlet-api 6.0.0
-    - org.apache.ivy -> ivy 2.5.3
+    - org.apache.ivy -> ivy 2.6.0
     - org.bouncycastle -> bcprov-jdk18on 1.81
     - org.bouncycastle -> bcpkix-jdk18on 1.81
     - org.codehaus.groovy -> groovy 3.0.25
