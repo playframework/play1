@@ -73,7 +73,7 @@ require:    &allDependencies
     - jakarta.transaction -> jakarta.transaction-api 2.0.1
     - jakarta.xml.bind -> jakarta.xml.bind-api 4.0.2
     - org.glassfish.jaxb -> jaxb-runtime 2.3.9
-    - com.fasterxml -> classmate 1.7.0
+    - com.fasterxml -> classmate 1.7.3
     - org.hibernate -> hibernate-c3p0 6.6.31.Final
     - org.hibernate -> hibernate-jcache 6.6.31.Final
     - com.mchange -> mchange-commons-java 0.3.2
