@@ -13,8 +13,8 @@ public class TestXMLHttpResponse extends WS.HttpResponse {
     }
 
     @Override
-    public Integer getStatus() {
-        return null;
+    public int getStatus() {
+        return 200;
     }
 
     @Override

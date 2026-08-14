@@ -39,7 +39,7 @@ public class TemplateParser {
         return lastState;
     }
 
-    public Integer getLine() {
+    public int getLine() {
         String token = pageSource.substring(0, begin2);
         if (token.indexOf('\n') == -1) {
             return 1;
@@ -54,7 +54,7 @@ public class TemplateParser {
 
     public String checkNext() {
         if (end2 < pageSource.length()) {
-            return pageSource.charAt(end2) + "";
+            return Character.toString(pageSource.charAt(end2));
         }
         return "";
     }

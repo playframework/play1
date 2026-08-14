@@ -202,10 +202,7 @@ public class GroovyTemplate extends BaseTemplate {
                     if (errorMsg instanceof SyntaxErrorMessage) {
                         SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
                         SyntaxException syntaxException = errorMessage.getCause();
-                        Integer line = this.linesMatrix.get(syntaxException.getLine());
-                        if (line == null) {
-                            line = 0;
-                        }
+                        Integer line = this.linesMatrix.getOrDefault(syntaxException.getLine(), 0);
                         String message = syntaxException.getMessage();
                         if (message.indexOf('@') > 0) {
                             message = message.substring(0, message.lastIndexOf('@'));
@@ -259,7 +256,7 @@ public class GroovyTemplate extends BaseTemplate {
             binding.setVariable("_response_encoding", currentResponse.encoding);
         }
         StringWriter writer = null;
-        Boolean applyLayouts = false;
+        boolean applyLayouts = false;
 
         // must check if this is the first template being rendered..
         // If this template is called from inside another template,
@@ -374,7 +371,7 @@ public class GroovyTemplate extends BaseTemplate {
                 cleanTrace.add(se);
             }
         }
-        e.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
+        e.setStackTrace(cleanTrace.toArray(StackTraceElement[]::new));
         return e;
     }
 

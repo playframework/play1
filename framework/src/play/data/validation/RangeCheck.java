@@ -27,17 +27,17 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
         if (value == null) {
             return true;
         }
-        if (value instanceof String) {
+        if (value instanceof String s) {
             try {
-                double v = Double.parseDouble(value.toString());
+                double v = Double.parseDouble(s);
                 return v >= min && v <= max;
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Number) {
+        if (value instanceof Number v) {
             try {
-                return ((Number) value).doubleValue() >= min && ((Number) value).doubleValue() <= max;
+                return v.doubleValue() >= min && v.doubleValue() <= max;
             } catch (Exception e) {
                 return false;
             }

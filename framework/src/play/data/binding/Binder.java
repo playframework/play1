@@ -202,7 +202,7 @@ public abstract class Binder {
             return MISSING;
         }
 
-        if (paramNode.getValues() == null && paramNode.getAllChildren().size() == 0) {
+        if (paramNode.getValues() == null && paramNode.getAllChildren().isEmpty()) {
             return MISSING;
         }
 
@@ -531,7 +531,7 @@ public abstract class Binder {
                     logBindingNormalFailure(paramNode, e); // TODO debug or error?
                 }
             }
-            if (hasMissing && l.size() == 0) {
+            if (hasMissing && l.isEmpty()) {
                 return MISSING;
             }
             return l;

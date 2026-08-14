@@ -596,12 +596,12 @@ public class ApacheMultipartParser extends DataParser {
      * The maximum size permitted for the complete request, as opposed to
      * {@link #maxFileSize}. A value of -1 indicates no maximum.
      */
-    private final long maxRequestSize = Integer.parseInt(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
+    private final long maxRequestSize = Long.parseLong(Play.configuration.getProperty("upload.maxRequestSize", "-1"));
     /**
      * The maximum size permitted for a single uploaded file, as opposed to
      * {@link #maxRequestSize}. A value of -1 indicates no maximum.
      */
-    private final long maxFileSize = Integer.parseInt(Play.configuration.getProperty("upload.maxFileSize", "-1"));
+    private final long maxFileSize = Long.parseLong(Play.configuration.getProperty("upload.maxFileSize", "-1"));
 
     // ------------------------------------------------------ Protected methods
 

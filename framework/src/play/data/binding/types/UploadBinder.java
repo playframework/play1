@@ -27,7 +27,7 @@ public class UploadBinder implements TypeBinder<Model.BinaryField> {
                 List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
                 if (uploads != null) {
                     for (Upload upload : uploads) {
-                        if (upload.getFieldName().equals(value) && upload.getFileName().trim().length() > 0) {
+                        if (upload.getFieldName().equals(value) && !upload.getFileName().isBlank()) {
                             return upload;
                         }
                     }

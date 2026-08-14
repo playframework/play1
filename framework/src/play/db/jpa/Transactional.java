@@ -15,5 +15,5 @@ public @interface Transactional {
      */
     String value() default "default";
 
-    public boolean readOnly() default false;
+    boolean readOnly() default false;
 }

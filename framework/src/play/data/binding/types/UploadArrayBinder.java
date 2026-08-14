@@ -32,7 +32,7 @@ public class UploadArrayBinder implements TypeBinder<Model.BinaryField[]> {
                         uploadArray.add(upload);
                     }
                 }
-                return uploadArray.toArray(new Upload[uploadArray.size()]);
+                return uploadArray.toArray(Upload[]::new);
             }
         }
         return null;

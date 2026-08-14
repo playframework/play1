@@ -16,7 +16,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 
     protected static final Map<String, Class<?>> classes = new HashMap<>();
 
-    private final String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
+    private final String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
 
     @Override
     public ChannelPipeline getPipeline() throws Exception {

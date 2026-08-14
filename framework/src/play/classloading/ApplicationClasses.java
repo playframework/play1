@@ -195,7 +195,7 @@ public class ApplicationClasses {
         /**
          * Last time than this class was compiled
          */
-        public Long timestamp = 0L;
+        public long timestamp = 0L;
         /**
          * Is this class compiled
          */
