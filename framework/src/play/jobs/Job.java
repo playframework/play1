@@ -2,6 +2,7 @@ package play.jobs;
 
 import java.util.Date;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,7 +76,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * 
      * @return the job completion
      */
-    public Promise<V> now() {
+    public CompletableFuture<V> now() {
         Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.submit(getJobCallingCallable(smartFuture));
         return smartFuture;
@@ -91,7 +92,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      *
      * @return the job completion
      */
-    public Promise<V> afterRequest() {
+    public CompletableFuture<V> afterRequest() {
         InvocationContext current = Invoker.InvocationContext.current();
         if (current == null || !Http.invocationType.equals(current.getInvocationType())) {
             return now();
@@ -110,7 +111,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      *            time in seconds
      * @return the job completion
      */
-    public Promise<V> in(String delay) {
+    public CompletableFuture<V> in(String delay) {
         return in(Time.parseDuration(delay));
     }
 
@@ -121,7 +122,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      *            time in seconds
      * @return the job completion
      */
-    public Promise<V> in(int seconds) {
+    public CompletableFuture<V> in(int seconds) {
         Promise<V> smartFuture = new Promise<>();
         JobsPlugin.executor.schedule(getJobCallingCallable(smartFuture), seconds, TimeUnit.SECONDS);
         return smartFuture;
@@ -137,7 +138,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 return result;
             } catch (Exception e) {
                 if (smartFuture != null) {
-                    smartFuture.invokeWithException(e);
+                    smartFuture.completeExceptionally(e);
                 }
                 return null;
             }

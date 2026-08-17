@@ -1,23 +1,22 @@
 package play.libs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
 
@@ -34,82 +33,28 @@ public class F {
         R apply() throws Throwable;
     }
 
-    public static class Promise<V> implements Future<V>, F.Action<V> {
-
-        protected final CountDownLatch taskLock = new CountDownLatch(1);
+    public static class Promise<V> extends CompletableFuture<V> implements F.Action<V> {
 
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean isDone() {
-            return invoked;
+        public <U> Promise<U> newIncompleteFuture() {
+            return new Promise<>();
         }
 
         public V getOrNull() {
-            return result;
+            return isDone() && !isCompletedExceptionally() ? join() : null;
         }
-
-        @Override
-        public V get() throws InterruptedException, ExecutionException {
-            taskLock.await();
-            if (exception != null) {
-                // The result of the promise is an exception - throw it
-                throw new ExecutionException(exception);
-            }
-            return result;
-        }
-
-        @Override
-        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            if(!taskLock.await(timeout, unit)) {
-              throw new TimeoutException(String.format("Promise didn't redeem in %s %s", timeout, unit));
-            }
-            
-            if (exception != null) {
-                // The result of the promise is an exception - throw it
-                throw new ExecutionException(exception);
-            }
-            return result;
-        }
-        protected List<F.Action<Promise<V>>> callbacks = new ArrayList<>();
-        protected boolean invoked = false;
-        protected V result = null;
-        protected Throwable exception = null;
 
         @Override
         public void invoke(V result) {
-            invokeWithResultOrException(result, null);
+            complete(result);
         }
 
+        /**
+         * @deprecated use {@link #completeExceptionally(Throwable)} instead.
+         */
+        @Deprecated(since = "1.12", forRemoval = true)
         public void invokeWithException(Throwable t) {
-            invokeWithResultOrException(null, t);
-        }
-
-        protected void invokeWithResultOrException(V result, Throwable t) {
-            synchronized (this) {
-                if (!invoked) {
-                    invoked = true;
-                    this.result = result;
-                    this.exception = t;
-                    taskLock.countDown();
-                } else {
-                    return;
-                }
-            }
-
-            // Notify all registered callbacks that this promise has been invoked.
-            // Do this outside of the synchronized block to avoid deadlocks.
-            for (F.Action<Promise<V>> callback : callbacks) {
-                callback.invoke(this);
-            }
+            completeExceptionally(t);
         }
 
         /**
@@ -124,284 +69,176 @@ public class F {
          *
          * @param callback
          *            The callback action to invoke when this promise.
+         *
+         * @deprecated use {@link #whenComplete(BiConsumer)} instead.
          */
+        @Deprecated(since = "1.12", forRemoval = true)
         public void onRedeem(F.Action<Promise<V>> callback) {
-            // If this promise has already been invoked, then we must call the callback.
-            final boolean mustCallCallback;
-            synchronized (this) {
-                if (!invoked) {
-                    callbacks.add(callback);
-                }
-                mustCallCallback = invoked;
-            }
-            
-            // Invoke the callback outside the synchronized block to avoid deadlocks.
-            if (mustCallCallback) {
-                callback.invoke(this);
-            }
+            whenComplete((r, e) -> callback.accept(this));
         }
 
-        public static <T> Promise<List<T>> waitAll(Promise<T>... promises) {
-            return waitAll(Arrays.asList(promises));
-        }
+        public static <T> CompletableFuture<List<T>> waitAll(CompletableFuture<T>... promises) {
+            Promise<List<T>> result = new Promise<>();
 
-        public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
-            final CountDownLatch waitAllLock = new CountDownLatch(promises.size());
-            final Promise<List<T>> result = new Promise<List<T>>() {
+            CompletableFuture.allOf(promises).whenComplete((__, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete(
+                        Stream.of(promises)
+                            .map(CompletableFuture::join)
+                            .toList()
+                    );
+                }
+            });
 
-                @Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.cancel(mayInterruptIfRunning);
-                    }
-                    return r;
-                }
-
-                @Override
-                public boolean isCancelled() {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.isCancelled();
-                    }
-                    return r;
-                }
-
-                @Override
-                public boolean isDone() {
-                    boolean r = true;
-                    for (Promise<T> f : promises) {
-                        r = r & f.isDone();
-                    }
-                    return r;
-                }
-
-                @Override
-                public List<T> get() throws InterruptedException, ExecutionException {
-                    waitAllLock.await();
-                    List<T> r = new ArrayList<>();
-                    for (Promise<T> f : promises) {
-                        r.add(f.get());
-                    }
-                    return r;
-                }
-
-                @Override
-                public List<T> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                    if(!waitAllLock.await(timeout, unit)) {
-                      throw new TimeoutException(String.format("Promises didn't redeem in %s %s", timeout, unit));
-                    }
-                    
-                    return get();
-                }
-            };
-            F.Action<Promise<T>> action = completed -> {
-                waitAllLock.countDown();
-                if (waitAllLock.getCount() == 0) {
-                    try {
-                        result.invoke(result.get());
-                    } catch (Exception e) {
-                        result.invokeWithException(e);
-                    }
-                }
-            };
-            for (Promise<T> f : promises) {
-                f.onRedeem(action);
-            }
-            if(promises.isEmpty()) {
-              result.invoke(Collections.<T>emptyList());
-            }
             return result;
         }
 
-        public static <A, B> Promise<F.Tuple<A, B>> wait2(Promise<A> tA, Promise<B> tB) {
+        public static <T> CompletableFuture<List<T>> waitAll(final Collection<? extends CompletableFuture<T>> promises) {
+            return waitAll(promises.toArray(Promise[]::new));
+        }
+
+        public static <A, B> CompletableFuture<F.Tuple<A, B>> wait2(CompletableFuture<A> tA, CompletableFuture<B> tB) {
             final Promise<F.Tuple<A, B>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new Tuple((A) values.get(0), (B) values.get(1)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+
+            CompletableFuture.allOf(tA, tB).whenComplete((__, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete(new Tuple<>(tA.join(), tB.join()));
                 }
             });
+
             return result;
         }
 
-        public static <A, B, C> Promise<F.T3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
+        public static <A, B, C> CompletableFuture<F.T3<A, B, C>> wait3(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
             final Promise<F.T3<A, B, C>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+
+            CompletableFuture.allOf(tA, tB, tC).whenComplete((__, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete(new T3<>(tA.join(), tB.join(), tC.join()));
                 }
             });
+
             return result;
         }
 
-        public static <A, B, C, D> Promise<F.T4<A, B, C, D>> wait4(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
+        public static <A, B, C, D> CompletableFuture<F.T4<A, B, C, D>> wait4(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
             final Promise<F.T4<A, B, C, D>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+
+            CompletableFuture.allOf(tA, tB, tC, tD).whenComplete((__, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete(new T4<>(tA.join(), tB.join(), tC.join(), tD.join()));
                 }
             });
+
             return result;
         }
 
-        public static <A, B, C, D, E> Promise<F.T5<A, B, C, D, E>> wait5(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
+        public static <A, B, C, D, E> CompletableFuture<F.T5<A, B, C, D, E>> wait5(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
             final Promise<F.T5<A, B, C, D, E>> result = new Promise<>();
-            Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD, tE});
-            t.onRedeem(completed -> {
-                List<Object> values = completed.getOrNull();
-                if(values != null) {
-                    result.invoke(new T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
-                }
-                else {
-                    result.invokeWithException(completed.exception);
+
+            CompletableFuture.allOf(tA, tB, tC, tD, tE).whenComplete((__, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete(new T5<>(tA.join(), tB.join(), tC.join(), tD.join(), tE.join()));
                 }
             });
+
             return result;
         }
 
-        private static Promise<F.Tuple<Integer, Promise<Object>>> waitEitherInternal(Promise<?>... futures) {
-            final Promise<F.Tuple<Integer, Promise<Object>>> result = new Promise<>();
-            for (int i = 0; i < futures.length; i++) {
-                final int index = i + 1;
-                futures[i].onRedeem(completed -> result.invoke(new Tuple(index, completed)));
-            }
-            return result;
-        }
-
-        public static <A, B> Promise<F.Either<A, B>> waitEither(Promise<A> tA, Promise<B> tB) {
+        public static <A, B> CompletableFuture<F.Either<A, B>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB) {
             final Promise<F.Either<A, B>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(Either.<A, B>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(Either.<A, B>_2((B) value._2.getOrNull()));
-                        break;
+            CompletableFuture.anyOf(
+                tA.thenApply(F.Either::<A, B>_1),
+                tB.thenApply(F.Either::<A, B>_2)
+            ).whenComplete((value, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete((F.Either<A, B>) value);
                 }
             });
 
             return result;
         }
 
-        public static <A, B, C> Promise<F.E3<A, B, C>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
+        public static <A, B, C> CompletableFuture<F.E3<A, B, C>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
             final Promise<F.E3<A, B, C>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E3.<A, B, C>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E3.<A, B, C>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E3.<A, B, C>_3((C) value._2.getOrNull()));
-                        break;
+            CompletableFuture.anyOf(
+                tA.thenApply(F.E3::<A, B, C>_1),
+                tB.thenApply(F.E3::<A, B, C>_2),
+                tC.thenApply(F.E3::<A, B, C>_3)
+            ).whenComplete((value, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete((F.E3<A, B, C>) value);
                 }
             });
 
             return result;
         }
 
-        public static <A, B, C, D> Promise<F.E4<A, B, C, D>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
+        public static <A, B, C, D> CompletableFuture<F.E4<A, B, C, D>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
             final Promise<F.E4<A, B, C, D>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E4.<A, B, C, D>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E4.<A, B, C, D>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E4.<A, B, C, D>_3((C) value._2.getOrNull()));
-                        break;
-                    case 4:
-                        result.invoke(E4.<A, B, C, D>_4((D) value._2.getOrNull()));
-                        break;
+            CompletableFuture.anyOf(
+                tA.thenApply(F.E4::<A, B, C, D>_1),
+                tB.thenApply(F.E4::<A, B, C, D>_2),
+                tC.thenApply(F.E4::<A, B, C, D>_3),
+                tD.thenApply(F.E4::<A, B, C, D>_4)
+            ).whenComplete((value, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete((F.E4<A, B, C, D>) value);
                 }
             });
 
             return result;
         }
 
-        public static <A, B, C, D, E> Promise<F.E5<A, B, C, D, E>> waitEither(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
+        public static <A, B, C, D, E> CompletableFuture<F.E5<A, B, C, D, E>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
             final Promise<F.E5<A, B, C, D, E>> result = new Promise<>();
-            Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD, tE);
 
-            t.onRedeem(completed -> {
-                Tuple<Integer, Promise<Object>> value = completed.getOrNull();
-                switch (value._1) {
-                    case 1:
-                        result.invoke(E5.<A, B, C, D, E>_1((A) value._2.getOrNull()));
-                        break;
-                    case 2:
-                        result.invoke(E5.<A, B, C, D, E>_2((B) value._2.getOrNull()));
-                        break;
-                    case 3:
-                        result.invoke(E5.<A, B, C, D, E>_3((C) value._2.getOrNull()));
-                        break;
-                    case 4:
-                        result.invoke(E5.<A, B, C, D, E>_4((D) value._2.getOrNull()));
-                        break;
-                    case 5:
-                        result.invoke(E5.<A, B, C, D, E>_5((E) value._2.getOrNull()));
-                        break;
+            CompletableFuture.anyOf(
+                tA.thenApply(F.E5::<A, B, C, D, E>_1),
+                tB.thenApply(F.E5::<A, B, C, D, E>_2),
+                tC.thenApply(F.E5::<A, B, C, D, E>_3),
+                tD.thenApply(F.E5::<A, B, C, D, E>_4),
+                tE.thenApply(F.E5::<A, B, C, D, E>_5)
+            ).whenComplete((value, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete((F.E5<A, B, C, D, E>) value);
                 }
             });
 
             return result;
         }
 
-        public static <T> Promise<T> waitAny(Promise<T>... futures) {
+        public static <T> CompletableFuture<T> waitAny(CompletableFuture<T>... promises) {
             final Promise<T> result = new Promise<>();
 
-            F.Action<Promise<T>> action = new F.Action<Promise<T>>() {
-
-                @Override
-                public void invoke(Promise<T> completed) {
-                    synchronized (this) {
-                        if (result.isDone()) {
-                            return;
-                        }
-                    }
-                    T resultOrNull = completed.getOrNull();
-                    if(resultOrNull != null) {
-                      result.invoke(resultOrNull);
-                    }
-                    else {
-                      result.invokeWithException(completed.exception);
-                    }
+            CompletableFuture.anyOf(promises).whenComplete((value, exception) -> {
+                if (exception != null) {
+                    result.completeExceptionally(exception);
+                } else {
+                    result.complete((T) value);
                 }
-            };
-
-            for (Promise<T> f : futures) {
-                f.onRedeem(action);
-            }
+            });
 
             return result;
         }
@@ -463,81 +300,75 @@ public class F {
 
     public static class EventStream<T> {
 
-        final int bufferSize;
-        final ConcurrentLinkedQueue<T> events = new ConcurrentLinkedQueue<>();
-        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
+        private final Lock lock = new ReentrantLock();
+        private final Queue<T> events = new ConcurrentLinkedQueue<>();
+        private final List<Promise<T>> waiting = new ArrayList<>();
+
+        private final int bufferSize;
 
         public EventStream() {
-            this.bufferSize = 100;
+            this(100);
         }
 
         public EventStream(int maxBufferSize) {
             this.bufferSize = maxBufferSize;
         }
 
-        public synchronized Promise<T> nextEvent() {
-            if (events.isEmpty()) {
-                LazyTask task = new LazyTask();
-                waiting.add(task);
-                return task;
-            }
-            return new LazyTask(events.peek());
-        }
-
-        public synchronized void publish(T event) {
-            if (events.size() > bufferSize) {
-                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
-                events.poll();
-            }
-            events.offer(event);
-            notifyNewEvent();
-        }
-
-        void notifyNewEvent() {
-            T value = events.peek();
-            for (Promise<T> task : waiting) {
-                task.invoke(value);
-            }
-            waiting.clear();
-        }
-
-        class LazyTask extends Promise<T> {
-
-            public LazyTask() {
-            }
-
-            public LazyTask(T value) {
-                invoke(value);
-            }
-
-            @Override
-            public T get() throws InterruptedException, ExecutionException {
-                T value = super.get();
-                markAsRead(value);
-                return value;
-            }
-
-            @Override
-            public T getOrNull() {
-                T value = super.getOrNull();
-                markAsRead(value);
-                return value;
-            }
-
-            private void markAsRead(T value) {
-                if (value != null) {
-                    events.remove(value);
+        public Promise<T> nextEvent() {
+            this.lock.lock();
+            try {
+                var it = this.waiting.iterator();
+                if (it.hasNext()) {
+                    var wait = it.next();
+                    if (wait.isDone()) {
+                        it.remove();
+                        return wait;
+                    }
                 }
+
+                var task = new Promise<T>();
+                var event = this.events.poll();
+                if (event == null) {
+                    this.waiting.add(task);
+                } else {
+                    task.complete(event);
+                }
+
+                return task;
+            } finally {
+                this.lock.unlock();
             }
         }
+
+        public void publish(T event) {
+            this.lock.lock();
+            try {
+                boolean saveEvent = true;
+                for (var f : this.waiting) {
+                    saveEvent &= !f.complete(event);
+                }
+
+                if (saveEvent) {
+                    if (this.events.size() > this.bufferSize) {
+                        Logger.warn("Dropping message. If this is catastrophic to your app, use a BlockingEvenStream instead");
+                        this.events.poll();
+                    }
+                    this.events.offer(event);
+                }
+            } finally {
+                this.lock.unlock();
+            }
+        }
+
     }
 
     public static class BlockingEventStream<T> {
 
-        final LinkedBlockingQueue<T> events;
-        final List<Promise<T>> waiting = Collections.synchronizedList(new ArrayList<Promise<T>>());
-        final ChannelHandlerContext ctx;
-        
+        private final Lock lock = new ReentrantLock();
+        private final List<Promise<T>> waiting = new ArrayList<>();
+
+        private final BlockingQueue<T> events;
+        private final ChannelHandlerContext ctx;
 
         public BlockingEventStream(ChannelHandlerContext ctx) {
             this(100, ctx);
@@ -545,16 +376,39 @@ public class F {
 
         public BlockingEventStream(int maxBufferSize, ChannelHandlerContext ctx) {
             this.ctx = ctx;
-            events = new LinkedBlockingQueue<>(maxBufferSize + 10);
+            this.events = new LinkedBlockingQueue<>(maxBufferSize + 10);
         }
 
-        public synchronized Promise<T> nextEvent() {
-            if (events.isEmpty()) {
-                LazyTask task = new LazyTask(ctx);
-                waiting.add(task);
+        public Promise<T> nextEvent() {
+            this.lock.lock();
+            try {
+                var it = this.waiting.iterator();
+                if (it.hasNext()) {
+                    var wait = it.next();
+                    if (wait.isDone()) {
+                        it.remove();
+                        return wait;
+                    }
+                }
+
+                var task = new Promise<T>();
+                var event = this.events.poll();
+                if (event == null) {
+                    task.whenComplete((v, e) -> {
+                        //Don't start back up until we get down to half the total capacity to prevent jittering:
+                        if (this.events.remainingCapacity() > this.events.size()) {
+                            this.ctx.getChannel().setReadable(true);
+                        }
+                    });
+                    this.waiting.add(task);
+                } else {
+                    task.complete(event);
+                }
+
                 return task;
+            } finally {
+                this.lock.unlock();
             }
-            return new LazyTask(events.peek(), ctx);
         }
 
         //NOTE: cannot synchronize since events.put may block when system is overloaded.
@@ -566,75 +420,41 @@ public class F {
         //This is normal flow control with NIO but since it is not done properly, this at least fixes the issue where websocket break down and
         //skip packets.  They no longer skip packets anymore.
         public void publish(T event) {
+            this.lock.lock();
             try {
-                // This method blocks if the queue is full(read publish method documentation just above)
-                if (events.remainingCapacity() == 10) {
-                    Logger.trace("events queue is full! Setting readable to false.");
-                    ctx.getChannel().setReadable(false);
+                boolean saveEvent = true;
+                for (var f : this.waiting) {
+                    saveEvent &= !f.complete(event);
                 }
-                events.put(event);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            notifyNewEvent();
-        }
 
-        synchronized void notifyNewEvent() {
-            T value = events.peek();
-            for (Promise<T> task : waiting) {
-                task.invoke(value);
-            }
-            waiting.clear();
-        }
-
-        class LazyTask extends Promise<T> {
-
-            final ChannelHandlerContext ctx;
-
-            public LazyTask(ChannelHandlerContext ctx) {
-                this.ctx = ctx;
-            }
-
-            public LazyTask(T value, ChannelHandlerContext ctx) {
-                this.ctx = ctx;
-                invoke(value);
-            }
-
-            @Override
-            public T get() throws InterruptedException, ExecutionException {
-                T value = super.get();
-                markAsRead(value);
-                return value;
-            }
-
-            @Override
-            public T getOrNull() {
-                T value = super.getOrNull();
-                markAsRead(value);
-                return value;
-            }
-
-            private void markAsRead(T value) {
-                if (value != null) {
-                    events.remove(value);
-                    //Don't start back up until we get down to half the total capacity to prevent jittering:
-                    if (events.remainingCapacity() > events.size()) {
-                        ctx.getChannel().setReadable(true);
+                if (saveEvent) {
+                    // This method blocks if the queue is full(read publish method documentation just above)
+                    if (this.events.remainingCapacity() == 10) {
+                        Logger.trace("events queue is full! Setting readable to false.");
+                        this.ctx.getChannel().setReadable(false);
+                    }
+                    try {
+                        this.events.put(event);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
+            } finally {
+                this.lock.unlock();
             }
         }
+
     }
 
-    public static class IndexedEvent<M> {
+    public static final class IndexedEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
+
+        public final Long id = idGenerator.getAndIncrement();
         public final M data;
-        public final Long id;
 
         public IndexedEvent(M data) {
             this.data = data;
-            this.id = idGenerator.getAndIncrement();
         }
 
         @Override
@@ -649,58 +469,80 @@ public class F {
 
     public static class ArchivedEventStream<T> {
 
-        final int archiveSize;
-        final ConcurrentLinkedQueue<IndexedEvent<T>> events = new ConcurrentLinkedQueue<>();
-        final List<FilterTask<T>> waiting = Collections.synchronizedList(new ArrayList<FilterTask<T>>());
-        final List<EventStream<T>> pipedStreams = new ArrayList<>();
+        private final Lock lock = new ReentrantLock();
+        private final Queue<IndexedEvent<T>> events = new ConcurrentLinkedQueue<>();
+        private final List<FilterTask<T>> waiting = new ArrayList<>();
+        private final List<EventStream<T>> pipedStreams = new ArrayList<>();
+
+        private final int archiveSize;
 
         public ArchivedEventStream(int archiveSize) {
             this.archiveSize = archiveSize;
         }
 
-        public synchronized EventStream<T> eventStream() {
-            EventStream<T> stream = new EventStream<>(archiveSize);
-            for (IndexedEvent<T> event : events) {
-                stream.publish(event.data);
-            }
-            pipedStreams.add(stream);
-            return stream;
-        }
-
-        public synchronized Promise<List<IndexedEvent<T>>> nextEvents(long lastEventSeen) {
-            FilterTask<T> filter = new FilterTask<>(lastEventSeen);
-            waiting.add(filter);
-            notifyNewEvent();
-            return filter;
-        }
-
-        public synchronized List<IndexedEvent<?>> availableEvents(long lastEventSeen) {
-            List<IndexedEvent<?>> result = new ArrayList<>();
-            for (IndexedEvent<?> event : events) {
-                if (event.id > lastEventSeen) {
-                    result.add(event);
+        public EventStream<T> eventStream() {
+            this.lock.lock();
+            try {
+                EventStream<T> stream = new EventStream<>(this.archiveSize);
+                for (IndexedEvent<T> event : this.events) {
+                    stream.publish(event.data);
                 }
+                this.pipedStreams.add(stream);
+                return stream;
+            } finally {
+                this.lock.unlock();
             }
-            return result;
+        }
+
+        public Promise<List<IndexedEvent<T>>> nextEvents(long lastEventSeen) {
+            this.lock.lock();
+            try {
+                FilterTask<T> filter = new FilterTask<>(lastEventSeen);
+                this.waiting.add(filter);
+                notifyNewEvent();
+                return filter;
+            } finally {
+                this.lock.unlock();
+            }
+        }
+
+        public List<IndexedEvent<T>> availableEvents(long lastEventSeen) {
+            this.lock.lock();
+            try {
+                List<IndexedEvent<T>> result = new ArrayList<>();
+                for (IndexedEvent<T> event : this.events) {
+                    if (event.id > lastEventSeen) {
+                        result.add(event);
+                    }
+                }
+                return result;
+            } finally {
+                this.lock.unlock();
+            }
         }
 
         public List<T> archive() {
             List<T> result = new ArrayList<>();
-            for (IndexedEvent<T> event : events) {
+            for (IndexedEvent<T> event : this.events) {
                 result.add(event.data);
             }
             return result;
         }
 
-        public synchronized void publish(T event) {
-            if (events.size() >= archiveSize) {
-                Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
-                events.poll();
-            }
-            events.offer(new IndexedEvent<T>(event));
-            notifyNewEvent();
-            for (EventStream<T> eventStream : pipedStreams) {
-                eventStream.publish(event);
+        public void publish(T event) {
+            this.lock.lock();
+            try {
+                if (this.events.size() >= this.archiveSize) {
+                    Logger.warn("Dropping message.  If this is catastrophic to your app, use a BlockingEvenStream instead");
+                    this.events.poll();
+                }
+                this.events.offer(new IndexedEvent<>(event));
+                notifyNewEvent();
+                for (EventStream<T> eventStream : this.pipedStreams) {
+                    eventStream.publish(event);
+                }
+            } finally {
+                this.lock.unlock();
             }
         }
 
@@ -716,26 +558,26 @@ public class F {
             }
         }
 
-        static class FilterTask<K> extends Promise<List<IndexedEvent<K>>> {
+        private static class FilterTask<K> extends Promise<List<IndexedEvent<K>>> {
 
-            final Long lastEventSeen;
-            final List<IndexedEvent<K>> newEvents = new ArrayList<>();
+            private final List<IndexedEvent<K>> newEvents = new ArrayList<>();
+            private final long lastEventSeen;
 
-            public FilterTask(Long lastEventSeen) {
+            FilterTask(long lastEventSeen) {
                 this.lastEventSeen = lastEventSeen;
             }
 
-            public void propose(IndexedEvent<K> event) {
-                if (event.id > lastEventSeen) {
-                    newEvents.add(event);
+            void propose(IndexedEvent<K> event) {
+                if (event.id > this.lastEventSeen) {
+                    this.newEvents.add(event);
                 }
             }
 
-            public boolean trigger() {
-                if (newEvents.isEmpty()) {
+            boolean trigger() {
+                if (this.newEvents.isEmpty()) {
                     return false;
                 }
-                invoke(newEvents);
+                complete(this.newEvents);
                 return true;
             }
         }
