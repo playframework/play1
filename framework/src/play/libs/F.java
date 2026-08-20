@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import org.jboss.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelHandlerContext;
 
 import play.Logger;
 
@@ -570,7 +570,7 @@ public class F {
                 // This method blocks if the queue is full(read publish method documentation just above)
                 if (events.remainingCapacity() == 10) {
                     Logger.trace("events queue is full! Setting readable to false.");
-                    ctx.getChannel().setReadable(false);
+                    ctx.channel().config().setAutoRead(false);
                 }
                 events.put(event);
             } catch (InterruptedException e) {
@@ -619,7 +619,7 @@ public class F {
                     events.remove(value);
                     //Don't start back up until we get down to half the total capacity to prevent jittering:
                     if (events.remainingCapacity() > events.size()) {
-                        ctx.getChannel().setReadable(true);
+                        ctx.channel().config().setAutoRead(true);
                     }
                 }
             }

@@ -18,7 +18,7 @@ require:    &allDependencies
     - cglib -> cglib 3.3.0
     - com.google.code.gson -> gson 2.14.0
     - com.jamonapi -> jamon 2.82
-    - com.ning -> async-http-client 1.9.40
+    - org.asynchttpclient -> async-http-client 3.0.13
     - commons-beanutils 1.11.0
     - commons-codec 1.22.0
     - org.apache.commons -> commons-email2-core 2.0.0-M1
@@ -78,7 +78,17 @@ require:    &allDependencies
     - org.hibernate -> hibernate-jcache 6.6.31.Final
     - com.mchange -> mchange-commons-java 0.3.2
     - org.javassist -> javassist 3.32.0-GA
-    - io.netty -> netty 3.10.6.Final
+    - io.netty -> netty-common 4.2.17.Final
+    - io.netty -> netty-buffer 4.2.17.Final
+    - io.netty -> netty-transport 4.2.17.Final
+    - io.netty -> netty-resolver 4.2.17.Final
+    - io.netty -> netty-codec-base 4.2.17.Final
+    - io.netty -> netty-codec-http 4.2.17.Final
+    - io.netty -> netty-codec-compression 4.2.17.Final
+    - io.netty -> netty-handler 4.2.17.Final
+    - io.netty -> netty-codec-http2 4.2.17.Final
+    - io.netty -> netty-handler-proxy 4.2.17.Final
+    - io.netty -> netty-codec-socks 4.2.17.Final
     - org.postgresql -> postgresql 42.7.13
     - org.slf4j -> slf4j-api 2.0.17
     - org.apache.logging.log4j -> log4j-slf4j2-impl 2.23.1

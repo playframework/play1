@@ -5,11 +5,13 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelException;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelException;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -66,14 +68,16 @@ public class Server {
 
         try {
             if (httpPort != -1) {
-                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-                );
+                MultiThreadIoEventLoopGroup bossGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
+                MultiThreadIoEventLoopGroup workerGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
-                bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
+                ServerBootstrap bootstrap = new ServerBootstrap()
+                    .group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new HttpServerPipelineFactory())
+                    .childOption(ChannelOption.TCP_NODELAY, true);
 
-                bootstrap.bind(new InetSocketAddress(address, httpPort));
-                bootstrap.setOption("child.tcpNoDelay", true);
+                bootstrap.bind(new InetSocketAddress(address, httpPort)).syncUninterruptibly();
 
                 if (Play.mode == Mode.DEV) {
                     if (address == null) {
@@ -88,23 +92,24 @@ public class Server {
                         Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
                     }
                 }
-
             }
-
         } catch (ChannelException e) {
-            Logger.error("Could not bind on port " + httpPort, e);
+            Logger.error(e, "Could not bind on port " + httpPort);
             Play.fatalServerErrorOccurred();
         }
 
         try {
             if (httpsPort != -1) {
-                ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                        Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
-                );
+                MultiThreadIoEventLoopGroup bossGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
+                MultiThreadIoEventLoopGroup workerGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
-                bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
-                bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort));
-                bootstrap.setOption("child.tcpNoDelay", true);
+                ServerBootstrap bootstrap = new ServerBootstrap()
+                    .group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new SslHttpServerPipelineFactory())
+                    .childOption(ChannelOption.TCP_NODELAY, true);
+
+                bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort)).syncUninterruptibly();
 
                 if (Play.mode == Mode.DEV) {
                     if (secureAddress == null) {
@@ -143,7 +148,7 @@ public class Server {
     }
 
     private static void writePID(File root) {
-        String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        String pid = Long.toString(ProcessHandle.current().pid());
         File pidfile = new File(root, PID_FILE);
         if (pidfile.exists()) {
             throw new RuntimeException("The " + PID_FILE + " already exists. Is the server already running?");
