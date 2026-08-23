@@ -870,7 +870,7 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
                 } else {
                     File localFile = file.getRealFile();
                     boolean keepAlive = isKeepAlive(nettyRequest);
-                    nettyResponse = addEtag(nettyRequest, nettyResponse, localFile);
+                    addEtag(nettyRequest, nettyResponse, localFile);
 
                     if (nettyResponse.status().equals(HttpResponseStatus.NOT_MODIFIED)) {
                         Channel ch = ctx.channel();
@@ -914,7 +914,7 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
         return HTTP.isModified(etag, last, browserEtag, ifModifiedSince);
     }
 
-    private static FullHttpResponse addEtag(HttpRequest nettyRequest, FullHttpResponse httpResponse, File file) {
+    private static void addEtag(HttpRequest nettyRequest, FullHttpResponse httpResponse, File file) {
         if (Play.mode == Play.Mode.DEV) {
             httpResponse.headers().set(CACHE_CONTROL, "no-cache");
         } else {
@@ -945,7 +945,6 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
                 httpResponse.headers().set(ETAG, etag);
             }
         }
-        return httpResponse;
     }
 
     public static boolean isKeepAlive(HttpMessage message) {
