@@ -462,25 +462,21 @@ public class PlayHandler extends SimpleChannelInboundHandler<Object> {
 
         boolean keepAlive = isKeepAlive(nettyRequest);
         if (file != null && file.isFile()) {
-            try {
-                nettyResponse = addEtag(nettyRequest, nettyResponse, file);
-                if (nettyResponse.status().equals(HttpResponseStatus.NOT_MODIFIED)) {
+            addEtag(nettyRequest, nettyResponse, file);
+            if (nettyResponse.status().equals(HttpResponseStatus.NOT_MODIFIED)) {
 
-                    Channel ch = ctx.channel();
+                Channel ch = ctx.channel();
 
-                    // Write the initial line and the header.
-                    ChannelFuture writeFuture = ch.writeAndFlush(nettyResponse);
+                // Write the initial line and the header.
+                ChannelFuture writeFuture = ch.writeAndFlush(nettyResponse);
 
-                    if (!keepAlive) {
-                        // Close the connection when the whole content is
-                        // written out.
-                        writeFuture.addListener(ChannelFutureListener.CLOSE);
-                    }
-                } else {
-                    FileService.serve(file, nettyRequest, nettyResponse, ctx, request, response, ctx.channel());
+                if (!keepAlive) {
+                    // Close the connection when the whole content is
+                    // written out.
+                    writeFuture.addListener(ChannelFutureListener.CLOSE);
                 }
-            } catch (Exception e) {
-                throw e;
+            } else {
+                FileService.serve(file, nettyRequest, nettyResponse, ctx, request, response, ctx.channel());
             }
         } else if (is != null) {
             ChannelFuture writeFuture = ctx.channel().writeAndFlush(nettyResponse);
