@@ -763,9 +763,7 @@ public class Play {
                 DependenciesManager dm = new DependenciesManager(applicationPath, frameworkPath, userHome);
                 modules = dm.retrieveModules();
             } catch (Exception e) {
-                Logger.error(
-                        "There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)",
-                        e);
+                Logger.error(e, "There was a problem parsing dependencies.yml (module will not be loaded in order of the dependencies.yml)");
                 // Load module without considering the dependencies.yml order
                 modules.addAll(Arrays.asList(localModules.list()));
             }

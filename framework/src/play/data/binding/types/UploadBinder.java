@@ -39,7 +39,7 @@ public class UploadBinder implements TypeBinder<Model.BinaryField> {
             }
             return Binder.MISSING;
         } catch (Exception e) {
-            Logger.error("", e);
+            Logger.error(e, "");
             throw new UnexpectedException(e);
         }
     }
