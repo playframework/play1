@@ -73,7 +73,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
                     sslPlayHandler.pipelines.put("Ssl" + name, instance);
                 }
             } catch (Throwable e) {
-                Logger.error(" error adding " + handler, e);
+                Logger.error(e, " error adding " + handler);
             }
 
         }

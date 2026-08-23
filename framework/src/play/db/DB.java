@@ -317,7 +317,7 @@ public class DB {
                 Logger.trace("Datasource destroyed");
             }
         } catch (Throwable t) {
-            Logger.error("Couldn't destroy the datasource", t);
+            Logger.error(t, "Couldn't destroy the datasource");
         }
     }
 

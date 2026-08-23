@@ -128,7 +128,7 @@ public class Server {
             }
 
         } catch (ChannelException e) {
-            Logger.error("Could not bind on port " + httpsPort, e);
+            Logger.error(e, "Could not bind on port " + httpsPort);
             Play.fatalServerErrorOccurred();
         }
         if (Play.mode == Mode.DEV || Play.runningInTestMode()) {

@@ -94,7 +94,7 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
         try{
             return (Class<PlayPlugin>)getClass().getClassLoader().loadClass(pluginClassName);
         }catch(Exception e){
-            Logger.error("Could not disable plugin " + pluginClassName, e);
+            Logger.error(e, "Could not disable plugin " + pluginClassName);
         }
         return null;
     }
