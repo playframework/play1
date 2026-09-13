@@ -1,12 +1,19 @@
 package play.libs.ws;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+
 import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
 
 public final class WSSSLContext {
@@ -39,10 +46,32 @@ public final class WSSSLContext {
 
             // SSL context
             var sslCTX = SSLContext.getInstance("TLS");
-            sslCTX.init(createKeyManagers(ks, keyStorePass), createTrustManagers(CAValidation, ks), new SecureRandom());
+            if (CAValidation) {
+                sslCTX.init(createKeyManagers(ks, keyStorePass), createTrustManagerFactory(ks).getTrustManagers(), new SecureRandom());
+            } else {
+                sslCTX.init(createKeyManagers(ks, keyStorePass), new TrustManager[] { TRUST_ALL_MANAGER }, new SecureRandom());
+            }
 
             return sslCTX;
         } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException("Error creating SSL context", e);
+        }
+    }
+
+    public static SslContext getNettySslContext(String keyStore, String keyStorePass, boolean CAValidation) {
+        try {
+            KeyStore ks = createKeyStore(keyStore, keyStorePass);
+
+            SslContextBuilder builder = SslContextBuilder.forClient()
+                    .keyManager(createKeyManagerFactory(ks, keyStorePass));
+            if (CAValidation) {
+                builder.trustManager(createTrustManagerFactory(ks));
+            } else {
+                builder.trustManager(InsecureTrustManagerFactory.INSTANCE);
+            }
+
+            return builder.build();
+        } catch (Exception e) {
             throw new RuntimeException("Error creating SSL context", e);
         }
     }
@@ -57,20 +86,21 @@ public final class WSSSLContext {
     }
 
     private static KeyManager[] createKeyManagers(KeyStore ks, String keyStorePass) throws GeneralSecurityException {
+        return createKeyManagerFactory(ks, keyStorePass).getKeyManagers();
+    }
+
+    private static KeyManagerFactory createKeyManagerFactory(KeyStore ks, String keyStorePass)
+            throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(ks, keyStorePass.toCharArray());
 
-        return kmf.getKeyManagers();
+        return kmf;
     }
 
-    private static TrustManager[] createTrustManagers(boolean CAValidation, KeyStore ks) throws GeneralSecurityException {
-        if (CAValidation) {
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-            tmf.init(ks);
+    private static TrustManagerFactory createTrustManagerFactory(KeyStore ks) throws NoSuchAlgorithmException, KeyStoreException {
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ks);
 
-            return tmf.getTrustManagers();
-        } else {
-            return new TrustManager[] { TRUST_ALL_MANAGER };
-        }
+        return tmf;
     }
 }

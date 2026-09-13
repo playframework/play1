@@ -28,10 +28,10 @@ public class WSTest extends UnitTest {
         String url = "http://google.com";
         HttpResponse response = WS.url(url).post();
         String resp1 = IO.readContentAsString(response.getStream(), response.getEncoding());
-        // Stream is consumed, no more content
+        // AHC 3.x buffers the response body: getStream() is repeatable
         String resp2 = IO.readContentAsString(response.getStream(), response.getEncoding());
-        assertNotEquals(resp1, resp2);
-        assertEquals("", resp2);
+        assertEquals(resp1, resp2);
+        assertNotEquals("", resp1);
     }
 
     @Test
