@@ -47,7 +47,7 @@ public class FixturesTest {
         public List<play.db.Model> fetch(int offset, int length, String orderBy, String orderDirection,
         	    List<String> properties, String keywords, String where) { return null; }
         @Override
-        public Long count(List<String> properties, String keywords, String where) { return null; }
+        public long count(List<String> properties, String keywords, String where) { return 0L; }
         @Override
         public void deleteAll() { /* Do nothing */ }
         @Override

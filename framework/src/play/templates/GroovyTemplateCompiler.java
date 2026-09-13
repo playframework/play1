@@ -326,7 +326,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         }
         Tag tag = tagsStack.pop();
         String lastInStack = tag.name;
-        if (tagName.equals("")) {
+        if (tagName.isEmpty()) {
             tagName = lastInStack;
         }
         if (!lastInStack.equals(tagName)) {
@@ -368,7 +368,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                     tName = tName.substring(dotIndex + 1);
                 }
                 for (Class<?> c : fastClasses) {
-                    if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
+                    if (!c.isAnnotationPresent(FastTags.Namespace.class) && !tSpace.isEmpty()) {
                         continue;
                     }
                     if (c.isAnnotationPresent(FastTags.Namespace.class)

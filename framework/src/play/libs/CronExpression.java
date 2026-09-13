@@ -1002,7 +1002,7 @@ public class CronExpression implements Serializable, Cloneable {
 
             // get second.................................................
             st = seconds.tailSet(sec);
-            if (st.size() != 0) {
+            if (!st.isEmpty()) {
                 sec = st.first();
             } else {
                 sec = seconds.first();
@@ -1017,7 +1017,7 @@ public class CronExpression implements Serializable, Cloneable {
 
             // get minute.................................................
             st = minutes.tailSet(min);
-            if (st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = min;
                 min = st.first();
             } else {
@@ -1038,7 +1038,7 @@ public class CronExpression implements Serializable, Cloneable {
 
             // get hour...................................................
             st = hours.tailSet(hr);
-            if (st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = hr;
                 hr = st.first();
             } else {
@@ -1141,7 +1141,7 @@ public class CronExpression implements Serializable, Cloneable {
                         day = daysOfMonth.first();
                         mon++;
                     }
-                } else if (st.size() != 0) {
+                } else if (!st.isEmpty()) {
                     t = day;
                     day = st.first();
                 } else {
@@ -1256,7 +1256,7 @@ public class CronExpression implements Serializable, Cloneable {
                     int dow = daysOfWeek.first(); // desired
                     // d-o-w
                     st = daysOfWeek.tailSet(cDow);
-                    if (st.size() > 0) {
+                    if (!st.isEmpty()) {
                         dow = st.first();
                     }
 
@@ -1310,7 +1310,7 @@ public class CronExpression implements Serializable, Cloneable {
 
             // get month...................................................
             st = months.tailSet(mon);
-            if (st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = mon;
                 mon = st.first();
             } else {
@@ -1338,7 +1338,7 @@ public class CronExpression implements Serializable, Cloneable {
 
             // get year...................................................
             st = years.tailSet(year);
-            if (st.size() != 0) {
+            if (!st.isEmpty()) {
                 t = year;
                 year = st.first();
             } else {

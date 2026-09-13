@@ -123,7 +123,7 @@ class IamADeveloper(unittest.TestCase):
         edit(app, "conf/application.conf", 32, 'http.port=-1')
         edit(app, "conf/application.conf", 33, 'https.port=' + DEFAULTS['http.port'])
         edit(app, "conf/application.conf", 232,
-             'play.ssl.netty.pipeline = play.server.FlashPolicyHandler,org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.codec.http.HttpContentCompressor,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler')
+             'play.ssl.netty.pipeline = org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.codec.http.HttpContentCompressor,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler')
         create(app, 'conf/host.key')
         insert(app, "conf/host.key", 1, '-----BEGIN RSA PRIVATE KEY-----')
         insert(app, "conf/host.key", 2, 'MIIEpQIBAAKCAQEAoOx9pCR7rZ50S9FotKVD2+aC36Hj4TkXZTZwEnh/fWyuiH2O')

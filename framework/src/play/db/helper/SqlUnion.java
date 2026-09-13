@@ -30,7 +30,7 @@ public class SqlUnion extends SqlQuery {
     private void unionSep(String separator, SqlSelect ... expr) {
         for (SqlSelect query : expr) {
             String sql = query.toString();
-            if (sql.length()>0) sql = "(" + sql + ")";
+            if (!sql.isEmpty()) sql = "(" + sql + ")";
             union.separator(separator).append(sql);
             params.addAll(query.getParams());
         }

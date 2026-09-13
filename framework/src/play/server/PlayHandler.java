@@ -555,7 +555,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         ChannelBuffer b = nettyRequest.getContent();
         if (b instanceof FileChannelBuffer buffer) {
             // An error occurred
-            Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
+            int max = Integer.parseInt(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
 
             body = buffer.getInputStream();
             if (!(max == -1 || body.available() < max)) {
@@ -1051,7 +1051,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     private void websocketHandshake(final ChannelHandlerContext ctx, HttpRequest req, MessageEvent messageEvent)
             throws Exception {
 
-        Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "65345"));
+        int max = Integer.parseInt(Play.configuration.getProperty("play.netty.maxContentLength", "65345"));
 
         // Upgrade the pipeline as the handshaker needs the HttpStream
         // Aggregator
