@@ -3,32 +3,34 @@ package play.libs.ws;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.SSLContext;
-
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.ssl.SslContext;
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.AsyncHttpClientConfig.Builder;
-import com.ning.http.client.ProxyServer;
-import com.ning.http.client.Realm.AuthScheme;
-import com.ning.http.client.Realm.RealmBuilder;
-import com.ning.http.client.Response;
-import com.ning.http.client.multipart.ByteArrayPart;
-import com.ning.http.client.multipart.FilePart;
-import com.ning.http.client.multipart.Part;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.BoundRequestBuilder;
+import org.asynchttpclient.DefaultAsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
+import org.asynchttpclient.Realm;
+import org.asynchttpclient.Realm.AuthScheme;
+import org.asynchttpclient.Response;
+import org.asynchttpclient.proxy.ProxyServer;
+import org.asynchttpclient.request.body.multipart.ByteArrayPart;
+import org.asynchttpclient.request.body.multipart.FilePart;
+import org.asynchttpclient.request.body.multipart.Part;
 
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -70,7 +72,7 @@ import play.mvc.Http.Header;
 public class WSAsync implements WSImpl {
 
     private AsyncHttpClient httpClient;
-    private static SSLContext sslCTX = null;
+    private static SslContext sslCTX = null;
 
     public WSAsync() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
@@ -83,7 +85,7 @@ public class WSAsync implements WSImpl {
         String keyStorePass = Play.configuration.getProperty("ssl.keyStorePassword", System.getProperty("javax.net.ssl.keyStorePassword"));
         boolean CAValidation = Boolean.parseBoolean(Play.configuration.getProperty("ssl.cavalidation", "true"));
 
-        Builder confBuilder = new AsyncHttpClientConfig.Builder();
+        DefaultAsyncHttpClientConfig.Builder confBuilder = new DefaultAsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
             int proxyPortInt = 0;
             try {
@@ -94,14 +96,15 @@ public class WSAsync implements WSImpl {
                         proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
-            ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
+            ProxyServer.Builder proxyBuilder = new ProxyServer.Builder(proxyHost, proxyPortInt);
+            if (proxyUser != null) {
+                proxyBuilder.setRealm(new org.asynchttpclient.Realm.Builder(proxyUser, proxyPassword == null ? "" : proxyPassword).build());
+            }
             if (nonProxyHosts != null) {
                 String[] strings = nonProxyHosts.split("\\|");
-                for (String uril : strings) {
-                    proxy.addNonProxyHost(uril);
-                }
+                proxyBuilder.setNonProxyHosts(Arrays.asList(strings));
             }
-            confBuilder.setProxyServer(proxy);
+            confBuilder.setProxyServer(proxyBuilder.build());
         }
         if (userAgent != null) {
             confBuilder.setUserAgent(userAgent);
@@ -115,21 +118,25 @@ public class WSAsync implements WSImpl {
             }
 
             if (sslCTX == null) {
-                sslCTX = WSSSLContext.getSslContext(keyStore, keyStorePass, CAValidation);
-                confBuilder.setSSLContext(sslCTX);
+                sslCTX = WSSSLContext.getNettySslContext(keyStore, keyStorePass, CAValidation);
+                confBuilder.setSslContext(sslCTX);
             }
         }
         // when using raw urls, AHC does not encode the params in url.
         // this means we can/must encode it(with correct encoding) before
         // passing it to AHC
-        confBuilder.setDisableUrlEncodingForBoundedRequests(true);
-        httpClient = new AsyncHttpClient(confBuilder.build());
+        confBuilder.setDisableUrlEncodingForBoundRequests(true);
+        httpClient = new DefaultAsyncHttpClient(confBuilder.build());
     }
 
     @Override
     public void stop() {
         Logger.trace("Releasing http client connections...");
-        httpClient.close();
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Error closing WS HTTP client", e);
+        }
     }
 
     @Override
@@ -437,14 +444,14 @@ public class WSAsync implements WSImpl {
                 default:
                     throw new RuntimeException("Scheme " + this.scheme + " not supported by the UrlFetch WS backend.");
                 }
-                builder.setRealm((new RealmBuilder()).setScheme(authScheme).setPrincipal(this.username).setPassword(this.password)
+                builder.setRealm(new Realm.Builder(this.username, this.password).setScheme(authScheme)
                         .setUsePreemptiveAuth(true).build());
             }
             for (String key : this.headers.keySet()) {
                 builder.addHeader(key, headers.get(key));
             }
-            builder.setFollowRedirects(this.followRedirects);
-            builder.setRequestTimeout(this.timeout * 1000);
+            builder.setFollowRedirect(this.followRedirects);
+            builder.setRequestTimeout(Duration.ofSeconds(this.timeout));
             if (this.virtualHost != null) {
                 builder.setVirtualHost(this.virtualHost);
             }
@@ -664,10 +671,10 @@ public class WSAsync implements WSImpl {
 
         @Override
         public List<Header> getHeaders() {
-            Map<String, List<String>> hdrs = response.getHeaders();
+            HttpHeaders hdrs = response.getHeaders();
             List<Header> result = new ArrayList<>();
-            for (String key : hdrs.keySet()) {
-                result.add(new Header(key, hdrs.get(key)));
+            for (String key : hdrs.names()) {
+                result.add(new Header(key, hdrs.getAll(key)));
             }
             return result;
         }
@@ -675,7 +682,7 @@ public class WSAsync implements WSImpl {
         @Override
         public String getString() {
             try {
-                return response.getResponseBody(getEncoding());
+                return response.getResponseBody(Charset.forName(getEncoding()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -684,7 +691,7 @@ public class WSAsync implements WSImpl {
         @Override
         public String getString(String encoding) {
             try {
-                return response.getResponseBody(encoding);
+                return response.getResponseBody(Charset.forName(encoding));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

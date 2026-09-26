@@ -287,6 +287,7 @@
 
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
+            <param name="play.user.timezone" value="-Duser.timezone=Etc/UTC"/>
             <param name="play.user.language" value="-Duser.language=en"/>
             <param name="play.user.country" value="-Duser.country=US"/>
         </antcall>
@@ -344,6 +345,7 @@
         <exec executable="${basedir}/../play${playExtension}" failonerror="true">
             <arg value="auto-test"/>
             <arg value="${testAppPath}"/>
+            <arg value="${play.user.timezone}" if:set="play.user.timezone"/>
             <arg value="${play.user.language}" if:set="play.user.language"/>
             <arg value="${play.user.country}" if:set="play.user.country"/>
         </exec>

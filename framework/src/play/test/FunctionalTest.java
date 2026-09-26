@@ -1,11 +1,11 @@
 package play.test;
 
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
-import com.ning.http.client.multipart.FilePart;
-import com.ning.http.client.multipart.MultipartBody;
-import com.ning.http.client.multipart.MultipartUtils;
-import com.ning.http.client.multipart.Part;
-import com.ning.http.client.multipart.StringPart;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import org.asynchttpclient.request.body.multipart.FilePart;
+import org.asynchttpclient.request.body.multipart.MultipartBody;
+import org.asynchttpclient.request.body.multipart.MultipartUtils;
+import org.asynchttpclient.request.body.multipart.Part;
+import org.asynchttpclient.request.body.multipart.StringPart;
 import org.junit.jupiter.api.BeforeEach;
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,7 +223,7 @@ public abstract class FunctionalTest extends BaseTest {
          **/
         _ByteArrayOutputStream baos;
         try {
-            requestEntity = MultipartUtils.newMultipartBody(parts, new FluentCaseInsensitiveStringsMap());
+            requestEntity = MultipartUtils.newMultipartBody(parts, new DefaultHttpHeaders());
             request.headers.put("content-type", new Http.Header("content-type", requestEntity.getContentType()));
             long contentLength = requestEntity.getContentLength();
             if (contentLength < Integer.MIN_VALUE || contentLength > Integer.MAX_VALUE) {
@@ -231,7 +232,10 @@ public abstract class FunctionalTest extends BaseTest {
             // array = new byte[(int) contentLength]; // ^1
             // requestEntity.read(ByteBuffer.wrap(array)); // ^1
             baos = new _ByteArrayOutputStream((int) contentLength);
-            requestEntity.transferTo(0, Channels.newChannel(baos));
+            WritableByteChannel channel = Channels.newChannel(baos);
+            // AHC 3.x writes at most 8192 bytes per call
+            while (requestEntity.transferTo(channel) > 0) {
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

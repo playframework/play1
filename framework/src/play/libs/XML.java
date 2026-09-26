@@ -126,9 +126,9 @@ public class XML {
         try {
             return newDocumentBuilder(namespaceAware).parse(file);
         } catch (SAXException e) {
-            Logger.warn("Parsing error when building Document object from xml file '" + file + "'.", e);
+            Logger.warn(e, "Parsing error when building Document object from xml file '" + file + "'.");
         } catch (IOException e) {
-            Logger.warn("Reading error when building Document object from xml file '" + file + "'.", e);
+            Logger.warn(e, "Reading error when building Document object from xml file '" + file + "'.");
         }
         return null;
     }
@@ -158,9 +158,9 @@ public class XML {
         try {
             return newDocumentBuilder(namespaceAware).parse(source);
         } catch (SAXException e) {
-            Logger.warn("Parsing error when building Document object from xml data.", e);
+            Logger.warn(e, "Parsing error when building Document object from xml data.");
         } catch (IOException e) {
-            Logger.warn("Reading error when building Document object from xml data.", e);
+            Logger.warn(e, "Reading error when building Document object from xml data.");
         }
         return null;
     }
@@ -189,9 +189,9 @@ public class XML {
         try {
             return newDocumentBuilder(namespaceAware).parse(stream);
         } catch (SAXException e) {
-            Logger.warn("Parsing error when building Document object from xml data.", e);
+            Logger.warn(e, "Parsing error when building Document object from xml data.");
         } catch (IOException e) {
-            Logger.warn("Reading error when building Document object from xml data.", e);
+            Logger.warn(e, "Reading error when building Document object from xml data.");
         }
         return null;
     }
@@ -217,7 +217,7 @@ public class XML {
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
             return signature.validate(valContext);
         } catch (Exception e) {
-            Logger.warn("Error validating an XML signature.", e);
+            Logger.warn(e, "Error validating an XML signature.");
             return false;
         }
     }
@@ -249,7 +249,7 @@ public class XML {
             XMLSignature signature = fac.newXMLSignature(si, ki);
             signature.sign(dsc);
         } catch (Exception e) {
-            Logger.warn("Error while signing an XML document.", e);
+            Logger.warn(e, "Error while signing an XML document.");
         }
 
         return document;
