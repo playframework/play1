@@ -27,6 +27,7 @@ public class StreamChunkAggregator extends ChannelInboundHandlerAdapter {
 
     private volatile HttpMessage currentMessage;
     private volatile OutputStream out;
+    private volatile ByteBuf memoryBuffer;
     private volatile File file;
 
     @Override
