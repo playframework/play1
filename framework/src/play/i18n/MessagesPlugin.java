@@ -21,7 +21,7 @@ import play.vfs.VirtualFile;
  */
 public class MessagesPlugin extends PlayPlugin {
 
-    static Long lastLoading = 0L;
+    static long lastLoading = 0L;
 
     private static final List<String> includeMessageFilenames = new ArrayList<>();
 

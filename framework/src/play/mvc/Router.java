@@ -275,7 +275,7 @@ public class Router {
         for (String line : content.split("\n")) {
             lineNumber++;
             line = line.trim().replaceAll("\\s+", " ");
-            if (line.length() == 0 || line.startsWith("#")) {
+            if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }
             Matcher matcher = routePattern.matcher(line);
@@ -663,7 +663,7 @@ public class Router {
                     qs = qs.substring(0, qs.length() - 1);
                 }
                 ActionDefinition actionDefinition = new ActionDefinition();
-                actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
+                actionDefinition.url = qs.isEmpty() ? path : path + "?" + qs;
                 actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
                 actionDefinition.star = "*".equals(route.method);
                 actionDefinition.action = action;
@@ -938,7 +938,7 @@ public class Router {
         }
 
         public void addParams(String params) {
-            if (params == null || params.length() < 1) {
+            if (params == null || params.isEmpty()) {
                 return;
             }
             params = params.substring(1, params.length() - 1);
@@ -954,7 +954,7 @@ public class Router {
 
         // TODO: Add args names
         public void addFormat(String params) {
-            if (params == null || params.length() < 1) {
+            if (params == null || params.isEmpty()) {
                 return;
             }
             params = params.trim();
@@ -1069,7 +1069,7 @@ public class Router {
             String name;
             Pattern constraint;
             String defaultValue;
-            Boolean optional = false;
+            boolean optional = false;
         }
 
         @Override

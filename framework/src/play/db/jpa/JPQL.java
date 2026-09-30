@@ -189,25 +189,27 @@ public class JPQL {
     }
 
     public String createCountQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
-        if (query.trim().toLowerCase().startsWith("select ")) {
+        var strippedAndLoweredQuery = (query = query.strip()).toLowerCase();
+        if (strippedAndLoweredQuery.startsWith("select ")) {
             return query;
         }
         if (query.matches("^by[A-Z].*$")) {
             return "select count(*) from " + entityName + " where " + findByToJPQL(dbName, query);
         }
-        if (query.trim().toLowerCase().startsWith("from ")) {
+        if (strippedAndLoweredQuery.startsWith("from ")) {
             return "select count(*) " + query;
         }
-        if (query.trim().toLowerCase().startsWith("order by ")) {
+        if (strippedAndLoweredQuery.startsWith("order by ")) {
             return "select count(*) from " + entityName;
         }
-        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params != null && params.length == 1) {
-            query += " = ?1";
+        if (query.indexOf(' ') == -1 && query.indexOf('=') == -1) {
+            if (params == null) {
+                query += " = null";
+            } else if (params.length == 1) {
+                query += " = ?1";
+            }
         }
-        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params == null) {
-            query += " = null";
-        }
-        if (query.trim().length() == 0) {
+        if (query.isEmpty()) {
             return "select count(*) from " + entityName;
         }
         return "select count(*) from " + entityName + " e where " + query;
@@ -228,12 +230,10 @@ public class JPQL {
     }
 
     public Query bindParameters(Query q, Map<String,Object> params) {
-        if (params == null) {
-            return q;
+        if (params != null) {
+            params.forEach(q::setParameter);
         }
-        for (String key : params.keySet()) {
-            q.setParameter(key, params.get(key));
-        }
+
         return q;
     }
 
@@ -317,8 +317,7 @@ public class JPQL {
 
     protected static String extractProp(String part, String end) {
         String prop = part.substring(0, part.length() - end.length());
-        prop = (prop.charAt(0) + "").toLowerCase() + prop.substring(1);
-        return prop;
+        return Character.toLowerCase(prop.charAt(0)) + prop.substring(1);
     }
     public static JPQL instance = null;
 }

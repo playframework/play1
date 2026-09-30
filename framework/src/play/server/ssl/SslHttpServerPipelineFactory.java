@@ -14,7 +14,7 @@ import play.server.HttpServerPipelineFactory;
 public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
 
     private final String pipelineConfig = Play.configuration.getProperty("play.ssl.netty.pipeline",
-            "play.server.FlashPolicyHandler,io.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,io.netty.handler.codec.http.HttpResponseEncoder,io.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
+            "org.jboss.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,org.jboss.netty.handler.codec.http.HttpResponseEncoder,org.jboss.netty.handler.stream.ChunkedWriteHandler,play.server.ssl.SslPlayHandler");
 
     @Override
     public void initChannel(Channel channel) throws Exception {
@@ -29,7 +29,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
         SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
         engine.setUseClientMode(false);
 
-        if (enabledCiphers != null && enabledCiphers.length() > 0) {
+        if (enabledCiphers != null && !enabledCiphers.isEmpty()) {
             engine.setEnabledCipherSuites(enabledCiphers.replaceAll(" ", "").split(","));
         }
 
@@ -39,7 +39,7 @@ public class SslHttpServerPipelineFactory extends HttpServerPipelineFactory {
             engine.setNeedClientAuth(true);
         }
 
-        if (enabledProtocols != null && enabledProtocols.trim().length() > 0) {
+        if (enabledProtocols != null && !enabledProtocols.isBlank()) {
             engine.setEnabledProtocols(enabledProtocols.replaceAll(" ", "").split(","));
         }
 

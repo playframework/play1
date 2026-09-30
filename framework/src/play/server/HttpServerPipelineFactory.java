@@ -15,7 +15,7 @@ public class HttpServerPipelineFactory extends ChannelInitializer<Channel> {
 
     protected static final Map<String, Class<?>> classes = new HashMap<>();
 
-    private final String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "play.server.FlashPolicyHandler,io.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,io.netty.handler.codec.http.HttpResponseEncoder,io.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
+    private final String pipelineConfig = Play.configuration.getProperty("play.netty.pipeline", "io.netty.handler.codec.http.HttpRequestDecoder,play.server.StreamChunkAggregator,io.netty.handler.codec.http.HttpResponseEncoder,io.netty.handler.stream.ChunkedWriteHandler,play.server.PlayHandler");
 
     @Override
     public void initChannel(Channel channel) throws Exception {

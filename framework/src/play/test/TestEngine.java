@@ -128,7 +128,7 @@ public class TestEngine {
             if (Request.current() == null) {
                 String host = Router.getBaseUrl();
                 String domain = null;
-                Integer port = 80;
+                int port = 80;
                 boolean isSecure = false;
                 if (host == null || host.equals("application.baseUrl")) {
                     host = "localhost:" + port;

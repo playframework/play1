@@ -51,7 +51,7 @@ public class XPath {
     public static Node selectNode(String path, Object node, Map<String, String> namespaces) {
         try {
             List<Node> nodes = selectNodes(path, node, namespaces);
-            if (nodes.size() == 0) {
+            if (nodes.isEmpty()) {
                 return null;
             }
             return nodes.get(0);

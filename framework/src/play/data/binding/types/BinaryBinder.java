@@ -16,7 +16,7 @@ public class BinaryBinder implements TypeBinder<Model.BinaryField> {
     @SuppressWarnings("unchecked")
     @Override
     public Object bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
-        if (value == null || value.trim().length() == 0) {
+        if (value == null || value.isBlank()) {
             return null;
         }
         try {
@@ -26,7 +26,7 @@ public class BinaryBinder implements TypeBinder<Model.BinaryField> {
                 List<Upload> uploads = (List<Upload>) req.args.get("__UPLOADS");
                 if(uploads != null){
                     for (Upload upload : uploads) {
-                        if (upload.getFieldName().equals(value) && upload.getFileName().trim().length() > 0) {
+                        if (upload.getFieldName().equals(value) && !upload.getFileName().isBlank()) {
                             b.set(upload.asStream(), upload.getContentType());
                             return b;
                         }

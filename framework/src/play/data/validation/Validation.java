@@ -499,12 +499,10 @@ public class Validation {
         try {
             ValidationResult result = new ValidationResult();
             if (!check.isSatisfied(o, o, null, null)) {
-                Error error = new Error(key, check.getClass()
-                        .getDeclaredField("mes").get(null)
-                        + "",
+                Error error = new Error(key, String.valueOf(check.getClass()
+                        .getDeclaredField("mes").get(null)),
                         check.getMessageVariables() == null ? new String[0]
-                                : check.getMessageVariables().values()
-                                        .toArray(new String[0]),
+                                : check.getMessageVariables().values().toArray(String[]::new),
                         check.getSeverity());
                 Validation.current().errors.add(error);
                 result.error = error;
@@ -520,7 +518,7 @@ public class Validation {
 
     static String getLocalName(Object o) {
         List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-        if (names.size() > 0) {
+        if (!names.isEmpty()) {
             return names.get(0);
         }
         return "";

@@ -582,7 +582,7 @@ public class Logger {
                     }
                     cleanTrace.add(se);
                 }
-                toClean.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
+                toClean.setStackTrace(cleanTrace.toArray(StackTraceElement[]::new));
                 toClean = toClean.getCause();
                 if (toClean == null) {
                     break;

@@ -26,7 +26,7 @@ public class FileBinder implements TypeBinder<File> {
             if (uploads != null) {
                 for (Upload upload : uploads) {
                     if (upload.getFieldName().equals(value)) {
-                        if (upload.getFileName().trim().length() > 0) {
+                        if (!upload.getFileName().isBlank()) {
                             File file = upload.asFile();
                             return file;
                         }

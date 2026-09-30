@@ -331,7 +331,7 @@ public class ApplicationClassloader extends ClassLoader {
             Cache.clear();
             if (HotswapAgent.enabled) {
                 try {
-                    HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
+                    HotswapAgent.reload(newDefinitions.toArray(ClassDefinition[]::new));
                 } catch (Throwable e) {
                     throw new RestartNeededException(newDefinitions.size() + " classes changed", e);
                 }
@@ -416,7 +416,7 @@ public class ApplicationClassloader extends ClassLoader {
                         }
                     }
 
-                    Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+                    Play.classes.compiler.compile(classNames.toArray(String[]::new));
 
                 }
 
@@ -521,7 +521,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     private List<ApplicationClass> getAllClasses(VirtualFile path, String basePackage) {
-        if (basePackage.length() > 0 && !basePackage.endsWith(".")) {
+        if (!basePackage.isEmpty() && !basePackage.endsWith(".")) {
             basePackage += ".";
         }
         List<ApplicationClass> res = new ArrayList<>();

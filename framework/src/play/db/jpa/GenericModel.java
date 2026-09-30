@@ -212,7 +212,7 @@ public class GenericModel extends JPABase {
                                 // Remove it to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);
                                 for (String _id : ids) {
-                                    if (_id == null || _id.equals("")) {
+                                    if (_id == null || _id.isEmpty()) {
                                         continue;
                                     }
 
@@ -246,14 +246,14 @@ public class GenericModel extends JPABase {
                                     // Remove only the key to prevent us from finding it again later
                                     // This how the old impl does it..
                                     fieldParamNode.removeChild(keyName, removedNodesList);
-                                    if (fieldParamNode.getAllChildren().size() == 0) {
+                                    if (fieldParamNode.getAllChildren().isEmpty()) {
                                         // remove the whole node..
                                         paramNode.removeChild(field.getName(), removedNodesList);
                                     }
 
                                 }
 
-                            } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
+                            } else if (ids != null && ids.length > 0 && ids[0].isEmpty()) {
                                 bw.set(field.getName(), o, null);
                                 // Remove the key to prevent us from finding it again later
                                 fieldParamNode.removeChild(keyName, removedNodesList);
@@ -563,8 +563,8 @@ public class GenericModel extends JPABase {
             if (param.getClass().isArray()) {
                 param = Arrays.asList((Object[]) param);
             }
-            if (param instanceof Integer) {
-                param = ((Integer) param).longValue();
+            if (param instanceof Integer v) {
+                param = v.longValue();
             }
             query.setParameter(name, param);
             return this;

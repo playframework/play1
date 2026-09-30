@@ -11,14 +11,14 @@ import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.TimeZone;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -68,9 +68,16 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List<String> temp = new ArrayList<>(Arrays.asList(array));
-        temp.remove(s);
-        return temp.toArray(new String[temp.size()]);
+        List<String> temp = new ArrayList<>(array.length);
+        var remove = true;
+        for (var element : array) {
+            if (remove && Objects.equals(element, s)) {
+                remove = false;
+            } else {
+                temp.add(element);
+            }
+        }
+        return temp.toArray(String[]::new);
     }
 
     public static String toString(Closure<?> closure) {
@@ -97,12 +104,9 @@ public class JavaExtensions {
         return sb.toString();
     }
 
-    public static String pad(String str, Integer size) {
+    public static String pad(String str, int size) {
         int t = size - str.length();
-        for (int i = 0; i < t; i++) {
-            str += "&nbsp;";
-        }
-        return str;
+        return t > 0 ? str + "&nbsp;".repeat(t) : str;
     }
 
     public static RawData escapeHtml(String htmlToEscape) {
@@ -180,7 +184,7 @@ public class JavaExtensions {
         return df.format(date);
     }
 
-    public static Integer page(Number number, Integer pageSize) {
+    public static int page(Number number, int pageSize) {
         return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
     }
 
@@ -188,7 +192,7 @@ public class JavaExtensions {
         return since(date, false);
     }
 
-    public static String since(Date date, Boolean stopAtMonth) {
+    public static String since(Date date, boolean stopAtMonth) {
         Date now = new Date();
         if (now.before(date)) {
             return "";
@@ -220,19 +224,19 @@ public class JavaExtensions {
         return Messages.get("since.years", years, pluralize(years));
     }
 
-    public static String asdate(Long timestamp) {
+    public static String asdate(long timestamp) {
         return asdate(timestamp, I18N.getDateFormat());
     }
 
-    public static String asdate(Long timestamp, String pattern) {
+    public static String asdate(long timestamp, String pattern) {
         return asdate(timestamp, pattern, Lang.get());
     }
 
-    public static String asdate(Long timestamp, String pattern, String lang) {
+    public static String asdate(long timestamp, String pattern, String lang) {
         return new SimpleDateFormat(pattern, Lang.getLocaleOrDefault(lang)).format(new Date(timestamp));
     }
 
-    public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
+    public static String asdate(long timestamp, String pattern, String lang, String timezone) {
         return format(new Date(timestamp), pattern, lang, timezone);
     }
 
@@ -257,7 +261,7 @@ public class JavaExtensions {
         return entity;
     }
 
-    public static String formatSize(Long bytes) {
+    public static String formatSize(long bytes) {
         if (bytes < 1024L) {
             return bytes + " B";
         }
@@ -297,7 +301,7 @@ public class JavaExtensions {
 
     public static String capFirst(Object o) {
         String string = o.toString();
-        if (string.length() == 0) {
+        if (string.isEmpty()) {
             return string;
         }
         return ("" + string.charAt(0)).toUpperCase() + string.substring(1);
@@ -373,10 +377,10 @@ public class JavaExtensions {
     }
 
     public static String slugify(String string) {
-        return slugify(string, Boolean.TRUE);
+        return slugify(string, true);
     }
 
-    public static String slugify(String string, Boolean lowercase) {
+    public static String slugify(String string, boolean lowercase) {
         string = noAccents(string);
         // Apostrophes.
         string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
@@ -430,15 +434,11 @@ public class JavaExtensions {
         if (items == null) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-        Iterator<?> ite = items.iterator();
-        int i = 0;
-        while (ite.hasNext()) {
-            if (i++ > 0) {
-                sb.append(separator);
-            }
-            sb.append(ite.next());
+
+        StringJoiner joiner = new StringJoiner(separator);
+        for (Object item : items) {
+            joiner.add(String.valueOf(item));
         }
-        return sb.toString();
+        return joiner.toString();
     }
 }
