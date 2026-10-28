@@ -156,6 +156,13 @@ public abstract class PlayAbstractFlushingEventListener {
 		// into Nullability, instead of abusing the Cascade infrastructure)
 		for ( var entryEntry : persistenceContext.reentrantSafeManagedEntities() ) {
 			final var entry = entryEntry.$$_hibernate_getEntityEntry();
+			// [play] Play semantics: entities which are not going to be saved
+			// (JPABase.willBeSaved == false) are not checked for references to
+			// transient instances either. Mirrors the guard in prepareEntityFlushes.
+			if ( isNotGoingToBeSaved( entryEntry.$$_hibernate_getEntityInstance() ) ) {
+				continue;
+			}
+			// [/play]
 			if ( checkable( entry ) ) {
 				Cascade.cascade(
 						CascadingActions.CHECK_ON_FLUSH,

@@ -38,7 +38,22 @@
  			if ( flushable( entityEntry ) ) {
  				cascadeOnFlush( session, entityEntry.getPersister(), entry.$$_hibernate_getEntityInstance(), context );
  			}
-@@ -152,6 +169,13 @@
+@@ -138,7 +155,14 @@
+ 		// persistent when we do the check (I wonder if we could move this
+ 		// into Nullability, instead of abusing the Cascade infrastructure)
+ 		for ( var entryEntry : persistenceContext.reentrantSafeManagedEntities() ) {
+ 			final var entry = entryEntry.$$_hibernate_getEntityEntry();
++			// [play] Play semantics: entities which are not going to be saved
++			// (JPABase.willBeSaved == false) are not checked for references to
++			// transient instances either. Mirrors the guard in prepareEntityFlushes.
++			if ( isNotGoingToBeSaved( entryEntry.$$_hibernate_getEntityInstance() ) ) {
++				continue;
++			}
++			// [/play]
+ 			if ( checkable( entry ) ) {
+ 				Cascade.cascade(
+ 						CascadingActions.CHECK_ON_FLUSH,
+@@ -152,6 +176,13 @@
  		}
  	}
  
@@ -52,7 +67,7 @@
  	private static boolean flushable(EntityEntry entry) {
  		final var status = entry.getStatus();
  		return status == Status.MANAGED
-@@ -278,7 +302,13 @@
+@@ -278,7 +309,13 @@
  		final var interceptor = session.getInterceptor();
  		persistenceContext.forEachCollectionEntry(
  				(collection, collectionEntry) -> {
@@ -67,7 +82,7 @@
  						final var currentKey = collectionEntry.getCurrentKey();
  						interceptor.onCollectionRecreate( collection, currentKey );
  						actionQueue.addAction(
-@@ -290,7 +320,7 @@
+@@ -290,7 +327,7 @@
  								)
  						);
  					}
@@ -76,7 +91,7 @@
  						final var loadedKey = collectionEntry.getLoadedKey();
  						interceptor.onCollectionRemove( collection, loadedKey );
  						if ( !skipRemoval( session, collectionEntry.getLoadedPersister(), loadedKey ) ) {
-@@ -305,7 +335,7 @@
+@@ -305,7 +342,7 @@
  							);
  						}
  					}
@@ -85,7 +100,7 @@
  						final var loadedKey = collectionEntry.getLoadedKey();
  						interceptor.onCollectionUpdate( collection, loadedKey );
  						actionQueue.addAction(
-@@ -336,6 +366,23 @@
+@@ -336,6 +373,23 @@
  		return count;
  	}
  
