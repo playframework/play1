@@ -1,7 +1,7 @@
 package play.db.jpa;
 
 import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.usertype.UserType;
 import java.io.Serializable;
 import java.sql.PreparedStatement;
@@ -35,12 +35,12 @@ public class BlobType implements UserType<Blob> {
     }
 
     @Override
-    public Blob nullSafeGet(ResultSet rs, int position, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
+    public Blob nullSafeGet(ResultSet rs, int position, WrapperOptions options) throws SQLException {
         return new Blob(rs.getString(position));
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement ps, Blob value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement ps, Blob value, int index, WrapperOptions options) throws SQLException {
         if (value != null) {
             ps.setString(index, encode(value));
         } else {
