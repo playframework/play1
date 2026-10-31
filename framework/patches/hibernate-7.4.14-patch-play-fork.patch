@@ -1,0 +1,166 @@
+--- a/src/play/db/jpa/PlayAbstractFlushingEventListener.java
++++ b/src/play/db/jpa/PlayAbstractFlushingEventListener.java
+@@ -38,6 +38,12 @@
+ 
+ /**
+  * A convenience base class for listeners whose functionality results in flushing.
++ * <p>
++ * [play] Fork of {@code org.hibernate.event.internal.AbstractFlushingEventListener}
++ * (Hibernate ORM 7.4) carrying the Play! {@code JPABase.willBeSaved} semantics;
++ * all Play-specific changes are wrapped in "// [play] ... // [/play]" marker comments
++ * and must be re-applied when syncing with a newer Hibernate version.
++ * [/play]
+  *
+  * @author Steve Ebersole
+  */
+@@ -116,6 +122,9 @@
+ 	 * Process {@link CascadingActions#PERSIST_ON_FLUSH} at the start of a
+ 	 * flush to discover any newly referenced entity that must be passed to
+ 	 * {@code persist()}, and also apply orphan delete.
++	 * <p>
++	 * Play: entities whose {@code JPABase.willBeSaved} is {@code false} are
++	 * invisible to the flush-time cascades.
+ 	 */
+ 	private void prepareEntityFlushes(EventSource session, PersistenceContext persistenceContext)
+ 			throws HibernateException {
+@@ -125,6 +134,14 @@
+ 		for ( var entry : persistenceContext.reentrantSafeManagedEntities() ) {
+ //		for ( Map.Entry entry : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
+ 			final var entityEntry = entry.$$_hibernate_getEntityEntry();
++			// [play] Play semantics: flush-time cascades must not touch entities which
++			// are not going to be saved (JPABase.willBeSaved == false). Mirrors the
++			// "willBeSaved" check injected by framework/patches/hibernate-*-patch-play.patch
++			// into the cascade loop of prepareEntityFlushes.
++			if ( isNotGoingToBeSaved( entry.$$_hibernate_getEntityInstance() ) ) {
++				continue;
++			}
++			// [/play]
+ 			if ( flushable( entityEntry ) ) {
+ 				cascadeOnFlush( session, entityEntry.getPersister(), entry.$$_hibernate_getEntityInstance(), context );
+ 			}
+@@ -138,7 +155,14 @@
+ 		// persistent when we do the check (I wonder if we could move this
+ 		// into Nullability, instead of abusing the Cascade infrastructure)
+ 		for ( var entryEntry : persistenceContext.reentrantSafeManagedEntities() ) {
+ 			final var entry = entryEntry.$$_hibernate_getEntityEntry();
++			// [play] Play semantics: entities which are not going to be saved
++			// (JPABase.willBeSaved == false) are not checked for references to
++			// transient instances either. Mirrors the guard in prepareEntityFlushes.
++			if ( isNotGoingToBeSaved( entryEntry.$$_hibernate_getEntityInstance() ) ) {
++				continue;
++			}
++			// [/play]
+ 			if ( checkable( entry ) ) {
+ 				Cascade.cascade(
+ 						CascadingActions.CHECK_ON_FLUSH,
+@@ -152,6 +176,13 @@
+ 		}
+ 	}
+ 
++	// [play] Added helper for the willBeSaved check in prepareEntityFlushes.
++	// (The original 6.6 patch did the same via reflection on play.db.jpa.JPABase.)
++	private static boolean isNotGoingToBeSaved(Object entity) {
++		return entity instanceof JPABase jpaBase && !jpaBase.willBeSaved;
++	}
++	// [/play]
++
+ 	private static boolean flushable(EntityEntry entry) {
+ 		final var status = entry.getStatus();
+ 		return status == Status.MANAGED
+@@ -278,7 +309,13 @@
+ 		final var interceptor = session.getInterceptor();
+ 		persistenceContext.forEachCollectionEntry(
+ 				(collection, collectionEntry) -> {
+-					if ( collectionEntry.isDorecreate() ) {
++					// [play] Play semantics: collection actions are only scheduled if the
++					// collection owner, or the entity currently being saved, is marked
++					// willBeSaved. Mirrors the "if ( ce.isDorecreate() && interceptor.onCollectionXxx( ... ) )"
++					// change made by framework/patches/hibernate-*-patch-play.patch in flushCollections.
++					final boolean willSave = collectionWillBeSaved( collection );
++					// [/play]
++					if ( collectionEntry.isDorecreate() && willSave ) {
+ 						final var currentKey = collectionEntry.getCurrentKey();
+ 						interceptor.onCollectionRecreate( collection, currentKey );
+ 						actionQueue.addAction(
+@@ -290,7 +327,7 @@
+ 								)
+ 						);
+ 					}
+-					if ( collectionEntry.isDoremove() ) {
++					if ( collectionEntry.isDoremove() && willSave ) {
+ 						final var loadedKey = collectionEntry.getLoadedKey();
+ 						interceptor.onCollectionRemove( collection, loadedKey );
+ 						if ( !skipRemoval( session, collectionEntry.getLoadedPersister(), loadedKey ) ) {
+@@ -305,7 +342,7 @@
+ 							);
+ 						}
+ 					}
+-					if ( collectionEntry.isDoupdate() ) {
++					if ( collectionEntry.isDoupdate() && willSave ) {
+ 						final var loadedKey = collectionEntry.getLoadedKey();
+ 						interceptor.onCollectionUpdate( collection, loadedKey );
+ 						actionQueue.addAction(
+@@ -336,6 +373,23 @@
+ 		return count;
+ 	}
+ 
++	// [play] Added helper for the collection veto in flushCollections. Mirrors the
++	// boolean onCollectionXxx() checks of play.db.jpa.HibernateInterceptor that the
++	// original 6.6 patched build relied on (vanilla Hibernate ignores the interceptor
++	// result, so the veto lives here instead).
++	private static boolean collectionWillBeSaved(PersistentCollection<?> collection) {
++		final Object owner = collection.getOwner();
++		if ( owner instanceof JPABase ownerEntity ) {
++			final Object currentEntity = HibernateInterceptor.currentSaveEntity();
++			if ( currentEntity instanceof JPABase currentJpaEntity ) {
++				return ownerEntity.willBeSaved || currentJpaEntity.willBeSaved;
++			}
++			return ownerEntity.willBeSaved;
++		}
++		return true;
++	}
++	// [/play]
++
+ 	private static int processUnreachableCollections(
+ 			EventSource session,
+ 			Map<PersistentCollection<?>, CollectionEntry> collectionEntries) {
+--- a/src/play/db/jpa/PlayFlushEventListener.java
++++ b/src/play/db/jpa/PlayFlushEventListener.java
+@@ -13,10 +13,17 @@
+ /**
+  * Defines the default flush event listeners used by hibernate for
+  * flushing session state in response to generated flush events.
++ * <p>
++ * [play] Fork of {@code org.hibernate.event.internal.DefaultFlushEventListener}
++ * (Hibernate ORM 7.4); the only change vs the original is the base class —
++ * {@link PlayAbstractFlushingEventListener} with the Play! willBeSaved semantics.
++ * [/play]
+  *
+  * @author Steve Ebersole
+  */
++// [play] extends PlayAbstractFlushingEventListener instead of org.hibernate.event.internal.AbstractFlushingEventListener
+ public class PlayFlushEventListener extends PlayAbstractFlushingEventListener implements FlushEventListener {
++// [/play]
+ 
+ 	/** Handle the given flush event.
+ 	 *
+--- a/src/play/db/jpa/PlayAutoFlushEventListener.java
++++ b/src/play/db/jpa/PlayAutoFlushEventListener.java
+@@ -16,10 +16,17 @@
+ /**
+  * Defines the default flush event listeners used by hibernate for
+  * flushing session state in response to generated auto-flush events.
++ * <p>
++ * [play] Fork of {@code org.hibernate.event.internal.DefaultAutoFlushEventListener}
++ * (Hibernate ORM 7.4); the only change vs the original is the base class —
++ * {@link PlayAbstractFlushingEventListener} with the Play! willBeSaved semantics.
++ * [/play]
+  *
+  * @author Steve Ebersole
+  */
++// [play] extends PlayAbstractFlushingEventListener instead of org.hibernate.event.internal.AbstractFlushingEventListener
+ public class PlayAutoFlushEventListener extends PlayAbstractFlushingEventListener implements AutoFlushEventListener {
++// [/play]
+ 
+ 	/**
+ 	 * Handle the given auto-flush event.

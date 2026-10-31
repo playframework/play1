@@ -23,7 +23,7 @@
     type('id', '89776')
     clickAndWait('go')
 
-    assertTextPresent('detached entity passed to persist: models.Project')
+    assertTextPresent('Detached entity passed to persist: models.Project')
 
     open('@{JPABinding.createCompany()}?company.name=zenexity')
     assertValue('name', 'zenexity')
