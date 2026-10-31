@@ -52,7 +52,7 @@ jobs:
       - run: pip install -r python/requirements.txt
 
       - name: Set up JDK ${{ matrix.jdk }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ matrix.jdk }}
           distribution: 'adopt'
@@ -80,7 +80,7 @@ jobs:
           architecture: 'x64'
 
       - name: Set up JDK ${{ env.DEFAULT_JAVA_VERSION }}
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           java-version: ${{ env.DEFAULT_JAVA_VERSION }}
           distribution: 'adopt'
@@ -126,7 +126,7 @@ jobs:
        - run: pip install -r python/requirements.txt
 
        - name: Set up JDK ${{ matrix.jdk }}
-         uses: actions/setup-java@v5
+         uses: actions/setup-java@v6
          with:
            java-version: ${{ matrix.jdk }}
            distribution: 'adopt'
