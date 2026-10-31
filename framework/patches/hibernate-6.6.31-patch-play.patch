@@ -91,37 +91,55 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 diff --git a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java
 --- a/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(revision 2a8ea797ca4b4b158cc74bd2165fb54c52495f4f)
 +++ b/hibernate-core/src/main/java/org/hibernate/event/internal/AbstractFlushingEventListener.java	(revision 84defc90227c02ee1583235e331dd445fd9567b6)
-@@ -152,8 +152,29 @@
+@@ -152,9 +152,8 @@
  		final PersistContext context = getContext( session );
  		//safe from concurrent modification because of how concurrentEntries() is implemented on IdentityMap
  		for ( Map.Entry<Object,EntityEntry> me : persistenceContext.reentrantSafeEntityEntries() ) {
 -//		for ( Map.Entry me : IdentityMap.concurrentEntries( persistenceContext.getEntityEntries() ) ) {
  			final EntityEntry entry = me.getValue();
-+
-+			// This entity will be saved?
-+			boolean willBeSaved = true;
-+			try {
-+				Object o = me.getKey();
-+				Class<?> c = o.getClass();
-+				Class<?> jpaBase = Class.forName("play.db.jpa.JPABase");
-+				while (!c.equals(Object.class)) {
-+					if (c.equals(jpaBase)) {
-+						willBeSaved = (Boolean) jpaBase.getDeclaredField("willBeSaved").get(o);
-+						break;
-+					}
-+					c = c.getSuperclass();
-+				}
-+				if (!willBeSaved) {
-+					continue;
-+				}
-+			}
-+			catch(ReflectiveOperationException ignore) {
-+				// do nothing
-+			}
-+
- 			if ( flushable( entry ) ) {
+-			if ( flushable( entry ) ) {
++			if ( willBeSaved( me.getKey() ) && flushable( entry ) ) {
  				cascadeOnFlush( session, entry.getPersister(), me.getKey(), context );
  			}
+ 		}
+@@ -165,7 +164,7 @@
+ 		// into Nullability, instead of abusing the Cascade infrastructure)
+ 		for ( Map.Entry<Object, EntityEntry> me : persistenceContext.reentrantSafeEntityEntries() ) {
+ 			final EntityEntry entry = me.getValue();
+-			if ( flushable( entry ) ) {
++			if ( willBeSaved( me.getKey() ) && flushable( entry ) ) {
+ 				Cascade.cascade(
+ 						CascadingActions.CHECK_ON_FLUSH,
+ 						CascadePoint.BEFORE_FLUSH,
+@@ -178,6 +177,28 @@
+ 		}
+ 	}
+ 
++	// Will this entity be saved? Play1 only writes an entity when save() has been called on it, which
++	// it signals through play.db.jpa.JPABase.willBeSaved. Entities that are not being saved must be
++	// left alone at flush time: they are neither cascaded from, nor checked for references to
++	// transient instances. Returns true for anything that is not a Play1 entity, so that plain
++	// Hibernate usage keeps the standard behaviour.
++	private static boolean willBeSaved(Object entity) {
++		try {
++			Class<?> c = entity.getClass();
++			Class<?> jpaBase = Class.forName("play.db.jpa.JPABase");
++			while (!c.equals(Object.class)) {
++				if (c.equals(jpaBase)) {
++					return (Boolean) jpaBase.getDeclaredField("willBeSaved").get(entity);
++				}
++				c = c.getSuperclass();
++			}
++		}
++		catch(ReflectiveOperationException ignore) {
++			// do nothing
++		}
++		return true;
++	}
++
+ 	private static boolean flushable(EntityEntry entry) {
+ 		final Status status = entry.getStatus();
+ 		return status == Status.MANAGED
 @@ -328,8 +349,7 @@
  		final Interceptor interceptor = session.getInterceptor();
  		persistenceContext.forEachCollectionEntry(
