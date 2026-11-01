@@ -13,22 +13,6 @@ import org.junit.jupiter.api.*;
 
 public class JavaExtensionsTest {
 
-    @BeforeAll
-    public static void setUpBeforeClass() throws Exception {
-    }
-
-    @AfterAll
-    public static void tearDownAfterClass() throws Exception {
-    }
-
-    @BeforeEach
-    public void setUp() throws Exception {
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-    }
-
     //Trivial no test @Test public void testEnumValues()  {}
 
     @Test 
@@ -43,14 +27,14 @@ public class JavaExtensionsTest {
     @Test 
     public void testAdd()  {
         final String[] items = JavaExtensions.add(new String[]{"a", "b"}, "c");
-		assertThat(items).hasSize(3).contains(new String[] {"a", "b", "c"});
+		assertThat(items).containsExactly("a", "b", "c");
         
     }
 
     @Test 
     public void testRemove()  {
-        String[] testArray = {"a", "b", "c"};
-        assertThat(JavaExtensions.remove(testArray, "c")).hasSize(2).contains("a", "b");
+        String[] testArray = {"a", "b", "c", "c", "d"};
+        assertThat(JavaExtensions.remove(testArray, "c")).containsExactly("a", "b", "c", "d");
     }
 
     //TODO @Test public void testToStringClosure()  {}

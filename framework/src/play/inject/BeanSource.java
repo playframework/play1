@@ -2,6 +2,6 @@ package play.inject;
 
 public interface BeanSource {
     
-    public <T> T getBeanOfType(Class<T> clazz);
+    <T> T getBeanOfType(Class<T> clazz);
 
 }
