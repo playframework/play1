@@ -117,6 +117,10 @@ To display this message in a template, simply use:
 
 bc. <h1>&{'clientName', client.name}</h1>
 
+In HTML templates the message arguments are escaped like any other dynamic expression, so a client name containing <code>==&lt;script>==</code> is displayed as text. The message text itself is not escaped, so it can contain HTML markup. Numbers, dates and booleans are passed as they are, so formats such as @%d@ and @%tY@ keep working. To pass an argument that is meant to be HTML, call @raw()@ on it:
+
+bc. <p>&{'welcome', user.name, link.raw()}</p>
+
 h3. Comment: ==*{…}*==
 
 Comments aren’t evaluated by the template engine. They are just comments…
