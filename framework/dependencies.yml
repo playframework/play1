@@ -63,19 +63,19 @@ require:    &allDependencies
     - org.codehaus.groovy -> groovy-xml 3.0.25
     - org.eclipse.jdt -> org.eclipse.jdt.core 3.40.0
     - org.eclipse.jdt -> ecj 3.40.0
-    - org.hibernate -> hibernate-core 6.6.31.Final.patched
-    - net.bytebuddy -> byte-buddy 1.17.6
-    - jakarta.persistence -> jakarta.persistence-api 3.1.0
-    - org.hibernate.common -> hibernate-commons-annotations 7.0.3.Final
-    - org.hibernate -> hibernate-validator 5.4.3.Final
+    - org.hibernate -> hibernate-core 7.4.14.Final
+    - net.bytebuddy -> byte-buddy 1.18.14
+    - jakarta.persistence -> jakarta.persistence-api 3.2.0
     - io.smallrye -> jandex 3.6.0
     - org.jboss.logging -> jboss-logging 3.6.3.Final
     - jakarta.transaction -> jakarta.transaction-api 2.0.1
-    - jakarta.xml.bind -> jakarta.xml.bind-api 4.0.2
-    - org.glassfish.jaxb -> jaxb-runtime 2.3.9
+    - jakarta.xml.bind -> jakarta.xml.bind-api 4.0.4
+    - org.glassfish.jaxb -> jaxb-runtime 4.0.7
+    - org.eclipse.angus -> angus-activation 2.0.2
+    - org.hibernate.models -> hibernate-models 1.1.2
     - com.fasterxml -> classmate 1.7.3
-    - org.hibernate -> hibernate-c3p0 6.6.31.Final
-    - org.hibernate -> hibernate-jcache 6.6.31.Final
+    - org.hibernate -> hibernate-c3p0 7.4.14.Final
+    - org.hibernate -> hibernate-jcache 7.4.14.Final
     - com.mchange -> mchange-commons-java 0.3.2
     - org.javassist -> javassist 3.32.0-GA
     - io.netty -> netty-common 4.2.17.Final

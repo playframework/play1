@@ -1,0 +1,59 @@
+----
+Hibernate flush-listener fork for Play! framework (Hibernate ORM 7.4.x)
+----
+
+The Play! "willBeSaved" semantics (flush-time cascades and collection actions
+must ignore JPABase entities that are not going to be saved) live in the
+framework's own forked flush event listeners:
+
+    framework/src/play/db/jpa/PlayAbstractFlushingEventListener.java
+        fork of org.hibernate.event.internal.AbstractFlushingEventListener
+
+    framework/src/play/db/jpa/PlayFlushEventListener.java
+        fork of org.hibernate.event.internal.DefaultFlushEventListener
+
+    framework/src/play/db/jpa/PlayAutoFlushEventListener.java
+        fork of org.hibernate.event.internal.DefaultAutoFlushEventListener
+
+    framework/src/play/db/jpa/PlayHibernateIntegrator.java
+        registers the two listeners (EventType.FLUSH / EventType.AUTO_FLUSH),
+        wired from JPAPlugin via JpaSettings.INTEGRATOR_PROVIDER
+
+All Play-specific changes inside the fork files are wrapped in
+"// [play] ... // [/play]" marker comments.
+
+This patch (hibernate-7.4.14-patch-play-fork.patch) is a record of exactly
+those changes. It is NOT applied to hibernate-core itself: it re-applies the
+Play changes on top of a freshly copied upstream listener, i.e. it is used to
+re-create the forks after upgrading Hibernate ORM.
+
+----
+How to re-create the forks after upgrading Hibernate ORM
+----
+
+1. Download the Hibernate ORM source of the target version.
+
+2. Copy the three upstream files (verbatim) into framework/src/play/db/jpa/
+   applying only the mechanical renames:
+
+       package org.hibernate.event.internal -> package play.db.jpa
+       AbstractFlushingEventListener        -> PlayAbstractFlushingEventListener
+       DefaultFlushEventListener            -> PlayFlushEventListener
+       DefaultAutoFlushEventListener        -> PlayAutoFlushEventListener
+
+   Keep the upstream license headers, javadoc and comments as they are.
+
+3. Verify the copies compile as they are (this is the pristine fork state,
+   functionally identical to vanilla Hibernate):
+
+       cd framework && ant compile
+
+4. Apply the Play changes:
+
+       DRY RUN -> patch --dry-run -p1 -i patches/hibernate-<version>-patch-play-fork.patch
+       APPLY   -> patch -p1 -i patches/hibernate-<version>-patch-play-fork.patch
+       (run from the framework/ directory)
+
+   Note: upstream refactorings between Hibernate versions may shift the patched
+   code; fix up the marker blocks manually and regenerate the patch file from
+   the diff between the pristine copies and the final forks.

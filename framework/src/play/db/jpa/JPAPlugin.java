@@ -21,7 +21,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
+import org.hibernate.jpa.boot.spi.IntegratorProvider;
 
+import org.hibernate.jpa.boot.spi.JpaSettings;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -189,6 +191,7 @@ public class JPAPlugin extends PlayPlugin {
         PersistenceUnitInfo persistenceUnitInfo = persistenceUnitInfo(dbName, dbConfig);
         Map<String, Object> configuration = new HashMap<>();
         configuration.put(AvailableSettings.INTERCEPTOR, new HibernateInterceptor());
+        configuration.put(JpaSettings.INTEGRATOR_PROVIDER, (IntegratorProvider) () -> List.of(new PlayHibernateIntegrator()));
 
         return new EntityManagerFactoryBuilderImpl(
                 new PersistenceUnitInfoDescriptor(persistenceUnitInfo), configuration

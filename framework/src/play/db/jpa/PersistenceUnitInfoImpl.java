@@ -57,6 +57,16 @@ public class PersistenceUnitInfoImpl implements PersistenceUnitInfo {
     }
 
     @Override
+    public String getScopeAnnotationName() {
+        return null;
+    }
+
+    @Override
+    public List<String> getQualifierAnnotationNames() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public DataSource getJtaDataSource() {
         return jtaDataSource;
     }
