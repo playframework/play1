@@ -1,10 +1,5 @@
 package play.data.validation;
 
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.OValContext;
-
-@SuppressWarnings("serial")
 public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
 
     static final String mes = "validation.isTrue";
@@ -15,7 +10,7 @@ public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         if (value == null) {
             return false;
         }

@@ -31,11 +31,11 @@ public class IPValidationTest extends UnitTest {
 
 	private boolean testv4(String addr, boolean expected) {
 		IPv4AddressCheck check = new IPv4AddressCheck();
-		return expected == check.isSatisfied(null, addr, null, null);
+		return expected == check.isSatisfied(null, addr, null);
 	}
 
 	private boolean testv6(String addr, boolean expected) {
 		IPv6AddressCheck check = new IPv6AddressCheck();
-		return expected == check.isSatisfied(null, addr, null, null);
+		return expected == check.isSatisfied(null, addr, null);
 	}
 }
