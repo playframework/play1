@@ -4,12 +4,8 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.OValContext;
 import play.exceptions.UnexpectedException;
 
-@SuppressWarnings("serial")
 public class CheckWithCheck extends AbstractAnnotationCheck<CheckWith> {
 
     static final String mes = "validation.invalid";
@@ -36,7 +32,7 @@ public class CheckWithCheck extends AbstractAnnotationCheck<CheckWith> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         return check.isSatisfied(validatedObject, value);
     }
 

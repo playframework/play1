@@ -1,17 +1,13 @@
 package play.data.validation;
 
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.FieldContext;
-import net.sf.oval.context.OValContext;
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.TreeMap;
+
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPQL;
 import play.db.jpa.Model;
 import play.exceptions.UnexpectedException;
-
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Check which proof if one or a set of properties is unique.
@@ -50,16 +46,14 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
      * {@inheritDoc}
      */
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value,
-            OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         requireMessageVariablesRecreation();
         if (value == null) {
             return true;
         }
-        String[] propertyNames = getPropertyNames(
-                ((FieldContext) context).getField().getName());
+        String[] propertyNames = getPropertyNames(((FieldValidationContext) context).getField().getName());
         GenericModel model = (GenericModel) validatedObject;
-        Model.Factory factory =  Model.Manager.factoryFor(model.getClass());
+        Model.Factory factory = Model.Manager.factoryFor(model.getClass());
         String keyProperty = factory.keyName();
         Object keyValue = factory.keyValue(model);
         //In case of an update make sure that we won't read the current record from database.
@@ -105,7 +99,7 @@ public class UniqueCheck extends AbstractAnnotationCheck<Unique> {
             throw new UnexpectedException("Error while determining the field " +
                     fieldName + " for an object of type " + clazz, e);
         }
-        throw new UnexpectedException("Cannot get the field " +  fieldName +
+        throw new UnexpectedException("Cannot get the field " + fieldName +
                 " for an object of type " + clazz);
     }
 }
