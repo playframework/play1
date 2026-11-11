@@ -1,9 +1,6 @@
-
-import play.*;
-
 import org.junit.jupiter.api.Test;
 
-import org.joda.time.DateMidnight;
+import java.time.LocalDate;
 
 import play.test.UnitTest;
 import play.i18n.Lang;
@@ -30,12 +27,12 @@ public class MessagesTest extends UnitTest {
     public void testMessageInAnotherLanguage() {
         try{
             Lang.set("fr");	// a page is displayed in french
-            assertEquals("Dernière connexion février 2013", Messages.getMessage("fr", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            assertEquals("Dernière connexion février 2013", Messages.getMessage("fr", "login.lastLogin", LocalDate.of(2013, 2, 1)));
             // On a french page, we want to display a german message with a date including a month-name
-            assertEquals("Letzte Anmeldung Februar 2013", Messages.getMessage("de", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            assertEquals("Letzte Anmeldung Februar 2013", Messages.getMessage("de", "login.lastLogin", LocalDate.of(2013, 2, 1)));
             // non-existing locale strings and null fallback to default messages
-            assertEquals("Last login February 2013", Messages.getMessage("xy", "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
-            assertEquals("Last login February 2013", Messages.getMessage(null, "login.lastLogin", new DateMidnight(2013, 2, 1).toDate()));
+            assertEquals("Last login February 2013", Messages.getMessage("xy", "login.lastLogin", LocalDate.of(2013, 2, 1)));
+            assertEquals("Last login February 2013", Messages.getMessage(null, "login.lastLogin", LocalDate.of(2013, 2, 1)));
         } finally {
             Lang.set("");
         }
