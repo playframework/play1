@@ -122,7 +122,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         } else {
                             throw new Oops("Unknown configuration format -> " + conf);
                         }
-                        boolean exclude = options.containsKey("exclude") && options.get("exclude") instanceof Boolean ? (Boolean) options.get("exclude") : false;
+                        boolean exclude = options.get("exclude") instanceof Boolean v ? v : false;
                         allExcludes &=  exclude;
                         confs.add((exclude ? "!" : "") + confName);
                     }
@@ -189,9 +189,9 @@ public class YamlParser extends AbstractModuleDescriptorParser {
 
                         ModuleRevisionId depId = ModuleRevisionId.newInstance(m.group(1), m.group(2), m.group(3), extraAttributesMap);
 
-                        boolean transitive = options.containsKey("transitive") && options.get("transitive") instanceof Boolean ? (Boolean) options.get("transitive") : transitiveDependencies;
-                        boolean force = options.containsKey("force") && options.get("force") instanceof Boolean ? (Boolean) options.get("force") : false;
-                        boolean changing = options.containsKey("changing") && options.get("changing") instanceof Boolean ? (Boolean) options.get("changing") : false;
+                        boolean transitive = options.get("transitive") instanceof Boolean v ? v : transitiveDependencies;
+                        boolean force = options.get("force") instanceof Boolean v ? v : false;
+                        boolean changing = options.get("changing") instanceof Boolean v ? v : false;
 
                         DefaultDependencyDescriptor depDescriptor = new DefaultDependencyDescriptor(descriptor, depId, force, changing, transitive);
                         for (String conf : confs) {
@@ -225,7 +225,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         // Ids
                         boolean useIt = true;
                         String currentId = System.getProperty("play.id");
-                        if (currentId == null || currentId.trim().equals("")) {
+                        if (currentId == null || currentId.isBlank()) {
                             currentId = "unset";
                         }
                         if (options.containsKey("id")) {

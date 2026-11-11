@@ -40,14 +40,11 @@ public class Time {
 
         matcher.reset();
         while (matcher.find()) {
-            if (matcher.group(3).equals("d")) {
-                seconds += Integer.parseInt(matcher.group(2)) * DAY;
-            } else if (matcher.group(3).equals("h")) {
-                seconds += Integer.parseInt(matcher.group(2)) * HOUR;
-            } else if (matcher.group(3).equals("mi") || matcher.group(3).equals("min") || matcher.group(3).equals("mn")) {
-                seconds += Integer.parseInt(matcher.group(2)) * MINUTE;
-            } else {
-                seconds += Integer.parseInt(matcher.group(2));
+            switch (matcher.group(3)) {
+                case "d" -> seconds += Integer.parseInt(matcher.group(2)) * DAY;
+                case "h" -> seconds += Integer.parseInt(matcher.group(2)) * HOUR;
+                case "mi", "min", "mn" -> seconds += Integer.parseInt(matcher.group(2)) * MINUTE;
+                default -> seconds += Integer.parseInt(matcher.group(2));
             }
         }
 

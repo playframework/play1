@@ -46,7 +46,7 @@ public class MimeTypes {
         if (matcher.matches()) {
             ext = matcher.group(1);
         }
-        if (ext.length() > 0) {
+        if (!ext.isEmpty()) {
             String mimeType = mimetypes().getProperty(ext);
             if (mimeType == null) {
                 return defaultMimeType;

@@ -232,12 +232,12 @@ public class Mail {
 
                 @Override
                 public Boolean get() {
-                    return result.length() == 0;
+                    return result.isEmpty();
                 }
 
                 @Override
                 public Boolean get(long timeout, TimeUnit unit) {
-                    return result.length() == 0;
+                    return result.isEmpty();
                 }
             };
         }

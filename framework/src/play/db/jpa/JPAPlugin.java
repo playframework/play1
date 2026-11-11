@@ -168,7 +168,7 @@ public class JPAPlugin extends PlayPlugin {
         // Add entities
         String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
         for (String entity : moreEntities) {
-            if (entity.trim().equals("")) {
+            if (entity.trim().isEmpty()) {
                 continue;
             }
             try {
@@ -208,7 +208,7 @@ public class JPAPlugin extends PlayPlugin {
 
     private List<String> mappingFiles(Configuration dbConfig) {
         String mappingFile = dbConfig.getProperty("jpa.mapping-file", "");
-        return mappingFile != null && mappingFile.length() > 0 ? singletonList(mappingFile) : emptyList();
+        return mappingFile == null || mappingFile.isEmpty() ? emptyList() : singletonList(mappingFile);
 
     }
 

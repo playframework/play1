@@ -155,7 +155,7 @@ public class PluginCollection {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (line.trim().length() == 0) {
+                    if (line.isBlank()) {
                         continue;
                     }
                     String[] lineParts = line.split(":");

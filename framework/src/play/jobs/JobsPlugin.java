@@ -85,7 +85,7 @@ public class JobsPlugin extends PlayPlugin {
             out.println();
             out.println("Waiting jobs:");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            ScheduledFuture<?>[] q = executor.getQueue().toArray(new ScheduledFuture[executor.getQueue().size()]);
+            ScheduledFuture<?>[] q = executor.getQueue().toArray(ScheduledFuture[]::new);
 
             for (ScheduledFuture<?> task : q) {
                 out.println(Java.extractUnderlyingCallable((FutureTask<?>) task) + " will run in " + task.getDelay(TimeUnit.SECONDS)

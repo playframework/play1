@@ -18,7 +18,7 @@ public class ByteArrayArrayBinder implements TypeBinder<byte[][]> {
     @SuppressWarnings("unchecked")
     @Override
     public byte[][] bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
-        if (value == null || value.trim().length() == 0) {
+        if (value == null || value.isBlank()) {
             return null;
         }
         Request req = Request.current();
@@ -32,7 +32,7 @@ public class ByteArrayArrayBinder implements TypeBinder<byte[][]> {
                     }
                 }
             }
-            return byteList.toArray(new byte[byteList.size()][]);
+            return byteList.toArray(byte[][]::new);
         }
         return null;
     }

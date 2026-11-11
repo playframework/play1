@@ -19,7 +19,7 @@ public class URLCheck extends AbstractAnnotationCheck<URL> {
 
     @Override
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
-        if (value == null || value.toString().length() == 0) {
+        if (value == null || value.toString().isEmpty()) {
             return true;
         }
         return urlPattern.matcher(value.toString()).matches();

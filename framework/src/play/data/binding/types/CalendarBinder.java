@@ -18,7 +18,7 @@ public class CalendarBinder implements TypeBinder<Calendar> {
 
     @Override
     public Calendar bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) throws Exception {
-        if (value == null || value.trim().length() == 0) {
+        if (value == null || value.isBlank()) {
             return null;
         }
         Calendar cal = Calendar.getInstance(Lang.getLocale());

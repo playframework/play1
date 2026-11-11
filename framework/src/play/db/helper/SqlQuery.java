@@ -62,12 +62,12 @@ public abstract class SqlQuery {
             String text;
             if (obj != null) {
                 String objStr = obj.toString();
-                if (objStr.length() > 0) text = objStr;
+                if (!objStr.isEmpty()) text = objStr;
                 else text = defaultValue;
             } else text = defaultValue;
 
             if (text != null) {
-                if (expr.length() > 0) {
+                if (!expr.isEmpty()) {
                     if (separator == null) throw new NullPointerException();
                     expr += separator;
                 }
@@ -118,7 +118,7 @@ public abstract class SqlQuery {
 
     public static String whereIn(String column, Object param) {
         String value = inlineParam(param);
-        if (value.length() == 0) return value;
+        if (value.isEmpty()) return value;
 
         String operator;
         if (param instanceof Object[]) {

@@ -108,7 +108,7 @@ public class Scope {
             if (value == null) {
                 put(key, (String) null);
             }
-            put(key, value + "");
+            put(key, String.valueOf(value));
         }
 
         public void now(String key, String value) {
