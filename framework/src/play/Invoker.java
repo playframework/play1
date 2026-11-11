@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -23,7 +24,6 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.F;
-import play.libs.F.Promise;
 import play.utils.PThreadFactory;
 
 /**
@@ -421,9 +421,8 @@ public class Invoker {
         }
 
         public static <V> void waitFor(Future<V> task, final Invocation invocation) {
-            if (task instanceof Promise) {
-                Promise<V> smartFuture = (Promise<V>) task;
-                smartFuture.onRedeem(result -> executor.submit(invocation));
+            if (task instanceof CompletableFuture<V> smartFuture) {
+                smartFuture.whenComplete((v, e) -> executor.submit(invocation));
             } else {
                 synchronized (WaitForTasksCompletion.class) {
                     if (instance == null) {

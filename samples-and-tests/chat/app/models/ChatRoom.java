@@ -1,6 +1,7 @@
 package models;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import play.libs.*;
 import play.libs.F.*;
@@ -41,7 +42,7 @@ public class ChatRoom {
      * For long polling, as we are sometimes disconnected, we need to pass 
      * the last event seen id, to be sure to not miss any message
      */
-    public Promise<List<IndexedEvent<ChatRoom.Event>>> nextMessages(long lastReceived) {
+    public CompletableFuture<List<IndexedEvent<ChatRoom.Event>>> nextMessages(long lastReceived) {
         return chatEvents.nextEvents(lastReceived);
     }
     
@@ -56,15 +57,14 @@ public class ChatRoom {
     // ~~~~~~~~~ Chat room events
 
     public static abstract class Event {
-        
-        final public String type;
-        final public Long timestamp;
-        
+
+        public final long timestamp = System.currentTimeMillis();
+        public final String type;
+
         public Event(String type) {
             this.type = type;
-            this.timestamp = System.currentTimeMillis();
         }
-        
+
     }
     
     public static class Join extends Event {
@@ -75,7 +75,7 @@ public class ChatRoom {
             super("join");
             this.user = user;
         }
-        
+
     }
     
     public static class Leave extends Event {
@@ -86,7 +86,7 @@ public class ChatRoom {
             super("leave");
             this.user = user;
         }
-        
+
     }
     
     public static class Message extends Event {
@@ -99,7 +99,7 @@ public class ChatRoom {
             this.user = user;
             this.text = text;
         }
-        
+
     }
     
     // ~~~~~~~~~ Chat room factory
