@@ -21,18 +21,20 @@ jobs:
 
     strategy:
       matrix:
-        jdk: [ 17, 21 ]
+        jdk: [ 17, 21, 25 ]
         os: [ubuntu-latest, windows-latest]
         include:
           - target: 17
             jdk: 17
           - target: 21
             jdk: 21
+          - target: 25
+            jdk: 25
         exclude: # only build specific os on java 17
           - os: windows-latest
             jdk: 17
           - os: windows-latest
-            jdk: 24
+            jdk: 25
 
     name: Build / Tests -> JDK-${{ matrix.jdk }}/ Target java-${{ matrix.target }} / ${{ matrix.os }}
     steps:
