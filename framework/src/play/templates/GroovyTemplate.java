@@ -5,8 +5,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -500,12 +503,28 @@ public class GroovyTemplate extends BaseTemplate {
                 return Messages.get(val[0]);
             } else {
                 // extract args from val
+                boolean escape = template.name.endsWith(".html") && !TagContext.hasParentTag("verbatim");
                 Object[] args = new Object[val.length - 1];
                 for (int i = 1; i < val.length; i++) {
-                    args[i - 1] = val[i];
+                    args[i - 1] = escape ? escapeMessageArg(val[i]) : val[i];
                 }
                 return Messages.get(val[0], args);
             }
+        }
+
+        /**
+         * HTML-escape a message argument the same way {@code ${}} escapes a value, so {@code &{'key', arg}} is safe
+         * for user data. The message text itself is not escaped. Raw data, numbers, booleans, characters and dates
+         * are passed through untouched so that %d, %f, %c and %t conversions keep working. Use {@code arg.raw()} to
+         * print HTML on purpose.
+         */
+        private Object escapeMessageArg(Object arg) {
+            if (arg == null || arg instanceof RawData || arg instanceof Number || arg instanceof Boolean
+                    || arg instanceof Character || arg instanceof Date || arg instanceof Calendar
+                    || arg instanceof TemporalAccessor) {
+                return arg;
+            }
+            return HTML.htmlEscape(arg.toString());
         }
 
         public String __reverseWithCheck_absolute_true(String action) {
