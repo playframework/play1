@@ -1,6 +1,7 @@
 from __future__ import print_function
 from builtins import str
 from builtins import range
+import ctypes
 import errno
 import os
 import os.path
@@ -9,9 +10,6 @@ import subprocess
 import time
 
 from play.utils import *
-
-if os.name == 'nt':
-    import win32pdh, win32pdhutil
 
 COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 
@@ -154,7 +152,6 @@ def out(app):
 
 def kill(pid):
     if os.name == 'nt':
-        import ctypes
         handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
         process = ctypes.windll.kernel32.TerminateProcess(handle, 0)
         ctypes.windll.kernel32.CloseHandle(handle)
@@ -201,34 +198,16 @@ def process_running(pid):
             return False
 
 
-# loosely based on http://code.activestate.com/recipes/303339/
-def process_list_nt():
-    # each instance is a process, you can have multiple processes w/same name
-    processLocalizedName = win32pdhutil.find_pdh_counter_localized_name("Process")
-    junk, instances = win32pdh.EnumObjectItems(None, None, processLocalizedName, win32pdh.PERF_DETAIL_WIZARD)
-    proc_ids = {}
-    proc_dict = {}
-    for instance in instances:
-        if instance in proc_dict:
-            proc_dict[instance] = proc_dict[instance] + 1
-        else:
-            proc_dict[instance] = 0
-    idProcessLocalizedName = win32pdhutil.find_pdh_counter_localized_name("ID Process")
-    for instance, max_instances in list(proc_dict.items()):
-        for inum in range(max_instances + 1):
-            hq = win32pdh.OpenQuery()  # initializes the query handle
-            path = win32pdh.MakeCounterPath((None, processLocalizedName, instance, None, inum, idProcessLocalizedName))
-            counter_handle = win32pdh.AddCounter(hq, path)
-            win32pdh.CollectQueryData(hq)  # collects data for the counter
-            type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG)
-            proc_ids[str(val)] = instance;
-            win32pdh.CloseQuery(hq)
-
-    return proc_ids
-
-
+# Check whether a process with the given PID exists, using the Windows API
+# through ctypes, so that we don't depend on pywin32 being installed.
 def process_running_nt(pid):
-    if process_list_nt().get(pid, "") != "":
+    SYNCHRONIZE = 0x00100000
+    ERROR_ACCESS_DENIED = 5
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.OpenProcess(SYNCHRONIZE, False, int(pid))
+    if handle:
+        kernel32.CloseHandle(handle)
         return True
-    else:
-        return False
+    # OpenProcess fails with ERROR_ACCESS_DENIED for processes we have no
+    # right to open. In that case the process does exist.
+    return kernel32.GetLastError() == ERROR_ACCESS_DENIED
