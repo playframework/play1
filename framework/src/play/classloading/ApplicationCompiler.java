@@ -21,6 +21,8 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
+import org.eclipse.jdt.internal.compiler.lookup.ModuleBinding;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
 import play.Logger;
@@ -42,7 +44,9 @@ public class ApplicationCompiler {
         Map.entry("20", CompilerOptions.VERSION_20),
         Map.entry("21", CompilerOptions.VERSION_21),
         Map.entry("22", CompilerOptions.VERSION_22),
-        Map.entry("23", CompilerOptions.VERSION_23)
+        Map.entry("23", CompilerOptions.VERSION_23),
+        Map.entry("24", CompilerOptions.VERSION_24),
+        Map.entry("25", CompilerOptions.VERSION_25)
     );
 
     final Map<String, Boolean> packagesCache = new HashMap<>();
@@ -137,6 +141,17 @@ public class ApplicationCompiler {
         @Override
         public boolean ignoreOptionalProblems() {
             return false;
+        }
+
+        /**
+         * Since JDT 3.41+ the default implementation of this method returns null when the name
+         * environment is not module-aware, which makes the compiler report a bogus
+         * "module not found" error (actually a NullPointerException inside ProblemReporter).
+         * Play applications are always compiled as part of the unnamed module.
+         */
+        @Override
+        public ModuleBinding module(LookupEnvironment environment) {
+            return environment.getModule(ModuleBinding.UNNAMED);
         }
     }
 
