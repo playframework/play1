@@ -1,7 +1,6 @@
 package play.data.binding;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.data.Upload;
@@ -34,7 +33,6 @@ public abstract class Binder {
     // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
         supportedTypes.put(Date.class, new DateBinder());
-        supportedTypes.put(DateTime.class, new DateTimeBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(File[].class, new FileArrayBinder());
         supportedTypes.put(LocalDateTime.class, new LocalDateTimeBinder());
