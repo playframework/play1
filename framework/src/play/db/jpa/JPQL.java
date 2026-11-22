@@ -189,25 +189,27 @@ public class JPQL {
     }
 
     public String createCountQuery(String dbName, String entityName, String entityClass, String query, Object... params) {
-        if (query.trim().toLowerCase().startsWith("select ")) {
+        String trimmedQuery = query.trim();
+        String loweredQuery = trimmedQuery.toLowerCase();
+        if (loweredQuery.startsWith("select ")) {
             return query;
         }
         if (query.matches("^by[A-Z].*$")) {
             return "select count(*) from " + entityName + " where " + findByToJPQL(dbName, query);
         }
-        if (query.trim().toLowerCase().startsWith("from ")) {
+        if (loweredQuery.startsWith("from ")) {
             return "select count(*) " + query;
         }
-        if (query.trim().toLowerCase().startsWith("order by ")) {
+        if (loweredQuery.startsWith("order by ")) {
             return "select count(*) from " + entityName;
         }
-        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params != null && params.length == 1) {
+        if (trimmedQuery.indexOf(' ') == -1 && trimmedQuery.indexOf('=') == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(' ') == -1 && query.trim().indexOf('=') == -1 && params == null) {
+        if (trimmedQuery.indexOf(' ') == -1 && trimmedQuery.indexOf('=') == -1 && params == null) {
             query += " = null";
         }
-        if (query.trim().length() == 0) {
+        if (trimmedQuery.isEmpty()) {
             return "select count(*) from " + entityName;
         }
         return "select count(*) from " + entityName + " e where " + query;
@@ -317,8 +319,7 @@ public class JPQL {
 
     protected static String extractProp(String part, String end) {
         String prop = part.substring(0, part.length() - end.length());
-        prop = (prop.charAt(0) + "").toLowerCase() + prop.substring(1);
-        return prop;
+        return String.valueOf(prop.charAt(0)).toLowerCase() + prop.substring(1);
     }
     public static JPQL instance = null;
 }

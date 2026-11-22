@@ -54,7 +54,7 @@ public class TemplateParser {
 
     public String checkNext() {
         if (end2 < pageSource.length()) {
-            return pageSource.charAt(end2) + "";
+            return Character.toString(pageSource.charAt(end2));
         }
         return "";
     }

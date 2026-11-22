@@ -21,7 +21,7 @@ public class CookieSessionStore implements SessionStore {
             int duration = Time.parseDuration(COOKIE_EXPIRE);
             long expiration = (duration * 1000l);
 
-            if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
+            if (cookie != null && Play.started && cookie.value != null && !cookie.value.isBlank()) {
                 String value = cookie.value;
                 int firstDashIndex = value.indexOf('-');
                 if (firstDashIndex > -1) {

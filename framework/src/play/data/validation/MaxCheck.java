@@ -25,16 +25,16 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
         if (value == null) {
             return true;
         }
-        if (value instanceof String) {
+        if (value instanceof String v) {
             try {
-                return Double.parseDouble(value.toString()) <= max;
+                return Double.parseDouble(v) <= max;
             } catch (Exception e) {
                 return false;
             }
         }
-        if (value instanceof Number) {
+        if (value instanceof Number v) {
             try {
-                return ((Number) value).doubleValue() <= max;
+                return v.doubleValue() <= max;
             } catch (Exception e) {
                 return false;
             }

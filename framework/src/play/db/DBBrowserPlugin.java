@@ -30,7 +30,7 @@ public class DBBrowserPlugin extends PlayPlugin {
             }
 
             String domain = request.domain;
-            if (domain.equals("")) {
+            if (domain.isEmpty()) {
                 domain = "localhost";
             }
 
