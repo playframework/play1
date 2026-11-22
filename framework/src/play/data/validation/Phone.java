@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.sf.oval.configuration.annotation.Constraint;
-
 /**
  * This field contain a phone number
  * This validation is relaxed and is intended to enforce a basic phone pattern.
@@ -34,7 +32,6 @@ import net.sf.oval.configuration.annotation.Constraint;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-@Constraint(checkWith = PhoneCheck.class)
 public @interface Phone {
     String message() default PhoneCheck.mes;
 }

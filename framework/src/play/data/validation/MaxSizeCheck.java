@@ -2,11 +2,7 @@ package play.data.validation;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.OValContext;
 
-@SuppressWarnings("serial")
 public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
     static final String mes = "validation.maxSize";
@@ -20,7 +16,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         requireMessageVariablesRecreation();
         if (value == null || value.toString().length() == 0) {
             return true;

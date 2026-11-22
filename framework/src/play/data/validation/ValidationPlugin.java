@@ -1,8 +1,5 @@
 package play.data.validation;
 
-import net.sf.oval.ConstraintViolation;
-import net.sf.oval.context.MethodParameterContext;
-import net.sf.oval.guard.Guard;
 import play.PlayPlugin;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.UnexpectedException;
@@ -68,20 +65,7 @@ public class ValidationPlugin extends PlayPlugin {
             if (!verify) {
                 return;
             }
-            List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
-            ArrayList<Error> errors = new ArrayList<>();
-            String[] paramNames = Java.parameterNames(actionMethod);
-            for (ConstraintViolation violation : violations) {
-                errors.add(new Error(
-                        paramNames[((MethodParameterContext) violation
-                                .getContext()).getParameterIndex()], violation
-                                .getMessage(),
-                        violation.getMessageVariables() == null ? new String[0]
-                                : violation.getMessageVariables().values()
-                                        .toArray(new String[0]), violation
-                                .getSeverity()));
-            }
-            Validation.current.get().errors.addAll(errors);
+            validateAction(actionMethod);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -107,27 +91,20 @@ public class ValidationPlugin extends PlayPlugin {
     }
 
     // ~~~~~~
-    static class Validator extends Guard {
-
-        public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
-            List<ConstraintViolation> violations = new ArrayList<>();
-            Object instance = null;
-            // Patch for scala defaults
-            if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
-                try {
-                    instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-                } catch (Exception e) {
-                    throw new ActionNotFoundException(Http.Request.current().action, e);
-                }
+    private static void validateAction(Method actionMethod) throws Exception {
+        Object instance = null;
+        // Patch for scala defaults
+        if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
+            try {
+                instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+            } catch (Exception e) {
+                throw new ActionNotFoundException(Http.Request.current().action, e);
             }
-            Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod, instance);
-            net.sf.oval.Validator.InternalValidationCycle cycle = new net.sf.oval.Validator.InternalValidationCycle(null, null);
-            cycle.violations = violations;
-            validateMethodParameters(null, actionMethod, rArgs, cycle);
-            validateMethodPre(null, actionMethod, rArgs, cycle);
-            return cycle.violations;
         }
+        Object[] args = ActionInvoker.getActionMethodArgs(actionMethod, instance);
+        PlayValidator.validateParameters(actionMethod, args, instance);
     }
+
     static final Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
     static Validation restore() {

@@ -5,18 +5,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.FieldContext;
-import net.sf.oval.context.MethodParameterContext;
-import net.sf.oval.context.OValContext;
+
 import play.data.binding.Binder;
 import play.data.binding.RootParamNode;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.Scope;
 
-@SuppressWarnings("serial")
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     static final String mes = "validation.equals";
@@ -32,11 +27,11 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         requireMessageVariablesRecreation();
         try {
             if (context != null) {
-                if (context instanceof MethodParameterContext ctx) {
+                if (context instanceof MethodParameterValidationContext ctx) {
                     Method method = ctx.getMethod();
                     String[] paramNames = Java.parameterNames(method);
                     int index = -1;
@@ -59,7 +54,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
 
                 }
-                if (context instanceof FieldContext ctx) {
+                if (context instanceof FieldValidationContext ctx) {
                     try {
                         Field otherField = ctx.getField().getDeclaringClass().getDeclaredField(to);
                         otherKey = to;

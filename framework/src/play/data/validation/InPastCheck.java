@@ -5,14 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.OValContext;
+
 import play.utils.Utils.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
 import play.libs.I18N;
 
-@SuppressWarnings("serial")
 public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
     static final String mes = "validation.past";
@@ -33,7 +30,7 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         requireMessageVariablesRecreation();
         if (value == null) {
             return true;

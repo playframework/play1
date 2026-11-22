@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.UnexpectedException;
@@ -498,10 +497,8 @@ public class Validation {
     static ValidationResult applyCheck(AbstractAnnotationCheck<?> check, String key, Object o) {
         try {
             ValidationResult result = new ValidationResult();
-            if (!check.isSatisfied(o, o, null, null)) {
-                Error error = new Error(key, check.getClass()
-                        .getDeclaredField("mes").get(null)
-                        + "",
+            if (!check.isSatisfied(o, o, null)) {
+                Error error = new Error(key, check.getMessageKey(),
                         check.getMessageVariables() == null ? new String[0]
                                 : check.getMessageVariables().values()
                                         .toArray(new String[0]),

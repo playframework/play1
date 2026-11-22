@@ -224,6 +224,13 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         properties.put("hibernate.connection.datasource", DB.getDataSource(dbName));
+
+        // Hibernate bootstraps its own ValidatorFactory for jakarta.persistence.validation.mode=AUTO.
+        // Provide ours (built without an EL implementation, see PlayValidator.validatorFactory());
+        // a value explicitly configured by the application takes precedence.
+        if (!properties.containsKey(org.hibernate.cfg.ValidationSettings.JAKARTA_VALIDATION_FACTORY)) {
+            properties.put(org.hibernate.cfg.ValidationSettings.JAKARTA_VALIDATION_FACTORY, play.data.validation.PlayValidator.validatorFactory());
+        }
         return properties;
     }
 

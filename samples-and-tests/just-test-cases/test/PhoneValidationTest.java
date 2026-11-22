@@ -125,7 +125,7 @@ public class PhoneValidationTest extends UnitTest {
 
 	private boolean test(String number, boolean expected) {
 		PhoneCheck check = new PhoneCheck();
-		return expected == check.isSatisfied(null, number, null, null);
+		return expected == check.isSatisfied(null, number, null);
 	}
 
 }

@@ -1,11 +1,7 @@
 package play.data.validation;
 
 import java.util.regex.Pattern;
-import net.sf.oval.Validator;
-import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
-import net.sf.oval.context.OValContext;
 
-@SuppressWarnings("serial")
 public class EmailCheck extends AbstractAnnotationCheck<Email> {
 
     static final String mes = "validation.email";
@@ -17,12 +13,12 @@ public class EmailCheck extends AbstractAnnotationCheck<Email> {
     }
 
     @Override
-    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
+    public boolean isSatisfied(Object validatedObject, Object value, PlayValidationContext context) {
         value = Validation.willBeValidated(value);
         if (value == null || value.toString().length() == 0) {
             return true;
         }
         return emailPattern.matcher(value.toString()).matches();
     }
-   
+
 }
