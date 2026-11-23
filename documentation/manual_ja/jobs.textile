@@ -117,7 +117,7 @@ bc. public static void encodeVideo(Long videoId) {
     renderText("Encoding started");
 }
 
-Job において @now()@ をコールすると、そのタスクの終了後に結果を読み出すために使用できる @Promise@ を返します。
+Job において @now()@ をコールすると、そのタスクの終了後に結果を読み出すために使用できる @java.util.concurrent.CompletableFuture@ を返します。
 
 h2. <a name="concepts">アプリケーションの停止</a>
 

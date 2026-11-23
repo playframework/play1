@@ -65,9 +65,9 @@ Document xml = res.getXml();
 JsonElement json = res.getJson();
 InputStream is = res.getStream();
 
-*async* API を使ってノンブロッキングな HTTP リクエストを作成することもできます。この場合は @Promise<HttpResponse>@ を受け取ります。いったん非同期状態から回復すれば、通常通り @HttpResponse@ を使うことができます:
+*async* API を使ってノンブロッキングな HTTP リクエストを作成することもできます。この場合は @CompletableFuture<HttpResponse>@ を受け取ります。いったん完了すれば、通常通り @HttpResponse@ を使うことができます:
 
-bc. Promise<HttpResponse> futureResponse = WS.url(
+bc. CompletableFuture<HttpResponse> futureResponse = WS.url(
     "http://www.google.com"
 ).getAsync();
 
@@ -154,17 +154,15 @@ bc. for(String s: String.and(StartsWith("command:")).match(o)) {
 
 この for ループは条件に合致する場合に一度だけ実行され、キャストをする必要なく自動的に String の値を抽出します。明示的なキャストが存在しないので、すべてがタイプセーフであり、コンパイラによって型チェックが行われます。
 
-h3. Promises
+h3. CompletableFuture
 
-@Promise@ は Play による @Future@ 型のカスタマイズです。実際のところ、 @Promise<T>@ は @Future<T>@ でもあるので、標準的な @Future@ として使用することもできます。しかし、 @Promise@ にはとても興味深い属性: @onRedeem(…)@ を使って、期待する値が利用可能になるとできるだけ早く呼び出されるコールバックを登録する機能が備わっています。
+@java.util.concurrent.CompletableFuture@ は、非同期処理の結果を表す Java の標準的な型です。@Future@ と @CompletionStage@ の両方を実装しているため、@get()/join()@ で結果をブロックして取得したり、@thenApply(…)@、@thenCompose(…)@、@whenComplete(…)@ などのメソッドで組み合わせたりできます。Play は Jobs や @WS.async@ などの非同期処理の結果に @CompletableFuture@ を使用します。
 
-@Promise@ インスタンスは Play のいたるところ (Jobs や @WS.async@, その他…) で @Future@ の代わりに使用されています。
+@CompletableFuture@ はいくつかの方法で組み合わせることができます。例えば:
 
-Promise はいくつかの方法で紐付けることができます。例えば:
-
-bc. Promise p = Promise.waitAll(p1, p2, p3)
-Promise p = Promise.waitAny(p1, p2, p3)
-Promise p = Promise.waitEither(p1, p2, p3)
+bc. CompletableFuture<List> all = F.Promise.waitAll(p1, p2, p3);
+CompletableFuture any = F.Promise.waitAny(p1, p2, p3);
+CompletableFuture<F.E3> either = F.Promise.waitEither(p1, p2, p3);
 
 h2. OAuth
 

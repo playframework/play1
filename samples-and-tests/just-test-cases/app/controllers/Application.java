@@ -167,7 +167,8 @@ public class Application extends Controller {
 		// e.g. for London/Europe the "at" is 5/4/61 00:00:00 BST and when formatted to UTC is
 		// adjusted back an hour to 4/4/61 23:00:00
 //        df.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
-       
+        df.setTimeZone(TimeZone.getTimeZone("Europe/Paris"));
+
         String value = String.format("Booked at %s !!", df.format(at));
         Logger.info("Date '%s' formatted to '%s' with system default TimeZone '%s'", at, value, TimeZone.getDefault());
         

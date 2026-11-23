@@ -5,6 +5,8 @@ import play.jobs.Job;
 import play.libs.F.*;
 import play.mvc.Controller;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Test controller to check Job.afterRequest() behavior.
  *
@@ -20,7 +22,7 @@ public class CallingJobLater extends Controller {
    * However this controller is for testing purposes only and I need to store
    * information between requests and don't want to use DB.
    */
-  private static Promise p;
+  private static CompletableFuture p;
   private static String resultName;
 
 

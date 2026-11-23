@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,6 @@ import play.libs.Codec;
 import play.libs.F;
 import play.libs.F.BlockingEventStream;
 import play.libs.F.Option;
-import play.libs.F.Promise;
 import play.libs.Time;
 import play.utils.HTTP;
 import play.utils.Utils;
@@ -902,7 +902,7 @@ public class Http {
             stream.publish(frame);
         }
 
-        public Promise<WebSocketEvent> nextEvent() {
+        public CompletableFuture<WebSocketEvent> nextEvent() {
             if (!isOpen()) {
                 throw new IllegalStateException("The inbound channel is closed");
             }
@@ -950,36 +950,29 @@ public class Http {
 
     public static class WebSocketEvent {
 
-        public static F.Matcher<WebSocketEvent, WebSocketClose> SocketClosed = new F.Matcher<WebSocketEvent, WebSocketClose>() {
+        public static final F.Matcher<WebSocketEvent, WebSocketClose> SocketClosed = new F.Matcher<>() {
 
-            @Override
-            public Option<WebSocketClose> match(WebSocketEvent o) {
+            @Override public Option<WebSocketClose> match(WebSocketEvent o) {
                 if (o instanceof WebSocketClose) {
                     return F.Option.Some((WebSocketClose) o);
                 }
                 return F.Option.None();
             }
         };
-        public static F.Matcher<WebSocketEvent, String> TextFrame = new F.Matcher<WebSocketEvent, String>() {
+        public static final F.Matcher<WebSocketEvent, String> TextFrame = new F.Matcher<>() {
 
-            @Override
-            public Option<String> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame frame) {
-                    if (!frame.isBinary) {
-                        return F.Option.Some(frame.textData);
-                    }
+            @Override public Option<String> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame frame && !frame.isBinary) {
+                    return F.Option.Some(frame.textData);
                 }
                 return F.Option.None();
             }
         };
-        public static F.Matcher<WebSocketEvent, byte[]> BinaryFrame = new F.Matcher<WebSocketEvent, byte[]>() {
+        public static final F.Matcher<WebSocketEvent, byte[]> BinaryFrame = new F.Matcher<>() {
 
-            @Override
-            public Option<byte[]> match(WebSocketEvent o) {
-                if (o instanceof WebSocketFrame frame) {
-                    if (frame.isBinary) {
-                        return F.Option.Some(frame.binaryData);
-                    }
+            @Override public Option<byte[]> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame frame && frame.isBinary) {
+                    return F.Option.Some(frame.binaryData);
                 }
                 return F.Option.None();
             }
