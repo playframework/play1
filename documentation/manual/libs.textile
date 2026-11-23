@@ -65,9 +65,9 @@ Document xml = res.getXml();
 JsonElement json = res.getJson();
 InputStream is = res.getStream();
 
-You can also use the *async* API to make HTTP requests in a non-blocking way. Then you will receive a @Promise<HttpResponse>@. Once redeemed, you can use the @HttpResponse@ as usual:
+You can also use the *async* API to make HTTP requests in a non-blocking way. Then you will receive a @CompletableFuture<HttpResponse>@. Once completed, you can use the @HttpResponse@ as usual:
 
-bc. Promise<HttpResponse> futureResponse = WS.url(
+bc. CompletableFuture<HttpResponse> futureResponse = WS.url(
     "http://www.google.com"
 ).getAsync();
 
@@ -154,17 +154,15 @@ bc. for(String s: String.and(StartsWith("command:")).match(o)) {
 
 The for loop is executed once, only if the condition is met, and it automatically extracts the String value without the need for casting. Because there is no explicit cast, everything is type-safe, and checked by the compiler.
 
-h3. Promises
+h3. Completable futures
 
-A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
+@java.util.concurrent.CompletableFuture@ is the standard Java type for an asynchronous result. It implements both @Future@ and @CompletionStage@, so you can block on it with @get()/join()@ or compose it using methods such as @thenApply(…)@, @thenCompose(…)@ and @whenComplete(…)@. Play uses @CompletableFuture@ for asynchronous results from Jobs, @WS.async@ and other APIs.
 
-@Promise@ instances are used everywhere in Play in place of @Future@ instances (for Jobs, @WS.async@, etc…).
+Completable futures can be combined in several ways. For example:
 
-Promises can be combined in several ways. For example:
-
-bc. Promise p = Promise.waitAll(p1, p2, p3)
-Promise p = Promise.waitAny(p1, p2, p3)
-Promise p = Promise.waitEither(p1, p2, p3)
+bc. CompletableFuture<List> all = F.Promise.waitAll(p1, p2, p3);
+CompletableFuture any = F.Promise.waitAny(p1, p2, p3);
+CompletableFuture<F.E3> either = F.Promise.waitEither(p1, p2, p3);
 
 h2. OAuth
 

@@ -10,19 +10,19 @@ That means that if a request’s processing time is very long (for example waiti
 
 Consider a chat application where browsers send a blocking HTTP request that waits for a new message to display. These requests can be very very long (typically several seconds) and will block the thread pool. If you plan to allow 100 users to connect simultaneously to your chat application you will need to provision at least 100 threads. OK it’s feasible. But what about 1,000 users? Or 10,000?
 
-To resolve these use cases, Play allows you to temporarily suspend a request. The HTTP request will stay connected, but the request execution will be popped out of the thread pool and tried again later. You can either tell Play to try the request later after a fixed delay, or wait for a @Promise@ value to be available.
+To resolve these use cases, Play allows you to temporarily suspend a request. The HTTP request will stay connected, but the request execution will be popped out of the thread pool and tried again later. You can either tell Play to try the request later after a fixed delay, or wait for a @java.util.concurrent.CompletableFuture@ value to be available.
 
 p(note). **Tip**. You can see a real example in @samples-and-tests/chat@.
 
 For example, this action will launch a very long job and wait for its completion before returning the result to the HTTP response:
 
 bc. public static void generatePDF(Long reportId) {
-    Promise<InputStream> pdf = new ReportAsPDFJob(report).now();
+    CompletableFuture<InputStream> pdf = new ReportAsPDFJob(report).now();
     InputStream pdfStream = await(pdf);
     renderBinary(pdfStream);
 }
 
-Here we use @await(…)@ to ask Play to suspend the request until the @Promise<InputStream>@ value is redeemed. 
+Here we use @await(…)@ to ask Play to suspend the request until the @CompletableFuture<InputStream>@ completes.
 
 h3. Continuations
 
@@ -31,7 +31,7 @@ Because the framework needs to recover the thread you were using in order to use
 To make it easier to deal with asynchronous code we have introduced continuations. Continuations allow your code to be suspended and resumed transparently. So you write your code in a very imperative way, as:
 
 bc. public static void computeSomething() {
-    Promise<String> delayedResult = veryLongComputation(…);
+    CompletableFuture<String> delayedResult = veryLongComputation(…);
     String result = await(delayedResult);
     render(result);
 }
@@ -50,19 +50,19 @@ bc. public static void loopWithoutBlocking() {
 
 While using only one thread to process requests, the default in development mode, Play is able to run concurrently these loops for several requests at the same time.
 
-A more realistic example is asynchronously fetching content from remote URLs. The following example, performs three remote HTTP requests in parallel: each call to the @play.libs.WS.WSRequest.getAsync()@ method executes a GET request asynchronously and returns a @play.libs.F.Promise@. The action method suspends the incoming HTTP request by calling @await(…)@ on the combination of the three @Promise@ instances. When all three remote calls have a response, a thread will resume processing and render a response.
+A more realistic example is asynchronously fetching content from remote URLs. The following example, performs three remote HTTP requests in parallel: each call to the @play.libs.WS.WSRequest.getAsync()@ method executes a GET request asynchronously and returns a @java.util.concurrent.CompletableFuture@. The action method suspends the incoming HTTP request by calling @await(…)@ on the combination of the three @CompletableFuture@ instances. When all three remote calls have a response, a thread will resume processing and render a response.
 
 bc. public class AsyncTest extends Controller {
  
   public static void remoteData() {
-    F.Promise<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
-    F.Promise<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
-    F.Promise<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
+    CompletableFuture<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
+    CompletableFuture<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
+    CompletableFuture<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
   
-    F.Promise<List<WS.HttpResponse>> promises = F.Promise.waitAll(r1, r2, r3);
+    CompletableFuture<List<WS.HttpResponse>> all = F.Promise.waitAll(r1, r2, r3);
  
     // Suspend processing here, until all three remote calls are complete.
-    List<WS.HttpResponse> httpResponses = await(promises);
+    List<WS.HttpResponse> httpResponses = await(all);
  
     render(httpResponses);
   }
@@ -71,19 +71,19 @@ bc. public class AsyncTest extends Controller {
 
 h3. Callbacks
 
-A different way to implement the previous example of three asynchronous remote requests is to use a callback. This time, the call to @await(…)@ includes a @play.libs.F.Action@ implementation, which is a callback that is executed when the @promises@ are done.
+A different way to implement the previous example of three asynchronous remote requests is to use a callback. This time, the call to @await(…)@ includes a @play.libs.F.Action@ implementation, which is a callback that is executed when the @all@ are done.
 
 bc. public class AsyncTest extends Controller {
  
   public static void remoteData() {
-    F.Promise<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
-    F.Promise<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
-    F.Promise<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
+    CompletableFuture<WS.HttpResponse> r1 = WS.url("http://example.org/1").getAsync();
+    CompletableFuture<WS.HttpResponse> r2 = WS.url("http://example.org/2").getAsync();
+    CompletableFuture<WS.HttpResponse> r3 = WS.url("http://example.org/3").getAsync();
  
-    F.Promise<List<WS.HttpResponse>> promises = F.Promise.waitAll(r1, r2, r3);
+    CompletableFuture<List<WS.HttpResponse>> all = F.Promise.waitAll(r1, r2, r3);
  
     // Suspend processing here, until all three remote calls are complete.
-    await(promises, new F.Action<List<WS.HttpResponse>>() {
+    await(all, new F.Action<List<WS.HttpResponse>>() {
       public void invoke(List<WS.HttpResponse> httpResponses) {
         render(httpResponses);
       }
