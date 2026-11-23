@@ -19,7 +19,6 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.F;
-import play.libs.F.Promise;
 import play.libs.Time;
 import play.mvc.Http;
 
@@ -77,7 +76,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public CompletableFuture<V> now() {
-        Promise<V> smartFuture = new Promise<>();
+        CompletableFuture<V> smartFuture = new CompletableFuture<>();
         JobsPlugin.executor.submit(getJobCallingCallable(smartFuture));
         return smartFuture;
     }
@@ -98,7 +97,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             return now();
         }
 
-        Promise<V> smartFuture = new Promise<>();
+        CompletableFuture<V> smartFuture = new CompletableFuture<>();
         Callable<V> callable = getJobCallingCallable(smartFuture);
         JobsPlugin.addAfterRequestAction(callable);
         return smartFuture;
@@ -123,17 +122,17 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public CompletableFuture<V> in(int seconds) {
-        Promise<V> smartFuture = new Promise<>();
+        CompletableFuture<V> smartFuture = new CompletableFuture<>();
         JobsPlugin.executor.schedule(getJobCallingCallable(smartFuture), seconds, TimeUnit.SECONDS);
         return smartFuture;
     }
 
-    private Callable<V> getJobCallingCallable(final Promise<V> smartFuture) {
+    private Callable<V> getJobCallingCallable(final CompletableFuture<V> smartFuture) {
         return () -> {
             try {
                 V result = Job.this.call();
                 if (smartFuture != null) {
-                    smartFuture.invoke(result);
+                    smartFuture.complete(result);
                 }
                 return result;
             } catch (Exception e) {

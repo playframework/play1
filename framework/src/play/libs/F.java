@@ -94,7 +94,7 @@ public class F {
         }
 
         public static <T> CompletableFuture<List<T>> waitAll(final Collection<? extends CompletableFuture<T>> promises) {
-            return waitAll(promises.toArray(Promise[]::new));
+            return waitAll(promises.toArray(CompletableFuture[]::new));
         }
 
         public static <A, B> CompletableFuture<F.Tuple<A, B>> wait2(CompletableFuture<A> tA, CompletableFuture<B> tB) {
@@ -117,6 +117,14 @@ public class F {
                 .thenApply(__ -> new T5<>(tA.join(), tB.join(), tC.join(), tD.join(), tE.join()));
         }
 
+        /**
+         * Waits for the first of two futures to complete.
+         *
+         * <p>The input futures are observed, not owned: this method never cancels them,
+         * and cancelling the returned future does not cancel them either. A future that
+         * loses the race is simply ignored, so a cached or otherwise shared future
+         * remains usable by its other consumers.
+         */
         public static <A, B> CompletableFuture<F.Either<A, B>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB) {
             var result = new CompletableFuture<F.Either<A, B>>();
             final AtomicBoolean winnerFound = new AtomicBoolean(false);
@@ -132,7 +140,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tB.cancel(false);
                 }
             });
 
@@ -147,13 +154,20 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
                 }
             });
 
             return result;
         }
 
+        /**
+         * Waits for the first of three futures to complete.
+         *
+         * <p>The input futures are observed, not owned: this method never cancels them,
+         * and cancelling the returned future does not cancel them either. A future that
+         * loses the race is simply ignored, so a cached or otherwise shared future
+         * remains usable by its other consumers.
+         */
         public static <A, B, C> CompletableFuture<F.E3<A, B, C>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC) {
             var result = new CompletableFuture<F.E3<A, B, C>>();
             final AtomicBoolean winnerFound = new AtomicBoolean(false);
@@ -169,8 +183,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tB.cancel(false);
-                    tC.cancel(false);
                 }
             });
 
@@ -185,8 +197,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tC.cancel(false);
                 }
             });
 
@@ -201,14 +211,20 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
                 }
             });
 
             return result;
         }
 
+        /**
+         * Waits for the first of four futures to complete.
+         *
+         * <p>The input futures are observed, not owned: this method never cancels them,
+         * and cancelling the returned future does not cancel them either. A future that
+         * loses the race is simply ignored, so a cached or otherwise shared future
+         * remains usable by its other consumers.
+         */
         public static <A, B, C, D> CompletableFuture<F.E4<A, B, C, D>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD) {
             var result = new CompletableFuture<F.E4<A, B, C, D>>();
             final AtomicBoolean winnerFound = new AtomicBoolean(false);
@@ -224,9 +240,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tB.cancel(false);
-                    tC.cancel(false);
-                    tD.cancel(false);
                 }
             });
 
@@ -241,9 +254,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tC.cancel(false);
-                    tD.cancel(false);
                 }
             });
 
@@ -258,9 +268,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
-                    tD.cancel(false);
                 }
             });
 
@@ -275,15 +282,20 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
-                    tC.cancel(false);
                 }
             });
 
             return result;
         }
 
+        /**
+         * Waits for the first of five futures to complete.
+         *
+         * <p>The input futures are observed, not owned: this method never cancels them,
+         * and cancelling the returned future does not cancel them either. A future that
+         * loses the race is simply ignored, so a cached or otherwise shared future
+         * remains usable by its other consumers.
+         */
         public static <A, B, C, D, E> CompletableFuture<F.E5<A, B, C, D, E>> waitEither(CompletableFuture<A> tA, CompletableFuture<B> tB, CompletableFuture<C> tC, CompletableFuture<D> tD, CompletableFuture<E> tE) {
             var result = new CompletableFuture<F.E5<A, B, C, D, E>>();
             final AtomicBoolean winnerFound = new AtomicBoolean(false);
@@ -299,10 +311,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tB.cancel(false);
-                    tC.cancel(false);
-                    tD.cancel(false);
-                    tE.cancel(false);
                 }
             });
 
@@ -317,10 +325,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tC.cancel(false);
-                    tD.cancel(false);
-                    tE.cancel(false);
                 }
             });
 
@@ -335,10 +339,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
-                    tD.cancel(false);
-                    tE.cancel(false);
                 }
             });
 
@@ -353,10 +353,6 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
-                    tC.cancel(false);
-                    tE.cancel(false);
                 }
             });
 
@@ -371,16 +367,13 @@ public class F {
                     } else {
                         result.completeExceptionally(exception);
                     }
-                    tA.cancel(false);
-                    tB.cancel(false);
-                    tC.cancel(false);
-                    tD.cancel(false);
                 }
             });
 
             return result;
         }
 
+        @SafeVarargs
         public static <T> CompletableFuture<T> waitAny(CompletableFuture<T>... promises) {
             final CompletableFuture<T> result = new CompletableFuture<>();
             final AtomicBoolean winnerFound = new AtomicBoolean(false);

@@ -618,4 +618,86 @@ class PromiseTest {
         }
     }
 
+    @Test void waitEitherShouldNotCancelSharedLoser() {
+        {
+            // An already completed winner must not cancel a pending shared future.
+            var shared = new CompletableFuture<String>();
+            var winner = CompletableFuture.completedFuture("winner");
+
+            var race = F.Promise.waitEither(winner, shared);
+
+            assertThat(race.join()._1.get()).isEqualTo("winner");
+            assertThat(shared.isCancelled()).isFalse();
+
+            shared.complete("shared");
+            assertThat(shared.join()).isEqualTo("shared");
+        }
+        {
+            // A winner that completes later must not cancel a pending shared future either.
+            var shared = new CompletableFuture<String>();
+            var winner = new CompletableFuture<String>();
+
+            var race = F.Promise.waitEither(winner, shared);
+            winner.complete("winner");
+
+            assertThat(race.join()._1.get()).isEqualTo("winner");
+            assertThat(shared.isCancelled()).isFalse();
+
+            shared.complete("shared");
+            assertThat(shared.join()).isEqualTo("shared");
+        }
+    }
+
+    @Test void waitEither5ShouldNotCancelSharedLosers() {
+        var winner = CompletableFuture.completedFuture(1);
+        var sharedB = new CompletableFuture<String>();
+        var sharedC = new CompletableFuture<Long>();
+        var sharedD = new CompletableFuture<Object>();
+        var sharedE = new CompletableFuture<Byte>();
+
+        var race = F.Promise.waitEither(winner, sharedB, sharedC, sharedD, sharedE);
+
+        assertThat(race.join()._1.get()).isEqualTo(1);
+        assertThat(sharedB.isCancelled()).isFalse();
+        assertThat(sharedC.isCancelled()).isFalse();
+        assertThat(sharedD.isCancelled()).isFalse();
+        assertThat(sharedE.isCancelled()).isFalse();
+
+        sharedB.complete("shared");
+        assertThat(sharedB.join()).isEqualTo("shared");
+    }
+
+    @Test void cancellingWaitEitherResultShouldNotCancelInputs() {
+        var first = new CompletableFuture<String>();
+        var second = new CompletableFuture<String>();
+
+        var race = F.Promise.waitEither(first, second);
+        assertThat(race.cancel(false)).isTrue();
+
+        assertThat(first.isCancelled()).isFalse();
+        assertThat(second.isCancelled()).isFalse();
+
+        first.complete("first");
+        assertThat(first.join()).isEqualTo("first");
+    }
+
+    @Test void waitEitherShouldLeaveLosingEventStreamEventUnconsumed() {
+        var stream = new F.EventStream<String>();
+        var losingEvent = stream.nextEvent();
+        var winner = new CompletableFuture<String>();
+
+        var race = F.Promise.waitEither(winner, losingEvent);
+        winner.complete("winner");
+
+        assertThat(race.join()._1.get()).isEqualTo("winner");
+        assertThat(losingEvent.isCancelled()).isFalse();
+
+        stream.publish("event");
+        assertThat(losingEvent.isDone()).isTrue();
+        assertThat(losingEvent.isCancelled()).isFalse();
+
+        // delivery does not consume the event; a later reader must still get it
+        assertThat(stream.nextEvent().join()).isEqualTo("event");
+    }
+
 }

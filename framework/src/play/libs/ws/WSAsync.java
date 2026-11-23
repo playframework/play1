@@ -40,7 +40,6 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
 import play.Logger;
 import play.Play;
-import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.WS.HttpResponse;
@@ -461,12 +460,12 @@ public class WSAsync implements WSImpl {
 
         private CompletableFuture<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                final Promise<HttpResponse> smartFuture = new Promise<>();
+                final CompletableFuture<HttpResponse> smartFuture = new CompletableFuture<>();
                 prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
                         HttpResponse httpResponse = new HttpAsyncResponse(response);
-                        smartFuture.invoke(httpResponse);
+                        smartFuture.complete(httpResponse);
                         return httpResponse;
                     }
 
