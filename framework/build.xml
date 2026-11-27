@@ -73,6 +73,7 @@
                 <include name="**/*.properties"/>
                 <include name="**/*.xml"/>
                 <include name="**/play.plugins"/>
+                <include name="**/META-INF/services/**"/>
             </fileset>
         </copy>
     </target>

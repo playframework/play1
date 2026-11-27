@@ -4,9 +4,13 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ThreadFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
@@ -25,7 +29,49 @@ public class Server {
 
     public static final String PID_FILE = "server.pid";
 
+    private final List<Channel> channels = new ArrayList<>();
+    private final List<MultiThreadIoEventLoopGroup> eventLoopGroups = new ArrayList<>();
+    private final ThreadFactory threadFactory;
+
+    private MultiThreadIoEventLoopGroup newEventLoopGroup() {
+        return threadFactory == null
+                ? new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory())
+                : new MultiThreadIoEventLoopGroup(threadFactory, NioIoHandler.newFactory());
+    }
+
+    /**
+     * Stops this server instance and releases the bound ports.
+     * <p>
+     * This is mainly useful when the server was started in-process (for example
+     * by the JUnit launcher listener) and has to be shut down again without
+     * terminating the JVM.
+     */
+    public void stop() {
+        for (Channel channel : channels) {
+            if (channel.isOpen()) {
+                channel.close().syncUninterruptibly();
+            }
+        }
+        channels.clear();
+        for (MultiThreadIoEventLoopGroup group : eventLoopGroups) {
+            group.shutdownGracefully().syncUninterruptibly();
+        }
+        eventLoopGroups.clear();
+    }
+
     public Server(String[] args) {
+        this(args, null);
+    }
+
+    /**
+     * @param args command line arguments
+     * @param threadFactory factory for the Netty event loop threads, or {@code null}
+     *                      to use Netty's default non-daemon factory. Tests start the
+     *                      server in-process and pass a daemon factory so that a
+     *                      missing launcher-session close cannot keep the JVM alive.
+     */
+    public Server(String[] args, ThreadFactory threadFactory) {
+        this.threadFactory = threadFactory;
 
         System.setProperty("file.encoding", "utf-8");
         Properties p = Play.configuration;
@@ -68,8 +114,10 @@ public class Server {
 
         try {
             if (httpPort != -1) {
-                MultiThreadIoEventLoopGroup bossGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
-                MultiThreadIoEventLoopGroup workerGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
+                MultiThreadIoEventLoopGroup bossGroup = newEventLoopGroup();
+                MultiThreadIoEventLoopGroup workerGroup = newEventLoopGroup();
+                eventLoopGroups.add(bossGroup);
+                eventLoopGroups.add(workerGroup);
 
                 ServerBootstrap bootstrap = new ServerBootstrap()
                     .group(bossGroup, workerGroup)
@@ -77,7 +125,7 @@ public class Server {
                     .childHandler(new HttpServerPipelineFactory())
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
-                bootstrap.bind(new InetSocketAddress(address, httpPort)).syncUninterruptibly();
+                channels.add(bootstrap.bind(new InetSocketAddress(address, httpPort)).syncUninterruptibly().channel());
 
                 if (Play.mode == Mode.DEV) {
                     if (address == null) {
@@ -100,8 +148,10 @@ public class Server {
 
         try {
             if (httpsPort != -1) {
-                MultiThreadIoEventLoopGroup bossGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
-                MultiThreadIoEventLoopGroup workerGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
+                MultiThreadIoEventLoopGroup bossGroup = newEventLoopGroup();
+                MultiThreadIoEventLoopGroup workerGroup = newEventLoopGroup();
+                eventLoopGroups.add(bossGroup);
+                eventLoopGroups.add(workerGroup);
 
                 ServerBootstrap bootstrap = new ServerBootstrap()
                     .group(bossGroup, workerGroup)
@@ -109,7 +159,7 @@ public class Server {
                     .childHandler(new SslHttpServerPipelineFactory())
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
-                bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort)).syncUninterruptibly();
+                channels.add(bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort)).syncUninterruptibly().channel());
 
                 if (Play.mode == Mode.DEV) {
                     if (secureAddress == null) {
