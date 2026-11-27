@@ -6,7 +6,6 @@ import models.zoo.Meal;
 import models.zoo.Zoo;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import play.db.jpa.JPA;
@@ -38,7 +37,6 @@ public class JPAPluginTest extends UnitTest {
 	}
     }
 
-    @Disabled("wait for full fix")
     @Test
     public void testOrphanRemovalDepDeletion() {
 	final Zoo zoo = new Zoo().save();
@@ -97,7 +95,6 @@ public class JPAPluginTest extends UnitTest {
             "We must have 2 LevelOne");
     }
     
-    @Disabled("wait for full fix")
     @Test
     public void testTransientErrorAddingTogether() {
 	BaseModel bmA = new BaseModel();
