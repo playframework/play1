@@ -309,11 +309,16 @@ public abstract class PlayAbstractFlushingEventListener {
 		final var interceptor = session.getInterceptor();
 		persistenceContext.forEachCollectionEntry(
 				(collection, collectionEntry) -> {
-					// [play] Play semantics: collection actions are only scheduled if the
-					// collection owner, or the entity currently being saved, is marked
-					// willBeSaved. Mirrors the "if ( ce.isDorecreate() && interceptor.onCollectionXxx( ... ) )"
+					// [play] Play semantics: collection create/update actions are only
+					// scheduled if the collection owner, or the entity currently being
+					// saved, is marked willBeSaved. Collection removals additionally have
+					// to run when the owner is being deleted: orphan removal of a child
+					// entity must delete its join-table rows even though the child itself
+					// is not marked willBeSaved. Mirrors the
+					// "if ( ce.isDorecreate() && interceptor.onCollectionXxx( ... ) )"
 					// change made by framework/patches/hibernate-*-patch-play.patch in flushCollections.
 					final boolean willSave = collectionWillBeSaved( collection );
+					final boolean ownerDeleted = collectionOwnerIsDeleted( session, collection );
 					// [/play]
 					if ( collectionEntry.isDorecreate() && willSave ) {
 						final var currentKey = collectionEntry.getCurrentKey();
@@ -327,7 +332,7 @@ public abstract class PlayAbstractFlushingEventListener {
 								)
 						);
 					}
-					if ( collectionEntry.isDoremove() && willSave ) {
+					if ( collectionEntry.isDoremove() && ( willSave || ownerDeleted ) ) {
 						final var loadedKey = collectionEntry.getLoadedKey();
 						interceptor.onCollectionRemove( collection, loadedKey );
 						if ( !skipRemoval( session, collectionEntry.getLoadedPersister(), loadedKey ) ) {
@@ -377,6 +382,15 @@ public abstract class PlayAbstractFlushingEventListener {
 	// boolean onCollectionXxx() checks of play.db.jpa.HibernateInterceptor that the
 	// original 6.6 patched build relied on (vanilla Hibernate ignores the interceptor
 	// result, so the veto lives here instead).
+	private static boolean collectionOwnerIsDeleted(EventSource session, PersistentCollection<?> collection) {
+		final Object owner = collection.getOwner();
+		if ( owner == null ) {
+			return false;
+		}
+		final EntityEntry entry = session.getPersistenceContextInternal().getEntry( owner );
+		return entry != null && entry.getStatus() == Status.DELETED;
+	}
+
 	private static boolean collectionWillBeSaved(PersistentCollection<?> collection) {
 		final Object owner = collection.getOwner();
 		if ( owner instanceof JPABase ownerEntity ) {

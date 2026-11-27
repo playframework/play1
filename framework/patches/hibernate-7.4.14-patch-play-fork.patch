@@ -67,31 +67,36 @@
  	private static boolean flushable(EntityEntry entry) {
  		final var status = entry.getStatus();
  		return status == Status.MANAGED
-@@ -278,7 +309,13 @@
+@@ -278,7 +309,18 @@
  		final var interceptor = session.getInterceptor();
  		persistenceContext.forEachCollectionEntry(
  				(collection, collectionEntry) -> {
 -					if ( collectionEntry.isDorecreate() ) {
-+					// [play] Play semantics: collection actions are only scheduled if the
-+					// collection owner, or the entity currently being saved, is marked
-+					// willBeSaved. Mirrors the "if ( ce.isDorecreate() && interceptor.onCollectionXxx( ... ) )"
++					// [play] Play semantics: collection create/update actions are only
++					// scheduled if the collection owner, or the entity currently being
++					// saved, is marked willBeSaved. Collection removals additionally have
++					// to run when the owner is being deleted: orphan removal of a child
++					// entity must delete its join-table rows even though the child itself
++					// is not marked willBeSaved. Mirrors the
++					// "if ( ce.isDorecreate() && interceptor.onCollectionXxx( ... ) )"
 +					// change made by framework/patches/hibernate-*-patch-play.patch in flushCollections.
 +					final boolean willSave = collectionWillBeSaved( collection );
++					final boolean ownerDeleted = collectionOwnerIsDeleted( session, collection );
 +					// [/play]
 +					if ( collectionEntry.isDorecreate() && willSave ) {
  						final var currentKey = collectionEntry.getCurrentKey();
  						interceptor.onCollectionRecreate( collection, currentKey );
  						actionQueue.addAction(
-@@ -290,7 +327,7 @@
+@@ -290,7 +332,7 @@
  								)
  						);
  					}
 -					if ( collectionEntry.isDoremove() ) {
-+					if ( collectionEntry.isDoremove() && willSave ) {
++					if ( collectionEntry.isDoremove() && ( willSave || ownerDeleted ) ) {
  						final var loadedKey = collectionEntry.getLoadedKey();
  						interceptor.onCollectionRemove( collection, loadedKey );
  						if ( !skipRemoval( session, collectionEntry.getLoadedPersister(), loadedKey ) ) {
-@@ -305,7 +342,7 @@
+@@ -305,7 +347,7 @@
  							);
  						}
  					}
@@ -100,7 +105,7 @@
  						final var loadedKey = collectionEntry.getLoadedKey();
  						interceptor.onCollectionUpdate( collection, loadedKey );
  						actionQueue.addAction(
-@@ -336,6 +373,23 @@
+@@ -336,6 +378,32 @@
  		return count;
  	}
  
@@ -108,6 +113,15 @@
 +	// boolean onCollectionXxx() checks of play.db.jpa.HibernateInterceptor that the
 +	// original 6.6 patched build relied on (vanilla Hibernate ignores the interceptor
 +	// result, so the veto lives here instead).
++	private static boolean collectionOwnerIsDeleted(EventSource session, PersistentCollection<?> collection) {
++		final Object owner = collection.getOwner();
++		if ( owner == null ) {
++			return false;
++		}
++		final EntityEntry entry = session.getPersistenceContextInternal().getEntry( owner );
++		return entry != null && entry.getStatus() == Status.DELETED;
++	}
++
 +	private static boolean collectionWillBeSaved(PersistentCollection<?> collection) {
 +		final Object owner = collection.getOwner();
 +		if ( owner instanceof JPABase ownerEntity ) {
