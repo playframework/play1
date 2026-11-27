@@ -299,6 +299,8 @@ class PlayApplication(object):
         if not is_java_version_supported(java_version):
             print("~ ERROR: java version prior to %s are no longer supported: current version \"%s\" : please update" % (get_minimal_supported_java_version(), java_version))
 
+        java_args.extend(get_netty_jvm_options(java_version))
+
         java_policy = self.readConf('java.policy')
         if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)

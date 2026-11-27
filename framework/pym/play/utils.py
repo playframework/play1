@@ -266,6 +266,25 @@ def get_java_version():
 def get_minimal_supported_java_version():
     return 17
 
+def get_java_major_version(java_version):
+    if not java_version:
+        return 0
+    if java_version.startswith("1."):
+        java_version = java_version[2:]
+    result = re.match(r'^(\d+)', java_version)
+    if result:
+        return int(result.group(1))
+    return 0
+
+def get_netty_jvm_options(java_version):
+    options = [
+        '-Dio.netty.tryReflectionSetAccessible=true',
+        '--add-opens', 'java.base/sun.nio.ch=ALL-UNNAMED',
+    ]
+    if get_java_major_version(java_version) >= 24:
+        options.append('--enable-native-access=ALL-UNNAMED')
+    return options
+
 def is_java_version_supported(java_version):
     try:
         if java_version.startswith("1."):
