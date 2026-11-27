@@ -1,5 +1,6 @@
 import java.io.File;
 import java.net.URLDecoder;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,21 @@ public class RestTest extends UnitTest {
         params.put("multipleValues", new String[]{Rest.filterString("欢迎"), Rest.filterString("dobrodošli"), Rest.filterString("ยินดีต้อนรับ")});
     }
 
+    /**
+     * The controller asserts that the Unicode file name survived the multipart
+     * upload. Play binds an uploaded file under the client-side file name, so the
+     * fixture has to be sent under that name instead of {@code kiki.txt}.
+     */
+    private File fileToSend() throws Exception {
+        File source = new File(URLDecoder.decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
+        File dir = Files.createTempDirectory("play-rest-test").toFile();
+        File file = new File(dir, Rest.filterString("éç欢迎") + ".txt");
+        Files.copy(source.toPath(), file.toPath());
+        dir.deleteOnExit();
+        file.deleteOnExit();
+        return file;
+    }
+
     @Test
     public void testGet() throws Exception {
         assertEquals(Rest.filterString("对!"), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("ééééééçççççç汉语漢語")).get().getString());
@@ -46,7 +62,7 @@ public class RestTest extends UnitTest {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("id", 101);
         assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("名字")).params(params).post().getJson().toString());
-        File fileToSend = new File(URLDecoder.decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
+        File fileToSend = fileToSend();
         assertTrue(fileToSend.exists());
         assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).post().getString());
         assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).params(params).post().getString());
@@ -74,7 +90,7 @@ public class RestTest extends UnitTest {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("id", 101);
         assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("名字")).params(params).put().getJson().toString());
-        File fileToSend = new File(URLDecoder.decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
+        File fileToSend = fileToSend();
         assertTrue(fileToSend.exists());
         assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).put().getString());
         assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).params(params).put().getString());

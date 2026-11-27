@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import org.junit.platform.launcher.LauncherSession;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -45,7 +46,11 @@ public class TestEngine {
 
     private static final ClassNameComparator classNameComparator = new ClassNameComparator();
 
-    public static final ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
+    public static final ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "play-functional-tests");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public static List<Class> allUnitTests() {
         List<Class> classes = new ArrayList<>();
@@ -185,11 +190,13 @@ public class TestEngine {
                     .selectors(selectClass(testClass))
                     .build();
 
-            Launcher launcher = LauncherFactory.create();
             Listener listener = new Listener(testClass.getName(), testResults);
 
-            launcher.registerTestExecutionListeners(listener);
-            launcher.execute(request);
+            try (LauncherSession session = LauncherFactory.openSession()) {
+                Launcher launcher = session.getLauncher();
+                launcher.registerTestExecutionListeners(listener);
+                launcher.execute(request);
+            }
 
         } catch (ClassNotFoundException e) {
             Logger.error(e, "Test not found %s", name);
